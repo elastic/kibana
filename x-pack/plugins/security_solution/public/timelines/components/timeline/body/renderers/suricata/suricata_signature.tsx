@@ -130,6 +130,7 @@ export const SuricataSignature = React.memo<{
           id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
           isDraggable={isDraggable}
           value={signature}
+          tooltipPosition="bottom"
         >
           <div>
             <GoogleLink link={signature}>

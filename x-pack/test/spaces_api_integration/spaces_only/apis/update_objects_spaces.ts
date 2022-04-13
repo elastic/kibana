@@ -11,6 +11,7 @@ import {
   getTestScenarios,
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
+import type { UpdateObjectsSpacesTestCase } from '../../common/suites/update_objects_spaces';
 import { updateObjectsSpacesTestSuiteFactory } from '../../common/suites/update_objects_spaces';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -51,7 +52,55 @@ const createSinglePartTestCases = (spaceId: string) => {
 const createMultiPartTestCases = () => {
   const nonExistentSpace = 'does_not_exist'; // space that doesn't exist
   const eachSpace = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
-  const group1 = [
+  const group1: UpdateObjectsSpacesTestCase[] = [
+    // These test cases ensure that aliases are deleted when objects are unshared.
+    // For simplicity these are done separately, before the others.
+    {
+      objects: [
+        {
+          id: CASES.ALIAS_DELETE_INCLUSIVE.id,
+          existingNamespaces: eachSpace,
+          expectAliasDifference: -1, // one alias should have been deleted from space_2
+        },
+      ],
+      spacesToAdd: [],
+      spacesToRemove: [SPACE_2_ID],
+    },
+    {
+      objects: [
+        {
+          id: CASES.ALIAS_DELETE_INCLUSIVE.id,
+          existingNamespaces: [DEFAULT_SPACE_ID, SPACE_1_ID],
+          expectAliasDifference: -1, // no aliases should have been deleted from space_1
+        },
+      ],
+      spacesToAdd: [],
+      spacesToRemove: [SPACE_1_ID],
+    },
+    {
+      objects: [
+        {
+          id: CASES.ALIAS_DELETE_INCLUSIVE.id,
+          existingNamespaces: [DEFAULT_SPACE_ID],
+          expectAliasDifference: -2, // one alias should have been deleted from the default space
+        },
+      ],
+      spacesToAdd: [],
+      spacesToRemove: [DEFAULT_SPACE_ID],
+    },
+    {
+      objects: [
+        {
+          id: CASES.ALIAS_DELETE_EXCLUSIVE.id,
+          existingNamespaces: [SPACE_1_ID],
+          expectAliasDifference: -3, // one alias should have been deleted from other_space
+        },
+      ],
+      spacesToAdd: [SPACE_1_ID],
+      spacesToRemove: ['*'],
+    },
+  ];
+  const group2 = [
     // first, add this object to each space and remove it from nonExistentSpace
     // this will succeed even though the object already exists in the default space and it doesn't exist in nonExistentSpace
     { objects: [CASES.DEFAULT_ONLY], spacesToAdd: eachSpace, spacesToRemove: [nonExistentSpace] },
@@ -87,7 +136,7 @@ const createMultiPartTestCases = () => {
       spacesToRemove: [SPACE_1_ID],
     },
   ];
-  const group2 = [
+  const group3 = [
     // first, add this object to space_2 and remove it from space_1
     {
       objects: [CASES.DEFAULT_AND_SPACE_1],
@@ -111,15 +160,17 @@ const createMultiPartTestCases = () => {
       spacesToRemove: [],
     },
   ];
-  return [...group1, ...group2];
+  return [...group1, ...group2, ...group3];
 };
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   const { addTests, createTestDefinitions } = updateObjectsSpacesTestSuiteFactory(
+    es,
     esArchiver,
     supertest
   );

@@ -14,7 +14,6 @@ import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
   getEsaggsMeta,
-  handleEsaggsRequest,
 } from '../../../common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
@@ -48,10 +47,12 @@ export function getFunctionDefinition({
         );
         aggConfigs.hierarchical = args.metricsAtAllLevels;
 
-        return { aggConfigs, indexPattern, searchSource, getNow };
+        const { handleEsaggsRequest } = await import('../../../common/search/expressions');
+
+        return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(
-        switchMap(({ aggConfigs, indexPattern, searchSource, getNow }) =>
-          handleEsaggsRequest({
+        switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
+          return handleEsaggsRequest({
             abortSignal,
             aggs: aggConfigs,
             filters: get(input, 'filters', undefined),
@@ -65,8 +66,8 @@ export function getFunctionDefinition({
             timeRange: get(input, 'timeRange', undefined),
             getNow,
             executionContext: getExecutionContext(),
-          })
-        )
+          });
+        })
       );
     },
   });

@@ -5,14 +5,10 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
-import { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-} from '../../../../../common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
@@ -20,8 +16,12 @@ import {
   querySignalsSchema,
   QuerySignalsSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
-export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
+export const querySignalsRoute = (
+  router: SecuritySolutionPluginRouter,
+  ruleDataClient: IRuleDataClient | null
+) => {
   router.post(
     {
       path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -36,7 +36,7 @@ export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: 
     },
     async (context, request, response) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { query, aggs, _source, track_total_hits, size } = request.body;
+      const { query, aggs, _source, track_total_hits, size, runtime_mappings } = request.body;
       const siemResponse = buildSiemResponse(response);
       if (
         query == null &&
@@ -50,26 +50,23 @@ export const querySignalsRoute = (router: SecuritySolutionPluginRouter, config: 
           body: '"value" must have at least 1 children',
         });
       }
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const siemClient = context.securitySolution!.getAppClient();
-
-      // TODO: Once we are past experimental phase this code should be removed
-      const { ruleRegistryEnabled } = parseExperimentalConfigValue(config.enableExperimental);
 
       try {
-        const { body } = await esClient.search({
-          index: ruleRegistryEnabled ? DEFAULT_ALERTS_INDEX : siemClient.getSignalsIndex(),
-          body: {
-            query,
-            // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
-            aggs: { ...aggs },
-            _source,
-            track_total_hits,
-            size,
-          },
-          ignore_unavailable: true,
-        });
-        return response.ok({ body });
+        const result = await ruleDataClient
+          ?.getReader({ namespace: context.securitySolution.getSpaceId() })
+          .search({
+            body: {
+              query,
+              // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
+              aggs: { ...aggs },
+              _source,
+              track_total_hits,
+              size,
+              runtime_mappings: runtime_mappings as MappingRuntimeFields,
+            },
+            ignore_unavailable: true,
+          });
+        return response.ok({ body: result });
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
         const error = transformError(err);

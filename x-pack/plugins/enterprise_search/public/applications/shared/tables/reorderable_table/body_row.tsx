@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiToken } from '@elastic/eui';
 
 import { Cell } from './cell';
 import { DRAGGABLE_UX_STYLE } from './constants';
@@ -19,6 +19,8 @@ export interface BodyRowProps<Item> {
   additionalProps?: object;
   // Cell to put in first column before other columns
   leftAction?: React.ReactNode;
+  errors?: string[];
+  rowIdentifier?: string;
 }
 
 export const BodyRow = <Item extends object>({
@@ -26,13 +28,27 @@ export const BodyRow = <Item extends object>({
   item,
   additionalProps,
   leftAction,
+  errors = [],
+  rowIdentifier,
 }: BodyRowProps<Item>) => {
   return (
     <div className="reorderableTableRow">
       <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="flexStart">
-            {!!leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
+          <EuiFlexGroup alignItems="center">
+            {leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
+            {rowIdentifier && (
+              <Cell {...DRAGGABLE_UX_STYLE} flexBasis="24px">
+                <EuiToken
+                  size="m"
+                  iconType={() => (
+                    <EuiText size="xs">
+                      <strong>{rowIdentifier}</strong>
+                    </EuiText>
+                  )}
+                />
+              </Cell>
+            )}
             {columns.map((column, columnIndex) => (
               <Cell
                 key={`table_row_cell_${columnIndex}`}
@@ -46,6 +62,15 @@ export const BodyRow = <Item extends object>({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {errors.length > 0 && (
+        <EuiFlexGroup direction="column">
+          {errors.map((errorMessage, errorMessageIndex) => (
+            <EuiFlexItem key={errorMessageIndex}>
+              <EuiCallOut iconType="alert" size="s" color="danger" title={errorMessage} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      )}
     </div>
   );
 };

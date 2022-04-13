@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
+import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
@@ -15,13 +18,16 @@ import { EngineCreation } from './';
 
 describe('EngineCreation', () => {
   const DEFAULT_VALUES = {
+    ingestionMethod: '',
     isLoading: false,
     name: '',
     rawName: '',
     language: 'Universal',
+    isSubmitDisabled: false,
   };
 
   const MOCK_ACTIONS = {
+    setIngestionMethod: jest.fn(),
     setRawName: jest.fn(),
     setLanguage: jest.fn(),
     submitEngine: jest.fn(),
@@ -36,6 +42,14 @@ describe('EngineCreation', () => {
   it('renders', () => {
     const wrapper = shallow(<EngineCreation />);
     expect(wrapper.find('[data-test-subj="EngineCreation"]')).toHaveLength(1);
+  });
+
+  it('EngineCreationLanguageInput calls setIngestionMethod on mount', () => {
+    const search = '?method=crawler';
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
+
+    shallow(<EngineCreation />);
+    expect(MOCK_ACTIONS.setIngestionMethod).toHaveBeenCalledWith('crawler');
   });
 
   it('EngineCreationForm calls submitEngine on form submit', () => {
@@ -72,7 +86,7 @@ describe('EngineCreation', () => {
 
   describe('NewEngineSubmitButton', () => {
     it('is disabled when name is empty', () => {
-      setMockValues({ ...DEFAULT_VALUES, name: '', rawName: '' });
+      setMockValues({ ...DEFAULT_VALUES, name: '', rawName: '', isSubmitDisabled: true });
       const wrapper = shallow(<EngineCreation />);
 
       expect(wrapper.find('[data-test-subj="NewEngineSubmitButton"]').prop('disabled')).toEqual(

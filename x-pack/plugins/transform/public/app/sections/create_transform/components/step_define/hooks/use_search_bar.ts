@@ -7,7 +7,8 @@
 
 import { useState } from 'react';
 
-import { esKuery, esQuery, Query } from '../../../../../../../../../../src/plugins/data/public';
+import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
+import { Query } from '../../../../../../../../../../src/plugins/data/public';
 
 import { getPivotQuery } from '../../../../../common';
 
@@ -23,7 +24,7 @@ import { StepDefineFormProps } from '../step_define_form';
 
 export const useSearchBar = (
   defaults: StepDefineExposedState,
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern']
+  dataView: StepDefineFormProps['searchItems']['dataView']
 ) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -52,14 +53,11 @@ export const useSearchBar = (
       switch (query.language) {
         case QUERY_LANGUAGE_KUERY:
           setSearchQuery(
-            esKuery.toElasticsearchQuery(
-              esKuery.fromKueryExpression(query.query as string),
-              indexPattern
-            )
+            toElasticsearchQuery(fromKueryExpression(query.query as string), dataView)
           );
           return;
         case QUERY_LANGUAGE_LUCENE:
-          setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
+          setSearchQuery(luceneStringToDsl(query.query as string));
           return;
       }
     } catch (e) {

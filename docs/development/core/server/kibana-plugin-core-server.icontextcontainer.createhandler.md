@@ -16,12 +16,12 @@ createHandler(pluginOpaqueId: PluginOpaqueId, handler: RequestHandler): (...rest
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  pluginOpaqueId | <code>PluginOpaqueId</code> | The plugin opaque ID for the plugin that registers this handler. |
-|  handler | <code>RequestHandler</code> | Handler function to pass context object to. |
+|  pluginOpaqueId | PluginOpaqueId | The plugin opaque ID for the plugin that registers this handler. |
+|  handler | RequestHandler | Handler function to pass context object to. |
 
 <b>Returns:</b>
 
-`(...rest: HandlerParameters<RequestHandler>) => ShallowPromise<ReturnType<RequestHandler>>`
+(...rest: HandlerParameters&lt;RequestHandler&gt;) =&gt; ShallowPromise&lt;ReturnType&lt;RequestHandler&gt;&gt;
 
 A function that takes `RequestHandler` parameters, calls `handler` with a new context, and returns a Promise of the `handler` return value.
 

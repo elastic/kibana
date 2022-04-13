@@ -21,7 +21,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error not typed yet
@@ -262,7 +262,7 @@ export class MarkdownPanelConfig extends Component<
             <EuiSpacer size="s" />
             <CodeEditor
               height="500px"
-              languageId={CssLang.ID}
+              languageId={CssLang}
               options={{ fontSize: 14 }}
               value={model.markdown_css ?? ''}
               onChange={this.handleCSSChange}

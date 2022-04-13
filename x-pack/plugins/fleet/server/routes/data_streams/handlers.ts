@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler, SavedObjectsBulkGetObject } from 'src/core/server';
+import type { RequestHandler } from 'src/core/server';
 
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';
@@ -37,14 +37,8 @@ interface ESDataStreamInfo {
   hidden: boolean;
 }
 
-interface ESDataStreamStats {
-  data_stream: string;
-  backing_indices: number;
-  store_size_bytes: number;
-  maximum_timestamp: number;
-}
-
 export const getListHandler: RequestHandler = async (context, request, response) => {
+  // Query datastreams as the current user as the Kibana internal user may not have all the required permission
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   const body: GetDataStreamsResponse = {
@@ -54,21 +48,17 @@ export const getListHandler: RequestHandler = async (context, request, response)
   try {
     // Get matching data streams, their stats, and package SOs
     const [
-      {
-        body: { data_streams: dataStreamsInfo },
-      },
-      {
-        body: { data_streams: dataStreamStats },
-      },
+      { data_streams: dataStreamsInfo },
+      { data_streams: dataStreamStats },
       packageSavedObjects,
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
-      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
+      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN, human: true }),
       getPackageSavedObjects(context.core.savedObjects.client),
     ]);
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
-    const dataStreamsStatsByName = keyBy<ESDataStreamStats>(dataStreamStats, 'data_stream');
+    const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
@@ -94,17 +84,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
     const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
       title?: string;
     }>(
-      Object.values(dashboardIdsByPackageName).reduce<SavedObjectsBulkGetObject[]>(
-        (allDashboards, dashboardIds) => {
-          return allDashboards.concat(
-            dashboardIds.map((id) => ({
-              id,
-              type: KibanaSavedObjectType.dashboard,
-              fields: ['title'],
-            }))
-          );
-        },
-        []
+      Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>
+        dashboardIds.map((id) => ({
+          id,
+          type: KibanaSavedObjectType.dashboard,
+          fields: ['title'],
+        }))
       )
     );
     // Ignore dashboards not found
@@ -133,21 +118,22 @@ export const getListHandler: RequestHandler = async (context, request, response)
         type: '',
         package: dataStream._meta?.package?.name || '',
         package_version: '',
-        last_activity_ms: dataStream.maximum_timestamp,
+        last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
         size_in_bytes: dataStream.store_size_bytes,
+        // `store_size` should be available from ES due to ?human=true flag
+        // but fallback to bytes just in case
+        size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
         dashboards: [],
       };
 
       // Query backing indices to extract data stream dataset, namespace, and type values
-      const {
-        body: { aggregations: dataStreamAggs },
-      } = await esClient.search({
-        index: dataStream.indices.map((index) => index.index_name),
+      const { aggregations: dataStreamAggs } = await esClient.search({
+        index: dataStream.name,
         body: {
           size: 0,
           query: {
             bool: {
-              must: [
+              filter: [
                 {
                   exists: {
                     field: 'data_stream.namespace',
@@ -162,6 +148,11 @@ export const getListHandler: RequestHandler = async (context, request, response)
             },
           },
           aggs: {
+            maxIngestedTimestamp: {
+              max: {
+                field: 'event.ingested',
+              },
+            },
             dataset: {
               terms: {
                 field: 'data_stream.dataset',
@@ -184,15 +175,26 @@ export const getListHandler: RequestHandler = async (context, request, response)
         },
       });
 
+      const { maxIngestedTimestamp } = dataStreamAggs as Record<
+        string,
+        estypes.AggregationsRateAggregate
+      >;
       const { dataset, namespace, type } = dataStreamAggs as Record<
         string,
-        estypes.AggregationsMultiBucketAggregate<{ key?: string }>
+        estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
       >;
 
-      // Set values from backing indices query
-      dataStreamResponse.dataset = dataset.buckets[0]?.key || '';
-      dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
-      dataStreamResponse.type = type.buckets[0]?.key || '';
+      // some integrations e.g custom logs don't have event.ingested
+      if (maxIngestedTimestamp?.value) {
+        dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
+      }
+
+      dataStreamResponse.dataset =
+        (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.namespace =
+        (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.type =
+        (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;
@@ -234,7 +236,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       return dataStreamResponse;
     });
 
-    // Return final data streams objects sorted by last activity, decending
+    // Return final data streams objects sorted by last activity, descending
     // After filtering out data streams that are missing dataset/namespace/type fields
     body.data_streams = (await Promise.all(dataStreamPromises))
       .filter(({ dataset, namespace, type }) => dataset && namespace && type)

@@ -17,6 +17,10 @@ export const UNIT = (totalCount: number) =>
     defaultMessage: `{totalCount, plural, =1 {host} other {hosts}}`,
   });
 
+export const RISK_SCORE = i18n.translate('xpack.securitySolution.hostsRiskTable.tableTitle', {
+  defaultMessage: 'Host risk',
+});
+
 export const NAME = i18n.translate('xpack.securitySolution.hostsTable.nameTitle', {
   defaultMessage: 'Host name',
 });
@@ -32,12 +36,31 @@ export const FIRST_LAST_SEEN_TOOLTIP = i18n.translate(
   }
 );
 
+export const HOST_RISK_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsTable.hostRiskToolTip',
+  {
+    defaultMessage:
+      'Host risk classifcation is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
+  }
+);
+
+export const OS_LAST_SEEN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsTable.osLastSeenToolTip',
+  {
+    defaultMessage: 'Last observed operating system',
+  }
+);
+
 export const OS = i18n.translate('xpack.securitySolution.hostsTable.osTitle', {
   defaultMessage: 'Operating system',
 });
 
 export const VERSION = i18n.translate('xpack.securitySolution.hostsTable.versionTitle', {
   defaultMessage: 'Version',
+});
+
+export const HOST_RISK = i18n.translate('xpack.securitySolution.hostsTable.hostRiskTitle', {
+  defaultMessage: 'Host risk classification',
 });
 
 export const ROWS_5 = i18n.translate('xpack.securitySolution.hostsTable.rows', {

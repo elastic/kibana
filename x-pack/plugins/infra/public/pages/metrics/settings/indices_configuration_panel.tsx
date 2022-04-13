@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { METRICS_INDEX_PATTERN } from '../../../../common/constants';
 import { InputFieldProps } from './input_fields';

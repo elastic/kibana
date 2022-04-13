@@ -8,7 +8,8 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import uuid from 'uuid';
-import { Filter } from '../../../../../../../src/plugins/data/public';
+
+import type { Filter } from '@kbn/es-query';
 
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
@@ -47,7 +48,8 @@ import {
   RESIZED_COLUMN_MIN_WITH,
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
-
+import { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineHistoryParams {
@@ -124,6 +126,7 @@ export const addTimelineNoteToEvent = ({
 
 interface AddTimelineParams {
   id: string;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   timelineById: TimelineById;
 }
@@ -145,6 +148,7 @@ export const shouldResetActiveTimelineContext = (
  */
 export const addTimelineToStore = ({
   id,
+  resolveTimelineConfig,
   timeline,
   timelineById,
 }: AddTimelineParams): TimelineById => {
@@ -159,6 +163,7 @@ export const addTimelineToStore = ({
       filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
       initialized: timelineById[id].initialized,
+      resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
         timeline.timelineType === TimelineType.template
@@ -278,6 +283,26 @@ export const updateGraphEventId = ({
       ...(graphEventId === '' && id === TimelineId.active
         ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
         : {}),
+    },
+  };
+};
+
+export const updateSessionViewConfig = ({
+  id,
+  sessionViewConfig,
+  timelineById,
+}: {
+  id: string;
+  sessionViewConfig: SessionViewConfig | null;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sessionViewConfig,
     },
   };
 };

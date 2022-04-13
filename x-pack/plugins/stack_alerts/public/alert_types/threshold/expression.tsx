@@ -7,7 +7,7 @@
 
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCallOut, EuiEmptyPrompt, EuiText, EuiTitle } from '@elastic/eui';
 import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -21,7 +21,7 @@ import {
   GroupByExpression,
   WhenExpression,
   builtInAggregationTypes,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
@@ -64,8 +64,8 @@ function indexParamToArray(index: string | string[]): string[] {
 }
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
-> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
+  Omit<RuleTypeParamsExpressionProps<IndexThresholdAlertParams>, 'unifiedSearch'>
+> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
   const {
     index,
     timeField,
@@ -78,7 +78,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     threshold,
     timeWindowSize,
     timeWindowUnit,
-  } = alertParams;
+  } = ruleParams;
 
   const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
@@ -97,7 +97,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      alertParams[errorKey as keyof IndexThresholdAlertParams] !== undefined
+      ruleParams[errorKey as keyof IndexThresholdAlertParams] !== undefined
   );
 
   const cannotShowVisualization = !!Object.keys(errors).find(
@@ -112,8 +112,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   );
 
   const setDefaultExpressionValues = async () => {
-    setAlertProperty('params', {
-      ...alertParams,
+    setRuleProperty('params', {
+      ...ruleParams,
       aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
       termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
@@ -163,12 +163,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         timeField={timeField}
         errors={errors}
         onIndexChange={async (indices: string[]) => {
-          setAlertParams('index', indices);
+          setRuleParams('index', indices);
 
           // reset expression fields if indices are deleted
           if (indices.length === 0) {
-            setAlertProperty('params', {
-              ...alertParams,
+            setRuleProperty('params', {
+              ...ruleParams,
               index: indices,
               aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
               termSize: DEFAULT_VALUES.TERM_SIZE,
@@ -184,7 +184,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) =>
-          setAlertParams('timeField', updatedTimeField)
+          setRuleParams('timeField', updatedTimeField)
         }
       />
       <WhenExpression
@@ -192,7 +192,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         data-test-subj="whenExpression"
         aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
         onChangeSelectedAggType={(selectedAggType: string) =>
-          setAlertParams('aggType', selectedAggType)
+          setRuleParams('aggType', selectedAggType)
         }
       />
       {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
@@ -204,7 +204,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           errors={errors}
           display="fullWidth"
           onChangeSelectedAggField={(selectedAggField?: string) =>
-            setAlertParams('aggField', selectedAggField)
+            setRuleParams('aggField', selectedAggField)
           }
         />
       ) : null}
@@ -216,13 +216,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         errors={errors}
         fields={esFields}
         display="fullWidth"
-        onChangeSelectedGroupBy={(selectedGroupBy) => setAlertParams('groupBy', selectedGroupBy)}
+        onChangeSelectedGroupBy={(selectedGroupBy) => setRuleParams('groupBy', selectedGroupBy)}
         onChangeSelectedTermField={(selectedTermField) =>
-          setAlertParams('termField', selectedTermField)
+          setRuleParams('termField', selectedTermField)
         }
-        onChangeSelectedTermSize={(selectedTermSize) =>
-          setAlertParams('termSize', selectedTermSize)
-        }
+        onChangeSelectedTermSize={(selectedTermSize) => setRuleParams('termSize', selectedTermSize)}
       />
       <EuiSpacer />
       <EuiTitle size="xs">
@@ -242,10 +240,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         display="fullWidth"
         popupPosition={'upLeft'}
         onChangeSelectedThreshold={(selectedThresholds) =>
-          setAlertParams('threshold', selectedThresholds)
+          setRuleParams('threshold', selectedThresholds)
         }
         onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
-          setAlertParams('thresholdComparator', selectedThresholdComparator)
+          setRuleParams('thresholdComparator', selectedThresholdComparator)
         }
       />
       <ForLastExpression
@@ -256,10 +254,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         display="fullWidth"
         errors={errors}
         onChangeWindowSize={(selectedWindowSize: number | undefined) =>
-          setAlertParams('timeWindowSize', selectedWindowSize)
+          setRuleParams('timeWindowSize', selectedWindowSize)
         }
         onChangeWindowUnit={(selectedWindowUnit: string) =>
-          setAlertParams('timeWindowUnit', selectedWindowUnit)
+          setRuleParams('timeWindowUnit', selectedWindowUnit)
         }
       />
       <EuiSpacer />
@@ -283,8 +281,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           <Fragment>
             <ThresholdVisualization
               data-test-subj="thresholdVisualization"
-              alertParams={alertParams}
-              alertInterval={alertInterval}
+              ruleParams={ruleParams}
+              alertInterval={ruleInterval}
               aggregationTypes={builtInAggregationTypes}
               comparators={builtInComparators}
               charts={charts}

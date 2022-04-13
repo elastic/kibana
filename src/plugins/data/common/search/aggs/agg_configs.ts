@@ -11,13 +11,14 @@ import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { isRangeFilter } from '@kbn/es-query';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   IEsSearchResponse,
   ISearchOptions,
   ISearchSource,
   RangeFilter,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from 'src/plugins/data/public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
@@ -58,7 +59,7 @@ export interface AggConfigsOptions {
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
-export type GenericBucket = estypes.AggregationsBucket & {
+export type GenericBucket = estypes.AggregationsBuckets<any> & {
   [property: string]: estypes.AggregationsAggregate;
 };
 
@@ -406,6 +407,7 @@ export class AggConfigs {
                     .map(([filter, field]) => ({
                       range: {
                         [field]: {
+                          format: 'strict_date_optional_time',
                           gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
                           lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
                         },
@@ -472,7 +474,14 @@ export class AggConfigs {
   getResponseAggById(id: string): AggConfig | undefined {
     id = String(id);
     const reqAgg = _.find(this.getRequestAggs(), function (agg: AggConfig) {
-      return id.substr(0, String(agg.id).length) === agg.id;
+      const aggId = String(agg.id);
+      // only multi-value aggs like percentiles are allowed to contain dots and [
+      const isMultiValueId = id.includes('[') || id.includes('.');
+      if (!isMultiValueId) {
+        return id === aggId;
+      }
+      const baseId = id.substring(0, id.indexOf('[') !== -1 ? id.indexOf('[') : id.indexOf('.'));
+      return baseId === aggId;
     });
     if (!reqAgg) return;
     return _.find(reqAgg.getResponseAggs(), { id });

@@ -7,18 +7,94 @@
 
 import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../../id_generator';
 import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 
 import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../../types';
 import { LayerDatasourceDropProps } from '../types';
-import { getCustomDropTarget, getAdditionalClassesOnDroppable } from './drop_targets_utils';
+import {
+  getCustomDropTarget,
+  getAdditionalClassesOnDroppable,
+  getDropProps,
+} from './drop_targets_utils';
 
 const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
   defaultMessage: 'Empty dimension',
 });
+
+interface EmptyButtonProps {
+  columnId: string;
+  onClick: (id: string) => void;
+  group: VisualizationDimensionGroupConfig;
+  labels?: {
+    ariaLabel: (label: string) => string;
+    label: JSX.Element | string;
+  };
+}
+
+const defaultButtonLabels = {
+  ariaLabel: (l: string) =>
+    i18n.translate('xpack.lens.indexPattern.addColumnAriaLabel', {
+      defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
+      values: { groupLabel: l },
+    }),
+  label: (
+    <FormattedMessage
+      id="xpack.lens.configure.emptyConfig"
+      defaultMessage="Add or drag-and-drop a field"
+    />
+  ),
+};
+
+const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
+  const { buttonAriaLabel, buttonLabel } = group.labels || {};
+  return (
+    <EuiButtonEmpty
+      className="lnsLayerPanel__triggerText"
+      color="text"
+      size="s"
+      iconType="plusInCircleFilled"
+      contentProps={{
+        className: 'lnsLayerPanel__triggerTextContent',
+      }}
+      aria-label={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
+      data-test-subj="lns-empty-dimension"
+      onClick={() => {
+        onClick(columnId);
+      }}
+    >
+      {buttonLabel || defaultButtonLabels.label}
+    </EuiButtonEmpty>
+  );
+};
+
+const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) => (
+  <EuiButtonEmpty
+    className="lnsLayerPanel__triggerText"
+    color="text"
+    size="s"
+    iconType="plusInCircleFilled"
+    contentProps={{
+      className: 'lnsLayerPanel__triggerTextContent',
+    }}
+    aria-label={i18n.translate('xpack.lens.indexPattern.suggestedValueAriaLabel', {
+      defaultMessage: 'Suggested value: {value} for {groupLabel}',
+      values: { value: group.suggestedValue?.(), groupLabel: group.groupLabel },
+    })}
+    data-test-subj="lns-empty-dimension-suggested-value"
+    onClick={() => {
+      onClick(columnId);
+    }}
+  >
+    <FormattedMessage
+      id="xpack.lens.configure.suggestedValuee"
+      defaultMessage="Suggested value: {value}"
+      values={{ value: group.suggestedValue?.() }}
+    />
+  </EuiButtonEmpty>
+);
 
 export function EmptyDimensionButton({
   group,
@@ -34,12 +110,12 @@ export function EmptyDimensionButton({
   layerId: string;
   groupIndex: number;
   layerIndex: number;
-  onClick: (id: string) => void;
   onDrop: (
     droppedItem: DragDropIdentifier,
     dropTarget: DragDropIdentifier,
     dropType?: DropType
   ) => void;
+  onClick: (id: string) => void;
   group: VisualizationDimensionGroupConfig;
   groups: VisualizationDimensionGroupConfig[];
 
@@ -55,14 +131,18 @@ export function EmptyDimensionButton({
     setNewColumnId(generateId());
   }, [itemIndex]);
 
-  const dropProps = layerDatasource.getDropProps({
-    ...layerDatasourceDropProps,
-    dragging,
-    columnId: newColumnId,
-    filterOperations: group.filterOperations,
-    groupId: group.groupId,
-    dimensionGroups: groups,
-  });
+  const dropProps = getDropProps(
+    layerDatasource,
+    {
+      ...(layerDatasourceDropProps || {}),
+      dragging,
+      columnId: newColumnId,
+      filterOperations: group.filterOperations,
+      groupId: group.groupId,
+      dimensionGroups: groups,
+    },
+    true
+  );
 
   const dropTypes = dropProps?.dropTypes;
   const nextLabel = dropProps?.nextLabel;
@@ -94,6 +174,12 @@ export function EmptyDimensionButton({
     [value, onDrop]
   );
 
+  const buttonProps: EmptyButtonProps = {
+    columnId: value.columnId,
+    onClick,
+    group,
+  };
+
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
@@ -105,28 +191,11 @@ export function EmptyDimensionButton({
         getCustomDropTarget={getCustomDropTarget}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
-          <EuiButtonEmpty
-            className="lnsLayerPanel__triggerText"
-            color="text"
-            size="s"
-            iconType="plusInCircleFilled"
-            contentProps={{
-              className: 'lnsLayerPanel__triggerTextContent',
-            }}
-            aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnAriaLabel', {
-              defaultMessage: 'Add or drag-and-drop a field to {groupLabel}',
-              values: { groupLabel: group.groupLabel },
-            })}
-            data-test-subj="lns-empty-dimension"
-            onClick={() => {
-              onClick(value.columnId);
-            }}
-          >
-            <FormattedMessage
-              id="xpack.lens.configure.emptyConfig"
-              defaultMessage="Add or drag-and-drop a field"
-            />
-          </EuiButtonEmpty>
+          {typeof group.suggestedValue?.() === 'number' ? (
+            <SuggestedValueButton {...buttonProps} />
+          ) : (
+            <DefaultEmptyButton {...buttonProps} />
+          )}
         </div>
       </DragDrop>
     </div>

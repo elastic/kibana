@@ -12,11 +12,15 @@ import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from 'src/plugins/telemetry_collection_manager/server';
+import type { SecurityPluginStart } from '../../../../../x-pack/plugins/security/server';
+
+export type SecurityGetter = () => SecurityPluginStart | undefined;
 
 export function registerTelemetryUsageStatsRoutes(
   router: IRouter,
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
-  isDev: boolean
+  isDev: boolean,
+  getSecurity: SecurityGetter
 ) {
   router.post(
     {
@@ -24,16 +28,31 @@ export function registerTelemetryUsageStatsRoutes(
       validate: {
         body: schema.object({
           unencrypted: schema.boolean({ defaultValue: false }),
+          refreshCache: schema.boolean({ defaultValue: false }),
         }),
       },
     },
     async (context, req, res) => {
-      const { unencrypted } = req.body;
+      const { unencrypted, refreshCache } = req.body;
+
+      const security = getSecurity();
+      if (security && unencrypted) {
+        // Normally we would use `options: { tags: ['access:decryptedTelemetry'] }` in the route definition to check authorization for an
+        // API action, however, we want to check this conditionally based on the `unencrypted` parameter. In this case we need to use the
+        // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only
+        // granted to users that have "Global All" or "Global Read" privileges in Kibana.
+        const { checkPrivilegesWithRequest, actions } = security.authz;
+        const privileges = { kibana: actions.api.get('decryptedTelemetry') };
+        const { hasAllRequested } = await checkPrivilegesWithRequest(req).globally(privileges);
+        if (!hasAllRequested) {
+          return res.forbidden();
+        }
+      }
 
       try {
         const statsConfig: StatsGetterConfig = {
-          request: req,
           unencrypted,
+          refreshCache: unencrypted || refreshCache,
         };
 
         const stats = await telemetryCollectionManager.getStats(statsConfig);

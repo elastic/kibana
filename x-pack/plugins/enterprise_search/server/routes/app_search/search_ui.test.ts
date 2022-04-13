@@ -33,7 +33,7 @@ describe('reference application routes', () => {
       });
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/:engineName/reference_application/field_config',
+        path: '/as/engines/:engineName/search_experience/field_config',
       });
     });
   });

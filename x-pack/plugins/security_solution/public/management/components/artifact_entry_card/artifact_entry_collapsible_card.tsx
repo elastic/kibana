@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { ArtifactEntryCardProps } from './artifact_entry_card';
+import { CommonArtifactEntryCardProps } from './artifact_entry_card';
 import { CardContainerPanel } from './components/card_container_panel';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
@@ -15,7 +15,7 @@ import { CardSectionPanel } from './components/card_section_panel';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { CardCompressedHeader } from './components/card_compressed_header';
 
-export interface ArtifactEntryCollapsibleCardProps extends ArtifactEntryCardProps {
+export interface ArtifactEntryCollapsibleCardProps extends CommonArtifactEntryCardProps {
   onExpandCollapse: () => void;
   expanded?: boolean;
 }
@@ -35,7 +35,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
 
     return (
       <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
-        <CardSectionPanel>
+        <CardSectionPanel className="artifact-entry-collapsible-card">
           <CardCompressedHeader
             artifact={artifact}
             actions={actions}

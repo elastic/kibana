@@ -162,4 +162,151 @@ describe('ui_settings 8.0.0 migrations', () => {
       migrationVersion: {},
     });
   });
+  test('removes telemetry:optIn and xPackMonitoring:allowReport from ui_settings', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'telemetry:optIn': false,
+        'xPackMonitoring:allowReport': false,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+  test('removes custom theme:version setting', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'theme:version': 'v7',
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+
+  test('removes "courier:batchSearches" setting', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'courier:batchSearches': true,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+});
+
+describe('ui_settings 8.1.0 migrations', () => {
+  const migration = migrations['8.1.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+
+  test('adds geo_point type to default map', () => {
+    const initialDefaultTypeMap = {
+      ip: { id: 'ip', params: {} },
+      date: { id: 'date', params: {} },
+      date_nanos: { id: 'date_nanos', params: {}, es: true },
+      number: { id: 'number', params: {} },
+      boolean: { id: 'boolean', params: {} },
+      histogram: { id: 'histogram', params: {} },
+      _source: { id: '_source', params: {} },
+      _default_: { id: 'string', params: {} },
+    };
+
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'format:defaultTypeMap': JSON.stringify(initialDefaultTypeMap),
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    const migrated = migration(doc);
+    expect(migrated.attributes.buildNum).toBe(9007199254740991);
+    expect(JSON.parse(migrated.attributes['format:defaultTypeMap'])).toEqual({
+      ip: { id: 'ip', params: {} },
+      date: { id: 'date', params: {} },
+      date_nanos: { id: 'date_nanos', params: {}, es: true },
+      number: { id: 'number', params: {} },
+      boolean: { id: 'boolean', params: {} },
+      histogram: { id: 'histogram', params: {} },
+      _source: { id: '_source', params: {} },
+      _default_: { id: 'string', params: {} },
+      geo_point: { id: 'geo_point', params: { transform: 'wkt' } },
+    });
+  });
+
+  test('removes idleTimeout option from rulesTableRefresh', () => {
+    const initialRulesTableRefresh = {
+      on: true,
+      value: 60000,
+      idleTimeout: 2700000,
+    };
+
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'securitySolution:rulesTableRefresh': JSON.stringify(initialRulesTableRefresh),
+      },
+      references: [],
+      updated_at: '2022-01-19T11:26:54.645Z',
+      migrationVersion: {},
+    };
+    const migrated = migration(doc);
+    expect(migrated.attributes.buildNum).toBe(9007199254740991);
+    expect(JSON.parse(migrated.attributes['securitySolution:rulesTableRefresh'])).toEqual({
+      on: true,
+      value: 60000,
+    });
+  });
 });

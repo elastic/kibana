@@ -19,10 +19,9 @@ import {
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { DocumentationLinksService } from '../../lib';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
@@ -85,10 +84,7 @@ export const ShareModeControl = (props: Props) => {
       return null;
     }
 
-    const kibanaPrivilegesUrl = new DocumentationLinksService(
-      docLinks!
-    ).getKibanaPrivilegesDocUrl();
-
+    const docLink = docLinks?.links.security.kibanaPrivileges;
     return (
       <>
         <EuiCallOut
@@ -108,7 +104,7 @@ export const ShareModeControl = (props: Props) => {
             values={{
               objectNoun,
               readAndWritePrivilegesLink: (
-                <EuiLink href={kibanaPrivilegesUrl} target="_blank">
+                <EuiLink href={docLink} target="_blank">
                   <FormattedMessage
                     id="xpack.spaces.shareToSpace.privilegeWarningLink"
                     defaultMessage="read and write privileges"
@@ -143,7 +139,7 @@ export const ShareModeControl = (props: Props) => {
           onChange(updatedSpaceIds);
         }}
         legend={buttonGroupLegend}
-        color="secondary"
+        color="success"
         isFullWidth={true}
         isDisabled={!canShareToAllSpaces}
       />
@@ -151,7 +147,7 @@ export const ShareModeControl = (props: Props) => {
       <EuiSpacer size="s" />
 
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <EuiText
               color="subdued"
@@ -187,7 +183,7 @@ export const ShareModeControl = (props: Props) => {
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
         <SelectableSpacesControl
           spaces={spaces}
           shareOptions={shareOptions}

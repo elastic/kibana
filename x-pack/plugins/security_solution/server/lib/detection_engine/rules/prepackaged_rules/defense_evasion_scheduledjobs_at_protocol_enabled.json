@@ -12,7 +12,8 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Scheduled Tasks AT Command Enabled",
-  "query": "registry where \n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\Configuration\\\\EnableAt\" and registry.data.strings == \"1\"\n",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "registry where \n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\Configuration\\\\EnableAt\" and \n registry.data.strings : (\"1\", \"0x00000001\")\n",
   "references": [
     "https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-scheduledjob"
   ],
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 5
 }

@@ -6,53 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Icons, IconButton, TooltipLinkList, WithTooltip } from '@storybook/components';
 import { useGlobals } from '@storybook/api';
-import { Link } from '@storybook/components/dist/tooltip/TooltipLinkList';
+
+type PropsOf<T extends React.FC<any>> = T extends React.FC<infer P> ? P : never;
+type ArrayItem<T extends any[]> = T extends Array<infer I> ? I : never;
+type Link = ArrayItem<PropsOf<typeof TooltipLinkList>['links']>;
 
 const defaultTheme = 'v8.light';
 
 export function ThemeSwitcher() {
-  const [globals, updateGlobals] = useGlobals();
-  const selectedTheme = globals.euiTheme;
+  const [{ euiTheme: selectedTheme }, updateGlobals] = useGlobals();
 
-  if (!selectedTheme || selectedTheme === defaultTheme) {
-    updateGlobals({ euiTheme: defaultTheme });
-  }
+  const selectTheme = useCallback(
+    (themeId: string) => {
+      updateGlobals({ euiTheme: themeId });
+    },
+    [updateGlobals]
+  );
 
-  function Menu({ onHide }: { onHide: () => void }) {
-    const links: Link[] = [
-      {
-        id: 'v8.light',
-        title: 'Amsterdam: Light',
-      },
-      {
-        id: 'v8.dark',
-        title: 'Amsterdam: Dark',
-      },
-      { id: 'v7.light', title: 'Light' },
-      { id: 'v7.dark', title: 'Dark' },
-    ].map((link) => ({
-      ...link,
-      onClick: (_event, item) => {
-        if (item.id !== selectedTheme) {
-          updateGlobals({ euiTheme: item.id });
-        }
-        onHide();
-      },
-      active: selectedTheme === link.id,
-    }));
-
-    return <TooltipLinkList links={links} />;
-  }
+  useEffect(() => {
+    if (!selectedTheme) {
+      selectTheme(defaultTheme);
+    }
+  }, [selectTheme, selectedTheme]);
 
   return (
     <WithTooltip
       placement="top"
       trigger="click"
       closeOnClick
-      tooltip={({ onHide }) => <Menu onHide={onHide} />}
+      tooltip={({ onHide }) => (
+        <ThemeSwitcherTooltip
+          onHide={onHide}
+          onChangeSelectedTheme={selectTheme}
+          selectedTheme={selectedTheme}
+        />
+      )}
     >
       {/* @ts-ignore Remove when @storybook has moved to @emotion v11 */}
       <IconButton key="eui-theme" title="Change the EUI theme">
@@ -61,3 +52,39 @@ export function ThemeSwitcher() {
     </WithTooltip>
   );
 }
+
+const ThemeSwitcherTooltip = React.memo(
+  ({
+    onHide,
+    onChangeSelectedTheme,
+    selectedTheme,
+  }: {
+    onHide: () => void;
+    onChangeSelectedTheme: (themeId: string) => void;
+    selectedTheme: string;
+  }) => {
+    const links = [
+      {
+        id: 'v8.light',
+        title: 'Light',
+      },
+      {
+        id: 'v8.dark',
+        title: 'Dark',
+      },
+    ].map(
+      (link): Link => ({
+        ...link,
+        onClick: (_event, item) => {
+          if (item.id != null && item.id !== selectedTheme) {
+            onChangeSelectedTheme(item.id);
+          }
+          onHide();
+        },
+        active: selectedTheme === link.id,
+      })
+    );
+
+    return <TooltipLinkList links={links} />;
+  }
+);

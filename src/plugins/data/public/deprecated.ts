@@ -36,18 +36,13 @@ import {
   luceneStringToDsl,
   decorateQuery,
   FILTERS,
-  isFilter,
   isFilters,
   KueryNode,
   RangeFilter,
-  RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
-  PhrasesFilter,
   PhraseFilter,
-  CustomFilter,
   MatchAllFilter,
-  IFieldSubType,
   EsQueryConfig,
   FilterStateStore,
   compareFilters,
@@ -55,8 +50,6 @@ import {
   onlyDisabledFiltersChanged,
   getEsQueryConfig,
 } from '../common';
-
-import { FilterLabel, FilterItem } from './ui';
 
 import {
   getDisplayValueFromFilter,
@@ -95,9 +88,6 @@ const convertRangeFilterToTimeRangeString = oldConvertRangeFilterToTimeRangeStri
  * @removeBy 8.1
  */
 export const esFilters = {
-  FilterLabel,
-  FilterItem,
-
   FILTERS,
   FilterStateStore,
 
@@ -137,21 +127,16 @@ export const esFilters = {
 /**
  * Deprecated type exports
  */
-export {
+export type {
   KueryNode,
   RangeFilter,
-  RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
-  PhrasesFilter,
   PhraseFilter,
-  CustomFilter,
   MatchAllFilter,
-  IFieldSubType,
   EsQueryConfig,
-  isFilter,
-  isFilters,
 };
+export { isFilters };
 
 /**
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.

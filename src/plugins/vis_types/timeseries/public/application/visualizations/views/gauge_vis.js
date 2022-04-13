@@ -9,6 +9,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
+import { EuiResizeObserver } from '@elastic/eui';
 import reactcss from 'reactcss';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 import { COLORS } from '../constants/chart';
@@ -25,19 +26,12 @@ export class GaugeVis extends Component {
       translateY: 1,
     };
     this.handleResize = this.handleResize.bind(this);
-  }
-
-  UNSAFE_componentWillMount() {
-    const check = () => {
-      this.timeout = setTimeout(() => {
-        const newState = calculateCoordinates(this.inner, this.resize, this.state);
-        if (newState && this.state && !_.isEqual(newState, this.state)) {
-          this.handleResize();
-        }
-        check();
-      }, 500);
-    };
-    check();
+    this.checkResizeThrottled = _.throttle(() => {
+      const newState = calculateCoordinates(this.inner, this.resize, this.state);
+      if (newState && this.state && !_.isEqual(newState, this.state)) {
+        this.handleResize();
+      }
+    }, 200);
   }
 
   componentWillUnmount() {
@@ -148,11 +142,21 @@ export class GaugeVis extends Component {
       );
     }
     return (
-      <div ref={(el) => (this.resize = el)} style={styles.resize}>
-        <div style={styles.svg} ref={(el) => (this.inner = el)}>
-          {svg}
-        </div>
-      </div>
+      <EuiResizeObserver onResize={this.checkResizeThrottled}>
+        {(resizeRef) => (
+          <div
+            ref={(el) => {
+              this.resize = el;
+              resizeRef(el);
+            }}
+            style={styles.resize}
+          >
+            <div style={styles.svg} ref={(el) => (this.inner = el)}>
+              {svg}
+            </div>
+          </div>
+        )}
+      </EuiResizeObserver>
     );
   }
 }

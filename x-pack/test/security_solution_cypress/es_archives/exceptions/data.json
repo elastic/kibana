@@ -8,6 +8,9 @@
       "agent": {
         "name": "bond"
       },
+      "unique_value": {
+        "test": "test field"
+      },
       "user" : [ 
         {
           "name" : "john",

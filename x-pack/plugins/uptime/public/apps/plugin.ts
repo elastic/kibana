@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   CoreSetup,
   CoreStart,
@@ -14,7 +15,10 @@ import {
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { SharePluginSetup, SharePluginStart } from '../../../../../src/plugins/share/public';
+import { DiscoverStart } from '../../../../../src/plugins/discover/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
+
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -28,6 +32,7 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
+
 import { alertTypeInitializers, legacyAlertTypeInitializers } from '../lib/alert_types';
 import { FleetStart } from '../../../fleet/public';
 import {
@@ -42,20 +47,30 @@ import {
   LazySyntheticsPolicyEditExtension,
 } from '../components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
+import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
+import { CasesUiStart } from '../../../cases/public';
+import { uptimeOverviewNavigatorParams } from './locators/overview';
+import { CloudSetup } from '../../../cloud/public';
 
 export interface ClientPluginsSetup {
-  data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
+  data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface ClientPluginsStart {
-  embeddable: EmbeddableStart;
-  data: DataPublicPluginStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fleet?: FleetStart;
+  data: DataPublicPluginStart;
+  discover: DiscoverStart;
+  inspector: InspectorPluginStart;
+  embeddable: EmbeddableStart;
   observability: ObservabilityPublicStart;
+  share: SharePluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  cases: CasesUiStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -71,7 +86,7 @@ export type ClientStart = void;
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
-  constructor(_context: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     if (plugins.home) {
@@ -91,6 +106,8 @@ export class UptimePlugin
 
       return UptimeDataHelper(coreStart);
     };
+
+    plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
 
     plugins.observability.dashboard.register({
       appName: 'synthetics',
@@ -201,7 +218,7 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-        return renderApp(coreStart, plugins, corePlugins, params);
+        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
       },
     });
   }
@@ -219,6 +236,7 @@ export class UptimePlugin
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-edit',
+        useLatestPackageVersion: true,
         Component: LazySyntheticsPolicyEditExtension,
       });
 

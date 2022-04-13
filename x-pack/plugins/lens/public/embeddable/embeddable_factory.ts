@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Capabilities, HttpSetup } from 'kibana/public';
+import type { Capabilities, HttpSetup, ThemeServiceStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { IndexPatternsContract, TimefilterContract } from '../../../../../src/plugins/data/public';
+import { FilterManager, TimefilterContract } from '../../../../../src/plugins/data/public';
+import type { DataViewsContract } from '../../../../../src/plugins/data_views/public';
 import { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactoryDefinition,
@@ -25,6 +26,7 @@ import { DOC_TYPE } from '../../common/constants';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { extract, inject } from '../../common/embeddable_factory';
 import type { SpacesPluginStart } from '../../../spaces/public';
+import { DatasourceMap, VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -33,13 +35,17 @@ export interface LensEmbeddableStartServices {
   attributeService: LensAttributeService;
   capabilities: RecursiveReadonly<Capabilities>;
   expressionRenderer: ReactExpressionRendererType;
-  indexPatternService: IndexPatternsContract;
+  indexPatternService: DataViewsContract;
   uiActions?: UiActionsStart;
   usageCollection?: UsageCollectionSetup;
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  injectFilterReferences: FilterManager['inject'];
+  visualizationMap: VisualizationMap;
+  datasourceMap: DatasourceMap;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -85,12 +91,16 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       timefilter,
       expressionRenderer,
       documentToExpression,
+      injectFilterReferences,
+      visualizationMap,
+      datasourceMap,
       uiActions,
       coreHttp,
       attributeService,
       indexPatternService,
       capabilities,
       usageCollection,
+      theme,
       inspector,
       spaces,
     } = await this.getStartServices();
@@ -108,11 +118,17 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         getTrigger: uiActions?.getTrigger,
         getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
+        injectFilterReferences,
+        visualizationMap,
+        datasourceMap,
         capabilities: {
           canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
           canSaveVisualizations: Boolean(capabilities.visualize.save),
+          navLinks: capabilities.navLinks,
+          discover: capabilities.discover,
         },
         usageCollection,
+        theme,
         spaces,
       },
       input,

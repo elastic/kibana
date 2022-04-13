@@ -17,7 +17,7 @@ import {
   EuiComment,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';

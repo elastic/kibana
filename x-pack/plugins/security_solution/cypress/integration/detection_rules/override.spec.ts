@@ -34,7 +34,6 @@ import {
   DETAILS_DESCRIPTION,
   DETAILS_TITLE,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
@@ -54,31 +53,21 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../screens/rule_details';
 
-import {
-  goToManageAlertsDetectionRules,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import {
-  changeRowsPerPageTo100,
-  filterByCustomRules,
-  goToCreateNewRule,
-  goToRuleDetails,
-  waitForRulesTableToBeLoaded,
-} from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
+import { getDetails } from '../../tasks/rule_details';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Detection rules, override', () => {
   const expectedUrls = getNewOverrideRule().referenceUrls.join('');
@@ -86,8 +75,11 @@ describe('Detection rules, override', () => {
   const expectedTags = getNewOverrideRule().tags.join('');
   const expectedMitre = formatMitreAttackDescription(getNewOverrideRule().mitre);
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+  });
+  beforeEach(() => {
     createTimeline(getNewOverrideRule().timeline).then((response) => {
       cy.wrap({
         ...getNewOverrideRule(),
@@ -99,32 +91,20 @@ describe('Detection rules, override', () => {
     });
   });
 
-  it('Creates and activates a new custom rule with override option', function () {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-    waitForRulesTableToBeLoaded();
-    goToCreateNewRule();
+  it('Creates and enables a new custom rule with override option', function () {
+    visitWithoutDateRange(RULE_CREATION);
     fillDefineCustomRuleWithImportedQueryAndContinue(this.rule);
     fillAboutRuleWithOverrideAndContinue(this.rule);
     fillScheduleRuleAndContinue(this.rule);
-    createAndActivateRule();
+    createAndEnableRule();
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-    changeRowsPerPageTo100();
 
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
 
-    filterByCustomRules();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-    });
     cy.get(RULE_NAME).should('have.text', this.rule.name);
     cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
     cy.get(SEVERITY).should('have.text', this.rule.severity);
@@ -139,7 +119,7 @@ describe('Detection rules, override', () => {
       getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
       getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
         'have.text',
-        `${this.rule.riskOverride}signal.rule.risk_score`
+        `${this.rule.riskOverride}kibana.alert.risk_score`
       );
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', this.rule.nameOverride);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
@@ -186,13 +166,11 @@ describe('Detection rules, override', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
-    cy.get(ALERT_GRID_CELL).eq(3).contains('auditbeat');
-    cy.get(ALERT_GRID_CELL).eq(4).contains('critical');
-
-    // TODO: Is this necessary?
-    // sortRiskScore();
-
-    cy.get(ALERT_GRID_CELL).eq(5).contains('80');
+    cy.get(NUMBER_OF_ALERTS)
+      .invoke('text')
+      .should('match', /^[1-9].+$/); // Any number of alerts
+    cy.get(ALERT_GRID_CELL).contains('auditbeat');
+    cy.get(ALERT_GRID_CELL).contains('critical');
+    cy.get(ALERT_GRID_CELL).contains('80');
   });
 });

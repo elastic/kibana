@@ -21,7 +21,7 @@ export const plugin: PluginInitializer<
   GlobalSearchTestPluginStartDeps
 > = () => new GlobalSearchTestPlugin();
 
-export {
+export type {
   GlobalSearchTestPluginSetup,
   GlobalSearchTestPluginStart,
   GlobalSearchTestPluginSetupDeps,

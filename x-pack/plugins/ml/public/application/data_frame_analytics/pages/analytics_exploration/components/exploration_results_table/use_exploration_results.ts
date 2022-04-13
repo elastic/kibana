@@ -13,7 +13,7 @@ import { CoreSetup } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { MlApiServices } from '../../../../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
@@ -41,7 +41,7 @@ import { FeatureImportanceBaseline } from '../../../../../../../common/types/fea
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery,
   toastNotifications: CoreSetup['notifications']['toasts'],

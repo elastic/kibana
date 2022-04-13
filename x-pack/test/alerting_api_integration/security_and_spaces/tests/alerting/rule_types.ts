@@ -21,6 +21,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       { id: 'recovered', name: 'Recovered' },
     ],
     default_action_group_id: 'default',
+    does_set_recovery_context: false,
     id: 'test.noop',
     name: 'Test: Noop',
     action_variables: {
@@ -36,6 +37,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       name: 'Recovered',
     },
     enabled_in_license: true,
+    rule_task_timeout: '5m',
   };
 
   const expectedRestrictedNoOpType = {
@@ -48,6 +50,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       name: 'Restricted Recovery',
     },
     default_action_group_id: 'default',
+    does_set_recovery_context: false,
     id: 'test.restricted-noop',
     name: 'Test: Restricted Noop',
     action_variables: {
@@ -59,6 +62,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
     minimum_license_required: 'basic',
     is_exportable: true,
     enabled_in_license: true,
+    rule_task_timeout: '5m',
   };
 
   describe('rule_types', () => {

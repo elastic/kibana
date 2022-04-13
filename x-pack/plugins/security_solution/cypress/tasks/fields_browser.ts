@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { drag, drop } from '../tasks/common';
-
 import {
   FIELDS_BROWSER_FILTER_INPUT,
-  FIELDS_BROWSER_DRAGGABLE_HOST_GEO_COUNTRY_NAME_HEADER,
-  FIELDS_BROWSER_HEADER_DROP_AREA,
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX,
   FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX,
   FIELDS_BROWSER_MESSAGE_CHECKBOX,
   FIELDS_BROWSER_RESET_FIELDS,
   FIELDS_BROWSER_CHECKBOX,
   CLOSE_BTN,
+  FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON,
+  FIELDS_BROWSER_CATEGORY_FILTER_OPTION,
+  FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH,
+  FIELDS_BROWSER_VIEW_ALL,
+  FIELDS_BROWSER_VIEW_BUTTON,
+  FIELDS_BROWSER_VIEW_SELECTED,
 } from '../screens/fields_browser';
 
 export const addsFields = (fields: string[]) => {
@@ -37,27 +39,33 @@ export const addsHostGeoContinentNameToTimeline = () => {
   });
 };
 
-export const addsHostGeoCountryNameToTimelineDraggingIt = () => {
-  cy.get(FIELDS_BROWSER_DRAGGABLE_HOST_GEO_COUNTRY_NAME_HEADER).should('exist');
-  cy.get(FIELDS_BROWSER_DRAGGABLE_HOST_GEO_COUNTRY_NAME_HEADER).then((field) => drag(field));
-
-  cy.get(FIELDS_BROWSER_HEADER_DROP_AREA)
-    .first()
-    .then((headersDropArea) => drop(headersDropArea));
-};
-
 export const clearFieldsBrowser = () => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
+  cy.get(FIELDS_BROWSER_FILTER_INPUT)
+    .type('{selectall}{backspace}')
+    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
 };
 
 export const closeFieldsBrowser = () => {
   cy.get(CLOSE_BTN).click({ force: true });
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.exist');
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
   cy.get(FIELDS_BROWSER_FILTER_INPUT)
+    .clear()
     .type(fieldName)
-    .should('not.have.class', 'euiFieldSearch-isLoading');
+    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
+};
+
+export const toggleCategoryFilter = () => {
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click({ force: true });
+};
+
+export const toggleCategory = (category: string) => {
+  toggleCategoryFilter();
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear().type(category);
+  cy.get(FIELDS_BROWSER_CATEGORY_FILTER_OPTION(category)).click({ force: true });
+  toggleCategoryFilter();
 };
 
 export const removesMessageField = () => {
@@ -68,4 +76,13 @@ export const removesMessageField = () => {
 
 export const resetFields = () => {
   cy.get(FIELDS_BROWSER_RESET_FIELDS).click({ force: true });
+};
+
+export const activateViewSelected = () => {
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click({ force: true });
+};
+export const activateViewAll = () => {
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_ALL).click({ force: true });
 };

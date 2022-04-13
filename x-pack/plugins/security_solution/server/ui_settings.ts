@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup } from '../../../../src/core/server';
+import { CoreSetup, UiSettingsParams } from '../../../../src/core/server';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -17,32 +17,42 @@ import {
   DEFAULT_FROM,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
-  DEFAULT_TRANSFORMS,
-  DEFAULT_TRANSFORMS_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
+  ENABLE_CCS_READ_WARNING_SETTING,
 } from '../common/constants';
-import { transformConfigSchema } from '../common/transforms/types';
 import { ExperimentalFeatures } from '../common/experimental_features';
+
+type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
+
+/**
+ * This helper is used to preserve settings order in the UI
+ *
+ * @param settings - UI settings config
+ * @returns Settings config with the order field added
+ */
+const orderSettings = (settings: SettingsConfig): SettingsConfig => {
+  return Object.fromEntries(
+    Object.entries(settings).map(([id, setting], index) => [id, { ...setting, order: index }])
+  );
+};
 
 export const initUiSettings = (
   uiSettings: CoreSetup['uiSettings'],
   experimentalFeatures: ExperimentalFeatures
 ) => {
-  uiSettings.register({
+  const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultRefreshIntervalLabel', {
@@ -91,9 +101,7 @@ export const initUiSettings = (
       }),
       sensitive: true,
 
-      value: experimentalFeatures.uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN,
+      value: DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
@@ -163,13 +171,11 @@ export const initUiSettings = (
       type: 'json',
       value: `{
   "on": ${DEFAULT_RULE_REFRESH_INTERVAL_ON},
-  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE},
-  "idleTimeout": ${DEFAULT_RULE_REFRESH_IDLE_VALUE}
+  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE}
 }`,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.object({
-        idleTimeout: schema.number({ min: 300000 }),
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
@@ -210,25 +216,20 @@ export const initUiSettings = (
         })
       ),
     },
-    // TODO: Remove this check once the experimental flag is removed
-    ...(experimentalFeatures.metricsEntitiesEnabled
-      ? {
-          [DEFAULT_TRANSFORMS]: {
-            name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
-              defaultMessage: 'Default transforms to use',
-            }),
-            value: DEFAULT_TRANSFORMS_SETTING,
-            type: 'json',
-            description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
-              // TODO: Add a hyperlink to documentation about this feature
-              defaultMessage: 'Experimental: Enable an application cache through transforms',
-            }),
-            sensitive: true,
-            category: [APP_ID],
-            requiresPageReload: false,
-            schema: transformConfigSchema,
-          },
-        }
-      : {}),
-  });
+    [ENABLE_CCS_READ_WARNING_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
+        defaultMessage: 'CCS Rule Privileges Warning',
+      }),
+      value: true,
+      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
+        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
+      }),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: false,
+      schema: schema.boolean(),
+    },
+  };
+
+  uiSettings.register(orderSettings(securityUiSettings));
 };

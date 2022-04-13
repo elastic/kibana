@@ -9,25 +9,19 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe('security', function () {
+  describe.skip('security', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
-    });
-
-    after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('global all privileges (aka kibana_admin)', () => {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin'], true);
+        await security.testUser.setRoles(['kibana_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -47,10 +41,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard read with global_upgrade_assistant_role', () => {
       before(async () => {
-        await security.testUser.setRoles(
-          ['global_dashboard_read', 'global_upgrade_assistant_role'],
-          true
-        );
+        await security.testUser.setRoles([
+          'global_dashboard_read',
+          'global_upgrade_assistant_role',
+        ]);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -62,11 +56,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       describe('[SkipCloud] global dashboard read with global_upgrade_assistant_role', function () {
         this.tags('skipCloud');
-        it('should render the "Stack" section with Upgrde Assistant', async function () {
+        it('should render the "Stack" section with Upgrade Assistant', async function () {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
-          expect(sections).to.have.length(3);
-          expect(sections[2]).to.eql({
+          expect(sections).to.have.length(5);
+          expect(sections[4]).to.eql({
             sectionId: 'stack',
             sectionLinks: ['license_management', 'upgrade_assistant'],
           });

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getPreviewIndicesFromAutoFollowPattern } from '../services/auto_follow_pattern';
 
 export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPatterns }) => {

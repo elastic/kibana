@@ -84,6 +84,22 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
     CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
     CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+    // We test the alias conflict preflight check error case twice; once by checking the alias with "find" and once by using "bulk-get".
+    {
+      ...CASES.ALIAS_CONFLICT_OBJ,
+      initialNamespaces: ['*'],
+      ...fail409(),
+      fail409Param: 'aliasConflictAllSpaces', // first try fails because an alias exists in space_x, the default space, and space_1 (but not space_y because that alias is disabled)
+    },
+    {
+      ...CASES.ALIAS_CONFLICT_OBJ,
+      // second try fails if this is the default space or space_1, because an alias exists in those spaces
+      ...(spaceId === DEFAULT_SPACE_ID
+        ? { ...fail409(), fail409Param: 'aliasConflictDefaultSpace' }
+        : {}),
+      ...(spaceId === SPACE_1_ID ? { ...fail409(), fail409Param: 'aliasConflictSpace1' } : {}),
+      expectedNamespaces,
+    },
   ];
 };
 

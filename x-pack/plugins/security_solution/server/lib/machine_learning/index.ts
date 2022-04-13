@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
-import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
+import { MlAnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
-export { Anomaly };
+export type { Anomaly };
 export type AnomalyResults = estypes.SearchResponse<Anomaly>;
 type MlAnomalySearch = <T>(
   searchParams: estypes.SearchRequest,
@@ -57,6 +57,7 @@ export const getAnomalies = async (
               lists: params.exceptionItems,
               excludeExceptions: true,
               chunkSize: 1024,
+              alias: null,
             })?.query,
           },
         },

@@ -7,7 +7,7 @@
 
 import querystring from 'querystring';
 import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
 
 import type {
@@ -50,7 +50,7 @@ import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
 
 export { Actions } from './actions';
-export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
+export type { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
@@ -178,7 +178,7 @@ export class AuthorizationService {
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
         const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
-        const body = renderToStaticMarkup(
+        const body = renderToString(
           <ResetSessionPage
             buildNumber={buildNumber}
             basePath={http.basePath}

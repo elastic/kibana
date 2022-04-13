@@ -14,13 +14,12 @@ import {
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
-  EuiShowFor,
   EuiCollapsibleNavProps,
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { Fragment, useMemo, useRef } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
@@ -33,6 +32,7 @@ import {
   createRecentNavLink,
   isModifiedOrPrevented,
   createEuiButtonItem,
+  createOverviewLink,
 } from './nav_link';
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -72,7 +72,6 @@ interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
   id: string;
-  isLocked: boolean;
   isNavOpen: boolean;
   homeHref: string;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
@@ -86,10 +85,17 @@ interface Props {
   button: EuiCollapsibleNavProps['button'];
 }
 
+const overviewIDsToHide = ['kibanaOverview'];
+const overviewIDs = [
+  ...overviewIDsToHide,
+  'observability-overview',
+  'securitySolutionUI:get_started',
+  'management',
+];
+
 export function CollapsibleNav({
   basePath,
   id,
-  isLocked,
   isNavOpen,
   homeHref,
   storage = window.localStorage,
@@ -104,23 +110,27 @@ export function CollapsibleNav({
   const allowedLinks = useMemo(
     () =>
       allLinks.filter(
-        // Filterting out hidden links and the integrations one in favor of a specific Add Data button at the bottom
-        (link) => !link.hidden && link.id !== 'integrations'
+        (link) =>
+          // Filterting out hidden links,
+          !link.hidden &&
+          // and non-data overview pages
+          !overviewIDsToHide.includes(link.id)
       ),
     [allLinks]
   );
+  // Find just the integrations link
   const integrationsLink = useMemo(
-    () =>
-      allLinks.find(
-        // Find just the integrations link
-        (link) => link.id === 'integrations'
-      ),
+    () => allLinks.find((link) => link.id === 'integrations'),
+    [allLinks]
+  );
+  // Find all the overview (landing page) links
+  const overviewLinks = useMemo(
+    () => allLinks.filter((link) => overviewIDs.includes(link.id)),
     [allLinks]
   );
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
   const customNavLink = useObservable(observables.customNavLink$, undefined);
   const appId = useObservable(observables.appId$, '');
-  const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(allowedLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
@@ -153,7 +163,7 @@ export function CollapsibleNav({
         <Fragment>
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiCollapsibleNavGroup
-              background="light"
+              background="dark"
               className="eui-yScroll"
               style={{ maxHeight: '40vh' }}
             >
@@ -166,12 +176,13 @@ export function CollapsibleNav({
                     dataTestSubj: 'collapsibleNavCustomNavLink',
                     onClick: closeNav,
                     externalLink: true,
+                    iconProps: { color: 'ghost' },
                   }),
                 ]}
                 maxWidth="none"
-                color="text"
                 gutterSize="none"
                 size="s"
+                color="ghost"
               />
             </EuiCollapsibleNavGroup>
           </EuiFlexItem>
@@ -270,13 +281,31 @@ export function CollapsibleNav({
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;
+          const overviewLink = overviewLinks.find((link) => link.category === category);
 
           return (
             <EuiCollapsibleNavGroup
               key={category.id}
               iconType={category.euiIconType}
               iconSize="m"
-              title={category.label}
+              buttonElement={overviewLink ? 'div' : 'button'}
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              title={
+                overviewLink ? (
+                  <a
+                    className="eui-textInheritColor kbnCollapsibleNav__solutionGroupLink"
+                    {...createOverviewLink({
+                      link: overviewLink,
+                      navigateToUrl,
+                      onClick: closeNav,
+                    })}
+                  >
+                    {category.label}
+                  </a>
+                ) : (
+                  category.label
+                )
+              }
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
               onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
@@ -305,45 +334,6 @@ export function CollapsibleNav({
             </EuiListGroup>
           </EuiCollapsibleNavGroup>
         ))}
-
-        {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={'none'}>
-          <EuiCollapsibleNavGroup>
-            <EuiListGroup flush>
-              <EuiListGroupItem
-                data-test-subj="collapsible-nav-lock"
-                buttonRef={lockRef}
-                size="xs"
-                color="subdued"
-                label={
-                  isLocked
-                    ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
-                        defaultMessage: 'Undock navigation',
-                      })
-                    : i18n.translate('core.ui.primaryNavSection.dockLabel', {
-                        defaultMessage: 'Dock navigation',
-                      })
-                }
-                aria-label={
-                  isLocked
-                    ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
-                        defaultMessage: 'Undock primary navigation',
-                      })
-                    : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
-                        defaultMessage: 'Dock primary navigation',
-                      })
-                }
-                onClick={() => {
-                  onIsLockedUpdate(!isLocked);
-                  if (lockRef.current) {
-                    lockRef.current.focus();
-                  }
-                }}
-                iconType={isLocked ? 'lock' : 'lockOpen'}
-              />
-            </EuiListGroup>
-          </EuiCollapsibleNavGroup>
-        </EuiShowFor>
       </EuiFlexItem>
       {integrationsLink && (
         <EuiFlexItem grow={false}>
@@ -355,14 +345,13 @@ export function CollapsibleNav({
                 link: integrationsLink,
                 navigateToUrl,
                 onClick: closeNav,
-                dataTestSubj: `collapsibleNavAppButton-${integrationsLink.id}`,
               })}
               fill
               fullWidth
               iconType="plusInCircleFilled"
             >
               {i18n.translate('core.ui.primaryNav.addData', {
-                defaultMessage: 'Add data',
+                defaultMessage: 'Add integrations',
               })}
             </EuiButton>
           </EuiCollapsibleNavGroup>

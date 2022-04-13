@@ -13,9 +13,9 @@ import {
   RegisterDeprecationsConfig,
 } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternAttributes } from '../../common';
+import { DataViewAttributes } from '../../common';
 
-type IndexPatternAttributesWithFields = Pick<IndexPatternAttributes, 'title' | 'fields'>;
+type IndexPatternAttributesWithFields = Pick<DataViewAttributes, 'title' | 'fields'>;
 
 export const createScriptedFieldsDeprecationsConfig: (
   core: CoreSetup
@@ -42,10 +42,10 @@ export const createScriptedFieldsDeprecationsConfig: (
       return [
         {
           title: i18n.translate('dataViews.deprecations.scriptedFieldsTitle', {
-            defaultMessage: 'Found index patterns using scripted fields',
+            defaultMessage: 'Found data views using scripted fields',
           }),
           message: i18n.translate('dataViews.deprecations.scriptedFieldsMessage', {
-            defaultMessage: `You have {numberOfIndexPatternsWithScriptedFields} index patterns ({titlesPreview}...) that use scripted fields. Scripted fields are deprecated and will be removed in future. Use runtime fields instead.`,
+            defaultMessage: `You have {numberOfIndexPatternsWithScriptedFields} data views ({titlesPreview}...) that use scripted fields. Scripted fields are deprecated and will be removed in future. Use runtime fields instead.`,
             values: {
               titlesPreview: indexPatternTitles.slice(0, PREVIEW_LIMIT).join('; '),
               numberOfIndexPatternsWithScriptedFields: indexPatternsWithScriptedFields.length,
@@ -57,11 +57,11 @@ export const createScriptedFieldsDeprecationsConfig: (
           correctiveActions: {
             manualSteps: [
               i18n.translate('dataViews.deprecations.scriptedFields.manualStepOneMessage', {
-                defaultMessage: 'Navigate to Stack Management > Kibana > Index Patterns.',
+                defaultMessage: 'Navigate to Stack Management > Kibana > Data Views.',
               }),
               i18n.translate('dataViews.deprecations.scriptedFields.manualStepTwoMessage', {
                 defaultMessage:
-                  'Update {numberOfIndexPatternsWithScriptedFields} index patterns that have scripted fields to use runtime fields instead. In most cases, to migrate existing scripts, you will need to change "return <value>;" to "emit(<value>);". Index patterns with at least one scripted field: {allTitles}',
+                  'Update {numberOfIndexPatternsWithScriptedFields} data views that have scripted fields to use runtime fields instead. In most cases, to migrate existing scripts, you will need to change "return <value>;" to "emit(<value>);". Data views with at least one scripted field: {allTitles}',
                 values: {
                   allTitles: indexPatternTitles.join('; '),
                   numberOfIndexPatternsWithScriptedFields: indexPatternsWithScriptedFields.length,

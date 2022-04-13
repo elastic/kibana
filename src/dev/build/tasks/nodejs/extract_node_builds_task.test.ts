@@ -43,6 +43,10 @@ async function setup() {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    dockerContextUseLocalArtifact: false,
+    dockerCrossCompile: false,
+    dockerPush: false,
+    dockerTagQualifier: '',
   });
 
   return { config };
@@ -101,6 +105,13 @@ it('runs expected fs operations', async () => {
         Array [
           <absolute path>/.node_binaries/<node version>/node-v<node version>-darwin-x64.tar.gz,
           <absolute path>/.node_binaries/<node version>/darwin-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/node-v<node version>-darwin-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/darwin-arm64,
           Object {
             "strip": 1,
           },

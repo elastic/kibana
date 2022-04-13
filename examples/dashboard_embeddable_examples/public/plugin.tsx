@@ -27,7 +27,7 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
       title: 'Dashboard embeddable examples',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const [, depsStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
         await depsStart.embeddableExamples.createSampleData();
         return renderApp(
@@ -35,6 +35,7 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
             basename: params.appBasePath,
             DashboardContainerByValueRenderer:
               depsStart.dashboard.getDashboardContainerByValueRenderer(),
+            uiSettings: coreStart.uiSettings,
           },
           params.element
         );

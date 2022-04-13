@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
 import { basicCase } from '../../containers/mock';
 import { getStatusDate, getStatusTitle } from './helpers';
 

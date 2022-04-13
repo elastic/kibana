@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
@@ -18,6 +18,7 @@ import {
   Error,
   WithPrivileges,
   NotAuthorizedSection,
+  useExecutionContext,
 } from '../../../../shared_imports';
 
 import { SlmPolicy } from '../../../../../common/types';
@@ -26,7 +27,7 @@ import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useDecodedParams } from '../../../lib';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
-import { useServices } from '../../../app_context';
+import { useAppContext, useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
@@ -50,6 +51,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   } = useLoadPolicies();
 
   const { uiMetricService } = useServices();
+  const { core } = useAppContext();
 
   // Load retention cluster settings
   const {
@@ -84,6 +86,11 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   useEffect(() => {
     uiMetricService.trackUiMetric(UIM_POLICY_LIST_LOAD);
   }, [uiMetricService]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'snapshotRestorePolicyTab',
+  });
 
   let content: JSX.Element;
 

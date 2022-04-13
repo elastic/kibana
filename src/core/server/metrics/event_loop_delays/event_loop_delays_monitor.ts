@@ -6,12 +6,24 @@
  * Side Public License, v 1.
  */
 
-import type { EventLoopDelayMonitor } from 'perf_hooks';
+import type { IntervalHistogram as PerfIntervalHistogram } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
 import type { IntervalHistogram } from '../types';
 
+/**
+ * Nanosecond to milisecond conversion unit
+ */
+export const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
+
+/**
+ * Converts time metric from ns to ms
+ **/
+export function nsToMs(metric: number) {
+  return metric / ONE_MILLISECOND_AS_NANOSECONDS;
+}
+
 export class EventLoopDelaysMonitor {
-  private readonly loopMonitor: EventLoopDelayMonitor;
+  private readonly loopMonitor: PerfIntervalHistogram;
   private fromTimestamp: Date;
 
   /**
@@ -28,26 +40,36 @@ export class EventLoopDelaysMonitor {
    * Collect gathers event loop delays metrics from nodejs perf_hooks.monitorEventLoopDelay
    * the histogram calculations start from the last time `reset` was called or this
    * EventLoopDelaysMonitor instance was created.
+   *
+   * Returns metrics in milliseconds.
+
    * @returns {IntervalHistogram}
    */
+
   public collect(): IntervalHistogram {
     const lastUpdated = new Date();
     this.loopMonitor.disable();
-    const { min, max, mean, exceeds, stddev } = this.loopMonitor;
+    const {
+      min: minNs,
+      max: maxNs,
+      mean: meanNs,
+      exceeds: exceedsNs,
+      stddev: stddevNs,
+    } = this.loopMonitor;
 
     const collectedData: IntervalHistogram = {
-      min,
-      max,
-      mean,
-      exceeds,
-      stddev,
+      min: nsToMs(minNs),
+      max: nsToMs(maxNs),
+      mean: nsToMs(meanNs),
+      exceeds: nsToMs(exceedsNs),
+      stddev: nsToMs(stddevNs),
       fromTimestamp: this.fromTimestamp.toISOString(),
       lastUpdatedAt: lastUpdated.toISOString(),
       percentiles: {
-        50: this.loopMonitor.percentile(50),
-        75: this.loopMonitor.percentile(75),
-        95: this.loopMonitor.percentile(95),
-        99: this.loopMonitor.percentile(99),
+        50: nsToMs(this.loopMonitor.percentile(50)),
+        75: nsToMs(this.loopMonitor.percentile(75)),
+        95: nsToMs(this.loopMonitor.percentile(95)),
+        99: nsToMs(this.loopMonitor.percentile(99)),
       },
     };
 

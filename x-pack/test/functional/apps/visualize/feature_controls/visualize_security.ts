@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const config = getService('config');
   const PageObjects = getPageObjects([
@@ -30,16 +31,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('visualize feature controls security', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+      );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('global visualize all privileges', () => {
@@ -76,6 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_all_role');
         await security.user.delete('global_visualize_all_user');
@@ -207,6 +213,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_read_role');
         await security.user.delete('global_visualize_read_user');
@@ -214,7 +221,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Visualize Library']);
+        expect(navLinks).to.eql(['Visualize Library']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -322,6 +329,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await security.role.delete('global_visualize_read_url_create_role');
         await security.user.delete('global_visualize_read_url_create_user');
@@ -329,7 +337,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Visualize Library']);
+        expect(navLinks).to.eql(['Visualize Library']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -427,6 +435,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await security.role.delete('no_visualize_privileges_role');
         await security.user.delete('no_visualize_privileges_user');

@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { fetchClusters } from '../../lib/fetch_clusters';
+import { useRequestErrorHandler } from './use_request_error_handler';
 
 export function useClusters(clusterUuid?: string | null, ccs?: any, codePaths?: string[]) {
   const { services } = useKibana<{ data: any }>();
@@ -17,6 +18,7 @@ export function useClusters(clusterUuid?: string | null, ccs?: any, codePaths?: 
 
   const [clusters, setClusters] = useState([] as any);
   const [loaded, setLoaded] = useState<boolean | null>(false);
+  const handleRequestError = useRequestErrorHandler();
 
   useEffect(() => {
     async function makeRequest() {
@@ -34,13 +36,13 @@ export function useClusters(clusterUuid?: string | null, ccs?: any, codePaths?: 
           setClusters(response);
         }
       } catch (e) {
-        // TODO: Handle errors
+        handleRequestError(e);
       } finally {
         setLoaded(true);
       }
     }
     makeRequest();
-  }, [clusterUuid, ccs, services.http, codePaths, min, max]);
+  }, [handleRequestError, clusterUuid, ccs, services.http, codePaths, min, max]);
 
   return { clusters, loaded };
 }

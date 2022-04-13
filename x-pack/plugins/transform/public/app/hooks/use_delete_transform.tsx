@@ -25,38 +25,39 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
     http,
     savedObjects,
     ml: { extractErrorMessage },
+    application: { capabilities },
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
   const [deleteDestIndex, setDeleteDestIndex] = useState<boolean>(true);
-  const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
+  const [deleteDataView, setDeleteDataView] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
-  const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
+  const [dataViewExists, setDataViewExists] = useState<boolean>(false);
+  const [userCanDeleteDataView, setUserCanDeleteDataView] = useState<boolean>(false);
 
   const toggleDeleteIndex = useCallback(
     () => setDeleteDestIndex(!deleteDestIndex),
     [deleteDestIndex]
   );
-  const toggleDeleteIndexPattern = useCallback(
-    () => setDeleteIndexPattern(!deleteIndexPattern),
-    [deleteIndexPattern]
+  const toggleDeleteDataView = useCallback(
+    () => setDeleteDataView(!deleteDataView),
+    [deleteDataView]
   );
-  const checkIndexPatternExists = useCallback(
+  const checkDataViewExists = useCallback(
     async (indexName: string) => {
       try {
-        if (await indexService.indexPatternExists(savedObjects.client, indexName)) {
-          setIndexPatternExists(true);
+        if (await indexService.dataViewExists(savedObjects.client, indexName)) {
+          setDataViewExists(true);
         }
       } catch (e) {
         const error = extractErrorMessage(e);
 
         toastNotifications.addDanger(
           i18n.translate(
-            'xpack.transform.deleteTransform.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
+            'xpack.transform.deleteTransform.errorWithCheckingIfDataViewExistsNotificationErrorMessage',
             {
-              defaultMessage:
-                'An error occurred checking if index pattern {indexPattern} exists: {error}',
-              values: { indexPattern: indexName, error },
+              defaultMessage: 'An error occurred checking if data view {dataView} exists: {error}',
+              values: { dataView: indexName, error },
             }
           )
         );
@@ -71,6 +72,13 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
+      const canDeleteDataView =
+        capabilities.savedObjectsManagement.delete === true ||
+        capabilities.indexPatterns.save === true;
+      setUserCanDeleteDataView(canDeleteDataView);
+      if (canDeleteDataView === false) {
+        setDeleteDataView(false);
+      }
     } catch (e) {
       toastNotifications.addDanger(
         i18n.translate(
@@ -81,7 +89,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
         )
       );
     }
-  }, [http, toastNotifications]);
+  }, [http, toastNotifications, capabilities]);
 
   useEffect(() => {
     checkUserIndexPermission();
@@ -92,26 +100,27 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
       const destinationIndex = Array.isArray(config.dest.index)
         ? config.dest.index[0]
         : config.dest.index;
-      checkIndexPatternExists(destinationIndex);
+      checkDataViewExists(destinationIndex);
     } else {
-      setIndexPatternExists(true);
+      setDataViewExists(true);
     }
-  }, [checkIndexPatternExists, checkUserIndexPermission, items]);
+  }, [checkDataViewExists, checkUserIndexPermission, items]);
 
   return {
     userCanDeleteIndex,
+    userCanDeleteDataView,
     deleteDestIndex,
-    indexPatternExists,
-    deleteIndexPattern,
+    dataViewExists,
+    deleteDataView,
     toggleDeleteIndex,
-    toggleDeleteIndexPattern,
+    toggleDeleteDataView,
   };
 };
 
 type SuccessCountField = keyof Omit<DeleteTransformStatus, 'destinationIndex'>;
 
 export const useDeleteTransforms = () => {
-  const { overlays } = useAppDependencies();
+  const { overlays, theme } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -127,8 +136,10 @@ export const useDeleteTransforms = () => {
           <ToastNotificationText
             previewTextLength={50}
             overlays={overlays}
+            theme={theme}
             text={getErrorMessage(results)}
-          />
+          />,
+          { theme$: theme.theme$ }
         ),
       });
       return;
@@ -138,7 +149,7 @@ export const useDeleteTransforms = () => {
     const successCount: Record<SuccessCountField, number> = {
       transformDeleted: 0,
       destIndexDeleted: 0,
-      destIndexPatternDeleted: 0,
+      destDataViewDeleted: 0,
     };
     for (const transformId in results) {
       // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
@@ -168,13 +179,12 @@ export const useDeleteTransforms = () => {
               )
             );
           }
-          if (status.destIndexPatternDeleted?.success) {
+          if (status.destDataViewDeleted?.success) {
             toastNotifications.addSuccess(
               i18n.translate(
-                'xpack.transform.deleteTransform.deleteAnalyticsWithIndexPatternSuccessMessage',
+                'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewSuccessMessage',
                 {
-                  defaultMessage:
-                    'Request to delete index pattern {destinationIndex} acknowledged.',
+                  defaultMessage: 'Request to delete data view {destinationIndex} acknowledged.',
                   values: { destinationIndex },
                 }
               )
@@ -195,7 +205,13 @@ export const useDeleteTransforms = () => {
               values: { transformId },
             }),
             text: toMountPoint(
-              <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              <ToastNotificationText
+                previewTextLength={50}
+                overlays={overlays}
+                theme={theme}
+                text={error}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -211,23 +227,35 @@ export const useDeleteTransforms = () => {
               }
             ),
             text: toMountPoint(
-              <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              <ToastNotificationText
+                previewTextLength={50}
+                overlays={overlays}
+                theme={theme}
+                text={error}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
 
-        if (status.destIndexPatternDeleted?.error) {
-          const error = status.destIndexPatternDeleted.error.reason;
+        if (status.destDataViewDeleted?.error) {
+          const error = status.destDataViewDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate(
-              'xpack.transform.deleteTransform.deleteAnalyticsWithIndexPatternErrorMessage',
+              'xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage',
               {
-                defaultMessage: 'An error occurred deleting index pattern {destinationIndex}',
+                defaultMessage: 'An error occurred deleting data view {destinationIndex}',
                 values: { destinationIndex },
               }
             ),
             text: toMountPoint(
-              <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              <ToastNotificationText
+                previewTextLength={50}
+                overlays={overlays}
+                theme={theme}
+                text={error}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -255,12 +283,12 @@ export const useDeleteTransforms = () => {
           })
         );
       }
-      if (successCount.destIndexPatternDeleted > 0) {
+      if (successCount.destDataViewDeleted > 0) {
         toastNotifications.addSuccess(
-          i18n.translate('xpack.transform.transformList.bulkDeleteDestIndexPatternSuccessMessage', {
+          i18n.translate('xpack.transform.transformList.bulkDeleteDestDataViewSuccessMessage', {
             defaultMessage:
-              'Successfully deleted {count} destination index {count, plural, one {pattern} other {patterns}}.',
-            values: { count: successCount.destIndexPatternDeleted },
+              'Successfully deleted {count} destination data {count, plural, one {view} other {views}}.',
+            values: { count: successCount.destDataViewDeleted },
           })
         );
       }

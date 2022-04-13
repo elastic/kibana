@@ -1,0 +1,41 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": "ft_categorization_small",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "field1": {
+          "type": "text"
+        },
+        "field2": {
+          "type": "text"
+        },
+        "field3": {
+          "type": "text"
+        },
+        "field4": {
+          "type": "text"
+        },
+        "field5": {
+          "type": "text"
+        },
+        "field6": {
+          "type": "text"
+        },
+        "field7": {
+          "type": "text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

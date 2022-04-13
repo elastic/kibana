@@ -27,14 +27,12 @@ import {
   BACK_TO_ALL_RULES_LINK,
   COMBO_BOX_CLEAR_BTN,
   COMBO_BOX_INPUT,
-  CREATE_AND_ACTIVATE_BTN,
+  CREATE_AND_ENABLE_BTN,
   CUSTOM_QUERY_INPUT,
   CUSTOM_QUERY_REQUIRED,
   DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
-  DEFINE_EDIT_TAB,
   EQL_QUERY_INPUT,
-  EQL_QUERY_PREVIEW_HISTOGRAM,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
   FALSE_POSITIVES_INPUT,
@@ -93,17 +91,17 @@ import {
   EMAIL_CONNECTOR_USER_INPUT,
   EMAIL_CONNECTOR_PASSWORD_INPUT,
   EMAIL_CONNECTOR_SERVICE_SELECTOR,
+  PREVIEW_HISTOGRAM,
 } from '../screens/create_new_rule';
-import { LOADING_INDICATOR } from '../screens/security_header';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
 
-export const createAndActivateRule = () => {
+export const createAndEnableRule = () => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
-  cy.get(CREATE_AND_ACTIVATE_BTN).click({ force: true });
-  cy.get(CREATE_AND_ACTIVATE_BTN).should('not.exist');
+  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
+  cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
   cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
   cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
 };
@@ -255,7 +253,7 @@ export const fillDefineCustomRuleWithImportedQueryAndContinue = (
   rule: CustomRule | OverrideRule
 ) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
@@ -274,7 +272,7 @@ export const fillDefineThresholdRule = (rule: ThresholdRule) => {
   const threshold = 1;
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(COMBO_BOX_CLEAR_BTN).first().click();
 
   rule.index.forEach((index) => {
@@ -299,7 +297,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
     cy.wrap($el).type(rule.thresholdField, { delay: 35 });
 
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timeline.id!)).click();
+  cy.get(TIMELINE(rule.timeline.id)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
@@ -315,20 +313,23 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
 };
 
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
+  if (rule.customQuery == null) {
+    throw new TypeError('The rule custom query should never be undefined or null ');
+  }
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
-  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery!);
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(RULES_CREATION_PREVIEW)
     .find(QUERY_PREVIEW_BUTTON)
     .should('not.be.disabled')
     .click({ force: true });
-  cy.get(EQL_QUERY_PREVIEW_HISTOGRAM)
+  cy.get(PREVIEW_HISTOGRAM)
     .invoke('text')
     .then((text) => {
-      if (text !== 'Hits') {
+      if (text !== 'Rule Preview') {
         cy.get(RULES_CREATION_PREVIEW).find(QUERY_PREVIEW_BUTTON).click({ force: true });
-        cy.get(EQL_QUERY_PREVIEW_HISTOGRAM).should('contain.text', 'Hits');
+        cy.get(PREVIEW_HISTOGRAM).should('contain.text', 'Rule Preview');
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
@@ -372,18 +373,14 @@ export const fillIndicatorMatchRow = ({
     .eq(0)
     .type(indexField);
   if (computedValueRows === 'indexField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indexField}"]`)
-      .should('be.visible')
-      .then(([e]) => e.click());
+    cy.get(`button[title="${indexField}"]`).then(([e]) => e.click());
   }
   cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
     .eq(computedRowNumber * 2 - 1)
     .type(indicatorIndexField);
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indicatorIndexField}"]`)
-      .should('be.visible')
-      .then(([e]) => e.click());
+    cy.get(`button[title="${indicatorIndexField}"]`).then(([e]) => e.click());
   }
 };
 
@@ -442,7 +439,7 @@ export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_IN
 export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
-export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON).should('exist');
+export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
 /** Returns the indicator index pattern */
 export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
@@ -452,7 +449,7 @@ export const getIndicatorIndicatorIndex = () =>
   cy.get(THREAT_MATCH_INDICATOR_INDICATOR_INDEX).eq(0);
 
 /** Returns the index pattern's clear button  */
-export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN).should('exist').first();
+export const getIndexPatternClearButton = () => cy.get(COMBO_BOX_CLEAR_BTN).first();
 
 /** Returns the custom query input */
 export const getCustomQueryInput = () => cy.get(THREAT_MATCH_CUSTOM_QUERY_INPUT).eq(0);
@@ -491,12 +488,6 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
     }
   );
   getDefineContinueButton().should('exist').click({ force: true });
-
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).should('not.exist');
-};
-
-export const goToDefineStepTab = () => {
-  cy.get(DEFINE_EDIT_TAB).click({ force: true });
 };
 
 export const goToAboutStepTab = () => {
@@ -520,6 +511,7 @@ export const selectIndicatorMatchType = () => {
 };
 
 export const selectMachineLearningRuleType = () => {
+  cy.get(MACHINE_LEARNING_TYPE).contains('Select');
   cy.get(MACHINE_LEARNING_TYPE).click({ force: true });
 };
 
@@ -535,7 +527,6 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
       refreshPage();
-      cy.get(LOADING_INDICATOR).should('not.exist');
       return cy
         .get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')

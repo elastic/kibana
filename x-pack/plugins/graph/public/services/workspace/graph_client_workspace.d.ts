@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { Workspace, WorkspaceOptions } from '../types';
+import { Workspace, WorkspaceOptions } from '../../types';
 
 declare function createWorkspace(options: WorkspaceOptions): Workspace;

@@ -7,13 +7,7 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { StaticStyleProperty } from './static_style_property';
-import { VECTOR_STYLES } from '../../../../../common/constants';
-import {
-  HALF_LARGE_MAKI_ICON_SIZE,
-  LARGE_MAKI_ICON_SIZE,
-  SMALL_MAKI_ICON_SIZE,
-  // @ts-expect-error
-} from '../symbol_utils';
+import { HALF_MAKI_ICON_SIZE, VECTOR_STYLES } from '../../../../../common/constants';
 import { SizeStaticOptions } from '../../../../../common/descriptor_types';
 
 export class StaticSizeProperty extends StaticStyleProperty<SizeStaticOptions> {
@@ -29,15 +23,8 @@ export class StaticSizeProperty extends StaticStyleProperty<SizeStaticOptions> {
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', this._options.size);
   }
 
-  getIconPixelSize() {
-    return this._options.size >= HALF_LARGE_MAKI_ICON_SIZE
-      ? LARGE_MAKI_ICON_SIZE
-      : SMALL_MAKI_ICON_SIZE;
-  }
-
   syncIconSizeWithMb(symbolLayerId: string, mbMap: MbMap) {
-    const halfIconPixels = this.getIconPixelSize() / 2;
-    mbMap.setLayoutProperty(symbolLayerId, 'icon-size', this._options.size / halfIconPixels);
+    mbMap.setLayoutProperty(symbolLayerId, 'icon-size', this._options.size / HALF_MAKI_ICON_SIZE);
   }
 
   syncCircleStrokeWidthWithMb(mbLayerId: string, mbMap: MbMap, hasNoRadius: boolean) {

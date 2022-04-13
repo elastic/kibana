@@ -7,4 +7,4 @@
 
 export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item.container';
 
-export { Handlers } from './types';
+export type { Handlers } from './types';

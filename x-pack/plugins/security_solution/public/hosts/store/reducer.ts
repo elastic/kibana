@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { Direction, HostsFields } from '../../../common/search_strategy';
+import { Direction, HostsFields, RiskScoreFields } from '../../../common/search_strategy';
 
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
@@ -14,6 +14,8 @@ import {
   setHostDetailsTablesActivePageToZero,
   setHostTablesActivePageToZero,
   updateHostsSort,
+  updateHostRiskScoreSeverityFilter,
+  updateHostRiskScoreSort,
   updateTableActivePage,
   updateTableLimit,
 } from './actions';
@@ -51,6 +53,19 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
     },
   },
   details: {
@@ -75,6 +90,19 @@ export const initialHostsState: HostsState = {
       },
       [HostsTableType.anomalies]: null,
       [HostsTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [HostsTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
@@ -137,6 +165,33 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
           ...state[hostsType].queries[HostsTableType.hosts],
           direction: sort.direction,
           sortField: sort.field,
+        },
+      },
+    },
+  }))
+  .case(updateHostRiskScoreSort, (state, { sort, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.risk]: {
+          ...state[hostsType].queries[HostsTableType.risk],
+          sort,
+        },
+      },
+    },
+  }))
+  .case(updateHostRiskScoreSeverityFilter, (state, { severitySelection, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.risk]: {
+          ...state[hostsType].queries[HostsTableType.risk],
+          severitySelection,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
       },
     },

@@ -17,7 +17,7 @@ import { ArtifactEntryCollapsibleCardProps } from '../artifact_entry_collapsible
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useCollapsedCssClassNames } from '../hooks/use_collapsed_css_class_names';
 import { usePolicyNavLinks } from '../hooks/use_policy_nav_links';
-import { getEmptyValue } from '../../../../common/components/empty_value';
+import { DescriptionField } from './description_field';
 
 export interface CardCompressedHeaderProps
   extends Pick<CommonProps, 'data-test-subj'>,
@@ -38,7 +38,6 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const cssClassNames = useCollapsedCssClassNames(expanded);
     const policyNavLinks = usePolicyNavLinks(artifact, policies);
 
     const handleExpandCollapseClick = useCallback(() => {
@@ -46,37 +45,31 @@ export const CardCompressedHeader = memo<CardCompressedHeaderProps>(
     }, [onExpandCollapse]);
 
     return (
-      <EuiFlexGroup responsive={false} alignItems="center" data-test-subj={dataTestSubj}>
-        <EuiFlexItem grow={false}>
+      <CardCompressedHeaderLayout
+        data-test-subj={dataTestSubj}
+        expanded={expanded}
+        expandToggle={
           <CardExpandButton
             expanded={expanded}
             onClick={handleExpandCollapseClick}
             data-test-subj={getTestId('expandCollapse')}
           />
-        </EuiFlexItem>
-        <EuiFlexItem className={cssClassNames}>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={2} className={cssClassNames} data-test-subj={getTestId('title')}>
-              <TextValueDisplay bold truncate={!expanded}>
-                {artifact.name}
-              </TextValueDisplay>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={3}
-              className={cssClassNames}
-              data-test-subj={getTestId('description')}
-            >
-              <TextValueDisplay truncate={!expanded}>
-                {artifact.description || getEmptyValue()}
-              </TextValueDisplay>
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EffectScope policies={policyNavLinks} data-test-subj={getTestId('effectScope')} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <CardActionsFlexItem actions={actions} data-test-subj={getTestId('actions')} />
-      </EuiFlexGroup>
+        }
+        name={
+          <TextValueDisplay bold truncate={!expanded} withTooltip={!expanded}>
+            {artifact.name}
+          </TextValueDisplay>
+        }
+        description={
+          <DescriptionField truncate={!expanded} withTooltip={!expanded}>
+            {artifact.description}
+          </DescriptionField>
+        }
+        effectScope={
+          <EffectScope policies={policyNavLinks} data-test-subj={getTestId('effectScope')} />
+        }
+        actionMenu={<CardActionsFlexItem actions={actions} data-test-subj={getTestId('actions')} />}
+      />
     );
   }
 );
@@ -106,8 +99,11 @@ export interface CardCompressedHeaderLayoutProps extends Pick<CommonProps, 'data
   name: ReactNode;
   description: ReactNode;
   effectScope: ReactNode;
-  /** If no menu is shown, but you want the space for it be preserved, set prop to `false` */
-  actionMenu?: ReactNode | false;
+  /**
+   * The EuiFlexItem react node that contains the actions for the carc. If wanting to NOT include a menu,
+   * but still want the placeholder for it be preserved (ex. for the Grid headers), set prop to `true`
+   */
+  actionMenu?: ReactNode | true;
   /**
    * When set to `true`, all padding and margin values will be set to zero for the top of the header
    * layout, so that all content is flushed to the top
@@ -137,7 +133,11 @@ export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
         data-test-subj={dataTestSubj}
         className={flushTopCssClassname}
       >
-        <EuiFlexItem grow={false} className={flushTopCssClassname}>
+        <EuiFlexItem
+          grow={false}
+          className={flushTopCssClassname}
+          data-test-subj={getTestId('expandCollapseHolder')}
+        >
           {expandToggle}
         </EuiFlexItem>
         <EuiFlexItem className={cssClassNames + flushTopCssClassname}>
@@ -145,27 +145,27 @@ export const CardCompressedHeaderLayout = memo<CardCompressedHeaderLayoutProps>(
             <EuiFlexItem
               grow={2}
               className={cssClassNames + flushTopCssClassname}
-              data-test-subj={getTestId('title')}
+              data-test-subj={getTestId('titleHolder')}
             >
               {name}
             </EuiFlexItem>
             <EuiFlexItem
               grow={3}
               className={cssClassNames + flushTopCssClassname}
-              data-test-subj={getTestId('description')}
+              data-test-subj={getTestId('descriptionHolder')}
             >
               {description}
             </EuiFlexItem>
             <EuiFlexItem
               grow={1}
-              data-test-subj={getTestId('effectScope')}
+              data-test-subj={getTestId('effectScopeHolder')}
               className={flushTopCssClassname}
             >
               {effectScope}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {actionMenu === false ? (
+        {actionMenu === true ? (
           <EuiFlexItem
             grow={false}
             data-test-subj={getTestId('cardActionsPlaceholder')}

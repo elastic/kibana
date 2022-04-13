@@ -15,16 +15,18 @@ import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionTypeModel,
-  AlertAddProps,
-  AlertEditProps,
-  AlertTypeModel,
+  RuleAddProps,
+  RuleEditProps,
+  RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
+  AlertsTableProps,
 } from './types';
+import { getAlertsTableLazy } from './common/get_alerts_table';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  const ruleTypeRegistry = new TypeRegistry<AlertTypeModel>();
+  const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
   return {
     actionTypeRegistry,
     ruleTypeRegistry,
@@ -37,21 +39,22 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         actionTypeRegistry,
       });
     },
-    getAddAlertFlyout: (props: Omit<AlertAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+    getAddAlertFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
       return getAddAlertFlyoutLazy({
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
       });
     },
-    getEditAlertFlyout: (
-      props: Omit<AlertEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-    ) => {
+    getEditAlertFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
       return getEditAlertFlyoutLazy({
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
       });
+    },
+    getAlertsTable: (props: AlertsTableProps) => {
+      return getAlertsTableLazy(props);
     },
   };
 }

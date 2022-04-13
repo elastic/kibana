@@ -5,48 +5,47 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
   isSingleColumn?: boolean;
   link?: ReactNode;
+  showPerPageOptions?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
   isSingleColumn = true,
   link,
+  showPerPageOptions = true,
 }: ServiceOverviewDependenciesTableProps) {
   const {
-    urlParams: { comparisonEnabled, comparisonType, latencyAggregationType },
-  } = useUrlParams();
-
-  const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      serviceGroup,
+      comparisonEnabled,
+      offset,
+      latencyAggregationType,
+    },
   } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
 
   const { serviceName, transactionType } = useApmServiceContext();
 
@@ -58,15 +57,23 @@ export function ServiceOverviewDependenciesTable({
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
-        params: {
-          path: { serviceName },
-          query: { start, end, environment, numBuckets: 20, offset },
-        },
-      });
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/dependencies',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              environment,
+              numBuckets: 20,
+              offset: comparisonEnabled ? offset : undefined,
+            },
+          },
+        }
+      );
     },
-    [start, end, serviceName, environment, offset]
+    [start, end, serviceName, environment, offset, comparisonEnabled]
   );
 
   const dependencies =
@@ -76,12 +83,12 @@ export function ServiceOverviewDependenciesTable({
       const itemLink =
         location.type === NodeType.backend ? (
           <BackendLink
-            backendName={location.backendName}
             type={location.spanType}
             subtype={location.spanSubtype}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
-              comparisonType,
+              backendName: location.backendName,
+              comparisonEnabled,
+              offset,
               environment,
               kuery,
               rangeFrom,
@@ -100,14 +107,15 @@ export function ServiceOverviewDependenciesTable({
             serviceName={location.serviceName}
             agentName={location.agentName}
             query={{
-              comparisonEnabled: comparisonEnabled ? 'true' : 'false',
-              comparisonType,
+              comparisonEnabled,
+              offset,
               environment,
               kuery,
               rangeFrom,
               rangeTo,
               latencyAggregationType,
               transactionType,
+              serviceGroup,
             }}
           />
         );
@@ -125,12 +133,33 @@ export function ServiceOverviewDependenciesTable({
       dependencies={dependencies}
       fixedHeight={fixedHeight}
       isSingleColumn={isSingleColumn}
-      title={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableTitle',
-        {
-          defaultMessage: 'Dependencies',
-        }
-      )}
+      title={
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.dependenciesTableTitleTip',
+            {
+              defaultMessage:
+                'Uninstrumented downstream services or external connections derived from the exit spans of instrumented services.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.dependenciesTableTitle',
+              {
+                defaultMessage: 'Dependencies',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      }
       nameColumnTitle={i18n.translate(
         'xpack.apm.serviceOverview.dependenciesTableColumn',
         {
@@ -139,6 +168,7 @@ export function ServiceOverviewDependenciesTable({
       )}
       status={status}
       link={link}
+      showPerPageOptions={showPerPageOptions}
     />
   );
 }

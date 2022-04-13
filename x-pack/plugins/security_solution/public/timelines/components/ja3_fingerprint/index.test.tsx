@@ -48,7 +48,7 @@ describe('Ja3Fingerprint', () => {
 
     expect(
       removeExternalLinkText(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text())
-    ).toEqual('fff799d91b7c01ae3fe6787cfc895552');
+    ).toContain('fff799d91b7c01ae3fe6787cfc895552');
   });
 
   test('it renders a hyperlink to an external site to compare the fingerprint against a known set of signatures', () => {

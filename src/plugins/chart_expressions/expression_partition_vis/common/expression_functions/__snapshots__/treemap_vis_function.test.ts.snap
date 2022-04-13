@@ -1,0 +1,182 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interpreter/functions#treemapVis logs correct datatable to inspector 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "col-0-1",
+      "meta": Object {
+        "dimensionName": "Slice size",
+        "type": "number",
+      },
+      "name": "Field 1",
+    },
+    Object {
+      "id": "col-0-2",
+      "meta": Object {
+        "dimensionName": "Slice",
+        "type": "number",
+      },
+      "name": "Field 2",
+    },
+    Object {
+      "id": "col-0-3",
+      "meta": Object {
+        "dimensionName": "Slice",
+        "type": "number",
+      },
+      "name": "Field 3",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "col-0-1": 0,
+      "col-0-2": 0,
+      "col-0-3": 0,
+      "col-0-4": 0,
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`interpreter/functions#treemapVis returns an object with the correct structure 1`] = `
+Object {
+  "as": "partitionVis",
+  "type": "render",
+  "value": Object {
+    "params": Object {
+      "listenOnChange": true,
+    },
+    "syncColors": false,
+    "visConfig": Object {
+      "addTooltip": true,
+      "ariaLabel": undefined,
+      "buckets": Array [
+        Object {
+          "accessor": 1,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+        Object {
+          "accessor": 2,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+      ],
+      "dimensions": Object {
+        "buckets": Array [
+          Object {
+            "accessor": 1,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+          Object {
+            "accessor": 2,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
+          },
+        ],
+        "metric": Object {
+          "accessor": 0,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
+        },
+        "splitColumn": undefined,
+        "splitRow": undefined,
+      },
+      "labels": Object {
+        "last_level": false,
+        "percentDecimals": 2,
+        "position": "default",
+        "show": false,
+        "truncate": 100,
+        "type": "partitionLabelsValue",
+        "values": true,
+        "valuesFormat": "percent",
+      },
+      "legendDisplay": "show",
+      "legendPosition": "right",
+      "legendSize": undefined,
+      "maxLegendLines": 2,
+      "metric": Object {
+        "accessor": 0,
+        "format": Object {
+          "id": "number",
+          "params": Object {},
+        },
+        "type": "vis_dimension",
+      },
+      "nestedLegend": true,
+      "palette": Object {
+        "name": "kibana_palette",
+        "type": "system_palette",
+      },
+      "splitColumn": undefined,
+      "splitRow": undefined,
+      "truncateLegend": true,
+    },
+    "visData": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Field 1",
+        },
+        Object {
+          "id": "col-0-2",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Field 2",
+        },
+        Object {
+          "id": "col-0-3",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Field 3",
+        },
+        Object {
+          "id": "col-0-4",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Field 4",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+          "col-0-2": 0,
+          "col-0-3": 0,
+          "col-0-4": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+    "visType": "treemap",
+  },
+}
+`;
+
+exports[`interpreter/functions#treemapVis throws error if provided more than 2 buckets 1`] = `"More than 2 buckets are not supported"`;
+
+exports[`interpreter/functions#treemapVis throws error if provided split row and split column at once 1`] = `"A split row and column are specified. Expression is supporting only one of them at once."`;

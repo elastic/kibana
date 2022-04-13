@@ -1,9 +1,8 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-securitysolution-list-utils"
-
 PKG_REQUIRE_NAME = "@kbn/securitysolution-list-utils"
 
 SOURCE_FILES = glob(
@@ -32,20 +31,26 @@ RUNTIME_DEPS = [
   "//packages/kbn-es-query",
   "//packages/kbn-i18n",
   "//packages/kbn-securitysolution-io-ts-list-types",
+  "//packages/kbn-securitysolution-io-ts-utils",
   "//packages/kbn-securitysolution-list-constants",
   "//packages/kbn-securitysolution-utils",
   "@npm//lodash",
+  "@npm//uuid",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-es-query",
-  "//packages/kbn-i18n",
-  "//packages/kbn-securitysolution-io-ts-list-types",
-  "//packages/kbn-securitysolution-list-constants",
-  "//packages/kbn-securitysolution-utils",
+  "//packages/kbn-es-query:npm_module_types",
+  "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-securitysolution-io-ts-list-types:npm_module_types",
+  "//packages/kbn-securitysolution-io-ts-utils:npm_module_types",
+  "//packages/kbn-securitysolution-list-constants:npm_module_types",
+  "//packages/kbn-securitysolution-utils:npm_module_types",
+  "@npm//@elastic/elasticsearch",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
+  "@npm//@types/uuid",
+  "@npm//tslib",
 ]
 
 jsts_transpiler(
@@ -76,18 +81,16 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 
@@ -104,6 +107,23 @@ filegroup(
   name = "build",
   srcs = [
       ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

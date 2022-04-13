@@ -6,20 +6,24 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { licensingMock } from '../../../../licensing/server/mocks';
+import { securityMock } from '../../../../security/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
+import { handleEsError } from '../../shared_imports';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
   detectReindexWarnings: jest.fn(),
-  getIndexGroup: jest.fn(),
   createReindexOperation: jest.fn(),
   findAllInProgressOperations: jest.fn(),
   findReindexOperation: jest.fn(),
   processNextStep: jest.fn(),
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
+  getIndexAliases: jest.fn().mockResolvedValue({}),
 };
 jest.mock('../../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
@@ -28,12 +32,15 @@ jest.mock('../../lib/es_version_precheck', () => ({
 jest.mock('../../lib/reindexing', () => {
   return {
     reindexServiceFactory: () => mockReindexService,
+    generateNewIndexName: () => 'reindexed-foo',
   };
 });
 
-import { IndexGroup, ReindexSavedObject, ReindexStatus } from '../../../common/types';
+import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { credentialStoreFactory } from '../../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
+
+const logMock = loggingSystemMock.create().get();
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
@@ -44,7 +51,7 @@ describe('reindex API', () => {
   let routeDependencies: any;
   let mockRouter: MockRouter;
 
-  const credentialStore = credentialStoreFactory();
+  const credentialStore = credentialStoreFactory(logMock);
   const worker = {
     includes: jest.fn(),
     forceRefresh: jest.fn(),
@@ -56,12 +63,13 @@ describe('reindex API', () => {
       credentialStore,
       router: mockRouter,
       licensing: licensingMock.createSetup(),
+      lib: { handleEsError },
+      getSecurityPlugin: () => securityMock.createStart(),
     };
     registerReindexIndicesRoutes(routeDependencies, () => worker);
 
     mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
-    mockReindexService.getIndexGroup.mockReset();
     mockReindexService.createReindexOperation.mockReset();
     mockReindexService.findAllInProgressOperations.mockReset();
     mockReindexService.findReindexOperation.mockReset();
@@ -120,6 +128,24 @@ describe('reindex API', () => {
       ]);
     });
 
+    it('returns es errors', async () => {
+      mockReindexService.findReindexOperation.mockResolvedValueOnce(null);
+      mockReindexService.detectReindexWarnings.mockRejectedValueOnce(
+        new esErrors.ResponseError({ statusCode: 404 } as any)
+      );
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+      })(
+        routeHandlerContextMock,
+        createRequestMock({ params: { indexName: 'anIndex' } }),
+        kibanaResponseFactory
+      );
+
+      expect(resp.status).toEqual(404);
+    });
+
     it("returns null for both if reindex operation doesn't exist and index doesn't exist", async () => {
       mockReindexService.findReindexOperation.mockResolvedValueOnce(null);
       mockReindexService.detectReindexWarnings.mockResolvedValueOnce(null);
@@ -135,27 +161,8 @@ describe('reindex API', () => {
 
       expect(resp.status).toEqual(200);
       const data = resp.payload;
-      expect(data.reindexOp).toBeNull();
+      expect(data.reindexOp).toBeUndefined();
       expect(data.warnings).toBeNull();
-    });
-
-    it('returns the indexGroup for ML indices', async () => {
-      mockReindexService.findReindexOperation.mockResolvedValueOnce(null);
-      mockReindexService.detectReindexWarnings.mockResolvedValueOnce([]);
-      mockReindexService.getIndexGroup.mockReturnValue(IndexGroup.ml);
-
-      const resp = await routeDependencies.router.getHandler({
-        method: 'get',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
-      })(
-        routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'anIndex' } }),
-        kibanaResponseFactory
-      );
-
-      expect(resp.status).toEqual(200);
-      const data = resp.payload;
-      expect(data.indexGroup).toEqual(IndexGroup.ml);
     });
   });
 
@@ -266,111 +273,6 @@ describe('reindex API', () => {
       );
 
       expect(resp.status).toEqual(403);
-    });
-  });
-
-  describe('POST /api/upgrade_assistant/reindex/batch', () => {
-    const queueSettingsArg = {
-      enqueue: true,
-    };
-    it('creates a collection of index operations', async () => {
-      mockReindexService.createReindexOperation
-        .mockResolvedValueOnce({
-          attributes: { indexName: 'theIndex1' },
-        })
-        .mockResolvedValueOnce({
-          attributes: { indexName: 'theIndex2' },
-        })
-        .mockResolvedValueOnce({
-          attributes: { indexName: 'theIndex3' },
-        });
-
-      const resp = await routeDependencies.router.getHandler({
-        method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/batch',
-      })(
-        routeHandlerContextMock,
-        createRequestMock({ body: { indexNames: ['theIndex1', 'theIndex2', 'theIndex3'] } }),
-        kibanaResponseFactory
-      );
-
-      // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        1,
-        'theIndex1',
-        queueSettingsArg
-      );
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        2,
-        'theIndex2',
-        queueSettingsArg
-      );
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        3,
-        'theIndex3',
-        queueSettingsArg
-      );
-
-      // It returned the right results
-      expect(resp.status).toEqual(200);
-      const data = resp.payload;
-      expect(data).toEqual({
-        errors: [],
-        enqueued: [
-          { indexName: 'theIndex1' },
-          { indexName: 'theIndex2' },
-          { indexName: 'theIndex3' },
-        ],
-      });
-    });
-
-    it('gracefully handles partial successes', async () => {
-      mockReindexService.createReindexOperation
-        .mockResolvedValueOnce({
-          attributes: { indexName: 'theIndex1' },
-        })
-        .mockRejectedValueOnce(new Error('oops!'));
-
-      mockReindexService.hasRequiredPrivileges
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false)
-        .mockResolvedValueOnce(true);
-
-      const resp = await routeDependencies.router.getHandler({
-        method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/batch',
-      })(
-        routeHandlerContextMock,
-        createRequestMock({ body: { indexNames: ['theIndex1', 'theIndex2', 'theIndex3'] } }),
-        kibanaResponseFactory
-      );
-
-      // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenCalledTimes(2);
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        1,
-        'theIndex1',
-        queueSettingsArg
-      );
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        2,
-        'theIndex3',
-        queueSettingsArg
-      );
-
-      // It returned the right results
-      expect(resp.status).toEqual(200);
-      const data = resp.payload;
-      expect(data).toEqual({
-        errors: [
-          {
-            indexName: 'theIndex2',
-            message: 'You do not have adequate privileges to reindex "theIndex2".',
-          },
-          { indexName: 'theIndex3', message: 'oops!' },
-        ],
-        enqueued: [{ indexName: 'theIndex1' }],
-      });
     });
   });
 

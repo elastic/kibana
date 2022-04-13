@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_UPDATE,
+  DETECTION_ENGINE_RULES_URL,
+} from '../../../../../common/constants';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
@@ -19,6 +22,7 @@ import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -34,17 +38,18 @@ describe.each([
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
+    const logger = loggingSystemMock.createLogger();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
     clients.rulesClient.update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // update succeeds
 
-    patchRulesBulkRoute(server.router, ml, isRuleRegistryEnabled);
+    patchRulesBulkRoute(server.router, ml, isRuleRegistryEnabled, logger);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
+  describe('status codes', () => {
+    test('returns 200', async () => {
       const response = await server.inject(getPatchBulkRequest(), context);
       expect(response.status).toEqual(200);
     });
@@ -88,13 +93,6 @@ describe.each([
       );
     });
 
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
-      const response = await server.inject(getPatchBulkRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
     it('rejects patching a rule to ML if mlAuthz fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
@@ -103,7 +101,7 @@ describe.each([
       });
       const request = requestMock.create({
         method: 'patch',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [typicalMlRulePayload()],
       });
       const response = await server.inject(request, context);
@@ -129,7 +127,7 @@ describe.each([
       const { type, ...payloadWithoutType } = typicalMlRulePayload();
       const request = requestMock.create({
         method: 'patch',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [payloadWithoutType],
       });
       const response = await server.inject(request, context);
@@ -151,7 +149,7 @@ describe.each([
     test('rejects payloads with no ID', async () => {
       const request = requestMock.create({
         method: 'patch',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [{ ...getCreateRulesSchemaMock(), rule_id: undefined }],
       });
       const response = await server.inject(request, context);
@@ -171,7 +169,7 @@ describe.each([
     test('allows query rule type', async () => {
       const request = requestMock.create({
         method: 'patch',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [{ ...getCreateRulesSchemaMock(), type: 'query' }],
       });
       const result = server.validate(request);
@@ -182,7 +180,7 @@ describe.each([
     test('rejects unknown rule type', async () => {
       const request = requestMock.create({
         method: 'patch',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [{ ...getCreateRulesSchemaMock(), type: 'unknown_type' }],
       });
       const result = server.validate(request);
@@ -195,7 +193,7 @@ describe.each([
     test('allows rule type of query and custom from and interval', async () => {
       const request = requestMock.create({
         method: 'patch',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [{ from: 'now-7m', interval: '5m', ...getCreateRulesSchemaMock() }],
       });
       const result = server.validate(request);
@@ -206,7 +204,7 @@ describe.each([
     test('disallows invalid "from" param on rule', async () => {
       const request = requestMock.create({
         method: 'patch',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [
           {
             from: 'now-3755555555555555.67s',

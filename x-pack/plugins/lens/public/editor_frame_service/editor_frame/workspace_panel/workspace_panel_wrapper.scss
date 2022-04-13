@@ -10,6 +10,7 @@
   height: 100%;
 
   .lnsWorkspacePanelWrapper__pageContentBody {
+    @include euiBottomShadowMedium;
     @include euiScrollBar;
     flex-grow: 1;
     display: flex;
@@ -18,14 +19,6 @@
     border-radius: $euiBorderRadius;
     background: $euiColorEmptyShade;
     height: 100%;
-
-    @include kbnThemeStyle('v7') {
-      @include euiBottomShadowSmall;
-    }
-
-    @include kbnThemeStyle('v8') {
-      @include euiBottomShadowMedium;
-    }
 
     > * {
       flex: 1 1 100%;
@@ -38,17 +31,15 @@
 
   &.lnsWorkspacePanelWrapper--fullscreen {
     margin-bottom: 0;
+    .lnsWorkspacePanelWrapper__pageContentBody {
+      box-shadow: none;
+    }
   }
+
 }
 
 .lnsWorkspacePanel__dragDrop {
-  @include kbnThemeStyle('v7') {
-    border: $euiBorderThin;
-  }
-
-  @include kbnThemeStyle('v8') {
-    border: $euiBorderWidthThin solid transparent;
-  }
+  border: $euiBorderWidthThin solid transparent;
 
   &.lnsDragDrop-isDropTarget {
     @include lnsDroppable;
@@ -89,20 +80,37 @@
   justify-content: center;
   align-items: center;
   transition: background-color $euiAnimSpeedFast ease-in-out;
+
+  .lnsWorkspacePanel__actions {
+    margin-top: $euiSizeL;
+  }
 }
 
 .lnsWorkspacePanelWrapper__toolbar {
   margin-bottom: 0;
+
+  &.lnsWorkspacePanelWrapper__toolbar--fullscreen {
+    padding: $euiSizeS $euiSizeS 0 $euiSizeS;
+    background-color: #FFF;
+  }
+
+  & > .euiFlexItem {
+    min-height: $euiButtonHeightSmall;
+  }
 }
 
-.lnsDropIllustration__adjustFill {
-  fill: $euiColorFullShade;
+.lnsWorkspacePanel__promptIllustration {
+  overflow: visible; // Shows arrow animation when it gets out of bounds
+  margin-top: 0;
+  margin-bottom: -$euiSize;
+
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 176px;
+  max-height: 176px;
 }
 
 .lnsWorkspacePanel__dropIllustration {
-  overflow: visible; // Shows arrow animation when it gets out of bounds
-  margin-top: $euiSizeL;
-  margin-bottom: $euiSizeXXL;
   // Drop shadow values is a dupe of @euiBottomShadowMedium but used as a filter
   // Hard-coded px values OK (@cchaos)
   // sass-lint:disable-block indentation
@@ -110,6 +118,10 @@
     drop-shadow(0 6px 12px transparentize($euiShadowColor, .8))
     drop-shadow(0 4px 4px transparentize($euiShadowColor, .8))
     drop-shadow(0 2px 2px transparentize($euiShadowColor, .8));
+}
+
+.lnsDropIllustration__adjustFill {
+  fill: $euiColorFullShade;
 }
 
 .lnsDropIllustration__hand {

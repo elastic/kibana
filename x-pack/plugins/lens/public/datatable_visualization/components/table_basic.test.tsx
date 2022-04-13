@@ -6,20 +6,27 @@
  */
 
 import React from 'react';
-import { ReactWrapper, shallow } from 'enzyme';
+import { ReactWrapper, shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiDataGrid } from '@elastic/eui';
 import { IAggType } from 'src/plugins/data/public';
-import { IFieldFormat } from 'src/plugins/field_formats/common';
+import {
+  FieldFormatParams,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from 'src/plugins/field_formats/common';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder } from '../../shared_components';
+import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
 import { LensMultiTable } from '../../../common';
 import { DatatableProps } from '../../../common/expressions';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { IUiSettingsClient } from 'kibana/public';
+import { RenderMode } from 'src/plugins/expressions';
+
+import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -77,12 +84,13 @@ function sampleArgs() {
     ],
     sortingColumnId: '',
     sortingDirection: 'none',
+    rowHeightLines: 1,
   };
 
   return { data, args };
 }
 
-function copyData(data: LensMultiTable): LensMultiTable {
+function copyData<T>(data: T): T {
   return JSON.parse(JSON.stringify(data));
 }
 
@@ -114,6 +122,7 @@ describe('DatatableComponent', () => {
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
           renderMode="edit"
+          interactive
         />
       )
     ).toMatchSnapshot();
@@ -134,12 +143,13 @@ describe('DatatableComponent', () => {
           renderMode="edit"
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          interactive
         />
       )
     ).toMatchSnapshot();
   });
 
-  test('it should render hide and reset actions on header even when it is in read only mode', () => {
+  test('it should render hide, reset, and sort actions on header even when it is in read only mode', () => {
     const { data, args } = sampleArgs();
 
     expect(
@@ -154,6 +164,7 @@ describe('DatatableComponent', () => {
           renderMode="view"
           paletteService={chartPluginMock.createPaletteRegistry()}
           uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          interactive
         />
       )
     ).toMatchSnapshot();
@@ -178,6 +189,7 @@ describe('DatatableComponent', () => {
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -199,7 +211,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: true,
-        timeFieldName: 'a',
       },
     });
   });
@@ -223,6 +234,7 @@ describe('DatatableComponent', () => {
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -244,7 +256,6 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'b',
       },
     });
   });
@@ -289,6 +300,7 @@ describe('DatatableComponent', () => {
       ],
       sortingColumnId: '',
       sortingDirection: 'none',
+      rowHeightLines: 1,
     };
 
     const wrapper = mountWithIntl(
@@ -307,6 +319,7 @@ describe('DatatableComponent', () => {
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -328,9 +341,38 @@ describe('DatatableComponent', () => {
           },
         ],
         negate: false,
-        timeFieldName: 'a',
       },
     });
+  });
+
+  test('it should not invoke executeTriggerActions if interactivity is set to false', async () => {
+    const { args, data } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <DatatableComponent
+        data={{
+          ...data,
+          dateRange: {
+            fromDate: new Date('2020-04-20T05:00:00.000Z'),
+            toDate: new Date('2020-05-03T05:00:00.000Z'),
+          },
+        }}
+        args={args}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        renderMode="edit"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive={false}
+      />
+    );
+
+    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
+
+    await waitForWrapperUpdate(wrapper);
+
+    expect(wrapper.find('[data-test-subj="lensDatatableFilterOut"]').exists()).toBe(false);
   });
 
   test('it shows emptyPlaceholder for undefined bucketed data', () => {
@@ -357,6 +399,7 @@ describe('DatatableComponent', () => {
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
     expect(component.find(VisualizationContainer)).toHaveLength(1);
@@ -380,6 +423,7 @@ describe('DatatableComponent', () => {
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -430,6 +474,7 @@ describe('DatatableComponent', () => {
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -460,6 +505,7 @@ describe('DatatableComponent', () => {
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -488,6 +534,7 @@ describe('DatatableComponent', () => {
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -495,6 +542,53 @@ describe('DatatableComponent', () => {
       // set via args
       a: 'center',
       // default for date
+      b: 'left',
+      // default for number
+      c: 'right',
+    });
+  });
+
+  test('it detect last_value filtered metric type', () => {
+    const { data, args } = sampleArgs();
+
+    const table = data.tables.l1;
+    const column = table.columns[1];
+
+    column.meta = {
+      ...column.meta,
+      field: undefined,
+      type: 'number',
+      sourceParams: { ...column.meta.sourceParams, type: 'filtered_metric' },
+    };
+    table.rows[0].b = 'Hello';
+
+    const wrapper = shallow(
+      <DatatableComponent
+        data={data}
+        args={{
+          ...args,
+          columns: [
+            { columnId: 'a', alignment: 'center', type: 'lens_datatable_column' },
+            { columnId: 'b', type: 'lens_datatable_column' },
+            { columnId: 'c', type: 'lens_datatable_column' },
+          ],
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
+        }}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn()}
+        renderMode="view"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
+      />
+    );
+
+    expect(wrapper.find(DataContext.Provider).prop('value').alignments).toEqual({
+      // set via args
+      a: 'center',
+      // default for string
       b: 'left',
       // default for number
       c: 'right',
@@ -514,6 +608,7 @@ describe('DatatableComponent', () => {
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
     // mnake a copy of the data, changing only the name of the first column
@@ -522,7 +617,9 @@ describe('DatatableComponent', () => {
     wrapper.setProps({ data: newData });
     wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toEqual(
+    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
+    // which can't be seen, but shows in the text content
+    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toContain(
       'new a'
     );
   });
@@ -549,6 +646,7 @@ describe('DatatableComponent', () => {
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -584,6 +682,7 @@ describe('DatatableComponent', () => {
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
     expect(wrapper.find('[data-test-subj="lnsDataTable-footer-a"]').exists()).toEqual(false);
@@ -619,6 +718,7 @@ describe('DatatableComponent', () => {
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
@@ -653,9 +753,143 @@ describe('DatatableComponent', () => {
         renderMode="view"
         paletteService={chartPluginMock.createPaletteRegistry()}
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+        interactive
       />
     );
 
     expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').exists()).toBe(false);
+  });
+
+  describe('pagination', () => {
+    it('enables pagination', async () => {
+      const { data, args } = sampleArgs();
+
+      args.pageSize = 10;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+          interactive
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).toBeTruthy();
+      expect(paginationConfig?.pageIndex).toBe(0); // should start at 0
+      expect(paginationConfig?.pageSize).toBe(args.pageSize);
+
+      // trigger new page
+      const newIndex = 3;
+      act(() => paginationConfig?.onChangePage(newIndex));
+      wrapper.update();
+
+      const updatedConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(updatedConfig).toBeTruthy();
+      expect(updatedConfig?.pageIndex).toBe(newIndex);
+      expect(updatedConfig?.pageSize).toBe(args.pageSize);
+    });
+
+    it('disables pagination by default', async () => {
+      const { data, args } = sampleArgs();
+
+      delete args.pageSize;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+          interactive
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).not.toBeTruthy();
+    });
+
+    it('dynamically toggles pagination', async () => {
+      const { data, args } = sampleArgs();
+
+      const argsWithPagination = copyData(args);
+      argsWithPagination.pageSize = 20;
+
+      const argsWithoutPagination = copyData(args);
+      delete argsWithoutPagination.pageSize;
+
+      const defaultProps = {
+        data,
+        formatFactory: (x?: SerializedFieldFormat<FieldFormatParams>) => x as IFieldFormat,
+        dispatchEvent: onDispatchEvent,
+        getType: jest.fn(),
+        paletteService: chartPluginMock.createPaletteRegistry(),
+        uiSettings: { get: jest.fn() } as unknown as IUiSettingsClient,
+        renderMode: 'edit' as RenderMode,
+        interactive: true,
+      };
+
+      const wrapper = mount(
+        <DatatableComponent {...{ ...defaultProps, args: argsWithoutPagination }} />
+      );
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')).not.toBeTruthy();
+
+      wrapper.setProps({ args: argsWithPagination });
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')).toBeTruthy();
+
+      wrapper.setProps({ args: argsWithoutPagination });
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')).not.toBeTruthy();
+    });
+
+    it('dispatches event when page size changed', async () => {
+      const { data, args } = sampleArgs();
+
+      args.pageSize = 10;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+          interactive
+        />
+      );
+
+      const paginationConfig = wrapper.find(EuiDataGrid).prop('pagination');
+      expect(paginationConfig).toBeTruthy();
+
+      const sizeToChangeTo = 100;
+      paginationConfig?.onChangeItemsPerPage(sizeToChangeTo);
+
+      expect(onDispatchEvent).toHaveBeenCalledTimes(1);
+      expect(onDispatchEvent).toHaveBeenCalledWith({
+        name: 'edit',
+        data: {
+          action: LENS_EDIT_PAGESIZE_ACTION,
+          size: sizeToChangeTo,
+        },
+      });
+    });
   });
 });

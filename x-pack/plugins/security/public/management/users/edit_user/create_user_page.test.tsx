@@ -9,7 +9,7 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
@@ -22,6 +22,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('CreateUserPage', () => {
   jest.setTimeout(15_000);
 
+  const theme$ = themeServiceMock.createTheme$();
+
   it('creates user when submitting form and redirects back', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/create'] });
@@ -29,7 +31,7 @@ describe('CreateUserPage', () => {
     coreStart.http.post.mockResolvedValue({});
 
     const { findByRole, findByLabelText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <CreateUserPage />
       </Providers>
     );
@@ -72,7 +74,7 @@ describe('CreateUserPage', () => {
     ]);
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
         <CreateUserPage />
       </Providers>
     );

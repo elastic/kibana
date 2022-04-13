@@ -17,7 +17,8 @@ const testElements: { [key: string]: ElementSpec } = {
     displayName: 'Area chart',
     help: 'A line chart with a filled body',
     type: 'chart',
-    expression: `filters
+    expression: `kibana
+    | selectFilter
     | demodata
     | pointseries x="time" y="mean(price)"
     | plot defaultStyle={seriesStyle lines=1 fill=1}
@@ -47,7 +48,8 @@ const testElements: { [key: string]: ElementSpec } = {
     displayName: 'Debug filter',
     help: 'Shows the underlying global filters in a workpad',
     icon: 'bug',
-    expression: `filters
+    expression: `kibana
+  | selectFilter
   | render as=debug`,
   },
   image: {
@@ -64,7 +66,8 @@ const testElements: { [key: string]: ElementSpec } = {
     type: 'text',
     help: 'Add text using Markdown',
     icon: 'visText',
-    expression: `filters
+    expression: `kibana
+| selectFilter
 | demodata
 | markdown "### Welcome to the Markdown element
 
@@ -89,7 +92,8 @@ You can use standard Markdown in here, but you can also access your piped-in dat
     width: 200,
     height: 200,
     icon: 'visGoal',
-    expression: `filters
+    expression: `kibana
+  | selectFilter
   | demodata
   | math "mean(percent_uptime)"
   | progress shape="gauge" label={formatnumber 0%} font={font size=24 family="Helvetica" color="#000000" align=center}
@@ -111,7 +115,8 @@ You can use standard Markdown in here, but you can also access your piped-in dat
     displayName: 'Data table',
     type: 'chart',
     help: 'A scrollable grid for displaying data in a tabular format',
-    expression: `filters
+    expression: `kibana
+  | selectFilter
   | demodata
   | table
   | render`,
@@ -129,12 +134,6 @@ You can use standard Markdown in here, but you can also access your piped-in dat
   },
 };
 
-const mockRenderEmbedPanel = () => <div id="embeddablePanel" />;
-
 storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
-  <ElementMenu
-    elements={testElements}
-    addElement={action('addElement')}
-    renderEmbedPanel={mockRenderEmbedPanel}
-  />
+  <ElementMenu elements={testElements} addElement={action('addElement')} />
 ));

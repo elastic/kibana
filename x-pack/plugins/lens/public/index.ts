@@ -11,30 +11,39 @@ export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
-export type { XYState } from './xy_visualization/types';
-export type { DataType, OperationMetadata } from './types';
 export type {
+  XYState,
+  XYReferenceLineLayerConfig,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+} from './xy_visualization/types';
+export type {
+  DatasourcePublicAPI,
+  DataType,
+  OperationMetadata,
+  SuggestionRequest,
+  TableSuggestion,
+  Visualization,
+  VisualizationSuggestion,
+} from './types';
+export type {
+  ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
-  MetricState,
-  AxesSettingsConfig,
-  XYLayerConfig,
-  LegendConfig,
-  SeriesType,
-  ValueLabelConfig,
-  YAxisMode,
-  XYCurveType,
-  YConfig,
-} from '../common/expressions';
+} from '../common/types';
+
 export type { DatatableVisualizationState } from './datatable_visualization/visualization';
+export type { HeatmapVisualizationState } from './heatmap_visualization/types';
+export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
   OperationType,
   IncompleteColumn,
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -55,9 +64,49 @@ export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
+  FormulaPublicApi,
+  StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './indexpattern_datasource/types';
+export type {
+  XYArgs,
+  YConfig,
+  XYRender,
+  LayerType,
+  YAxisMode,
+  LineStyle,
+  FillStyle,
+  SeriesType,
+  YScaleType,
+  XScaleType,
+  AxisConfig,
+  ValidLayer,
+  XYCurveType,
+  XYChartProps,
+  LegendConfig,
+  IconPosition,
+  YConfigResult,
+  DataLayerArgs,
+  LensMultiTable,
+  ValueLabelMode,
+  AxisExtentMode,
+  FittingFunction,
+  AxisExtentConfig,
+  LegendConfigResult,
+  AxesSettingsConfig,
+  GridlinesConfigResult,
+  DataLayerConfigResult,
+  TickLabelsConfigResult,
+  AxisExtentConfigResult,
+  ReferenceLineLayerArgs,
+  LabelsOrientationConfig,
+  LabelsOrientationConfigResult,
+  ReferenceLineLayerConfigResult,
+  AxisTitlesVisibilityConfigResult,
+} from '../../../../src/plugins/chart_expressions/expression_xy/common';
 export type { LensEmbeddableInput } from './embeddable';
+export { layerTypes } from '../common';
 
-export { LensPublicStart } from './plugin';
+export type { LensPublicStart, LensPublicSetup } from './plugin';
 
 export const plugin = () => new LensPlugin();

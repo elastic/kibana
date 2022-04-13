@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProviderContext) {
+export function MachineLearningAnomalyExplorerProvider({
+  getPageObject,
+  getService,
+}: FtrProviderContext) {
+  const dashboardPage = getPageObject('dashboard');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -83,15 +87,20 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
-      await this.filterDashboardSearchWithSearchString(dashboardTitle);
-      await this.selectAllDashboards();
-      await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.filterDashboardSearchWithSearchString(dashboardTitle);
+        await testSubjects.clickWhenNotDisabled('~mlEmbeddableAddAndEditDashboard');
+
+        // make sure the dashboard page actually loaded
+        const dashboardItemCount = await dashboardPage.getSharedItemsCount();
+        expect(dashboardItemCount).to.not.eql(undefined);
+      });
       // changing to the dashboard app might take sime time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
       const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
         true,
-        'Anomaly swimlane should be displayed in dashboard'
+        'Anomaly swim lane should be displayed in dashboard'
       );
     },
 
@@ -100,15 +109,24 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async waitForDashboardsToLoad() {
-      await testSubjects.existOrFail('~mlDashboardSelectionTable', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail('mlDashboardSelectionTable loaded', { timeout: 60 * 1000 });
     },
 
-    async filterDashboardSearchWithSearchString(filter: string) {
-      await this.waitForDashboardsToLoad();
-      const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
-      await searchBarInput.clearValueWithKeyboard();
-      await searchBarInput.type(filter);
-      await this.assertDashboardSearchInputValue(filter);
+    async filterDashboardSearchWithSearchString(filter: string, expectedRowCount: number = 1) {
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.waitForDashboardsToLoad();
+        const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
+        await searchBarInput.clearValueWithKeyboard();
+        await searchBarInput.type(filter);
+        await this.assertDashboardSearchInputValue(filter);
+        await this.waitForDashboardsToLoad();
+
+        const dashboardRows = await testSubjects.findAll('~mlDashboardSelectionTableRow', 2000);
+        expect(dashboardRows.length).to.eql(
+          expectedRowCount,
+          `Dashboard table should have ${expectedRowCount} rows, got ${dashboardRows.length}`
+        );
+      });
     },
 
     async assertDashboardSearchInputValue(expectedSearchValue: string) {
@@ -120,20 +138,17 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       );
     },
 
-    async selectAllDashboards() {
-      await retry.tryForTime(3000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlDashboardSelectionTable > checkboxSelectAll');
-        expect(
-          await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll')
-        ).to.eql(true, 'Checkbox to select all dashboards should be selected');
-      });
-    },
-
     async assertClearSelectionButtonVisible(expectVisible: boolean) {
       if (expectVisible) {
-        await testSubjects.existOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          true,
+          `Expected 'Clear selection' button to be displayed`
+        );
       } else {
-        await testSubjects.missingOrFail('mlAnomalyTimelineClearSelection');
+        expect(await testSubjects.isDisplayed('mlAnomalyTimelineClearSelection')).to.eql(
+          false,
+          `Expected 'Clear selection' button to be hidden`
+        );
       }
     },
 
@@ -152,6 +167,14 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
         expectedChartsCount,
         `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
       );
+    },
+
+    async scrollChartsContainerIntoView() {
+      await testSubjects.scrollIntoView('mlExplorerChartsContainer');
+    },
+
+    async scrollMapContainerIntoView() {
+      await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
     },
   };
 }

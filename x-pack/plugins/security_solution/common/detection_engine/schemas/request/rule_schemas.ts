@@ -58,18 +58,16 @@ import {
   tags,
   interval,
   enabled,
+  outcome,
+  alias_target_id,
+  alias_purpose,
   updated_at,
   updated_by,
   created_at,
   created_by,
-  ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
   namespace,
-} from '../common/schemas';
+  ruleExecutionSummary,
+} from '../common';
 
 export const createSchema = <
   Required extends t.Props,
@@ -150,6 +148,9 @@ const baseParams = {
     building_block_type,
     note,
     license,
+    outcome,
+    alias_target_id,
+    alias_purpose,
     output_index,
     timeline_id,
     timeline_title,
@@ -218,7 +219,7 @@ const {
   patch: eqlPatchParams,
   response: eqlResponseParams,
 } = buildAPISchemas(eqlRuleParams);
-export { eqlCreateParams };
+export { eqlCreateParams, eqlResponseParams };
 
 const threatMatchRuleParams = {
   required: {
@@ -358,6 +359,12 @@ export type MachineLearningCreateSchema = CreateSchema<
 
 export const createRulesSchema = t.intersection([sharedCreateSchema, createTypeSpecific]);
 export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
+export const previewRulesSchema = t.intersection([
+  sharedCreateSchema,
+  createTypeSpecific,
+  t.type({ invocationCount: t.number }),
+]);
+export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
@@ -406,13 +413,9 @@ const responseRequiredFields = {
   created_at,
   created_by,
 };
+
 const responseOptionalFields = {
-  status: ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
+  execution_summary: ruleExecutionSummary,
 };
 
 export const fullResponseSchema = t.intersection([
@@ -422,3 +425,16 @@ export const fullResponseSchema = t.intersection([
   t.exact(t.partial(responseOptionalFields)),
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
+
+export interface RulePreviewLogs {
+  errors: string[];
+  warnings: string[];
+  startedAt?: string;
+  duration: number;
+}
+
+export interface PreviewResponse {
+  previewId: string | undefined;
+  logs: RulePreviewLogs[] | undefined;
+  isAborted: boolean | undefined;
+}

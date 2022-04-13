@@ -6,7 +6,7 @@
 
 The Kibana Core APIs for client-side plugins.
 
-A plugin's `public/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) which returns an object that implements [Plugin](./kibana-plugin-core-public.plugin.md)<!-- -->.
+A plugin's `public/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) which returns an object that implements .
 
 The plugin integrates with the core system via lifecycle events: `setup`<!-- -->, `start`<!-- -->, and `stop`<!-- -->. In each lifecycle method, the plugin will receive the corresponding core services available (either [CoreSetup](./kibana-plugin-core-public.coresetup.md) or [CoreStart](./kibana-plugin-core-public.corestart.md)<!-- -->) and any interfaces returned by dependency plugins' lifecycle method. Anything returned by the plugin's lifecycle method will be exposed to downstream dependencies when their corresponding lifecycle methods are invoked.
 
@@ -39,7 +39,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
 |  [AppNavOptions](./kibana-plugin-core-public.appnavoptions.md) | App navigation menu options |
-|  [AsyncPlugin](./kibana-plugin-core-public.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-core-public.chromebadge.md) |  |
 |  [ChromeDocTitle](./kibana-plugin-core-public.chromedoctitle.md) | APIs for accessing and updating the document title. |
@@ -58,9 +57,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeUserBanner](./kibana-plugin-core-public.chromeuserbanner.md) |  |
 |  [CoreSetup](./kibana-plugin-core-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
+|  [CoreTheme](./kibana-plugin-core-public.coretheme.md) | Contains all the required information to apply Kibana's theme at the various levels it can be used. |
 |  [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) | DeprecationsService provides methods to fetch domain deprecation details from the Kibana server. |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
+|  [ExecutionContextSetup](./kibana-plugin-core-public.executioncontextsetup.md) | Kibana execution context. Used to provide execution context to Elasticsearch, reporting, performance monitoring, etc. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) | All options that may be used with a [HttpHandler](./kibana-plugin-core-public.httphandler.md)<!-- -->. |
@@ -84,6 +85,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
 |  [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-core-public.iuisettingsclient.md) |
 |  [NavigateToAppOptions](./kibana-plugin-core-public.navigatetoappoptions.md) | Options for the [navigateToApp API](./kibana-plugin-core-public.applicationstart.navigatetoapp.md) |
+|  [NavigateToUrlOptions](./kibana-plugin-core-public.navigatetourloptions.md) | Options for the [navigateToUrl API](./kibana-plugin-core-public.applicationstart.navigatetourl.md) |
 |  [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md) |  |
 |  [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |  |
@@ -94,9 +96,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayModalStart](./kibana-plugin-core-public.overlaymodalstart.md) | APIs to open and manage modal dialogs. |
 |  [OverlayRef](./kibana-plugin-core-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay. |
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
-|  [Plugin](./kibana-plugin-core-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
+|  [Plugin\_2](./kibana-plugin-core-public.plugin_2.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
 |  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)<!-- -->. |
+|  [ResponseErrorBody](./kibana-plugin-core-public.responseerrorbody.md) |  |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectError](./kibana-plugin-core-public.savedobjecterror.md) |  |
@@ -130,6 +133,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsResolveResponse](./kibana-plugin-core-public.savedobjectsresolveresponse.md) |  |
 |  [SavedObjectsStart](./kibana-plugin-core-public.savedobjectsstart.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-public.savedobjectsupdateoptions.md) |  |
+|  [ThemeServiceSetup](./kibana-plugin-core-public.themeservicesetup.md) |  |
+|  [ThemeServiceStart](./kibana-plugin-core-public.themeservicestart.md) |  |
 |  [ToastOptions](./kibana-plugin-core-public.toastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
 |  [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsState](./kibana-plugin-core-public.uisettingsstate.md) |  |
@@ -146,6 +151,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AnalyticsServiceSetup](./kibana-plugin-core-public.analyticsservicesetup.md) | Exposes the public APIs of the AnalyticsClient during the setup phase.  |
+|  [AnalyticsServiceStart](./kibana-plugin-core-public.analyticsservicestart.md) | Exposes the public APIs of the AnalyticsClient during the start phase  |
 |  [AppDeepLink](./kibana-plugin-core-public.appdeeplink.md) | Input type for registering secondary in-app locations for an application.<!-- -->Deep links must include at least one of <code>path</code> or <code>deepLinks</code>. A deep link that does not have a <code>path</code> represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible. |
 |  [AppLeaveAction](./kibana-plugin-core-public.appleaveaction.md) | Possible actions to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md)<!-- -->See [AppLeaveConfirmAction](./kibana-plugin-core-public.appleaveconfirmaction.md) and [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) |
 |  [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples. |
@@ -156,6 +163,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeBreadcrumb](./kibana-plugin-core-public.chromebreadcrumb.md) |  |
 |  [ChromeHelpExtensionLinkBase](./kibana-plugin-core-public.chromehelpextensionlinkbase.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
+|  [ExecutionContextStart](./kibana-plugin-core-public.executioncontextstart.md) | See [ExecutionContextSetup](./kibana-plugin-core-public.executioncontextsetup.md)<!-- -->. |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
 |  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |

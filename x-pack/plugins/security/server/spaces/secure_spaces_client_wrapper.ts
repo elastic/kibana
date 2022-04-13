@@ -17,13 +17,13 @@ import type {
   LegacyUrlAliasTarget,
   Space,
 } from '../../../spaces/server';
+import { ALL_SPACES_ID } from '../../common/constants';
 import type { AuditLogger } from '../audit';
 import { SavedObjectAction, savedObjectEvent, SpaceAuditAction, spaceAuditEvent } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
 import type { SecurityPluginSetup } from '../plugin';
 import type { EnsureAuthorizedDependencies, EnsureAuthorizedOptions } from '../saved_objects';
 import { ensureAuthorized, isAuthorizedForObjectInAllSpaces } from '../saved_objects';
-import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetAllSpacesPurpose,
@@ -45,16 +45,17 @@ const PURPOSE_PRIVILEGE_MAP: Record<
 export const LEGACY_URL_ALIAS_TYPE = 'legacy-url-alias';
 
 export class SecureSpacesClientWrapper implements ISpacesClient {
-  private readonly useRbac = this.authorization.mode.useRbacForRequest(this.request);
+  private readonly useRbac: boolean;
 
   constructor(
     private readonly spacesClient: ISpacesClient,
     private readonly request: KibanaRequest,
     private readonly authorization: AuthorizationServiceSetup,
     private readonly auditLogger: AuditLogger,
-    private readonly legacyAuditLogger: LegacySpacesAuditLogger,
     private readonly errors: SavedObjectsClientContract['errors']
-  ) {}
+  ) {
+    this.useRbac = this.authorization.mode.useRbacForRequest(this.request);
+  }
 
   public async getAll({
     purpose = 'any',
@@ -89,7 +90,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     );
 
     // Check all privileges against all spaces
-    const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, {
+    const { privileges } = await checkPrivileges.atSpaces(spaceIds, {
       kibana: Object.values(allPrivileges).flat(),
     });
 
@@ -132,7 +133,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     if (authorizedSpaces.length === 0) {
       const error = Boom.forbidden();
 
-      this.legacyAuditLogger.spacesAuthorizationFailure(username, 'getAll');
       this.auditLogger.log(
         spaceAuditEvent({
           action: SpaceAuditAction.FIND,
@@ -143,9 +143,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       throw error; // Note: there is a catch for this in `SpacesSavedObjectsClient.find`; if we get rid of this error, remove that too
     }
 
-    const authorizedSpaceIds = authorizedSpaces.map((space) => space.id);
-
-    this.legacyAuditLogger.spacesAuthorizationSuccess(username, 'getAll', authorizedSpaceIds);
     authorizedSpaces.forEach(({ id }) =>
       this.auditLogger.log(
         spaceAuditEvent({
@@ -164,7 +161,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
         await this.ensureAuthorizedAtSpace(
           id,
           this.authorization.actions.login,
-          'get',
           `Unauthorized to get ${id} space`
         );
       } catch (error) {
@@ -196,7 +192,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       try {
         await this.ensureAuthorizedGlobally(
           this.authorization.actions.space.manage,
-          'create',
           'Unauthorized to create spaces'
         );
       } catch (error) {
@@ -227,7 +222,6 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
       try {
         await this.ensureAuthorizedGlobally(
           this.authorization.actions.space.manage,
-          'update',
           'Unauthorized to update spaces'
         );
       } catch (error) {
@@ -253,12 +247,15 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return this.spacesClient.update(id, space);
   }
 
+  public createSavedObjectFinder(id: string) {
+    return this.spacesClient.createSavedObjectFinder(id);
+  }
+
   public async delete(id: string) {
     if (this.useRbac) {
       try {
         await this.ensureAuthorizedGlobally(
           this.authorization.actions.space.manage,
-          'delete',
           'Unauthorized to delete spaces'
         );
       } catch (error) {
@@ -270,6 +267,35 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
           })
         );
         throw error;
+      }
+    }
+
+    // Fetch saved objects to be removed for audit logging
+    if (this.auditLogger.enabled) {
+      const finder = this.spacesClient.createSavedObjectFinder(id);
+      try {
+        for await (const response of finder.find()) {
+          response.saved_objects.forEach((savedObject) => {
+            const { namespaces = [] } = savedObject;
+            const isOnlySpace = namespaces.length === 1; // We can always rely on the `namespaces` field having >=1 element
+            if (namespaces.includes(ALL_SPACES_ID) && !namespaces.includes(id)) {
+              // This object exists in All Spaces and its `namespaces` field isn't going to change; there's nothing to audit
+              return;
+            }
+            this.auditLogger.log(
+              savedObjectEvent({
+                action: isOnlySpace
+                  ? SavedObjectAction.DELETE
+                  : SavedObjectAction.UPDATE_OBJECTS_SPACES,
+                outcome: 'unknown',
+                savedObject: { type: savedObject.type, id: savedObject.id },
+                deleteFromSpaces: [id],
+              })
+            );
+          });
+        }
+      } finally {
+        await finder.close();
       }
     }
 
@@ -362,33 +388,22 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     return ensureAuthorized(ensureAuthorizedDependencies, types, actions, namespaces, options);
   }
 
-  private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {
+  private async ensureAuthorizedGlobally(action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-    const { username, hasAllRequested } = await checkPrivileges.globally({ kibana: action });
+    const { hasAllRequested } = await checkPrivileges.globally({ kibana: action });
 
-    if (hasAllRequested) {
-      this.legacyAuditLogger.spacesAuthorizationSuccess(username, method);
-    } else {
-      this.legacyAuditLogger.spacesAuthorizationFailure(username, method);
+    if (!hasAllRequested) {
       throw Boom.forbidden(forbiddenMessage);
     }
   }
 
-  private async ensureAuthorizedAtSpace(
-    spaceId: string,
-    action: string,
-    method: string,
-    forbiddenMessage: string
-  ) {
+  private async ensureAuthorizedAtSpace(spaceId: string, action: string, forbiddenMessage: string) {
     const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
-    const { username, hasAllRequested } = await checkPrivileges.atSpace(spaceId, {
+    const { hasAllRequested } = await checkPrivileges.atSpace(spaceId, {
       kibana: action,
     });
 
-    if (hasAllRequested) {
-      this.legacyAuditLogger.spacesAuthorizationSuccess(username, method, [spaceId]);
-    } else {
-      this.legacyAuditLogger.spacesAuthorizationFailure(username, method, [spaceId]);
+    if (!hasAllRequested) {
       throw Boom.forbidden(forbiddenMessage);
     }
   }

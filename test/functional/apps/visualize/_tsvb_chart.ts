@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('visual builder', function describeIndexTests() {
-    this.tags('includeFirefox');
-
     before(async () => {
       await visualize.initTests();
     });
@@ -36,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async () => {
       await security.testUser.setRoles(
         ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],
-        false
+        { skipBrowserRefresh: true }
       );
       await visualize.navigateToNewVisualization();
       await visualize.clickVisualBuilder();
@@ -54,8 +52,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickDataTab('metric');
       });
 
-      it('should not have inspector enabled', async () => {
-        await inspector.expectIsNotEnabled();
+      it('should have inspector enabled', async () => {
+        await inspector.expectIsEnabled();
       });
 
       it('should show correct data', async () => {
@@ -124,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const error = await visualBuilder.getVisualizeError();
 
         expect(error).to.eql(
-          'The aggregation derivative is not supported in entire_time_range mode'
+          'The "derivative" aggregation is not supported for existing panel configuration.'
         );
       });
 
@@ -210,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const error = await visualBuilder.getVisualizeError();
 
         expect(error).to.eql(
-          'The aggregation derivative is not supported in entire_time_range mode'
+          'The "derivative" aggregation is not supported for existing panel configuration.'
         );
       });
 
@@ -364,7 +362,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const error = await visualBuilder.getVisualizeError();
 
         expect(error).to.eql(
-          'The aggregation derivative is not supported in entire_time_range mode'
+          'The "derivative" aggregation is not supported for existing panel configuration.'
         );
       });
 

@@ -8,27 +8,24 @@
 import React, { useCallback, useState, useContext } from 'react';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
-import { EventFieldsData, FieldsData } from '../types';
+import { EnrichedFieldInfo } from '../types';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
-import { BrowserField } from '../../../containers/source';
 import { TimelineContext } from '../../../../../../timelines/public';
 
-interface Props {
+interface Props extends EnrichedFieldInfo {
   contextId: string;
-  data: FieldsData | EventFieldsData;
+  applyWidthAndPadding?: boolean;
   disabled?: boolean;
-  eventId: string;
-  fieldFromBrowserField?: BrowserField;
   getLinkValue?: (field: string) => string | null;
-  linkValue?: string | null | undefined;
   onFilterAdded?: () => void;
-  timelineId?: string;
+  setIsPopoverVisible?: (isVisible: boolean) => void;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
-  values: string[] | null | undefined;
+  hideAddToTimeline?: boolean;
 }
 
 export const ActionCell: React.FC<Props> = React.memo(
   ({
+    applyWidthAndPadding = true,
     contextId,
     data,
     eventId,
@@ -36,9 +33,11 @@ export const ActionCell: React.FC<Props> = React.memo(
     getLinkValue,
     linkValue,
     onFilterAdded,
+    setIsPopoverVisible,
     timelineId,
     toggleColumn,
     values,
+    hideAddToTimeline,
   }) => {
     const actionCellConfig = useActionCellDataProvider({
       contextId,
@@ -58,9 +57,10 @@ export const ActionCell: React.FC<Props> = React.memo(
     const toggleTopN = useCallback(() => {
       setShowTopN((prevShowTopN) => {
         const newShowTopN = !prevShowTopN;
+        if (setIsPopoverVisible) setIsPopoverVisible(newShowTopN);
         return newShowTopN;
       });
-    }, []);
+    }, [setIsPopoverVisible]);
 
     const closeTopN = useCallback(() => {
       setShowTopN(false);
@@ -68,11 +68,13 @@ export const ActionCell: React.FC<Props> = React.memo(
 
     return (
       <HoverActions
+        applyWidthAndPadding={applyWidthAndPadding}
         closeTopN={closeTopN}
         dataType={data.type}
         dataProvider={actionCellConfig?.dataProvider}
         enableOverflowButton={true}
         field={data.field}
+        hideAddToTimeline={hideAddToTimeline}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}

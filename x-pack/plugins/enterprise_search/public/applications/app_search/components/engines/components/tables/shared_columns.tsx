@@ -13,7 +13,7 @@ import {
   EuiTableActionsColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedNumber } from '@kbn/i18n/react';
+import { FormattedNumber } from '@kbn/i18n-react';
 
 import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
 import { FormattedDateTime } from '../../../../utils/formatted_date_time';
@@ -36,11 +36,8 @@ export const NAME_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   truncateText: true,
   mobileOptions: {
     header: true,
-    // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
-    // @ts-ignore
     enlarge: true,
     width: '100%',
-    truncateText: false,
   },
 };
 
@@ -51,6 +48,17 @@ export const CREATED_AT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   }),
   dataType: 'string',
   render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
+};
+
+export const LAST_UPDATED_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
+  field: 'updated_at',
+  name: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.lastUpdated',
+    {
+      defaultMessage: 'Last updated',
+    }
+  ),
+  dataType: 'string',
 };
 
 export const DOCUMENT_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {

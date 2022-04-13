@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Encrypting Files with WinRar or 7z",
+  "note": "## Triage and analysis\n\n### Investigating Encrypting Files with WinRar or 7z\n\nAttackers may compress and/or encrypt data collected before exfiltration. Compressing the data can help obfuscate the\ncollected data and minimize the amount of data sent over the network. Encryption can be used to hide information that is\nbeing exfiltrated from detection or make exfiltration less apparent upon inspection by a defender.\n\nThese steps are usually done in preparation for exfiltration, meaning the attack may be in its final stages.\n\n#### Possible investigation steps\n\n- Investigate the script execution chain (parent process tree).\n- Retrieve the encrypted file.\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Check if the password used in the encryption was included in the command line.\n- Decrypt the `.rar`/`.zip` and check if the information is sensitive.\n- If the password is not available, and the format is `.zip` or the option used in WinRAR is not the `-hp`, list the\nfile names included in the encrypted file.\n- Investigate if the file was transferred to an attacker-controlled server.\n\n### False positive analysis\n\n- Backup software can use these utilities. Check the `process.parent.executable` and\n`process.parent.command_line` fields to determine what triggered the encryption.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- If personally identifiable information (PII) or other classified data is involved, investigations into this should be prioritized.\n- Quarantine the involved host for forensic investigation, as well as eradication and recovery activities.\n- Reset the passwords of the involved accounts.\n- Safeguard critical assets to prevent further harm or theft of data.\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  ((process.name:\"rar.exe\" or process.code_signature.subject_name == \"win.rar GmbH\" or\n      process.pe.original_file_name == \"Command line RAR\") and\n    process.args == \"a\" and process.args : (\"-hp*\", \"-p*\", \"-dw\", \"-tb\", \"-ta\", \"/hp*\", \"/p*\", \"/dw\", \"/tb\", \"/ta\"))\n\n  or\n  (process.pe.original_file_name in (\"7z.exe\", \"7za.exe\") and\n     process.args == \"a\" and process.args : (\"-p*\", \"-sdel\"))\n\n  /* uncomment if noisy for backup software related FPs */\n  /* not process.parent.executable : (\"C:\\\\Program Files\\\\*.exe\", \"C:\\\\Program Files (x86)\\\\*.exe\") */\n",
   "references": [
     "https://www.welivesecurity.com/2020/12/02/turla-crutch-keeping-back-door-open/"
@@ -38,12 +39,19 @@
         {
           "id": "T1560",
           "name": "Archive Collected Data",
-          "reference": "https://attack.mitre.org/techniques/T1560/"
+          "reference": "https://attack.mitre.org/techniques/T1560/",
+          "subtechnique": [
+            {
+              "id": "T1560.001",
+              "name": "Archive via Utility",
+              "reference": "https://attack.mitre.org/techniques/T1560/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 5
 }

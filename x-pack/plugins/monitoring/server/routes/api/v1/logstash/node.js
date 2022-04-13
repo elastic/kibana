@@ -9,9 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { getNodeInfo } from '../../../../lib/logstash/get_node_info';
 import { handleError } from '../../../../lib/errors';
 import { getMetrics } from '../../../../lib/details/get_metrics';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node';
-import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -49,10 +47,8 @@ export function logstashNodeRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
-      const ccs = req.payload.ccs;
+      const config = server.config;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
       const logstashUuid = req.params.logstashUuid;
 
       let metricSet;
@@ -61,7 +57,7 @@ export function logstashNodeRoute(server) {
       } else {
         metricSet = metricSetOverview;
         // set the cgroup option if needed
-        const showCgroupMetricsLogstash = config.get('monitoring.ui.container.logstash.enabled');
+        const showCgroupMetricsLogstash = config.ui.container.logstash.enabled;
         const metricCpu = metricSet.find((m) => m.name === 'logstash_node_cpu_metric');
         if (showCgroupMetricsLogstash) {
           metricCpu.keys = ['logstash_node_cgroup_quota_as_cpu_utilization'];
@@ -71,18 +67,21 @@ export function logstashNodeRoute(server) {
       }
 
       try {
+        const moduleType = 'logstash';
+        const dsDataset = 'node_stats';
         const [metrics, nodeSummary] = await Promise.all([
-          getMetrics(req, lsIndexPattern, metricSet, [
+          getMetrics(req, 'logstash', metricSet, [
             {
               bool: {
                 should: [
+                  { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                  { term: { 'metricset.name': dsDataset } },
                   { term: { type: 'logstash_stats' } },
-                  { term: { 'metricset.name': 'stats' } },
                 ],
               },
             },
           ]),
-          getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
+          getNodeInfo(req, { clusterUuid, logstashUuid }),
         ]);
 
         return {

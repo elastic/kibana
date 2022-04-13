@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const testSubjects = getService('testSubjects');
+  const refreshButtonSelector = 'refreshDataButton';
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -43,6 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/date_nested.json'
+      );
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
@@ -50,7 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
@@ -58,53 +63,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => await initSearchOnPageLoad(false));
 
       it('should not fetch data from ES initially', async function () {
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
       });
 
       it('should not fetch on indexPattern change', async function () {
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
         await PageObjects.discover.selectIndexPattern('date-nested');
 
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
       });
 
       it('should fetch data from ES after refreshDataButton click', async function () {
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
-        await testSubjects.click('refreshDataButton');
+        await testSubjects.click(refreshButtonSelector);
+        await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await testSubjects.exists('refreshDataButton')).to.be(false);
       });
 
       it('should fetch data from ES after submit query', async function () {
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
         await queryBar.submitQuery();
+        await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await testSubjects.exists('refreshDataButton')).to.be(false);
       });
 
       it('should fetch data from ES after choosing commonly used time range', async function () {
         await PageObjects.discover.selectIndexPattern('logstash-*');
-        expect(await testSubjects.exists('refreshDataButton')).to.be(true);
+        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
         await PageObjects.timePicker.setCommonlyUsedTime('This_week');
+        await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await testSubjects.exists('refreshDataButton')).to.be(false);
       });
     });
 
-    it(`when it's false should fetch data from ES initially`, async function () {
+    it(`when it's true should fetch data from ES initially`, async function () {
       await initSearchOnPageLoad(true);
       await retry.waitFor('number of fetches to be 1', waitForFetches(1));
     });

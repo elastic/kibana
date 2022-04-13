@@ -8,7 +8,7 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock, notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 
 import { KibanaFeature } from '../../../../features/public';
@@ -58,29 +58,6 @@ describe('SpacesGridPage', () => {
   const getUrlForApp = (appId: string) => appId;
   const history = scopedHistoryMock.create();
 
-  it('renders as expected', () => {
-    const httpStart = httpServiceMock.createStartContract();
-    httpStart.get.mockResolvedValue([]);
-
-    expect(
-      shallowWithIntl(
-        <SpacesGridPage
-          spacesManager={spacesManager as unknown as SpacesManager}
-          getFeatures={featuresStart.getFeatures}
-          notifications={notificationServiceMock.createStartContract()}
-          getUrlForApp={getUrlForApp}
-          history={history}
-          capabilities={{
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          }}
-        />
-      )
-    ).toMatchSnapshot();
-  });
-
   it('renders the list of spaces', async () => {
     const httpStart = httpServiceMock.createStartContract();
     httpStart.get.mockResolvedValue([]);
@@ -106,7 +83,6 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(spaces.length);
-    expect(wrapper.find(SpaceAvatarInternal)).toMatchSnapshot();
   });
 
   it('notifies when spaces fail to load', async () => {

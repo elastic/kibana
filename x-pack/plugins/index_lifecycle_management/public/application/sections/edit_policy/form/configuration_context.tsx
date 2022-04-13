@@ -19,7 +19,7 @@ export interface Configuration {
    */
   isUsingRollover: boolean;
   /**
-   * If this value is true, phases after hot cannot set shrink, forcemerge, freeze, or
+   * If this value is true, phases after hot cannot set shrink, forcemerge or
    * searchable_snapshot actions.
    *
    * See https://github.com/elastic/elasticsearch/blob/master/docs/reference/ilm/actions/ilm-searchable-snapshot.asciidoc.

@@ -8,6 +8,10 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
+import { Globals } from '../../static_globals';
+import { getConfigCcs } from '../../../common/ccs_utils';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ClusterBucketESResponse {
   key: string;
@@ -44,15 +48,21 @@ interface TopHitESResponse {
 export async function fetchMissingMonitoringData(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   size: number,
   nowInMs: number,
   startMs: number,
   filterQuery?: string
 ): Promise<AlertMissingData[]> {
   const endMs = nowInMs;
+  // changing this to only search ES because of changes related to https://github.com/elastic/kibana/issues/83309
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'node_stats',
+    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+  });
   const params = {
-    index,
+    index: indexPatterns,
     filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
@@ -64,6 +74,7 @@ export async function fetchMissingMonitoringData(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
@@ -106,7 +117,7 @@ export async function fetchMissingMonitoringData(
                       },
                     ],
                     _source: {
-                      includes: ['_index', 'source_node.name'],
+                      includes: ['source_node.name', 'elasticsearch.node.name'],
                     },
                   },
                 },
@@ -127,7 +138,7 @@ export async function fetchMissingMonitoringData(
     // meh
   }
 
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   const clusterBuckets = get(
     response,
     'aggregations.clusters.buckets',
@@ -142,7 +153,10 @@ export async function fetchMissingMonitoringData(
       const nodeId = uuidBucket.key;
       const indexName = get(uuidBucket, `document.hits.hits[0]._index`);
       const differenceInMs = nowInMs - uuidBucket.most_recent.value;
-      const nodeName = get(uuidBucket, `document.hits.hits[0]._source.source_node.name`, nodeId);
+      const nodeName =
+        get(uuidBucket, `document.hits.hits[0]._source.source_node.name`) ||
+        get(uuidBucket, `document.hits.hits[0]._source.elasticsearch.node.name`) ||
+        nodeId;
 
       uniqueList[`${clusterUuid}${nodeId}`] = {
         nodeId,

@@ -7,8 +7,18 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from 'kibana/server';
 import { generateSlug } from 'random-word-slugs';
-import type { IShortUrlClient, ShortUrl, ShortUrlCreateParams } from '../../../common/url_service';
+import { ShortUrlRecord } from '.';
+import type {
+  IShortUrlClient,
+  ShortUrl,
+  ShortUrlCreateParams,
+  ILocatorClient,
+  ShortUrlData,
+  LocatorData,
+} from '../../../common/url_service';
+import { UrlServiceError } from '../error';
 import type { ShortUrlStorage } from './types';
 import { validateSlug } from './util';
 
@@ -36,6 +46,11 @@ export interface ServerShortUrlClientDependencies {
    * Storage provider for short URLs.
    */
   storage: ShortUrlStorage;
+
+  /**
+   * The locators service.
+   */
+  locators: ILocatorClient;
 }
 
 export class ServerShortUrlClient implements IShortUrlClient {
@@ -60,31 +75,76 @@ export class ServerShortUrlClient implements IShortUrlClient {
     if (slug) {
       const isSlugTaken = await storage.exists(slug);
       if (isSlugTaken) {
-        throw new Error(`Slug "${slug}" already exists.`);
+        throw new UrlServiceError(`Slug "${slug}" already exists.`, 'SLUG_EXISTS');
       }
     }
 
-    const now = Date.now();
-    const data = await storage.create({
-      accessCount: 0,
-      accessDate: now,
-      createDate: now,
-      slug,
-      locator: {
-        id: locator.id,
-        version: currentVersion,
-        state: params,
-      },
+    const extracted = this.extractReferences({
+      id: locator.id,
+      version: currentVersion,
+      state: params,
     });
+    const now = Date.now();
+
+    const data = await storage.create<P>(
+      {
+        accessCount: 0,
+        accessDate: now,
+        createDate: now,
+        slug,
+        locator: extracted.state as LocatorData<P>,
+      },
+      { references: extracted.references }
+    );
 
     return {
       data,
     };
   }
 
+  private extractReferences(locatorData: LocatorData): {
+    state: LocatorData;
+    references: SavedObjectReference[];
+  } {
+    const { locators } = this.dependencies;
+    const { state, references } = locators.extract(locatorData);
+    return {
+      state,
+      references: references.map((ref) => ({
+        ...ref,
+        name: 'locator:' + ref.name,
+      })),
+    };
+  }
+
+  private injectReferences({ data, references }: ShortUrlRecord): ShortUrlData {
+    const { locators } = this.dependencies;
+    const locatorReferences = references
+      .filter((ref) => ref.name.startsWith('locator:'))
+      .map((ref) => ({
+        ...ref,
+        name: ref.name.substr('locator:'.length),
+      }));
+    return {
+      ...data,
+      locator: locators.inject(data.locator, locatorReferences),
+    };
+  }
+
   public async get(id: string): Promise<ShortUrl> {
     const { storage } = this.dependencies;
-    const data = await storage.getById(id);
+    const record = await storage.getById(id);
+    const data = this.injectReferences(record);
+
+    return {
+      data,
+    };
+  }
+
+  public async resolve(slug: string): Promise<ShortUrl> {
+    const { storage } = this.dependencies;
+    const record = await storage.getBySlug(slug);
+    const data = this.injectReferences(record);
 
     return {
       data,
@@ -94,14 +154,5 @@ export class ServerShortUrlClient implements IShortUrlClient {
   public async delete(id: string): Promise<void> {
     const { storage } = this.dependencies;
     await storage.delete(id);
-  }
-
-  public async resolve(slug: string): Promise<ShortUrl> {
-    const { storage } = this.dependencies;
-    const data = await storage.getBySlug(slug);
-
-    return {
-      data,
-    };
   }
 }

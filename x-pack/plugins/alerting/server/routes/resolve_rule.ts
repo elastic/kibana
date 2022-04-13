@@ -11,7 +11,7 @@ import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext, RewriteResponseCase } from './lib';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   ResolvedSanitizedRule,
@@ -21,7 +21,7 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>> = ({
   alertTypeId,
   createdBy,
   updatedBy,
@@ -48,8 +48,9 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
-    ...omit(executionStatus, 'lastExecutionDate'),
+    ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
     last_execution_date: executionStatus.lastExecutionDate,
+    last_duration: executionStatus.lastDuration,
   },
   actions: actions.map(({ group, id, actionTypeId, params }) => ({
     group,

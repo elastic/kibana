@@ -106,7 +106,7 @@ describe('policy details: ', () => {
 
       it('windows process events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.windows.events.process).toEqual(true);
+        expect(config.windows.events.process).toEqual(true);
       });
     });
 
@@ -128,7 +128,7 @@ describe('policy details: ', () => {
 
       it('mac file events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.mac.events.file).toEqual(true);
+        expect(config.mac.events.file).toEqual(true);
       });
     });
 
@@ -150,7 +150,7 @@ describe('policy details: ', () => {
 
       it('linux file events is enabled', () => {
         const config = policyConfig(getState());
-        expect(config!.linux.events.file).toEqual(true);
+        expect(config.linux.events.file).toEqual(true);
       });
     });
 
@@ -283,7 +283,7 @@ describe('policy details: ', () => {
                       registry: true,
                       security: true,
                     },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     memory_protection: { mode: 'off', supported: false },
                     behavior_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
@@ -312,8 +312,9 @@ describe('policy details: ', () => {
                   },
                   mac: {
                     events: { process: true, file: true, network: true },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },
+                    memory_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
@@ -323,20 +324,29 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                      memory_protection: {
+                        enabled: false,
+                        message: '',
+                      },
                     },
                     logging: { file: 'info' },
                   },
                   linux: {
-                    events: { process: true, file: true, network: true },
+                    events: { process: true, file: true, network: true, session_data: false },
                     logging: { file: 'info' },
-                    malware: { mode: 'prevent' },
+                    malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },
+                    memory_protection: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
                         message: '',
                       },
                       behavior_protection: {
+                        enabled: false,
+                        message: '',
+                      },
+                      memory_protection: {
                         enabled: false,
                         message: '',
                       },

@@ -13,12 +13,13 @@ import {
 } from './application_service.test.mocks';
 
 import { createElement } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { bufferCount, take, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import { bufferCount, takeUntil } from 'rxjs/operators';
 import { mount, shallow } from 'enzyme';
 
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { themeServiceMock } from '../theme/theme_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';
@@ -44,7 +45,11 @@ describe('#setup()', () => {
       http,
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -57,6 +62,16 @@ describe('#setup()', () => {
         register(Symbol(), createApp({ id: 'app1' }))
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the id \\"app1\\""`
+      );
+    });
+
+    it('throws an error if app is registered with an invalid id', () => {
+      const { register } = service.setup(setupDeps);
+
+      expect(() =>
+        register(Symbol(), createApp({ id: 'invalid&app' }))
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid application id: it can only be composed of alphanum chars, '-' and '_'"`
       );
     });
 
@@ -81,7 +96,7 @@ describe('#setup()', () => {
       );
       const { applications$ } = await service.start(startDeps);
 
-      let applications = await applications$.pipe(take(1)).toPromise();
+      let applications = await firstValueFrom(applications$);
       expect(applications.size).toEqual(2);
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
@@ -110,7 +125,7 @@ describe('#setup()', () => {
         deepLinks: [{ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }],
       }));
 
-      applications = await applications$.pipe(take(1)).toPromise();
+      applications = await firstValueFrom(applications$);
       expect(applications.size).toEqual(2);
       expect(applications.get('app1')).toEqual(
         expect.objectContaining({
@@ -190,7 +205,7 @@ describe('#setup()', () => {
         })
       );
       const start = await service.start(startDeps);
-      const applications = await start.applications$.pipe(take(1)).toPromise();
+      const applications = await firstValueFrom(start.applications$);
 
       expect(applications.size).toEqual(2);
       expect(applications.get('app1')).toEqual(
@@ -237,7 +252,7 @@ describe('#setup()', () => {
       );
 
       const { applications$ } = await service.start(startDeps);
-      const applications = await applications$.pipe(take(1)).toPromise();
+      const applications = await firstValueFrom(applications$);
 
       expect(applications.size).toEqual(2);
       expect(applications.get('app1')).toEqual(
@@ -280,7 +295,7 @@ describe('#setup()', () => {
       );
 
       const start = await service.start(startDeps);
-      const applications = await start.applications$.pipe(take(1)).toPromise();
+      const applications = await firstValueFrom(start.applications$);
 
       expect(applications.size).toEqual(1);
       expect(applications.get('app1')).toEqual(
@@ -395,7 +410,7 @@ describe('#setup()', () => {
 
       updater$.next((app) => ({ defaultPath: '/foo' }));
 
-      let appInfos = await applications$.pipe(take(1)).toPromise();
+      let appInfos = await firstValueFrom(applications$);
 
       expect(appInfos.get('app1')!.deepLinks).toEqual([
         {
@@ -430,7 +445,7 @@ describe('#setup()', () => {
         ],
       }));
 
-      appInfos = await applications$.pipe(take(1)).toPromise();
+      appInfos = await firstValueFrom(applications$);
 
       expect(appInfos.get('app1')!.deepLinks).toEqual([
         {
@@ -454,7 +469,11 @@ describe('#start()', () => {
       http,
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -477,7 +496,7 @@ describe('#start()', () => {
     register(Symbol(), createApp({ id: 'app2' }));
 
     const { applications$ } = await service.start(startDeps);
-    const availableApps = await applications$.pipe(take(1)).toPromise();
+    const availableApps = await firstValueFrom(applications$);
 
     expect(availableApps.size).toEqual(2);
     expect([...availableApps.keys()]).toEqual(['app1', 'app2']);
@@ -529,7 +548,7 @@ describe('#start()', () => {
     register(Symbol(), createApp({ id: 'app2' }));
 
     const { applications$ } = await service.start(startDeps);
-    const availableApps = await applications$.pipe(take(1)).toPromise();
+    const availableApps = await firstValueFrom(applications$);
 
     expect([...availableApps.keys()]).toEqual(['app1']);
   });
@@ -783,7 +802,7 @@ describe('#start()', () => {
       service.setup(setupDeps);
 
       const { currentAppId$, navigateToApp } = await service.start(startDeps);
-      const stop$ = new Subject();
+      const stop$ = new Subject<void>();
       const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
       await navigateToApp('alpha');
@@ -808,7 +827,7 @@ describe('#start()', () => {
       service.setup(setupDeps);
 
       const { currentAppId$, navigateToApp } = await service.start(startDeps);
-      const stop$ = new Subject();
+      const stop$ = new Subject<void>();
       const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
       await navigateToApp('delta', { openInNewTab: true });
@@ -852,7 +871,7 @@ describe('#start()', () => {
 
       const { navigateToApp, getComponent } = await service.start(startDeps);
       const httpLoadingCount$ = startDeps.http.addLoadingCountSource.mock.calls[0][0];
-      const stop$ = new Subject();
+      const stop$ = new Subject<void>();
       const currentLoadingCount$ = new BehaviorSubject(0);
       httpLoadingCount$.pipe(takeUntil(stop$)).subscribe(currentLoadingCount$);
       const loadingPromise = httpLoadingCount$.pipe(bufferCount(5), takeUntil(stop$)).toPromise();
@@ -889,15 +908,22 @@ describe('#start()', () => {
 
     it('should call private function shouldNavigate with overlays and the nextAppId', async () => {
       service.setup(setupDeps);
+
       const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
-
       const { navigateToApp } = await service.start(startDeps);
-
       await navigateToApp('myTestApp');
       expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
 
       await navigateToApp('myOtherApp');
       expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myOtherApp');
+    });
+
+    it('should call private function shouldNavigate with overlays, nextAppId and skipAppLeave', async () => {
+      service.setup(setupDeps);
+      const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
+      const { navigateToApp } = await service.start(startDeps);
+      await navigateToApp('myTestApp', { skipAppLeave: true });
+      expect(shouldNavigateSpy).not.toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
     });
 
     describe('when `replace` option is true', () => {
@@ -1108,6 +1134,63 @@ describe('#start()', () => {
       expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
       expect(setupDeps.redirectTo).not.toHaveBeenCalled();
     });
+
+    describe('navigateToUrl with options', () => {
+      let addListenerSpy: jest.SpyInstance;
+      let removeListenerSpy: jest.SpyInstance;
+      beforeEach(() => {
+        addListenerSpy = jest.spyOn(window, 'addEventListener');
+        removeListenerSpy = jest.spyOn(window, 'removeEventListener');
+      });
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it('calls `navigateToApp` with `skipAppLeave` option', async () => {
+        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+        service.setup(setupDeps);
+        const { navigateToUrl } = await service.start(startDeps);
+
+        await navigateToUrl('/an-app-path', { skipAppLeave: true });
+
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
+        expect(setupDeps.redirectTo).not.toHaveBeenCalled();
+      });
+
+      it('calls `redirectTo` when `forceRedirect` option is true', async () => {
+        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+        service.setup(setupDeps);
+
+        const { navigateToUrl } = await service.start(startDeps);
+
+        await navigateToUrl('/an-app-path', { forceRedirect: true });
+
+        expect(addListenerSpy).toHaveBeenCalledTimes(1);
+        expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+
+        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/an-app-path');
+        expect(MockHistory.push).not.toHaveBeenCalled();
+      });
+
+      it('removes the beforeunload listener and calls `redirectTo` when `forceRedirect` and `skipAppLeave` option are both true', async () => {
+        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+        service.setup(setupDeps);
+
+        const { navigateToUrl } = await service.start(startDeps);
+
+        await navigateToUrl('/an-app-path', { skipAppLeave: true, forceRedirect: true });
+
+        expect(addListenerSpy).toHaveBeenCalledTimes(1);
+        expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+        const handler = addListenerSpy.mock.calls[0][1];
+
+        expect(MockHistory.push).toHaveBeenCalledTimes(0);
+        expect(setupDeps.redirectTo).toHaveBeenCalledWith('/an-app-path');
+
+        expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+        expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
+      });
+    });
   });
 });
 
@@ -1124,7 +1207,11 @@ describe('#stop()', () => {
     setupDeps = {
       http,
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 

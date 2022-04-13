@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import '../../../../common/mock/formatted_relative';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -44,7 +44,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
 
-    hasNotes[0].notes!.forEach(({ savedObjectId }) => {
+    hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
     });
   });
@@ -54,7 +54,7 @@ describe('NotePreviews', () => {
 
     const wrapper = mountWithIntl(<NotePreviews notes={hasNotes[0].notes} />);
 
-    hasNotes[0].notes!.forEach(({ savedObjectId }) => {
+    hasNotes[0].notes?.forEach(({ savedObjectId }) => {
       expect(wrapper.find(`[data-test-subj="note-preview-${savedObjectId}"]`).exists()).toBe(true);
     });
   });

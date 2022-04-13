@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest, Logger } from 'kibana/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../../alerting/server';
-import { SecurityPluginStart } from '../../../../security/server';
-import { AppClientFactory } from '../../client';
 import { createDetectionIndex } from '../../lib/detection_engine/routes/index/create_index_route';
 import { createPrepackagedRules } from '../../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
-import { buildFrameworkRequest } from '../../lib/timeline/utils/common';
+import { SecuritySolutionApiRequestHandlerContext } from '../../types';
 
 export interface InstallPrepackagedRulesProps {
   logger: Logger;
-  appClientFactory: AppClientFactory;
-  context: RequestHandlerContext;
+  context: SecuritySolutionApiRequestHandlerContext;
   request: KibanaRequest;
-  securityStart: SecurityPluginStart;
   alerts: AlertsStartContract;
-  maxTimelineImportExportSize: number;
-  prebuiltRulesFromFileSystem: boolean;
-  prebuiltRulesFromSavedObjects: boolean;
   exceptionsClient: ExceptionListClient;
 }
 
@@ -33,29 +26,14 @@ export interface InstallPrepackagedRulesProps {
  */
 export const installPrepackagedRules = async ({
   logger,
-  appClientFactory,
   context,
   request,
-  securityStart,
   alerts,
-  maxTimelineImportExportSize,
-  prebuiltRulesFromFileSystem,
-  prebuiltRulesFromSavedObjects,
   exceptionsClient,
 }: InstallPrepackagedRulesProps): Promise<void> => {
-  // prep for detection rules creation
-  const appClient = appClientFactory.create(request);
-
-  // This callback is called by fleet plugin.
-  // It doesn't have access to SecuritySolutionRequestHandlerContext in runtime.
-  // Muting the error to have green CI.
-  // @ts-expect-error
-  const frameworkRequest = await buildFrameworkRequest(context, securityStart, request);
-
   // Create detection index & rules (if necessary). move past any failure, this is just a convenience
   try {
-    // @ts-expect-error
-    await createDetectionIndex(context, appClient);
+    await createDetectionIndex(context);
   } catch (err) {
     if (err.statusCode !== 409) {
       // 409 -> detection index already exists, which is fine
@@ -68,14 +46,8 @@ export const installPrepackagedRules = async ({
     // this checks to make sure index exists first, safe to try in case of failure above
     // may be able to recover from minor errors
     await createPrepackagedRules(
-      // @ts-expect-error
       context,
-      appClient,
       alerts.getRulesClientWithRequest(request),
-      frameworkRequest,
-      maxTimelineImportExportSize,
-      prebuiltRulesFromFileSystem,
-      prebuiltRulesFromSavedObjects,
       exceptionsClient
     );
   } catch (err) {

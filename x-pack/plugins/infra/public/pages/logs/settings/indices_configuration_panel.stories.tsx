@@ -6,21 +6,16 @@
  */
 
 import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPageContent, PropsOf } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   MockIndexPatternsKibanaContextProvider,
   MockIndexPatternSpec,
 } from '../../../hooks/use_kibana_index_patterns.mock';
-import {
-  FieldsFormState,
-  LogIndicesFormState,
-  useFieldsFormElement,
-  useLogIndicesFormElement,
-} from './indices_configuration_form_state';
+import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
+import { LogIndicesFormState, useLogIndicesFormElement } from './indices_configuration_form_state';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 
 export default {
@@ -29,23 +24,22 @@ export default {
     (WrappedStory, { args }) => {
       return (
         <I18nProvider>
-          <EuiThemeProvider>
-            <MockIndexPatternsKibanaContextProvider
-              asyncDelay={2000}
-              mockIndexPatterns={args.availableIndexPatterns}
-            >
-              <EuiPage restrictWidth>
-                <EuiPageBody>
-                  <EuiPageContent>
-                    <WrappedStory />
-                  </EuiPageContent>
-                </EuiPageBody>
-              </EuiPage>
-            </MockIndexPatternsKibanaContextProvider>
-          </EuiThemeProvider>
+          <MockIndexPatternsKibanaContextProvider
+            asyncDelay={2000}
+            mockIndexPatterns={args.availableIndexPatterns}
+          >
+            <EuiPage restrictWidth>
+              <EuiPageBody>
+                <EuiPageContent>
+                  <WrappedStory />
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </MockIndexPatternsKibanaContextProvider>
         </I18nProvider>
       );
     },
+    decorateWithGlobalStorybookThemeProviders,
   ],
   argTypes: {
     logIndices: {
@@ -69,17 +63,14 @@ type IndicesConfigurationPanelStoryArgs = Pick<
 > & {
   availableIndexPatterns: MockIndexPatternSpec[];
   logIndices: LogIndicesFormState;
-  fields: FieldsFormState;
 };
 
 const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArgs> = ({
   isLoading,
   isReadOnly,
   logIndices,
-  fields,
 }) => {
   const logIndicesFormElement = useLogIndicesFormElement(logIndices);
-  const { tiebreakerFieldFormElement, timestampFieldFormElement } = useFieldsFormElement(fields);
 
   return (
     <>
@@ -87,8 +78,6 @@ const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArg
         isLoading={isLoading}
         isReadOnly={isReadOnly}
         indicesFormElement={logIndicesFormElement}
-        tiebreakerFieldFormElement={tiebreakerFieldFormElement}
-        timestampFieldFormElement={timestampFieldFormElement}
       />
       <EuiCodeBlock language="json">
         // field states{'\n'}
@@ -97,14 +86,6 @@ const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArg
             logIndices: {
               value: logIndicesFormElement.value,
               validity: logIndicesFormElement.validity,
-            },
-            tiebreakerField: {
-              value: tiebreakerFieldFormElement.value,
-              validity: tiebreakerFieldFormElement.validity,
-            },
-            timestampField: {
-              value: timestampFieldFormElement.value,
-              validity: timestampFieldFormElement.validity,
             },
           },
           null,
@@ -122,15 +103,12 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
     type: 'index_name' as const,
     indexName: 'logs-*',
   },
-  fields: {
-    tiebreakerField: '_doc',
-    timestampField: '@timestamp',
-  },
   availableIndexPatterns: [
     {
       id: 'INDEX_PATTERN_A',
       title: 'pattern-a-*',
       timeFieldName: '@timestamp',
+      type: undefined,
       fields: [
         {
           name: '@timestamp',
@@ -149,6 +127,8 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
     {
       id: 'INDEX_PATTERN_B',
       title: 'pattern-b-*',
+      timeFieldName: '@timestamp',
+      type: undefined,
       fields: [],
     },
   ],

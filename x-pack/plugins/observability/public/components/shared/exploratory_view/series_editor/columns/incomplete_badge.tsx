@@ -9,7 +9,7 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export function IncompleteBadge({ seriesConfig, series }: Props) {
-  const { loading } = useAppIndexPatternContext();
+  const { loading } = useAppDataViewContext();
 
   if (!seriesConfig) {
     return null;
@@ -31,7 +31,14 @@ export function IncompleteBadge({ seriesConfig, series }: Props) {
   const incompleteDefinition = isEmpty(reportDefinitions)
     ? i18n.translate('xpack.observability.overview.exploratoryView.missingReportDefinition', {
         defaultMessage: 'Missing {reportDefinition}',
-        values: { reportDefinition: labels?.[definitionFields[0]] },
+        values: {
+          reportDefinition:
+            labels?.[
+              typeof definitionFields[0] === 'string'
+                ? definitionFields[0]
+                : definitionFields[0].field
+            ],
+        },
       })
     : '';
 

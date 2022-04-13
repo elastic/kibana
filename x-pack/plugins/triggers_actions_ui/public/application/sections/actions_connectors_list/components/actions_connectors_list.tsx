@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ClassNames } from '@emotion/react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
@@ -23,7 +24,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { withTheme, EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -45,6 +47,35 @@ import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
+import {
+  connectorDeprecatedMessage,
+  deprecatedMessage,
+  checkConnectorIsDeprecated,
+} from '../../../../common/connectors_selection';
+
+const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
+  return (
+    <ClassNames>
+      {({ css }) => (
+        <EuiIconTip
+          anchorClassName={css({
+            /**
+             * Adds some spacing to the left of the warning icon for deprecated connectors
+             */
+            marginLeft: theme.eui.euiSizeS,
+            marginBottom: '0 !important',
+          })}
+          aria-label="Warning"
+          size="m"
+          type="alert"
+          color="warning"
+          content={connectorDeprecatedMessage}
+          position="right"
+        />
+      )}
+    </ClassNames>
+  );
+});
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -168,6 +199,13 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           actionTypesIndex && actionTypesIndex[item.actionTypeId]
         );
 
+        /**
+         * TODO: Remove when connectors can provide their own UX message.
+         * Issue: https://github.com/elastic/kibana/issues/114507
+         */
+        const showDeprecatedTooltip = checkConnectorIsDeprecated(item);
+        const name = getConnectorName(value, item);
+
         const link = (
           <>
             <EuiLink
@@ -176,7 +214,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
               key={item.id}
               disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
             >
-              {value}
+              {name}
             </EuiLink>
             {item.isMissingSecrets ? (
               <EuiIconTip
@@ -190,6 +228,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
                 position="right"
               />
             ) : null}
+            {showDeprecatedTooltip && <ConnectorIconTipWithSpacing />}
           </>
         );
 
@@ -448,6 +487,10 @@ export { ActionsConnectorsList as default };
 
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter((action) => action.actionTypeId === actionTypeId).length;
+}
+
+function getConnectorName(name: string, connector: ActionConnector): string {
+  return checkConnectorIsDeprecated(connector) ? `${name} ${deprecatedMessage}` : name;
 }
 
 const DeleteOperation: React.FunctionComponent<{

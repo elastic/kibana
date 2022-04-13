@@ -12,15 +12,14 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { noop } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
-
-import * as i18n from '../../../pages/detection_engine/rules/translations';
-import { enableRules, RulesTableAction } from '../../../containers/detection_engine/rules';
-import { enableRulesAction } from '../../../pages/detection_engine/rules/all/actions';
-import { useStateToaster, displayErrorToast } from '../../../../common/components/toasters';
-import { bucketRulesResponse } from '../../../pages/detection_engine/rules/all/helpers';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useUpdateRulesCache } from '../../../containers/detection_engine/rules/use_find_rules_query';
+import { executeRulesBulkAction } from '../../../pages/detection_engine/rules/all/actions';
+import { useRulesTableContextOptional } from '../../../pages/detection_engine/rules/all/rules_table/rules_table_context';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -32,12 +31,10 @@ const StaticSwitch = styled(EuiSwitch)`
 StaticSwitch.displayName = 'StaticSwitch';
 
 export interface RuleSwitchProps {
-  dispatch?: React.Dispatch<RulesTableAction>;
   id: string;
   enabled: boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
-  optionLabel?: string;
   onChange?: (enabled: boolean) => void;
 }
 
@@ -45,67 +42,37 @@ export interface RuleSwitchProps {
  * Basic switch component for displaying loader when enabled/disabled
  */
 export const RuleSwitchComponent = ({
-  dispatch,
   id,
   isDisabled,
   isLoading,
   enabled,
-  optionLabel,
   onChange,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
-  const [myEnabled, setMyEnabled] = useState(enabled ?? false);
-  const [, dispatchToaster] = useStateToaster();
+  const rulesTableContext = useRulesTableContextOptional();
+  const updateRulesCache = useUpdateRulesCache();
+  const toasts = useAppToasts();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
-      if (dispatch != null) {
-        await enableRulesAction([id], event.target.checked!, dispatch, dispatchToaster);
-      } else {
-        const enabling = event.target.checked!;
-        const title = enabling
-          ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(1)
-          : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(1);
-        try {
-          const response = await enableRules({
-            ids: [id],
-            enabled: enabling,
-          });
-          const { rules, errors } = bucketRulesResponse(response);
-
-          if (errors.length > 0) {
-            setMyIsLoading(false);
-
-            displayErrorToast(
-              title,
-              errors.map((e) => e.error.message),
-              dispatchToaster
-            );
-          } else {
-            const [rule] = rules;
-            setMyEnabled(rule.enabled);
-            if (onChange != null) {
-              onChange(rule.enabled);
-            }
-          }
-        } catch (err) {
-          setMyIsLoading(false);
-          displayErrorToast(title, err.message, dispatchToaster);
-        }
+      const bulkActionResponse = await executeRulesBulkAction({
+        setLoadingRules: rulesTableContext?.actions.setLoadingRules,
+        toasts,
+        onSuccess: rulesTableContext ? undefined : noop,
+        action: event.target.checked ? BulkAction.enable : BulkAction.disable,
+        search: { ids: [id] },
+        visibleRuleIds: [],
+      });
+      if (bulkActionResponse?.attributes.results.updated.length) {
+        // The rule was successfully updated
+        updateRulesCache(bulkActionResponse.attributes.results.updated);
+        onChange?.(bulkActionResponse.attributes.results.updated[0].enabled);
       }
       setMyIsLoading(false);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dispatch, id]
+    [id, onChange, rulesTableContext, toasts, updateRulesCache]
   );
-
-  useEffect(() => {
-    if (myEnabled !== enabled) {
-      setMyEnabled(enabled);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled]);
 
   const showLoader = useMemo((): boolean => {
     if (myIsLoading !== isLoading) {
@@ -123,10 +90,9 @@ export const RuleSwitchComponent = ({
         ) : (
           <StaticSwitch
             data-test-subj="ruleSwitch"
-            label={optionLabel ?? ''}
-            showLabel={!isEmpty(optionLabel)}
+            label={undefined}
             disabled={isDisabled}
-            checked={myEnabled}
+            checked={enabled}
             onChange={onRuleStateChange}
           />
         )}

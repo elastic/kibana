@@ -8,16 +8,19 @@ import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
-import type {
-  IndexPattern,
-  IndexPatternsContract,
-  TimefilterContract,
-} from 'src/plugins/data/public';
-import type { IUiSettingsClient } from 'kibana/public';
-import type { SavedObjectReference } from 'kibana/public';
+import type { TimefilterContract } from 'src/plugins/data/public';
+import type { IUiSettingsClient, SavedObjectReference } from 'kibana/public';
+import type { DataView, DataViewsContract } from '../../../../src/plugins/data_views/public';
 import type { Document } from './persistence/saved_object_store';
-import type { Datasource, DatasourceMap } from './types';
-import type { DatasourceStates } from './state_management';
+import type {
+  Datasource,
+  DatasourceMap,
+  LensBrushEvent,
+  LensFilterEvent,
+  Visualization,
+} from './types';
+import { search } from '../../../../src/plugins/data/public';
+import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -82,15 +85,49 @@ export function getIndexPatternsIds({
 
 export async function getIndexPatternsObjects(
   ids: string[],
-  indexPatternsService: IndexPatternsContract
-): Promise<{ indexPatterns: IndexPattern[]; rejectedIds: string[] }> {
+  indexPatternsService: DataViewsContract
+): Promise<{ indexPatterns: DataView[]; rejectedIds: string[] }> {
   const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
   const fullfilled = responses.filter(
-    (response): response is PromiseFulfilledResult<IndexPattern> => response.status === 'fulfilled'
+    (response): response is PromiseFulfilledResult<DataView> => response.status === 'fulfilled'
   );
   const rejectedIds = responses
     .map((_response, i) => ids[i])
     .filter((id, i) => responses[i].status === 'rejected');
   // return also the rejected ids in case we want to show something later on
   return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
+}
+
+export function getRemoveOperation(
+  activeVisualization: Visualization,
+  visualizationState: VisualizationState['state'],
+  layerId: string,
+  layerCount: number
+) {
+  if (activeVisualization.getRemoveOperation) {
+    return activeVisualization.getRemoveOperation(visualizationState, layerId);
+  }
+  // fallback to generic count check
+  return layerCount === 1 ? 'clear' : 'remove';
+}
+
+export function inferTimeField(context: LensBrushEvent['data'] | LensFilterEvent['data']) {
+  const tablesAndColumns =
+    'table' in context
+      ? [{ table: context.table, column: context.column }]
+      : !context.negate
+      ? context.data
+      : // if it's a negated filter, never respect bound time field
+        [];
+  return tablesAndColumns
+    .map(({ table, column }) => {
+      const tableColumn = table.columns[column];
+      const hasTimeRange = Boolean(
+        tableColumn && search.aggs.getDateHistogramMetaDataByDatatableColumn(tableColumn)?.timeRange
+      );
+      if (hasTimeRange) {
+        return tableColumn.meta.field;
+      }
+    })
+    .find(Boolean);
 }

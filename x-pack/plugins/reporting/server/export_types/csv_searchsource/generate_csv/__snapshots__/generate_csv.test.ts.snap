@@ -12,9 +12,9 @@ exports[`fields from job.columns (7.13+ generated) columns can be top-level fiel
 "
 `;
 
-exports[`fields from job.columns (7.13+ generated) empty columns defaults to using searchSource.getFields() 1`] = `
-"product
-coconut
+exports[`fields from job.columns (7.13+ generated) default column names come from tabify 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",category,product
+\\"my-cool-id\\",\\"my-cool-index\\",\\"'-\\",\\"cool, rad\\",coconut
 "
 `;
 
@@ -31,8 +31,8 @@ exports[`fields from job.searchSource.getFields() (7.12 generated) provides top-
 `;
 
 exports[`fields from job.searchSource.getFields() (7.12 generated) sorts the fields when they are to be used as table column names 1`] = `
-"\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\",date,\\"message_t\\",\\"message_u\\",\\"message_v\\",\\"message_w\\",\\"message_x\\",\\"message_y\\",\\"message_z\\"
-\\"my-cool-id\\",\\"my-cool-index\\",\\"'-\\",\\"'-\\",\\"2020-12-31T00:14:28.000Z\\",\\"test field T\\",\\"test field U\\",\\"test field V\\",\\"test field W\\",\\"test field X\\",\\"test field Y\\",\\"test field Z\\"
+"\\"_id\\",\\"_index\\",\\"_score\\",date,\\"message_t\\",\\"message_u\\",\\"message_v\\",\\"message_w\\",\\"message_x\\",\\"message_y\\",\\"message_z\\"
+\\"my-cool-id\\",\\"my-cool-index\\",\\"'-\\",\\"2020-12-31T00:14:28.000Z\\",\\"test field T\\",\\"test field U\\",\\"test field V\\",\\"test field W\\",\\"test field X\\",\\"test field Y\\",\\"test field Z\\"
 "
 `;
 

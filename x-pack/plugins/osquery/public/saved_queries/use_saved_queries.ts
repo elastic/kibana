@@ -8,7 +8,7 @@
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
-import { savedQuerySavedObjectType } from '../../common/types';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERIES_ID } from './constants';
 
 export const useSavedQueries = ({
@@ -18,29 +18,26 @@ export const useSavedQueries = ({
   sortField = 'updated_at',
   sortDirection = 'desc',
 }) => {
-  const { savedObjects } = useKibana().services;
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
-    async () =>
-      savedObjects.client.find<{
-        id: string;
-        description?: string;
-        query: string;
-        updated_at: string;
-        updated_by: string;
-        created_at: string;
-        created_by: string;
-      }>({
-        type: savedQuerySavedObjectType,
-        page: pageIndex + 1,
-        perPage: pageSize,
-        sortField,
+    () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      http.get<any>('/internal/osquery/saved_query', {
+        query: { pageIndex, pageSize, sortField, sortDirection },
       }),
     {
       keepPreviousData: true,
-      // Refetch the data every 10 seconds
-      refetchInterval: isLive ? 5000 : false,
+      refetchInterval: isLive ? 10000 : false,
+      onError: (error: { body: { error: string; message: string } }) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
+      },
+      refetchOnWindowFocus: !!isLive,
     }
   );
 };

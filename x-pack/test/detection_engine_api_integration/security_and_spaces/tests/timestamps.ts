@@ -7,10 +7,12 @@
 
 import expect from '@kbn/expect';
 import { orderBy } from 'lodash';
+import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
 } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { ALERT_ORIGINAL_TIME } from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -29,6 +31,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   /**
    * Tests around timestamps within signals such as the copying of timestamps correctly into
@@ -38,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('timestamp tests', () => {
     describe('Signals generated from events with a timestamp in seconds is converted correctly into the forced ISO8601 format when copying', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
         );
@@ -48,8 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
         );
@@ -61,11 +64,13 @@ export default ({ getService }: FtrProviderContext) => {
       describe('KQL query', () => {
         it('should convert the @timestamp which is epoch_seconds into the correct ISO format', async () => {
           const rule = getRuleForSignalTesting(['timestamp_in_seconds']);
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+          const hits = signalsOpen.hits.hits
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+            .sort();
           expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
         });
 
@@ -74,11 +79,13 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleForSignalTesting(['myfakeindex-5']),
             timestamp_override: 'event.ingested',
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+          const hits = signalsOpen.hits.hits
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+            .sort();
           expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
         });
       });
@@ -86,11 +93,13 @@ export default ({ getService }: FtrProviderContext) => {
       describe('EQL query', () => {
         it('should convert the @timestamp which is epoch_seconds into the correct ISO format for EQL', async () => {
           const rule = getEqlRuleForSignalTesting(['timestamp_in_seconds']);
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+          const hits = signalsOpen.hits.hits
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+            .sort();
           expect(hits).to.eql(['2021-06-02T23:33:15.000Z']);
         });
 
@@ -99,11 +108,13 @@ export default ({ getService }: FtrProviderContext) => {
             ...getEqlRuleForSignalTesting(['myfakeindex-5']),
             timestamp_override: 'event.ingested',
           };
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
-          const hits = signalsOpen.hits.hits.map((hit) => hit._source?.signal.original_time).sort();
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+          const hits = signalsOpen.hits.hits
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+            .sort();
           expect(hits).to.eql(['2020-12-16T15:16:18.000Z']);
         });
       });
@@ -117,8 +128,8 @@ export default ({ getService }: FtrProviderContext) => {
      */
     describe('Signals generated from events with timestamp override field', async () => {
       beforeEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await createSignalsIndex(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await createSignalsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
         );
@@ -134,8 +145,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
         );
@@ -157,11 +168,16 @@ export default ({ getService }: FtrProviderContext) => {
             timestamp_override: 'event.ingested',
           };
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-          await waitForSignalsToBePresent(supertest, 3, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, [id], 3);
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await waitForSignalsToBePresent(supertest, log, 3, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id], 3);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
           const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
@@ -171,11 +187,16 @@ export default ({ getService }: FtrProviderContext) => {
         it('should generate 2 signals with @timestamp', async () => {
           const rule: QueryCreateSchema = getRuleForSignalTesting(['myfa*']);
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, [id]);
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
           const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
@@ -187,11 +208,16 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleForSignalTesting(['myfa*']),
             timestamp_override: 'event.fakeingestfield',
           };
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, [id, id]);
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
           const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
@@ -209,13 +235,13 @@ export default ({ getService }: FtrProviderContext) => {
             ...getRuleForSignalTesting(['myfakeindex-2']),
             timestamp_override: 'event.ingested',
           };
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, [id, id]);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const hits = signalsResponse.hits.hits
-            .map((hit) => hit._source?.signal.original_time)
+            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
             .sort();
           expect(hits).to.eql([undefined]);
         });
@@ -225,11 +251,37 @@ export default ({ getService }: FtrProviderContext) => {
         it('should generate 2 signals with @timestamp', async () => {
           const rule: EqlCreateSchema = getEqlRuleForSignalTesting(['myfa*']);
 
-          const { id } = await createRule(supertest, rule);
+          const { id } = await createRule(supertest, log, rule);
 
-          await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, [id]);
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id]);
+          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+          expect(signalsOrderedByEventId.length).equal(2);
+        });
+
+        it('should generate 2 signals when timestamp override does not exist', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['myfa*']),
+            timestamp_override: 'event.fakeingestfield',
+          };
+          const { id } = await createRule(supertest, log, rule);
+
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
           const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
@@ -248,12 +300,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       describe('KQL', () => {
@@ -275,10 +327,15 @@ export default ({ getService }: FtrProviderContext) => {
             max_signals: 200,
           };
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id, 'partial failure');
-          await waitForSignalsToBePresent(supertest, 200, [id]);
-          const signalsResponse = await getSignalsByIds(supertest, [id], 200);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await waitForSignalsToBePresent(supertest, log, 200, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id], 200);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
 
           expect(signals.length).equal(200);

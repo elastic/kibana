@@ -6,41 +6,68 @@
  * Side Public License, v 1.
  */
 
+import { DeprecationsFactoryMock } from './deprecations_service.test.mocks';
+
 /* eslint-disable dot-notation */
-import { DeprecationsService } from './deprecations_service';
+import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
 import { httpServiceMock } from '../http/http_service.mock';
-import { mockRouter } from '../http/router/router.mock';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '../mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock, configServiceMock } from '../mocks';
 import { mockCoreContext } from '../core_context.mock';
 import { mockDeprecationsFactory } from './deprecations_factory.mock';
 import { mockDeprecationsRegistry } from './deprecations_registry.mock';
 
 describe('DeprecationsService', () => {
-  const coreContext = mockCoreContext.create();
-  const http = httpServiceMock.createInternalSetupContract();
-  const router = mockRouter.create();
-  http.createRouter.mockReturnValue(router);
-  const deprecationsCoreSetupDeps = { http };
+  let coreContext: ReturnType<typeof mockCoreContext.create>;
+  let http: ReturnType<typeof httpServiceMock.createInternalSetupContract>;
+  let router: ReturnType<typeof httpServiceMock.createRouter>;
+  let deprecationsCoreSetupDeps: DeprecationsSetupDeps;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    const configService = configServiceMock.create({
+      atPath: { skip_deprecated_settings: ['hello', 'world'] },
+    });
+    coreContext = mockCoreContext.create({ configService });
+    http = httpServiceMock.createInternalSetupContract();
+    router = httpServiceMock.createRouter();
+    http.createRouter.mockReturnValue(router);
+    deprecationsCoreSetupDeps = { http };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    DeprecationsFactoryMock.mockClear();
+  });
 
   describe('#setup', () => {
-    it('registers routes', () => {
+    it('registers routes', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
-      deprecationsService.setup(deprecationsCoreSetupDeps);
-      // Registers correct base api path
+      await deprecationsService.setup(deprecationsCoreSetupDeps);
+      // registers correct base api path
       expect(http.createRouter).toBeCalledWith('/api/deprecations');
       // registers get route '/'
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith({ path: '/', validate: false }, expect.any(Function));
     });
 
-    it('calls registerConfigDeprecationsInfo', () => {
+    it('calls registerConfigDeprecationsInfo', async () => {
       const deprecationsService = new DeprecationsService(coreContext);
       const mockRegisterConfigDeprecationsInfo = jest.fn();
       deprecationsService['registerConfigDeprecationsInfo'] = mockRegisterConfigDeprecationsInfo;
-      deprecationsService.setup(deprecationsCoreSetupDeps);
+      await deprecationsService.setup(deprecationsCoreSetupDeps);
       expect(mockRegisterConfigDeprecationsInfo).toBeCalledTimes(1);
+    });
+
+    it('creates DeprecationsFactory with the correct parameters', async () => {
+      const deprecationsService = new DeprecationsService(coreContext);
+      await deprecationsService.setup(deprecationsCoreSetupDeps);
+
+      expect(DeprecationsFactoryMock).toHaveBeenCalledTimes(1);
+      expect(DeprecationsFactoryMock).toHaveBeenCalledWith({
+        logger: expect.any(Object),
+        config: {
+          ignoredConfigDeprecations: ['hello', 'world'],
+        },
+      });
     });
   });
 
@@ -51,7 +78,7 @@ describe('DeprecationsService', () => {
         const savedObjectsClient = savedObjectsClientMock.create();
         const deprecationsService = new DeprecationsService(coreContext);
 
-        deprecationsService.setup(deprecationsCoreSetupDeps);
+        await deprecationsService.setup(deprecationsCoreSetupDeps);
 
         const start = deprecationsService.start();
         const deprecationsClient = start.asScopedToClient(esClient, savedObjectsClient);
@@ -73,6 +100,8 @@ describe('DeprecationsService', () => {
           'testDomain',
           [
             {
+              configPath: 'test',
+              level: 'critical',
               message: 'testMessage',
               documentationUrl: 'testDocUrl',
               correctiveActions: {
@@ -100,6 +129,7 @@ describe('DeprecationsService', () => {
       expect(configDeprecations).toMatchInlineSnapshot(`
         Array [
           Object {
+            "configPath": "test",
             "correctiveActions": Object {
               "manualSteps": Array [
                 "Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.",
@@ -124,6 +154,7 @@ describe('DeprecationsService', () => {
           'testDomain',
           [
             {
+              configPath: 'test',
               message: 'testMessage',
               level: 'warning',
               correctiveActions: {

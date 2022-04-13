@@ -9,7 +9,6 @@ import { useQuery } from 'react-query';
 
 import { PLUGIN_ID } from '../../common';
 import { useKibana } from '../common/lib/kibana';
-import { savedQuerySavedObjectType } from '../../common/types';
 import { pagePathGetters } from '../common/page_paths';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERY_ID } from './constants';
@@ -21,20 +20,17 @@ interface UseSavedQueryProps {
 export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
   const {
     application: { navigateToApp },
-    savedObjects,
+    http,
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
   return useQuery(
     [SAVED_QUERY_ID, { savedQueryId }],
-    async () =>
-      savedObjects.client.get<{
-        id: string;
-        description?: string;
-        query: string;
-      }>(savedQuerySavedObjectType, savedQueryId),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    () => http.get<any>(`/internal/osquery/saved_query/${savedQueryId}`),
     {
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
       onSuccess: (data) => {
         if (data.error) {
           setErrorToast(data.error, {
@@ -44,9 +40,11 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         }
       },
-      onError: (error) => {
-        // @ts-expect-error update types
-        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
+      onError: (error: { body: { error: string; message: string } }) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
       },
     }
   );

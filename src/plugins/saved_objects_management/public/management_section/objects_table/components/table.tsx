@@ -26,7 +26,7 @@ import {
   QueryType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
@@ -73,6 +73,8 @@ interface TableState {
   isIncludeReferencesDeepChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
 }
+
+const MAX_PAGINATED_ITEM = 10000;
 
 export class Table extends PureComponent<TableProps, TableState> {
   state: TableState = {
@@ -150,10 +152,12 @@ export class Table extends PureComponent<TableProps, TableState> {
       allowedTypes,
     } = this.props;
 
+    const cappedTotalItemCount = Math.min(totalItemCount, MAX_PAGINATED_ITEM);
+
     const pagination = {
       pageIndex,
       pageSize,
-      totalItemCount,
+      totalItemCount: cappedTotalItemCount,
       pageSizeOptions: [5, 10, 20, 50],
     };
 
@@ -223,6 +227,12 @@ export class Table extends PureComponent<TableProps, TableState> {
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
       ...columnRegistry.getAll().map((column) => {
+        column.setColumnContext({ capabilities });
+        column.registerOnFinishCallback(() => {
+          const { refreshOnFinish = () => [] } = column;
+          const objectsToRefresh = refreshOnFinish();
+          onActionRefresh(objectsToRefresh);
+        });
         return {
           ...column.euiColumn,
           sortable: false,
@@ -321,6 +331,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     );
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
+    const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
     return (
       <Fragment>
@@ -392,6 +403,18 @@ export class Table extends PureComponent<TableProps, TableState> {
         />
         {queryParseError}
         <EuiSpacer size="s" />
+        {exceededResultCount && (
+          <>
+            <EuiText color="subdued" size="s" data-test-subj="savedObjectsTableTooManyResultsLabel">
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.table.tooManyResultsLabel"
+                defaultMessage="Showing {limit} of {totalItemCount, plural, one {# object} other {# objects}}"
+                values={{ totalItemCount, limit: MAX_PAGINATED_ITEM }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}

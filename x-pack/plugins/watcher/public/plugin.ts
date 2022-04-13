@@ -8,13 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, CoreStart, Capabilities } from 'kibana/public';
 import { first, map, skip } from 'rxjs/operators';
-
 import { Subject, combineLatest } from 'rxjs';
+
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-
-import { LicenseStatus } from '../common/types/license_status';
-
 import { ILicense } from '../../licensing/public';
+import { LicenseStatus } from '../common/types/license_status';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
 
@@ -44,7 +42,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       id: 'watcher',
       title: pluginName,
       order: 3,
-      mount: async ({ element, setBreadcrumbs, history }) => {
+      mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const [coreStart] = await getStartServices();
         const {
           chrome: { docTitle },
@@ -52,6 +50,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           docLinks,
           savedObjects,
           application,
+          executionContext,
         } = coreStart;
 
         docTitle.change(pluginName);
@@ -75,6 +74,8 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
           history,
           getUrlForApp: application.getUrlForApp,
+          theme$,
+          executionContext,
         });
 
         return () => {

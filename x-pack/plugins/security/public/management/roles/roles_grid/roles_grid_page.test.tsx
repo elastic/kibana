@@ -9,7 +9,7 @@ import { EuiBasicTable, EuiIcon } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
@@ -144,31 +144,33 @@ describe('<RolesGridPage />', () => {
 
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
-    let editButton = wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-test-role-1"]');
+    let editButton = wrapper.find('EuiButtonEmpty[data-test-subj="edit-role-action-test-role-1"]');
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/test-role-1');
 
     editButton = wrapper.find(
-      'EuiButtonIcon[data-test-subj="edit-role-action-special%chars%role"]'
+      'EuiButtonEmpty[data-test-subj="edit-role-action-special%chars%role"]'
     );
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/special%25chars%25role');
 
-    let cloneButton = wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-test-role-1"]');
+    let cloneButton = wrapper.find(
+      'EuiButtonEmpty[data-test-subj="clone-role-action-test-role-1"]'
+    );
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/test-role-1');
 
     cloneButton = wrapper.find(
-      'EuiButtonIcon[data-test-subj="clone-role-action-special%chars%role"]'
+      'EuiButtonEmpty[data-test-subj="clone-role-action-special%chars%role"]'
     );
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/special%25chars%25role');
 
     expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="edit-role-action-disabled-role"]')
+      wrapper.find('EuiButtonEmpty[data-test-subj="edit-role-action-disabled-role"]')
     ).toHaveLength(1);
     expect(
-      wrapper.find('EuiButtonIcon[data-test-subj="clone-role-action-disabled-role"]')
+      wrapper.find('EuiButtonEmpty[data-test-subj="clone-role-action-disabled-role"]')
     ).toHaveLength(1);
   });
 

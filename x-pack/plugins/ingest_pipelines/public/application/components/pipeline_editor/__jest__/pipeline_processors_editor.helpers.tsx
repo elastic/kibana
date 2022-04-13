@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { Props } from '../';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
@@ -178,7 +178,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 };
 
 export const setup = async (props: Props): Promise<SetupResult> => {
-  const testBed = await testBedSetup(props);
+  const testBed = testBedSetup(props);
   return {
     ...testBed,
     actions: createActions(testBed),

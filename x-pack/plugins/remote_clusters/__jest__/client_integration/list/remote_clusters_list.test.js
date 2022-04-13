@@ -31,7 +31,7 @@ jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
 });
 
 describe('<RemoteClusterList />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -39,7 +39,6 @@ describe('<RemoteClusterList />', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
@@ -47,8 +46,8 @@ describe('<RemoteClusterList />', () => {
   describe('on component mount', () => {
     let exists;
 
-    beforeEach(() => {
-      ({ exists } = setup());
+    beforeEach(async () => {
+      ({ exists } = await setup(httpSetup));
     });
 
     test('should show a "loading remote clusters" indicator', () => {
@@ -62,7 +61,7 @@ describe('<RemoteClusterList />', () => {
 
     beforeEach(async () => {
       await act(async () => {
-        ({ exists, component } = setup());
+        ({ exists, component } = await setup(httpSetup));
       });
 
       component.update();
@@ -74,6 +73,51 @@ describe('<RemoteClusterList />', () => {
 
     test('should have a button to create a remote cluster', async () => {
       expect(exists('remoteClusterEmptyPromptCreateButton')).toBe(true);
+    });
+  });
+
+  describe('can search', () => {
+    let table;
+    let component;
+    let form;
+
+    const remoteClusters = [
+      {
+        name: 'simple_remote_cluster',
+        seeds: ['127.0.0.1:2000', '127.0.0.2:3000'],
+      },
+      {
+        name: 'remote_cluster_with_proxy',
+        proxyAddress: '192.168.0.1:80',
+        mode: PROXY_MODE,
+      },
+    ];
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
+
+      await act(async () => {
+        ({ table, component, form } = await setup(httpSetup));
+      });
+
+      component.update();
+    });
+
+    test('without any search params it should show all clusters', () => {
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(2);
+    });
+
+    test('search by seed works', () => {
+      form.setInputValue('remoteClusterSearch', 'simple');
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(1);
+    });
+
+    test('search by proxyAddress works', () => {
+      form.setInputValue('remoteClusterSearch', 'proxy');
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(1);
     });
   });
 
@@ -91,17 +135,25 @@ describe('<RemoteClusterList />', () => {
     ];
 
     for (let i = 0; i < 29; i++) {
-      remoteClusters.push({
-        name: `name${i}`,
-        seeds: [],
-      });
+      if (i % 2 === 0) {
+        remoteClusters.push({
+          name: `cluster-${i}`,
+          seeds: [],
+        });
+      } else {
+        remoteClusters.push({
+          name: `cluster_with_proxy-${i}`,
+          proxyAddress: `127.0.0.1:10${i}`,
+          mode: PROXY_MODE,
+        });
+      }
     }
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ table, actions, component, form } = setup());
+        ({ table, actions, component, form } = await setup(httpSetup));
       });
 
       component.update();
@@ -164,7 +216,7 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ component, find, exists, table, actions } = setup());
+        ({ component, find, exists, table, actions } = await setup(httpSetup));
       });
 
       component.update();
@@ -199,7 +251,7 @@ describe('<RemoteClusterList />', () => {
         ],
         [
           '',
-          remoteCluster2.name,
+          remoteCluster2.name.concat('Info'), //Tests include the word "info" to account for the rendered text coming from EuiIcon
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
@@ -208,7 +260,7 @@ describe('<RemoteClusterList />', () => {
         ],
         [
           '',
-          remoteCluster3.name,
+          remoteCluster3.name.concat('Info'), //Tests include the word "info" to account for the rendered text coming from EuiIcon
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
@@ -286,7 +338,7 @@ describe('<RemoteClusterList />', () => {
     describe('confirmation modal (delete remote cluster)', () => {
       test('should remove the remote cluster from the table after delete is successful', async () => {
         // Mock HTTP DELETE request
-        httpRequestsMockHelpers.setDeleteRemoteClusterResponse({
+        httpRequestsMockHelpers.setDeleteRemoteClusterResponse(remoteCluster1.name, {
           itemsDeleted: [remoteCluster1.name],
           errors: [],
         });
@@ -307,7 +359,7 @@ describe('<RemoteClusterList />', () => {
         ({ rows } = table.getMetaData('remoteClusterListTable'));
 
         expect(rows.length).toBe(2);
-        expect(rows[0].columns[1].value).toEqual(remoteCluster2.name);
+        expect(rows[0].columns[1].value).toContain(remoteCluster2.name);
       });
     });
 

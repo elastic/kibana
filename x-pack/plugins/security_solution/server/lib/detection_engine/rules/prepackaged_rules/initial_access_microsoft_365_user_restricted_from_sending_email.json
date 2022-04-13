@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when a user has been restricted from sending email due to exceeding sending limits of the service policies per the Security Compliance Center.",
+  "false_positives": [
+    "A user sending emails using personal distribution folders may trigger the event."
+  ],
+  "from": "now-30m",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Microsoft 365 User Restricted from Sending Email",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n",
+  "query": "event.dataset:o365.audit and event.provider:SecurityComplianceCenter and event.category:web and event.action:\"User restricted from sending email\" and event.outcome:success\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/cloud-app-security/anomaly-detection-policy",
+    "https://docs.microsoft.com/en-us/cloud-app-security/policy-template-reference"
+  ],
+  "risk_score": 47,
+  "rule_id": "0136b315-b566-482f-866c-1d8e2477ba16",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

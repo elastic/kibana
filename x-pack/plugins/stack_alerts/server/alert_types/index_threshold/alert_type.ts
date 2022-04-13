@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
-import { AlertType, AlertExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
@@ -23,7 +23,7 @@ export const ActionGroupId = 'threshold met';
 export function getAlertType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): AlertType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
+): RuleType<Params, never, {}, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -128,12 +128,14 @@ export function getAlertType(
     isExportable: true,
     executor,
     producer: STACK_ALERTS_FEATURE_ID,
+    doesSetRecoveryContext: true,
   };
 
   async function executor(
-    options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
+    options: RuleExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
   ) {
-    const { alertId, name, services, params } = options;
+    const { alertId: ruleId, name, services, params } = options;
+    const { alertFactory, scopedClusterClient } = services;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
@@ -147,7 +149,7 @@ export function getAlertType(
       );
     }
 
-    const esClient = services.scopedClusterClient.asCurrentUser;
+    const esClient = scopedClusterClient.asCurrentUser;
     const date = new Date().toISOString();
     // the undefined values below are for config-schema optional types
     const queryParams: TimeSeriesQuery = {
@@ -172,19 +174,22 @@ export function getAlertType(
       esClient,
       query: queryParams,
     });
-    logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
+    logger.debug(`rule ${ID}:${ruleId} "${name}" query result: ${JSON.stringify(result)}`);
+
+    const unmetGroupValues: Record<string, number> = {};
+    const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
 
     const groupResults = result.results || [];
     // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {
-      const instanceId = groupResult.group;
+      const alertId = groupResult.group;
       const metric =
         groupResult.metrics && groupResult.metrics.length > 0 ? groupResult.metrics[0] : null;
       const value = metric && metric.length === 2 ? metric[1] : null;
 
       if (value === null || value === undefined) {
         logger.debug(
-          `alert ${ID}:${alertId} "${name}": no metrics found for group ${instanceId}} from groupResult ${JSON.stringify(
+          `rule ${ID}:${ruleId} "${name}": no metrics found for group ${alertId}} from groupResult ${JSON.stringify(
             groupResult
           )}`
         );
@@ -193,23 +198,41 @@ export function getAlertType(
 
       const met = compareFn(value, params.threshold);
 
-      if (!met) continue;
+      if (!met) {
+        unmetGroupValues[alertId] = value;
+        continue;
+      }
 
-      const agg = params.aggField ? `${params.aggType}(${params.aggField})` : `${params.aggType}`;
       const humanFn = `${agg} is ${getHumanReadableComparator(
         params.thresholdComparator
       )} ${params.threshold.join(' and ')}`;
 
       const baseContext: BaseActionContext = {
         date,
-        group: instanceId,
+        group: alertId,
         value,
         conditions: humanFn,
       };
       const actionContext = addMessages(options, baseContext, params);
-      const alertInstance = options.services.alertInstanceFactory(instanceId);
-      alertInstance.scheduleActions(ActionGroupId, actionContext);
+      const alert = alertFactory.create(alertId);
+      alert.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);
+    }
+
+    const { getRecoveredAlerts } = services.alertFactory.done();
+    for (const recoveredAlert of getRecoveredAlerts()) {
+      const alertId = recoveredAlert.getId();
+      logger.debug(`setting context for recovered alert ${alertId}`);
+      const baseContext: BaseActionContext = {
+        date,
+        value: unmetGroupValues[alertId] ?? 'unknown',
+        group: alertId,
+        conditions: `${agg} is NOT ${getHumanReadableComparator(
+          params.thresholdComparator
+        )} ${params.threshold.join(' and ')}`,
+      };
+      const recoveryContext = addMessages(options, baseContext, params, true);
+      recoveredAlert.setContext(recoveryContext);
     }
   }
 }

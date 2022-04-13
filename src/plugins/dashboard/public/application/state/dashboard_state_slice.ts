@@ -8,9 +8,10 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { Filter, Query } from '../../services/data';
+import { Filter, Query, TimeRange } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import { DashboardContainerControlGroupInput } from '../embeddable';
 
 export const dashboardStateSlice = createSlice({
   name: 'dashboardState',
@@ -41,6 +42,12 @@ export const dashboardStateSlice = createSlice({
         state.tags = action.payload.tags;
       }
     },
+    setControlGroupState: (
+      state,
+      action: PayloadAction<DashboardContainerControlGroupInput | undefined>
+    ) => {
+      state.controlGroupInput = action.payload;
+    },
     setUseMargins: (state, action: PayloadAction<boolean>) => {
       state.options.useMargins = action.payload;
     },
@@ -64,6 +71,9 @@ export const dashboardStateSlice = createSlice({
     },
     setTimeRestore: (state, action: PayloadAction<boolean>) => {
       state.timeRestore = action.payload;
+    },
+    setTimeRange: (state, action: PayloadAction<TimeRange>) => {
+      state.timeRange = action.payload;
     },
     setDescription: (state, action: PayloadAction<string>) => {
       state.description = action.payload;
@@ -92,6 +102,7 @@ export const dashboardStateSlice = createSlice({
 
 export const {
   setStateFromSaveModal,
+  setControlGroupState,
   setDashboardOptions,
   setExpandedPanelId,
   setHidePanelTitles,
@@ -101,6 +112,7 @@ export const {
   setSavedQueryId,
   setDescription,
   setTimeRestore,
+  setTimeRange,
   setSyncColors,
   setUseMargins,
   setViewMode,

@@ -7,8 +7,10 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange } from '@elastic/eui';
-import { IndexPatternColumn } from '../indexpattern';
+import { EuiFormRow, EuiComboBox, EuiSpacer, EuiRange, EuiFieldText } from '@elastic/eui';
+import { GenericIndexPatternColumn } from '../indexpattern';
+import { isColumnFormatted } from '../operations/definitions/helpers';
+import { useDebouncedValue } from '../../shared_components';
 
 const supportedFormats: Record<string, { title: string }> = {
   number: {
@@ -35,39 +37,61 @@ const defaultOption = {
   }),
 };
 
+const singleSelectionOption = { asPlainText: true };
+
+const label = i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
+  defaultMessage: 'Value format',
+});
+
+const decimalsLabel = i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
+  defaultMessage: 'Decimals',
+});
+
+const suffixLabel = i18n.translate('xpack.lens.indexPattern.suffixLabel', {
+  defaultMessage: 'Suffix',
+});
+
 interface FormatSelectorProps {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
 }
 
-interface State {
-  decimalPlaces: number;
-}
-
-const singleSelectionOption = { asPlainText: true };
+const RANGE_MIN = 0;
+const RANGE_MAX = 15;
 
 export function FormatSelector(props: FormatSelectorProps) {
   const { selectedColumn, onChange } = props;
+  const currentFormat = isColumnFormatted(selectedColumn)
+    ? selectedColumn.params?.format
+    : undefined;
 
-  const currentFormat =
-    'params' in selectedColumn && selectedColumn.params && 'format' in selectedColumn.params
-      ? selectedColumn.params.format
-      : undefined;
-  const [state, setState] = useState<State>({
-    decimalPlaces:
-      typeof currentFormat?.params?.decimals === 'number' ? currentFormat.params.decimals : 2,
-  });
+  const [decimals, setDecimals] = useState(currentFormat?.params?.decimals ?? 2);
+
+  const onChangeSuffix = useCallback(
+    (suffix: string) => {
+      if (!currentFormat) {
+        return;
+      }
+      onChange({
+        id: currentFormat.id,
+        params: {
+          ...currentFormat.params,
+          suffix,
+        },
+      });
+    },
+    [currentFormat, onChange]
+  );
+
+  const { handleInputChange: setSuffix, inputValue: suffix } = useDebouncedValue(
+    {
+      onChange: onChangeSuffix,
+      value: currentFormat?.params?.suffix ?? '',
+    },
+    { allowFalsyValue: true }
+  );
 
   const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
-
-  const label = i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
-    defaultMessage: 'Value format',
-  });
-
-  const decimalsLabel = i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
-    defaultMessage: 'Decimals',
-  });
-
   const stableOptions = useMemo(
     () => [
       defaultOption,
@@ -91,10 +115,10 @@ export function FormatSelector(props: FormatSelectorProps) {
       }
       onChange({
         id: choices[0].value,
-        params: { decimals: state.decimalPlaces },
+        params: { decimals },
       });
     },
-    [onChange, state.decimalPlaces]
+    [onChange, decimals]
   );
 
   const currentOption = useMemo(
@@ -130,15 +154,18 @@ export function FormatSelector(props: FormatSelectorProps) {
               <EuiSpacer size="xs" />
               <EuiRange
                 showInput="inputWithPopover"
-                min={0}
-                max={20}
-                value={state.decimalPlaces}
+                value={decimals}
+                min={RANGE_MIN}
+                max={RANGE_MAX}
                 onChange={(e) => {
-                  setState({ decimalPlaces: Number(e.currentTarget.value) });
+                  const value = Number(e.currentTarget.value);
+                  setDecimals(value);
+                  const validatedValue = Math.min(RANGE_MAX, Math.max(RANGE_MIN, value));
                   onChange({
-                    id: (selectedColumn.params as { format: { id: string } }).format.id,
+                    id: currentFormat.id,
                     params: {
-                      decimals: Number(e.currentTarget.value),
+                      ...currentFormat.params,
+                      decimals: validatedValue,
                     },
                   });
                 }}
@@ -147,6 +174,18 @@ export function FormatSelector(props: FormatSelectorProps) {
                 fullWidth
                 prepend={decimalsLabel}
                 aria-label={decimalsLabel}
+              />
+              <EuiSpacer size="xs" />
+              <EuiFieldText
+                value={suffix}
+                onChange={(e) => {
+                  setSuffix(e.currentTarget.value);
+                }}
+                data-test-subj="indexPattern-dimension-formatSuffix"
+                compressed
+                fullWidth
+                prepend={suffixLabel}
+                aria-label={suffixLabel}
               />
             </>
           ) : null}

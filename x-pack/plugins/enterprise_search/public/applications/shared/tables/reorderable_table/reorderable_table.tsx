@@ -25,11 +25,14 @@ interface ReorderableTableProps<Item> {
   items: Item[];
   noItemsMessage: React.ReactNode;
   unreorderableItems?: Item[];
+  bottomRows?: React.ReactNode[];
   className?: string;
   disableDragging?: boolean;
   disableReordering?: boolean;
+  showRowIndex?: boolean;
   onReorder?: (items: Item[], oldItems: Item[]) => void;
   rowProps?: (item: Item) => object;
+  rowErrors?: (item: Item) => string[] | undefined;
 }
 
 export const ReorderableTable = <Item extends object>({
@@ -37,22 +40,45 @@ export const ReorderableTable = <Item extends object>({
   items,
   noItemsMessage,
   unreorderableItems = [],
+  bottomRows = [],
   className = '',
   disableDragging = false,
   disableReordering = false,
   onReorder = () => undefined,
   rowProps = () => ({}),
+  rowErrors = () => undefined,
+  showRowIndex = false,
 }: ReorderableTableProps<Item>) => {
   return (
     <div className={classNames(className, 'reorderableTable')}>
-      <HeaderRow columns={columns} leftAction={!disableReordering ? <></> : undefined} />
+      <HeaderRow
+        columns={columns}
+        leftAction={disableReordering ? undefined : <></>}
+        spacingForRowIdentifier={showRowIndex}
+      />
 
-      {items.length === 0 && unreorderableItems.length === 0 && (
+      {items.length === 0 && unreorderableItems.length === 0 && bottomRows.length === 0 && (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem data-test-subj="NoItems" className="reorderableTableNoItems">
             {noItemsMessage}
           </EuiFlexItem>
         </EuiFlexGroup>
+      )}
+
+      {items.length > 0 && disableReordering && (
+        <BodyRows
+          items={items}
+          renderItem={(item, itemIndex) => (
+            <BodyRow
+              key={`table_draggable_row_${itemIndex}`}
+              columns={columns}
+              item={item}
+              additionalProps={rowProps(item)}
+              errors={rowErrors(item)}
+              rowIdentifier={showRowIndex ? `${itemIndex + 1}` : undefined}
+            />
+          )}
+        />
       )}
 
       {items.length > 0 && !disableReordering && (
@@ -67,41 +93,43 @@ export const ReorderableTable = <Item extends object>({
                 additionalProps={rowProps(item)}
                 disableDragging={disableDragging}
                 rowIndex={itemIndex}
+                errors={rowErrors(item)}
+                rowIdentifier={showRowIndex ? `${itemIndex + 1}` : undefined}
               />
             )}
             onReorder={onReorder}
           />
         </>
       )}
+      <div className="unorderableRows">
+        {unreorderableItems.length > 0 && (
+          <BodyRows
+            items={unreorderableItems}
+            renderItem={(item, itemIndex) => (
+              <BodyRow
+                key={`table_draggable_row_${itemIndex}`}
+                columns={columns}
+                item={item}
+                additionalProps={rowProps(item)}
+                errors={rowErrors(item)}
+                leftAction={disableReordering ? undefined : <> </>}
+                rowIdentifier={showRowIndex ? '∞' : undefined}
+              />
+            )}
+          />
+        )}
 
-      {items.length > 0 && disableReordering && (
-        <BodyRows
-          items={items}
-          renderItem={(item, itemIndex) => (
-            <BodyRow
-              key={`table_draggable_row_${itemIndex}`}
-              columns={columns}
-              item={item}
-              additionalProps={rowProps(item)}
-            />
-          )}
-        />
-      )}
-
-      {unreorderableItems.length > 0 && (
-        <BodyRows
-          items={unreorderableItems}
-          renderItem={(item, itemIndex) => (
-            <BodyRow
-              key={`table_draggable_row_${itemIndex}`}
-              columns={columns}
-              item={item}
-              additionalProps={rowProps(item)}
-              leftAction={<></>}
-            />
-          )}
-        />
-      )}
+        {bottomRows.map((row, rowIndex) => (
+          <BodyRow // Shoving a generic ReactNode into a BodyRow is kind of a hack
+            key={rowIndex}
+            rowIdentifier={showRowIndex ? '∞' : undefined}
+            columns={[{ render: () => row }]}
+            item={{}}
+            leftAction={disableReordering ? undefined : <> </>}
+            data-test-subj="BottomRow"
+          />
+        ))}
+      </div>
     </div>
   );
 };

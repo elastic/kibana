@@ -33,13 +33,20 @@
       },
       "technique": [
         {
-          "id": "T1210",
-          "name": "Exploitation of Remote Services",
-          "reference": "https://attack.mitre.org/techniques/T1210/"
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/",
+          "subtechnique": [
+            {
+              "id": "T1021.002",
+              "name": "SMB/Windows Admin Shares",
+              "reference": "https://attack.mitre.org/techniques/T1021/002/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 7
 }

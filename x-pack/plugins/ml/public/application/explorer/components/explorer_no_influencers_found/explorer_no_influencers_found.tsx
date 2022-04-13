@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 /*
  * React component for rendering EuiEmptyPrompt when no influencers were found.

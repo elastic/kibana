@@ -67,7 +67,10 @@ describe('Security Plugin', () => {
         Object {
           "audit": Object {
             "asScoped": [Function],
-            "getLogger": [Function],
+            "withoutRequest": Object {
+              "enabled": false,
+              "log": [Function],
+            },
           },
           "authc": Object {
             "getCurrentUser": [Function],
@@ -108,13 +111,8 @@ describe('Security Plugin', () => {
           },
           "license": Object {
             "features$": Observable {
-              "_isScalar": false,
-              "operator": MapOperator {
-                "project": [Function],
-                "thisArg": undefined,
-              },
+              "operator": [Function],
               "source": Observable {
-                "_isScalar": false,
                 "_subscribe": [Function],
               },
             },

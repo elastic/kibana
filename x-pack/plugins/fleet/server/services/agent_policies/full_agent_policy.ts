@@ -19,14 +19,15 @@ import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 import {
   storedPackagePoliciesToAgentPermissions,
-  DEFAULT_PERMISSIONS,
+  DEFAULT_CLUSTER_PERMISSIONS,
 } from '../package_policies_to_agent_permissions';
-import { storedPackagePoliciesToAgentInputs, dataTypes, outputType } from '../../../common';
+import { dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
+import { storedPackagePoliciesToAgentInputs } from './';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
@@ -34,7 +35,7 @@ export async function getFullAgentPolicy(
   options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
   let agentPolicy;
-  const standalone = options?.standalone;
+  const standalone = options?.standalone ?? false;
 
   try {
     agentPolicy = await agentPolicyService.get(soClient, id);
@@ -48,13 +49,17 @@ export async function getFullAgentPolicy(
     return null;
   }
 
-  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
-  if (!defaultOutputId) {
+  const defaultDataOutputId = await outputService.getDefaultDataOutputId(soClient);
+
+  if (!defaultDataOutputId) {
     throw new Error('Default output is not setup');
   }
 
-  const dataOutputId = agentPolicy.data_output_id || defaultOutputId;
-  const monitoringOutputId = agentPolicy.monitoring_output_id || defaultOutputId;
+  const dataOutputId: string = agentPolicy.data_output_id || defaultDataOutputId;
+  const monitoringOutputId: string =
+    agentPolicy.monitoring_output_id ||
+    (await outputService.getDefaultMonitoringOutputId(soClient)) ||
+    dataOutputId;
 
   const outputs = await Promise.all(
     Array.from(new Set([dataOutputId, monitoringOutputId])).map((outputId) =>
@@ -70,17 +75,20 @@ export async function getFullAgentPolicy(
   if (!monitoringOutput) {
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
-
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(output);
+        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
+          output,
+          standalone
+        );
 
         return acc;
       }, {}),
     },
-    inputs: storedPackagePoliciesToAgentInputs(
+    inputs: await storedPackagePoliciesToAgentInputs(
+      soClient,
       agentPolicy.package_policies as PackagePolicy[],
       getOutputIdForAgentPolicy(dataOutput)
     ),
@@ -104,13 +112,11 @@ export async function getFullAgentPolicy(
         }),
   };
 
-  const dataPermissions = (await storedPackagePoliciesToAgentPermissions(
-    soClient,
-    agentPolicy.package_policies
-  )) || { _fallback: DEFAULT_PERMISSIONS };
+  const dataPermissions =
+    (await storedPackagePoliciesToAgentPermissions(soClient, agentPolicy.package_policies)) || {};
 
   dataPermissions._elastic_agent_checks = {
-    cluster: DEFAULT_PERMISSIONS.cluster,
+    cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
   const monitoringPermissions = await getMonitoringPermissions(
@@ -122,7 +128,7 @@ export async function getFullAgentPolicy(
     agentPolicy.namespace
   );
   monitoringPermissions._elastic_agent_checks = {
-    cluster: DEFAULT_PERMISSIONS.cluster,
+    cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
   // Only add permissions if output.type is "elasticsearch"
@@ -162,25 +168,25 @@ export async function getFullAgentPolicy(
   return fullAgentPolicy;
 }
 
-function transformOutputToFullPolicyOutput(
+export function transformOutputToFullPolicyOutput(
   output: Output,
   standalone = false
 ): FullAgentPolicyOutput {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, api_key } = output;
+  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl } = output;
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
   const newOutput: FullAgentPolicyOutput = {
+    ...configJs,
     type,
     hosts,
-    ca_sha256,
-    api_key,
-    ...configJs,
+    ...(ca_sha256 ? { ca_sha256 } : {}),
+    ...(ssl ? { ssl } : {}),
+    ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
 
-  if (standalone) {
-    delete newOutput.api_key;
-    newOutput.username = 'ES_USERNAME';
-    newOutput.password = 'ES_PASSWORD';
+  if (output.type === outputType.Elasticsearch && standalone) {
+    newOutput.username = '{ES_USERNAME}';
+    newOutput.password = '{ES_PASSWORD}';
   }
 
   return newOutput;

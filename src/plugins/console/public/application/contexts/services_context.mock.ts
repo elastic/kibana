@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { httpServiceMock } from '../../../../../core/public/mocks';
+import {
+  notificationServiceMock,
+  httpServiceMock,
+  themeServiceMock,
+  docLinksServiceMock,
+} from '../../../../../core/public/mocks';
 
 import type { ObjectStorageClient } from '../../../common/types';
 import { HistoryMock } from '../../services/history.mock';
@@ -33,8 +37,11 @@ export const serviceContextMock = {
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),
         objectStorageClient: {} as unknown as ObjectStorageClient,
+        http,
       },
       docLinkVersion: 'NA',
+      theme$: themeServiceMock.create().start().theme$,
+      docLinks: docLinksServiceMock.createStartContract().links,
     };
   },
 };

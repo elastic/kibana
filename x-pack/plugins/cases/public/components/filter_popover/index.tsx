@@ -21,7 +21,7 @@ interface FilterPopoverProps {
   buttonLabel: string;
   onSelectedOptionsChanged: Dispatch<SetStateAction<string[]>>;
   options: string[];
-  optionsEmptyLabel: string;
+  optionsEmptyLabel?: string;
   selectedOptions: string[];
 }
 
@@ -91,7 +91,7 @@ export const FilterPopoverComponent = ({
         {options.map((option, index) => (
           <EuiFilterSelectItem
             checked={selectedOptions.includes(option) ? 'on' : undefined}
-            data-test-subj={`options-filter-popover-item-${index}`}
+            data-test-subj={`options-filter-popover-item-${option}`}
             key={`${index}-${option}`}
             onClick={toggleSelectedGroupCb.bind(null, option)}
           >
@@ -99,7 +99,7 @@ export const FilterPopoverComponent = ({
           </EuiFilterSelectItem>
         ))}
       </ScrollableDiv>
-      {options.length === 0 && (
+      {options.length === 0 && optionsEmptyLabel != null && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
           <EuiFlexItem grow={true}>
             <EuiPanel>

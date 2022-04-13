@@ -6,11 +6,13 @@
  */
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
-import { ruleExecutionLogClientMock } from '../rule_execution_log/__mocks__/rule_execution_log_client';
+import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
+
 jest.mock('./patch_rules');
 
 describe.each([
@@ -18,11 +20,13 @@ describe.each([
   ['RAC', true],
 ])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let ruleStatusClient: ReturnType<typeof ruleExecutionLogClientMock.create>;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let ruleExecutionLog: ReturnType<typeof ruleExecutionLogMock.forRoutes.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    ruleStatusClient = ruleExecutionLogClientMock.create();
+    savedObjectsClient = savedObjectsClientMock.create();
+    ruleExecutionLog = ruleExecutionLogMock.forRoutes.create();
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -40,11 +44,11 @@ describe.each([
 
     await updatePrepackagedRules(
       rulesClient,
-      'default',
-      ruleStatusClient,
+      savedObjectsClient,
       [{ ...prepackagedRule, actions }],
       outputIndex,
-      isRuleRegistryEnabled
+      isRuleRegistryEnabled,
+      ruleExecutionLog
     );
 
     expect(patchRules).toHaveBeenCalledWith(
@@ -56,6 +60,43 @@ describe.each([
     expect(patchRules).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: undefined,
+      })
+    );
+  });
+
+  it('should update threat match rules', async () => {
+    const updatedThreatParams = {
+      threat_index: ['test-index'],
+      threat_indicator_path: 'test.path',
+      threat_query: 'threat:*',
+    };
+    const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+
+    await updatePrepackagedRules(
+      rulesClient,
+      savedObjectsClient,
+      [{ ...prepackagedRule, ...updatedThreatParams }],
+      'output-index',
+      isRuleRegistryEnabled,
+      ruleExecutionLog
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatIndicatorPath: 'test.path',
+      })
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatIndex: ['test-index'],
+      })
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatQuery: 'threat:*',
       })
     );
   });

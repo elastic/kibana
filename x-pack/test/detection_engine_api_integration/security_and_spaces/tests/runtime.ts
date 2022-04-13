@@ -23,6 +23,8 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
+
   interface Runtime {
     name: string;
     hostname: string;
@@ -39,48 +41,50 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Regular runtime field mappings', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((signal) => (signal._source?.host as Runtime).name);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits
+          .map((signal) => (signal._source?.host as Runtime).name)
+          .sort();
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
 
       it('should copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map(
-          (signal) => (signal._source?.host as Runtime).hostname
-        );
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits
+          .map((signal) => (signal._source?.host as Runtime).hostname)
+          .sort();
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
     });
 
     describe('Runtime field mappings that have conflicts within them', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'
         );
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'
         );
@@ -93,11 +97,20 @@ export default ({ getService }: FtrProviderContext) => {
        */
       it('should NOT copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((signal) => signal._source?.host);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits
+          .map((signal) => signal._source?.host as Array<{ name: string }>)
+          .map((host) => {
+            // sort the inner array elements first
+            return host.sort((a, b) => a.name.localeCompare(b.name));
+          })
+          .sort((aArray, bArray) => {
+            // since these are all unique, using just the first element should give us stability
+            return aArray[0].name.localeCompare(bArray[0].name);
+          });
         expect(hits).to.eql([
           [
             {
@@ -141,10 +154,10 @@ export default ({ getService }: FtrProviderContext) => {
        */
       it('should NOT copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
-        const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, id);
-        await waitForSignalsToBePresent(supertest, 4, [id]);
-        const signalsOpen = await getSignalsById(supertest, id);
+        const { id } = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
         const hits = signalsOpen.hits.hits.map(
           (signal) => (signal._source?.host as Runtime).hostname
         );

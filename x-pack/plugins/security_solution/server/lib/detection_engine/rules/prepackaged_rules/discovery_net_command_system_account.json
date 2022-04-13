@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the SYSTEM account using an account discovery utility. This could be a sign of discovery activity after an adversary has achieved privilege escalation.",
+  "description": "Identifies when the SYSTEM account uses an account discovery utility. This could be a sign of discovery activity after an adversary has achieved privilege escalation.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -12,7 +12,8 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Net command via SYSTEM account",
-  "query": "process where event.type in (\"start\", \"process_started\") and \n  user.id in (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\") and\n  process.name : \"whoami.exe\" or\n  (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\")\n",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and \n  (?process.Ext.token.integrity_level_name : \"System\" or\n  ?winlog.event_data.IntegrityLevel : \"System\") and\n  process.name : \"whoami.exe\" or\n  (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\")\n",
   "risk_score": 21,
   "rule_id": "2856446a-34e6-435b-9fb5-f8f040bfa7ed",
   "severity": "low",
@@ -33,14 +34,14 @@
       },
       "technique": [
         {
-          "id": "T1087",
-          "name": "Account Discovery",
-          "reference": "https://attack.mitre.org/techniques/T1087/"
+          "id": "T1033",
+          "name": "System Owner/User Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1033/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 10
 }

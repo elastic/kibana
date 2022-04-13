@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
+import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import type { LatestFunctionConfig, PutTransformsRequestSchema } from '../api_schemas/transforms';
 import { isPopulatedObject } from '../shared_imports';
-import { PivotGroupByDict } from './pivot_group_by';
-import { PivotAggDict } from './pivot_aggs';
+import type { PivotGroupByDict } from './pivot_group_by';
+import type { PivotAggDict } from './pivot_aggs';
+import type { TransformHealthAlertRule } from './alerting';
 
 export type IndexName = string;
-export type IndexPattern = string;
+export type DataView = string;
 export type TransformId = string;
 
 /**
@@ -22,6 +23,8 @@ export type TransformBaseConfig = PutTransformsRequestSchema & {
   id: TransformId;
   create_time?: number;
   version?: string;
+  alerting_rules?: TransformHealthAlertRule[];
+  _meta?: Record<string, unknown>;
 };
 
 export interface PivotConfigDefinition {
@@ -45,12 +48,21 @@ export type TransformLatestConfig = Omit<TransformBaseConfig, 'pivot'> & {
 
 export type TransformConfigUnion = TransformPivotConfig | TransformLatestConfig;
 
+export type ContinuousTransform = Omit<TransformConfigUnion, 'sync'> &
+  Required<{
+    sync: TransformConfigUnion['sync'];
+  }>;
+
 export function isPivotTransform(transform: unknown): transform is TransformPivotConfig {
   return isPopulatedObject(transform, ['pivot']);
 }
 
 export function isLatestTransform(transform: unknown): transform is TransformLatestConfig {
   return isPopulatedObject(transform, ['latest']);
+}
+
+export function isContinuousTransform(transform: unknown): transform is ContinuousTransform {
+  return isPopulatedObject(transform, ['sync']);
 }
 
 export interface LatestFunctionConfigUI {

@@ -16,7 +16,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { IAggConfig, AggGroupNames } from '../../../data/public';
 import type { Schema } from '../../../visualizations/public';

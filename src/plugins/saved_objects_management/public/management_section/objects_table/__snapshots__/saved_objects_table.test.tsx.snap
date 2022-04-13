@@ -104,9 +104,9 @@ exports[`SavedObjectsTable should render normally 1`] = `
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -123,10 +123,9 @@ exports[`SavedObjectsTable should render normally 1`] = `
           },
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -235,10 +234,10 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "#/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
+                "path": "/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",

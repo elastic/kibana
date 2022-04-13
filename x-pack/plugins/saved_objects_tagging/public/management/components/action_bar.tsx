@@ -16,7 +16,7 @@ import {
   EuiLink,
   EuiIcon,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TagBulkAction } from '../types';
 
 import './_action_bar.scss';

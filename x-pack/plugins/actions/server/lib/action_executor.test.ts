@@ -30,6 +30,7 @@ const executeParams = {
   params: {
     foo: true,
   },
+  executionId: '123abc',
   request: {} as KibanaRequest,
 };
 
@@ -115,8 +116,16 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute-start",
+            "kind": "action",
           },
           "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
             "saved_objects": Array [
               Object {
                 "id": "1",
@@ -126,6 +135,9 @@ test('successfully executes', async () => {
                 "type_id": "test",
               },
             ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
           },
           "message": "action started: test:1: 1",
         },
@@ -134,9 +146,17 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute",
+            "kind": "action",
             "outcome": "success",
           },
           "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
             "saved_objects": Array [
               Object {
                 "id": "1",
@@ -145,6 +165,9 @@ test('successfully executes', async () => {
                 "type": "action",
                 "type_id": "test",
               },
+            ],
+            "space_ids": Array [
+              "some-namespace",
             ],
           },
           "message": "action executed: test:1: 1",
@@ -270,6 +293,45 @@ test('throws an error when config is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+  });
+});
+
+test('throws an error when connector is invalid', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    validate: {
+      connector: () => {
+        return 'error';
+      },
+    },
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  const result = await actionExecutor.execute(executeParams);
+  expect(result).toEqual({
+    actionId: '1',
+    status: 'error',
+    retry: false,
+    message: `error validating action type connector: config must be defined`,
   });
 });
 
@@ -472,6 +534,46 @@ test('logs a warning when alert executor returns invalid status', async () => {
   );
 });
 
+test('writes to event log for execute timeout', async () => {
+  setupActionExecutorMock();
+
+  await actionExecutor.logCancellation({
+    actionId: 'action1',
+    executionId: '123abc',
+    consumer: 'test-consumer',
+    relatedSavedObjects: [],
+    request: {} as KibanaRequest,
+  });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-timeout',
+      kind: 'action',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: 'action1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: `action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+  });
+});
+
 test('writes to event log for execute and execute start', async () => {
   const executorMock = setupActionExecutorMock();
   executorMock.mockResolvedValue({
@@ -480,11 +582,19 @@ test('writes to event log for execute and execute start', async () => {
   });
   await actionExecutor.execute(executeParams);
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
     event: {
       action: 'execute-start',
+      kind: 'action',
     },
     kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
       saved_objects: [
         {
           rel: 'primary',
@@ -494,14 +604,24 @@ test('writes to event log for execute and execute start', async () => {
           namespace: 'some-namespace',
         },
       ],
+      space_ids: ['some-namespace'],
     },
     message: 'action started: test:1: action-1',
   });
-  expect(eventLogger.logEvent.mock.calls[1][0]).toMatchObject({
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
     event: {
       action: 'execute',
+      kind: 'action',
+      outcome: 'success',
     },
     kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
       saved_objects: [
         {
           rel: 'primary',
@@ -511,6 +631,96 @@ test('writes to event log for execute and execute start', async () => {
           namespace: 'some-namespace',
         },
       ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action executed: test:1: action-1',
+  });
+});
+
+test('writes to event log for execute and execute start when consumer and related saved object are defined', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute({
+    ...executeParams,
+    consumer: 'test-consumer',
+    relatedSavedObjects: [
+      {
+        typeId: '.rule-type',
+        type: 'alert',
+        id: '12',
+      },
+    ],
+  });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-start',
+      kind: 'action',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+          rule_type_id: '.rule-type',
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: '12',
+          type_id: '.rule-type',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action started: test:1: action-1',
+  });
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    event: {
+      action: 'execute',
+      kind: 'action',
+      outcome: 'success',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+          rule_type_id: '.rule-type',
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: '12',
+          type_id: '.rule-type',
+        },
+      ],
+      space_ids: ['some-namespace'],
     },
     message: 'action executed: test:1: action-1',
   });

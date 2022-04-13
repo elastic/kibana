@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternBase } from '../../es_query';
+import { DataViewBase } from '../../es_query';
 import { buildExistsFilter, getExistsFilterField } from './exists_filter';
 import { fields } from '../stubs/fields.mocks';
 
 describe('exists filter', function () {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields,
+    title: 'dataView',
   };
 
   describe('getExistsFilterField', function () {

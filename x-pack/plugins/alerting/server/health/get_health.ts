@@ -6,7 +6,7 @@
  */
 
 import { ISavedObjectsRepository, SavedObjectsServiceStart } from 'src/core/server';
-import { AlertsHealth, HealthStatus, RawAlert, AlertExecutionStatusErrorReasons } from '../types';
+import { AlertsHealth, HealthStatus, RawRule, RuleExecutionStatusErrorReasons } from '../types';
 
 export const getHealth = async (
   internalSavedObjectsRepository: ISavedObjectsRepository
@@ -26,8 +26,8 @@ export const getHealth = async (
     },
   };
 
-  const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
+  const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawRule>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Decrypt}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
@@ -44,8 +44,8 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
+  const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawRule>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Execute}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
@@ -62,8 +62,8 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
+  const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawRule>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Read}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
@@ -80,7 +80,7 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+  const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: 'not alert.attributes.executionStatus.status:error',
     fields: ['executionStatus'],
     type: 'alert',

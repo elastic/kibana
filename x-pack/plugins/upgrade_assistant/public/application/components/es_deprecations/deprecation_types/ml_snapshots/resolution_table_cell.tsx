@@ -66,7 +66,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.resolutionTooltipLabel',
     {
       defaultMessage:
-        'Resolve this deprecation by upgrading or deleting a job model snapshot. This is an automated resolution.',
+        'Resolve this issue by upgrading or deleting a job model snapshot. This issue can be resolved automatically.',
     }
   ),
 };

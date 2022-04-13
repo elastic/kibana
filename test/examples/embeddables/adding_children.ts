@@ -23,6 +23,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.click('embeddablePanelToggleMenuIcon');
       await testSubjects.click('embeddablePanelAction-ACTION_ADD_PANEL');
       await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
+      await testSubjects.click('savedObjectFinderFilterButton');
+      await testSubjects.click('savedObjectFinderFilter-todo');
       await testSubjects.click('savedObjectTitleGarbage');
       await testSubjects.moveMouseTo('euiFlyoutCloseButton');
       await flyout.ensureClosed('dashboardAddPanel');

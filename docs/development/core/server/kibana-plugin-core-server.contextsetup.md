@@ -68,7 +68,6 @@ class MyPlugin {
     }
   }
 }
-
 ```
 
 ## Example
@@ -127,7 +126,6 @@ class VizRenderingPlugin {
     };
   }
 }
-
 ```
 
 ## Methods

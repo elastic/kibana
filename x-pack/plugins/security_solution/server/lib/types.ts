@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ConfigType as Configuration } from '../config';
+export type { ConfigType as Configuration } from '../config';
 import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
 
 export interface ShardsResponse {
@@ -74,6 +74,9 @@ export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 export interface TermAggregationBucket {
   key: string;
   doc_count: number;
+  min_timestamp: {
+    value_as_string: string;
+  };
   max_timestamp: {
     value_as_string: string;
   };

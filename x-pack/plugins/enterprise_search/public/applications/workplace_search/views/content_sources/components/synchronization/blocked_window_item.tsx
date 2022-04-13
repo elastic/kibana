@@ -7,10 +7,11 @@
 
 import React from 'react';
 
+import { useActions, useValues } from 'kea';
 import moment from 'moment';
 
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiDatePicker,
   EuiDatePickerRange,
   EuiFlexGroup,
@@ -22,7 +23,7 @@ import {
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_DAYS_LABEL, DAYS_OF_WEEK_LABELS } from '../../../../../shared/constants';
 import { BLOCK_LABEL, BETWEEN_LABEL, ON_LABEL, REMOVE_BUTTON } from '../../../../constants';
@@ -40,8 +41,13 @@ import {
   UTC_TITLE,
 } from '../../constants';
 
+import { SourceLogic } from '../../source_logic';
+
+import { SynchronizationLogic } from './synchronization_logic';
+
 interface Props {
   blockedWindow: BlockedWindow;
+  index: number;
 }
 
 const syncOptions = [
@@ -66,7 +72,7 @@ const syncOptions = [
     ),
   },
   {
-    value: 'deletion',
+    value: 'delete',
     inputDisplay: DELETION_SYNC_LABEL,
     dropdownDisplay: (
       <>
@@ -93,10 +99,11 @@ const daySelectOptions = DAYS_OF_WEEK_VALUES.map((day) => ({
 })) as EuiSelectOption[];
 daySelectOptions.push({ text: ALL_DAYS_LABEL, value: 'all' });
 
-export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
-  const handleSyncTypeChange = () => '#TODO';
-  const handleStartDateChange = () => '#TODO';
-  const handleEndDateChange = () => '#TODO';
+export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => {
+  const { contentSource } = useValues(SourceLogic);
+  const { removeBlockedWindow, setBlockedTimeWindow } = useActions(
+    SynchronizationLogic({ contentSource })
+  );
 
   return (
     <>
@@ -109,16 +116,20 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
           <EuiSuperSelect
             valueOfSelected={blockedWindow.jobType}
             options={syncOptions}
-            onChange={handleSyncTypeChange}
+            onChange={(value) => setBlockedTimeWindow(index, 'jobType', value)}
             itemClassName="blockedWindowSelectItem"
-            popoverClassName="blockedWindowSelectPopover"
+            popoverProps={{ className: 'blockedWindowSelectPopover' }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>{ON_LABEL}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 130 }}>
-          <EuiSelect value={blockedWindow.day} options={daySelectOptions} />
+          <EuiSelect
+            value={blockedWindow.day}
+            onChange={(e) => setBlockedTimeWindow(index, 'day', e.target.value)}
+            options={daySelectOptions}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText>{BETWEEN_LABEL}</EuiText>
@@ -129,8 +140,11 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
               <EuiDatePicker
                 showTimeSelect
                 showTimeSelectOnly
-                selected={moment(blockedWindow.start, 'HH:mm:ssZ')}
-                onChange={handleStartDateChange}
+                selected={moment(blockedWindow.start, 'HH:mm:ssZ').utc()}
+                onChange={(value) =>
+                  value &&
+                  setBlockedTimeWindow(index, 'start', `${value.utc().format('HH:mm:ss')}Z`)
+                }
                 dateFormat="h:mm A"
                 timeFormat="h:mm A"
               />
@@ -139,8 +153,10 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
               <EuiDatePicker
                 showTimeSelect
                 showTimeSelectOnly
-                selected={moment(blockedWindow.end, 'HH:mm:ssZ')}
-                onChange={handleEndDateChange}
+                selected={moment(blockedWindow.end, 'HH:mm:ssZ').utc()}
+                onChange={(value) =>
+                  value && setBlockedTimeWindow(index, 'end', `${value.utc().format('HH:mm:ss')}Z`)
+                }
                 dateFormat="h:mm A"
                 timeFormat="h:mm A"
               />
@@ -163,9 +179,14 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow }) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill color="danger">
-            {REMOVE_BUTTON}
-          </EuiButton>
+          <EuiButtonIcon
+            display="base"
+            iconType="trash"
+            color="danger"
+            onClick={() => removeBlockedWindow(index)}
+            aria-label={REMOVE_BUTTON}
+            title={REMOVE_BUTTON}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

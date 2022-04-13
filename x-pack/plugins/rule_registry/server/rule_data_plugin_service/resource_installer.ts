@@ -6,10 +6,11 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
@@ -20,7 +21,6 @@ import { ecsComponentTemplate } from '../../common/assets/component_templates/ec
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 
 import { IndexInfo } from './index_info';
-import { incrementIndexName } from './utils';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 
@@ -29,9 +29,10 @@ interface ConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
-  isIndexUpgradeEnabled: boolean;
+  disabledRegistrationContexts: string[];
 }
 
+export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
 export class ResourceInstaller {
   constructor(private readonly options: ConstructorOptions) {}
 
@@ -42,7 +43,6 @@ export class ResourceInstaller {
     try {
       const installResources = async (): Promise<void> => {
         const { logger, isWriteEnabled } = this.options;
-
         if (!isWriteEnabled) {
           logger.info(`Write is disabled; not installing ${resources}`);
           return;
@@ -87,7 +87,7 @@ export class ResourceInstaller {
       // We can install them in parallel
       await Promise.all([
         this.createOrUpdateLifecyclePolicy({
-          policy: getResourceName(DEFAULT_ILM_POLICY_ID),
+          name: getResourceName(DEFAULT_ILM_POLICY_ID),
           body: defaultLifecyclePolicy,
         }),
 
@@ -111,16 +111,13 @@ export class ResourceInstaller {
    * Installs index-level resources shared between all namespaces of this index:
    *   - custom ILM policy if it was provided
    *   - component templates
-   *   - attempts to update mappings of existing concrete indices
    */
   public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
     await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
       const { componentTemplates, ilmPolicy } = indexInfo.indexOptions;
-      const { isIndexUpgradeEnabled } = this.options;
-
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
-          policy: indexInfo.getIlmPolicyName(),
+          name: indexInfo.getIlmPolicyName(),
           body: { policy: ilmPolicy },
         });
       }
@@ -139,39 +136,34 @@ export class ResourceInstaller {
           });
         })
       );
-
-      if (isIndexUpgradeEnabled) {
-        // TODO: Update all existing namespaced index templates matching this index' base name
-
-        await this.updateIndexMappings(indexInfo);
-      }
     });
   }
 
-  private async updateIndexMappings(indexInfo: IndexInfo) {
+  private async updateIndexMappings(indexInfo: IndexInfo, namespace: string) {
     const { logger } = this.options;
 
     const aliases = indexInfo.basePattern;
-    const backingIndices = indexInfo.getPatternForBackingIndices();
+    const backingIndices = indexInfo.getPatternForBackingIndices(namespace);
 
     logger.debug(`Updating mappings of existing concrete indices for ${indexInfo.baseName}`);
 
     // Find all concrete indices for all namespaces of the index.
     const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
-    const concreteWriteIndices = concreteIndices.filter((item) => item.isWriteIndex);
-
-    // Update mappings of the found write indices.
-    await Promise.all(concreteWriteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
+    // Update mappings of the found indices.
+    await Promise.all(concreteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
   }
 
+  // NOTE / IMPORTANT: Please note this will update the mappings of backing indices but
+  // *not* the settings. This is due to the fact settings can be classed as dynamic and static,
+  // and static updates will fail on an index that isn't closed. New settings *will* be applied as part
+  // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
   private async updateAliasWriteIndexMapping({ index, alias }: ConcreteIndexInfo) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
-
     const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
       name: index,
     });
-    const simulatedMapping = get(simulatedIndexMapping, ['body', 'template', 'mappings']);
+    const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
 
     try {
       await clusterClient.indices.putMapping({
@@ -180,35 +172,8 @@ export class ResourceInstaller {
       });
       return;
     } catch (err) {
-      if (err.meta?.body?.error?.type !== 'illegal_argument_exception') {
-        /**
-         * We skip the rollover if we catch anything except for illegal_argument_exception - that's the error
-         * returned by ES when the mapping update contains a conflicting field definition (e.g., a field changes types).
-         * We expect to get that error for some mapping changes we might make, and in those cases,
-         * we want to continue to rollover the index. Other errors are unexpected.
-         */
-        logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
-        return;
-      }
-      const newIndexName = incrementIndexName(index);
-      if (newIndexName == null) {
-        logger.error(`Failed to increment write index name for alias: ${alias}`);
-        return;
-      }
-      try {
-        await clusterClient.indices.rollover({
-          alias,
-          new_index: newIndexName,
-        });
-      } catch (e) {
-        /**
-         * If we catch resource_already_exists_exception, that means that the index has been
-         * rolled over already — nothing to do for us in this case.
-         */
-        if (e?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
-          logger.error(`Failed to rollover index for alias ${alias}: ${e.message}`);
-        }
-      }
+      logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
+      throw err;
     }
   }
 
@@ -216,11 +181,12 @@ export class ResourceInstaller {
   // Namespace-level resources
 
   /**
-   * Installs resources tied to concrete namespace of an index:
+   * Installs and updates resources tied to concrete namespace of an index:
    *   - namespaced index template
+   *   - Index mappings for existing concrete indices
    *   - concrete index (write target) if it doesn't exist
    */
-  public async installNamespaceLevelResources(
+  public async installAndUpdateNamespaceLevelResources(
     indexInfo: IndexInfo,
     namespace: string
   ): Promise<void> {
@@ -230,15 +196,19 @@ export class ResourceInstaller {
 
     logger.info(`Installing namespace-level resources and creating concrete index for ${alias}`);
 
+    // Install / update the index template
+    await this.installNamespacedIndexTemplate(indexInfo, namespace);
+    // Update index mappings for indices matching this namespace.
+    await this.updateIndexMappings(indexInfo, namespace);
+
     // If we find a concrete backing index which is the write index for the alias here, we shouldn't
     // be making a new concrete index. We return early because we don't need a new write target.
     const indexExists = await this.checkIfConcreteWriteIndexExists(indexInfo, namespace);
     if (indexExists) {
       return;
+    } else {
+      await this.createConcreteWriteIndex(indexInfo, namespace);
     }
-
-    await this.installNamespacedIndexTemplate(indexInfo, namespace);
-    await this.createConcreteWriteIndex(indexInfo, namespace);
   }
 
   private async checkIfConcreteWriteIndexExists(
@@ -340,12 +310,13 @@ export class ResourceInstaller {
 
         template: {
           settings: {
+            hidden: true,
+            // @ts-expect-error type only defines nested structure
             'index.lifecycle': {
               name: ilmPolicyName,
-              // TODO: fix the types in the ES package, they don't include rollover_alias???
-              // @ts-expect-error
               rollover_alias: primaryNamespacedAlias,
             },
+            'index.mapping.total_fields.limit': 1700,
           },
           mappings: {
             dynamic: false,
@@ -395,7 +366,7 @@ export class ResourceInstaller {
       // something else created it so suppress the error. If it's not the write
       // index, that's bad, throw an error.
       if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
-        const { body: existingIndices } = await clusterClient.indices.get({
+        const existingIndices = await clusterClient.indices.get({
           index: initialIndexName,
         });
         if (!existingIndices[initialIndexName]?.aliases?.[primaryNamespacedAlias]?.is_write_index) {
@@ -416,7 +387,7 @@ export class ResourceInstaller {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
 
-    logger.debug(`Installing lifecycle policy ${policy.policy}`);
+    logger.debug(`Installing lifecycle policy ${policy.name}`);
     return clusterClient.ilm.putLifecycle(policy);
   }
 
@@ -436,7 +407,7 @@ export class ResourceInstaller {
 
     logger.debug(`Installing index template ${template.name}`);
 
-    const { body: simulateResponse } = await clusterClient.indices.simulateTemplate(template);
+    const simulateResponse = await clusterClient.indices.simulateTemplate(template);
     const mappings: estypes.MappingTypeMapping = simulateResponse.template.mappings;
 
     if (isEmpty(mappings)) {
@@ -464,7 +435,7 @@ export class ResourceInstaller {
       // finding legacy .siem-signals indices that we add the alias to for backwards compatibility reasons. Together,
       // the index pattern and alias should ensure that we retrieve only the "new" backing indices for this
       // particular alias.
-      const { body: response } = await clusterClient.indices.getAlias({
+      const response = await clusterClient.indices.getAlias({
         index: indexPatternForBackingIndices,
         name: aliasOrPatternForAliases,
       });

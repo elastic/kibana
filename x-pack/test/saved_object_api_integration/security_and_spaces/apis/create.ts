@@ -61,8 +61,11 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+    // We test the alias conflict preflight check error case twice; once by checking the alias with "find" and once by using "bulk-get".
+    { ...CASES.ALIAS_CONFLICT_OBJ, ...fail409(spaceId !== SPACE_2_ID), expectedNamespaces }, // first try fails if this is the default space or space_1, because an alias exists in those spaces
   ];
   const crossNamespace = [
+    { ...CASES.ALIAS_CONFLICT_OBJ, initialNamespaces: ['*'], ...fail409() }, // second try fails because an alias exists in space_x, the default space, and space_1 (but not space_y because that alias is disabled)
     {
       ...CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
       initialNamespaces: ['x', 'y'],

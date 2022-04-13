@@ -6,11 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/inventory_metric_threshold/types';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/metric_threshold/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
+import {
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
+} from '../common/alerting/metrics';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import { infraSourceConfigurationSavedObjectName } from './lib/sources/saved_object_type';
+import { logViewSavedObjectName } from './saved_objects';
 
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
@@ -83,22 +87,22 @@ export const LOGS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+  alerting: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana'],
       catalogue: ['infralogging', 'logs'],
       api: ['infra'],
       savedObject: {
-        all: ['infrastructure-ui-source'],
+        all: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
         read: [],
       },
       alerting: {
         rule: {
-          all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
         },
         alert: {
-          all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+          all: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
         },
       },
       management: {
@@ -112,10 +116,10 @@ export const LOGS_FEATURE = {
       api: ['infra'],
       alerting: {
         rule: {
-          read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
         },
         alert: {
-          read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+          read: [LOG_DOCUMENT_COUNT_RULE_TYPE_ID],
         },
       },
       management: {
@@ -123,7 +127,7 @@ export const LOGS_FEATURE = {
       },
       savedObject: {
         all: [],
-        read: ['infrastructure-ui-source'],
+        read: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
       },
       ui: ['show'],
     },

@@ -8,12 +8,18 @@
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
+} from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
     initialEntries: [`/indices?includeHiddenIndices=true`],
@@ -28,14 +34,21 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
+    dataStreamLinkExistsAt: (index: number) => boolean;
+    clickManageContextMenuButton: () => void;
+    clickContextMenuOption: (optionDataTestSubject: string) => void;
+    clickModalConfirm: () => void;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
 }
 
-export const setup = async (overridingDependencies: any = {}): Promise<IndicesTestBed> => {
+export const setup = async (
+  httpSetup: HttpSetup,
+  overridingDependencies: any = {}
+): Promise<IndicesTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(IndexManagementHome, overridingDependencies),
+    WithAppDependencies(IndexManagementHome, httpSetup, overridingDependencies),
     testBedConfig
   );
   const testBed = await initTestBed();
@@ -43,10 +56,27 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
   /**
    * User Actions
    */
+  const clickContextMenuOption = async (optionDataTestSubject: string) => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find(`indexContextMenu.${optionDataTestSubject}`).simulate('click');
+    });
+    component.update();
+  };
 
   const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;
     find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+  };
+
+  const clickManageContextMenuButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('indexActionsContextMenuButton').simulate('click');
+    });
+    component.update();
   };
 
   const getIncludeHiddenIndicesToggleStatus = () => {
@@ -78,6 +108,21 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
     component.update();
   };
 
+  const dataStreamLinkExistsAt = (index: number) => {
+    const { table } = testBed;
+    const { rows } = table.getMetaData('indexTable');
+    return findTestSubject(rows[index].reactWrapper, 'dataStreamLink').exists();
+  };
+
+  const clickModalConfirm = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('confirmModalConfirmButton').simulate('click');
+    });
+    component.update();
+  };
+
   const findDataStreamDetailPanel = () => {
     const { find } = testBed;
     return find('dataStreamDetailPanel');
@@ -95,6 +140,10 @@ export const setup = async (overridingDependencies: any = {}): Promise<IndicesTe
       getIncludeHiddenIndicesToggleStatus,
       clickIncludeHiddenIndicesToggle,
       clickDataStreamAt,
+      dataStreamLinkExistsAt,
+      clickManageContextMenuButton,
+      clickContextMenuOption,
+      clickModalConfirm,
     },
     findDataStreamDetailPanel,
     findDataStreamDetailPanelTitle,

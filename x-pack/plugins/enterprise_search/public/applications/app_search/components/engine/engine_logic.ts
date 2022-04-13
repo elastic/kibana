@@ -22,6 +22,7 @@ interface EngineValues {
   hasNoDocuments: boolean;
   hasEmptySchema: boolean;
   isMetaEngine: boolean;
+  isElasticsearchEngine: boolean;
   isSampleEngine: boolean;
   hasSchemaErrors: boolean;
   hasSchemaConflicts: boolean;
@@ -100,6 +101,10 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       (engine) => Object.keys(engine.schema || {}).length === 0,
     ],
     isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === EngineTypes.meta],
+    isElasticsearchEngine: [
+      () => [selectors.engine],
+      (engine) => engine?.type === EngineTypes.elasticsearch,
+    ],
     isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
     // Indexed engines
     hasSchemaErrors: [
@@ -132,7 +137,9 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       const { http } = HttpLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}`);
+        const response = await http.get<EngineDetails>(
+          `/internal/app_search/engines/${engineName}`
+        );
         actions.setEngineData(response);
       } catch (error) {
         if (error?.response?.status >= 400 && error?.response?.status < 500) {

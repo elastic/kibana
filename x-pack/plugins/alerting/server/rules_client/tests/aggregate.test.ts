@@ -14,8 +14,8 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
-import { AlertExecutionStatusValues } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
 
@@ -26,12 +26,14 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
+  minimumScheduleInterval: { value: '1m', enforce: false },
   authorization: authorization as unknown as AlertingAuthorization,
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
@@ -47,6 +49,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
@@ -69,39 +72,49 @@ describe('aggregate()', () => {
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
-      logSuccessfulAuthorization() {},
     });
-    unsecuredSavedObjectsClient.find
-      .mockResolvedValueOnce({
-        total: 10,
-        per_page: 0,
-        page: 1,
-        saved_objects: [],
-      })
-      .mockResolvedValueOnce({
-        total: 8,
-        per_page: 0,
-        page: 1,
-        saved_objects: [],
-      })
-      .mockResolvedValueOnce({
-        total: 6,
-        per_page: 0,
-        page: 1,
-        saved_objects: [],
-      })
-      .mockResolvedValueOnce({
-        total: 4,
-        per_page: 0,
-        page: 1,
-        saved_objects: [],
-      })
-      .mockResolvedValueOnce({
-        total: 2,
-        per_page: 0,
-        page: 1,
-        saved_objects: [],
-      });
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 30,
+      per_page: 0,
+      page: 1,
+      saved_objects: [],
+      aggregations: {
+        status: {
+          buckets: [
+            { key: 'active', doc_count: 8 },
+            { key: 'error', doc_count: 6 },
+            { key: 'ok', doc_count: 10 },
+            { key: 'pending', doc_count: 4 },
+            { key: 'unknown', doc_count: 2 },
+            { key: 'warning', doc_count: 1 },
+          ],
+        },
+        enabled: {
+          buckets: [
+            { key: 0, key_as_string: '0', doc_count: 2 },
+            { key: 1, key_as_string: '1', doc_count: 28 },
+          ],
+        },
+        muted: {
+          buckets: [
+            { key: 0, key_as_string: '0', doc_count: 27 },
+            { key: 1, key_as_string: '1', doc_count: 3 },
+          ],
+        },
+        snoozed: {
+          buckets: [
+            {
+              key: '2022-03-21T20:22:01.501Z-*',
+              format: 'strict_date_time',
+              from: 1.647894121501e12,
+              from_as_string: '2022-03-21T20:22:01.501Z',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+    });
+
     ruleTypeRegistry.list.mockReturnValue(listedTypes);
     authorization.filterByRuleTypeAuthorization.mockResolvedValue(
       new Set([
@@ -134,42 +147,101 @@ describe('aggregate()', () => {
           "ok": 10,
           "pending": 4,
           "unknown": 2,
+          "warning": 1,
+        },
+        "ruleEnabledStatus": Object {
+          "disabled": 2,
+          "enabled": 28,
+        },
+        "ruleMutedStatus": Object {
+          "muted": 3,
+          "unmuted": 27,
+        },
+        "ruleSnoozedStatus": Object {
+          "snoozed": 2,
         },
       }
     `);
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(
-      AlertExecutionStatusValues.length
-    );
-    AlertExecutionStatusValues.forEach((status: string, ndx: number) => {
-      expect(unsecuredSavedObjectsClient.find.mock.calls[ndx]).toEqual([
-        {
-          fields: undefined,
-          filter: `alert.attributes.executionStatus.status:(${status})`,
-          page: 1,
-          perPage: 0,
-          type: 'alert',
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
+      {
+        filter: undefined,
+        page: 1,
+        perPage: 0,
+        type: 'alert',
+        aggs: {
+          status: {
+            terms: { field: 'alert.attributes.executionStatus.status' },
+          },
+          enabled: {
+            terms: { field: 'alert.attributes.enabled' },
+          },
+          muted: {
+            terms: { field: 'alert.attributes.muteAll' },
+          },
+          snoozed: {
+            date_range: {
+              field: 'alert.attributes.snoozeEndTime',
+              format: 'strict_date_time',
+              ranges: [{ from: 'now' }],
+            },
+          },
         },
-      ]);
-    });
+      },
+    ]);
   });
 
   test('supports filters when aggregating', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.aggregate({ options: { filter: 'someTerm' } });
 
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(
-      AlertExecutionStatusValues.length
-    );
-    AlertExecutionStatusValues.forEach((status: string, ndx: number) => {
-      expect(unsecuredSavedObjectsClient.find.mock.calls[ndx]).toEqual([
-        {
-          fields: undefined,
-          filter: `someTerm and alert.attributes.executionStatus.status:(${status})`,
-          page: 1,
-          perPage: 0,
-          type: 'alert',
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
+      {
+        fields: undefined,
+        filter: 'someTerm',
+        page: 1,
+        perPage: 0,
+        type: 'alert',
+        aggs: {
+          status: {
+            terms: { field: 'alert.attributes.executionStatus.status' },
+          },
+          enabled: {
+            terms: { field: 'alert.attributes.enabled' },
+          },
+          muted: {
+            terms: { field: 'alert.attributes.muteAll' },
+          },
+          snoozed: {
+            date_range: {
+              field: 'alert.attributes.snoozeEndTime',
+              format: 'strict_date_time',
+              ranges: [{ from: 'now' }],
+            },
+          },
         },
-      ]);
-    });
+      },
+    ]);
+  });
+
+  test('logs audit event when not authorized to aggregate rules', async () => {
+    const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
+    authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
+
+    await expect(rulesClient.aggregate()).rejects.toThrow();
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_aggregate',
+          outcome: 'failure',
+        }),
+        error: {
+          code: 'Error',
+          message: 'Unauthorized',
+        },
+      })
+    );
   });
 });

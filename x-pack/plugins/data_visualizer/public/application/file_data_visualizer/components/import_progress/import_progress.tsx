@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 import { EuiStepsHorizontal, EuiProgress, EuiSpacer } from '@elastic/eui';
@@ -23,10 +23,10 @@ export interface Statuses {
   parseJSONStatus: IMPORT_STATUS;
   indexCreatedStatus: IMPORT_STATUS;
   ingestPipelineCreatedStatus: IMPORT_STATUS;
-  indexPatternCreatedStatus: IMPORT_STATUS;
+  dataViewCreatedStatus: IMPORT_STATUS;
   uploadProgress: number;
   uploadStatus: IMPORT_STATUS;
-  createIndexPattern: boolean;
+  createDataView: boolean;
   createPipeline: boolean;
   permissionCheckStatus: IMPORT_STATUS;
 }
@@ -38,10 +38,10 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     parseJSONStatus,
     indexCreatedStatus,
     ingestPipelineCreatedStatus,
-    indexPatternCreatedStatus,
+    dataViewCreatedStatus,
     uploadProgress,
     uploadStatus,
-    createIndexPattern,
+    createDataView,
     createPipeline,
   } = statuses;
 
@@ -75,7 +75,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   if (uploadStatus === IMPORT_STATUS.COMPLETE) {
     completedStep = 4;
   }
-  if (indexPatternCreatedStatus === IMPORT_STATUS.COMPLETE) {
+  if (dataViewCreatedStatus === IMPORT_STATUS.COMPLETE) {
     completedStep = 5;
   }
 
@@ -103,10 +103,10 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       defaultMessage: 'Upload data',
     }
   );
-  let createIndexPatternTitle = i18n.translate(
-    'xpack.dataVisualizer.file.importProgress.createIndexPatternTitle',
+  let createDataViewTitle = i18n.translate(
+    'xpack.dataVisualizer.file.importProgress.createDataViewTitle',
     {
-      defaultMessage: 'Create index pattern',
+      defaultMessage: 'Create data view',
     }
   );
 
@@ -198,18 +198,18 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
         defaultMessage: 'Data uploaded',
       }
     );
-    if (createIndexPattern === true) {
-      createIndexPatternTitle = i18n.translate(
-        'xpack.dataVisualizer.file.importProgress.creatingIndexPatternTitle',
+    if (createDataView === true) {
+      createDataViewTitle = i18n.translate(
+        'xpack.dataVisualizer.file.importProgress.creatingDataViewTitle',
         {
-          defaultMessage: 'Creating index pattern',
+          defaultMessage: 'Creating data view',
         }
       );
       statusInfo = (
         <p>
           <FormattedMessage
-            id="xpack.dataVisualizer.file.importProgress.creatingIndexPatternDescription"
-            defaultMessage="Creating index pattern"
+            id="xpack.dataVisualizer.file.importProgress.creatingDataViewDescription"
+            defaultMessage="Creating data view"
           />
         </p>
       );
@@ -218,10 +218,10 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     }
   }
   if (completedStep >= 5) {
-    createIndexPatternTitle = i18n.translate(
-      'xpack.dataVisualizer.file.importProgress.indexPatternCreatedTitle',
+    createDataViewTitle = i18n.translate(
+      'xpack.dataVisualizer.file.importProgress.dataViewCreatedTitle',
       {
-        defaultMessage: 'Index pattern created',
+        defaultMessage: 'Data view created',
       }
     );
     statusInfo = null;
@@ -265,12 +265,12 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
     });
   }
 
-  if (createIndexPattern === true) {
+  if (createDataView === true) {
     steps.push({
-      title: createIndexPatternTitle,
+      title: createDataViewTitle,
       isSelected: uploadStatus === IMPORT_STATUS.COMPLETE,
-      isComplete: indexPatternCreatedStatus === IMPORT_STATUS.COMPLETE,
-      status: indexPatternCreatedStatus,
+      isComplete: dataViewCreatedStatus === IMPORT_STATUS.COMPLETE,
+      status: dataViewCreatedStatus,
       onClick: () => {},
     });
   }

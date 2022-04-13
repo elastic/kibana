@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
-  getCapabilitiesForRollupIndices,
-  IndexPatternsService,
-} from '../../../../../../data/server';
-import { AbstractSearchStrategy } from './abstract_search_strategy';
+import { getCapabilitiesForRollupIndices } from '../../../../../../data/server';
+import type { DataViewsService } from '../../../../../../data_views/common';
+import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 
-import type { FetchedIndexPattern } from '../../../../common/types';
+import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
   VisTypeTimeseriesRequest,
@@ -29,9 +27,10 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
   async search(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesVisDataRequest,
-    bodies: any[]
+    esRequests: EsSearchRequest[],
+    trackedEsSearches?: TrackedEsSearches
   ) {
-    return super.search(requestContext, req, bodies, 'rollup');
+    return super.search(requestContext, req, esRequests, trackedEsSearches, 'rollup');
   }
 
   async getRollupData(
@@ -39,7 +38,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     indexPattern: string
   ) {
     try {
-      const { body } =
+      const body =
         await requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
           index: indexPattern,
         });
@@ -92,7 +91,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
 
   async getFieldsForWildcard(
     fetchedIndexPattern: FetchedIndexPattern,
-    indexPatternsService: IndexPatternsService,
+    indexPatternsService: DataViewsService,
     getCachedIndexPatternFetcher: CachedIndexPatternFetcher,
     capabilities?: unknown
   ) {

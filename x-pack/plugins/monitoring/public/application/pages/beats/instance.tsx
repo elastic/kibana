@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ComponentProps } from '../../route_init';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
@@ -59,7 +59,7 @@ export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/beats/beat/${instance}`;
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<{ summary: { name: string } }>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -71,7 +71,7 @@ export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
     });
 
     setData(response);
-    setBeatName(response.summary.name);
+    setBeatName(response?.summary.name || '');
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
   return (

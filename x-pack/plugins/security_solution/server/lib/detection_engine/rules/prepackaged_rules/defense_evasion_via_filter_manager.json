@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Evasion via Filter Manager",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and \n process.name : \"fltMC.exe\" and process.args : \"unload\"\n",
   "risk_score": 47,
   "rule_id": "06dceabf-adca-48af-ac79-ffdf4c3b1e9a",
@@ -33,14 +34,21 @@
       },
       "technique": [
         {
-          "id": "T1222",
-          "name": "File and Directory Permissions Modification",
-          "reference": "https://attack.mitre.org/techniques/T1222/"
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 9
 }

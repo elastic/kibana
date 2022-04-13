@@ -19,20 +19,21 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Visualization,
   FramePublicAPI,
   VisualizationType,
   VisualizationMap,
   DatasourceMap,
+  Suggestion,
 } from '../../../types';
-import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
+import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
-  updateLayer,
-  updateVisualizationState,
+  insertLayer,
+  removeLayers,
   useLensDispatch,
   useLensSelector,
   VisualizationState,
@@ -120,41 +121,6 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
   const visualization = useLensSelector(selectVisualization);
   const datasourceStates = useLensSelector(selectDatasourceStates);
 
-  function removeLayers(layerIds: string[]) {
-    const activeVisualization =
-      visualization.activeId && props.visualizationMap[visualization.activeId];
-    if (activeVisualization && activeVisualization.removeLayer && visualization.state) {
-      dispatchLens(
-        updateVisualizationState({
-          visualizationId: activeVisualization.id,
-          updater: layerIds.reduce(
-            (acc, layerId) =>
-              activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
-            visualization.state
-          ),
-        })
-      );
-    }
-    layerIds.forEach((layerId) => {
-      const [layerDatasourceId] =
-        Object.entries(props.datasourceMap).find(([datasourceId, datasource]) => {
-          return (
-            datasourceStates[datasourceId] &&
-            datasource.getLayers(datasourceStates[datasourceId].state).includes(layerId)
-          );
-        }) ?? [];
-      if (layerDatasourceId) {
-        dispatchLens(
-          updateLayer({
-            layerId,
-            datasourceId: layerDatasourceId,
-            updater: props.datasourceMap[layerDatasourceId].removeLayer,
-          })
-        );
-      }
-    });
-  }
-
   const commitSelection = (selection: VisualizationSelection) => {
     setFlyoutOpen(false);
 
@@ -166,14 +132,19 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
         ...selection,
         visualizationState: selection.getVisualizationState(),
       },
-      true
+      { clearStagedPreview: true }
     );
 
     if (
       (!selection.datasourceId && !selection.sameDatasources) ||
       selection.dataLoss === 'everything'
     ) {
-      removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
+      dispatchLens(
+        removeLayers({
+          visualizationId: visualization.activeId,
+          layerIds: Object.keys(props.framePublicAPI.datasourceLayers),
+        })
+      );
     }
   };
 
@@ -231,13 +202,11 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
     function addNewLayer() {
       const newLayerId = generateId();
       dispatchLens(
-        updateLayer({
+        insertLayer({
           datasourceId: activeDatasourceId!,
           layerId: newLayerId,
-          updater: props.datasourceMap[activeDatasourceId!].insertLayer,
         })
       );
-
       return newLayerId;
     }
 
@@ -279,10 +248,13 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       if (!flyoutOpen) {
         return { visualizationTypes: [], visualizationsLookup: {} };
       }
-      const subVisualizationId = getCurrentVisualizationId(
-        props.visualizationMap[visualization.activeId || ''],
-        visualization.state
-      );
+      const subVisualizationId =
+        visualization.activeId && props.visualizationMap[visualization.activeId]
+          ? getCurrentVisualizationId(
+              props.visualizationMap[visualization.activeId],
+              visualization.state
+            )
+          : undefined;
       const lowercasedSearchTerm = searchTerm.toLowerCase();
       // reorganize visualizations in groups
       const grouped: Record<
@@ -368,6 +340,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                         <EuiFlexGroup
                           gutterSize="xs"
                           responsive={false}
+                          alignItems="center"
                           className="lnsChartSwitch__append"
                         >
                           {v.selection.dataLoss !== 'nothing' ? (
@@ -397,7 +370,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                               <EuiBadge color="hollow">
                                 <FormattedMessage
                                   id="xpack.lens.chartSwitch.experimentalLabel"
-                                  defaultMessage="Experimental"
+                                  defaultMessage="Technical preview"
                                 />
                               </EuiBadge>
                             </EuiFlexItem>
@@ -465,10 +438,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           isPreFiltered
           data-test-subj="lnsChartSwitchList"
           searchProps={{
-            incremental: true,
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
-            onSearch: (value) => setSearchTerm(value),
+            onChange: (value) => setSearchTerm(value),
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {

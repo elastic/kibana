@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { FormattedDate, FormattedTime } from '@kbn/i18n/react';
+import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 
 interface Props {
   date: Date;

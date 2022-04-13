@@ -27,6 +27,22 @@ export function parseDuration(duration: string): number {
   );
 }
 
+export function formatDuration(duration: string, fullUnit?: boolean): string {
+  const parsed = parseInt(duration, 10);
+  if (isSeconds(duration)) {
+    return `${parsed} ${fullUnit ? (parsed > 1 ? 'seconds' : 'second') : 'sec'}`;
+  } else if (isMinutes(duration)) {
+    return `${parsed} ${fullUnit ? (parsed > 1 ? 'minutes' : 'minute') : 'min'}`;
+  } else if (isHours(duration)) {
+    return `${parsed} ${fullUnit ? (parsed > 1 ? 'hours' : 'hour') : 'hr'}`;
+  } else if (isDays(duration)) {
+    return `${parsed} ${parsed > 1 ? 'days' : 'day'}`;
+  }
+  throw new Error(
+    `Invalid duration "${duration}". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"`
+  );
+}
+
 export function getDurationNumberInItsUnit(duration: string): number {
   return parseInt(duration.replace(/[^0-9.]/g, ''), 10);
 }

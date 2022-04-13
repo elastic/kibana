@@ -35,6 +35,12 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
+          },
+          dns: {
+            question: {
+              name: 'test-dns',
+            },
           },
           agent: {
             name: 'test',
@@ -53,6 +59,8 @@ describe('TelemetryEventsSender', () => {
             test: 'me',
             another: 'nope',
             Ext: {
+              bytes_compressed: 'data up to 4mb',
+              bytes_compressed_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
@@ -63,6 +71,7 @@ describe('TelemetryEventsSender', () => {
               malware_signature: {
                 key1: 'X',
               },
+              header_bytes: 'data in here',
               quarantine_result: true,
               quarantine_message: 'this file is bad',
               something_else: 'nope',
@@ -79,6 +88,7 @@ describe('TelemetryEventsSender', () => {
             nope: 'nope',
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
+            entity_id: 'some_entity_id',
           },
           Responses: '{ "result": 0 }', // >= 7.15
           Target: {
@@ -101,6 +111,12 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
+          },
+          dns: {
+            question: {
+              name: 'test-dns',
+            },
           },
           agent: {
             name: 'test',
@@ -117,10 +133,13 @@ describe('TelemetryEventsSender', () => {
             created: 0,
             path: 'X',
             Ext: {
+              bytes_compressed: 'data up to 4mb',
+              bytes_compressed_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
               },
+              header_bytes: 'data in here',
               malware_classification: {
                 key1: 'X',
               },
@@ -139,6 +158,7 @@ describe('TelemetryEventsSender', () => {
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
+            entity_id: 'some_entity_id',
           },
           Responses: '{ "result": 0 }',
           Target: {

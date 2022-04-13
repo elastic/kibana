@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
@@ -22,7 +22,7 @@ import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_ano
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
-  selectedCells?: AppStateSelectedCells;
+  selectedCells?: AppStateSelectedCells | null;
   bounds?: TimeRangeBounds;
   interval?: number;
   chartsCount: number;
@@ -39,10 +39,12 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       application: { capabilities },
     },
   } = useMlKibana();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+
   const menuItems = useMemo(() => {
     const items = [];
     if (canEditDashboards) {
@@ -75,7 +77,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
                 aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
                   defaultMessage: 'Actions',
                 })}
-                color="subdued"
+                color="text"
                 iconType="boxesHorizontal"
                 onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                 data-test-subj="mlExplorerAnomalyPanelMenu"
@@ -91,20 +93,17 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           </EuiPopover>
         </EuiFlexItem>
       )}
-      {isAddDashboardsActive && selectedJobs && (
+      {isAddDashboardsActive && selectedJobs ? (
         <AddAnomalyChartsToDashboardControl
-          onClose={async (callback) => {
+          onClose={async () => {
             setIsAddDashboardActive(false);
-            if (callback) {
-              await callback();
-            }
           }}
           selectedCells={selectedCells}
           bounds={bounds}
           interval={interval}
           jobIds={jobIds}
         />
-      )}
+      ) : null}
     </>
   );
 };

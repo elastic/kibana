@@ -72,7 +72,6 @@
           "search-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
           "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
           "alert": "4373936518133d7f118940e0441bbf40",
-          "siem-detection-engine-rule-status": "ae783f41c6937db6b7a2ef5c93a9e9b0",
           "ingest-package-policies": "4525de5ba9d036d8322ecfba3bca93f8",
           "map": "9134b47593116d7953f6adba096fc463",
           "legacy-url-alias": "e8dd3b6056ad7e1de32523f457310ecb",
@@ -272,27 +271,23 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
-              "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
-                }
-              }
+            "error": {
+              "type": "keyword"
+            },
+            "metric": {
+              "type": "keyword"
+            },
+            "onboarding": {
+              "type": "keyword"
+            },
+            "sourcemap": {
+              "type": "keyword"
+            },
+            "span": {
+              "type": "keyword"
+            },
+            "transaction": {
+              "type": "keyword"
             }
           }
         },
@@ -2340,43 +2335,6 @@
             },
             "ruleThrottle": {
               "type": "keyword"
-            }
-          }
-        },
-        "siem-detection-engine-rule-status": {
-          "properties": {
-            "alertId": {
-              "type": "keyword"
-            },
-            "bulkCreateTimeDurations": {
-              "type": "float"
-            },
-            "gap": {
-              "type": "text"
-            },
-            "lastFailureAt": {
-              "type": "date"
-            },
-            "lastFailureMessage": {
-              "type": "text"
-            },
-            "lastLookBackDate": {
-              "type": "date"
-            },
-            "lastSuccessAt": {
-              "type": "date"
-            },
-            "lastSuccessMessage": {
-              "type": "text"
-            },
-            "searchAfterTimeDurations": {
-              "type": "float"
-            },
-            "status": {
-              "type": "keyword"
-            },
-            "statusDate": {
-              "type": "date"
             }
           }
         },

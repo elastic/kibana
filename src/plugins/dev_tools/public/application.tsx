@@ -7,20 +7,45 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
-import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+  RouteComponentProps,
+} from 'react-router-dom';
+import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-import { ApplicationStart, ChromeStart, ScopedHistory } from 'src/core/public';
+import type {
+  ApplicationStart,
+  ChromeStart,
+  ScopedHistory,
+  CoreTheme,
+  ExecutionContextStart,
+} from 'src/core/public';
+import { KibanaThemeProvider, useExecutionContext } from '../../kibana_react/public';
+import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
+
+export interface AppServices {
+  docTitleService: DocTitleService;
+  breadcrumbService: BreadcrumbService;
+  executionContext: ExecutionContextStart;
+}
 
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
   updateRoute: (newRoute: string) => void;
+  theme$: Observable<CoreTheme>;
+  appServices: AppServices;
+  location: RouteComponentProps['location'];
 }
 
 interface MountedDevToolDescriptor {
@@ -29,7 +54,15 @@ interface MountedDevToolDescriptor {
   unmountHandler: () => void;
 }
 
-function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapperProps) {
+function DevToolsWrapper({
+  devTools,
+  activeDevTool,
+  updateRoute,
+  theme$,
+  appServices,
+  location,
+}: DevToolsWrapperProps) {
+  const { docTitleService, breadcrumbService } = appServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
 
   useEffect(
@@ -41,23 +74,48 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
     []
   );
 
+  useEffect(() => {
+    docTitleService.setTitle(activeDevTool.title);
+    breadcrumbService.setBreadcrumbs(activeDevTool.title);
+  }, [activeDevTool, docTitleService, breadcrumbService]);
+
+  useExecutionContext(appServices.executionContext, {
+    type: 'application',
+    page: activeDevTool.id,
+  });
+
   return (
     <main className="devApp">
-      <EuiTabs>
+      <EuiTabs style={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
         {devTools.map((currentDevTool) => (
-          <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
-            <EuiTab
-              disabled={currentDevTool.isDisabled()}
-              isSelected={currentDevTool === activeDevTool}
-              onClick={() => {
-                if (!currentDevTool.isDisabled()) {
-                  updateRoute(`/${currentDevTool.id}`);
-                }
-              }}
-            >
-              {currentDevTool.title}
-            </EuiTab>
-          </EuiToolTip>
+          <EuiTab
+            key={currentDevTool.id}
+            disabled={currentDevTool.isDisabled()}
+            isSelected={currentDevTool === activeDevTool}
+            onClick={() => {
+              if (!currentDevTool.isDisabled()) {
+                updateRoute(`/${currentDevTool.id}`);
+              }
+            }}
+          >
+            <EuiToolTip content={currentDevTool.tooltipContent}>
+              <span>
+                {currentDevTool.title}{' '}
+                {currentDevTool.isBeta && (
+                  <EuiBetaBadge
+                    size="s"
+                    className="devApp__tabBeta"
+                    label={i18n.translate('devTools.badge.betaLabel', {
+                      defaultMessage: 'Beta',
+                    })}
+                    tooltipContent={i18n.translate('devTools.badge.betaTooltipText', {
+                      defaultMessage: 'This feature might change drastically in future releases',
+                    })}
+                  />
+                )}
+              </span>
+            </EuiToolTip>
+          </EuiTab>
         ))}
       </EuiTabs>
       <div
@@ -77,11 +135,8 @@ function DevToolsWrapper({ devTools, activeDevTool, updateRoute }: DevToolsWrapp
 
             const params = {
               element,
-              appBasePath: '',
-              onAppLeave: () => undefined,
-              setHeaderActionMenu: () => undefined,
-              // TODO: adapt to use Core's ScopedHistory
-              history: {} as any,
+              location,
+              theme$,
             };
 
             const unmountHandler = await activeDevTool.mount(params);
@@ -122,66 +177,52 @@ function setBadge(application: ApplicationStart, chrome: ChromeStart) {
   });
 }
 
-function setTitle(chrome: ChromeStart) {
-  chrome.docTitle.change(
-    i18n.translate('devTools.pageTitle', {
-      defaultMessage: 'Dev Tools',
-    })
-  );
-}
-
-function setBreadcrumbs(chrome: ChromeStart) {
-  chrome.setBreadcrumbs([
-    {
-      text: i18n.translate('devTools.k7BreadcrumbsDevToolsLabel', {
-        defaultMessage: 'Dev Tools',
-      }),
-      href: '#/',
-    },
-  ]);
-}
-
 export function renderApp(
   element: HTMLElement,
   application: ApplicationStart,
   chrome: ChromeStart,
   history: ScopedHistory,
-  devTools: readonly DevToolApp[]
+  theme$: Observable<CoreTheme>,
+  devTools: readonly DevToolApp[],
+  appServices: AppServices
 ) {
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
   }
 
   setBadge(application, chrome);
-  setBreadcrumbs(chrome);
-  setTitle(chrome);
 
   ReactDOM.render(
     <I18nProvider>
-      <Router>
-        <Switch>
-          {devTools
-            // Only create routes for devtools that are not disabled
-            .filter((devTool) => !devTool.isDisabled())
-            .map((devTool) => (
-              <Route
-                key={devTool.id}
-                path={`/${devTool.id}`}
-                exact={!devTool.enableRouting}
-                render={(props) => (
-                  <DevToolsWrapper
-                    updateRoute={props.history.push}
-                    activeDevTool={devTool}
-                    devTools={devTools}
-                  />
-                )}
-              />
-            ))}
-          <Route path="/">
-            <Redirect to={`/${devTools[0].id}`} />
-          </Route>
-        </Switch>
-      </Router>
+      <KibanaThemeProvider theme$={theme$}>
+        <Router>
+          <Switch>
+            {devTools
+              // Only create routes for devtools that are not disabled
+              .filter((devTool) => !devTool.isDisabled())
+              .map((devTool) => (
+                <Route
+                  key={devTool.id}
+                  path={`/${devTool.id}`}
+                  exact={!devTool.enableRouting}
+                  render={(props) => (
+                    <DevToolsWrapper
+                      updateRoute={props.history.push}
+                      location={props.location}
+                      activeDevTool={devTool}
+                      devTools={devTools}
+                      theme$={theme$}
+                      appServices={appServices}
+                    />
+                  )}
+                />
+              ))}
+            <Route path="/">
+              <Redirect to={`/${devTools[0].id}`} />
+            </Route>
+          </Switch>
+        </Router>
+      </KibanaThemeProvider>
     </I18nProvider>,
     element
   );

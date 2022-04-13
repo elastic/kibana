@@ -10,15 +10,19 @@ import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ESFilter } from '../../../../../src/core/types/elasticsearch';
 import { createEsParams, useEsSearch } from './use_es_search';
+import { IInspectorInfo } from '../../../../../src/plugins/data/common';
+import { TRANSACTION_URL } from '../components/shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
 
 export interface Props {
   sourceField: string;
+  label: string;
   query?: string;
-  indexPatternTitle?: string;
+  dataViewTitle?: string;
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
   cardinalityField?: string;
+  inspector?: IInspectorInfo;
 }
 
 export interface ListItem {
@@ -30,23 +34,17 @@ const uniqueValues = (values: ListItem[], prevValues: ListItem[]) => {
   return uniqBy([...values, ...prevValues], 'label');
 };
 
-export const useValuesList = ({
-  sourceField,
-  indexPatternTitle,
-  query = '',
-  filters,
-  time,
-  keepHistory,
-  cardinalityField,
-}: Props): { values: ListItem[]; loading?: boolean } => {
-  const [debouncedQuery, setDebounceQuery] = useState<string>(query);
-  const [values, setValues] = useState<ListItem[]>([]);
-
-  const { from, to } = time ?? {};
+const getIncludeClause = (sourceField: string, query?: string) => {
+  if (!query) {
+    return '';
+  }
 
   let includeClause = '';
 
-  if (query) {
+  if (sourceField === TRANSACTION_URL) {
+    // for the url we also match leading text
+    includeClause = `*.${query.toLowerCase()}.*`;
+  } else {
     if (query[0].toLowerCase() === query[0]) {
       // if first letter is lowercase we also add the capitalize option
       includeClause = `(${query}|${capitalize(query)}).*`;
@@ -55,6 +53,24 @@ export const useValuesList = ({
       includeClause = `(${query}|${query.toLowerCase()}).*`;
     }
   }
+
+  return includeClause;
+};
+
+export const useValuesList = ({
+  sourceField,
+  dataViewTitle,
+  query = '',
+  filters,
+  time,
+  label,
+  keepHistory,
+  cardinalityField,
+}: Props): { values: ListItem[]; loading?: boolean } => {
+  const [debouncedQuery, setDebounceQuery] = useState<string>(query);
+  const [values, setValues] = useState<ListItem[]>([]);
+
+  const { from, to } = time ?? {};
 
   useDebounce(
     () => {
@@ -71,9 +87,11 @@ export const useValuesList = ({
     }
   }, [query]);
 
+  const includeClause = getIncludeClause(sourceField, query);
+
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: indexPatternTitle!,
+      index: dataViewTitle!,
       body: {
         query: {
           bool: {
@@ -117,7 +135,8 @@ export const useValuesList = ({
         },
       },
     }),
-    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle, sourceField]
+    [debouncedQuery, from, to, JSON.stringify(filters), dataViewTitle, sourceField],
+    { name: `get${label.replace(/\s/g, '')}ValuesList` }
   );
 
   useEffect(() => {

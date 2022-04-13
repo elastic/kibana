@@ -6,24 +6,27 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line no-restricted-syntax
-const alwaysImportedTests = [
+require('../src/setup_node_env');
+require('@kbn/test').runTestsCli([
+  require.resolve('../test/functional/config.ccs.ts'),
   require.resolve('../test/functional/config.js'),
   require.resolve('../test/plugin_functional/config.ts'),
   require.resolve('../test/ui_capabilities/newsfeed_err/config.ts'),
   require.resolve('../test/new_visualize_flow/config.ts'),
-];
-// eslint-disable-next-line no-restricted-syntax
-const onlyNotInCoverageTests = [
+  require.resolve('../test/interactive_setup_api_integration/enrollment_flow.config.ts'),
+  require.resolve('../test/interactive_setup_api_integration/manual_configuration_flow.config.ts'),
+  require.resolve(
+    '../test/interactive_setup_api_integration/manual_configuration_flow_without_tls.config.ts'
+  ),
+  require.resolve('../test/interactive_setup_functional/enrollment_token.config.ts'),
+  require.resolve('../test/interactive_setup_functional/manual_configuration.config.ts'),
+  require.resolve(
+    '../test/interactive_setup_functional/manual_configuration_without_security.config.ts'
+  ),
+  require.resolve(
+    '../test/interactive_setup_functional/manual_configuration_without_tls.config.ts'
+  ),
   require.resolve('../test/api_integration/config.js'),
   require.resolve('../test/interpreter_functional/config.ts'),
   require.resolve('../test/examples/config.js'),
-];
-
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  // eslint-disable-next-line no-restricted-syntax
-  ...alwaysImportedTests,
-  // eslint-disable-next-line no-restricted-syntax
-  ...(!!process.env.CODE_COVERAGE ? [] : onlyNotInCoverageTests),
 ]);

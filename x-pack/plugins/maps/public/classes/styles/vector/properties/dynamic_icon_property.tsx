@@ -10,8 +10,12 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
-// @ts-expect-error
-import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
+import { IVectorStyle } from '../vector_style';
+import {
+  getIconPalette,
+  getMakiSymbolAnchor,
+  // @ts-expect-error
+} from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';
@@ -31,13 +35,9 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     return palette.length;
   }
 
-  syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
+  syncIconWithMb(symbolLayerId: string, mbMap: MbMap) {
     if (this._isIconDynamicConfigComplete()) {
-      mbMap.setLayoutProperty(
-        symbolLayerId,
-        'icon-image',
-        this._getMbIconImageExpression(iconPixelSize)
-      );
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', this._getMbIconImageExpression());
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
@@ -49,10 +49,11 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (this._options.useCustomIconMap && this._options.customIconStops) {
       const stops = [];
       for (let i = 1; i < this._options.customIconStops.length; i++) {
-        const { stop, icon } = this._options.customIconStops[i];
+        const { stop, icon, iconSource } = this._options.customIconStops[i];
         stops.push({
           stop,
           style: icon,
+          iconSource,
         });
       }
 
@@ -64,12 +65,12 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     }
 
     return assignCategoriesToPalette({
-      categories: _.get(this.getCategoryFieldMeta(), 'categories', []),
+      categories: this.getCategoryFieldMeta(),
       paletteValues: getIconPalette(this._options.iconPaletteId),
     });
   }
 
-  _getMbIconImageExpression(iconPixelSize: number) {
+  _getMbIconImageExpression() {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallbackSymbolId) {
@@ -80,13 +81,13 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      mbStops.push(getMakiIconId(style, iconPixelSize));
+      mbStops.push(style);
     });
 
     if (fallbackSymbolId) {
-      mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); // last item is fallback style for anything that does not match provided stops
+      mbStops.push(fallbackSymbolId); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
@@ -106,7 +107,7 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (fallbackSymbolId) {
       mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _isIconDynamicConfigComplete() {
@@ -116,21 +117,26 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps) {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
     const breaks = [];
+    const layerStyle = this._layer.getCurrentStyle() as IVectorStyle;
     stops.forEach(({ stop, style }) => {
       if (stop) {
+        const svg = layerStyle.getIconSvg(style);
         breaks.push({
           color: 'grey',
           label: this.formatField(stop),
           symbolId: style,
+          svg,
         });
       }
     });
 
     if (fallbackSymbolId) {
+      const svg = layerStyle.getIconSvg(fallbackSymbolId);
       breaks.push({
         color: 'grey',
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
+        label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
         symbolId: fallbackSymbolId,
+        svg,
       });
     }
 

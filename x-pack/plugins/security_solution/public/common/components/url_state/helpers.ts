@@ -10,7 +10,8 @@ import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter, Query } from '@kbn/es-query';
+
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
@@ -24,7 +25,7 @@ import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
-import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
@@ -93,6 +94,9 @@ export const replaceQueryStringInLocation = (
 export const getUrlType = (pageName: string): UrlStateType => {
   if (pageName === SecurityPageName.overview) {
     return 'overview';
+  }
+  if (pageName === SecurityPageName.landing) {
+    return 'get_started';
   } else if (pageName === SecurityPageName.hosts) {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
@@ -106,7 +110,7 @@ export const getUrlType = (pageName: string): UrlStateType => {
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {
-    return 'case';
+    return 'cases';
   } else if (pageName === SecurityPageName.administration) {
     return 'administration';
   }
@@ -156,9 +160,18 @@ export const makeMapStateToProps = () => {
     }
     const sourcerer = getSourcererScopes(state);
     const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-    const selectedPatterns: SourcererScopePatterns = activeScopes
+    const selectedPatterns: SourcererUrlState = activeScopes
       .filter((scope) => scope === SourcererScopeName.default)
-      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
+      .reduce(
+        (acc, scope) => ({
+          ...acc,
+          [scope]: {
+            id: sourcerer[scope]?.selectedDataViewId,
+            selectedPatterns: sourcerer[scope]?.selectedPatterns,
+          },
+        }),
+        {}
+      );
 
     return {
       urlState: {
@@ -199,8 +212,11 @@ export const updateTimerangeUrl = (
   return timeRange;
 };
 
-export const isQueryStateEmpty = (queryState: ValueUrlState | null, urlKey: KeyUrlState) =>
-  queryState === null ||
+export const isQueryStateEmpty = (
+  queryState: ValueUrlState | undefined | null,
+  urlKey: KeyUrlState
+): boolean =>
+  queryState == null ||
   (urlKey === CONSTANTS.appQuery && isEmpty((queryState as Query).query)) ||
   (urlKey === CONSTANTS.filters && isEmpty(queryState)) ||
   (urlKey === CONSTANTS.timeline && (queryState as TimelineUrl).id === '');

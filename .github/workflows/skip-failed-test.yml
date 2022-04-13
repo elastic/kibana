@@ -1,0 +1,45 @@
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  issue_commented:
+    name: Skip failed test on comment
+    if: |
+      !github.event.issue.pull_request
+      && startsWith(github.event.comment.body, '/skip')
+      && contains(github.event.issue.labels.*.name, 'failed-test')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+        with:
+          repository: 'elastic/kibana-github-actions'
+          ref: main
+          path: ./actions
+
+      - name: Install Actions
+        run: npm install --production --prefix ./actions
+
+      - name: User Permission Check
+        uses: ./actions/permission-check
+        with:
+          permission: admin
+          token: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Checkout kibana-operations
+        uses: actions/checkout@v2
+        with:
+          repository: 'elastic/kibana-operations'
+          ref: main
+          path: ./kibana-operations
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
+
+      - name: Skip failed test
+        working-directory: ./kibana-operations/triage
+        env:
+          GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+        run: |
+          npm install
+          node failed-test-auto ${{github.event.issue.number}}

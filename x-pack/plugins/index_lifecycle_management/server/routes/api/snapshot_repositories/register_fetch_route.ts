@@ -29,10 +29,10 @@ export const registerFetchRoute = ({ router, license }: RouteDependencies) => {
 
       try {
         const esResult = await ctx.core.elasticsearch.client.asCurrentUser.snapshot.getRepository({
-          repository: '*',
+          name: '*',
         });
         const repos: ListSnapshotReposResponse = {
-          repositories: Object.keys(esResult.body),
+          repositories: Object.keys(esResult),
         };
         return response.ok({ body: repos });
       } catch (e) {

@@ -15,6 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Enable Host Network Discovery via Netsh",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\nprocess.name : \"netsh.exe\" and\nprocess.args : (\"firewall\", \"advfirewall\") and process.args : \"group=Network Discovery\" and process.args : \"enable=Yes\"\n",
   "risk_score": 47,
   "rule_id": "8b4f0816-6a65-4630-86a6-c21c179c0d09",
@@ -41,9 +42,9 @@
           "reference": "https://attack.mitre.org/techniques/T1562/",
           "subtechnique": [
             {
-              "id": "T1562.001",
-              "name": "Disable or Modify Tools",
-              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+              "id": "T1562.004",
+              "name": "Disable or Modify System Firewall",
+              "reference": "https://attack.mitre.org/techniques/T1562/004/"
             }
           ]
         }
@@ -52,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

@@ -10,6 +10,13 @@ import { resolve } from 'path';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
+// Docker image to use for Fleet API integration tests.
+// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
+// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
+// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
+export const dockerImage =
+  'docker.elastic.co/package-registry/distribution:e1a3906e0c9944ecade05308022ba35eb0ebd00a';
+
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
@@ -46,7 +53,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
       resolve(__dirname, './apps/api_keys'),
-      resolve(__dirname, './apps/index_patterns'),
+      resolve(__dirname, './apps/data_views'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
       resolve(__dirname, './apps/ingest_pipelines'),
@@ -56,7 +63,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
-      resolve(__dirname, './apps/reporting'),
       resolve(__dirname, './apps/lens'), // smokescreen tests cause flakiness in other tests
 
       // This license_management file must be last because it is destructive.
@@ -82,11 +88,10 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
-        '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
-        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
       ],
     },
     uiSettings: {
@@ -113,6 +118,9 @@ export default async function ({ readConfigFile }) {
       },
       logstashPipelines: {
         pathname: '/app/management/ingest/pipelines',
+      },
+      cases: {
+        pathname: '/app/management/insightsAndAlerting/cases/',
       },
       maps: {
         pathname: '/app/maps',
@@ -214,6 +222,11 @@ export default async function ({ readConfigFile }) {
     },
     security: {
       roles: {
+        test_monitoring: {
+          elasticsearch: {
+            cluster: ['monitor'],
+          },
+        },
         test_logstash_reader: {
           elasticsearch: {
             cluster: [],
@@ -412,6 +425,14 @@ export default async function ({ readConfigFile }) {
         },
 
         global_devtools_read: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'all'],
+              },
+            ],
+          },
           kibana: [
             {
               feature: {
@@ -443,9 +464,7 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [
             {
-              feature: {
-                discover: ['read'],
-              },
+              base: ['all'],
               spaces: ['*'],
             },
           ],
@@ -481,7 +500,7 @@ export default async function ({ readConfigFile }) {
           },
         },
 
-        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        // Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
             cluster: ['manage_security', 'manage_api_key'],
@@ -512,6 +531,14 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_ilm'],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
         },
 
         index_management_user: {
@@ -522,6 +549,25 @@ export default async function ({ readConfigFile }) {
                 names: ['*'],
                 privileges: ['all'],
               },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
+        snapshot_restore_user: {
+          elasticsearch: {
+            cluster: [
+              'monitor',
+              'manage_slm',
+              'cluster:admin/snapshot',
+              'cluster:admin/repository',
             ],
           },
           kibana: [
@@ -563,6 +609,27 @@ export default async function ({ readConfigFile }) {
         remote_clusters_user: {
           elasticsearch: {
             cluster: ['manage'],
+          },
+        },
+
+        global_alerts_logs_all_else_read: {
+          kibana: [
+            {
+              feature: {
+                apm: ['read'],
+                logs: ['all'],
+                infrastructure: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
           },
         },
       },

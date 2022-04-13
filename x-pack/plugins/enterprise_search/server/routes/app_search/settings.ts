@@ -38,6 +38,16 @@ export function registerSettingsRoutes({
               enabled: schema.boolean(),
             })
           ),
+          audit: schema.maybe(
+            schema.object({
+              enabled: schema.boolean(),
+            })
+          ),
+          crawler: schema.maybe(
+            schema.object({
+              enabled: schema.boolean(),
+            })
+          ),
         }),
       },
     },

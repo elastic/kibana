@@ -16,9 +16,9 @@ isHidden(type: string): boolean;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
+|  type | string |  |
 
 <b>Returns:</b>
 
-`boolean`
+boolean
 

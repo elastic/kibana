@@ -26,6 +26,10 @@ const MOCK_VALUES = {
     },
     queries: ['some query'],
   },
+  // EngineLogic
+  engine: {
+    adaptive_relevance_suggestions_active: true,
+  },
 };
 
 describe('SuggestedDocumentsCallout', () => {
@@ -40,8 +44,17 @@ describe('SuggestedDocumentsCallout', () => {
     expect(wrapper.is(SuggestionsCallout));
   });
 
-  it('is empty when the suggested is undefined', () => {
+  it('is empty when the suggestion is undefined', () => {
     setMockValues({ ...MOCK_VALUES, curation: {} });
+
+    const wrapper = shallow(<SuggestedDocumentsCallout />);
+
+    expect(wrapper.isEmptyRender()).toBe(true);
+  });
+
+  it('is empty when suggestions are not active', () => {
+    const values = set('engine.adaptive_relevance_suggestions_active', false, MOCK_VALUES);
+    setMockValues(values);
 
     const wrapper = shallow(<SuggestedDocumentsCallout />);
 

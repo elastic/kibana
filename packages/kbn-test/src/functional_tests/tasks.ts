@@ -9,7 +9,8 @@
 import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner, ToolingLog, REPO_ROOT, getTimeReporter } from '@kbn/dev-utils';
+import { withProcRunner, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
 
 import {
@@ -22,7 +23,7 @@ import {
   CreateFtrOptions,
 } from './lib';
 
-import { readConfigFile } from '../functional_test_runner/lib';
+import { readConfigFile, EsVersion } from '../functional_test_runner/lib';
 
 const makeSuccessMessage = (options: StartServerOptions) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
@@ -54,6 +55,7 @@ interface RunTestsParams extends CreateFtrOptions {
   configs: string[];
   /** run from source instead of snapshot */
   esFrom?: string;
+  esVersion: EsVersion;
   createLogger: () => ToolingLog;
   extraKbnOpts: string[];
   assertNoneExcluded: boolean;
@@ -78,12 +80,9 @@ export async function runTests(options: RunTestsParams) {
     log.write('--- asserting that all tests belong to a ciGroup');
     for (const configPath of options.configs) {
       log.info('loading', configPath);
-      log.indent(4);
-      try {
+      await log.indent(4, async () => {
         await assertNoneExcluded({ configPath, options: { ...options, log } });
-      } finally {
-        log.indent(-4);
-      }
+      });
       continue;
     }
 
@@ -93,43 +92,45 @@ export async function runTests(options: RunTestsParams) {
   log.write('--- determining which ftr configs to run');
   const configPathsWithTests: string[] = [];
   for (const configPath of options.configs) {
-    log.info('testing', configPath);
-    log.indent(4);
-    try {
+    log.info('testing', relative(REPO_ROOT, configPath));
+    await log.indent(4, async () => {
       if (await hasTests({ configPath, options: { ...options, log } })) {
         configPathsWithTests.push(configPath);
       }
-    } finally {
-      log.indent(-4);
-    }
+    });
   }
 
-  for (const configPath of configPathsWithTests) {
-    log.write(`--- Running ${relative(REPO_ROOT, configPath)}`);
+  for (const [i, configPath] of configPathsWithTests.entries()) {
+    await log.indent(0, async () => {
+      const progress = `${i + 1}/${configPathsWithTests.length}`;
+      log.write(`--- [${progress}] Running ${relative(REPO_ROOT, configPath)}`);
 
-    await withProcRunner(log, async (procs) => {
-      const config = await readConfigFile(log, configPath);
+      await withProcRunner(log, async (procs) => {
+        const config = await readConfigFile(log, options.esVersion, configPath);
 
-      let es;
-      try {
-        es = await runElasticsearch({ config, options: { ...options, log } });
-        await runKibanaServer({ procs, config, options });
-        await runFtr({ configPath, options: { ...options, log } });
-      } finally {
+        let shutdownEs;
         try {
-          const delay = config.get('kbnTestServer.delayShutdown');
-          if (typeof delay === 'number') {
-            log.info('Delaying shutdown of Kibana for', delay, 'ms');
-            await new Promise((r) => setTimeout(r, delay));
+          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
+            shutdownEs = await runElasticsearch({ ...options, log, config });
           }
-
-          await procs.stop('kibana');
+          await runKibanaServer({ procs, config, options });
+          await runFtr({ configPath, options: { ...options, log } });
         } finally {
-          if (es) {
-            await es.cleanup();
+          try {
+            const delay = config.get('kbnTestServer.delayShutdown');
+            if (typeof delay === 'number') {
+              log.info('Delaying shutdown of Kibana for', delay, 'ms');
+              await new Promise((r) => setTimeout(r, delay));
+            }
+
+            await procs.stop('kibana');
+          } finally {
+            if (shutdownEs) {
+              await shutdownEs();
+            }
           }
         }
-      }
+      });
     });
   }
 }
@@ -145,6 +146,7 @@ interface StartServerOptions {
   createLogger: () => ToolingLog;
   extraKbnOpts: string[];
   useDefaultConfig?: boolean;
+  esVersion: EsVersion;
 }
 
 export async function startServers({ ...options }: StartServerOptions) {
@@ -162,9 +164,9 @@ export async function startServers({ ...options }: StartServerOptions) {
   };
 
   await withProcRunner(log, async (procs) => {
-    const config = await readConfigFile(log, options.config);
+    const config = await readConfigFile(log, options.esVersion, options.config);
 
-    const es = await runElasticsearch({ config, options: opts });
+    const shutdownEs = await runElasticsearch({ ...opts, config });
     await runKibanaServer({
       procs,
       config,
@@ -172,7 +174,7 @@ export async function startServers({ ...options }: StartServerOptions) {
         ...opts,
         extraKbnOpts: [
           ...options.extraKbnOpts,
-          ...(options.installDir ? [] : ['--dev', '--no-dev-config']),
+          ...(options.installDir ? [] : ['--dev', '--no-dev-config', '--no-dev-credentials']),
         ],
       },
     });
@@ -188,7 +190,7 @@ export async function startServers({ ...options }: StartServerOptions) {
     log.success(makeSuccessMessage(options));
 
     await procs.waitForAllToStop();
-    await es.cleanup();
+    await shutdownEs();
   });
 }
 

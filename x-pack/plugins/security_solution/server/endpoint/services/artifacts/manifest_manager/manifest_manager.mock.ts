@@ -42,14 +42,14 @@ export const mockFindExceptionListItemResponses = (
   responses: Record<string, Record<string, ExceptionListItemSchema[]>>
 ) => {
   return jest.fn().mockImplementation((options: FindExceptionListItemOptions) => {
-    const matches = options.filter!.match(FILTER_REGEXP) || [];
+    const matches = options.filter?.match(FILTER_REGEXP) || [];
 
-    if (matches[4] && responses[options.listId]?.[`${matches![1]}-${matches[4]}`]) {
+    if (matches[4] && responses[options.listId]?.[`${matches?.[1]}-${matches[4]}`]) {
       return createExceptionListResponse(
-        responses[options.listId]?.[`${matches![1]}-${matches[4]}`] || []
+        responses[options.listId]?.[`${matches?.[1]}-${matches[4]}`] || []
       );
     } else {
-      return createExceptionListResponse(responses[options.listId]?.[matches![1] || ''] || []);
+      return createExceptionListResponse(responses[options.listId]?.[matches?.[1] || ''] || []);
     }
   });
 };

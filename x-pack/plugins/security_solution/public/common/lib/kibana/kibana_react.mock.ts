@@ -10,7 +10,7 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, themeServiceMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { securityMock } from '../../../../../../plugins/security/public/mocks';
@@ -32,8 +32,6 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
-  DEFAULT_TRANSFORMS,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
@@ -61,10 +59,6 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-    idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
-  },
-  [DEFAULT_TRANSFORMS]: {
-    enabled: false,
   },
 };
 
@@ -91,8 +85,9 @@ export const createUseUiSetting$Mock = () => {
   ];
 };
 
-export const createStartServicesMock = (): StartServices => {
-  const core = coreMock.createStart();
+export const createStartServicesMock = (
+  core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
+): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();
@@ -140,6 +135,13 @@ export const createStartServicesMock = (): StartServices => {
             next: jest.fn(),
             unsubscribe: jest.fn(),
           })),
+          pipe: jest.fn().mockImplementation(() => ({
+            subscribe: jest.fn().mockImplementation(() => ({
+              error: jest.fn(),
+              next: jest.fn(),
+              unsubscribe: jest.fn(),
+            })),
+          })),
         })),
       },
     },
@@ -148,6 +150,9 @@ export const createStartServicesMock = (): StartServices => {
     fleet,
     ml: {
       locator,
+    },
+    theme: {
+      theme$: themeServiceMock.createTheme$(),
     },
   } as unknown as StartServices;
 };

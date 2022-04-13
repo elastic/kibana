@@ -30,21 +30,21 @@ export const latestConfigMapper = {
 
 /**
  * Provides available options for unique_key and sort fields
- * @param indexPattern
+ * @param dataView
  * @param aggConfigs
  * @param runtimeMappings
  */
 function getOptions(
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern'],
+  dataView: StepDefineFormProps['searchItems']['dataView'],
   aggConfigs: AggConfigs,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ) {
   const aggConfig = aggConfigs.aggs[0];
   const param = aggConfig.type.params.find((p) => p.type === 'field');
-  const filteredIndexPatternFields = param
+  const filteredDataViewFields = param
     ? (param as unknown as FieldParamType)
         .getAvailableFields(aggConfig)
-        // runtimeMappings may already include runtime fields defined by the index pattern
+        // runtimeMappings may already include runtime fields defined by the data view
         .filter((ip) => ip.runtimeField === undefined)
     : [];
 
@@ -54,7 +54,7 @@ function getOptions(
     ? Object.keys(runtimeMappings).map((k) => ({ label: k, value: k }))
     : [];
 
-  const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = filteredIndexPatternFields
+  const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = filteredDataViewFields
     .filter((v) => !ignoreFieldNames.has(v.name))
     .map((v) => ({
       label: v.displayName,
@@ -70,7 +70,7 @@ function getOptions(
         }))
     : [];
 
-  const indexPatternFieldsSortOptions: Array<EuiComboBoxOptionOption<string>> = indexPattern.fields
+  const dataViewFieldsSortOptions: Array<EuiComboBoxOptionOption<string>> = dataView.fields
     // The backend API for `latest` allows all field types for sort but the UI will be limited to `date`.
     .filter((v) => !ignoreFieldNames.has(v.name) && v.sortable && v.type === 'date')
     .map((v) => ({
@@ -83,9 +83,7 @@ function getOptions(
 
   return {
     uniqueKeyOptions: [...uniqueKeyOptions, ...runtimeFieldsOptions].sort(sortByLabel),
-    sortFieldOptions: [...indexPatternFieldsSortOptions, ...runtimeFieldsSortOptions].sort(
-      sortByLabel
-    ),
+    sortFieldOptions: [...dataViewFieldsSortOptions, ...runtimeFieldsSortOptions].sort(sortByLabel),
   };
 }
 
@@ -112,7 +110,7 @@ export function validateLatestConfig(config?: LatestFunctionConfig) {
 
 export function useLatestFunctionConfig(
   defaults: StepDefineExposedState['latestConfig'],
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern'],
+  dataView: StepDefineFormProps['searchItems']['dataView'],
   runtimeMappings: StepDefineExposedState['runtimeMappings']
 ): {
   config: LatestFunctionConfigUI;
@@ -130,9 +128,9 @@ export function useLatestFunctionConfig(
   const { data } = useAppDependencies();
 
   const { uniqueKeyOptions, sortFieldOptions } = useMemo(() => {
-    const aggConfigs = data.search.aggs.createAggConfigs(indexPattern, [{ type: 'terms' }]);
-    return getOptions(indexPattern, aggConfigs, runtimeMappings);
-  }, [indexPattern, data.search.aggs, runtimeMappings]);
+    const aggConfigs = data.search.aggs.createAggConfigs(dataView, [{ type: 'terms' }]);
+    return getOptions(dataView, aggConfigs, runtimeMappings);
+  }, [dataView, data.search.aggs, runtimeMappings]);
 
   const updateLatestFunctionConfig = useCallback(
     (update) =>

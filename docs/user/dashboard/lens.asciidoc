@@ -10,9 +10,11 @@ With *Lens*, you can:
 
 * Create area, line, and bar charts with layers to display multiple indices and chart types.
 * Change the aggregation function to change the data in the visualization.
+* Create custom tables.
 * Perform math on aggregations using *Formula*.
 * Use time shifts to compare the data in two time intervals, such as month over month.
-* Create custom tables.
+* Add annotations and reference lines.
+
 
 ++++
 <script type="text/javascript" async 
@@ -48,28 +50,32 @@ Choose the data you want to visualize.
 
 . If you want to learn more about the data a field contains, click the field.
 
+. To visualize more than one {data-source}, click *Add layer > Visualization*, then select the {data-source}.
+
 Edit and delete.
 
 . To change the aggregation *Quick function* and display options, click the field in the layer pane. 
 
 . To delete a field, close the configuration options, then click *X* next to the field.
 
+TIP: You can manually apply the changes you make, which is helpful when creating large and complex visualizations. To manually apply your changes, click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
+
 [float]
 [[change-the-fields]]
 ==== Change the fields list
 
-Change the fields list to display a different index pattern, different time range, or add your own fields.
+Change the fields list to display a different {data-source}, different time range, or add your own fields.
 
-* To create a visualization with fields in a different index pattern, open the *Change index pattern* dropdown, then select the index pattern. 
+* To create a visualization with fields in a different {data-source}, open the *Data view* dropdown, then select the {data-source}. 
 
 * If the fields list is empty, change the <<set-time-filter,time filter>>.
 
-* To add fields, open the action menu (*...*) next to the *Change index pattern* dropdown, then select *Add field to index pattern*.
+* To add fields, open the action menu (*...*) next to the *Data view* dropdown, then select *Add field to {data-source}*.
 +
 [role="screenshot"]
-image:images/runtime-field-menu.png[Dropdown menu located next to index pattern field with items for adding and managing fields, width=50%]
+image:images/runtime-field-menu.png[Dropdown menu located next to {data-source} field with items for adding and managing fields, width=50%]
 +
-For more information about adding fields to index patterns and examples, refer to <<runtime-fields>>.
+For more information about adding fields to {data-sources} and examples, refer to <<runtime-fields>>.
 
 [float]
 [[create-custom-tables]]
@@ -177,6 +183,48 @@ Compare your real-time data set to the results that are offset by a time increme
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
+[[add-annotations]]
+==== Add annotations
+
+preview::[]
+
+Annotations allow you to call out specific points in your visualizations that are important, such as a major change in the data. You can add text and icons to annotations and customize the appearance, such as the line format and color. 
+
+[role="screenshot"]
+image::images/lens_annotations_8.2.0.png[Lens annotations]
+
+. In the layer pane, click *Add layer > Annotations*.
+
+. To open the annotation options, click *Event*.
+
+. Specify the *Annotation date*, then change the *Appearance* options you want to display.
+
+. Click *Close*.
+
+[float]
+[[add-reference-lines]]
+==== Add reference lines
+
+With reference lines, you can identify specific values in your visualizations with icons, colors, and other display options. You can add reference lines to any visualization type that displays axes.
+
+For example, to track the number of bytes in the 75th percentile, add a shaded *Percentile* reference line to your time series visualization.  
+
+[role="screenshot"]
+image::images/lens_referenceLine_7.16.png[Lens drag and drop focus state]
+
+. In the layer pane, click *Add layer > Reference lines*.
+
+. Click the reference line value, then specify the reference line you want to use:
+
+* To add a static reference line, click *Static*, then enter the reference line value you want to use.
+
+* To add a dynamic reference line, click *Quick functions*, then click and configure the functions you want to use.
+
+* To calculate the reference line value with math, click *Formula*, then enter the formula.
+
+. Specify the display options, such as *Display name* and *Icon*, then click *Close*.
+
+[float]
 [[filter-the-data]]
 ==== Apply filters
 
@@ -224,7 +272,7 @@ In the legend, click the field, then choose one of the following options:
 [[configure-the-visualization-components]]
 ==== Configure the visualization components
 
-Each visualiztion type comes with a set of components that you access from the editor toolbar.
+Each visualization type comes with a set of components that you access from the editor toolbar.
 
 The following component menus are available:
 
@@ -237,8 +285,38 @@ The following component menus are available:
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
 
 [float]
+[[explore-lens-data-in-discover]]
+=== Explore the data in Discover
+
+When your visualization includes one data view, you can open and explore the visualization data in *Discover*.
+
+To get started, click *Explore data in Discover* in the toolbar.
+
+For more information about exploring your data with *Discover*, check out <<discover,Discover>>.
+
+[float]
+[[view-data-and-requests]]
+==== View the visualization data and requests
+
+To view the data included in the visualization and the requests that collected the data, use the *Inspector*.
+
+. In the toolbar, click *Inspect*.
+
+. Open the *View* dropdown, then click *Data*.
+
+.. From the dropdown, select the table that contains the data you want to view.
+
+.. To download the data, click *Download CSV*, then select the format type.
+
+. Open the *View* dropdown, then click *Requests*.
+
+.. From the dropdown, select the requests you want to view.
+
+.. To view the requests in *Console*, click *Request*, then click *Open in Console*.
+
+[float]
 [[save-the-lens-panel]]
-===== Save and add the panel
+==== Save and add the panel
 
 Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
 
@@ -408,7 +486,23 @@ To configure the bounds, use the menus in the editor toolbar. Bar and area chart
 .*Is it possible to display icons in data tables?*
 [%collapsible]
 ====
-You can display icons with <<managing-index-patterns, field formatter>> in data tables.
+You can display icons with <<managing-data-views, field formatters>> in data tables.
+====
+
+[discrete]
+[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
+.*How do I inspect {es} queries in visualizations?*
+[%collapsible]
+====
+You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
+====
+
+[discrete]
+[[how-to-isolate-a-single-series-in-a-chart]]
+.*How do I isolate a single series in a chart?*
+[%collapsible]
+====
+For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically deselected.
 ====
 
 [discrete]
@@ -441,20 +535,4 @@ Pagination in a data table is unsupported. To use pagination in data tables, cre
 [%collapsible]
 ====
 Specifying the color for a single data point, such as a single bar or line, is unsupported.
-====
-
-[discrete]
-[[is-it-possible-to-inspect-the-elasticsearch-queries-in-Lens]]
-.*How do I inspect {es} queries in visualizations?*
-[%collapsible]
-====
-You can inspect the requests sent by the visualization to {es} using the Inspector. It can be accessed within the editor or in the dashboard.
-====
-
-[discrete]
-[[how-to-isolate-a-single-series-in-a-chart]]
-.*How do I isolate a single series in a chart?*
-[%collapsible]
-====
-For area, line, and bar charts, press Shift, then click the series in the legend. All other series are automatically unselected.
 ====

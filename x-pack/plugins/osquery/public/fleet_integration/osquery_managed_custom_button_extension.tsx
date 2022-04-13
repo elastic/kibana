@@ -6,12 +6,13 @@
  */
 
 import { EuiLoadingContent } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { PackageCustomExtensionComponentProps } from '../../../fleet/public';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
-import { useKibana } from '../common/lib/kibana';
+import { MissingPrivileges } from '../routes/components/missing_privileges';
+import { useFetchStatus } from './use_fetch_status';
 
 /**
  * Exports Osquery-specific package policy instructions
@@ -19,20 +20,14 @@ import { useKibana } from '../common/lib/kibana';
  */
 export const OsqueryManagedCustomButtonExtension = React.memo<PackageCustomExtensionComponentProps>(
   () => {
-    const [disabled, setDisabled] = React.useState<boolean | null>(null);
-    const { http } = useKibana().services;
+    const { loading, disabled, permissionDenied } = useFetchStatus();
 
-    useEffect(() => {
-      const fetchStatus = () => {
-        http.get('/internal/osquery/status').then((response) => {
-          setDisabled(response.install_status !== 'installed');
-        });
-      };
-      fetchStatus();
-    }, [http]);
-
-    if (disabled === null) {
+    if (loading) {
       return <EuiLoadingContent lines={5} />;
+    }
+
+    if (permissionDenied) {
+      return <MissingPrivileges />;
     }
 
     return (

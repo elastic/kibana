@@ -6,10 +6,10 @@
  */
 
 // The Annotation interface is based on annotation documents stored in the
-// `.ml-annotations-6` index, accessed via the `.ml-annotations-[read|write]` aliases.
+// `.ml-annotations-*` index, accessed via the `.ml-annotations-[read|write]` aliases.
 
 // Annotation document mapping:
-// PUT .ml-annotations-6
+// PUT .ml-annotations-000001
 // {
 //   "mappings": {
 //     "annotation": {
@@ -54,8 +54,8 @@
 // POST /_aliases
 // {
 //     "actions" : [
-//         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations-read" } },
-//         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations-write" } }
+//         { "add" : { "index" : ".ml-annotations-000001", "alias" : ".ml-annotations-read" } },
+//         { "add" : { "index" : ".ml-annotations-000001", "alias" : ".ml-annotations-write" } }
 //     ]
 // }
 
@@ -118,26 +118,8 @@ export function isAnnotations(arg: any): arg is Annotations {
   return arg.every((d: Annotation) => isAnnotation(d));
 }
 
-export interface FieldToBucket {
-  field: string;
-  missing?: string | number;
-}
-
-export interface FieldToBucketResult {
-  key: string;
-  doc_count: number;
-}
-
-export interface TermAggregationResult {
-  doc_count_error_upper_bound: number;
-  sum_other_doc_count: number;
-  buckets: FieldToBucketResult[];
-}
-
-export type EsAggregationResult = Record<string, TermAggregationResult>;
-
 export interface GetAnnotationsResponse {
-  aggregations?: EsAggregationResult;
+  totalCount: number;
   annotations: Record<string, Annotations>;
   error?: string;
   success: boolean;
@@ -145,6 +127,6 @@ export interface GetAnnotationsResponse {
 
 export interface AnnotationsTable {
   annotationsData: Annotations;
-  aggregations: EsAggregationResult;
   error?: string;
+  totalCount?: number;
 }

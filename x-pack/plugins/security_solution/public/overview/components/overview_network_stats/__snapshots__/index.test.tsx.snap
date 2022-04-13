@@ -38,6 +38,8 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
+    buttonElement="button"
+    element="div"
     id="network-stat-accordion-groupauditbeat"
     initialIsOpen={false}
     isLoading={false}
@@ -113,6 +115,8 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
+    buttonElement="button"
+    element="div"
     id="network-stat-accordion-groupfilebeat"
     initialIsOpen={false}
     isLoading={false}
@@ -316,6 +320,8 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
+    buttonElement="button"
+    element="div"
     id="network-stat-accordion-grouppacketbeat"
     initialIsOpen={false}
     isLoading={false}

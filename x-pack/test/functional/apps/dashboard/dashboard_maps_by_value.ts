@@ -23,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const kibanaServer = getService('kibanaServer');
 
   const LAYER_NAME = 'World Countries';
   let mapCounter = 0;
@@ -77,7 +78,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('dashboard maps by value', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('adding a map by value', () => {

@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { assign, cloneDeep } from 'lodash';
+import { SavedObjectsClientContract } from 'kibana/public';
+import type { ResolvedSimpleSavedObject } from 'src/core/public';
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
@@ -15,6 +18,7 @@ import { extractReferences, injectReferences } from '../../common/saved_dashboar
 
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { DashboardOptions } from '../types';
+import { RawControlGroupAttributes } from '../application';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;
@@ -32,12 +36,36 @@ export interface DashboardSavedObject extends SavedObject {
   getQuery(): Query;
   getFilters(): Filter[];
   getFullEditPath: (editMode?: boolean) => string;
+  outcome?: ResolvedSimpleSavedObject['outcome'];
+  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+
+  controlGroupInput?: Omit<RawControlGroupAttributes, 'id'>;
 }
+
+const defaults = {
+  title: '',
+  hits: 0,
+  description: '',
+  panelsJSON: '[]',
+  optionsJSON: JSON.stringify({
+    // for BWC reasons we can't default dashboards that already exist without this setting to true.
+    useMargins: true,
+    syncColors: false,
+    hidePanelTitles: false,
+  } as DashboardOptions),
+  version: 1,
+  timeRestore: false,
+  timeTo: undefined,
+  timeFrom: undefined,
+  refreshInterval: undefined,
+};
 
 // Used only by the savedDashboards service, usually no reason to change this
 export function createSavedDashboardClass(
   savedObjectStart: SavedObjectsStart,
-  embeddableStart: EmbeddableStart
+  embeddableStart: EmbeddableStart,
+  savedObjectsClient: SavedObjectsClientContract
 ): new (id: string) => DashboardSavedObject {
   class SavedDashboard extends savedObjectStart.SavedObjectClass {
     // save these objects with the 'dashboard' type
@@ -63,12 +91,23 @@ export function createSavedDashboardClass(
           value: { type: 'integer' },
         },
       },
+      controlGroupInput: {
+        type: 'object',
+        properties: {
+          controlStyle: { type: 'keyword' },
+          panelsJSON: { type: 'text' },
+        },
+      },
     };
     public static fieldOrder = ['title', 'description'];
     public static searchSource = true;
     public showInRecentlyAccessed = true;
 
-    constructor(id: string) {
+    public outcome?: ResolvedSimpleSavedObject['outcome'];
+    public aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+    public aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+
+    constructor(arg: { id: string; useResolve: boolean } | string) {
       super({
         type: SavedDashboard.type,
         mapping: SavedDashboard.mapping,
@@ -88,28 +127,55 @@ export function createSavedDashboardClass(
         },
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
-        id,
+        id: typeof arg === 'object' ? arg.id : arg,
 
         // default values that will get assigned if the doc is new
-        defaults: {
-          title: '',
-          hits: 0,
-          description: '',
-          panelsJSON: '[]',
-          optionsJSON: JSON.stringify({
-            // for BWC reasons we can't default dashboards that already exist without this setting to true.
-            useMargins: true,
-            syncColors: false,
-            hidePanelTitles: false,
-          } as DashboardOptions),
-          version: 1,
-          timeRestore: false,
-          timeTo: undefined,
-          timeFrom: undefined,
-          refreshInterval: undefined,
-        },
+        defaults,
       });
-      this.getFullPath = () => `/app/dashboards#${createDashboardEditUrl(this.id)}`;
+
+      const id: string = typeof arg === 'object' ? arg.id : arg;
+      const useResolve = typeof arg === 'object' ? arg.useResolve : false;
+
+      this.getFullPath = () => `/app/dashboards#${createDashboardEditUrl(this.aliasId || this.id)}`;
+
+      // Overwrite init if we want to use resolve
+      if (useResolve || true) {
+        this.init = async () => {
+          const esType = SavedDashboard.type;
+          // ensure that the esType is defined
+          if (!esType) throw new Error('You must define a type name to use SavedObject objects.');
+
+          if (!id) {
+            // just assign the defaults and be done
+            assign(this, defaults);
+            await this.hydrateIndexPattern!();
+
+            return this;
+          }
+
+          const {
+            outcome,
+            alias_target_id: aliasId,
+            alias_purpose: aliasPurpose,
+            saved_object: resp,
+          } = await savedObjectsClient.resolve(esType, id);
+
+          const respMapped = {
+            _id: resp.id,
+            _type: resp.type,
+            _source: cloneDeep(resp.attributes),
+            references: resp.references,
+            found: !!resp._version,
+          };
+
+          this.outcome = outcome;
+          this.aliasId = aliasId;
+          this.aliasPurpose = aliasPurpose;
+          await this.applyESResp(respMapped);
+
+          return this;
+        };
+      }
     }
 
     getQuery() {

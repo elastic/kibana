@@ -12,8 +12,8 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Windows Defender Disabled via Registry Modification",
-  "note": "## Triage and analysis\n\nDetections should be investigated to identify if the hosts and users are authorized to use this tool. As this rule detects post-exploitation process activity, investigations into this should be prioritized.",
-  "query": "registry where event.type in (\"creation\", \"change\") and\n  ((registry.path:\"HKLM\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows Defender\\\\DisableAntiSpyware\" and\n     registry.data.strings:\"1\") or\n  (registry.path:\"HKLM\\\\System\\\\ControlSet*\\\\Services\\\\WinDefend\\\\Start\" and\n     registry.data.strings in (\"3\", \"4\")))\n",
+  "note": "## Triage and analysis\n\nDetections should be investigated to identify if the hosts and users are authorized to use this tool. As this rule detects post-exploitation process activity, investigations into this should be prioritized.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "registry where event.type in (\"creation\", \"change\") and\n  (\n    (\n      registry.path:\"HKLM\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows Defender\\\\DisableAntiSpyware\" and\n      registry.data.strings: (\"1\", \"0x00000001\")\n   ) or\n   (\n      registry.path:\"HKLM\\\\System\\\\*ControlSet*\\\\Services\\\\WinDefend\\\\Start\" and\n      registry.data.strings in (\"3\", \"4\", \"0x00000003\", \"0x00000004\")\n   )\n  )\n",
   "references": [
     "https://thedfirreport.com/2020/12/13/defender-control/"
   ],
@@ -42,14 +42,14 @@
           "reference": "https://attack.mitre.org/techniques/T1562/",
           "subtechnique": [
             {
-              "id": "T1562.006",
-              "name": "Indicator Blocking",
-              "reference": "https://attack.mitre.org/techniques/T1562/006/"
-            },
-            {
               "id": "T1562.001",
               "name": "Disable or Modify Tools",
               "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            },
+            {
+              "id": "T1562.006",
+              "name": "Indicator Blocking",
+              "reference": "https://attack.mitre.org/techniques/T1562/006/"
             }
           ]
         }
@@ -58,5 +58,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 5
 }

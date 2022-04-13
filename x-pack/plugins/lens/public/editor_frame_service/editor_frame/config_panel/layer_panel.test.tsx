@@ -51,11 +51,23 @@ const defaultContext = {
   registerDropTarget: jest.fn(),
 };
 
+const draggingField = {
+  field: { name: 'dragged' },
+  indexPatternId: 'a',
+  id: '1',
+  humanData: { label: 'Label' },
+  ghost: {
+    children: <button>Hello!</button>,
+    style: {},
+  },
+};
+
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
   let mockVisualization2: jest.Mocked<Visualization>;
 
   let mockDatasource: DatasourceMock;
+  mockDatasource = createMockDatasource('testDatasource');
   let frame: FramePublicAPI;
 
   function getDefaultProps() {
@@ -157,7 +169,7 @@ describe('LayerPanel', () => {
   });
 
   describe('single group', () => {
-    it('should render the non-editable state', async () => {
+    it('should render the non-editable state and optional label', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -172,8 +184,11 @@ describe('LayerPanel', () => {
       });
 
       const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
       const group = instance.find('.lnsLayerPanel__dimensionContainer[data-test-subj="lnsGroup"]');
       expect(group).toHaveLength(1);
+      const optionalLabel = instance.find('[data-test-subj="lnsGroup_optional"]').first();
+      expect(optionalLabel.text()).toEqual('Optional');
     });
 
     it('should render the group with a way to add a new column', async () => {
@@ -222,7 +237,39 @@ describe('LayerPanel', () => {
 
       const group = instance
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error') === 'Required dimension');
+        .findWhere((e) => e.prop('error') === 'Requires field');
+
+      expect(group).toHaveLength(1);
+    });
+
+    it('should render the required warning when only one group is configured (with requiredMinDimensionCount)', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [{ columnId: 'y' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+            requiredMinDimensionCount: 2,
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      const group = instance
+        .find(EuiFormRow)
+        .findWhere((e) => e.prop('error') === 'Requires 2 fields');
 
       expect(group).toHaveLength(1);
     });
@@ -576,17 +623,6 @@ describe('LayerPanel', () => {
         nextLabel: '',
       });
 
-      const draggingField = {
-        field: { name: 'dragged' },
-        indexPatternId: 'a',
-        id: '1',
-        humanData: { label: 'Label' },
-        ghost: {
-          children: <button>Hello!</button>,
-          style: {},
-        },
-      };
-
       const { instance } = await mountWithProvider(
         <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
           <LayerPanel {...getDefaultProps()} />
@@ -630,17 +666,6 @@ describe('LayerPanel', () => {
       mockDatasource.getDropProps.mockImplementation(({ columnId }) =>
         columnId !== 'a' ? { dropTypes: ['field_replace'], nextLabel: '' } : undefined
       );
-
-      const draggingField = {
-        field: { name: 'dragged' },
-        indexPatternId: 'a',
-        id: '1',
-        humanData: { label: 'Label' },
-        ghost: {
-          children: <button>Hello!</button>,
-          style: {},
-        },
-      };
 
       const { instance } = await mountWithProvider(
         <ChildDragDropProvider {...defaultContext} dragging={draggingField}>
@@ -948,6 +973,54 @@ describe('LayerPanel', () => {
         'newid',
         expect.objectContaining({ groupId: 'a' })
       );
+    });
+  });
+  describe('dimension trigger', () => {
+    it('should render datasource dimension trigger if there is layer datasource', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+      await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+      expect(mockDatasource.renderDimensionTrigger).toHaveBeenCalled();
+    });
+
+    it('should render visualization dimension trigger if there is no layer datasource', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const props = getDefaultProps();
+      const propsWithVisOnlyLayer = {
+        ...props,
+        framePublicAPI: { ...props.framePublicAPI, datasourceLayers: {} },
+      };
+
+      mockVisualization.renderDimensionTrigger = jest.fn();
+      mockVisualization.getUniqueLabels = jest.fn(() => ({
+        x: 'A',
+      }));
+
+      await mountWithProvider(<LayerPanel {...propsWithVisOnlyLayer} />);
+      expect(mockDatasource.renderDimensionTrigger).not.toHaveBeenCalled();
+      expect(mockVisualization.renderDimensionTrigger).toHaveBeenCalled();
     });
   });
 });

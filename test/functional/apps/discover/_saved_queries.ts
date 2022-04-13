@@ -13,7 +13,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const browser = getService('browser');
@@ -21,39 +20,83 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
-  const defaultSettings = {
-    defaultIndex: 'logstash-*',
+  const config = getService('config');
+  const localArchiveDirectories = {
+    nested: 'test/functional/fixtures/kbn_archiver/date_nested.json',
+    discover: 'test/functional/fixtures/kbn_archiver/discover.json',
   };
+  const remoteArchiveDirectories = {
+    nested: 'test/functional/fixtures/kbn_archiver/ccs/date_nested.json',
+    discover: 'test/functional/fixtures/kbn_archiver/ccs/discover.json',
+  };
+  const logstashIndexPatternString = config.get('esTestCluster.ccs')
+    ? 'ftr-remote:logstash-*'
+    : 'logstash-*';
+  const dateNestedIndexPattern = config.get('esTestCluster.ccs')
+    ? 'ftr-remote:date-nested'
+    : 'date-nested';
+  const defaultSettings = {
+    defaultIndex: logstashIndexPatternString,
+  };
+  const esNode = config.get('esTestCluster.ccs')
+    ? getService('remoteEsArchiver' as 'esArchiver')
+    : getService('esArchiver');
+  const kbnArchives = config.get('esTestCluster.ccs')
+    ? remoteArchiveDirectories
+    : localArchiveDirectories;
+
+  const from = 'Sep 20, 2015 @ 08:00:00.000';
+  const to = 'Sep 21, 2015 @ 08:00:00.000';
 
   const setUpQueriesWithFilters = async () => {
+    await kibanaServer.savedObjects.clean({ types: ['search', 'query'] });
     // set up a query with filters and a time filter
     log.debug('set up a query with filters to save');
-    const fromTime = 'Sep 20, 2015 @ 08:00:00.000';
-    const toTime = 'Sep 21, 2015 @ 08:00:00.000';
-    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    await PageObjects.common.setTime({ from, to });
+    await PageObjects.common.navigateToApp('discover');
+    await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('4,731');
+    });
+
     await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('3,029');
+    });
+
     await queryBar.setQuery('response:200');
+    await queryBar.submitQuery();
+    await retry.try(async function tryingForTime() {
+      const hitCount = await PageObjects.discover.getHitCount();
+      expect(hitCount).to.be('2,792');
+    });
   };
 
   describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'query'] });
 
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(kbnArchives.discover);
+      await kibanaServer.importExport.load(kbnArchives.nested);
+      await esNode.load('test/functional/fixtures/es_archiver/date_nested');
+      await esNode.load('test/functional/fixtures/es_archiver/logstash_functional');
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload(kbnArchives.discover);
+      await kibanaServer.importExport.unload(kbnArchives.nested);
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'query'] });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'query'] });
+      await esNode.unload('test/functional/fixtures/es_archiver/date_nested');
+      await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await PageObjects.common.unsetTime();
     });
 
     describe('saved query selection', () => {
@@ -77,12 +120,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('date-nested');
+        await PageObjects.discover.selectIndexPattern(dateNestedIndexPattern);
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.discover.selectIndexPattern(logstashIndexPatternString);
+        const currentDataView = await PageObjects.discover.getCurrentlySelectedDataView();
+        expect(currentDataView).to.be(logstashIndexPatternString);
+        await retry.try(async function tryingForTime() {
+          const hitCount = await PageObjects.discover.getHitCount();
+          expect(hitCount).to.be('4,731');
+        });
 
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(false);
         expect(await queryBar.getQueryString()).to.eql('');
@@ -110,6 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           true,
           true
         );
+
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
         await savedQueryManagementComponent.savedQueryTextExist('response:200');
       });
@@ -120,20 +170,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
-        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+        expect(timePickerValues.start).to.eql(from);
+        expect(timePickerValues.end).to.eql(to);
       });
 
       it('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
         const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
-        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
-        await retry.waitFor(
-          'the right hit count',
-          async () => (await PageObjects.discover.getHitCount()) === '2,792'
-        );
+        expect(timePickerValues.start).to.eql(from);
+        expect(timePickerValues.end).to.eql(to);
+        await retry.waitForWithTimeout('the right hit count', 65000, async () => {
+          const hitCount = await PageObjects.discover.getHitCount();
+          log.debug(`Found hit count is ${hitCount}. Looking for 2,792.`);
+          return hitCount === '2,792';
+        });
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
@@ -164,17 +215,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('does not allow saving a query with a non-unique name', async () => {
-        // this check allows this test to run stand alone, also should fix occacional flakiness
-        const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
-        if (!savedQueryExists) {
-          await savedQueryManagementComponent.saveNewQuery(
-            'OkResponse',
-            '200 responses for .jpg over 24 hours',
-            true,
-            true
-          );
-          await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        }
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 

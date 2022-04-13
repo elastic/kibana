@@ -13,6 +13,7 @@ export const CLOUD_MACHINE_TYPE = 'cloud.machine.type';
 export const CLOUD_ACCOUNT_ID = 'cloud.account.id';
 export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
+export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
@@ -40,7 +41,6 @@ export const USER_AGENT_NAME = 'user_agent.name';
 export const DESTINATION_ADDRESS = 'destination.address';
 
 export const OBSERVER_HOSTNAME = 'observer.hostname';
-export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
@@ -51,7 +51,6 @@ export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
-export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
@@ -114,8 +113,8 @@ export const METRICSET_NAME = 'metricset.name';
 export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
-export const HOST_NAME = 'host.hostname';
-export const HOSTNAME = 'host.name';
+export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
+export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';
@@ -153,3 +152,7 @@ export const PROFILE_ALLOC_OBJECTS = 'profile.alloc_objects.count';
 export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
 export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
 export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
+
+export const FAAS_ID = 'faas.id';
+export const FAAS_COLDSTART = 'faas.coldstart';
+export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';

@@ -70,7 +70,7 @@ describe('Field Renderers', () => {
 
   describe('#dateRenderer', () => {
     test('it renders correctly against snapshot', () => {
-      const wrapper = shallow(dateRenderer(mockData.complete.source!.firstSeen));
+      const wrapper = shallow(dateRenderer(mockData.complete.source?.firstSeen));
 
       expect(wrapper).toMatchSnapshot();
     });
@@ -307,7 +307,7 @@ describe('Field Renderers', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="more-container"]').first().props().style!.overflow
+        wrapper.find('[data-test-subj="more-container"]').first().props().style?.overflow
       ).toEqual('auto');
     });
 
@@ -322,7 +322,7 @@ describe('Field Renderers', () => {
       );
 
       expect(
-        wrapper.find('[data-test-subj="more-container"]').first().props().style!.maxHeight
+        wrapper.find('[data-test-subj="more-container"]').first().props().style?.maxHeight
       ).toEqual(DEFAULT_MORE_MAX_HEIGHT);
     });
 

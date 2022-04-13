@@ -8,17 +8,17 @@
 
 import $ from 'jquery';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { buildQueryFilter, compareFilters } from '@kbn/es-query';
 import { TooltipHandler } from './vega_tooltip';
-import { esFilters } from '../../../../data/public';
 
-import { getEnableExternalUrls, getData } from '../services';
+import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 scheme('elastic', euiPaletteColorBlind());
@@ -89,6 +89,7 @@ export class VegaBaseView {
     this._initialized = false;
     this._externalUrl = opts.externalUrl;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._renderMode = opts.renderMode;
     this._vegaStateRestorer = opts.vegaStateRestorer;
   }
 
@@ -105,7 +106,7 @@ export class VegaBaseView {
       }
 
       if (this._parser.error) {
-        this._addMessage('err', this._parser.error);
+        this.onError(this._parser.error);
         return;
       }
 
@@ -155,11 +156,11 @@ export class VegaBaseView {
    * @returns {Promise<string>} index id
    */
   async findIndex(index) {
-    const { indexPatterns } = getData();
+    const dataViews = getDataViews();
     let idxObj;
 
     if (index) {
-      [idxObj] = await indexPatterns.find(index);
+      [idxObj] = await dataViews.find(index);
       if (!idxObj) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
@@ -174,7 +175,7 @@ export class VegaBaseView {
       );
 
       if (!idxObj) {
-        const defaultIdx = await indexPatterns.getDefault();
+        const defaultIdx = await dataViews.getDefault();
 
         if (defaultIdx) {
           idxObj = defaultIdx;
@@ -206,7 +207,7 @@ export class VegaBaseView {
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
     vegaLoader.sanitize = async (uri, options) => {
-      if (uri.bypassToken === bypassToken) {
+      if (uri.bypassToken === bypassToken || this._externalUrl.isInternalUrl(uri)) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
         uri = uri.url;
@@ -234,11 +235,13 @@ export class VegaBaseView {
   }
 
   onError() {
-    this._addMessage('err', Utils.formatErrorToStr(...arguments));
+    const error = Utils.formatErrorToStr(...arguments);
+    this._addMessage('err', error);
+    this._parser.searchAPI.inspectorAdapters?.vega.setError(error);
   }
 
   onWarn() {
-    if (!this._parser || !this._parser.hideWarnings) {
+    if (this._renderMode !== 'view' && (!this._parser || !this._parser.hideWarnings)) {
       this._addMessage('warn', Utils.formatWarningToStr(...arguments));
     }
   }
@@ -247,23 +250,31 @@ export class VegaBaseView {
     if (!this._$messages) {
       this._$messages = $(`<ul class="vgaVis__messages">`).appendTo(this._$parentEl);
     }
-    this._$messages.append(
-      $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
-        $(`<pre class="vgaVis__messageCode">`).text(text)
-      )
-    );
-  }
-
-  resize() {
-    if (this._parser.useResize && this._view) {
-      this.updateVegaSize(this._view);
-      return this._view.runAsync();
+    const isMessageAlreadyDisplayed = this._$messages
+      .find(`pre.vgaVis__messageCode`)
+      .filter((index, element) => element.textContent === text).length;
+    if (!isMessageAlreadyDisplayed) {
+      this._$messages.append(
+        $(`<li class="vgaVis__message vgaVis__message--${type}">`).append(
+          $(`<pre class="vgaVis__messageCode">`).text(text)
+        )
+      );
     }
   }
 
-  updateVegaSize(view) {
-    const width = Math.floor(Math.max(0, this._$container.width()));
-    const height = Math.floor(Math.max(0, this._$container.height()));
+  async resize(dimensions) {
+    if (this._parser.useResize && this._view) {
+      this.updateVegaSize(this._view, dimensions);
+      await this._view.runAsync();
+
+      // The derived class should create this method
+      this.onViewContainerResize?.();
+    }
+  }
+
+  updateVegaSize(view, dimensions) {
+    const width = Math.floor(Math.max(0, dimensions?.width ?? this._$container.width()));
+    const height = Math.floor(Math.max(0, dimensions?.height ?? this._$container.height()));
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);
@@ -334,10 +345,11 @@ export class VegaBaseView {
   /**
    * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
    * @param {string} [index] as defined in Kibana, or default if missing
+   * @param {string} Elastic Query DSL's Custom label for kibanaAddFilter, as used in '+ Add Filter'
    */
-  async addFilterHandler(query, index) {
+  async addFilterHandler(query, index, alias) {
     const indexId = await this.findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const filter = buildQueryFilter(query, indexId, alias);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
@@ -348,12 +360,10 @@ export class VegaBaseView {
    */
   async removeFilterHandler(query, index) {
     const indexId = await this.findIndex(index);
-    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
+    const filterToRemove = buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
-    const existingFilter = currentFilters.find((filter) =>
-      esFilters.compareFilters(filter, filterToRemove)
-    );
+    const existingFilter = currentFilters.find((filter) => compareFilters(filter, filterToRemove));
 
     if (!existingFilter) return;
 

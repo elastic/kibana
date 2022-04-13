@@ -45,7 +45,7 @@ export const PROJECTS = [
     { name: 'enterprise_search/shared/cypress' }
   ),
   createProject(
-    'x-pack/plugins/enterprise_search/public/applications/enterprise_search/cypress/tsconfig.json',
+    'x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/cypress/tsconfig.json',
     { name: 'enterprise_search/overview/cypress' }
   ),
   createProject(
@@ -63,6 +63,9 @@ export const PROJECTS = [
     name: 'apm/ftr_e2e',
     disableTypeCheck: true,
   }),
+  createProject('x-pack/plugins/fleet/cypress/tsconfig.json', {
+    name: 'fleet/cypress',
+  }),
 
   createProject('x-pack/plugins/uptime/e2e/tsconfig.json', {
     name: 'uptime/synthetics-e2e-tests',
@@ -79,4 +82,5 @@ export const PROJECTS = [
   ...findProjects('test/plugin_functional/plugins/*/tsconfig.json'),
   ...findProjects('test/interpreter_functional/plugins/*/tsconfig.json'),
   ...findProjects('test/server_integration/__fixtures__/plugins/*/tsconfig.json'),
+  ...findProjects('packages/kbn-type-summarizer/tests/tsconfig.json'),
 ];

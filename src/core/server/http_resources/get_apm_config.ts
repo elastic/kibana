@@ -6,12 +6,20 @@
  * Side Public License, v 1.
  */
 
-import agent from 'elastic-apm-node';
-import { getConfiguration } from '@kbn/apm-config-loader';
+import agent, { AgentConfigOptions } from 'elastic-apm-node';
+import { getConfiguration, shouldInstrumentClient } from '@kbn/apm-config-loader';
+
+const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = ['secretToken'];
 
 export const getApmConfig = (requestPath: string) => {
-  const baseConfig = getConfiguration('kibana-frontend');
-  if (!baseConfig?.active) {
+  const baseConfig = getConfiguration('kibana-frontend') || {};
+
+  // Omit configs not used by RUM agent.
+  OMIT_APM_CONFIG.forEach((config) => {
+    delete baseConfig[config];
+  });
+
+  if (!shouldInstrumentClient(baseConfig)) {
     return null;
   }
 

@@ -8,50 +8,11 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import './welcome.test.mocks';
 import { Welcome } from './welcome';
-import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
 
-jest.mock('../kibana_services', () => ({
-  getServices: () => ({
-    addBasePath: (path: string) => `root${path}`,
-    trackUiMetric: () => {},
-  }),
-}));
-
-test('should render a Welcome screen with the telemetry disclaimer', () => {
-  const telemetry = telemetryPluginMock.createStartContract();
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
-
-  expect(component).toMatchSnapshot();
-});
-
-test('should render a Welcome screen with the telemetry disclaimer when optIn is true', () => {
-  const telemetry = telemetryPluginMock.createStartContract();
-  telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
-
-  expect(component).toMatchSnapshot();
-});
-
-test('should render a Welcome screen with the telemetry disclaimer when optIn is false', () => {
-  const telemetry = telemetryPluginMock.createStartContract();
-  telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
-
-  expect(component).toMatchSnapshot();
-});
-
-test('should render a Welcome screen with no telemetry disclaimer', () => {
+test('should render a Welcome screen', () => {
   const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} />);
 
   expect(component).toMatchSnapshot();
-});
-
-test('fires opt-in seen when mounted', () => {
-  const telemetry = telemetryPluginMock.createStartContract();
-  const mockSetOptedInNoticeSeen = jest.fn();
-  telemetry.telemetryNotifications.setOptedInNoticeSeen = mockSetOptedInNoticeSeen;
-  shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
-
-  expect(mockSetOptedInNoticeSeen).toHaveBeenCalled();
 });

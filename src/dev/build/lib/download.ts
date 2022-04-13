@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { openSync, writeSync, unlinkSync, closeSync } from 'fs';
+import { openSync, writeSync, unlinkSync, closeSync, statSync } from 'fs';
 import { dirname } from 'path';
+import { setTimeout } from 'timers/promises';
 
 import chalk from 'chalk';
 import { createHash } from 'crypto';
 import Axios from 'axios';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, isAxiosResponseError } from '@kbn/dev-utils';
 
 // https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
 // @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
@@ -30,80 +31,170 @@ function tryUnlink(path: string) {
   }
 }
 
-interface DownloadOptions {
+interface DownloadToDiskOptions {
   log: ToolingLog;
   url: string;
   destination: string;
-  sha256: string;
-  retries?: number;
+  shaChecksum: string;
+  shaAlgorithm: string;
+  maxAttempts?: number;
+  retryDelaySecMultiplier?: number;
+  skipChecksumCheck?: boolean;
 }
-export async function download(options: DownloadOptions): Promise<void> {
-  const { log, url, destination, sha256, retries = 0 } = options;
-
-  if (!sha256) {
-    throw new Error(`sha256 checksum of ${url} not provided, refusing to download.`);
+export async function downloadToDisk({
+  log,
+  url,
+  destination,
+  shaChecksum,
+  shaAlgorithm,
+  maxAttempts = 1,
+  retryDelaySecMultiplier = 5,
+  skipChecksumCheck = false,
+}: DownloadToDiskOptions) {
+  if (!shaChecksum && !skipChecksumCheck) {
+    throw new Error(`${shaAlgorithm} checksum of ${url} not provided, refusing to download.`);
   }
 
-  // mkdirp and open file outside of try/catch, we don't retry for those errors
-  await mkdirp(dirname(destination));
-  const fileHandle = openSync(destination, 'w');
+  if (maxAttempts < 1) {
+    throw new Error(`[maxAttempts=${maxAttempts}] must be >= 1`);
+  }
 
-  let error;
-  try {
-    log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
+  let attempt = 0;
+  while (true) {
+    attempt += 1;
 
-    const response = await Axios.request({
-      url,
-      responseType: 'stream',
-      adapter: AxiosHttpAdapter,
-    });
+    // mkdirp and open file outside of try/catch, we don't retry for those errors
+    await mkdirp(dirname(destination));
+    const fileHandle = openSync(destination, 'w');
 
-    if (response.status !== 200) {
-      throw new Error(`Unexpected status code ${response.status} when downloading ${url}`);
-    }
+    let error;
+    try {
+      log.debug(
+        `[${attempt}/${maxAttempts}] Attempting download of ${url}`,
+        skipChecksumCheck ? '' : chalk.dim(shaAlgorithm)
+      );
 
-    const hash = createHash('sha256');
-    await new Promise((resolve, reject) => {
-      response.data.on('data', (chunk: Buffer) => {
-        hash.update(chunk);
-        writeSync(fileHandle, chunk);
+      const response = await Axios.request({
+        url,
+        responseType: 'stream',
+        adapter: AxiosHttpAdapter,
       });
 
-      response.data.on('error', reject);
-      response.data.on('end', resolve);
-    });
+      if (response.status !== 200) {
+        throw new Error(`Unexpected status code ${response.status} when downloading ${url}`);
+      }
 
-    const downloadedSha256 = hash.digest('hex');
-    if (downloadedSha256 !== sha256) {
-      throw new Error(
-        `Downloaded checksum ${downloadedSha256} does not match the expected sha256 checksum.`
-      );
+      const hash = createHash(shaAlgorithm);
+      let bytesWritten = 0;
+
+      await new Promise<void>((resolve, reject) => {
+        response.data.on('data', (chunk: Buffer) => {
+          if (!skipChecksumCheck) {
+            hash.update(chunk);
+          }
+
+          const bytes = writeSync(fileHandle, chunk);
+          bytesWritten += bytes;
+        });
+
+        response.data.on('error', reject);
+        response.data.on('end', () => {
+          if (bytesWritten === 0) {
+            return reject(new Error(`No bytes written when downloading ${url}`));
+          }
+
+          return resolve();
+        });
+      });
+
+      if (!skipChecksumCheck) {
+        const downloadedSha = hash.digest('hex');
+        if (downloadedSha !== shaChecksum) {
+          throw new Error(
+            `Downloaded checksum ${downloadedSha} does not match the expected ${shaAlgorithm} checksum.`
+          );
+        }
+      }
+    } catch (_error) {
+      error = _error;
+    } finally {
+      closeSync(fileHandle);
+
+      const fileStats = statSync(destination);
+      log.debug(`Downloaded ${fileStats.size} bytes to ${destination}`);
     }
-  } catch (_error) {
-    error = _error;
-  } finally {
-    closeSync(fileHandle);
+
+    if (!error) {
+      log.debug(`Downloaded ${url} ${skipChecksumCheck ? '' : 'and verified checksum'}`);
+      return;
+    }
+
+    log.debug(`Download failed: ${error.message}`);
+
+    // cleanup downloaded data and log error
+    log.debug(`Deleting downloaded data at ${destination}`);
+    tryUnlink(destination);
+
+    // retry if we have retries left
+    if (attempt < maxAttempts) {
+      const sec = attempt * retryDelaySecMultiplier;
+      log.info(`Retrying in ${sec} seconds`);
+      await setTimeout(sec * 1000);
+      continue;
+    }
+
+    throw error;
   }
+}
 
-  if (!error) {
-    log.debug(`Downloaded ${url} and verified checksum`);
-    return;
+interface DownloadToStringOptions {
+  log: ToolingLog;
+  url: string;
+  expectStatus?: number;
+  maxAttempts?: number;
+  retryDelaySecMultiplier?: number;
+}
+export async function downloadToString({
+  log,
+  url,
+  expectStatus,
+  maxAttempts = 3,
+  retryDelaySecMultiplier = 5,
+}: DownloadToStringOptions) {
+  let attempt = 0;
+  while (true) {
+    try {
+      attempt += 1;
+      log.debug(`[${attempt}/${maxAttempts}] Attempting download to string of [${url}]`);
+
+      const resp = await Axios.request<string>({
+        url,
+        method: 'GET',
+        adapter: AxiosHttpAdapter,
+        responseType: 'text',
+        validateStatus: !expectStatus ? undefined : (status) => status === expectStatus,
+      });
+
+      log.success(`Downloaded [${url}]`);
+      return resp.data;
+    } catch (error) {
+      log.warning(`Download failed: ${error.message}`);
+      if (isAxiosResponseError(error)) {
+        log.debug(
+          `[${error.response.status}/${error.response.statusText}] response: ${error.response.data}`
+        );
+      } else {
+        log.debug('received no response');
+      }
+
+      if ((maxAttempts ?? 3) > attempt) {
+        const sec = (retryDelaySecMultiplier ?? 5) * attempt;
+        log.info(`Retrying in ${sec} seconds`);
+        await setTimeout(sec * 1000);
+        continue;
+      }
+
+      throw error;
+    }
   }
-
-  log.debug(`Download failed: ${error.message}`);
-
-  // cleanup downloaded data and log error
-  log.debug(`Deleting downloaded data at ${destination}`);
-  tryUnlink(destination);
-
-  // retry if we have retries left
-  if (retries > 0) {
-    log.debug(`Retrying - ${retries} attempt remaining`);
-    return await download({
-      ...options,
-      retries: retries - 1,
-    });
-  }
-
-  throw error;
 }

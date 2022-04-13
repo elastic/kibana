@@ -12,6 +12,7 @@ export enum EngineTypes {
   default = 'default',
   indexed = 'indexed',
   meta = 'meta',
+  elasticsearch = 'elasticsearch',
 }
 export interface Engine {
   name: string;
@@ -44,6 +45,7 @@ export interface EngineDetails extends Engine {
   unsearchedUnconfirmedFields: boolean;
   apiTokens: ApiToken[];
   apiKey: string;
+  elasticsearchIndexName?: string;
   schema: Schema;
   schemaConflicts?: SchemaConflicts;
   unconfirmedFields?: string[];
@@ -53,7 +55,8 @@ export interface EngineDetails extends Engine {
   isMeta: boolean;
   engine_count?: number;
   includedEngines?: EngineDetails[];
-  search_relevance_suggestions?: SearchRelevanceSuggestionDetails;
+  adaptive_relevance_suggestions?: SearchRelevanceSuggestionDetails;
+  adaptive_relevance_suggestions_active: boolean;
 }
 
 interface ResultField {

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
   EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState } from 'react';
+import { FieldSpec } from 'src/plugins/data_views/common';
 import { GroupBySelector } from './selector';
 
 interface Props {
   selectedGroups?: string[];
-  fields: IFieldType[];
+  fields: FieldSpec[];
   onChange: (groupBy: string[]) => void;
   label?: string;
 }

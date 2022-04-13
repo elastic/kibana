@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { firstValueFrom } from 'rxjs';
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
@@ -30,8 +31,8 @@ export const validateEql = async ({
   query,
   signal,
 }: Params): Promise<{ valid: boolean; errors: string[] }> => {
-  const { rawResponse: response } = await data.search
-    .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
+  const { rawResponse: response } = await firstValueFrom(
+    data.search.search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
       {
         params: { index: index.join(), body: { query, size: 0 } },
         options: { ignore: [400] },
@@ -41,7 +42,7 @@ export const validateEql = async ({
         abortSignal: signal,
       }
     )
-    .toPromise();
+  );
 
   if (isValidationErrorResponse(response.body)) {
     return { valid: false, errors: getValidationErrors(response.body) };

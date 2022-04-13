@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import semverLte from 'semver/functions/lte';
 import { assertNever } from '@kbn/std';
@@ -32,9 +31,10 @@ import {
 import {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
-} from '../../../fleet/common/types/rest_spec';
-import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
-import { agentPolicyStatuses } from '../../../fleet/common/constants';
+  EsAssetReference,
+  KibanaAssetReference,
+  agentPolicyStatuses,
+} from '../../../fleet/common';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';
@@ -346,6 +346,7 @@ export interface TreeOptions {
   ancestryArraySize?: number;
   eventsDataStream?: DataStream;
   alertsDataStream?: DataStream;
+  sessionEntryLeader?: string;
 }
 
 type TreeOptionDefaults = Required<TreeOptions>;
@@ -363,6 +364,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     relatedEvents: options?.relatedEvents ?? 5,
     relatedEventsOrdered: options?.relatedEventsOrdered ?? false,
     relatedAlerts: options?.relatedAlerts ?? 3,
+    sessionEntryLeader: options?.sessionEntryLeader ?? '',
     percentWithRelated: options?.percentWithRelated ?? 30,
     percentTerminated: options?.percentTerminated ?? 100,
     alwaysGenMaxChildrenPerNode: options?.alwaysGenMaxChildrenPerNode ?? false,
@@ -406,6 +408,7 @@ const alertsDefaultDataStream = {
 export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
   sequence: number = 0;
+
   /**
    * The EndpointDocGenerator parameters
    *
@@ -523,6 +526,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       data_stream: metadataDataStream,
     };
   }
+
   /**
    * Creates a malware alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
@@ -533,12 +537,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateMalwareAlert({
     ts = new Date().getTime(),
+    sessionEntryLeader = this.randomString(10),
     entityID = this.randomString(10),
     parentEntityID,
     ancestry = [],
     alertsDataStream = alertsDefaultDataStream,
   }: {
     ts?: number;
+    sessionEntryLeader?: string;
     entityID?: string;
     parentEntityID?: string;
     ancestry?: string[];
@@ -606,6 +612,21 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           sha1: 'fake sha1',
           sha256: 'fake sha256',
         },
+        entry_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake entry',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        session_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake session',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        group_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake leader',
+          pid: Math.floor(Math.random() * 1000),
+        },
         Ext: {
           ancestry,
           code_signature: [
@@ -646,6 +667,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateMemoryAlert({
     ts = new Date().getTime(),
+    sessionEntryLeader = this.randomString(10),
     entityID = this.randomString(10),
     parentEntityID,
     ancestry = [],
@@ -653,6 +675,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     alertType,
   }: {
     ts?: number;
+    sessionEntryLeader?: string;
     entityID?: string;
     parentEntityID?: string;
     ancestry?: string[];
@@ -699,6 +722,21 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           sha1: 'fake sha1',
           sha256: 'fake sha256',
         },
+        entry_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake entry',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        session_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake session',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        group_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake leader',
+          pid: Math.floor(Math.random() * 1000),
+        },
         Ext: {
           ancestry,
           code_signature: [
@@ -744,6 +782,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     }
     return newAlert;
   }
+
   /**
    * Creates an alert from the simulated host represented by this EndpointDocGenerator
    * @param ts - Timestamp to put in the event
@@ -755,12 +794,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   public generateAlert({
     ts = new Date().getTime(),
     entityID = this.randomString(10),
+    sessionEntryLeader,
     parentEntityID,
     ancestry = [],
     alertsDataStream = alertsDefaultDataStream,
   }: {
     ts?: number;
     entityID?: string;
+    sessionEntryLeader?: string;
     parentEntityID?: string;
     ancestry?: string[];
     alertsDataStream?: DataStream;
@@ -770,6 +811,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       case AlertTypes.MALWARE:
         return this.generateMalwareAlert({
           ts,
+          sessionEntryLeader,
           entityID,
           parentEntityID,
           ancestry,
@@ -780,6 +822,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         return this.generateMemoryAlert({
           ts,
           entityID,
+          sessionEntryLeader,
           parentEntityID,
           ancestry,
           alertsDataStream,
@@ -788,6 +831,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       case AlertTypes.BEHAVIOR:
         return this.generateBehaviorAlert({
           ts,
+          sessionEntryLeader,
           entityID,
           parentEntityID,
           ancestry,
@@ -808,12 +852,14 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateBehaviorAlert({
     ts = new Date().getTime(),
+    sessionEntryLeader = this.randomString(10),
     entityID = this.randomString(10),
     parentEntityID,
     ancestry = [],
     alertsDataStream = alertsDefaultDataStream,
   }: {
     ts?: number;
+    sessionEntryLeader?: string;
     entityID?: string;
     parentEntityID?: string;
     ancestry?: string[];
@@ -875,6 +921,21 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           status: 'trusted',
           subject_name: 'Microsoft Windows',
         },
+        entry_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake entry',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        session_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake session',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        group_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake leader',
+          pid: Math.floor(Math.random() * 1000),
+        },
         parent: parentEntityID
           ? {
               entity_id: parentEntityID,
@@ -900,6 +961,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     };
     return newAlert;
   }
+
   /**
    * Returns the default DLLs used in alerts
    */
@@ -946,6 +1008,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       options.ancestry?.slice(0, options?.ancestryArrayLimit ?? ANCESTRY_LIMIT) ?? [];
 
     const processName = options.processName ? options.processName : this.randomProcessName();
+    const sessionEntryLeader = options.sessionEntryLeader
+      ? options.sessionEntryLeader
+      : this.randomString(10);
+    const userName = this.randomString(10);
     const detailRecordForEventType =
       options.extensions ||
       ((eventCategory) => {
@@ -988,13 +1054,29 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         pid:
           'pid' in options && typeof options.pid !== 'undefined' ? options.pid : this.randomN(5000),
         executable: `C:\\${processName}`,
-        args: `"C:\\${processName}" \\${this.randomString(3)}`,
+        args: [`"C:\\${processName}"`, `--${this.randomString(3)}`],
+        working_directory: `/home/${userName}/`,
         code_signature: {
           status: 'trusted',
           subject_name: 'Microsoft',
         },
         hash: { md5: this.seededUUIDv4() },
         entity_id: options.entityID ? options.entityID : this.randomString(10),
+        entry_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake entry',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        session_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake session',
+          pid: Math.floor(Math.random() * 1000),
+        },
+        group_leader: {
+          entity_id: sessionEntryLeader,
+          name: 'fake leader',
+          pid: Math.floor(Math.random() * 1000),
+        },
         parent: options.parentEntityID
           ? {
               entity_id: options.parentEntityID,
@@ -1013,7 +1095,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       },
       user: {
         domain: this.randomString(10),
-        name: this.randomString(10),
+        name: userName,
       },
     };
   }
@@ -1175,7 +1257,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   public *alertsGenerator(numAlerts: number, options: TreeOptions = {}) {
     const opts = getTreeOptionsWithDef(options);
     for (let i = 0; i < numAlerts; i++) {
-      yield* this.fullResolverTreeGenerator(opts);
+      // 1 session per resolver tree
+      const sessionEntryLeader = this.randomString(10);
+      yield* this.fullResolverTreeGenerator({ ...opts, sessionEntryLeader });
     }
   }
 
@@ -1218,8 +1302,11 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
     const events = [];
     const startDate = new Date().getTime();
+
     const root = this.generateEvent({
       timestamp: startDate + 1000,
+      entityID: opts.sessionEntryLeader,
+      sessionEntryLeader: opts.sessionEntryLeader,
       eventsDataStream: opts.eventsDataStream,
     });
     events.push(root);
@@ -1236,6 +1323,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         node,
         relatedAlerts: alertsPerNode,
         alertCreationTime: secBeforeAlert,
+        sessionEntryLeader: opts.sessionEntryLeader,
         alertsDataStream: opts.alertsDataStream,
       })) {
         eventList.push(relatedAlert);
@@ -1248,6 +1336,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         relatedEvents: opts.relatedEvents,
         processDuration: secBeforeEvent,
         ordered: opts.relatedEventsOrdered,
+        sessionEntryLeader: opts.sessionEntryLeader,
         eventsDataStream: opts.eventsDataStream,
       })) {
         eventList.push(relatedEvent);
@@ -1269,6 +1358,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           timestamp: timestamp + termProcessDuration * 1000,
           entityID: entityIDSafeVersion(root),
           parentEntityID: parentEntityIDSafeVersion(root),
+          sessionEntryLeader: opts.sessionEntryLeader,
           eventCategory: ['process'],
           eventType: ['end'],
           eventsDataStream: opts.eventsDataStream,
@@ -1288,6 +1378,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       ancestor = this.generateEvent({
         timestamp,
         parentEntityID: entityIDSafeVersion(ancestor),
+        sessionEntryLeader: opts.sessionEntryLeader,
         // add the parent to the ancestry array
         ancestry,
         ancestryArrayLimit: opts.ancestryArraySize,
@@ -1305,6 +1396,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
             timestamp: timestamp + termProcessDuration * 1000,
             entityID: entityIDSafeVersion(ancestor),
             parentEntityID: parentEntityIDSafeVersion(ancestor),
+            sessionEntryLeader: opts.sessionEntryLeader,
             eventCategory: ['process'],
             eventType: ['end'],
             ancestry: ancestryArray(ancestor),
@@ -1335,6 +1427,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         ts: timestamp,
         entityID: entityIDSafeVersion(ancestor),
         parentEntityID: parentEntityIDSafeVersion(ancestor),
+        sessionEntryLeader: opts.sessionEntryLeader,
         ancestry: ancestryArray(ancestor),
         alertsDataStream: opts.alertsDataStream,
       })
@@ -1391,6 +1484,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       const child = this.generateEvent({
         timestamp,
         parentEntityID: currentStateEntityID,
+        sessionEntryLeader: opts.sessionEntryLeader,
         ancestry,
         ancestryArrayLimit: opts.ancestryArraySize,
         eventsDataStream: opts.eventsDataStream,
@@ -1412,6 +1506,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         yield this.generateEvent({
           timestamp: timestamp + processDuration * 1000,
           entityID: entityIDSafeVersion(child),
+          sessionEntryLeader: opts.sessionEntryLeader,
           parentEntityID: parentEntityIDSafeVersion(child),
           eventCategory: ['process'],
           eventType: ['end'],
@@ -1424,6 +1519,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         yield* this.relatedEventsGenerator({
           node: child,
           relatedEvents: opts.relatedEvents,
+          sessionEntryLeader: opts.sessionEntryLeader,
           processDuration,
           ordered: opts.relatedEventsOrdered,
           eventsDataStream: opts.eventsDataStream,
@@ -1431,6 +1527,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         yield* this.relatedAlertsGenerator({
           node: child,
           relatedAlerts: opts.relatedAlerts,
+          sessionEntryLeader: opts.sessionEntryLeader,
           alertCreationTime: processDuration,
           alertsDataStream: opts.alertsDataStream,
         });
@@ -1452,11 +1549,13 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     relatedEvents = 10,
     processDuration = 6 * 3600,
     ordered = false,
+    sessionEntryLeader,
     eventsDataStream = eventsDefaultDataStream,
   }: {
     node: Event;
     relatedEvents?: RelatedEventInfo[] | number;
     processDuration?: number;
+    sessionEntryLeader: string;
     ordered?: boolean;
     eventsDataStream?: DataStream;
   }) {
@@ -1487,6 +1586,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         yield this.generateEvent({
           timestamp: ts,
           entityID: entityIDSafeVersion(node),
+          sessionEntryLeader,
           parentEntityID: parentEntityIDSafeVersion(node),
           eventCategory: eventInfo.category,
           eventType: eventInfo.creationType,
@@ -1508,17 +1608,20 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     relatedAlerts = 3,
     alertCreationTime = 6 * 3600,
     alertsDataStream = alertsDefaultDataStream,
+    sessionEntryLeader,
   }: {
     node: Event;
     relatedAlerts: number;
     alertCreationTime: number;
     alertsDataStream: DataStream;
+    sessionEntryLeader: string;
   }) {
     for (let i = 0; i < relatedAlerts; i++) {
       const ts = (timestampSafeVersion(node) ?? 0) + this.randomN(alertCreationTime) * 1000;
       yield this.generateAlert({
         ts,
         entityID: entityIDSafeVersion(node),
+        sessionEntryLeader,
         parentEntityID: parentEntityIDSafeVersion(node),
         ancestry: ancestryArray(node),
         alertsDataStream,
@@ -1531,6 +1634,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generatePolicyPackagePolicy(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
+    // FIXME: remove and use new FleetPackagePolicyGenerator (#2262)
     return {
       id: this.seededUUIDv4(),
       name: 'Endpoint Policy',
@@ -1575,6 +1679,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    * Generate an Agent Policy (ingest)
    */
   public generateAgentPolicy(): GetAgentPoliciesResponseItem {
+    // FIXME: remove and use new FleetPackagePolicyGenerator (#2262)
     return {
       id: this.seededUUIDv4(),
       name: 'Agent Policy',
@@ -1594,7 +1699,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   /**
    * Generate an EPM Package for Endpoint
    */
-  public generateEpmPackage(): GetPackagesResponse['response'][0] {
+  public generateEpmPackage(): GetPackagesResponse['items'][0] {
     return {
       id: this.seededUUIDv4(),
       name: 'endpoint',
@@ -1869,10 +1974,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         dataset: 'endpoint.policy',
       },
     };
-  }
-
-  private seededUUIDv4(): string {
-    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
 
   private randomHostPolicyResponseActionNames(): string[] {

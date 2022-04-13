@@ -10,7 +10,7 @@ import React from 'react';
 import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { Plugin, CoreStart, CoreSetup } from 'src/core/public';
+import type { CoreStart, CoreSetup, DocLinksStart } from 'src/core/public';
 
 import {
   telemetryManagementSectionWrapper,
@@ -23,18 +23,7 @@ export interface TelemetryManagementSectionPluginDepsSetup {
   usageCollection?: UsageCollectionSetup;
 }
 
-export interface TelemetryManagementSectionPluginSetup {
-  toggleSecuritySolutionExample: (enabled: boolean) => void;
-}
-
-export class TelemetryManagementSectionPlugin
-  implements Plugin<TelemetryManagementSectionPluginSetup>
-{
-  private showSecuritySolutionExample = false;
-  private shouldShowSecuritySolutionExample = () => {
-    return this.showSecuritySolutionExample;
-  };
-
+export class TelemetryManagementSectionPlugin {
   public setup(
     core: CoreSetup,
     {
@@ -43,6 +32,12 @@ export class TelemetryManagementSectionPlugin
       usageCollection,
     }: TelemetryManagementSectionPluginDepsSetup
   ) {
+    let docLinksLinks: DocLinksStart['links'];
+
+    core.getStartServices().then(([{ docLinks }]) => {
+      docLinksLinks = docLinks?.links;
+    });
+
     const ApplicationUsageTrackingProvider =
       usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
     advancedSettings.component.register(
@@ -52,7 +47,7 @@ export class TelemetryManagementSectionPlugin
           <ApplicationUsageTrackingProvider>
             {telemetryManagementSectionWrapper(
               telemetryService,
-              this.shouldShowSecuritySolutionExample
+              docLinksLinks
             )(props as TelemetryManagementSectionWrapperProps)}
           </ApplicationUsageTrackingProvider>
         );
@@ -60,11 +55,7 @@ export class TelemetryManagementSectionPlugin
       true
     );
 
-    return {
-      toggleSecuritySolutionExample: (enabled: boolean) => {
-        this.showSecuritySolutionExample = enabled;
-      },
-    };
+    return {};
   }
 
   public start(core: CoreStart) {}

@@ -16,8 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   async function checkData() {
-    const data = await elasticChart.getChartDebugData();
-    expect(data!.bars![0].bars.length).to.eql(24);
+    await retry.try(async () => {
+      const data = await elasticChart.getChartDebugData();
+      expect(data!.bars![0].bars.length).to.eql(24);
+    });
   }
 
   describe('show and save', () => {
@@ -25,12 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('embedded_lens_example');
       await elasticChart.setNewChartUiDebugFlag(true);
       await testSubjects.click('lns-example-change-time-range');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
     });
 
     it('should show chart', async () => {
       await testSubjects.click('lns-example-change-color');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       await checkData();
     });
 
@@ -58,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should load Lens editor', async () => {
       await testSubjects.click('lns-example-open-editor');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       await checkData();
     });
   });

@@ -17,7 +17,7 @@ image:concepts/images/saved-query.png["Example of the saved query management pop
 
 Saved queries are different than <<save-open-search,saved searches>>,
 which include the *Discover* configuration&mdash;selected columns in the document table, sort order, and
-index pattern&mdash;in addition to the query.
+{data-source}&mdash;in addition to the query.
 Saved searches are primarily used for adding search results to a dashboard.
 
 [role="xpack"]

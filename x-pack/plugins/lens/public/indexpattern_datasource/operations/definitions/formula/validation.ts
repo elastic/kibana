@@ -9,7 +9,8 @@ import { isObject, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
-import { esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
+import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import type { Query } from 'src/plugins/data/public';
 import {
   findMathNodes,
   findVariables,
@@ -20,7 +21,11 @@ import {
   tinymathFunctions,
 } from './util';
 
-import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
+import type {
+  OperationDefinition,
+  GenericIndexPatternColumn,
+  GenericOperationDefinition,
+} from '../index';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import type { TinymathNodeTypes } from './types';
 import { parseTimeShift } from '../../../../../../../../src/plugins/data/common';
@@ -75,6 +80,14 @@ interface ValidationErrors {
   wrongArgument: {
     message: string;
     type: { operation: string; text: string; type: string };
+  };
+  wrongReturnedType: {
+    message: string;
+    type: { text: string };
+  };
+  filtersTypeConflict: {
+    message: string;
+    type: { operation: string; outerType: string; innerType: string };
   };
 }
 
@@ -182,9 +195,9 @@ export const getQueryValidationError = (
   }
   try {
     if (language === 'kql') {
-      esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query), indexPattern);
+      toElasticsearchQuery(fromKueryExpression(query), indexPattern);
     } else {
-      esQuery.luceneStringToDsl(query);
+      luceneStringToDsl(query);
     }
     return;
   } catch (e) {
@@ -308,6 +321,20 @@ function getMessageFromId<K extends ErrorTypes>({
         values: { operation: out.operation, text: out.text, type: out.type },
       });
       break;
+    case 'wrongReturnedType':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongReturnedType', {
+        defaultMessage:
+          'The return value type of the operation {text} is not supported in Formula.',
+        values: { text: out.text },
+      });
+      break;
+    case 'filtersTypeConflict':
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationFiltersTypeConflicts', {
+        defaultMessage:
+          'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation.',
+        values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
+      });
+      break;
     // case 'mathRequiresFunction':
     //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
     //     defaultMessage; 'The function {name} requires an Elasticsearch function',
@@ -357,11 +384,12 @@ export function runASTValidation(
   ast: TinymathAST,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  operations: Record<string, GenericOperationDefinition>
+  operations: Record<string, GenericOperationDefinition>,
+  currentColumn: GenericIndexPatternColumn
 ) {
   return [
     ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations),
-    ...runFullASTValidation(ast, layer, indexPattern, operations),
+    ...runFullASTValidation(ast, layer, indexPattern, operations, currentColumn),
   ];
 }
 
@@ -468,11 +496,43 @@ function checkSingleQuery(namedArguments: TinymathNamedArgument[] | undefined) {
     : undefined;
 }
 
+function validateFiltersArguments(
+  node: TinymathFunction,
+  nodeOperation:
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
+  namedArguments: TinymathNamedArgument[] | undefined,
+  globalFilters?: Query
+) {
+  const errors = [];
+  const { conflicts, innerType, outerType } = hasFiltersConflicts(
+    nodeOperation,
+    namedArguments,
+    globalFilters
+  );
+  if (conflicts) {
+    if (innerType && outerType) {
+      errors.push(
+        getMessageFromId({
+          messageId: 'filtersTypeConflict',
+          values: {
+            operation: node.name,
+            innerType,
+            outerType,
+          },
+          locations: node.location ? [node.location] : [],
+        })
+      );
+    }
+  }
+  return errors;
+}
+
 function validateNameArguments(
   node: TinymathFunction,
   nodeOperation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   namedArguments: TinymathNamedArgument[] | undefined,
   indexPattern: IndexPattern
 ) {
@@ -537,13 +597,15 @@ function runFullASTValidation(
   ast: TinymathAST,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  operations: Record<string, GenericOperationDefinition>
+  operations: Record<string, GenericOperationDefinition>,
+  currentColumn?: GenericIndexPatternColumn
 ): ErrorWrapper[] {
   const missingVariables = findVariables(ast).filter(
     // filter empty string as well?
     ({ value }) => !indexPattern.getFieldByName(value) && !layer.columns[value]
   );
   const missingVariablesSet = new Set(missingVariables.map(({ value }) => value));
+  const globalFilter = currentColumn?.filter;
 
   function validateNode(node: TinymathAST): ErrorWrapper[] {
     if (!isObject(node) || node.type !== 'function') {
@@ -602,6 +664,7 @@ function runFullASTValidation(
             const fieldErrors = validateFieldArguments(node, variables, {
               isFieldOperation: true,
               firstArg,
+              returnedType: getReturnedType(nodeOperation, indexPattern, firstArg),
             });
             if (fieldErrors.length) {
               errors.push(...fieldErrors);
@@ -648,9 +711,14 @@ function runFullASTValidation(
             namedArguments,
             indexPattern
           );
-          if (argumentsErrors.length) {
-            errors.push(...argumentsErrors);
-          }
+
+          const filtersErrors = validateFiltersArguments(
+            node,
+            nodeOperation,
+            namedArguments,
+            globalFilter
+          );
+          errors.push(...argumentsErrors, ...filtersErrors);
         }
         return errors;
       }
@@ -711,19 +779,21 @@ function runFullASTValidation(
           const fieldErrors = validateFieldArguments(node, variables, {
             isFieldOperation: false,
             firstArg,
+            returnedType: undefined,
           });
-          if (fieldErrors.length) {
-            errors.push(...fieldErrors);
-          }
           const argumentsErrors = validateNameArguments(
             node,
             nodeOperation,
             namedArguments,
             indexPattern
           );
-          if (argumentsErrors.length) {
-            errors.push(...argumentsErrors);
-          }
+          const filtersErrors = validateFiltersArguments(
+            node,
+            nodeOperation,
+            namedArguments,
+            globalFilter
+          );
+          errors.push(...fieldErrors, ...argumentsErrors, ...filtersErrors);
         }
       }
       return errors.concat(validateNode(functions[0]));
@@ -736,16 +806,16 @@ function runFullASTValidation(
 
 export function canHaveParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>
 ) {
   return Boolean((operation.operationParams || []).length) || operation.filterable;
 }
 
 export function getInvalidParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ) {
   return validateParams(operation, params).filter(
@@ -755,8 +825,8 @@ export function getInvalidParams(
 
 export function getMissingParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ) {
   return validateParams(operation, params).filter(
@@ -766,13 +836,32 @@ export function getMissingParams(
 
 export function getWrongTypeParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ) {
   return validateParams(operation, params).filter(
     ({ isCorrectType, isMissing }) => !isCorrectType && !isMissing
   );
+}
+
+function getReturnedType(
+  operation: OperationDefinition<GenericIndexPatternColumn, 'field'>,
+  indexPattern: IndexPattern,
+  firstArg: TinymathAST
+) {
+  const variables = findVariables(firstArg);
+  if (variables.length !== 1) {
+    return;
+  }
+  const field = indexPattern.getFieldByName(getValueOrName(variables[0]) as string);
+  // while usually this is used where it is safe, as generic function it should check anyway
+  if (!field) {
+    return;
+  }
+  // here we're validating the support of the returned type for Formula, not for the operation itself
+  // that is already handled indipendently by the operation. So return the scale type
+  return operation.getPossibleOperationForField(field)?.scale;
 }
 
 function getDuplicateParams(params: TinymathNamedArgument[] = []) {
@@ -788,10 +877,30 @@ function getDuplicateParams(params: TinymathNamedArgument[] = []) {
   return [];
 }
 
+export function hasFiltersConflicts(
+  operation:
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
+  params: TinymathNamedArgument[] = [],
+  globalFilter?: Query
+) {
+  const paramsObj = getOperationParams(operation, params);
+  if (!operation.filterable || !globalFilter || !(paramsObj.kql || paramsObj.lucene)) {
+    return { conflicts: false };
+  }
+  const language = globalFilter.language === 'kuery' ? 'kql' : globalFilter.language;
+  const conflicts = !(language in paramsObj);
+  return {
+    conflicts,
+    innerType: paramsObj.lucene ? 'lucene' : 'kql',
+    outerType: language,
+  };
+}
+
 export function validateParams(
   operation:
-    | OperationDefinition<IndexPatternColumn, 'field'>
-    | OperationDefinition<IndexPatternColumn, 'fullReference'>,
+    | OperationDefinition<GenericIndexPatternColumn, 'field'>
+    | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   params: TinymathNamedArgument[] = []
 ) {
   const paramsObj = getOperationParams(operation, params);
@@ -898,7 +1007,15 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
 function validateFieldArguments(
   node: TinymathFunction,
   variables: Array<string | number | TinymathVariable>,
-  { isFieldOperation, firstArg }: { isFieldOperation: boolean; firstArg: TinymathAST }
+  {
+    isFieldOperation,
+    firstArg,
+    returnedType,
+  }: {
+    isFieldOperation: boolean;
+    firstArg: TinymathAST;
+    returnedType: 'ratio' | 'ordinal' | 'interval' | undefined;
+  }
 ) {
   const fields = variables.filter(
     (arg) => isArgumentValidType(arg, 'variable') && !isMathNode(arg)
@@ -919,6 +1036,19 @@ function validateFieldArguments(
         locations: node.location ? [node.location] : [],
       })
     );
+  }
+  if (isFieldOperation && fields.length === 1 && fields[0] === firstArg) {
+    if (returnedType === 'ordinal') {
+      errors.push(
+        getMessageFromId({
+          messageId: 'wrongReturnedType',
+          values: {
+            text: node.text ?? `${node.name}(${getValueOrName(firstArg)})`,
+          },
+          locations: node.location ? [node.location] : [],
+        })
+      );
+    }
   }
   if (!isFieldOperation && fields.length) {
     errors.push(

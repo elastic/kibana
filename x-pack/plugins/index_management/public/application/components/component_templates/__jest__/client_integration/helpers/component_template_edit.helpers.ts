@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { BASE_PATH } from '../../../../../../../common';
 import { ComponentTemplateEdit } from '../../../component_template_wizard';
 
@@ -19,7 +20,7 @@ export type ComponentTemplateEditTestBed = TestBed<ComponentTemplateFormTestSubj
   actions: ReturnType<typeof getFormActions>;
 };
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`${BASE_PATH}/edit_component_template/comp-1`],
     componentRoutePath: `${BASE_PATH}/edit_component_template/:name`,
@@ -27,9 +28,11 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(ComponentTemplateEdit), testBedConfig);
-
-export const setup = async (): Promise<ComponentTemplateEditTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateEditTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(ComponentTemplateEdit, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

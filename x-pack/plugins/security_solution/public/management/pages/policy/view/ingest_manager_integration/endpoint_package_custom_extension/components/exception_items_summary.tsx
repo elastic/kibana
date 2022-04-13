@@ -46,8 +46,8 @@ export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)`
 const StyledEuiFlexGroup = styled(EuiFlexGroup)<{
   isSmall: boolean;
 }>`
-  font-size: ${({ isSmall, theme }) => (isSmall ? theme.eui.euiFontSizeXS : 'innherit')};
-  font-weight: ${({ isSmall }) => (isSmall ? '1px' : 'innherit')};
+  font-size: ${({ isSmall, theme }) => (isSmall ? theme.eui.euiFontSizeXS : 'inherit')};
+  font-weight: ${({ isSmall }) => (isSmall ? '1px' : 'inherit')};
 `;
 
 const CSS_BOLD: Readonly<React.CSSProperties> = { fontWeight: 'bold' };
@@ -60,18 +60,23 @@ interface ExceptionItemsSummaryProps {
 export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(
   ({ stats, isSmall = false }) => {
     const getItem = useCallback(
-      (stat: keyof GetExceptionSummaryResponse) => (
-        <EuiFlexItem key={stat}>
-          <SummaryStat
-            value={stats?.[stat] ?? 0}
-            color={stat === 'total' ? 'primary' : 'default'}
-            key={stat}
-            isSmall={isSmall}
-          >
-            {SUMMARY_LABELS[stat]}
-          </SummaryStat>
-        </EuiFlexItem>
-      ),
+      (stat: keyof GetExceptionSummaryResponse) => {
+        if (stat !== 'total' && isSmall) {
+          return null;
+        }
+        return (
+          <EuiFlexItem key={stat}>
+            <SummaryStat
+              value={stats?.[stat] ?? 0}
+              color={stat === 'total' && !isSmall ? 'primary' : 'default'}
+              key={stat}
+              isSmall={isSmall}
+            >
+              {SUMMARY_LABELS[stat]}
+            </SummaryStat>
+          </EuiFlexItem>
+        );
+      },
       [stats, isSmall]
     );
 
@@ -100,9 +105,11 @@ const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color']; isSmall?:
           gutterSize={isSmall ? 'xs' : 'l'}
           isSmall={isSmall}
         >
-          <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
-            {children}
-          </EuiFlexItem>
+          {!isSmall ? (
+            <EuiFlexItem grow={false} style={color === 'primary' ? CSS_BOLD : undefined}>
+              {children}
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <EuiBadge color={color}>{value}</EuiBadge>
           </EuiFlexItem>

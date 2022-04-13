@@ -67,7 +67,7 @@ export interface StepDefineFormProps {
 
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
-  const { indexPattern } = searchItems;
+  const { dataView } = searchItems;
   const {
     ml: { DataGrid },
   } = useAppDependencies();
@@ -88,7 +88,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
   const indexPreviewProps = {
     ...useIndexData(
-      indexPattern,
+      dataView,
       stepDefineForm.searchBar.state.pivotQuery,
       stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
     ),
@@ -101,7 +101,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       : stepDefineForm.latestFunctionConfig;
 
   const previewRequest = getPreviewTransformRequestBody(
-    indexPattern.title,
+    dataView.title,
     pivotQuery,
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? stepDefineForm.pivotConfig.state.requestPayload
@@ -109,7 +109,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
   );
 
-  const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern.title);
+  const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, dataView.title);
   const copyToClipboardSourceDescription = i18n.translate(
     'xpack.transform.indexPreview.copyClipboardTooltip',
     {
@@ -127,7 +127,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
   const pivotPreviewProps = {
     ...usePivotData(
-      indexPattern.title,
+      dataView.title,
       pivotQuery,
       validationStatus,
       requestPayload,
@@ -207,11 +207,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
         {searchItems.savedSearch === undefined && (
           <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
+            label={i18n.translate('xpack.transform.stepDefineForm.dataViewLabel', {
+              defaultMessage: 'Data view',
             })}
           >
-            <span>{indexPattern.title}</span>
+            <span>{dataView.title}</span>
           </EuiFormRow>
         )}
 
@@ -233,10 +233,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                 {searchItems.savedSearch === undefined && (
                   <>
                     {!isAdvancedSourceEditorEnabled && (
-                      <SourceSearchBar
-                        indexPattern={indexPattern}
-                        searchBar={stepDefineForm.searchBar}
-                      />
+                      <SourceSearchBar dataView={dataView} searchBar={stepDefineForm.searchBar} />
                     )}
                     {isAdvancedSourceEditorEnabled && <AdvancedSourceEditor {...stepDefineForm} />}
                   </>

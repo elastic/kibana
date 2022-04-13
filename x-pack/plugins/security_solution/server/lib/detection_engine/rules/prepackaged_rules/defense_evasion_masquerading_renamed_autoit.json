@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Renamed AutoIt Scripts Interpreter",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n  process.pe.original_file_name : \"AutoIt*.exe\" and not process.name : \"AutoIt*.exe\"\n",
   "risk_score": 47,
   "rule_id": "2e1e835d-01e5-48ca-b9fc-7a61f7f11902",
@@ -35,12 +36,19 @@
         {
           "id": "T1036",
           "name": "Masquerading",
-          "reference": "https://attack.mitre.org/techniques/T1036/"
+          "reference": "https://attack.mitre.org/techniques/T1036/",
+          "subtechnique": [
+            {
+              "id": "T1036.003",
+              "name": "Rename System Utilities",
+              "reference": "https://attack.mitre.org/techniques/T1036/003/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 6
 }

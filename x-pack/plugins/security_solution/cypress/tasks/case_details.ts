@@ -7,16 +7,16 @@
 
 import { TIMELINE_TITLE } from '../screens/timeline';
 import {
-  CASE_ACTIONS_BTN,
+  CASE_ACTIONS,
+  CASE_DELETE,
   CASE_DETAILS_TIMELINE_LINK_MARKDOWN,
-  DELETE_CASE_BTN,
-  DELETE_CASE_CONFIRMATION_BTN,
+  DELETE_CASE_CONFIRM_BUTTON,
 } from '../screens/case_details';
 
 export const deleteCase = () => {
-  cy.get(CASE_ACTIONS_BTN).first().click();
-  cy.get(DELETE_CASE_BTN).click();
-  cy.get(DELETE_CASE_CONFIRMATION_BTN).click();
+  cy.get(CASE_ACTIONS).first().click({ force: true });
+  cy.get(CASE_DELETE).click({ force: true });
+  cy.get(DELETE_CASE_CONFIRM_BUTTON).click({ force: true });
 };
 
 export const openCaseTimeline = () => {

@@ -19,6 +19,8 @@ import {
   EuiSpacer,
   EuiFieldSearch,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -76,38 +78,41 @@ export const AddResultFlyout: React.FC = () => {
           <EuiSpacer />
 
           {searchResults.length > 0 ? (
-            searchResults.map((result) => {
-              const id = result.id.raw;
-              const isPromoted = promotedIds.includes(id);
-              const isHidden = hiddenIds.includes(id);
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {searchResults.map((result, index) => {
+                const id = result.id.raw;
+                const isPromoted = promotedIds.includes(id);
+                const isHidden = hiddenIds.includes(id);
 
-              return (
-                <CurationResult
-                  key={id}
-                  result={result}
-                  actions={[
-                    isHidden
-                      ? {
-                          ...SHOW_DOCUMENT_ACTION,
-                          onClick: () => removeHiddenId(id),
-                        }
-                      : {
-                          ...HIDE_DOCUMENT_ACTION,
-                          onClick: () => addHiddenId(id),
-                        },
-                    isPromoted
-                      ? {
-                          ...DEMOTE_DOCUMENT_ACTION,
-                          onClick: () => removePromotedId(id),
-                        }
-                      : {
-                          ...PROMOTE_DOCUMENT_ACTION,
-                          onClick: () => addPromotedId(id),
-                        },
-                  ]}
-                />
-              );
-            })
+                return (
+                  <EuiFlexItem key={index}>
+                    <CurationResult
+                      result={result}
+                      actions={[
+                        isHidden
+                          ? {
+                              ...SHOW_DOCUMENT_ACTION,
+                              onClick: () => removeHiddenId(id),
+                            }
+                          : {
+                              ...HIDE_DOCUMENT_ACTION,
+                              onClick: () => addHiddenId(id),
+                            },
+                        isPromoted
+                          ? {
+                              ...DEMOTE_DOCUMENT_ACTION,
+                              onClick: () => removePromotedId(id),
+                            }
+                          : {
+                              ...PROMOTE_DOCUMENT_ACTION,
+                              onClick: () => addPromotedId(id),
+                            },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
           ) : (
             <EuiEmptyPrompt
               body={i18n.translate(

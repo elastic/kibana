@@ -15,6 +15,7 @@ import {
   securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyReadSpacesAll,
   observabilityOnlyAllSpacesAll,
+  logsOnlyAllSpacesAll,
   observabilityOnlyReadSpacesAll,
   // trial license roles
   observabilityMinReadAlertsAll,
@@ -27,6 +28,7 @@ import {
   observabilityOnlyAllSpace2,
   observabilityOnlyReadSpace2,
   observabilityMinReadAlertsAllSpacesAll,
+  observabilityOnlyAllSpacesAllWithReadESIndices,
 } from './roles';
 import { User } from './types';
 
@@ -161,6 +163,18 @@ export const obsOnlySpacesAll: User = {
   roles: [observabilityOnlyAllSpacesAll.name],
 };
 
+export const logsOnlySpacesAll: User = {
+  username: 'logs_only_all_spaces_all',
+  password: 'logs_only_all_spaces_all',
+  roles: [logsOnlyAllSpacesAll.name],
+};
+
+export const obsOnlySpacesAllEsRead: User = {
+  username: 'obs_only_all_spaces_all_es_read',
+  password: 'obs_only_all_spaces_all_es_read',
+  roles: [observabilityOnlyAllSpacesAllWithReadESIndices.name],
+};
+
 export const obsSecSpacesAll: User = {
   username: 'sec_only_all_spaces_all_and_obs_only_all_spaces_all',
   password: 'sec_only_all_spaces_all_and_obs_only_all_spaces_all',
@@ -172,21 +186,6 @@ export const obsSecReadSpacesAll: User = {
   password: 'sec_only_read_all_spaces_all_and_obs_only_read_all_spaces_all',
   roles: [securitySolutionOnlyReadSpacesAll.name, observabilityOnlyReadSpacesAll.name],
 };
-
-/**
- * These users are for the security_only tests because most of them have access to the default space instead of 'space1'
- */
-export const usersDefaultSpace = [
-  superUser,
-  secOnlySpacesAll,
-  secOnlyReadSpacesAll,
-  obsOnlySpacesAll,
-  obsOnlyReadSpacesAll,
-  obsSecSpacesAll,
-  obsSecReadSpacesAll,
-  globalRead,
-  noKibanaPrivileges,
-];
 
 /**
  * Trial users with trial roles
@@ -282,6 +281,7 @@ export const allUsers = [
   secOnlySpacesAll,
   secOnlyReadSpacesAll,
   obsOnlySpacesAll,
+  logsOnlySpacesAll,
   obsSecSpacesAll,
   obsSecReadSpacesAll,
   obsMinReadAlertsRead,
@@ -298,4 +298,5 @@ export const allUsers = [
   obsOnlyReadSpace2,
   obsSecAllSpace2,
   obsSecReadSpace2,
+  obsOnlySpacesAllEsRead,
 ];

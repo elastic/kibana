@@ -12,9 +12,14 @@ import { getIndexActionType } from './es_index';
 import { getPagerDutyActionType } from './pagerduty';
 import { getSwimlaneActionType } from './swimlane';
 import { getWebhookActionType } from './webhook';
+import { getXmattersActionType } from './xmatters';
 import { TypeRegistry } from '../../type_registry';
 import { ActionTypeModel } from '../../../types';
-import { getServiceNowITSMActionType, getServiceNowSIRActionType } from './servicenow';
+import {
+  getServiceNowITSMActionType,
+  getServiceNowSIRActionType,
+  getServiceNowITOMActionType,
+} from './servicenow';
 import { getJiraActionType } from './jira';
 import { getResilientActionType } from './resilient';
 import { getTeamsActionType } from './teams';
@@ -31,7 +36,9 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getPagerDutyActionType());
   actionTypeRegistry.register(getSwimlaneActionType());
   actionTypeRegistry.register(getWebhookActionType());
+  actionTypeRegistry.register(getXmattersActionType());
   actionTypeRegistry.register(getServiceNowITSMActionType());
+  actionTypeRegistry.register(getServiceNowITOMActionType());
   actionTypeRegistry.register(getServiceNowSIRActionType());
   actionTypeRegistry.register(getJiraActionType());
   actionTypeRegistry.register(getResilientActionType());

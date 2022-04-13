@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiButtonGroup, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
-import { useDebouncedValue } from './debounced_value';
-import { TooltipWrapper } from './tooltip_wrapper';
 
 export interface LegendLocationSettingsProps {
   /**
@@ -42,20 +40,10 @@ export interface LegendLocationSettingsProps {
    */
   onAlignmentChange?: (id: string) => void;
   /**
-   * Sets the number of columns for legend inside chart
-   */
-  floatingColumns?: number;
-  /**
-   * Callback on horizontal alignment option change
-   */
-  onFloatingColumnsChange?: (value: number) => void;
-  /**
    * Flag to disable the location settings
    */
   isDisabled?: boolean;
 }
-
-const DEFAULT_FLOATING_COLUMNS = 1;
 
 const toggleButtonsIcons = [
   {
@@ -149,31 +137,6 @@ const locationAlignmentButtonsIcons: Array<{
   },
 ];
 
-const FloatingColumnsInput = ({
-  value,
-  setValue,
-  isDisabled,
-}: {
-  value: number;
-  setValue: (value: number) => void;
-  isDisabled: boolean;
-}) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
-  return (
-    <EuiFieldNumber
-      data-test-subj="lens-legend-location-columns-input"
-      value={inputValue}
-      min={1}
-      max={5}
-      compressed
-      disabled={isDisabled}
-      onChange={(e) => {
-        handleInputChange(Number(e.target.value));
-      }}
-    />
-  );
-};
-
 export const LegendLocationSettings: React.FunctionComponent<LegendLocationSettingsProps> = ({
   location,
   onLocationChange = () => {},
@@ -182,13 +145,12 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
   verticalAlignment,
   horizontalAlignment,
   onAlignmentChange = () => {},
-  floatingColumns,
-  onFloatingColumnsChange = () => {},
   isDisabled = false,
 }) => {
   const alignment = `${verticalAlignment || VerticalAlignment.Top}_${
     horizontalAlignment || HorizontalAlignment.Right
   }`;
+  if (isDisabled) return null;
   return (
     <>
       {location && (
@@ -198,32 +160,22 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
             defaultMessage: 'Location',
           })}
         >
-          <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-              defaultMessage: 'Requires legend to be shown',
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.shared.legendLocationLabel', {
+              defaultMessage: 'Location',
             })}
-            condition={isDisabled}
-            position="top"
-            delay="regular"
-            display="block"
-          >
-            <EuiButtonGroup
-              isFullWidth
-              legend={i18n.translate('xpack.lens.shared.legendLocationLabel', {
-                defaultMessage: 'Location',
-              })}
-              data-test-subj="lens-legend-location-btn"
-              name="legendLocation"
-              buttonSize="compressed"
-              options={locationOptions}
-              isDisabled={isDisabled}
-              idSelected={locationOptions.find(({ value }) => value === location)!.id}
-              onChange={(optionId) => {
-                const newLocation = locationOptions.find(({ id }) => id === optionId)!.value;
-                onLocationChange(newLocation);
-              }}
-            />
-          </TooltipWrapper>
+            data-test-subj="lens-legend-location-btn"
+            name="legendLocation"
+            buttonSize="compressed"
+            options={locationOptions}
+            isDisabled={isDisabled}
+            idSelected={locationOptions.find(({ value }) => value === location)!.id}
+            onChange={(optionId) => {
+              const newLocation = locationOptions.find(({ id }) => id === optionId)!.value;
+              onLocationChange(newLocation);
+            }}
+          />
         </EuiFormRow>
       )}
       <EuiFormRow
@@ -234,96 +186,45 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
       >
         <>
           {(!location || location === 'outside') && (
-            <TooltipWrapper
-              tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                defaultMessage: 'Requires legend to be shown',
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.shared.legendAlignmentLabel', {
+                defaultMessage: 'Alignment',
               })}
-              condition={isDisabled}
-              position="top"
-              delay="regular"
-              display="block"
-            >
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.shared.legendAlignmentLabel', {
-                  defaultMessage: 'Alignment',
-                })}
-                isDisabled={isDisabled}
-                data-test-subj="lens-legend-position-btn"
-                name="legendPosition"
-                buttonSize="compressed"
-                options={toggleButtonsIcons}
-                idSelected={position || Position.Right}
-                onChange={onPositionChange}
-                isIconOnly
-              />
-            </TooltipWrapper>
+              isDisabled={isDisabled}
+              data-test-subj="lens-legend-position-btn"
+              name="legendPosition"
+              buttonSize="compressed"
+              options={toggleButtonsIcons}
+              idSelected={position || Position.Right}
+              onChange={onPositionChange}
+              isIconOnly
+            />
           )}
           {location === 'inside' && (
-            <TooltipWrapper
-              tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                defaultMessage: 'Requires legend to be shown',
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.shared.legendInsideLocationAlignmentLabel', {
+                defaultMessage: 'Alignment',
               })}
-              condition={isDisabled}
-              position="top"
-              delay="regular"
-              display="block"
-            >
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.shared.legendInsideLocationAlignmentLabel', {
-                  defaultMessage: 'Alignment',
-                })}
-                type="single"
-                data-test-subj="lens-legend-inside-alignment-btn"
-                name="legendInsideAlignment"
-                buttonSize="compressed"
-                isDisabled={isDisabled}
-                options={locationAlignmentButtonsIcons}
-                idSelected={
-                  locationAlignmentButtonsIcons.find(({ value }) => value === alignment)!.id
-                }
-                onChange={(optionId) => {
-                  const newAlignment = locationAlignmentButtonsIcons.find(
-                    ({ id }) => id === optionId
-                  )!.value;
-                  onAlignmentChange(newAlignment);
-                }}
-                isIconOnly
-              />
-            </TooltipWrapper>
+              type="single"
+              data-test-subj="lens-legend-inside-alignment-btn"
+              name="legendInsideAlignment"
+              buttonSize="compressed"
+              isDisabled={isDisabled}
+              options={locationAlignmentButtonsIcons}
+              idSelected={
+                locationAlignmentButtonsIcons.find(({ value }) => value === alignment)!.id
+              }
+              onChange={(optionId) => {
+                const newAlignment = locationAlignmentButtonsIcons.find(
+                  ({ id }) => id === optionId
+                )!.value;
+                onAlignmentChange(newAlignment);
+              }}
+              isIconOnly
+            />
           )}
         </>
       </EuiFormRow>
-      {location && (
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.shared.legendInsideColumnsLabel', {
-            defaultMessage: 'Number of columns',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <TooltipWrapper
-            tooltipContent={
-              isDisabled
-                ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                    defaultMessage: 'Requires legend to be shown',
-                  })
-                : i18n.translate('xpack.lens.shared.legendInsideTooltip', {
-                    defaultMessage: 'Requires legend to be located inside visualization',
-                  })
-            }
-            condition={isDisabled || location === 'outside'}
-            position="top"
-            delay="regular"
-            display="block"
-          >
-            <FloatingColumnsInput
-              value={floatingColumns ?? DEFAULT_FLOATING_COLUMNS}
-              setValue={onFloatingColumnsChange}
-              isDisabled={isDisabled || location === 'outside'}
-            />
-          </TooltipWrapper>
-        </EuiFormRow>
-      )}
     </>
   );
 };

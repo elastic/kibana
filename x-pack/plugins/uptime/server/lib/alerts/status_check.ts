@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { min } from 'lodash';
-import datemath from '@elastic/datemath';
+
+import datemath from '@kbn/datemath';
 import { schema } from '@kbn/config-schema';
-import { ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -19,19 +19,34 @@ import {
   GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
 import { MONITOR_STATUS } from '../../../common/constants/alerts';
-import { updateState, generateAlertMessage } from './common';
-import { commonMonitorStateI18, commonStateTranslations, DOWN_LABEL } from './translations';
+import { updateState, getViewInAppUrl } from './common';
+import {
+  commonMonitorStateI18,
+  commonStateTranslations,
+  statusCheckTranslations,
+} from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
-import { GetMonitorStatusResult } from '../requests/get_monitor_status';
+import {
+  GetMonitorStatusResult,
+  GetMonitorDownStatusMessageParams,
+  getMonitorDownStatusMessageParams,
+} from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { MonitorStatusTranslations } from '../../../common/translations';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
 import { ActionGroupIdsOf } from '../../../../alerting/common';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
+import {
+  ALERT_REASON_MSG,
+  MESSAGE,
+  MONITOR_WITH_GEO,
+  ACTION_VARIABLES,
+  VIEW_IN_APP_URL,
+} from './action_variables';
+import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
-
 /**
  * Returns the appropriate range for filtering the documents by `@timestamp`.
  *
@@ -132,6 +147,8 @@ export const formatFilterString = async (
   );
 
 export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
+  const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
+  const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
   const summary = {
     monitorUrl: monitorInfo.url?.full,
     monitorId: monitorInfo.monitor?.id,
@@ -141,13 +158,10 @@ export const getMonitorSummary = (monitorInfo: Ping, statusMessage: string) => {
     observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
     observerHostname: monitorInfo.agent?.name,
   };
-  const reason = generateAlertMessage(MonitorStatusTranslations.defaultActionMessage, {
-    ...summary,
-    statusMessage,
-  });
+
   return {
     ...summary,
-    reason,
+    reason: `${monitorName} from ${observerLocation} ${statusMessage}`,
   };
 };
 
@@ -159,44 +173,35 @@ export const getMonitorAlertDocument = (monitorSummary: Record<string, string | 
   'observer.geo.name': monitorSummary.observerLocation,
   'error.message': monitorSummary.latestErrorMessage,
   'agent.name': monitorSummary.observerHostname,
-  [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING,
   [ALERT_REASON]: monitorSummary.reason,
 });
 
 export const getStatusMessage = (
-  downMonInfo?: Ping,
+  downMonParams?: GetMonitorDownStatusMessageParams,
   availMonInfo?: GetMonitorAvailabilityResult,
   availability?: GetMonitorAvailabilityParams
 ) => {
   let statusMessage = '';
-  if (downMonInfo) {
-    statusMessage = DOWN_LABEL;
+  if (downMonParams?.info) {
+    statusMessage = statusCheckTranslations.downMonitorsLabel(
+      downMonParams.count!,
+      downMonParams.interval!,
+      downMonParams.numTimes
+    );
   }
   let availabilityMessage = '';
 
   if (availMonInfo) {
-    availabilityMessage = i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage',
-      {
-        defaultMessage:
-          'below threshold with {availabilityRatio}% availability expected is {expectedAvailability}%',
-        values: {
-          availabilityRatio: (availMonInfo.availabilityRatio! * 100).toFixed(2),
-          expectedAvailability: availability?.threshold,
-        },
-      }
+    availabilityMessage = statusCheckTranslations.availabilityBreachLabel(
+      (availMonInfo.availabilityRatio! * 100).toFixed(2),
+      availability?.threshold!,
+      formatDurationFromTimeUnitChar(availability?.range!, availability?.rangeUnit! as TimeUnitChar)
     );
   }
-  if (availMonInfo && downMonInfo) {
-    return i18n.translate(
-      'xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage',
-      {
-        defaultMessage: '{statusMessage} and also {availabilityMessage}',
-        values: {
-          statusMessage,
-          availabilityMessage,
-        },
-      }
+  if (availMonInfo && downMonParams?.info) {
+    return statusCheckTranslations.downMonitorsAndAvailabilityBreachLabel(
+      statusMessage,
+      availabilityMessage
     );
   }
   return statusMessage + availabilityMessage;
@@ -217,7 +222,7 @@ export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   return `${urlText}_${monIdByLoc}`;
 };
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (server, libs) => ({
   id: 'xpack.uptime.alerts.monitorStatus',
   producer: 'uptime',
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
@@ -272,25 +277,10 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   ],
   actionVariables: {
     context: [
-      {
-        name: 'message',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
-          {
-            defaultMessage: 'A generated message summarizing the currently down monitors',
-          }
-        ),
-      },
-      {
-        name: 'downMonitorsWithGeo',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
-          {
-            defaultMessage:
-              'A generated summary that shows some or all of the monitors detected as "down" by the alert',
-          }
-        ),
-      },
+      ACTION_VARIABLES[MESSAGE],
+      ACTION_VARIABLES[MONITOR_WITH_GEO],
+      ACTION_VARIABLES[ALERT_REASON_MSG],
+      ACTION_VARIABLES[VIEW_IN_APP_URL],
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
@@ -299,10 +289,11 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   async executor({
     params: rawParams,
     state,
-    services: { savedObjectsClient, scopedClusterClient, alertWithLifecycle },
+    services: { savedObjectsClient, scopedClusterClient, alertWithLifecycle, getAlertStartedDate },
     rule: {
       schedule: { interval },
     },
+    startedAt,
   }) {
     const {
       filters,
@@ -316,6 +307,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
       isAutoGenerated,
       timerange: oldVersionTimeRange,
     } = rawParams;
+    const { basePath } = server;
     const uptimeEsClient = createUptimeESClient({
       esClient: scopedClusterClient.asCurrentUser,
       savedObjectsClient,
@@ -324,7 +316,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
 
     const timespanInterval = `${String(timerangeCount)}${timerangeUnit}`;
-
     // Range filter for `monitor.timespan`, the range of time the ping is valid
     const timespanRange = oldVersionTimeRange || {
       from: `now-${timespanInterval}`,
@@ -355,12 +346,21 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     if (isAutoGenerated) {
       for (const monitorLoc of downMonitorsByLocation) {
         const monitorInfo = monitorLoc.monitorInfo;
+        const monitorStatusMessageParams = getMonitorDownStatusMessageParams(
+          monitorInfo,
+          monitorLoc.count,
+          numTimes,
+          timerangeCount,
+          timerangeUnit,
+          oldVersionTimeRange
+        );
 
-        const statusMessage = getStatusMessage(monitorInfo);
+        const statusMessage = getStatusMessage(monitorStatusMessageParams);
         const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
-
+        const alertId = getInstanceId(monitorInfo, monitorLoc.location);
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
         const alert = alertWithLifecycle({
-          id: getInstanceId(monitorInfo, monitorLoc.location),
+          id: alertId,
           fields: getMonitorAlertDocument(monitorSummary),
         });
 
@@ -371,7 +371,19 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           ...updateState(state, true),
         });
 
-        alert.scheduleActions(MONITOR_STATUS.id);
+        const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
+          monitorId: monitorSummary.monitorId,
+          dateRangeEnd: 'now',
+          dateRangeStart: indexedStartedAt,
+          filters: {
+            'observer.geo.name': [monitorSummary.observerLocation],
+          },
+        });
+
+        alert.scheduleActions(MONITOR_STATUS.id, {
+          [ALERT_REASON_MSG]: monitorSummary.reason,
+          [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+        });
       }
       return updateState(state, downMonitorsByLocation.length > 0);
     }
@@ -396,13 +408,31 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
       )?.monitorInfo;
 
+      const downMonCount = downMonitorsByLocation.find(
+        ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
+      )?.count;
+
       const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;
 
-      const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
-      const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
+      const monitorStatusMessageParams = getMonitorDownStatusMessageParams(
+        downMonInfo!,
+        downMonCount!,
+        numTimes,
+        timerangeCount,
+        timerangeUnit,
+        oldVersionTimeRange
+      );
 
+      const statusMessage = getStatusMessage(
+        monitorStatusMessageParams,
+        availMonInfo!,
+        availability
+      );
+      const monitorSummary = getMonitorSummary(monitorInfo, statusMessage);
+      const alertId = getInstanceId(monitorInfo, monIdByLoc);
+      const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
       const alert = alertWithLifecycle({
-        id: getInstanceId(monitorInfo, monIdByLoc),
+        id: alertId,
         fields: getMonitorAlertDocument(monitorSummary),
       });
 
@@ -411,10 +441,20 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         ...monitorSummary,
         statusMessage,
       });
+      const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
+        monitorId: monitorSummary.monitorId,
+        dateRangeEnd: 'now',
+        dateRangeStart: indexedStartedAt,
+        filters: {
+          'observer.geo.name': [monitorSummary.observerLocation],
+        },
+      });
 
-      alert.scheduleActions(MONITOR_STATUS.id);
+      alert.scheduleActions(MONITOR_STATUS.id, {
+        [ALERT_REASON_MSG]: monitorSummary.reason,
+        [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
+      });
     });
-
     return updateState(state, downMonitorsByLocation.length > 0);
   },
 });

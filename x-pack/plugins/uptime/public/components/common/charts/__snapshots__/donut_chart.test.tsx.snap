@@ -15,459 +15,681 @@ exports[`DonutChart component passes correct props without errors for valid prop
   >
     <Chart
       aria-label="Pie chart showing the current status. 32 of 127 monitors are down."
-      baseTheme={
-        Object {
-          "arcSeriesStyle": Object {
-            "arc": Object {
-              "opacity": 1,
-              "stroke": "black",
-              "strokeWidth": 1,
-              "visible": true,
-            },
-          },
-          "areaSeriesStyle": Object {
-            "area": Object {
-              "opacity": 0.3,
-              "visible": true,
-            },
-            "line": Object {
-              "opacity": 1,
-              "strokeWidth": 1,
-              "visible": true,
-            },
-            "point": Object {
-              "fill": "white",
-              "opacity": 1,
-              "radius": 2,
-              "strokeWidth": 1,
-              "visible": false,
-            },
-          },
-          "axes": Object {
-            "axisLine": Object {
-              "stroke": "#eaeaea",
-              "strokeWidth": 1,
-              "visible": true,
-            },
-            "axisPanelTitle": Object {
-              "fill": "#333",
-              "fontFamily": "sans-serif",
-              "fontSize": 10,
-              "padding": Object {
-                "inner": 8,
-                "outer": 0,
-              },
-              "visible": true,
-            },
-            "axisTitle": Object {
-              "fill": "#333",
-              "fontFamily": "sans-serif",
-              "fontSize": 12,
-              "padding": Object {
-                "inner": 8,
-                "outer": 0,
-              },
-              "visible": true,
-            },
-            "gridLine": Object {
-              "horizontal": Object {
-                "dash": Array [
-                  0,
-                  0,
-                ],
-                "opacity": 1,
-                "stroke": "#D3DAE6",
-                "strokeWidth": 1,
-                "visible": false,
-              },
-              "vertical": Object {
-                "dash": Array [
-                  0,
-                  0,
-                ],
-                "opacity": 1,
-                "stroke": "#D3DAE6",
-                "strokeWidth": 1,
-                "visible": false,
-              },
-            },
-            "tickLabel": Object {
-              "alignment": Object {
-                "horizontal": "near",
-                "vertical": "near",
-              },
-              "fill": "#777",
-              "fontFamily": "sans-serif",
-              "fontSize": 10,
-              "fontStyle": "normal",
-              "offset": Object {
-                "reference": "local",
-                "x": 0,
-                "y": 0,
-              },
-              "padding": 0,
-              "rotation": 0,
-              "visible": true,
-            },
-            "tickLine": Object {
-              "padding": 10,
-              "size": 10,
-              "stroke": "#eaeaea",
-              "strokeWidth": 1,
-              "visible": true,
-            },
-          },
-          "background": Object {
-            "color": "transparent",
-          },
-          "barSeriesStyle": Object {
-            "displayValue": Object {
-              "fill": "#777",
-              "fontFamily": "sans-serif",
-              "fontSize": 8,
-              "fontStyle": "normal",
-              "offsetX": 0,
-              "offsetY": 0,
-              "padding": 0,
-            },
-            "rect": Object {
-              "opacity": 1,
-            },
-            "rectBorder": Object {
-              "strokeWidth": 1,
-              "visible": false,
-            },
-          },
-          "bubbleSeriesStyle": Object {
-            "point": Object {
-              "fill": "white",
-              "opacity": 1,
-              "radius": 2,
-              "strokeWidth": 1,
-              "visible": true,
-            },
-          },
-          "chartMargins": Object {
-            "bottom": 10,
-            "left": 10,
-            "right": 10,
-            "top": 10,
-          },
-          "chartPaddings": Object {
-            "bottom": 0,
-            "left": 0,
-            "right": 0,
-            "top": 0,
-          },
-          "colors": Object {
-            "defaultVizColor": "red",
-            "vizColors": Array [
-              "#1EA593",
-              "#2B70F7",
-              "#CE0060",
-              "#38007E",
-              "#FCA5D3",
-              "#F37020",
-              "#E49E29",
-              "#B0916F",
-              "#7B000B",
-              "#34130C",
-            ],
-          },
-          "crosshair": Object {
-            "band": Object {
-              "fill": "#F5F5F5",
-              "visible": true,
-            },
-            "crossLine": Object {
-              "dash": Array [
-                5,
-                5,
-              ],
-              "stroke": "#98A2B3",
-              "strokeWidth": 1,
-              "visible": true,
-            },
-            "line": Object {
-              "stroke": "#98A2B3",
-              "strokeWidth": 1,
-              "visible": true,
-            },
-          },
-          "goal": Object {
-            "majorCenterLabel": Object {
-              "fill": "black",
-              "fontFamily": "sans-serif",
-              "fontStyle": "normal",
-            },
-            "majorLabel": Object {
-              "fill": "black",
-              "fontFamily": "sans-serif",
-              "fontStyle": "normal",
-            },
-            "maxFontSize": 64,
-            "minFontSize": 8,
-            "minorCenterLabel": Object {
-              "fill": "black",
-              "fontFamily": "sans-serif",
-              "fontStyle": "normal",
-            },
-            "minorLabel": Object {
-              "fill": "black",
-              "fontFamily": "sans-serif",
-              "fontStyle": "normal",
-            },
-            "progressLine": Object {
-              "stroke": "black",
-            },
-            "targetLine": Object {
-              "stroke": "black",
-            },
-            "tickLabel": Object {
-              "fill": "black",
-              "fontFamily": "sans-serif",
-              "fontStyle": "normal",
-            },
-            "tickLine": Object {
-              "stroke": "darkgrey",
-            },
-          },
-          "legend": Object {
-            "horizontalHeight": 64,
-            "labelOptions": Object {
-              "maxLines": 1,
-            },
-            "margin": 0,
-            "spacingBuffer": 10,
-            "verticalWidth": 200,
-          },
-          "lineSeriesStyle": Object {
-            "line": Object {
-              "opacity": 1,
-              "strokeWidth": 1,
-              "visible": true,
-            },
-            "point": Object {
-              "fill": "white",
-              "opacity": 1,
-              "radius": 2,
-              "strokeWidth": 1,
-              "visible": true,
-            },
-          },
-          "scales": Object {
-            "barsPadding": 0.25,
-            "histogramPadding": 0.05,
-          },
-          "sharedStyle": Object {
-            "default": Object {
-              "opacity": 1,
-            },
-            "highlighted": Object {
-              "opacity": 1,
-            },
-            "unhighlighted": Object {
-              "opacity": 0.25,
-            },
-          },
-        }
-      }
       renderer="canvas"
       size={125}
-      theme={
-        Object {
-          "areaSeriesStyle": Object {
-            "area": Object {
-              "opacity": 0.3,
-            },
-            "line": Object {
-              "strokeWidth": 2,
-            },
-            "point": Object {
-              "fill": "rgba(255, 255, 255, 1)",
-              "radius": 3,
-              "strokeWidth": 2,
-              "visible": false,
-            },
-          },
-          "axes": Object {
-            "axisLine": Object {
-              "stroke": "rgba(238, 240, 243, 1)",
-            },
-            "axisTitle": Object {
-              "fill": "rgba(52, 55, 65, 1)",
-              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-              "fontSize": 12,
-              "padding": Object {
-                "inner": 10,
-                "outer": 0,
-              },
-            },
-            "gridLine": Object {
-              "horizontal": Object {
-                "dash": Array [
-                  0,
-                  0,
-                ],
-                "opacity": 1,
-                "stroke": "rgba(238, 240, 243, 1)",
-                "strokeWidth": 1,
-                "visible": true,
-              },
-              "vertical": Object {
-                "dash": Array [
-                  4,
-                  4,
-                ],
-                "opacity": 1,
-                "stroke": "rgba(238, 240, 243, 1)",
-                "strokeWidth": 1,
-                "visible": true,
-              },
-            },
-            "tickLabel": Object {
-              "fill": "rgba(106, 113, 125, 1)",
-              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-              "fontSize": 10,
-              "padding": Object {
-                "inner": 10,
-                "outer": 8,
-              },
-            },
-            "tickLine": Object {
-              "stroke": "rgba(238, 240, 243, 1)",
-              "strokeWidth": 1,
-              "visible": false,
-            },
-          },
-          "background": Object {
-            "color": "rgba(255, 255, 255, 1)",
-          },
-          "barSeriesStyle": Object {
-            "displayValue": Object {
-              "fill": "rgba(106, 113, 125, 1)",
-              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-              "fontSize": 8,
-            },
-          },
-          "chartMargins": Object {
-            "bottom": 0,
-            "left": 0,
-            "right": 0,
-            "top": 0,
-          },
-          "colors": Object {
-            "defaultVizColor": "#6092C0",
-            "vizColors": Array [
-              "#54B399",
-              "#6092C0",
-              "#9170B8",
-              "#CA8EAE",
-              "#D36086",
-              "#E7664C",
-              "#AA6556",
-              "#DA8B45",
-              "#B9A888",
-              "#D6BF57",
-            ],
-          },
-          "crosshair": Object {
-            "band": Object {
-              "fill": "rgba(245, 247, 250, 1)",
-            },
-            "crossLine": Object {
-              "dash": Array [
-                4,
-                4,
-              ],
-              "stroke": "rgba(105, 112, 125, 1)",
-              "strokeWidth": 1,
-            },
-            "line": Object {
-              "dash": Array [
-                4,
-                4,
-              ],
-              "stroke": "rgba(105, 112, 125, 1)",
-              "strokeWidth": 1,
-            },
-          },
-          "goal": Object {
-            "majorCenterLabel": Object {
-              "fill": "rgba(52, 55, 65, 1)",
-              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-            },
-            "majorLabel": Object {
-              "fill": "rgba(52, 55, 65, 1)",
-              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-            },
-            "minorCenterLabel": Object {
-              "fill": "rgba(106, 113, 125, 1)",
-              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-            },
-            "minorLabel": Object {
-              "fill": "rgba(106, 113, 125, 1)",
-              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-            },
-            "progressLine": Object {
-              "stroke": "rgba(52, 55, 65, 1)",
-            },
-            "targetLine": Object {
-              "stroke": "rgba(52, 55, 65, 1)",
-            },
-            "tickLabel": Object {
-              "fill": "rgba(106, 113, 125, 1)",
-              "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
-  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
-            },
-            "tickLine": Object {
-              "stroke": "rgba(152, 162, 179, 1)",
-            },
-          },
-          "lineSeriesStyle": Object {
-            "line": Object {
-              "strokeWidth": 2,
-            },
-            "point": Object {
-              "fill": "rgba(255, 255, 255, 1)",
-              "radius": 3,
-              "strokeWidth": 2,
-            },
-          },
-          "scales": Object {
-            "barsPadding": 0.25,
-            "histogramPadding": 0.05,
-          },
-        }
-      }
     >
-      <Connect(SpecInstance) />
-      <Connect(SpecInstance)
-        config={
+      <Settings
+        baseTheme={
           Object {
-            "circlePadding": 4,
-            "emptySizeRatio": 0.4,
-            "idealFontSizeJump": 1.1,
-            "linkLabel": Object {
-              "maximumSection": Infinity,
+            "arcSeriesStyle": Object {
+              "arc": Object {
+                "opacity": 1,
+                "stroke": "black",
+                "strokeWidth": 1,
+                "visible": true,
+              },
             },
-            "margin": Object {
+            "areaSeriesStyle": Object {
+              "area": Object {
+                "opacity": 0.3,
+                "visible": true,
+              },
+              "fit": Object {
+                "area": Object {
+                  "fill": "__use__series__color__",
+                  "opacity": 0.15,
+                  "visible": true,
+                },
+                "line": Object {
+                  "dash": Array [
+                    5,
+                    5,
+                  ],
+                  "opacity": 1,
+                  "stroke": "__use__series__color__",
+                  "visible": true,
+                },
+              },
+              "line": Object {
+                "opacity": 1,
+                "strokeWidth": 1,
+                "visible": true,
+              },
+              "point": Object {
+                "fill": "white",
+                "opacity": 1,
+                "radius": 2,
+                "strokeWidth": 1,
+                "visible": false,
+              },
+            },
+            "axes": Object {
+              "axisLine": Object {
+                "stroke": "#eaeaea",
+                "strokeWidth": 1,
+                "visible": true,
+              },
+              "axisPanelTitle": Object {
+                "fill": "#333",
+                "fontFamily": "sans-serif",
+                "fontSize": 10,
+                "padding": Object {
+                  "inner": 8,
+                  "outer": 0,
+                },
+                "visible": true,
+              },
+              "axisTitle": Object {
+                "fill": "#333",
+                "fontFamily": "sans-serif",
+                "fontSize": 12,
+                "padding": Object {
+                  "inner": 8,
+                  "outer": 0,
+                },
+                "visible": true,
+              },
+              "gridLine": Object {
+                "horizontal": Object {
+                  "dash": Array [
+                    0,
+                    0,
+                  ],
+                  "opacity": 1,
+                  "stroke": "#D3DAE6",
+                  "strokeWidth": 1,
+                  "visible": false,
+                },
+                "lumaSteps": Array [
+                  224,
+                  184,
+                  128,
+                  96,
+                  64,
+                  32,
+                  16,
+                  8,
+                  4,
+                  2,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                ],
+                "vertical": Object {
+                  "dash": Array [
+                    0,
+                    0,
+                  ],
+                  "opacity": 1,
+                  "stroke": "#D3DAE6",
+                  "strokeWidth": 1,
+                  "visible": false,
+                },
+              },
+              "tickLabel": Object {
+                "alignment": Object {
+                  "horizontal": "near",
+                  "vertical": "near",
+                },
+                "fill": "#777",
+                "fontFamily": "sans-serif",
+                "fontSize": 10,
+                "fontStyle": "normal",
+                "offset": Object {
+                  "reference": "local",
+                  "x": 0,
+                  "y": 0,
+                },
+                "padding": 0,
+                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
+                "padding": 10,
+                "size": 10,
+                "stroke": "#eaeaea",
+                "strokeWidth": 1,
+                "visible": true,
+              },
+            },
+            "background": Object {
+              "color": "transparent",
+              "fallbackColor": "white",
+            },
+            "barSeriesStyle": Object {
+              "displayValue": Object {
+                "fill": "#777",
+                "fontFamily": "sans-serif",
+                "fontSize": 8,
+                "fontStyle": "normal",
+                "offsetX": 0,
+                "offsetY": 0,
+                "padding": 0,
+              },
+              "rect": Object {
+                "opacity": 1,
+              },
+              "rectBorder": Object {
+                "strokeWidth": 1,
+                "visible": false,
+              },
+            },
+            "bubbleSeriesStyle": Object {
+              "point": Object {
+                "fill": "white",
+                "opacity": 1,
+                "radius": 2,
+                "strokeWidth": 1,
+                "visible": true,
+              },
+            },
+            "chartMargins": Object {
+              "bottom": 10,
+              "left": 10,
+              "right": 10,
+              "top": 10,
+            },
+            "chartPaddings": Object {
               "bottom": 0,
               "left": 0,
               "right": 0,
               "top": 0,
             },
-            "outerSizeRatio": 0.9,
-            "partitionLayout": "sunburst",
+            "colors": Object {
+              "defaultVizColor": "red",
+              "vizColors": Array [
+                "#54B399",
+                "#6092C0",
+                "#D36086",
+                "#9170B8",
+                "#CA8EAE",
+                "#D6BF57",
+                "#B9A888",
+                "#DA8B45",
+                "#AA6556",
+                "#E7664C",
+              ],
+            },
+            "crosshair": Object {
+              "band": Object {
+                "fill": "#F5F5F5",
+                "visible": true,
+              },
+              "crossLine": Object {
+                "dash": Array [
+                  5,
+                  5,
+                ],
+                "stroke": "#98A2B3",
+                "strokeWidth": 1,
+                "visible": true,
+              },
+              "line": Object {
+                "stroke": "#98A2B3",
+                "strokeWidth": 1,
+                "visible": true,
+              },
+            },
+            "goal": Object {
+              "arcBoxSamplePitch": 0.08726646259971647,
+              "barThicknessMinSizeRatio": 0.1,
+              "baselineArcThickness": 32,
+              "baselineBarThickness": 32,
+              "capturePad": 16,
+              "majorCenterLabel": Object {
+                "fill": "black",
+                "fontFamily": "sans-serif",
+                "fontStyle": "normal",
+              },
+              "majorLabel": Object {
+                "fill": "black",
+                "fontFamily": "sans-serif",
+                "fontStyle": "normal",
+              },
+              "marginRatio": 0.05,
+              "maxBulletSize": 500,
+              "maxCentralFontSize": 38,
+              "maxCircularSize": 360,
+              "maxFontSize": 64,
+              "maxLabelFontSize": 32,
+              "maxTickFontSize": 24,
+              "minFontSize": 8,
+              "minorCenterLabel": Object {
+                "fill": "black",
+                "fontFamily": "sans-serif",
+                "fontStyle": "normal",
+              },
+              "minorLabel": Object {
+                "fill": "black",
+                "fontFamily": "sans-serif",
+                "fontStyle": "normal",
+              },
+              "progressLine": Object {
+                "stroke": "black",
+              },
+              "targetLine": Object {
+                "stroke": "black",
+              },
+              "tickLabel": Object {
+                "fill": "black",
+                "fontFamily": "sans-serif",
+                "fontStyle": "normal",
+              },
+              "tickLine": Object {
+                "stroke": "darkgrey",
+              },
+            },
+            "heatmap": Object {
+              "brushArea": Object {
+                "stroke": "#69707D",
+                "strokeWidth": 2,
+                "visible": true,
+              },
+              "brushMask": Object {
+                "fill": "#73737380",
+                "visible": true,
+              },
+              "brushTool": Object {
+                "fill": "gray",
+                "visible": false,
+              },
+              "cell": Object {
+                "align": "center",
+                "border": Object {
+                  "stroke": "gray",
+                  "strokeWidth": 1,
+                },
+                "label": Object {
+                  "fontFamily": "Sans-Serif",
+                  "fontStyle": "normal",
+                  "fontVariant": "normal",
+                  "fontWeight": "normal",
+                  "maxFontSize": 12,
+                  "maxWidth": "fill",
+                  "minFontSize": 8,
+                  "textColor": "black",
+                  "useGlobalMinFontSize": true,
+                  "visible": true,
+                },
+                "maxHeight": "fill",
+                "maxWidth": "fill",
+              },
+              "grid": Object {
+                "cellHeight": Object {
+                  "max": 30,
+                  "min": 12,
+                },
+                "cellWidth": Object {
+                  "max": 30,
+                  "min": 0,
+                },
+                "stroke": Object {
+                  "color": "gray",
+                  "width": 1,
+                },
+              },
+              "maxColumnWidth": 30,
+              "maxRowHeight": 30,
+              "xAxisLabel": Object {
+                "fontFamily": "Sans-Serif",
+                "fontSize": 12,
+                "fontStyle": "normal",
+                "fontVariant": "normal",
+                "fontWeight": "normal",
+                "padding": Object {
+                  "bottom": 5,
+                  "left": 5,
+                  "right": 5,
+                  "top": 5,
+                },
+                "rotation": 0,
+                "textColor": "black",
+                "visible": true,
+              },
+              "yAxisLabel": Object {
+                "fontFamily": "Sans-Serif",
+                "fontSize": 12,
+                "fontStyle": "normal",
+                "fontVariant": "normal",
+                "fontWeight": "normal",
+                "padding": Object {
+                  "bottom": 5,
+                  "left": 5,
+                  "right": 5,
+                  "top": 5,
+                },
+                "textColor": "black",
+                "visible": true,
+                "width": "auto",
+              },
+            },
+            "legend": Object {
+              "horizontalHeight": 64,
+              "labelOptions": Object {
+                "maxLines": 1,
+              },
+              "margin": 0,
+              "spacingBuffer": 10,
+              "verticalWidth": 200,
+            },
+            "lineSeriesStyle": Object {
+              "fit": Object {
+                "line": Object {
+                  "dash": Array [
+                    5,
+                    5,
+                  ],
+                  "opacity": 1,
+                  "stroke": "__use__series__color__",
+                  "visible": true,
+                },
+              },
+              "line": Object {
+                "opacity": 1,
+                "strokeWidth": 1,
+                "visible": true,
+              },
+              "point": Object {
+                "fill": "white",
+                "opacity": 1,
+                "radius": 2,
+                "strokeWidth": 1,
+                "visible": true,
+              },
+            },
+            "partition": Object {
+              "circlePadding": 2,
+              "emptySizeRatio": 0,
+              "fillLabel": Object {
+                "clipText": false,
+                "fontFamily": "Sans-Serif",
+                "fontStyle": "normal",
+                "fontVariant": "normal",
+                "fontWeight": 400,
+                "padding": 2,
+                "textColor": "__use__adaptive__color__",
+                "valueFont": Object {
+                  "fontStyle": "normal",
+                  "fontVariant": "normal",
+                  "fontWeight": 400,
+                },
+              },
+              "fontFamily": "Sans-Serif",
+              "horizontalTextAngleThreshold": 0.5235987755982988,
+              "horizontalTextEnforcer": 1,
+              "idealFontSizeJump": 1.05,
+              "linkLabel": Object {
+                "fontFamily": "Sans-Serif",
+                "fontSize": 12,
+                "fontStyle": "normal",
+                "fontVariant": "normal",
+                "fontWeight": 400,
+                "gap": 10,
+                "horizontalStemLength": 10,
+                "lineWidth": 1,
+                "maxCount": 36,
+                "maxTextLength": 100,
+                "maximumSection": 10,
+                "minimumStemLength": 0,
+                "padding": 0,
+                "radiusPadding": 10,
+                "spacing": 2,
+                "stemAngle": 0.7853981633974483,
+                "textColor": "__use__adaptive__color__",
+                "valueFont": Object {
+                  "fontStyle": "normal",
+                  "fontVariant": "normal",
+                  "fontWeight": 400,
+                },
+              },
+              "maxFontSize": 64,
+              "maximizeFontSize": false,
+              "minFontSize": 8,
+              "outerSizeRatio": 0.6180469715698392,
+              "radialPadding": 0.017453292519943295,
+              "sectorLineStroke": "white",
+              "sectorLineWidth": 1,
+            },
+            "scales": Object {
+              "barsPadding": 0.25,
+              "histogramPadding": 0.05,
+            },
+            "sharedStyle": Object {
+              "default": Object {
+                "opacity": 1,
+              },
+              "highlighted": Object {
+                "opacity": 1,
+              },
+              "unhighlighted": Object {
+                "opacity": 0.25,
+              },
+            },
           }
         }
+        theme={
+          Array [
+            Object {
+              "chartMargins": Object {
+                "bottom": 0,
+                "left": 0,
+                "right": 0,
+                "top": 0,
+              },
+              "partition": Object {
+                "circlePadding": 4,
+                "emptySizeRatio": 0.4,
+                "idealFontSizeJump": 1.1,
+                "linkLabel": Object {
+                  "maximumSection": Infinity,
+                },
+                "outerSizeRatio": 0.9,
+              },
+            },
+            Object {
+              "areaSeriesStyle": Object {
+                "area": Object {
+                  "opacity": 0.3,
+                },
+                "line": Object {
+                  "strokeWidth": 2,
+                },
+                "point": Object {
+                  "fill": "rgba(255, 255, 255, 1)",
+                  "radius": 3,
+                  "strokeWidth": 2,
+                  "visible": false,
+                },
+              },
+              "axes": Object {
+                "axisLine": Object {
+                  "stroke": "rgba(238, 240, 243, 1)",
+                },
+                "axisTitle": Object {
+                  "fill": "rgba(52, 55, 65, 1)",
+                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                  "fontSize": 12,
+                  "padding": Object {
+                    "inner": 10,
+                    "outer": 0,
+                  },
+                },
+                "gridLine": Object {
+                  "horizontal": Object {
+                    "dash": Array [
+                      0,
+                      0,
+                    ],
+                    "opacity": 1,
+                    "stroke": "rgba(238, 240, 243, 1)",
+                    "strokeWidth": 1,
+                    "visible": true,
+                  },
+                  "vertical": Object {
+                    "dash": Array [
+                      4,
+                      4,
+                    ],
+                    "opacity": 1,
+                    "stroke": "rgba(238, 240, 243, 1)",
+                    "strokeWidth": 1,
+                    "visible": true,
+                  },
+                },
+                "tickLabel": Object {
+                  "fill": "rgba(105, 112, 125, 1)",
+                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                  "fontSize": 10,
+                  "padding": Object {
+                    "inner": 10,
+                    "outer": 8,
+                  },
+                },
+                "tickLine": Object {
+                  "stroke": "rgba(238, 240, 243, 1)",
+                  "strokeWidth": 1,
+                  "visible": false,
+                },
+              },
+              "background": Object {
+                "color": "rgba(255, 255, 255, 1)",
+              },
+              "barSeriesStyle": Object {
+                "displayValue": Object {
+                  "alignment": Object {
+                    "horizontal": "center",
+                    "vertical": "middle",
+                  },
+                  "fill": Object {
+                    "textBorder": 0,
+                  },
+                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                  "fontSize": 10,
+                },
+              },
+              "chartMargins": Object {
+                "bottom": 0,
+                "left": 0,
+                "right": 0,
+                "top": 0,
+              },
+              "colors": Object {
+                "defaultVizColor": "#6092C0",
+                "vizColors": Array [
+                  "#54B399",
+                  "#6092C0",
+                  "#9170B8",
+                  "#CA8EAE",
+                  "#D36086",
+                  "#E7664C",
+                  "#AA6556",
+                  "#DA8B45",
+                  "#B9A888",
+                  "#D6BF57",
+                ],
+              },
+              "crosshair": Object {
+                "band": Object {
+                  "fill": "rgba(245, 247, 250, 1)",
+                },
+                "crossLine": Object {
+                  "dash": Array [
+                    4,
+                    4,
+                  ],
+                  "stroke": "rgba(105, 112, 125, 1)",
+                  "strokeWidth": 1,
+                },
+                "line": Object {
+                  "dash": Array [
+                    4,
+                    4,
+                  ],
+                  "stroke": "rgba(105, 112, 125, 1)",
+                  "strokeWidth": 1,
+                },
+              },
+              "goal": Object {
+                "majorCenterLabel": Object {
+                  "fill": "rgba(52, 55, 65, 1)",
+                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                },
+                "majorLabel": Object {
+                  "fill": "rgba(52, 55, 65, 1)",
+                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                },
+                "minorCenterLabel": Object {
+                  "fill": "rgba(105, 112, 125, 1)",
+                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                },
+                "minorLabel": Object {
+                  "fill": "rgba(105, 112, 125, 1)",
+                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                },
+                "progressLine": Object {
+                  "stroke": "rgba(52, 55, 65, 1)",
+                },
+                "targetLine": Object {
+                  "stroke": "rgba(52, 55, 65, 1)",
+                },
+                "tickLabel": Object {
+                  "fill": "rgba(105, 112, 125, 1)",
+                  "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                },
+                "tickLine": Object {
+                  "stroke": "rgba(152, 162, 179, 1)",
+                },
+              },
+              "lineSeriesStyle": Object {
+                "line": Object {
+                  "strokeWidth": 2,
+                },
+                "point": Object {
+                  "fill": "rgba(255, 255, 255, 1)",
+                  "radius": 3,
+                  "strokeWidth": 2,
+                },
+              },
+              "partition": Object {
+                "circlePadding": 4,
+                "fillLabel": Object {
+                  "valueFont": Object {
+                    "fontWeight": 700,
+                  },
+                },
+                "fontFamily": "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                "linkLabel": Object {
+                  "fontSize": 11,
+                  "maxCount": 5,
+                  "textColor": "rgba(52, 55, 65, 1)",
+                },
+                "maxFontSize": 16,
+                "minFontSize": 8,
+                "outerSizeRatio": 1,
+                "sectorLineStroke": "rgba(255, 255, 255, 1)",
+                "sectorLineWidth": 1.5,
+              },
+              "scales": Object {
+                "barsPadding": 0.25,
+                "histogramPadding": 0.05,
+              },
+            },
+          ]
+        }
+      />
+      <Partition
         data={
           Array [
             Object {
@@ -492,6 +714,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
           ]
         }
+        layout="sunburst"
         valueAccessor={[Function]}
       />
     </Chart>

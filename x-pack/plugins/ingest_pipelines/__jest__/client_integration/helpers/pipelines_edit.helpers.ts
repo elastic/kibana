@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig, TestBed } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { PipelinesEdit } from '../../../public/application/sections/pipelines_edit';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
@@ -28,7 +29,7 @@ export const PIPELINE_TO_EDIT = {
   ],
 };
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [getEditPath({ pipelineName: PIPELINE_TO_EDIT.name })],
     componentRoutePath: ROUTES.edit,
@@ -36,9 +37,8 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(PipelinesEdit), testBedConfig);
-
-export const setup = async (): Promise<PipelinesEditTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<PipelinesEditTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(PipelinesEdit, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   return {

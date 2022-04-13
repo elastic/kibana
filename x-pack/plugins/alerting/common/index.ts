@@ -8,26 +8,28 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { AlertsHealth } from './alert';
+import { AlertsHealth } from './rule';
 
-export * from './alert';
-export * from './alert_type';
+export * from './rule';
+export * from './rule_type';
+export * from './rule_task_instance';
+export * from './rule_navigation';
 export * from './alert_instance';
-export * from './alert_task_instance';
-export * from './alert_navigation';
-export * from './alert_instance_summary';
+export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './disabled_action_groups';
-export * from './alert_notify_when_type';
+export * from './rule_notify_when_type';
 export * from './parse_duration';
+export * from './execution_log_types';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
-  alertingFrameworkHeath: AlertsHealth;
+  alertingFrameworkHealth: AlertsHealth;
 }
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const ALERTS_FEATURE_ID = 'alerts';
+export const MONITORING_HISTORY_LIMIT = 200;

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { GaugeSeries } from './series';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 const defaultProps = {
   disableAdd: true,

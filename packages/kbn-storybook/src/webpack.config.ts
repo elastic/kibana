@@ -9,10 +9,12 @@
 import { externals } from '@kbn/ui-shared-deps-src';
 import { stringifyRequest } from 'loader-utils';
 import { resolve } from 'path';
-import { Configuration, Stats } from 'webpack';
+import webpack, { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
+
+type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 
 const stats = {
   ...Stats.presetToOptions('minimal'),
@@ -22,9 +24,51 @@ const stats = {
   moduleTrace: true,
 };
 
+function isProgressPlugin(plugin: any) {
+  return 'handler' in plugin && plugin.showActiveModules && plugin.showModules;
+}
+
+function isHtmlPlugin(plugin: any): plugin is { options: { template: string } } {
+  return !!(typeof plugin.options?.template === 'string');
+}
+
+interface BabelLoaderRule extends webpack.RuleSetRule {
+  use: webpack.RuleSetLoader[];
+}
+
+function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is BabelLoaderRule {
+  return !!(
+    rule.use &&
+    Array.isArray(rule.use) &&
+    rule.use.some(
+      (l) =>
+        typeof l === 'object' && typeof l.loader === 'string' && l.loader.includes('babel-loader')
+    )
+  );
+}
+
+function getPresetPath(preset: Preset) {
+  if (typeof preset === 'string') return preset;
+  if (Array.isArray(preset)) return preset[0];
+  return undefined;
+}
+
+function getTsPreset(preset: Preset) {
+  if (getPresetPath(preset)?.includes('preset-typescript')) {
+    if (typeof preset === 'string') return [preset, {}];
+    if (Array.isArray(preset)) return preset;
+
+    throw new Error('unsupported preset-typescript format');
+  }
+}
+
+function isDesiredPreset(preset: Preset) {
+  return !getPresetPath(preset)?.includes('preset-flow');
+}
+
 // Extend the Storybook Webpack config with some customizations
 /* eslint-disable import/no-default-export */
-export default function ({ config: storybookConfig }: { config: Configuration }) {
+export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config = {
     devServer: {
       stats,
@@ -58,7 +102,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
                 additionalData(content: string, loaderContext: any) {
                   return `@import ${stringifyRequest(
                     loaderContext,
-                    resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
+                    resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v8light.scss')
                   )};\n${content}`;
                 },
                 implementation: require('node-sass'),
@@ -73,31 +117,83 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
+      extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
       },
       symlinks: false,
     },
     stats,
   };
 
-  // Disable the progress plugin
-  const progressPlugin: any = (storybookConfig.plugins || []).find((plugin: any) => {
-    return 'handler' in plugin && plugin.showActiveModules && plugin.showModules;
-  });
-  progressPlugin.handler = () => {};
+  const updatedModuleRules = [];
+  // clone and modify the module.rules config provided by storybook so that the default babel plugins run after the typescript preset
+  for (const originalRule of storybookConfig.module?.rules ?? []) {
+    const rule = { ...originalRule };
+    updatedModuleRules.push(rule);
 
-  // This is the hacky part. We find something that looks like the
-  // HtmlWebpackPlugin and mutate its `options.template` to point at our
-  // revised template.
-  const htmlWebpackPlugin: any = (storybookConfig.plugins || []).find((plugin: any) => {
-    return plugin.options && typeof plugin.options.template === 'string';
-  });
-  if (htmlWebpackPlugin) {
-    htmlWebpackPlugin.options.template = require.resolve('../templates/index.ejs');
+    if (isBabelLoaderRule(rule)) {
+      rule.use = [...rule.use];
+      const loader = (rule.use[0] = { ...rule.use[0] });
+      const options = (loader.options = { ...(loader.options as Record<string, any>) });
+
+      // capture the plugins defined at the root level
+      const plugins: string[] = options.plugins;
+      options.plugins = [];
+
+      // move the plugins to the top of the preset array so they will run after the typescript preset
+      options.presets = [
+        {
+          plugins,
+        },
+        ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
+          const tsPreset = getTsPreset(preset);
+          if (!tsPreset) {
+            return preset;
+          }
+
+          return [
+            tsPreset[0],
+            {
+              ...tsPreset[1],
+              allowNamespaces: true,
+              allowDeclareFields: true,
+            },
+          ];
+        }),
+      ];
+    }
   }
 
-  return webpackMerge(storybookConfig, config);
-}
+  // copy and modify the webpack plugins added by storybook
+  const filteredStorybookPlugins = [];
+  for (const plugin of storybookConfig.plugins ?? []) {
+    // Remove the progress plugin
+    if (isProgressPlugin(plugin)) {
+      continue;
+    }
+
+    // This is the hacky part. We find something that looks like the
+    // HtmlWebpackPlugin and mutate its `options.template` to point at our
+    // revised template.
+    if (isHtmlPlugin(plugin)) {
+      plugin.options.template = require.resolve('../templates/index.ejs');
+    }
+
+    filteredStorybookPlugins.push(plugin);
+  }
+
+  return webpackMerge(
+    {
+      ...storybookConfig,
+      plugins: filteredStorybookPlugins,
+      module: {
+        ...storybookConfig.module,
+        rules: updatedModuleRules,
+      },
+    },
+    config
+  );
+};

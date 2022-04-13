@@ -1,38 +1,29 @@
 {
-  "configPath": [
-    "xpack",
-    "uptime"
-  ],
+  "configPath": ["xpack", "uptime"],
   "id": "uptime",
   "kibanaVersion": "kibana",
-  "optionalPlugins": [
-    "data",
-    "home",
-    "ml",
-    "fleet"
-  ],
+  "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "telemetry"],
   "requiredPlugins": [
     "alerting",
+    "cases",
     "embeddable",
+    "discover",
+    "encryptedSavedObjects",
     "features",
+    "inspector",
     "licensing",
-    "triggersActionsUi",
-    "usageCollection",
+    "observability",
     "ruleRegistry",
-    "observability"
+    "security",
+    "share",
+    "taskManager",
+    "triggersActionsUi",
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
   "version": "8.0.0",
-  "requiredBundles": [
-    "observability",
-    "kibanaReact",
-    "kibanaUtils",
-    "home",
-    "data",
-    "ml",
-    "fleet"
-  ],
+  "requiredBundles": ["unifiedSearch", "fleet", "home", "kibanaReact", "kibanaUtils", "ml", "observability"],
   "owner": {
     "name": "Uptime",
     "githubTeam": "uptime"

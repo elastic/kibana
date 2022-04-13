@@ -10,15 +10,23 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { PolicySelectionItem, PoliciesSelector } from '../policies_selector';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export interface SearchExceptionsProps {
   defaultValue?: string;
   placeholder: string;
   hasPolicyFilter?: boolean;
   policyList?: ImmutableArray<PolicyData>;
-  defaultExcludedPolicies?: string;
   defaultIncludedPolicies?: string;
-  onSearch(query: string, includedPolicies?: string, excludedPolicies?: string): void;
+  hideRefreshButton?: boolean;
+  onSearch(
+    /** The query string the user entered into the text field */
+    query: string,
+    /** A list of policy id's comma delimited */
+    includedPolicies: string | undefined,
+    /** Will be `true` if the user clicked the `refresh` button */
+    refresh: boolean
+  ): void;
 }
 
 export const SearchExceptions = memo<SearchExceptionsProps>(
@@ -29,11 +37,11 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     hasPolicyFilter,
     policyList,
     defaultIncludedPolicies,
-    defaultExcludedPolicies,
+    hideRefreshButton = false,
   }) => {
+    const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const [query, setQuery] = useState<string>(defaultValue);
     const [includedPolicies, setIncludedPolicies] = useState<string>(defaultIncludedPolicies || '');
-    const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');
 
     const onChangeSelection = useCallback(
       (items: PolicySelectionItem[]) => {
@@ -41,15 +49,10 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
           .filter((item) => item.checked === 'on')
           .map((item) => item.id)
           .join(',');
-        const excludePoliciesNew = items
-          .filter((item) => item.checked === 'off')
-          .map((item) => item.id)
-          .join(',');
 
         setIncludedPolicies(includePoliciesNew);
-        setExcludedPolicies(excludePoliciesNew);
 
-        onSearch(query, includePoliciesNew, excludePoliciesNew);
+        onSearch(query, includePoliciesNew, false);
       },
       [onSearch, query]
     );
@@ -59,15 +62,15 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
       [setQuery]
     );
     const handleOnSearch = useCallback(
-      () => onSearch(query, includedPolicies, excludedPolicies),
-      [onSearch, query, includedPolicies, excludedPolicies]
+      () => onSearch(query, includedPolicies, true),
+      [onSearch, query, includedPolicies]
     );
 
     const handleOnSearchQuery = useCallback(
       (value) => {
-        onSearch(value, includedPolicies, excludedPolicies);
+        onSearch(value, includedPolicies, false);
       },
-      [onSearch, includedPolicies, excludedPolicies]
+      [onSearch, includedPolicies]
     );
 
     return (
@@ -88,24 +91,25 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
             data-test-subj="searchField"
           />
         </EuiFlexItem>
-        {hasPolicyFilter && policyList ? (
+        {canCreateArtifactsByPolicy && hasPolicyFilter && policyList ? (
           <EuiFlexItem grow={false}>
             <PoliciesSelector
               policies={policyList}
-              defaultExcludedPolicies={defaultExcludedPolicies}
               defaultIncludedPolicies={defaultIncludedPolicies}
               onChangeSelection={onChangeSelection}
             />
           </EuiFlexItem>
         ) : null}
 
-        <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="searchButton">
-          <EuiButton iconType="refresh">
-            {i18n.translate('xpack.securitySolution.management.search.button', {
-              defaultMessage: 'Refresh',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
+        {!hideRefreshButton ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="refresh" onClick={handleOnSearch} data-test-subj="searchButton">
+              {i18n.translate('xpack.securitySolution.management.search.button', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     );
   }

@@ -21,6 +21,7 @@ export interface SavedObjectsMigrationLogger {
   info: (msg: string) => void;
   /**
    * @deprecated Use `warn` instead.
+   * @removeBy 8.8.0
    */
   warning: (msg: string) => void;
   warn: (msg: string) => void;

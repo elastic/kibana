@@ -7,7 +7,7 @@
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
 import { Plugin, PluginSetup, PluginStart } from './plugin';
-import { configSchema, ConfigType } from './config';
+import { configSchema, ConfigSchema, ConfigType } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';
 import { AppClient } from './types';
 
@@ -15,38 +15,43 @@ export const plugin = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };
 
-export const config: PluginConfigDescriptor<ConfigType> = {
+export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExperimental: true,
   },
   schema: configSchema,
-  deprecations: ({ deprecate, renameFromRoot }) => [
-    deprecate('enabled', '8.0.0'),
-    renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled'),
+  deprecations: ({ renameFromRoot, unused }) => [
+    renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled', { level: 'critical' }),
     renameFromRoot(
       'xpack.siem.maxRuleImportExportSize',
-      'xpack.securitySolution.maxRuleImportExportSize'
+      'xpack.securitySolution.maxRuleImportExportSize',
+      { level: 'critical' }
     ),
     renameFromRoot(
       'xpack.siem.maxRuleImportPayloadBytes',
-      'xpack.securitySolution.maxRuleImportPayloadBytes'
+      'xpack.securitySolution.maxRuleImportPayloadBytes',
+      { level: 'critical' }
     ),
     renameFromRoot(
       'xpack.siem.maxTimelineImportExportSize',
-      'xpack.securitySolution.maxTimelineImportExportSize'
+      'xpack.securitySolution.maxTimelineImportExportSize',
+      { level: 'critical' }
     ),
     renameFromRoot(
       'xpack.siem.maxTimelineImportPayloadBytes',
-      'xpack.securitySolution.maxTimelineImportPayloadBytes'
+      'xpack.securitySolution.maxTimelineImportPayloadBytes',
+      { level: 'critical' }
     ),
     renameFromRoot(
       `xpack.siem.${SIGNALS_INDEX_KEY}`,
-      `xpack.securitySolution.${SIGNALS_INDEX_KEY}`
+      `xpack.securitySolution.${SIGNALS_INDEX_KEY}`,
+      { level: 'critical' }
     ),
+    unused('ruleExecutionLog.underlyingClient', { level: 'warning' }),
   ],
 };
 
-export { ConfigType, Plugin, PluginSetup, PluginStart };
+export type { ConfigType, PluginSetup, PluginStart };
+export { Plugin };
 export { AppClient };
-export type { AppRequestContext } from './types';
-export { EndpointError } from './endpoint/errors';
+export type { SecuritySolutionApiRequestHandlerContext } from './types';

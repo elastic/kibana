@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- This is a copy of the
-     [Storybook IFrame template](https://github.com/storybookjs/storybook/blob/7874ca357c6cb54f3f258dc61f6becae6783fba6/lib/core/src/server/templates/index.ejs).
+     [Storybook IFrame template](https://github.com/storybookjs/storybook/blob/337fdcd0fe7436b46bcca65145ff6db2affd780f/lib/core-common/src/templates/index.ejs).
      We use this one instead because we want to add the @kbn/ui-shared-deps-* tags here.
   -->
 <html lang="en">
@@ -13,6 +13,7 @@
     <% } %>
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="eui-styles-global" />
 
     <!-- Added for Kibana shared dependencies -->
     <script>
@@ -35,25 +36,30 @@
         display: none !important;
       }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:slnt,wght@-10,300..700;0,300..700&family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <% if (typeof bodyHtmlSnippet !== 'undefined') { %> <%= bodyHtmlSnippet %> <% } %>
+    <% if (typeof bodyHtmlSnippet !== 'undefined') { %>
+      <%= bodyHtmlSnippet %>
+    <% } %>
 
     <div id="root"></div>
     <div id="docs-root"></div>
 
     <% if (typeof globals !== 'undefined' && Object.keys(globals).length) { %>
-    <script>
-      <% for (var varName in globals) { %>
-          <% if (globals[varName] != undefined) { %>
-            window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
-          <% } %>
-      <% } %>
-    </script>
-    <% } %> <% dlls.forEach(file => { %>
-    <script src="<%= file %>"></script>
-    <% }); %> <% files.js.forEach(file => { %>
-    <script src="<%= file %>"></script>
+      <script>
+        <% for (var varName in globals) { %>
+            <% if (globals[varName] != undefined) { %>
+              window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
+            <% } %>
+        <% } %>
+      </script>
+    <% } %>
+
+    <% files.js.forEach(file => { %>
+      <script src="<%= file %>"></script>
     <% }); %>
   </body>
 </html>

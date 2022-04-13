@@ -10,7 +10,7 @@ import { FieldSpec, DataView } from '..';
 
 /**
  * @deprecated Use {@link IndexPatternField}
- * @removeBy 8.1
+ * @removeBy 8.2
  */
 export interface IFieldType extends DataViewFieldBase {
   count?: number;

@@ -17,13 +17,19 @@ import {
   createStartServicesMock,
   createWithKibanaMock,
 } from '../kibana_react.mock';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { mockCasesContract } from '../../../../../../cases/public/mocks';
 
 const mockStartServicesMock = createStartServicesMock();
 export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
 export const useKibana = jest.fn().mockReturnValue({
   services: {
     ...mockStartServicesMock,
+    uiSettings: {
+      get: jest.fn(),
+      set: jest.fn(),
+    },
+    cases: mockCasesContract(),
     data: {
       ...mockStartServicesMock.data,
       search: {
@@ -65,7 +71,7 @@ export const useGetUserCasesPermissions = jest.fn();
 export const useAppUrl = jest.fn().mockReturnValue({
   getAppUrl: jest
     .fn()
-    .mockImplementation(({ appId = APP_ID, ...options }) =>
+    .mockImplementation(({ appId = APP_UI_ID, ...options }) =>
       mockStartServicesMock.application.getUrlForApp(appId, options)
     ),
 });

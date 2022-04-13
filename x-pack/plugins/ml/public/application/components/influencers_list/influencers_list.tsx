@@ -12,13 +12,13 @@
 import React, { FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
 import { getSeverity, getFormattedSeverityScore } from '../../../../common/util/anomaly_utils';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 
-interface InfluencerValueData {
+export interface InfluencerValueData {
   influencerFieldValue: string;
   maxAnomalyScore: number;
   sumAnomalyScore: number;

@@ -35,6 +35,7 @@ class Interactive extends React.Component<{}, { argValue: ExpressionAstExpressio
   public render() {
     return (
       <SimpleTemplate
+        resolved={{ labels: [] }}
         argValue={this.state.argValue}
         onValueChange={(argValue) => {
           action('onValueChange')(argValue);
@@ -64,6 +65,7 @@ storiesOf('arguments/SeriesStyle/components', module)
       argValue={defaultExpression}
       onValueChange={action('onValueChange')}
       workpad={getDefaultWorkpad()}
+      resolved={{ labels: [] }}
       typeInstance={{
         name: 'defaultStyle',
       }}
@@ -72,7 +74,7 @@ storiesOf('arguments/SeriesStyle/components', module)
   .add('simple: defaults', () => (
     <SimpleTemplate
       argValue={defaultExpression}
-      labels={['label1', 'label2']}
+      resolved={{ labels: ['label1', 'label2'] }}
       onValueChange={action('onValueChange')}
       workpad={getDefaultWorkpad()}
       typeInstance={{
@@ -83,6 +85,7 @@ storiesOf('arguments/SeriesStyle/components', module)
   .add('simple: no series', () => (
     <SimpleTemplate
       argValue={defaultExpression}
+      resolved={{ labels: [] }}
       onValueChange={action('onValueChange')}
       workpad={getDefaultWorkpad()}
       typeInstance={{
@@ -94,7 +97,7 @@ storiesOf('arguments/SeriesStyle/components', module)
     <SimpleTemplate
       argValue={defaultExpression}
       onValueChange={action('onValueChange')}
-      labels={['label1', 'label2']}
+      resolved={{ labels: ['label1', 'label2'] }}
       workpad={getDefaultWorkpad()}
       typeInstance={{
         name: 'unknown',

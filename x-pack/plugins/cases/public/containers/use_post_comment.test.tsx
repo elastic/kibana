@@ -7,15 +7,24 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
+import { CommentType } from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { usePostComment, UsePostComment } from './use_post_comment';
-import { basicCaseId, basicSubCaseId } from './mock';
+import { basicCaseId } from './mock';
 import * as api from './api';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
+const useToastMock = useToasts as jest.Mock;
+
 describe('usePostComment', () => {
+  const toastErrorMock = jest.fn();
+  useToastMock.mockReturnValue({
+    addError: toastErrorMock,
+  });
+
   const abortCtrl = new AbortController();
   const samplePost = {
     comment: 'a comment',
@@ -57,32 +66,8 @@ describe('usePostComment', () => {
         updateCase: updateCaseCallback,
       });
       await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal, undefined);
-    });
-  });
-
-  it('calls postComment with correct arguments - sub case', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'postComment');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
-        usePostComment()
-      );
-      await waitForNextUpdate();
-
-      result.current.postComment({
-        caseId: basicCaseId,
-        data: samplePost,
-        updateCase: updateCaseCallback,
-        subCaseId: basicSubCaseId,
-      });
-      await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(
-        samplePost,
-        basicCaseId,
-        abortCtrl.signal,
-        basicSubCaseId
-      );
+      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
+      expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });
 
@@ -122,7 +107,7 @@ describe('usePostComment', () => {
     });
   });
 
-  it('unhappy path', async () => {
+  it('set isError true and shows a toast error when an error occurs', async () => {
     const spyOnPostCase = jest.spyOn(api, 'postComment');
     spyOnPostCase.mockImplementation(() => {
       throw new Error('Something went wrong');
@@ -144,6 +129,33 @@ describe('usePostComment', () => {
         isError: true,
         postComment: result.current.postComment,
       });
+
+      expect(toastErrorMock).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Error fetching data',
+      });
+    });
+  });
+
+  it('throws an error when invoked with throwOnError true', async () => {
+    const spyOnPostCase = jest.spyOn(api, 'postComment');
+    spyOnPostCase.mockImplementation(() => {
+      throw new Error('This is not possible');
+    });
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UsePostComment>(() =>
+        usePostComment()
+      );
+      await waitForNextUpdate();
+      async function test() {
+        await result.current.postComment({
+          caseId: basicCaseId,
+          data: samplePost,
+          updateCase: updateCaseCallback,
+          throwOnError: true,
+        });
+      }
+      expect(test()).rejects.toThrowError('This is not possible');
     });
   });
 });

@@ -4,15 +4,15 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
 <AppRouter
   appStatuses$={
     AnonymousSubject {
-      "_isScalar": false,
       "closed": false,
+      "currentObservers": null,
       "destination": AnonymousSubject {
-        "_isScalar": false,
         "closed": false,
+        "currentObservers": null,
         "destination": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": Array [],
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -21,14 +21,11 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
         "hasError": false,
         "isStopped": false,
         "observers": Array [],
-        "operator": MapOperator {
-          "project": [Function],
-          "thisArg": undefined,
-        },
+        "operator": [Function],
         "source": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": Array [],
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -41,12 +38,12 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
       "observers": Array [],
       "operator": [Function],
       "source": AnonymousSubject {
-        "_isScalar": false,
         "closed": false,
+        "currentObservers": null,
         "destination": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": Array [],
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -55,14 +52,11 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
         "hasError": false,
         "isStopped": false,
         "observers": Array [],
-        "operator": MapOperator {
-          "project": [Function],
-          "thisArg": undefined,
-        },
+        "operator": [Function],
         "source": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": Array [],
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -83,5 +77,10 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
   setAppActionMenu={[Function]}
   setAppLeaveHandler={[Function]}
   setIsMounting={[Function]}
+  theme$={
+    Observable {
+      "_subscribe": [Function],
+    }
+  }
 />
 `;

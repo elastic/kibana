@@ -7,8 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isString } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { isString, debounce } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -27,7 +27,6 @@ import {
   firstFieldOption,
   getFields,
   getIndexOptions,
-  getIndexPatterns,
   getTimeFieldOptions,
   IErrorObject,
 } from '../../../../triggers_actions_ui/public';
@@ -62,16 +61,14 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
-  const [indexPatterns, setIndexPatterns] = useState([]);
   const [areIndicesLoading, setAreIndicesLoading] = useState<boolean>(false);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
 
-  useEffect(() => {
-    const indexPatternsFunction = async () => {
-      setIndexPatterns(await getIndexPatterns());
-    };
-    indexPatternsFunction();
-  }, []);
+  const loadIndexOptions = debounce(async (search: string) => {
+    setAreIndicesLoading(true);
+    setIndexOptions(await getIndexOptions(http!, search));
+    setAreIndicesLoading(false);
+  }, 250);
 
   useEffect(() => {
     const timeFields = getTimeFieldOptions(esFields);
@@ -193,11 +190,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
                 setTimeFieldOptions([firstFieldOption, ...timeFields]);
               }
             }}
-            onSearchChange={async (search) => {
-              setAreIndicesLoading(true);
-              setIndexOptions(await getIndexOptions(http!, search, indexPatterns));
-              setAreIndicesLoading(false);
-            }}
+            onSearchChange={loadIndexOptions}
             onBlur={() => {
               if (!index) {
                 onIndexChange([]);

@@ -14,6 +14,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Disable Windows Event and Security Logs Using Built-in Tools",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n\n  ((process.name:\"logman.exe\" or process.pe.original_file_name == \"Logman.exe\") and\n      process.args : \"EventLog-*\" and process.args : (\"stop\", \"delete\")) or\n\n  ((process.name : (\"pwsh.exe\", \"powershell.exe\", \"powershell_ise.exe\") or process.pe.original_file_name in\n      (\"pwsh.exe\", \"powershell.exe\", \"powershell_ise.exe\")) and\n\tprocess.args : \"Set-Service\" and process.args: \"EventLog\" and process.args : \"Disabled\")  or\n\t\n  ((process.name:\"auditpol.exe\" or process.pe.original_file_name == \"AUDITPOL.EXE\") and process.args : \"/success:disable\")\n",
   "references": [
     "https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/logman"
@@ -40,12 +41,19 @@
         {
           "id": "T1070",
           "name": "Indicator Removal on Host",
-          "reference": "https://attack.mitre.org/techniques/T1070/"
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.001",
+              "name": "Clear Windows Event Logs",
+              "reference": "https://attack.mitre.org/techniques/T1070/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
 
@@ -192,7 +193,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no dev_tools privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/113080
+    describe.skip('no dev_tools privileges', () => {
       before(async () => {
         await security.role.create('no_dev_tools_privileges_role', {
           kibana: [

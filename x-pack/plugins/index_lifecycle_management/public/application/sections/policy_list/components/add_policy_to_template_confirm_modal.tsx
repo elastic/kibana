@@ -7,7 +7,7 @@
 
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -27,6 +27,7 @@ import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../se
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';
 import { LearnMoreLink } from '../../edit_policy/components';
+import { useKibana } from '../../../../shared_imports';
 
 interface Props {
   policy: PolicyFromES;
@@ -257,6 +258,8 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
     }
   );
 
+  const { docLinks } = useKibana().services;
+
   return (
     <EuiConfirmModal
       data-test-subj="addPolicyToTemplateModal"
@@ -285,7 +288,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
                   all indices which match the index template."
           />{' '}
           <LearnMoreLink
-            docPath="index-templates.html"
+            docPath={docLinks.links.elasticsearch.indexTemplates}
             text={
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexTemplatesLink"

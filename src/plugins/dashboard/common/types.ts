@@ -22,6 +22,7 @@ import {
 } from './bwc/types';
 
 import { GridData } from './embeddable/types';
+import { ControlGroupInput } from '../../controls/common';
 export type PanelId = string;
 export type SavedObjectId = string;
 
@@ -96,8 +97,24 @@ export type SavedDashboardPanel730ToLatest = Pick<
 
 // Making this interface because so much of the Container type from embeddable is tied up in public
 // Once that is all available from common, we should be able to move the dashboard_container type to our common as well
+
+// dashboard only persists part of the Control Group Input
+export type DashboardContainerControlGroupInput = Pick<
+  ControlGroupInput,
+  'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings'
+>;
+
+export type RawControlGroupAttributes = Omit<
+  DashboardContainerControlGroupInput,
+  'panels' | 'ignoreParentSettings'
+> & {
+  ignoreParentSettingsJSON: string;
+  panelsJSON: string;
+};
+
 export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
+  controlGroupInput?: DashboardContainerControlGroupInput;
 }

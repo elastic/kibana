@@ -1,0 +1,61 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies a new or modified federation domain, which can be used to create a trust between O365 and an external identity provider.",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "New or Modified Federation Domain",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:(\"Set-AcceptedDomain\" or \n\"Set-MsolDomainFederationSettings\" or \"Add-FederatedDomain\" or \"New-AcceptedDomain\" or \"Remove-AcceptedDomain\" or \"Remove-FederatedDomain\") and \nevent.outcome:success\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/remove-accepteddomain?view=exchange-ps",
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/remove-federateddomain?view=exchange-ps",
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/new-accepteddomain?view=exchange-ps",
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/add-federateddomain?view=exchange-ps",
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/set-accepteddomain?view=exchange-ps",
+    "https://docs.microsoft.com/en-us/powershell/module/msonline/set-msoldomainfederationsettings?view=azureadps-1.0"
+  ],
+  "risk_score": 21,
+  "rule_id": "684554fc-0777-47ce-8c9b-3d01f198d7f8",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1484",
+          "name": "Domain Policy Modification",
+          "reference": "https://attack.mitre.org/techniques/T1484/",
+          "subtechnique": [
+            {
+              "id": "T1484.002",
+              "name": "Domain Trust Modification",
+              "reference": "https://attack.mitre.org/techniques/T1484/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

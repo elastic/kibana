@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
 import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
@@ -13,18 +13,29 @@ import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
 
 interface Props {
+  borderStyle?: CSSProperties;
   fillColor?: string;
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   strokeColor?: string;
   symbolId?: string;
+  svg?: string;
 }
 
-export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, symbolId }: Props) {
+export function VectorIcon({
+  borderStyle = {},
+  fillColor,
+  isPointsOnly,
+  isLinesOnly,
+  strokeColor,
+  symbolId,
+  svg,
+}: Props) {
   if (isLinesOnly) {
     const style = {
       stroke: strokeColor,
       strokeWidth: '4px',
+      ...borderStyle,
     };
     return <LineIcon style={style} />;
   }
@@ -33,6 +44,7 @@ export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, 
     stroke: strokeColor,
     strokeWidth: '1px',
     fill: fillColor,
+    ...borderStyle,
   };
 
   if (!isPointsOnly) {
@@ -43,12 +55,18 @@ export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, 
     return <CircleIcon style={style} />;
   }
 
-  return (
-    <SymbolIcon
-      key={`${symbolId}${fillColor}${strokeColor}`}
-      symbolId={symbolId}
-      fill={fillColor}
-      stroke={strokeColor}
-    />
-  );
+  if (svg) {
+    return (
+      <SymbolIcon
+        key={`${symbolId}${fillColor}${strokeColor}`}
+        symbolId={symbolId}
+        fill={fillColor}
+        stroke={strokeColor}
+        style={borderStyle}
+        svg={svg}
+      />
+    );
+  }
+
+  return null;
 }

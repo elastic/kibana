@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../common';
+import { SwimlaneConnectorType } from '../../../common/api';
 
 export const connector = {
   id: '123',
@@ -87,6 +87,12 @@ export const choices = [
     label: 'Operation System',
     value: 'os',
     element: 'subcategory',
+  },
+  {
+    dependent_value: '',
+    label: 'Failed Login',
+    value: 'failed_login',
+    element: 'category',
   },
   ...['severity', 'urgency', 'impact', 'priority']
     .map((element) => [

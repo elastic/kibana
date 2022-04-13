@@ -9,7 +9,7 @@ import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiConfirmModal, EuiLink } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { routing } from '../../services/routing';

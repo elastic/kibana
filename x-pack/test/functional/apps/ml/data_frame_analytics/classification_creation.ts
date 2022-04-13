@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
     });
 
     const jobId = `bm_1_${Date.now()}`;
@@ -53,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
             // tick/grid/axis
             { color: '#DDDDDD', percentage: 50 },
             // line
-            { color: '#98A2B3', percentage: 30 },
+            { color: '#98A2B3', percentage: 10 },
           ],
           scatterplotMatrixColorStats: [
             // marker colors
@@ -195,12 +196,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
-          await ml.testExecution.logTestStep('sets the create index pattern switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
-
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -215,6 +210,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+
+          await ml.testExecution.logTestStep('sets the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
+            testData.createIndexPattern
+          );
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

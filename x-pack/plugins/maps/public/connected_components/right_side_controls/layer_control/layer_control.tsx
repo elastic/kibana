@@ -17,7 +17,7 @@ import {
   EuiToolTip,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LayerTOC } from './layer_toc';
 import { ILayer } from '../../../classes/layers/layer';
@@ -53,6 +53,7 @@ function renderExpandButton({
         type="button"
         onClick={onClick}
         aria-label={expandLabel}
+        data-test-subj="mapExpandLayerControlButton"
       >
         <EuiLoadingSpinner size="m" />
       </button>
@@ -66,6 +67,7 @@ function renderExpandButton({
       onClick={onClick}
       iconType={hasErrors ? 'alert' : 'menuLeft'}
       aria-label={expandLabel}
+      data-test-subj="mapExpandLayerControlButton"
     />
   );
 }

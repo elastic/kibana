@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageContent,
   EuiEmptyPrompt,
@@ -27,11 +27,12 @@ import {
   PageError,
   PageLoading,
   Error,
+  useExecutionContext,
 } from '../../../../shared_imports';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useLoadRestores } from '../../../services/http';
 import { linkToSnapshots } from '../../../services/navigation';
-import { useServices } from '../../../app_context';
+import { useAppContext, useServices } from '../../../app_context';
 import { RestoreTable } from './restore_table';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -63,11 +64,17 @@ export const RestoreList: React.FunctionComponent = () => {
   } = useLoadRestores(currentInterval);
 
   const { uiMetricService, history } = useServices();
+  const { core } = useAppContext();
 
   // Track component loaded
   useEffect(() => {
     uiMetricService.trackUiMetric(UIM_RESTORE_LIST_LOAD);
   }, [uiMetricService]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'snapshotRestoreRestoreTab',
+  });
 
   let content: JSX.Element;
 

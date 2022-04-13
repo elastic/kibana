@@ -6,7 +6,7 @@
  */
 
 import { TimelineType } from '../../../../common/types/timeline';
-import { esFilters, Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import {
   DataProvider,
   DataProviderType,
@@ -563,7 +563,7 @@ describe('helpers', () => {
             },
           },
           $state: {
-            store: esFilters.FilterStateStore.APP_STATE,
+            store: FilterStateStore.APP_STATE,
           },
         },
       ]);

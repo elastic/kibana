@@ -6,6 +6,7 @@
  */
 
 import '../../__mocks__/engine_logic.mock';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -22,9 +23,21 @@ import { EmptyEngineOverview } from './engine_overview_empty';
 
 describe('EmptyEngineOverview', () => {
   let wrapper: ShallowWrapper;
+  const values = {
+    isElasticsearchEngine: false,
+    engine: {
+      elasticsearchIndexName: 'my-elasticsearch-index',
+    },
+  };
 
   beforeAll(() => {
+    setMockValues(values);
     wrapper = shallow(<EmptyEngineOverview />);
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setMockValues(values);
   });
 
   it('renders', () => {
@@ -33,12 +46,19 @@ describe('EmptyEngineOverview', () => {
 
   it('renders a documentation link', () => {
     expect(getPageHeaderActions(wrapper).find(EuiButton).prop('href')).toEqual(
-      `${docLinks.appSearchBase}/index.html`
+      docLinks.appSearchGuide
     );
   });
 
   it('renders document creation components', () => {
     expect(wrapper.find(DocumentCreationButtons)).toHaveLength(1);
     expect(wrapper.find(DocumentCreationFlyout)).toHaveLength(1);
+  });
+
+  it('renders elasticsearch index empty state', () => {
+    setMockValues({ ...values, isElasticsearchEngine: true });
+    wrapper = shallow(<EmptyEngineOverview />);
+
+    expect(wrapper.find('[data-test-subj="ElasticsearchIndexEmptyState"]')).toHaveLength(1);
   });
 });

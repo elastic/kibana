@@ -10,7 +10,7 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import type { Filter } from 'src/plugins/data/public';
+import { type Filter, buildPhraseFilter } from '@kbn/es-query';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -23,7 +23,7 @@ import {
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
 import { registerSource } from '../source_registry';
@@ -36,9 +36,9 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { makePublicExecutionContext } from '../../../util';
 
 type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
@@ -85,7 +85,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   constructor(descriptor: Partial<ESGeoLineSourceDescriptor>, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters, true);
+    super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
   }
 
@@ -123,9 +123,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         value: geoLineTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.esGeoLine.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        }),
+        label: getDataViewLabel(),
         value: indexPatternTitle,
       },
       {
@@ -142,7 +140,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
       fieldName: this._descriptor.splitField,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
-      canReadFromGeoJson: true,
     });
   }
 
@@ -206,7 +203,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       },
     });
     if (splitField.type === 'string') {
-      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(splitField, '', indexPattern);
+      const entityIsNotEmptyFilter = buildPhraseFilter(splitField, '', indexPattern);
       entityIsNotEmptyFilter.meta.negate = true;
       entitySearchSource.setField('filter', [
         ...(entitySearchSource.getField('filter') as Filter[]),
@@ -228,6 +225,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_line:entities'),
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
       entityResp,
@@ -254,7 +252,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     //
     const entityFilters: { [key: string]: unknown } = {};
     for (let i = 0; i < entityBuckets.length; i++) {
-      entityFilters[entityBuckets[i].key] = esFilters.buildPhraseFilter(
+      entityFilters[entityBuckets[i].key] = buildPhraseFilter(
         splitField,
         entityBuckets[i].key,
         indexPattern
@@ -299,6 +297,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_geo_line:tracks'),
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,
@@ -321,7 +320,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     };
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest) {
+  getSourceStatus(sourceDataRequest?: DataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest
       ? (sourceDataRequest.getMeta() as ESGeoLineSourceResponseMeta)

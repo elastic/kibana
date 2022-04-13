@@ -1,0 +1,200 @@
+$smallControl: $euiSize * 14;
+$mediumControl: $euiSize * 25;
+$largeControl: $euiSize * 50;
+$controlMinWidth: $euiSize * 14;
+
+.controlGroup {
+  min-height: $euiSize * 4;
+}
+
+.controlsWrapper--twoLine {
+  .groupEditActions {
+    padding-top: $euiSize;
+  }
+}
+
+.controlFrameCloneWrapper {
+  width: max-content;
+
+  &--small {
+    width: $smallControl;
+  }
+
+  &--medium {
+    width: $mediumControl;
+  }
+
+  &--large {
+    width: $largeControl;
+  }
+
+  &--twoLine {
+    margin-top: -$euiSize * 1.25;
+  }
+
+  &__label {
+    cursor: grabbing !important; // prevents cursor flickering while dragging the clone
+  }
+
+  .controlFrame__draggable {
+    cursor: grabbing;
+    height: $euiButtonHeight;
+    align-items: center;
+    border-radius: $euiBorderRadius;
+    font-weight: $euiFontWeightSemiBold;
+    @include euiFormControlDefaultShadow;
+    background-color: $euiFormInputGroupLabelBackground;
+    min-width: $controlMinWidth;
+    @include euiFontSizeXS;
+  }
+
+  .controlFrame__formControlLayout,
+  .controlFrame__draggable {
+    .controlFrame__dragHandle {
+      cursor: grabbing;
+    }
+  }
+}
+
+.controlFrame__labelToolTip {
+  max-width: 40%;
+}
+
+.controlFrameWrapper {
+  flex-basis: auto;
+  position: relative;
+
+  &.controlFrameWrapper-isEditable {
+    .controlFrame__formControlLayoutLabel {
+      padding-left: 0;
+    }
+  }
+
+  &:not(.controlFrameWrapper-isEditable) {
+    .controlFrameFormControlLayout--twoLine .euiFormControlLayout__childrenWrapper {
+      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
+    }
+  }
+
+  .controlFrame__formControlLayout {
+    width: 100%;
+    min-width: $controlMinWidth;
+    transition: background-color .1s, color .1s;
+
+    &Label {
+      @include euiTextTruncate;
+      border-radius: $euiBorderRadius;
+    }
+
+    &:not(.controlFrame__formControlLayout-clone) {
+      .controlFrame__dragHandle {
+        cursor: grab;
+      }
+    }
+
+    .controlFrame__control {
+      height: 100%;
+      transition: opacity .1s;
+
+      &.controlFrame--twoLine {
+        width: 100%;
+      }
+    }
+
+    .controlFrame--controlLoading {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  &--small {
+    width: $smallControl;
+  }
+
+  &--medium {
+    width: $mediumControl;
+  }
+
+  &--large {
+    width: $largeControl;
+  }
+
+  &--insertBefore,
+  &--insertAfter {
+    .controlFrame__formControlLayout:after {
+      content: '';
+      position: absolute;
+      background-color: transparentize($euiColorPrimary, .5);
+      border-radius: $euiBorderRadius;
+      top: 0;
+      bottom: 0;
+      width: $euiSizeXS * .5;
+    }
+  }
+
+  &--insertBefore {
+    .controlFrame__formControlLayout:after {
+      left: -$euiSizeXS - 1;
+    }
+  }
+
+  &--insertAfter {
+    .controlFrame__formControlLayout:after {
+      right: -$euiSizeXS - 1;
+    }
+  }
+
+  .controlFrameFloatingActions {
+    visibility: hidden;
+    opacity: 0;
+
+    // slower transition on hover leave in case the user accidentally stops hover
+    transition: visibility .3s, opacity .3s;
+
+    z-index: 1;
+    position: absolute;
+
+    &--oneLine {
+      right: $euiSizeXS;
+      top: -$euiSizeL;
+      padding: $euiSizeXS;
+      border-radius: $euiBorderRadius;
+      background-color: $euiColorEmptyShade;
+      box-shadow: 0 0 0 1px $euiColorLightShade;
+    }
+
+    &--twoLine {
+      right: $euiSizeXS;
+      top: -$euiSizeXS;
+    }
+  }
+
+  &:hover {
+    .controlFrameFloatingActions {
+      transition: visibility .1s, opacity .1s;
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  &-isDragging {
+    .euiFormRow__labelWrapper {
+      opacity: 0;
+    }
+    .controlFrame__formControlLayout {
+      background-color: tintOrShade($euiColorSuccess, 90%, 70%);
+      color: transparent !important;
+      box-shadow: none;
+
+      .euiFormLabel {
+        opacity: 0;
+      }
+
+      .controlFrame__control {
+        opacity: 0;
+      }
+    }
+  }
+}

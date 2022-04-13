@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { JOB_MAP_NODE_TYPES } from '../../common/constants/data_frame_analytics';
-import { Field, Aggregation } from '../../common/types/fields';
+import type { Field, Aggregation } from '../../common/types/fields';
 import {
   dataAnalyticsJobConfigSchema,
   dataAnalyticsJobUpdateSchema,
@@ -25,23 +25,27 @@ import {
   analyticsNewJobCapsParamsSchema,
   analyticsNewJobCapsQuerySchema,
 } from './schemas/data_analytics_schema';
-import { GetAnalyticsMapArgs, ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
-import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
+import type {
+  GetAnalyticsMapArgs,
+  ExtendAnalyticsMapArgs,
+} from '../models/data_frame_analytics/types';
+import { DataViewHandler } from '../models/data_frame_analytics/index_patterns';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
-import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
+import type { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
+import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
 
-function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
-  const iph = new IndexPatternHandler(context.core.savedObjects.client);
-  return iph.getIndexPatternId(patternName);
+function getDataViewId(dataViewsService: DataViewsService, patternName: string) {
+  const iph = new DataViewHandler(dataViewsService);
+  return iph.getDataViewId(patternName);
 }
 
-function deleteDestIndexPatternById(context: RequestHandlerContext, indexPatternId: string) {
-  const iph = new IndexPatternHandler(context.core.savedObjects.client);
-  return iph.deleteIndexPatternById(indexPatternId);
+function deleteDestDataViewById(dataViewsService: DataViewsService, dataViewId: string) {
+  const iph = new DataViewHandler(dataViewsService);
+  return iph.deleteDataViewById(dataViewId);
 }
 
 function getAnalyticsMap(
@@ -92,7 +96,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       return true;
     }
 
-    const { body } = await client.asCurrentUser.security.hasPrivileges({
+    const body = await client.asCurrentUser.security.hasPrivileges({
       body: {
         index: [
           {
@@ -119,15 +123,18 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   router.get(
     {
       path: '/api/ml/data_frame/analytics',
-      validate: false,
+      validate: {
+        query: analyticsQuerySchema,
+      },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.getDataFrameAnalytics({
-          size: 1000,
+        const { size } = request.query;
+        const body = await mlClient.getDataFrameAnalytics({
+          size: size ?? 1000,
         });
         return response.ok({
           body,
@@ -163,7 +170,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const { analyticsId } = request.params;
         const { excludeGenerated } = request.query;
 
-        const { body } = await mlClient.getDataFrameAnalytics({
+        const body = await mlClient.getDataFrameAnalytics({
           id: analyticsId,
           ...(excludeGenerated ? { exclude_generated: true } : {}),
         });
@@ -193,7 +200,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getDataFrameAnalyticsStats({ size: 1000 });
+        const body = await mlClient.getDataFrameAnalyticsStats({ size: 1000 });
         return response.ok({
           body,
         });
@@ -225,7 +232,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.getDataFrameAnalyticsStats({
+        const body = await mlClient.getDataFrameAnalyticsStats({
           id: analyticsId,
         });
         return response.ok({
@@ -262,7 +269,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.putDataFrameAnalytics(
+        const body = await mlClient.putDataFrameAnalytics(
           {
             id: analyticsId,
             // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
@@ -300,7 +307,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.evaluateDataFrame(
+        const body = await mlClient.evaluateDataFrame(
           {
             // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
@@ -338,9 +345,8 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.explainDataFrameAnalytics(
+        const body = await mlClient.explainDataFrameAnalytics(
           {
-            // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
             body: request.body,
           },
           getAuthorizationHeader(request)
@@ -374,86 +380,89 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, client, request, response, context }) => {
-      try {
-        const { analyticsId } = request.params;
-        const { deleteDestIndex, deleteDestIndexPattern } = request.query;
-        let destinationIndex: string | undefined;
-        const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
-        const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
-        const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
-          success: false,
-        };
-
+    routeGuard.fullLicenseAPIGuard(
+      async ({ mlClient, client, request, response, getDataViewsService }) => {
         try {
-          // Check if analyticsId is valid and get destination index
-          const { body } = await mlClient.getDataFrameAnalytics({
-            id: analyticsId,
-          });
-          if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
-            destinationIndex = body.data_frame_analytics[0].dest.index;
+          const { analyticsId } = request.params;
+          const { deleteDestIndex, deleteDestIndexPattern } = request.query;
+          let destinationIndex: string | undefined;
+          const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+          const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
+          const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+            success: false,
+          };
+
+          try {
+            // Check if analyticsId is valid and get destination index
+            const body = await mlClient.getDataFrameAnalytics({
+              id: analyticsId,
+            });
+            if (Array.isArray(body.data_frame_analytics) && body.data_frame_analytics.length > 0) {
+              destinationIndex = body.data_frame_analytics[0].dest.index;
+            }
+          } catch (e) {
+            // exist early if the job doesn't exist
+            return response.customError(wrapError(e));
           }
+
+          if (deleteDestIndex || deleteDestIndexPattern) {
+            // If user checks box to delete the destinationIndex associated with the job
+            if (destinationIndex && deleteDestIndex) {
+              // Verify if user has privilege to delete the destination index
+              const userCanDeleteDestIndex = await userCanDeleteIndex(client, destinationIndex);
+              // If user does have privilege to delete the index, then delete the index
+              if (userCanDeleteDestIndex) {
+                try {
+                  await client.asCurrentUser.indices.delete({
+                    index: destinationIndex,
+                  });
+                  destIndexDeleted.success = true;
+                } catch ({ body }) {
+                  destIndexDeleted.error = body;
+                }
+              } else {
+                return response.forbidden();
+              }
+            }
+
+            // Delete the index pattern if there's an index pattern that matches the name of dest index
+            if (destinationIndex && deleteDestIndexPattern) {
+              try {
+                const dataViewsService = await getDataViewsService();
+                const dataViewId = await getDataViewId(dataViewsService, destinationIndex);
+                if (dataViewId) {
+                  await deleteDestDataViewById(dataViewsService, dataViewId);
+                }
+                destIndexPatternDeleted.success = true;
+              } catch (deleteDestIndexPatternError) {
+                destIndexPatternDeleted.error = deleteDestIndexPatternError;
+              }
+            }
+          }
+          // Grab the target index from the data frame analytics job id
+          // Delete the data frame analytics
+
+          try {
+            await mlClient.deleteDataFrameAnalytics({
+              id: analyticsId,
+            });
+            analyticsJobDeleted.success = true;
+          } catch ({ body }) {
+            analyticsJobDeleted.error = body;
+          }
+          const results = {
+            analyticsJobDeleted,
+            destIndexDeleted,
+            destIndexPatternDeleted,
+          };
+          return response.ok({
+            body: results,
+          });
         } catch (e) {
-          // exist early if the job doesn't exist
           return response.customError(wrapError(e));
         }
-
-        if (deleteDestIndex || deleteDestIndexPattern) {
-          // If user checks box to delete the destinationIndex associated with the job
-          if (destinationIndex && deleteDestIndex) {
-            // Verify if user has privilege to delete the destination index
-            const userCanDeleteDestIndex = await userCanDeleteIndex(client, destinationIndex);
-            // If user does have privilege to delete the index, then delete the index
-            if (userCanDeleteDestIndex) {
-              try {
-                await client.asCurrentUser.indices.delete({
-                  index: destinationIndex,
-                });
-                destIndexDeleted.success = true;
-              } catch ({ body }) {
-                destIndexDeleted.error = body;
-              }
-            } else {
-              return response.forbidden();
-            }
-          }
-
-          // Delete the index pattern if there's an index pattern that matches the name of dest index
-          if (destinationIndex && deleteDestIndexPattern) {
-            try {
-              const indexPatternId = await getIndexPatternId(context, destinationIndex);
-              if (indexPatternId) {
-                await deleteDestIndexPatternById(context, indexPatternId);
-              }
-              destIndexPatternDeleted.success = true;
-            } catch (deleteDestIndexPatternError) {
-              destIndexPatternDeleted.error = deleteDestIndexPatternError;
-            }
-          }
-        }
-        // Grab the target index from the data frame analytics job id
-        // Delete the data frame analytics
-
-        try {
-          await mlClient.deleteDataFrameAnalytics({
-            id: analyticsId,
-          });
-          analyticsJobDeleted.success = true;
-        } catch ({ body }) {
-          analyticsJobDeleted.error = body;
-        }
-        const results = {
-          analyticsJobDeleted,
-          destIndexDeleted,
-          destIndexPatternDeleted,
-        };
-        return response.ok({
-          body: results,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
       }
-    })
+    )
   );
 
   /**
@@ -478,7 +487,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.startDataFrameAnalytics({
+        const body = await mlClient.startDataFrameAnalytics({
           id: analyticsId,
         });
         return response.ok({
@@ -513,7 +522,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const { body } = await mlClient.stopDataFrameAnalytics({
+        const body = await mlClient.stopDataFrameAnalytics({
           id: request.params.analyticsId,
           force: request.query.force,
         });
@@ -550,7 +559,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { body } = await mlClient.updateDataFrameAnalytics(
+        const body = await mlClient.updateDataFrameAnalytics(
           {
             id: analyticsId,
             body: request.body,
@@ -603,12 +612,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   /**
    * @apiGroup DataFrameAnalytics
    *
-   * @api {post} /api/ml/data_frame/analytics/job_exists Check whether jobs exists in current or any space
-   * @apiName JobExists
-   * @apiDescription Checks if each of the jobs in the specified list of IDs exist.
+   * @api {post} /api/ml/data_frame/analytics/jobs_exist Check whether jobs exist in current or any space
+   * @apiName JobsExist
+   * @apiDescription Checks if each of the jobs in the specified list of IDs exists.
    *                 If allSpaces is true, the check will look across all spaces.
    *
-   * @apiSchema (params) analyticsIdSchema
+   * @apiSchema (params) jobsExistSchema
    */
   router.post(
     {
@@ -626,7 +635,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const results: { [id: string]: { exists: boolean } } = {};
         for (const id of analyticsIds) {
           try {
-            const { body } = allSpaces
+            const body = allSpaces
               ? await client.asInternalUser.ml.getDataFrameAnalytics({
                   id,
                 })
@@ -701,7 +710,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   /**
    * @apiGroup DataFrameAnalytics
    *
-   * @api {get} api/data_frame/analytics/fields/:indexPattern Get index pattern fields for analytics
+   * @api {get} /api/ml/data_frame/analytics/new_job_caps/:indexPattern Get fields for a pattern of indices used for analytics
    * @apiName AnalyticsNewJobCaps
    * @apiDescription Retrieve the index fields for analytics
    */
@@ -716,17 +725,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, context }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, getDataViewsService }) => {
       try {
         const { indexPattern } = request.params;
         const isRollup = request.query?.rollup === 'true';
-        const savedObjectsClient = context.core.savedObjects.client;
-        const fieldService = fieldServiceProvider(
-          indexPattern,
-          isRollup,
-          client,
-          savedObjectsClient
-        );
+        const dataViewsService = await getDataViewsService();
+        const fieldService = fieldServiceProvider(indexPattern, isRollup, client, dataViewsService);
         const { fields, aggs } = await fieldService.getData(true);
         convertForStringify(aggs, fields);
 

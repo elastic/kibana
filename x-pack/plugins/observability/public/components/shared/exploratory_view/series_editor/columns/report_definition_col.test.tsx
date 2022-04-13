@@ -9,22 +9,24 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import {
-  mockAppIndexPattern,
-  mockIndexPattern,
+  mockAppDataView,
+  mockDataView,
   mockUseValuesList,
   mockUxSeries,
   render,
 } from '../../rtl_helpers';
 import { ReportDefinitionCol } from './report_definition_col';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('Series Builder ReportDefinitionCol', function () {
-  mockAppIndexPattern();
+  mockAppDataView();
   const seriesId = 0;
 
   const seriesConfig = getDefaultConfigs({
     reportType: 'data-distribution',
-    indexPattern: mockIndexPattern,
+    dataView: mockDataView,
     dataType: 'ux',
+    reportConfigMap: obsvReportConfigMap,
   });
 
   mockUseValuesList([{ label: 'elastic-co', count: 10 }]);

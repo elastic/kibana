@@ -92,7 +92,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     .subscribe({
       next({ message, level }) {
         const msg = message.replace(/\\n/g, '\n');
-        log[level === 'SEVERE' || level === 'error' ? 'error' : 'debug'](
+        log[level === 'SEVERE' || level === 'error' ? 'warning' : 'debug'](
           `browser[${level}] ${msg}`
         );
       },

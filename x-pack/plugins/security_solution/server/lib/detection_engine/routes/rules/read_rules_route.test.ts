@@ -12,11 +12,15 @@ import { readRulesRoute } from './read_rules_route';
 import {
   getEmptyFindResult,
   getReadRequest,
+  getReadRequestWithId,
   getFindResultWithSingleHit,
   nonRuleFindResult,
   getEmptySavedObjectsResponse,
+  getRuleExecutionSummarySucceeded,
+  resolveAlertMock,
 } from '../__mocks__/request_responses';
 import { requestMock, requestContextMock, serverMock } from '../__mocks__';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 describe.each([
   ['Legacy', false],
@@ -26,6 +30,7 @@ describe.each([
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
+  const myFakeId = '99403909-ca9b-49ba-9d7a-7e5320e68d05';
   beforeEach(() => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
@@ -33,22 +38,54 @@ describe.each([
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // successful transform
-    clients.ruleExecutionLogClient.find.mockResolvedValue([]);
+    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
+      getRuleExecutionSummarySucceeded()
+    );
 
+    clients.rulesClient.resolve.mockResolvedValue({
+      ...resolveAlertMock(isRuleRegistryEnabled, {
+        ...getQueryRuleParams(),
+      }),
+      id: myFakeId,
+    });
     readRulesRoute(server.router, logger, isRuleRegistryEnabled);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
+  describe('status codes', () => {
+    test('returns 200', async () => {
       const response = await server.inject(getReadRequest(), context);
       expect(response.status).toEqual(200);
     });
 
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
-      const response = await server.inject(getReadRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
+    test('returns 200 when reading a single rule outcome === exactMatch', async () => {
+      const response = await server.inject(getReadRequestWithId(myFakeId), context);
+      expect(response.status).toEqual(200);
+    });
+
+    test('returns 200 when reading a single rule outcome === aliasMatch', async () => {
+      clients.rulesClient.resolve.mockResolvedValue({
+        ...resolveAlertMock(isRuleRegistryEnabled, {
+          ...getQueryRuleParams(),
+        }),
+        id: myFakeId,
+        outcome: 'aliasMatch',
+      });
+      const response = await server.inject(getReadRequestWithId(myFakeId), context);
+      expect(response.status).toEqual(200);
+    });
+
+    test('returns 200 when reading a single rule outcome === conflict', async () => {
+      clients.rulesClient.resolve.mockResolvedValue({
+        ...resolveAlertMock(isRuleRegistryEnabled, {
+          ...getQueryRuleParams(),
+        }),
+        id: myFakeId,
+        outcome: 'conflict',
+        alias_target_id: 'myaliastargetid',
+      });
+      const response = await server.inject(getReadRequestWithId(myFakeId), context);
+      expect(response.status).toEqual(200);
+      expect(response.body.alias_target_id).toEqual('myaliastargetid');
     });
 
     test('returns error if requesting a non-rule', async () => {

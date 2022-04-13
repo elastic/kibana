@@ -6,17 +6,17 @@
  */
 
 import { MiddlewareAPI } from '@reduxjs/toolkit';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { LensAppState, setState, initEmpty, LensStoreDeps } from '..';
+import { setState, initEmpty, LensStoreDeps } from '..';
+import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
 import { getInitialDatasourceId } from '../../utils';
 import { initializeDatasources } from '../../editor_frame_service/editor_frame';
 import { LensAppServices } from '../../app_plugin/types';
 import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { Document, injectFilterReferences } from '../../persistence';
+import { Document } from '../../persistence';
 
 export const getPersisted = async ({
   initialInput,
@@ -27,7 +27,7 @@ export const getPersisted = async ({
   lensServices: LensAppServices;
   history?: History<unknown>;
 }): Promise<
-  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'errorJSON'> } | undefined
+  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'> } | undefined
 > => {
   const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;
@@ -45,19 +45,21 @@ export const getPersisted = async ({
         },
       };
     }
-    const { sharingSavedObjectProps, ...attributes } = result;
+    const { metaInfo, attributes } = result;
+    const sharingSavedObjectProps = metaInfo?.sharingSavedObjectProps;
     if (spaces && sharingSavedObjectProps?.outcome === 'aliasMatch' && history) {
       // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-      const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
+      const newObjectId = sharingSavedObjectProps.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
       const newPath = lensServices.http.basePath.prepend(
         `${getEditPath(newObjectId)}${history.location.search}`
       );
-      await spaces.ui.redirectLegacyUrl(
-        newPath,
-        i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
+      await spaces.ui.redirectLegacyUrl({
+        path: newPath,
+        aliasPurpose: sharingSavedObjectProps.aliasPurpose,
+        objectNoun: i18n.translate('xpack.lens.legacyUrlConflict.objectNoun', {
           defaultMessage: 'Lens visualization',
-        })
-      );
+        }),
+      });
     }
     doc = {
       ...initialInput,
@@ -83,22 +85,22 @@ export const getPersisted = async ({
 
 export function loadInitial(
   store: MiddlewareAPI,
-  { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext }: LensStoreDeps,
+  storeDeps: LensStoreDeps,
   {
     redirectCallback,
     initialInput,
-    emptyState,
     history,
   }: {
     redirectCallback: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
-    emptyState?: LensAppState;
     history?: History<unknown>;
-  }
+  },
+  autoApplyDisabled: boolean
 ) {
+  const { lensServices, datasourceMap, embeddableEditorIncomingState, initialContext } = storeDeps;
+  const { resolvedDateRange, searchSessionId, isLinkedToOriginatingApp, ...emptyState } =
+    getPreloadedState(storeDeps);
   const { attributeService, notifications, data, dashboardFeatureFlag } = lensServices;
-  const currentSessionId = data.search.session.getSessionId();
-
   const { lens } = store.getState();
   if (
     !initialInput ||
@@ -113,7 +115,7 @@ export function loadInitial(
           initEmpty({
             newState: {
               ...emptyState,
-              searchSessionId: currentSessionId || data.search.session.start(),
+              searchSessionId: data.search.session.getSessionId() || data.search.session.start(),
               datasourceStates: Object.entries(result).reduce(
                 (state, [datasourceId, datasourceState]) => ({
                   ...state,
@@ -129,6 +131,9 @@ export function loadInitial(
             initialContext,
           })
         );
+        if (autoApplyDisabled) {
+          store.dispatch(disableAutoApply());
+        }
       })
       .catch((e: { message: string }) => {
         notifications.toasts.addDanger({
@@ -150,10 +155,6 @@ export function loadInitial(
               initialInput.savedObjectId
             );
           }
-          // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(
-            injectFilterReferences(doc.state.filters, doc.references)
-          );
 
           const docDatasourceStates = Object.entries(doc.state.datasourceStates).reduce(
             (stateMap, [datasourceId, datasourceState]) => ({
@@ -166,6 +167,10 @@ export function loadInitial(
             {}
           );
 
+          const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
+          // Don't overwrite any pinned filters
+          data.query.filterManager.setAppFilters(filters);
+
           initializeDatasources(
             datasourceMap,
             docDatasourceStates,
@@ -176,9 +181,12 @@ export function loadInitial(
             }
           )
             .then((result) => {
+              const currentSessionId = data.search.session.getSessionId();
               store.dispatch(
                 setState({
+                  isSaveable: true,
                   sharingSavedObjectProps,
+                  filters: data.query.filterManager.getFilters(),
                   query: doc.state.query,
                   searchSessionId:
                     dashboardFeatureFlag.allowByValueEmbeddables &&
@@ -187,7 +195,7 @@ export function loadInitial(
                     currentSessionId
                       ? currentSessionId
                       : data.search.session.start(),
-                  ...(!isEqual(lens.persistedDoc, doc) ? { persistedDoc: doc } : null),
+                  persistedDoc: doc,
                   activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                   visualization: {
                     activeId: doc.visualizationType,
@@ -206,6 +214,10 @@ export function loadInitial(
                   isLoading: false,
                 })
               );
+
+              if (autoApplyDisabled) {
+                store.dispatch(disableAutoApply());
+              }
             })
             .catch((e: { message: string }) =>
               notifications.toasts.addDanger({

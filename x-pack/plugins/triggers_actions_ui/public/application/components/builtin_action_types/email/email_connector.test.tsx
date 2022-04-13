@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EmailActionConnector } from '../types';
 import EmailActionConnectorFields from './email_connector';
 import * as hooks from './use_email_config';
@@ -35,6 +35,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
@@ -66,6 +68,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
@@ -99,6 +103,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').first().prop('value')).toBe(
@@ -132,6 +138,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailServiceSelectInput"]').length > 0).toBeTruthy();
@@ -165,6 +173,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailHostInput"]').first().prop('disabled')).toBe(true);
@@ -199,6 +209,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailHostInput"]').first().prop('disabled')).toBe(false);
@@ -223,6 +235,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
@@ -245,6 +259,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
@@ -268,6 +284,8 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);

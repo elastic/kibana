@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Agg } from './agg';
 import { FieldSelect } from './field_select';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
@@ -34,7 +34,7 @@ const runTest = (aggType, name, test, additionalProps = {}) => {
         <div>
           <Agg
             onAdd={jest.fn()}
-            onChange={jest.fn()}
+            onModelChange={jest.fn()}
             onDelete={jest.fn()}
             panel={panel}
             fields={FIELDS}

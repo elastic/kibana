@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+// @ts-ignore
 import { ElasticsearchOverview } from '../../../components/elasticsearch';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
@@ -56,7 +57,7 @@ export const ElasticsearchOverviewPage: React.FC<ComponentProps> = ({ clusters }
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch`;
 
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,

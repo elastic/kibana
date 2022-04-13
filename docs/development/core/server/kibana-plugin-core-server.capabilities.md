@@ -16,7 +16,7 @@ export interface Capabilities
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [catalogue](./kibana-plugin-core-server.capabilities.catalogue.md) | <code>Record&lt;string, boolean&gt;</code> | Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. |
-|  [management](./kibana-plugin-core-server.capabilities.management.md) | <code>{</code><br/><code>        [sectionId: string]: Record&lt;string, boolean&gt;;</code><br/><code>    }</code> | Management section capabilities. |
-|  [navLinks](./kibana-plugin-core-server.capabilities.navlinks.md) | <code>Record&lt;string, boolean&gt;</code> | Navigation link capabilities. |
+|  [catalogue](./kibana-plugin-core-server.capabilities.catalogue.md) | Record&lt;string, boolean&gt; | Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. |
+|  [management](./kibana-plugin-core-server.capabilities.management.md) | { \[sectionId: string\]: Record&lt;string, boolean&gt;; } | Management section capabilities. |
+|  [navLinks](./kibana-plugin-core-server.capabilities.navlinks.md) | Record&lt;string, boolean&gt; | Navigation link capabilities. |
 

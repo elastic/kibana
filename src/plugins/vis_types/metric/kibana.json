@@ -5,7 +5,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "visualizations", "charts", "expressions"],
-  "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
+  "requiredBundles": ["visDefaultEditor"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

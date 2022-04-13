@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from 'kibana/public';
 import moment from 'moment';
-import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
-import { getInfraHref } from '../../../../shared/Links/InfraLink';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { getInfraHref } from '../../../../shared/links/infra_link';
 import {
   Action,
   getNonEmptySections,
@@ -17,7 +17,7 @@ import {
 } from '../../../../shared/transaction_action_menu/sections_helper';
 
 type InstaceDetails =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 function getInfraMetricsQuery(timestamp?: string) {
   if (!timestamp) {

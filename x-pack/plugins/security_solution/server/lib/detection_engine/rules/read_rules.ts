@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { ResolvedSanitizedRule, SanitizedRule } from '../../../../../alerting/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
 import { findRules } from './find_rules';
@@ -24,11 +24,17 @@ export const readRules = async ({
   rulesClient,
   id,
   ruleId,
-}: ReadRuleOptions): Promise<SanitizedAlert<RuleParams> | null> => {
+}: ReadRuleOptions): Promise<
+  SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
+> => {
   if (id != null) {
     try {
-      const rule = await rulesClient.get({ id });
+      const rule = await rulesClient.resolve({ id });
       if (isAlertType(isRuleRegistryEnabled, rule)) {
+        if (rule?.outcome === 'exactMatch') {
+          const { outcome, ...restOfRule } = rule;
+          return restOfRule;
+        }
         return rule;
       } else {
         return null;

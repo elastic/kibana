@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -19,29 +19,51 @@ import {
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
   createRule,
+  createLegacyRuleAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('patch_rules_bulk', () => {
+    describe('deprecations', () => {
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log);
+      });
+
+      it('should return a warning header', async () => {
+        await createRule(supertest, log, getSimpleRule('rule-1'));
+
+        const { header } = await supertest
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .send([{ rule_id: 'rule-1', name: 'some other name' }])
+          .expect(200);
+
+        expect(header.warning).to.be(
+          '299 Kibana "Deprecated endpoint: /api/detection_engine/rules/_bulk_update API is deprecated since v8.2. Please use the /api/detection_engine/rules/_bulk_action API instead. See https://www.elastic.co/guide/en/security/master/rule-api-overview.html for more detail."'
+        );
+      });
+    });
+
     describe('patch rules bulk', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should patch a single rule property of name using a rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', name: 'some other name' }])
           .expect(200);
@@ -54,12 +76,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch two rule properties of name using the two rules rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
-        await createRule(supertest, getSimpleRule('rule-2'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-2'));
 
         // patch both rule names
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([
             { rule_id: 'rule-1', name: 'some other name' },
@@ -82,11 +104,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch a single rule property of name using an id', async () => {
-        const createRuleBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ id: createRuleBody.id, name: 'some other name' }])
           .expect(200);
@@ -99,12 +121,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch two rule properties of name using the two rules id', async () => {
-        const createRule1 = await createRule(supertest, getSimpleRule('rule-1'));
-        const createRule2 = await createRule(supertest, getSimpleRule('rule-2'));
+        const createRule1 = await createRule(supertest, log, getSimpleRule('rule-1'));
+        const createRule2 = await createRule(supertest, log, getSimpleRule('rule-2'));
 
         // patch both rule names
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([
             { id: createRule1.id, name: 'some other name' },
@@ -126,12 +148,61 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare2).to.eql(outputRule2);
       });
 
+      it('should bulk disable two rules and migrate their actions', async () => {
+        const [connector, rule1, rule2] = await Promise.all([
+          supertest
+            .post(`/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My action',
+              connector_type_id: '.slack',
+              secrets: {
+                webhookUrl: 'http://localhost:1234',
+              },
+            }),
+          createRule(supertest, log, getSimpleRule('rule-1')),
+          createRule(supertest, log, getSimpleRule('rule-2')),
+        ]);
+        await Promise.all([
+          createLegacyRuleAction(supertest, rule1.id, connector.body.id),
+          createLegacyRuleAction(supertest, rule2.id, connector.body.id),
+        ]);
+        // patch a simple rule's name
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
+          .set('kbn-xsrf', 'true')
+          .send([
+            { id: rule1.id, enabled: false },
+            { id: rule2.id, enabled: false },
+          ])
+          .expect(200);
+
+        // @ts-expect-error
+        body.forEach((response) => {
+          const outputRule = getSimpleRuleOutput(response.rule_id, false);
+          outputRule.actions = [
+            {
+              action_type_id: '.slack',
+              group: 'default',
+              id: connector.body.id,
+              params: {
+                message:
+                  'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+            },
+          ];
+          outputRule.throttle = '1h';
+          const bodyToCompare = removeServerGeneratedProperties(response);
+          expect(bodyToCompare).to.eql(outputRule);
+        });
+      });
+
       it('should patch a single rule property of name using the auto-generated id', async () => {
-        const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ id: createdBody.id, name: 'some other name' }])
           .expect(200);
@@ -144,11 +215,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not change the version of a rule when it patches only enabled', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', enabled: false }])
           .expect(200);
@@ -161,11 +232,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change the version of a rule when it patches enabled and another property', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', severity: 'low', enabled: false }])
           .expect(200);
@@ -180,18 +251,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not change other properties when it does patches', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's timeline_title
         await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', timeline_title: 'some title', timeline_id: 'some id' }])
           .expect(200);
 
         // patch a simple rule's name
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'rule-1', name: 'some other name' }])
           .expect(200);
@@ -208,7 +279,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a 200 but give a 404 in the message if it is given a fake id', async () => {
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' }])
           .expect(200);
@@ -226,7 +297,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a 200 but give a 404 in the message if it is given a fake rule_id', async () => {
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([{ rule_id: 'fake_id', name: 'some other name' }])
           .expect(200);
@@ -240,11 +311,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch one rule property and give an error about a second fake rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch one rule name and give a fake id for the second
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([
             { rule_id: 'rule-1', name: 'some other name' },
@@ -270,11 +341,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch one rule property and give an error about a second fake id', async () => {
-        const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
+        const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch one rule name and give a fake id for the second
         const { body } = await supertest
-          .patch(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`)
+          .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([
             { id: createdBody.id, name: 'some other name' },

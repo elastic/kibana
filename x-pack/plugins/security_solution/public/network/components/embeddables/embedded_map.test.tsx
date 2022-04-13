@@ -25,9 +25,13 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('./embedded_map_helpers', () => ({
   createEmbeddable: jest.fn(),
 }));
+
+const mockGetStorage = jest.fn();
+const mockSetStorage = jest.fn();
+
 jest.mock('../../../common/lib/kibana', () => {
   return {
-    useKibana: jest.fn().mockReturnValue({
+    useKibana: () => ({
       services: {
         embeddable: {
           EmbeddablePanel: jest.fn(() => <div data-test-subj="EmbeddablePanel" />),
@@ -38,11 +42,21 @@ jest.mock('../../../common/lib/kibana', () => {
             siem: { networkMap: '' },
           },
         },
+        storage: {
+          get: mockGetStorage,
+          set: mockSetStorage,
+        },
       },
     }),
   };
 });
-
+jest.mock('../../../common/containers/sourcerer', () => {
+  return {
+    useSourcererDataView: () => ({
+      selectedPatterns: ['filebeat-*', 'packetbeat-*'],
+    }),
+  };
+});
 jest.mock('./index_patterns_missing_prompt', () => {
   return {
     IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
@@ -52,11 +66,10 @@ jest.mock('./index_patterns_missing_prompt', () => {
 describe('EmbeddedMapComponent', () => {
   const setQuery: jest.Mock = jest.fn();
   const mockSelector = {
-    kibanaIndexPatterns: [
+    kibanaDataViews: [
       { id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9', title: 'filebeat-*' },
       { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'auditbeat-*' },
     ],
-    sourcererScope: { selectedPatterns: ['filebeat-*', 'packetbeat-*'] },
   };
   const mockCreateEmbeddable = {
     destroyed: false,
@@ -96,6 +109,11 @@ describe('EmbeddedMapComponent', () => {
 
   beforeEach(() => {
     setQuery.mockClear();
+    mockGetStorage.mockReturnValue(true);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   test('renders correctly against snapshot', () => {
@@ -132,7 +150,7 @@ describe('EmbeddedMapComponent', () => {
     const spy = jest.spyOn(redux, 'useSelector');
     spy.mockReturnValue({
       ...mockSelector,
-      kibanaIndexPatterns: [],
+      kibanaDataViews: [],
     });
 
     (createEmbeddable as jest.Mock).mockResolvedValue(mockCreateEmbeddable);
@@ -168,6 +186,44 @@ describe('EmbeddedMapComponent', () => {
       expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
       expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
       expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(true);
+    });
+  });
+
+  test('map hidden on close', async () => {
+    mockGetStorage.mockReturnValue(false);
+    const wrapper = mount(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(false);
+
+    const container = wrapper.find('[data-test-subj="false-toggle-network-map"]').at(0);
+    container.simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', true);
+      expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(true);
+    });
+  });
+
+  test('map visible on open', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(true);
+    const container = wrapper.find('[data-test-subj="true-toggle-network-map"]').at(0);
+    container.simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
+      expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(false);
     });
   });
 });

@@ -10,13 +10,14 @@ import {
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from 'src/core/server';
-import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { maxSuggestions } from '../../observability/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
 
+// All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc
+// and be included on cloud allow list unless there are specific reasons not to
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  autoCreateApmDataView: schema.boolean({ defaultValue: true }),
   serviceMapEnabled: schema.boolean({ defaultValue: true }),
   serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
@@ -25,7 +26,6 @@ const configSchema = schema.object({
   }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
-  autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
@@ -47,19 +47,61 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
+  indices: schema.object({
+    transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+    span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
+    error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
+    metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
+    sourcemap: schema.string({ defaultValue: 'apm-*' }),
+    onboarding: schema.string({ defaultValue: 'apm-*' }),
+  }),
 });
 
 // plugin config
-export const config: PluginConfigDescriptor<APMXPackConfig> = {
-  deprecations: ({ deprecate, renameFromRoot }) => [
-    deprecate('enabled', '8.0.0'),
+export const config: PluginConfigDescriptor<APMConfig> = {
+  deprecations: ({
+    rename,
+    renameFromRoot,
+    deprecateFromRoot,
+    unusedFromRoot,
+  }) => [
+    rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
+      level: 'warning',
+    }),
+    renameFromRoot(
+      'apm_oss.transactionIndices',
+      'xpack.apm.indices.transaction',
+      { level: 'warning' }
+    ),
+    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.error', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemap', {
+      level: 'warning',
+    }),
+    renameFromRoot(
+      'apm_oss.onboardingIndices',
+      'xpack.apm.indices.onboarding',
+      { level: 'warning' }
+    ),
+    deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
+    unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
+    unusedFromRoot('apm_oss.indexPattern', { level: 'warning' }),
     renameFromRoot(
       'xpack.apm.maxServiceEnvironments',
-      `uiSettings.overrides[${maxSuggestions}]`
+      `uiSettings.overrides[${maxSuggestions}]`,
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.apm.maxServiceSelections',
-      `uiSettings.overrides[${maxSuggestions}]`
+      `uiSettings.overrides[${maxSuggestions}]`,
+      { level: 'warning' }
     ),
   ],
   exposeToBrowser: {
@@ -70,78 +112,19 @@ export const config: PluginConfigDescriptor<APMXPackConfig> = {
   schema: configSchema,
 };
 
-export type APMXPackConfig = TypeOf<typeof configSchema>;
-export type APMConfig = ReturnType<typeof mergeConfigs>;
-
-// plugin config and ui indices settings
-export function mergeConfigs(
-  apmOssConfig: APMOSSConfig,
-  apmConfig: APMXPackConfig
-) {
-  const mergedConfig = {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    // TODO: Remove all apm_oss options by 8.0
-    'apm_oss.transactionIndices': apmOssConfig.transactionIndices,
-    'apm_oss.spanIndices': apmOssConfig.spanIndices,
-    'apm_oss.errorIndices': apmOssConfig.errorIndices,
-    'apm_oss.metricsIndices': apmOssConfig.metricsIndices,
-    'apm_oss.sourcemapIndices': apmOssConfig.sourcemapIndices,
-    'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
-    /* eslint-enable @typescript-eslint/naming-convention */
-    'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
-    'xpack.apm.serviceMapFingerprintBucketSize':
-      apmConfig.serviceMapFingerprintBucketSize,
-    'xpack.apm.serviceMapTraceIdBucketSize':
-      apmConfig.serviceMapTraceIdBucketSize,
-    'xpack.apm.serviceMapFingerprintGlobalBucketSize':
-      apmConfig.serviceMapFingerprintGlobalBucketSize,
-    'xpack.apm.serviceMapTraceIdGlobalBucketSize':
-      apmConfig.serviceMapTraceIdGlobalBucketSize,
-    'xpack.apm.serviceMapMaxTracesPerRequest':
-      apmConfig.serviceMapMaxTracesPerRequest,
-    'xpack.apm.ui.enabled': apmConfig.ui.enabled,
-    'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
-    'xpack.apm.ui.transactionGroupBucketSize':
-      apmConfig.ui.transactionGroupBucketSize,
-    'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern,
-    'xpack.apm.telemetryCollectionEnabled':
-      apmConfig.telemetryCollectionEnabled,
-    'xpack.apm.searchAggregatedTransactions':
-      apmConfig.searchAggregatedTransactions,
-    'xpack.apm.metricsInterval': apmConfig.metricsInterval,
-    'xpack.apm.agent.migrations.enabled': apmConfig.agent.migrations.enabled,
-  };
-
-  // Add data stream indices to list of configured values
-  mergedConfig[
-    'apm_oss.transactionIndices'
-  ] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
-
-  mergedConfig[
-    'apm_oss.spanIndices'
-  ] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
-
-  mergedConfig[
-    'apm_oss.errorIndices'
-  ] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
-
-  mergedConfig[
-    'apm_oss.metricsIndices'
-  ] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
-
-  return mergedConfig;
-}
+export type APMConfig = TypeOf<typeof configSchema>;
+export type ApmIndicesConfigName = keyof APMConfig['indices'];
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
 export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
 export { APMPlugin } from './plugin';
-export { APMPluginSetup } from './types';
-export {
+export type { APMPluginSetup } from './types';
+export type {
   APMServerRouteRepository,
   APIEndpoint,
-} from './routes/get_global_apm_server_route_repository';
-export { APMRouteHandlerResources } from './routes/typings';
+} from './routes/apm_routes/get_global_apm_server_route_repository';
+export type { APMRouteHandlerResources } from './routes/typings';
 
 export type { ProcessorEvent } from '../common/processor_event';

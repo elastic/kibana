@@ -6,7 +6,7 @@
  */
 
 import { get, isObject } from 'lodash';
-import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../common/cti/constants';
 
 import type { SignalSearchResponse, SignalSourceHit } from '../types';
 import type {
@@ -14,8 +14,42 @@ import type {
   ThreatEnrichment,
   ThreatListItem,
   ThreatMatchNamedQuery,
+  SignalMatch,
 } from './types';
 import { extractNamedQueries } from './utils';
+
+export const getSignalMatchesFromThreatList = (
+  threatList: ThreatListItem[] = []
+): SignalMatch[] => {
+  const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
+
+  threatList.forEach((threatHit) =>
+    extractNamedQueries(threatHit).forEach((item) => {
+      const signalId = item.id;
+      if (!signalId) {
+        return;
+      }
+
+      if (!signalMap[signalId]) {
+        signalMap[signalId] = [];
+      }
+
+      signalMap[signalId].push({
+        id: threatHit._id,
+        index: threatHit._index,
+        field: item.field,
+        value: item.value,
+      });
+    })
+  );
+
+  const signalMatches = Object.entries(signalMap).map(([key, value]) => ({
+    signalId: key,
+    queries: value,
+  }));
+
+  return signalMatches;
+};
 
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
@@ -52,16 +86,20 @@ export const buildEnrichments = ({
   queries.map((query) => {
     const matchedThreat = threats.find((threat) => threat._id === query.id);
     const indicatorValue = get(matchedThreat?._source, indicatorPath) as unknown;
+    const feedName = (get(matchedThreat?._source, FEED_NAME_PATH) ?? '') as string;
     const indicator = ([indicatorValue].flat()[0] ?? {}) as Record<string, unknown>;
     if (!isObject(indicator)) {
       throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
     }
-    const atomic = get(matchedThreat?._source, query.value) as unknown;
-
+    const feed: { name?: string } = {};
+    if (feedName) {
+      feed.name = feedName;
+    }
     return {
       indicator,
+      feed,
       matched: {
-        atomic,
+        atomic: undefined,
         field: query.field,
         id: query.id,
         index: query.index,
@@ -73,7 +111,8 @@ export const buildEnrichments = ({
 export const enrichSignalThreatMatches = async (
   signals: SignalSearchResponse,
   getMatchedThreats: GetMatchedThreats,
-  indicatorPath: string
+  indicatorPath: string,
+  signalMatchesArg?: SignalMatch[]
 ): Promise<SignalSearchResponse> => {
   const signalHits = signals.hits.hits;
   if (signalHits.length === 0) {
@@ -81,13 +120,27 @@ export const enrichSignalThreatMatches = async (
   }
 
   const uniqueHits = groupAndMergeSignalMatches(signalHits);
-  const signalMatches = uniqueHits.map((signalHit) => extractNamedQueries(signalHit));
-  const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
+  const signalMatches: SignalMatch[] = signalMatchesArg
+    ? signalMatchesArg
+    : uniqueHits.map((signalHit) => ({
+        signalId: signalHit._id,
+        queries: extractNamedQueries(signalHit),
+      }));
+
+  const matchedThreatIds = [
+    ...new Set(
+      signalMatches
+        .map((signalMatch) => signalMatch.queries)
+        .flat()
+        .map(({ id }) => id)
+    ),
+  ];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
-  const enrichments = signalMatches.map((queries) =>
+
+  const enrichmentsWithoutAtomic = signalMatches.map((signalMatch) =>
     buildEnrichments({
       indicatorPath,
-      queries,
+      queries: signalMatch.queries,
       threats: matchedThreats,
     })
   );
@@ -103,14 +156,22 @@ export const enrichSignalThreatMatches = async (
     // new issues.
     const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
     const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
+    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[i];
+    const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
+      ...enrichment,
+      matched: {
+        ...enrichment.matched,
+        atomic: get(signalHit._source, enrichment.matched.field),
+      },
+    }));
 
     return {
       ...signalHit,
       _source: {
-        ...signalHit._source!,
+        ...signalHit._source,
         threat: {
           ...threat,
-          enrichments: [...existingEnrichments, ...enrichments[i]],
+          enrichments: [...existingEnrichments, ...newEnrichments],
         },
       },
     };

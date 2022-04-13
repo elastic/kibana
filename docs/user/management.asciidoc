@@ -4,7 +4,7 @@
 [partintro]
 --
 *Stack Management* is home to UIs for managing all things Elastic Stack&mdash;
-indices, clusters, licenses, UI settings, index patterns, spaces, and more.
+indices, clusters, licenses, UI settings, data views, spaces, and more.
 
 
 Access to individual features is governed by {es} and {kib} privileges.
@@ -45,7 +45,7 @@ through the hot, warm, cold, and delete phases.
 Such policies help you control operation costs
 because you can put data in different resource tiers.
 
-| <<snapshot-repositories, Snapshot and Restore>>
+| {ref}/snapshot-restore.html[Snapshot and Restore]
 |Define a policy that creates, schedules, and automatically deletes snapshots to ensure that you
 have backups of your cluster in case something goes wrong.
 
@@ -78,6 +78,9 @@ You can add and remove remote clusters, and check their connectivity.
 | Centrally <<create-and-manage-rules, manage your rules>> across {kib}. Create and <<connector-management, manage reusable
 connectors>> for triggering actions.
 
+| <<cases,Cases>>
+| Create and manage cases to investigate issues.
+
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
 A report can contain a dashboard, visualization, saved search, or Canvas workpad.
@@ -106,7 +109,7 @@ a| <<xpack-security, Users>>
 Add or delete users and assign roles that give users
 specific privileges.
 
-| <<xpack-kibana-role-management, Roles>>
+| <<kibana-role-management, Roles>>
 |View the roles that exist on your cluster. Customize
 the actions that a user with the role can perform, on a cluster, index, and space level.
 
@@ -128,12 +131,12 @@ Kerberos, PKI, OIDC, and SAML.
 [cols="50, 50"]
 |===
 
-a| <<managing-index-patterns, Manage index pattern data fields>>
-|Manage the data fields in the index patterns that retrieve your data from {es}.
+a| <<data-views, Data Views>>
+|Manage the fields in the data views that retrieve your data from {es}.
 
 | <<managing-saved-objects, Saved Objects>>
 | Copy, edit, delete, import, and export your saved objects.
-These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
+These include dashboards, visualizations, maps, data views, Canvas workpads, and more.
 
 | <<managing-tags, Tags>>
 |Create, manage, and assign tags to your saved objects.
@@ -167,10 +170,6 @@ set the timespan for notification messages, and much more.
 the full list of features that are included in your license,
 see the https://www.elastic.co/subscriptions[subscription page].
 
-| <<upgrade-assistant, Upgrade Assistant>>
-| Identify the issues that you need to address before upgrading to the
-next major version of {es}, and then reindex, if needed.
-
 |===
 
 
@@ -179,11 +178,13 @@ next major version of {es}, and then reindex, if needed.
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
+include::{kib-repo-dir}/management/cases/index.asciidoc[]
+
 include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
-include::{kib-repo-dir}/management/manage-index-patterns.asciidoc[]
+include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
 
 include::{kib-repo-dir}/management/numeral.asciidoc[]
 
@@ -193,12 +194,8 @@ include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
 
 include::security/index.asciidoc[]
 
-include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
-
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
-
-include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
 
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]

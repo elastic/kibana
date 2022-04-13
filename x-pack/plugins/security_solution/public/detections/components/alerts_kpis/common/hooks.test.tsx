@@ -5,8 +5,25 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { useInspectButton, UseInspectButtonParams } from './hooks';
+import {
+  getAggregatableFields,
+  useInspectButton,
+  UseInspectButtonParams,
+  useStackByFields,
+} from './hooks';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
+import { TestProviders } from '../../../../common/mock';
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+
+test('getAggregatableFields', () => {
+  expect(getAggregatableFields(mockBrowserFields)).toMatchSnapshot();
+});
 
 describe('hooks', () => {
   describe('useInspectButton', () => {
@@ -41,6 +58,24 @@ describe('hooks', () => {
       result.unmount();
 
       expect(mockDeleteQuery).toHaveBeenCalledWith({ id: defaultParams.uniqueQueryId });
+    });
+  });
+
+  describe('useStackByFields', () => {
+    jest.mock('../../../../common/containers/sourcerer', () => ({
+      useSourcererDataView: jest.fn().mockReturnValue({ browserFields: mockBrowserFields }),
+    }));
+    it('returns only aggregateable fields', () => {
+      const wrapper = ({ children }: { children: JSX.Element }) => (
+        <TestProviders>{children}</TestProviders>
+      );
+      const { result, unmount } = renderHook(() => useStackByFields(), { wrapper });
+      const aggregateableFields = result.current;
+      unmount();
+      expect(aggregateableFields?.find((field) => field.label === 'agent.id')).toBeTruthy();
+      expect(
+        aggregateableFields?.find((field) => field.label === 'nestedField.firstAttributes')
+      ).toBe(undefined);
     });
   });
 });

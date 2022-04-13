@@ -18,4 +18,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);
 }
 
-export { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+export type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';

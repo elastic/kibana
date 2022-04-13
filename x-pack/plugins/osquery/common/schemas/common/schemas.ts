@@ -39,11 +39,27 @@ export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
 
 export const version = t.string;
-export type Version = t.TypeOf<typeof query>;
+export type Version = t.TypeOf<typeof version>;
 export const versionOrUndefined = t.union([version, t.undefined]);
 export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
 
 export const interval = t.string;
-export type Interval = t.TypeOf<typeof query>;
+export type Interval = t.TypeOf<typeof interval>;
 export const intervalOrUndefined = t.union([interval, t.undefined]);
 export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
+
+export const savedQueryId = t.string;
+export type SavedQueryId = t.TypeOf<typeof savedQueryId>;
+export const savedQueryIdOrUndefined = t.union([savedQueryId, t.undefined]);
+export type SavedQueryIdOrUndefined = t.TypeOf<typeof savedQueryIdOrUndefined>;
+
+export const ecsMapping = t.record(
+  t.string,
+  t.partial({
+    field: t.string,
+    value: t.union([t.string, t.array(t.string)]),
+  })
+);
+export type ECSMapping = t.TypeOf<typeof ecsMapping>;
+export const ecsMappingOrUndefined = t.union([ecsMapping, t.undefined]);
+export type ECSMappingOrUndefined = t.TypeOf<typeof ecsMappingOrUndefined>;

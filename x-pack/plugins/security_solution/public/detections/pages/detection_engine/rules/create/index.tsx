@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo } from 'react';
-import styled, { StyledComponent } from 'styled-components';
+import styled from 'styled-components';
 
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
@@ -34,7 +34,6 @@ import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
 import {
   redirectToDetections,
@@ -47,8 +46,9 @@ import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
-import { APP_ID } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { HeaderPage } from '../../../../../common/components/header_page';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -70,22 +70,12 @@ const MyEuiPanel = styled(EuiPanel)<{
       display: none;
     }
   }
-`;
-
-MyEuiPanel.displayName = 'MyEuiPanel';
-
-const StepDefineRuleAccordion: StyledComponent<
-  typeof EuiAccordion,
-  any, // eslint-disable-line
-  { ref: React.MutableRefObject<EuiAccordion | null> },
-  never
-> = styled(EuiAccordion)`
   .euiAccordion__childWrapper {
-    overflow: visible;
+    transform: none; /* To circumvent an issue in Eui causing the fullscreen datagrid to break */
   }
 `;
 
-StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
+MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC = () => {
   const [
@@ -269,7 +259,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   if (ruleName && ruleId) {
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId),
     });
@@ -284,13 +274,13 @@ const CreateRulePageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });
     return null;
   } else if (!userHasPermissions(canUserCRUD)) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),
     });
@@ -301,7 +291,7 @@ const CreateRulePageComponent: React.FC = () => {
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup direction="row" justifyContent="spaceAround">
           <MaxWidthEuiFlexItem>
-            <DetectionEngineHeaderPage
+            <HeaderPage
               backOptions={{
                 path: getRulesUrl(),
                 text: i18n.BACK_TO_RULES,
@@ -311,7 +301,7 @@ const CreateRulePageComponent: React.FC = () => {
               title={i18n.PAGE_TITLE}
             />
             <MyEuiPanel zindex={4} hasBorder>
-              <StepDefineRuleAccordion
+              <EuiAccordion
                 initialIsOpen={true}
                 id={RuleStep.defineRule}
                 buttonContent={defineRuleButton}
@@ -341,7 +331,7 @@ const CreateRulePageComponent: React.FC = () => {
                   onSubmit={submitStepDefineRule}
                   descriptionColumns="singleSplit"
                 />
-              </StepDefineRuleAccordion>
+              </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
             <MyEuiPanel hasBorder zindex={3}>
@@ -401,6 +391,7 @@ const CreateRulePageComponent: React.FC = () => {
               >
                 <EuiHorizontalRule margin="m" />
                 <StepScheduleRule
+                  ruleType={ruleType}
                   addPadding={true}
                   defaultValues={stepsData.current[RuleStep.scheduleRule].data}
                   descriptionColumns="singleSplit"

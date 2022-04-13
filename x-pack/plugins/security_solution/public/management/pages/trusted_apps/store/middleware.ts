@@ -63,9 +63,7 @@ import {
   editItemId,
   editingTrustedApp,
   getListItems,
-  editItemState,
   getCurrentLocationIncludedPolicies,
-  getCurrentLocationExcludedPolicies,
 } from './selectors';
 import { parsePoliciesToKQL, parseQueryFilterToKQL } from '../../../common/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
@@ -99,14 +97,14 @@ const refreshListIfNeeded = async (
       const pageSize = getCurrentLocationPageSize(store.getState());
       const filter = getCurrentLocationFilter(store.getState());
       const includedPolicies = getCurrentLocationIncludedPolicies(store.getState());
-      const excludedPolicies = getCurrentLocationExcludedPolicies(store.getState());
 
       const kuery = [];
 
       const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
       if (filterKuery) kuery.push(filterKuery);
 
-      const policiesKuery = parsePoliciesToKQL(includedPolicies, excludedPolicies) || undefined;
+      const policiesKuery =
+        parsePoliciesToKQL(includedPolicies ? includedPolicies.split(',') : []) || undefined;
       if (policiesKuery) kuery.push(policiesKuery);
 
       const response = await trustedAppsService.getTrustedAppsList({
@@ -126,7 +124,6 @@ const refreshListIfNeeded = async (
             timestamp: Date.now(),
             filter,
             includedPolicies,
-            excludedPolicies,
           },
         })
       );
@@ -191,6 +188,7 @@ const submitCreationIfNeeded = async (
       if (editMode) {
         responseTrustedApp = (
           await trustedAppsService.updateTrustedApp(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             { id: editItemId(currentState)! },
             // TODO: try to remove the cast
             entry as PostTrustedAppCreateRequest
@@ -413,8 +411,6 @@ const fetchEditTrustedAppIfNeeded = async (
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
             type: 'LoadingResourceState',
-            // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
-            previousState: editItemState(currentState)!,
           },
         });
 
@@ -476,5 +472,6 @@ export const createTrustedAppsPageMiddleware = (
   };
 };
 
-export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> =
-  (coreStart) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));
+export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<
+  TrustedAppsListPageState
+> = (coreStart) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));

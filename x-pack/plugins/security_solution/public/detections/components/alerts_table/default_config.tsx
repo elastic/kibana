@@ -6,186 +6,22 @@
  */
 
 import {
-  ALERT_DURATION,
-  ALERT_INSTANCE_ID,
-  ALERT_RULE_PRODUCER,
-  ALERT_START,
+  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
-  ALERT_UUID,
-  ALERT_RULE_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_CATEGORY,
+  ALERT_RULE_RULE_ID,
 } from '@kbn/rule-data-utils';
 
-import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
+import type { Filter } from '@kbn/es-query';
+import { RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
-
 import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { columns } from '../../configurations/security_solution_detections/columns';
+import {
+  columns,
+  rulePreviewColumns,
+} from '../../configurations/security_solution_detections/columns';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => {
-  const combinedQuery =
-    status === 'acknowledged'
-      ? {
-          bool: {
-            should: [
-              {
-                term: {
-                  'signal.status': status,
-                },
-              },
-              {
-                term: {
-                  'signal.status': 'in-progress',
-                },
-              },
-            ],
-          },
-        }
-      : {
-          term: {
-            'signal.status': status,
-          },
-        };
-
-  return [
-    {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-        type: 'phrase',
-        key: 'signal.status',
-        params: {
-          query: status,
-        },
-      },
-      query: combinedQuery,
-    },
-  ];
-};
-
-/**
- * For backwards compatability issues, if `acknowledged` is a status prop, `in-progress` will likely have to be too
- */
-export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
-  const combinedQuery = {
-    bool: {
-      should: statuses.map((status) => ({
-        term: {
-          'signal.status': status,
-        },
-      })),
-    },
-  };
-
-  return [
-    {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-      },
-      query: combinedQuery,
-    },
-  ];
-};
-
-export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
-  ruleId
-    ? [
-        {
-          meta: {
-            alias: null,
-            negate: false,
-            disabled: false,
-            type: 'phrase',
-            key: 'signal.rule.id',
-            params: {
-              query: ruleId,
-            },
-          },
-          query: {
-            match_phrase: {
-              'signal.rule.id': ruleId,
-            },
-          },
-        },
-      ]
-    : [];
-
-export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] =>
-  showBuildingBlockAlerts
-    ? []
-    : [
-        {
-          meta: {
-            alias: null,
-            negate: true,
-            disabled: false,
-            type: 'exists',
-            key: 'signal.rule.building_block_type',
-            value: 'exists',
-          },
-          query: { exists: { field: 'signal.rule.building_block_type' } },
-        },
-      ];
-
-export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): Filter[] =>
-  showOnlyThreatIndicatorAlerts
-    ? [
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: false,
-            key: 'signal.rule.threat_mapping',
-            type: 'exists',
-            value: 'exists',
-          },
-          query: { exists: { field: 'signal.rule.threat_mapping' } },
-        },
-      ]
-    : [];
-
-export const alertsDefaultModel: SubsetTimelineModel = {
-  ...timelineDefaults,
-  columns,
-  showCheckboxes: true,
-  excludedRowRendererIds: Object.values(RowRendererId),
-};
-
-export const requiredFieldsForActions = [
-  '@timestamp',
-  'signal.status',
-  'signal.group.id',
-  'signal.original_time',
-  'signal.rule.building_block_type',
-  'signal.rule.filters',
-  'signal.rule.from',
-  'signal.rule.language',
-  'signal.rule.query',
-  'signal.rule.name',
-  'signal.rule.to',
-  'signal.rule.id',
-  'signal.rule.index',
-  'signal.rule.type',
-  'signal.original_event.kind',
-  'signal.original_event.module',
-  // Endpoint exception fields
-  'file.path',
-  'file.Ext.code_signature.subject_name',
-  'file.Ext.code_signature.trusted',
-  'file.hash.sha256',
-  'host.os.family',
-  'event.code',
-];
-
-// TODO: Once we are past experimental phase this code should be removed
-export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => {
   const combinedQuery =
     status === 'acknowledged'
       ? {
@@ -227,8 +63,10 @@ export const buildAlertStatusFilterRuleRegistry = (status: Status): Filter[] => 
   ];
 };
 
-// TODO: Once we are past experimental phase this code should be removed
-export const buildAlertStatusesFilterRuleRegistry = (statuses: Status[]): Filter[] => {
+/**
+ * For backwards compatability issues, if `acknowledged` is a status prop, `in-progress` will likely have to be too
+ */
+export const buildAlertStatusesFilter = (statuses: Status[]): Filter[] => {
   const combinedQuery = {
     bool: {
       should: statuses.map((status) => ({
@@ -251,9 +89,37 @@ export const buildAlertStatusesFilterRuleRegistry = (statuses: Status[]): Filter
   ];
 };
 
-export const buildShowBuildingBlockFilterRuleRegistry = (
-  showBuildingBlockAlerts: boolean
-): Filter[] =>
+/**
+ * Builds Kuery filter for fetching alerts for a specific rule. Takes the rule's
+ * static id, i.e. `rule.ruleId` (not rule.id), so that alerts for _all
+ * historical instances_ of the rule are returned.
+ *
+ * @param ruleStaticId Rule's static id: `rule.ruleId`
+ */
+export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
+  ruleStaticId
+    ? [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: ALERT_RULE_RULE_ID,
+            params: {
+              query: ruleStaticId,
+            },
+          },
+          query: {
+            match_phrase: {
+              [ALERT_RULE_RULE_ID]: ruleStaticId,
+            },
+          },
+        },
+      ]
+    : [];
+
+export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] =>
   showBuildingBlockAlerts
     ? []
     : [
@@ -263,40 +129,68 @@ export const buildShowBuildingBlockFilterRuleRegistry = (
             negate: true,
             disabled: false,
             type: 'exists',
-            key: 'kibana.rule.building_block_type',
+            key: ALERT_BUILDING_BLOCK_TYPE,
             value: 'exists',
           },
-          query: { exists: { field: 'kibana.rule.building_block_type' } },
+          query: { exists: { field: ALERT_BUILDING_BLOCK_TYPE } },
         },
       ];
 
-export const requiredFieldMappingsForActionsRuleRegistry = {
-  '@timestamp': '@timestamp',
-  'alert.instance.id': ALERT_INSTANCE_ID,
-  'event.kind': 'event.kind',
-  'alert.start': ALERT_START,
-  'alert.uuid': ALERT_UUID,
-  'event.action': 'event.action',
-  'alert.workflow_status': ALERT_WORKFLOW_STATUS,
-  'alert.duration.us': ALERT_DURATION,
-  'rule.uuid': ALERT_RULE_UUID,
-  'rule.name': ALERT_RULE_NAME,
-  'rule.category': ALERT_RULE_CATEGORY,
-  producer: ALERT_RULE_PRODUCER,
-  tags: 'tags',
-};
+export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): Filter[] =>
+  showOnlyThreatIndicatorAlerts
+    ? [
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+            key: 'kibana.alert.rule.type',
+            type: 'term',
+          },
+          query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
+        },
+      ]
+    : [];
 
-export const alertsHeadersRuleRegistry: ColumnHeaderOptions[] = Object.entries(
-  requiredFieldMappingsForActionsRuleRegistry
-).map<ColumnHeaderOptions>(([alias, field]) => ({
-  columnHeaderType: defaultColumnHeaderType,
-  displayAsText: alias,
-  id: field,
-}));
-
-export const alertsDefaultModelRuleRegistry: SubsetTimelineModel = {
+export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
-  columns: alertsHeadersRuleRegistry,
+  columns,
   showCheckboxes: true,
   excludedRowRendererIds: Object.values(RowRendererId),
 };
+
+export const alertsPreviewDefaultModel: SubsetTimelineModel = {
+  ...alertsDefaultModel,
+  columns: rulePreviewColumns,
+  defaultColumns: rulePreviewColumns,
+  sort: [
+    {
+      columnId: 'kibana.alert.original_time',
+      columnType: 'number',
+      sortDirection: 'desc',
+    },
+  ],
+};
+
+export const requiredFieldsForActions = [
+  '@timestamp',
+  'kibana.alert.workflow_status',
+  'kibana.alert.group.id',
+  'kibana.alert.original_time',
+  'kibana.alert.building_block_type',
+  'kibana.alert.rule.from',
+  'kibana.alert.rule.name',
+  'kibana.alert.rule.to',
+  'kibana.alert.rule.uuid',
+  'kibana.alert.rule.type',
+  'kibana.alert.original_event.kind',
+  'kibana.alert.original_event.module',
+  // Endpoint exception fields
+  'file.path',
+  'file.Ext.code_signature.subject_name',
+  'file.Ext.code_signature.trusted',
+  'file.hash.sha256',
+  'host.os.family',
+  'event.code',
+  'process.entry_leader.entity_id',
+];

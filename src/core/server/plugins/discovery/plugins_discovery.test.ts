@@ -7,14 +7,14 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 
-import { from } from 'rxjs';
-import { first, map, toArray } from 'rxjs/operators';
+import { firstValueFrom, from } from 'rxjs';
+import { map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '../../config';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
@@ -163,10 +163,7 @@ describe('plugins discovery system', () => {
       logger,
     };
 
-    pluginConfig = await configService
-      .atPath<PluginsConfigType>('plugins')
-      .pipe(first())
-      .toPromise();
+    pluginConfig = await firstValueFrom(configService.atPath<PluginsConfigType>('plugins'));
 
     // jest relies on the filesystem to get sourcemaps when using console.log
     // which breaks with the mocked FS, see https://github.com/tschaub/mock-fs/issues/234
@@ -195,7 +192,7 @@ describe('plugins discovery system', () => {
       { createCwd: false }
     );
 
-    const plugins = await plugin$.pipe(toArray()).toPromise();
+    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
 
     expect(pluginNames).toHaveLength(4);
@@ -362,7 +359,7 @@ describe('plugins discovery system', () => {
       { createCwd: false }
     );
 
-    const plugins = await plugin$.pipe(toArray()).toPromise();
+    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
 
     expect(pluginNames).toHaveLength(4);
@@ -401,7 +398,7 @@ describe('plugins discovery system', () => {
       { createCwd: false }
     );
 
-    const plugins = await plugin$.pipe(toArray()).toPromise();
+    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
 
     expect(pluginNames).toEqual(['pluginA']);
@@ -423,7 +420,7 @@ describe('plugins discovery system', () => {
       { createCwd: false }
     );
 
-    const plugins = await plugin$.pipe(toArray()).toPromise();
+    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
 
     expect(pluginNames).toHaveLength(5);
@@ -451,7 +448,7 @@ describe('plugins discovery system', () => {
       { createCwd: false }
     );
 
-    const plugins = await plugin$.pipe(toArray()).toPromise();
+    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
     const pluginNames = plugins.map((plugin) => plugin.name);
 
     expect(pluginNames).toHaveLength(3);
@@ -536,7 +533,7 @@ describe('plugins discovery system', () => {
       let { plugin$ } = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo);
 
       expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(1);
-      let plugins = await plugin$.pipe(toArray()).toPromise();
+      let plugins = await firstValueFrom(plugin$.pipe(toArray()));
       let pluginNames = plugins.map((plugin) => plugin.name);
 
       expect(pluginNames).toHaveLength(3);
@@ -555,7 +552,7 @@ describe('plugins discovery system', () => {
       plugin$ = discover(new PluginsConfig(pluginConfig, env), coreContext, instanceInfo).plugin$;
 
       expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(2);
-      plugins = await plugin$.pipe(toArray()).toPromise();
+      plugins = await firstValueFrom(plugin$.pipe(toArray()));
       pluginNames = plugins.map((plugin) => plugin.name);
 
       expect(pluginNames).toHaveLength(3);

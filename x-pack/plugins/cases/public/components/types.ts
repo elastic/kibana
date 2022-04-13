@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { ActionConnector } from '../../common';
+export type { CaseActionConnector } from '../../common/ui/types';
 
-export type CaseActionConnector = ActionConnector;
+export type ReleasePhase = 'experimental' | 'beta' | 'ga';

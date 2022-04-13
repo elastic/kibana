@@ -5,36 +5,31 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { CoreStart } from 'kibana/public';
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { coreMock } from 'src/core/public/mocks';
 import { registerDataHandler, unregisterDataHandler } from '../data_handler';
 import { useHasData } from '../hooks/use_has_data';
-import * as routeParams from '../hooks/use_route_params';
-import * as timeRange from '../hooks/use_time_range';
 import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { HasDataContextProvider } from './has_data_context';
-import * as pluginContext from '../hooks/use_plugin_context';
-import { PluginContextValue } from './plugin_context';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ApmIndicesConfig } from '../../common/typings';
 import { act } from '@testing-library/react';
 
-const relativeStart = '2020-10-08T06:00:00.000Z';
-const relativeEnd = '2020-10-08T07:00:00.000Z';
+const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
-const sampleAPMIndices = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'apm_oss.transactionIndices': 'apm-*',
-} as ApmIndicesConfig;
+const core = coreMock.createStart();
 
 function wrapper({ children }: { children: React.ReactElement }) {
   const history = createMemoryHistory();
   return (
-    <Router history={history}>
-      <HasDataContextProvider>{children}</HasDataContextProvider>
-    </Router>
+    <KibanaContextProvider services={{ ...core }}>
+      <Router history={history}>
+        <HasDataContextProvider>{children}</HasDataContextProvider>
+      </Router>
+    </KibanaContextProvider>
   );
 }
 
@@ -59,24 +54,7 @@ function registerApps<T extends ObservabilityFetchDataPlugins>(
 }
 
 describe('HasDataContextProvider', () => {
-  beforeAll(() => {
-    jest.spyOn(routeParams, 'useRouteParams').mockImplementation(() => ({
-      query: {
-        from: relativeStart,
-        to: relativeEnd,
-      },
-      path: {},
-    }));
-    jest.spyOn(timeRange, 'useTimeRange').mockImplementation(() => ({
-      relativeStart,
-      relativeEnd,
-      absoluteStart: new Date(relativeStart).valueOf(),
-      absoluteEnd: new Date(relativeEnd).valueOf(),
-    }));
-    jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
-      core: { http: { get: jest.fn() } } as unknown as CoreStart,
-    } as PluginContextValue);
-  });
+  beforeAll(() => {});
 
   describe('when no plugin has registered', () => {
     it('hasAnyData returns undefined and all apps return undefined', async () => {
@@ -99,7 +77,7 @@ describe('HasDataContextProvider', () => {
           infra_logs: { hasData: undefined, status: 'success' },
           infra_metrics: { hasData: undefined, status: 'success' },
           ux: { hasData: undefined, status: 'success' },
-          alert: { hasData: [], status: 'success' },
+          alert: { hasData: false, status: 'success' },
         },
         hasAnyData: false,
         isAllRequestsComplete: true,
@@ -108,13 +86,17 @@ describe('HasDataContextProvider', () => {
       });
     });
   });
+
   describe('when plugins have registered', () => {
     describe('all apps return false', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: false }) },
-          { appName: 'infra_logs', hasData: async () => false },
-          { appName: 'infra_metrics', hasData: async () => false },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: false, indices: 'test-index' }),
+          },
+          { appName: 'infra_metrics', hasData: async () => ({ hasData: false }) },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: false }),
@@ -130,6 +112,7 @@ describe('HasDataContextProvider', () => {
 
       it('hasAnyData returns false and all apps return false', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
+
         expect(result.current).toEqual({
           hasDataMap: {},
           hasAnyData: undefined,
@@ -149,13 +132,13 @@ describe('HasDataContextProvider', () => {
               hasData: false,
               status: 'success',
             },
-            infra_logs: { hasData: false, status: 'success' },
+            infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: false, status: 'success' },
             ux: {
               hasData: false,
               status: 'success',
             },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: false,
           isAllRequestsComplete: true,
@@ -169,8 +152,14 @@ describe('HasDataContextProvider', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
-          { appName: 'infra_logs', hasData: async () => false },
-          { appName: 'infra_metrics', hasData: async () => false },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: false, indices: 'test-index' }),
+          },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: false, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: false, indices: 'heartbeat-*, synthetics-*' }),
@@ -206,14 +195,14 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: false, status: 'success' },
-            infra_metrics: { hasData: false, status: 'success' },
+            infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
+            infra_metrics: { hasData: false, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: false,
               indices: 'apm-*',
               status: 'success',
             },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -227,8 +216,14 @@ describe('HasDataContextProvider', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
-          { appName: 'infra_logs', hasData: async () => true },
-          { appName: 'infra_metrics', hasData: async () => true },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: true, indices: 'test-index' }),
+          },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
@@ -267,15 +262,15 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: true, status: 'success' },
-            infra_metrics: { hasData: true, status: 'success' },
+            infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
+            infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
               serviceName: 'ux',
               indices: 'apm-*',
               status: 'success',
             },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -318,7 +313,7 @@ describe('HasDataContextProvider', () => {
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },
               ux: { hasData: undefined, status: 'success' },
-              alert: { hasData: [], status: 'success' },
+              alert: { hasData: false, status: 'success' },
             },
             hasAnyData: true,
             isAllRequestsComplete: true,
@@ -367,7 +362,7 @@ describe('HasDataContextProvider', () => {
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },
               ux: { hasData: undefined, status: 'success' },
-              alert: { hasData: [], status: 'success' },
+              alert: { hasData: false, status: 'success' },
             },
             hasAnyData: false,
             isAllRequestsComplete: true,
@@ -387,8 +382,14 @@ describe('HasDataContextProvider', () => {
               throw new Error('BOOMMMMM');
             },
           },
-          { appName: 'infra_logs', hasData: async () => true },
-          { appName: 'infra_metrics', hasData: async () => true },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: true, indices: 'test-index' }),
+          },
+          {
+            appName: 'infra_metrics',
+            hasData: async () => ({ hasData: true, indices: 'metric-*' }),
+          },
           {
             appName: 'synthetics',
             hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
@@ -424,15 +425,15 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: true, status: 'success' },
-            infra_metrics: { hasData: true, status: 'success' },
+            infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
+            infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
               serviceName: 'ux',
               indices: 'apm-*',
               status: 'success',
             },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -501,7 +502,7 @@ describe('HasDataContextProvider', () => {
             infra_logs: { hasData: undefined, status: 'failure' },
             infra_metrics: { hasData: undefined, status: 'failure' },
             ux: { hasData: undefined, status: 'failure' },
-            alert: { hasData: [], status: 'success' },
+            alert: { hasData: false, status: 'success' },
           },
           hasAnyData: false,
           isAllRequestsComplete: true,
@@ -514,23 +515,19 @@ describe('HasDataContextProvider', () => {
 
   describe('with alerts', () => {
     beforeAll(() => {
-      jest.spyOn(pluginContext, 'usePluginContext').mockReturnValue({
-        core: {
-          http: {
-            get: async () => {
-              return {
-                data: [
-                  { id: 2, consumer: 'apm' },
-                  { id: 3, consumer: 'uptime' },
-                ],
-              };
-            },
-          },
-        } as unknown as CoreStart,
-      } as PluginContextValue);
+      core.http.get.mockResolvedValue({
+        data: [
+          { id: 2, consumer: 'apm' },
+          { id: 3, consumer: 'uptime' },
+        ],
+      });
     });
 
-    it('returns all alerts available', async () => {
+    afterAll(() => {
+      core.http.get.mockReset();
+    });
+
+    it('returns if alerts are available', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
         hasDataMap: {},
@@ -552,14 +549,11 @@ describe('HasDataContextProvider', () => {
           infra_metrics: { hasData: undefined, status: 'success' },
           ux: { hasData: undefined, status: 'success' },
           alert: {
-            hasData: [
-              { id: 2, consumer: 'apm' },
-              { id: 3, consumer: 'uptime' },
-            ],
+            hasData: true,
             status: 'success',
           },
         },
-        hasAnyData: false,
+        hasAnyData: true,
         isAllRequestsComplete: true,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),

@@ -8,11 +8,12 @@
 
 import Path from 'path';
 
-import { run, REPO_ROOT } from '@kbn/dev-utils';
+import { run, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import del from 'del';
 
 import { RefOutputCache } from './ref_output_cache';
-import { buildAllTsRefs } from './build_ts_refs';
+import { buildTsRefs } from './build_ts_refs';
 import { updateRootRefsConfig, ROOT_REFS_CONFIG_PATH } from './root_refs_config';
 import { Project } from './project';
 import { PROJECT_CACHE } from './projects';
@@ -41,24 +42,34 @@ export async function runBuildRefsCli() {
         return;
       }
 
+      const projectFilter = flags.project;
+      if (projectFilter && typeof projectFilter !== 'string') {
+        throw createFlagError('expected --project to be a string');
+      }
+
       // if the tsconfig.refs.json file is not self-managed then make sure it has
       // a reference to every composite project in the repo
       await updateRootRefsConfig(log);
 
-      // load all the projects referenced from the root refs config deeply, so we know all
-      // the ts projects we are going to be cleaning or populating with caches
-      const projects = Project.load(
-        ROOT_REFS_CONFIG_PATH,
+      const rootProject = Project.load(
+        projectFilter ? projectFilter : ROOT_REFS_CONFIG_PATH,
         {},
         {
           skipConfigValidation: true,
         }
-      ).getProjectsDeep(PROJECT_CACHE);
+      );
+      // load all the projects referenced from the root project deeply, so we know all
+      // the ts projects we are going to be cleaning or populating with caches
+      const projects = rootProject.getProjectsDeep(PROJECT_CACHE);
 
       const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE !== 'false' && !!flags.cache;
       const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';
       const doClean = !!flags.clean || doCapture;
       const doInitCache = cacheEnabled && !doCapture;
+
+      if (doCapture && projectFilter) {
+        throw createFlagError('--project can not be combined with cache capture');
+      }
 
       statsMeta.set('buildTsRefsEnabled', enabled);
       statsMeta.set('buildTsRefsCacheEnabled', cacheEnabled);
@@ -87,7 +98,12 @@ export async function runBuildRefsCli() {
       }
 
       try {
-        await buildAllTsRefs({ log, procRunner, verbose: !!flags.verbose });
+        await buildTsRefs({
+          log,
+          procRunner,
+          verbose: !!flags.verbose,
+          project: rootProject,
+        });
         log.success('ts refs build successfully');
       } catch (error) {
         const typeFailure = isTypeFailure(error);
@@ -110,13 +126,15 @@ export async function runBuildRefsCli() {
       }
     },
     {
-      description: 'Build TypeScript projects',
+      description: 'Build TypeScript project references',
       flags: {
         boolean: ['clean', 'force', 'cache', 'ignore-type-failures'],
+        string: ['project'],
         default: {
           cache: true,
         },
         help: `
+          --project          Only build the TS Refs for a specific project
           --force            Run the build even if the BUILD_TS_REFS_DISABLE is set to "true"
           --clean            Delete outDirs for each ts project before building
           --no-cache         Disable fetching/extracting outDir caches based on the mergeBase with upstream

@@ -26,7 +26,6 @@ Provide a screenshot or video.
 //Screenshots must be 16:9 ratio.
 
 TIP: Need introduction inspiration? Here are some good examples:
-* <<snapshot-repositories, Snapshot and Restore>>
 * <<dashboard, Dashboard>>
 * <<canvas, Canvas>>
 

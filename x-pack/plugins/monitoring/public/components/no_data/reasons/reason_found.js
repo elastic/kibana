@@ -15,7 +15,7 @@ import {
   ExplainExportersCloud,
   ExplainPluginEnabled,
 } from '../explanations';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const ExplainWhyNoData = (props) => {
   const { reason } = props;

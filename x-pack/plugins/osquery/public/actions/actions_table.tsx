@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
+import { isArray, isEmpty, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
@@ -13,21 +13,22 @@ import { useHistory } from 'react-router-dom';
 
 import { useAllActions } from './use_all_actions';
 import { Direction } from '../../common/search_strategy';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 
 interface ActionTableResultsButtonProps {
   actionId: string;
 }
 
-const ActionTableResultsButton = React.memo<ActionTableResultsButtonProps>(({ actionId }) => {
+const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
   const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
   return <EuiButtonIcon iconType="visTable" {...navProps} />;
-});
+};
 
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -72,11 +73,21 @@ const ActionsTableComponent = () => {
   const handlePlayClick = useCallback(
     (item) =>
       push('/live_queries/new', {
-        form: {
-          query: item._source?.data?.query,
-        },
+        form: pickBy(
+          {
+            agentIds: item.fields.agents,
+            query: item._source.data.query,
+            ecs_mapping: item._source.data.ecs_mapping,
+            savedQueryId: item._source.data.saved_query_id,
+          },
+          (value) => !isEmpty(value)
+        ),
       }),
     [push]
+  );
+  const isPlayButtonAvailable = useCallback(
+    () => permissions.runSavedQueries || permissions.writeLiveQueries,
+    [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
   const columns = useMemo(
@@ -122,6 +133,7 @@ const ActionsTableComponent = () => {
             type: 'icon',
             icon: 'play',
             onClick: handlePlayClick,
+            available: isPlayButtonAvailable,
           },
           {
             render: renderActionsColumn,
@@ -131,6 +143,7 @@ const ActionsTableComponent = () => {
     ],
     [
       handlePlayClick,
+      isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,

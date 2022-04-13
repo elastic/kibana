@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TGridIntegrated, TGridIntegratedProps } from './index';
@@ -63,5 +64,18 @@ describe('integrated t_grid', () => {
       </TestProviders>
     );
     expect(screen.queryByTestId(dataTestSubj)).not.toBeNull();
+  });
+
+  it(`prevents view selection from overlapping EuiDataGrid's 'Full screen' button`, () => {
+    render(
+      <TestProviders>
+        <TGridIntegrated {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('updated-flex-group')).toHaveStyleRule(
+      `margin-right`,
+      euiDarkVars.paddingSizes.xl
+    );
   });
 });

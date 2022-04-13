@@ -1,4 +1,3 @@
-
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
@@ -28,6 +27,8 @@
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/telemetry/tsconfig.json" },
     { "path": "../../../src/plugins/telemetry_management_section/tsconfig.json" },
+    { "path": "../../../src/plugins/data_view_field_editor/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" },
     { "path": "../actions/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../cases/tsconfig.json" },
@@ -39,8 +40,10 @@
     { "path": "../lists/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
     { "path": "../ml/tsconfig.json" },
+    { "path": "../osquery/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
-    { "path": "../security/tsconfig.json"},
-    { "path": "../timelines/tsconfig.json"},
+    { "path": "../security/tsconfig.json" },
+    { "path": "../timelines/tsconfig.json" },
+    { "path": "../session_view/tsconfig.json" }
   ]
 }

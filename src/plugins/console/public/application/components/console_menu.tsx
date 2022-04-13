@@ -10,9 +10,15 @@ import React, { Component } from 'react';
 
 import { NotificationsSetup } from 'src/core/public';
 
-import { EuiIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+  EuiLink,
+} from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -98,8 +104,7 @@ export class ConsoleMenu extends Component<Props, State> {
 
   render() {
     const button = (
-      <button
-        className="euiButtonIcon--primary"
+      <EuiLink
         onClick={this.onButtonClick}
         data-test-subj="toggleConsoleMenu"
         aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
@@ -107,7 +112,7 @@ export class ConsoleMenu extends Component<Props, State> {
         })}
       >
         <EuiIcon type="wrench" />
-      </button>
+      </EuiLink>
     );
 
     const items = [

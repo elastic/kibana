@@ -13,16 +13,36 @@ import { render } from '../../lib/helper/rtl_helpers';
 import { NewPackagePolicy } from '../../../../fleet/public';
 import { SyntheticsPolicyCreateExtensionWrapper } from './synthetics_policy_create_extension_wrapper';
 import { defaultConfig } from './synthetics_policy_create_extension';
-import { ConfigKeys, DataStream, ScheduleUnit, VerificationMode } from './types';
+import { ConfigKey, DataStream, ScheduleUnit, VerificationMode } from './types';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-jest.mock('./code_editor', () => ({
-  CodeEditor: () => <div>code editor mock</div>,
+// ensures that fields appropriately match to their label
+jest.mock('@elastic/eui/lib/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
+
+jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
 
 const defaultNewPolicy: NewPackagePolicy = {
   name: 'samplePolicyName',
@@ -43,6 +63,10 @@ const defaultNewPolicy: NewPackagePolicy = {
             dataset: 'http',
           },
           vars: {
+            __ui: {
+              value: JSON.stringify({ is_tls_enabled: true }),
+              type: 'yaml',
+            },
             type: {
               value: 'http',
               type: 'text',
@@ -333,19 +357,19 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     expect(monitorType).toBeInTheDocument();
     expect(monitorType.value).toEqual(DataStream.HTTP);
     expect(url).toBeInTheDocument();
-    expect(url.value).toEqual(defaultHTTPConfig[ConfigKeys.URLS]);
+    expect(url.value).toEqual(defaultHTTPConfig[ConfigKey.URLS]);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultHTTPConfig[ConfigKey.PROXY_URL]);
     expect(monitorIntervalNumber).toBeInTheDocument();
-    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].number);
+    expect(monitorIntervalNumber.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].number);
     expect(monitorIntervalUnit).toBeInTheDocument();
-    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKeys.SCHEDULE].unit);
+    expect(monitorIntervalUnit.value).toEqual(defaultHTTPConfig[ConfigKey.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKeys.APM_SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultHTTPConfig[ConfigKey.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKeys.MAX_REDIRECTS]}`);
+    expect(maxRedirects.value).toEqual(`${defaultHTTPConfig[ConfigKey.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
-    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKeys.TIMEOUT]}`);
+    expect(timeout.value).toEqual(`${defaultHTTPConfig[ConfigKey.TIMEOUT]}`);
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
@@ -503,7 +527,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const host = getByLabelText('Host:Port') as HTMLInputElement;
 
     expect(host).toBeInTheDocument();
-    expect(host.value).toEqual(defaultTCPConfig[ConfigKeys.HOSTS]);
+    expect(host.value).toEqual(defaultTCPConfig[ConfigKey.HOSTS]);
 
     // expect HTTP fields not to be in the DOM
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
@@ -539,7 +563,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     const urlError = getByText('URL is required');
-    const monitorIntervalError = getByText('Monitor interval is required');
+    const monitorIntervalError = getByText('Monitor frequency is required');
     const maxRedirectsError = getByText('Max redirects must be 0 or greater');
     const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
@@ -566,7 +590,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     // expect onChange to be called with isValid true
     await waitFor(() => {
       expect(queryByText('URL is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -594,7 +618,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Host and port are required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
       const timeoutError = getByText('Timeout must be greater than or equal to 0');
 
       expect(hostError).toBeInTheDocument();
@@ -614,7 +638,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Host and port are required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -644,7 +668,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       const hostError = getByText('Host is required');
-      const monitorIntervalError = getByText('Monitor interval is required');
+      const monitorIntervalError = getByText('Monitor frequency is required');
       const timeoutError = getByText('Timeout must be greater than or equal to 0');
       const waitError = getByText('Wait must be 0 or greater');
 
@@ -667,7 +691,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
       expect(queryByText('Wait must be 0 or greater')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -686,21 +710,17 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(zipUrl, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Zip URL is required');
-      const monitorIntervalError = getByText('Monitor interval is required');
-      const timeoutError = getByText('Timeout must be greater than or equal to 0');
+      const monitorIntervalError = getByText('Monitor frequency is required');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(timeoutError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: false,
@@ -711,12 +731,10 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     // resolve errors
     fireEvent.change(zipUrl, { target: { value: 'http://github.com/tests.zip' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } });
-    fireEvent.change(timeout, { target: { value: '1' } });
 
     await waitFor(() => {
       expect(queryByText('Zip URL is required')).not.toBeInTheDocument();
-      expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
-      expect(queryByText('Timeout must be greater than or equal to 0')).not.toBeInTheDocument();
+      expect(queryByText('Monitor frequency is required')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
           isValid: true,
@@ -736,51 +754,6 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const { findByLabelText, queryByLabelText } = render(<WrappedComponent />);
     const enableSSL = queryByLabelText('Enable TLS configuration') as HTMLInputElement;
 
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({
-        isValid: false,
-        updatedPolicy: {
-          ...defaultNewPolicy,
-          inputs: [
-            {
-              ...defaultNewPolicy.inputs[0],
-              streams: [
-                {
-                  ...defaultNewPolicy.inputs[0].streams[0],
-                  vars: {
-                    ...defaultNewPolicy.inputs[0].streams[0].vars,
-                    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
-                      value: null,
-                      type: 'yaml',
-                    },
-                    [ConfigKeys.TLS_CERTIFICATE]: {
-                      value: null,
-                      type: 'yaml',
-                    },
-                    [ConfigKeys.TLS_KEY]: {
-                      value: null,
-                      type: 'yaml',
-                    },
-                    [ConfigKeys.TLS_KEY_PASSPHRASE]: {
-                      value: null,
-                      type: 'text',
-                    },
-                    [ConfigKeys.TLS_VERIFICATION_MODE]: {
-                      value: null,
-                      type: 'text',
-                    },
-                  },
-                },
-              ],
-            },
-            defaultNewPolicy.inputs[1],
-            defaultNewPolicy.inputs[2],
-            defaultNewPolicy.inputs[3],
-          ],
-        },
-      });
-    });
-
     // ensure at least one http advanced option is present
     fireEvent.click(enableSSL);
 
@@ -794,27 +767,23 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     await waitFor(() => {
       fireEvent.change(ca, { target: { value: 'certificateAuthorities' } });
-      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
+      expect(ca.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_CERTIFICATE_AUTHORITIES]);
     });
     await waitFor(() => {
       fireEvent.change(clientCertificate, { target: { value: 'clientCertificate' } });
-      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
+      expect(clientCertificate.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY]);
     });
     await waitFor(() => {
       fireEvent.change(clientKey, { target: { value: 'clientKey' } });
-      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKeys.TLS_KEY].value);
+      expect(clientKey.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY]);
     });
     await waitFor(() => {
       fireEvent.change(clientKeyPassphrase, { target: { value: 'clientKeyPassphrase' } });
-      expect(clientKeyPassphrase.value).toEqual(
-        defaultHTTPConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value
-      );
+      expect(clientKeyPassphrase.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_KEY_PASSPHRASE]);
     });
     await waitFor(() => {
       fireEvent.change(verificationMode, { target: { value: VerificationMode.NONE } });
-      expect(verificationMode.value).toEqual(
-        defaultHTTPConfig[ConfigKeys.TLS_VERIFICATION_MODE].value
-      );
+      expect(verificationMode.value).toEqual(defaultHTTPConfig[ConfigKey.TLS_VERIFICATION_MODE]);
     });
 
     await waitFor(() => {
@@ -830,23 +799,23 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
                   ...defaultNewPolicy.inputs[0].streams[0],
                   vars: {
                     ...defaultNewPolicy.inputs[0].streams[0].vars,
-                    [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+                    [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: {
                       value: '"certificateAuthorities"',
                       type: 'yaml',
                     },
-                    [ConfigKeys.TLS_CERTIFICATE]: {
+                    [ConfigKey.TLS_CERTIFICATE]: {
                       value: '"clientCertificate"',
                       type: 'yaml',
                     },
-                    [ConfigKeys.TLS_KEY]: {
+                    [ConfigKey.TLS_KEY]: {
                       value: '"clientKey"',
                       type: 'yaml',
                     },
-                    [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+                    [ConfigKey.TLS_KEY_PASSPHRASE]: {
                       value: 'clientKeyPassphrase',
                       type: 'text',
                     },
-                    [ConfigKeys.TLS_VERIFICATION_MODE]: {
+                    [ConfigKey.TLS_VERIFICATION_MODE]: {
                       value: VerificationMode.NONE,
                       type: 'text',
                     },

@@ -4,48 +4,32 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
 <CollapsibleNav
   appId$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": "test",
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -65,7 +49,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
   closeNav={[Function]}
   customNavLink$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Object {
         "baseUrl": "/",
         "category": undefined,
@@ -77,45 +60,30 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         "url": "/",
       },
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -127,7 +95,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
   isNavOpen={true}
   navLinks$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [
         Object {
           "baseUrl": "/",
@@ -246,45 +213,30 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         },
       ],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -295,7 +247,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [
         Object {
           "id": "recent 1",
@@ -309,45 +260,30 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         },
       ],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -404,6 +340,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         role={null}
       >
         <button
+          aria-label="Close this dialog"
           data-test-subj="euiFlyoutCloseButton"
           onClick={[Function]}
           type="button"
@@ -425,7 +362,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             }
           >
             <EuiCollapsibleNavGroup
-              background="light"
+              background="dark"
               className="eui-yScroll"
               style={
                 Object {
@@ -434,7 +371,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               }
             >
               <div
-                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
+                className="euiCollapsibleNavGroup euiCollapsibleNavGroup--dark eui-yScroll"
                 id="generated-id"
                 style={
                   Object {
@@ -446,7 +383,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   className="euiCollapsibleNavGroup__children"
                 >
                   <EuiListGroup
-                    color="text"
+                    color="ghost"
                     gutterSize="none"
                     listItems={
                       Array [
@@ -454,6 +391,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           "data-test-subj": "collapsibleNavCustomNavLink",
                           "href": "Custom link",
                           "icon": undefined,
+                          "iconProps": Object {
+                            "color": "ghost",
+                          },
                           "iconType": undefined,
                           "isActive": false,
                           "isDisabled": undefined,
@@ -474,9 +414,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       }
                     >
                       <EuiListGroupItem
-                        color="text"
+                        color="ghost"
                         data-test-subj="collapsibleNavCustomNavLink"
                         href="Custom link"
+                        iconProps={
+                          Object {
+                            "color": "ghost",
+                          }
+                        }
                         isActive={false}
                         key="title-0"
                         label="Custom link"
@@ -486,7 +431,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         wrapText={false}
                       >
                         <li
-                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+                          className="euiListGroupItem euiListGroupItem--small euiListGroupItem--ghost euiListGroupItem-isClickable"
                         >
                           <a
                             className="euiListGroupItem__button"
@@ -644,6 +589,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         >
           <EuiAccordion
             arrowDisplay="right"
+            arrowProps={
+              Object {
+                "color": "text",
+              }
+            }
             buttonClassName="euiCollapsibleNavGroup__heading"
             buttonContent={
               <EuiFlexGroup
@@ -665,8 +615,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
+            buttonElement="button"
             className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
             data-test-subj="collapsibleNavGroup-recentlyViewed"
+            element="div"
             id="generated-id"
             initialIsOpen={true}
             isLoading={false}
@@ -685,28 +637,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 <button
                   aria-controls="generated-id"
                   aria-expanded={true}
-                  className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                  className="euiAccordion__button euiCollapsibleNavGroup__heading"
                   id="generated-id"
                   onClick={[Function]}
                   type="button"
                 >
                   <span
-                    className="euiAccordion__iconWrapper"
-                  >
-                    <EuiIcon
-                      className="euiAccordion__icon euiAccordion__icon-isOpen"
-                      size="m"
-                      type="arrowRight"
-                    >
-                      <span
-                        className="euiAccordion__icon euiAccordion__icon-isOpen"
-                        data-euiicon-type="arrowRight"
-                        size="m"
-                      />
-                    </EuiIcon>
-                  </span>
-                  <span
-                    className="euiIEFlexWrapFix"
+                    className="euiAccordion__buttonContent"
                   >
                     <EuiFlexGroup
                       alignItems="center"
@@ -736,6 +673,42 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexGroup>
                   </span>
                 </button>
+                <EuiButtonIcon
+                  aria-controls="generated-id"
+                  aria-expanded={true}
+                  aria-labelledby="generated-id"
+                  className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                  color="text"
+                  iconType="arrowRight"
+                  onClick={[Function]}
+                  tabIndex={-1}
+                >
+                  <button
+                    aria-controls="generated-id"
+                    aria-expanded={true}
+                    aria-labelledby="generated-id"
+                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                    onClick={[Function]}
+                    tabIndex={-1}
+                    type="button"
+                  >
+                    <EuiIcon
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      size="m"
+                      type="arrowRight"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowRight"
+                        size="m"
+                      />
+                    </EuiIcon>
+                  </button>
+                </EuiButtonIcon>
               </div>
               <div
                 aria-labelledby="generated-id"
@@ -881,6 +854,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             className="euiFlexItem eui-yScroll"
           >
             <EuiCollapsibleNavGroup
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-kibana"
               iconSize="m"
               iconType="logoKibana"
@@ -892,7 +867,12 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiAccordion
                 arrowDisplay="right"
-                buttonClassName="euiCollapsibleNavGroup__heading"
+                arrowProps={
+                  Object {
+                    "color": "text",
+                  }
+                }
+                buttonClassName="kbnCollapsibleNav__solutionGroupButton"
                 buttonContent={
                   <EuiFlexGroup
                     alignItems="center"
@@ -921,8 +901,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                buttonElement="button"
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                 data-test-subj="collapsibleNavGroup-kibana"
+                element="div"
                 id="generated-id"
                 initialIsOpen={true}
                 isLoading={false}
@@ -941,28 +923,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
+                        className="euiAccordion__buttonContent"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -1009,6 +976,42 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </EuiFlexGroup>
                       </span>
                     </button>
+                    <EuiButtonIcon
+                      aria-controls="generated-id"
+                      aria-expanded={true}
+                      aria-labelledby="generated-id"
+                      className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={[Function]}
+                      tabIndex={-1}
+                    >
+                      <button
+                        aria-controls="generated-id"
+                        aria-expanded={true}
+                        aria-labelledby="generated-id"
+                        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                        onClick={[Function]}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
                   <div
                     aria-labelledby="generated-id"
@@ -1173,6 +1176,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-observability"
               iconSize="m"
               iconType="logoObservability"
@@ -1184,7 +1189,12 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiAccordion
                 arrowDisplay="right"
-                buttonClassName="euiCollapsibleNavGroup__heading"
+                arrowProps={
+                  Object {
+                    "color": "text",
+                  }
+                }
+                buttonClassName="kbnCollapsibleNav__solutionGroupButton"
                 buttonContent={
                   <EuiFlexGroup
                     alignItems="center"
@@ -1213,8 +1223,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                buttonElement="button"
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                 data-test-subj="collapsibleNavGroup-observability"
+                element="div"
                 id="generated-id"
                 initialIsOpen={true}
                 isLoading={false}
@@ -1233,28 +1245,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
+                        className="euiAccordion__buttonContent"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -1301,6 +1298,42 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </EuiFlexGroup>
                       </span>
                     </button>
+                    <EuiButtonIcon
+                      aria-controls="generated-id"
+                      aria-expanded={true}
+                      aria-labelledby="generated-id"
+                      className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={[Function]}
+                      tabIndex={-1}
+                    >
+                      <button
+                        aria-controls="generated-id"
+                        aria-expanded={true}
+                        aria-labelledby="generated-id"
+                        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                        onClick={[Function]}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
                   <div
                     aria-labelledby="generated-id"
@@ -1426,6 +1459,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-securitySolution"
               iconSize="m"
               iconType="logoSecurity"
@@ -1437,7 +1472,12 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiAccordion
                 arrowDisplay="right"
-                buttonClassName="euiCollapsibleNavGroup__heading"
+                arrowProps={
+                  Object {
+                    "color": "text",
+                  }
+                }
+                buttonClassName="kbnCollapsibleNav__solutionGroupButton"
                 buttonContent={
                   <EuiFlexGroup
                     alignItems="center"
@@ -1466,8 +1506,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                buttonElement="button"
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                 data-test-subj="collapsibleNavGroup-securitySolution"
+                element="div"
                 id="generated-id"
                 initialIsOpen={true}
                 isLoading={false}
@@ -1486,28 +1528,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
+                        className="euiAccordion__buttonContent"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -1554,6 +1581,42 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </EuiFlexGroup>
                       </span>
                     </button>
+                    <EuiButtonIcon
+                      aria-controls="generated-id"
+                      aria-expanded={true}
+                      aria-labelledby="generated-id"
+                      className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={[Function]}
+                      tabIndex={-1}
+                    >
+                      <button
+                        aria-controls="generated-id"
+                        aria-expanded={true}
+                        aria-labelledby="generated-id"
+                        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                        onClick={[Function]}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
                   <div
                     aria-labelledby="generated-id"
@@ -1640,6 +1703,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               </EuiAccordion>
             </EuiCollapsibleNavGroup>
             <EuiCollapsibleNavGroup
+              buttonClassName="kbnCollapsibleNav__solutionGroupButton"
+              buttonElement="button"
               data-test-subj="collapsibleNavGroup-management"
               iconSize="m"
               iconType="managementApp"
@@ -1651,7 +1716,12 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <EuiAccordion
                 arrowDisplay="right"
-                buttonClassName="euiCollapsibleNavGroup__heading"
+                arrowProps={
+                  Object {
+                    "color": "text",
+                  }
+                }
+                buttonClassName="kbnCollapsibleNav__solutionGroupButton"
                 buttonContent={
                   <EuiFlexGroup
                     alignItems="center"
@@ -1680,8 +1750,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 }
+                buttonElement="button"
                 className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                 data-test-subj="collapsibleNavGroup-management"
+                element="div"
                 id="generated-id"
                 initialIsOpen={true}
                 isLoading={false}
@@ -1700,28 +1772,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     <button
                       aria-controls="generated-id"
                       aria-expanded={true}
-                      className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
+                      className="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
                       id="generated-id"
                       onClick={[Function]}
                       type="button"
                     >
                       <span
-                        className="euiAccordion__iconWrapper"
-                      >
-                        <EuiIcon
-                          className="euiAccordion__icon euiAccordion__icon-isOpen"
-                          size="m"
-                          type="arrowRight"
-                        >
-                          <span
-                            className="euiAccordion__icon euiAccordion__icon-isOpen"
-                            data-euiicon-type="arrowRight"
-                            size="m"
-                          />
-                        </EuiIcon>
-                      </span>
-                      <span
-                        className="euiIEFlexWrapFix"
+                        className="euiAccordion__buttonContent"
                       >
                         <EuiFlexGroup
                           alignItems="center"
@@ -1768,6 +1825,42 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </EuiFlexGroup>
                       </span>
                     </button>
+                    <EuiButtonIcon
+                      aria-controls="generated-id"
+                      aria-expanded={true}
+                      aria-labelledby="generated-id"
+                      className="euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                      color="text"
+                      iconType="arrowRight"
+                      onClick={[Function]}
+                      tabIndex={-1}
+                    >
+                      <button
+                        aria-controls="generated-id"
+                        aria-expanded={true}
+                        aria-labelledby="generated-id"
+                        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+                        onClick={[Function]}
+                        tabIndex={-1}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          color="inherit"
+                          size="m"
+                          type="arrowRight"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiButtonIcon>
                   </div>
                   <div
                     aria-labelledby="generated-id"
@@ -1904,9 +1997,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 </div>
               </div>
             </EuiCollapsibleNavGroup>
-            <EuiShowFor
-              sizes="none"
-            />
           </div>
         </EuiFlexItem>
       </nav>
@@ -1919,48 +2009,32 @@ exports[`CollapsibleNav renders the default nav 1`] = `
 <CollapsibleNav
   appId$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": "test",
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -1980,48 +2054,32 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   closeNav={[Function]}
   customNavLink$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": undefined,
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2033,48 +2091,32 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   isNavOpen={false}
   navLinks$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2085,48 +2127,32 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2167,48 +2193,32 @@ exports[`CollapsibleNav renders the default nav 2`] = `
 <CollapsibleNav
   appId$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": "test",
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2228,48 +2238,32 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   closeNav={[Function]}
   customNavLink$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": undefined,
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2282,48 +2276,32 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   isOpen={true}
   navLinks$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,
@@ -2334,48 +2312,32 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
-      "_isScalar": false,
       "_value": Array [],
       "closed": false,
+      "currentObservers": null,
       "hasError": false,
       "isStopped": false,
       "observers": Array [
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
               "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
+              "initialTeardown": [Function],
             },
           ],
+          "_parentage": null,
           "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
               "next": [Function],
             },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
           },
+          "initialTeardown": undefined,
           "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
         },
       ],
       "thrownError": null,

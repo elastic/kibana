@@ -15,6 +15,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
   const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
 
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../security_functional/fixtures/common/test_endpoints'
+  );
+
   return {
     testFiles: [require.resolve('./tests/saml')],
     servers: xPackAPITestsConfig.get('servers'),
@@ -44,6 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
         '--xpack.security.authc.saml.realm=saml1',
         '--xpack.security.authc.saml.maxRedirectURLSize=100b',

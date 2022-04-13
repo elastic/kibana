@@ -19,7 +19,7 @@ const treeKillAsync = promisify((...args: [number, string, any]) => treeKill(...
 
 import { ToolingLog } from '../tooling_log';
 import { observeLines } from '../stdio';
-import { createCliError } from './errors';
+import { createFailError } from '../run';
 
 const SECOND = 1000;
 const STOP_TIMEOUT = 30 * SECOND;
@@ -57,7 +57,7 @@ export type Proc = ReturnType<typeof startProc>;
 export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   const { cmd, args, cwd, env, stdin } = options;
 
-  log.info('[%s] > %s', name, cmd, args.join(' '));
+  log.info('[%s] > %s', name, cmd === process.execPath ? 'node' : cmd, args.join(' '));
 
   // spawn fails with ENOENT when either the
   // cmd or cwd don't exist, so we check for the cwd
@@ -97,7 +97,9 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
         }
         // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
         if (code > 0 && !(code === 143 || code === 130)) {
-          throw createCliError(`[${name}] exited with code ${code}`);
+          throw createFailError(`[${name}] exited with code ${code}`, {
+            exitCode: code,
+          });
         }
 
         return code;
@@ -131,7 +133,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     await withTimeout(
       async () => {
         log.debug(`Sending "${signal}" to proc "${name}"`);
-        await treeKillAsync(childProcess.pid, signal);
+        await treeKillAsync(childProcess.pid!, signal);
         await outcomePromise;
       },
       STOP_TIMEOUT,
@@ -139,7 +141,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
         log.warning(
           `Proc "${name}" was sent "${signal}" didn't emit the "exit" or "error" events after ${STOP_TIMEOUT} ms, sending SIGKILL`
         );
-        await treeKillAsync(childProcess.pid, 'SIGKILL');
+        await treeKillAsync(childProcess.pid!, 'SIGKILL');
       }
     );
 

@@ -40,57 +40,69 @@ Changing these settings may disable features of the APM App.
 
 [cols="2*<"]
 |===
-| `xpack.apm.enabled`
-  | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-  Set to `false` to disable the APM app. Defaults to `true`.
-
-| `xpack.apm.maxServiceEnvironments`
+| `xpack.apm.maxServiceEnvironments` {ess-icon}
   | Maximum number of unique service environments recognized by the UI. Defaults to `100`.
 
-| `xpack.apm.serviceMapFingerprintBucketSize`
+| `xpack.apm.serviceMapFingerprintBucketSize` {ess-icon}
   | Maximum number of unique transaction combinations sampled for generating service map focused on a specific service. Defaults to `100`.
 
-| `xpack.apm.serviceMapFingerprintGlobalBucketSize`
+| `xpack.apm.serviceMapFingerprintGlobalBucketSize` {ess-icon}
   | Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to `100`.
+
+| `xpack.apm.serviceMapEnabled` {ess-icon}
+  | Set to `false` to disable service maps. Defaults to `true`.
+
+| `xpack.apm.serviceMapTraceIdBucketSize` {ess-icon}
+  | Maximum number of trace IDs sampled for generating service map focused on a specific service. Defaults to `65`.
+
+| `xpack.apm.serviceMapTraceIdGlobalBucketSize` {ess-icon}
+  | Maximum number of trace IDs sampled for generating the global service map. Defaults to `6`.
+
+| `xpack.apm.serviceMapMaxTracesPerRequest` {ess-icon}
+  | Maximum number of traces per request for generating the global service map. Defaults to `50`.
 
 | `xpack.apm.ui.enabled` {ess-icon}
   | Set to `false` to hide the APM app from the main menu. Defaults to `true`.
 
-| `xpack.apm.ui.transactionGroupBucketSize`
+| `xpack.apm.ui.transactionGroupBucketSize` {ess-icon}
   | Number of top transaction groups displayed in the APM app. Defaults to `1000`.
 
 | `xpack.apm.ui.maxTraceItems` {ess-icon}
   | Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
 
-| `xpack.observability.annotations.index`
+| `xpack.observability.annotations.index` {ess-icon}
   | Index name where Observability annotations are stored. Defaults to `observability-annotations`.
 
-| `xpack.apm.searchAggregatedTransactions`
-  | experimental[] Enables Transaction histogram metrics. Defaults to `never` and aggregated transactions are not used. When set to `auto`, the UI will use metric indices over transaction indices for transactions if aggregated transactions are found. When set to `always`, additional configuration in APM Server is required.
-    See {apm-server-ref-v}/transaction-metrics.html[Configure transaction metrics] for more information.
+| `xpack.apm.searchAggregatedTransactions` {ess-icon}
+  | Enables Transaction histogram metrics. Defaults to `auto` so the UI will use metric indices over transaction indices for transactions if aggregated transactions are found. When set to `always`, additional configuration in APM Server is required. When set to `never` and aggregated transactions are not used.
+    See {apm-guide-ref}/transaction-metrics.html[Configure transaction metrics] for more information.
 
-| `apm_oss.indexPattern` {ess-icon}
-  | The index pattern used for integrations with Machine Learning and Query Bar.
-  It must match all apm indices. Defaults to `apm-*`.
+| `xpack.apm.metricsInterval` {ess-icon}
+  | Sets a `fixed_interval` for date histograms in metrics aggregations. Defaults to `30`.
 
-| `apm_oss.errorIndices` {ess-icon}
-  | Matcher for all {apm-server-ref}/error-indices.html[error indices]. Defaults to `apm-*`.
+| `xpack.apm.agent.migrations.enabled` {ess-icon}
+  | Set to `false` to disable cloud APM migrations. Defaults to `true`.
 
-| `apm_oss.onboardingIndices`
+| `xpack.apm.indices.error` {ess-icon}
+  | Matcher for all error indices. Defaults to `logs-apm*,apm-*`.
+
+| `xpack.apm.indices.onboarding` {ess-icon}
   | Matcher for all onboarding indices. Defaults to `apm-*`.
 
-| `apm_oss.spanIndices` {ess-icon}
-  | Matcher for all {apm-server-ref}/span-indices.html[span indices]. Defaults to `apm-*`.
+| `xpack.apm.indices.span` {ess-icon}
+  | Matcher for all span indices. Defaults to `traces-apm*,apm-*`.
 
-| `apm_oss.transactionIndices` {ess-icon}
-  | Matcher for all {apm-server-ref}/transaction-indices.html[transaction indices]. Defaults to `apm-*`.
+| `xpack.apm.indices.transaction` {ess-icon}
+  | Matcher for all transaction indices. Defaults to `traces-apm*,apm-*`.
 
-| `apm_oss.metricsIndices`
-  | Matcher for all {apm-server-ref}/metricset-indices.html[metrics indices]. Defaults to `apm-*`.
+| `xpack.apm.indices.metric` {ess-icon}
+  | Matcher for all metrics indices. Defaults to `metrics-apm*,apm-*`.
 
-| `apm_oss.sourcemapIndices`
-  | Matcher for all {apm-server-ref}/sourcemap-indices.html[source map indices]. Defaults to `apm-*`.
+| `xpack.apm.indices.sourcemap` {ess-icon}
+  | Matcher for all source map indices. Defaults to `apm-*`.
 
+| `xpack.apm.autoCreateApmDataView` {ess-icon}
+  | Set to `false` to disable the automatic creation of the APM data view when the APM app is opened. Defaults to `true`.
 |===
 
 // end::general-apm-settings[]

@@ -11,7 +11,7 @@ import './index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
-import {
+import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
@@ -20,28 +20,24 @@ import {
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
-import { createIndexPatternSelect } from './ui/index_pattern_select';
 import {
   setIndexPatterns,
   setNotifications,
   setOverlays,
   setSearchService,
   setUiSettings,
+  setTheme,
 } from './services';
-import { createSearchBar } from './ui/search_bar/create_search_bar';
 import {
-  ACTION_GLOBAL_APPLY_FILTER,
-  createFilterAction,
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
   createValueClickAction,
   createSelectRangeAction,
 } from './actions';
-import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
-import { UsageCollectionSetup } from '../../usage_collection/public';
+import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
-import { getAggsFormats } from '../common';
+import { getAggsFormats, DatatableUtilitiesService } from '../common';
 
 export class DataPublicPlugin
   implements
@@ -56,7 +52,6 @@ export class DataPublicPlugin
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
-  private usageCollection: UsageCollectionSetup | undefined;
   private readonly nowProvider: NowProviderInternalContract;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -81,7 +76,7 @@ export class DataPublicPlugin
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    this.usageCollection = usageCollection;
+    setTheme(core.theme);
 
     const searchService = this.searchService.setup(core, {
       bfetch,
@@ -97,16 +92,13 @@ export class DataPublicPlugin
     });
 
     uiActions.registerTrigger(applyFilterTrigger);
-    uiActions.registerAction(
-      createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
-    );
 
     inspector.registerView(
       getTableViewDescription(() => ({
         uiActions: startServices().plugins.uiActions,
         uiSettings: startServices().core.uiSettings,
         fieldFormats: startServices().self.fieldFormats,
-        isFilterable: startServices().self.search.aggs.datatableUtilities.isFilterable,
+        isFilterable: startServices().self.datatableUtilities.isFilterable,
       }))
     );
 
@@ -130,7 +122,7 @@ export class DataPublicPlugin
     core: CoreStart,
     { uiActions, fieldFormats, dataViews }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, notifications, savedObjects, overlays } = core;
+    const { uiSettings, notifications, overlays } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
@@ -138,7 +130,7 @@ export class DataPublicPlugin
 
     const query = this.queryService.start({
       storage: this.storage,
-      savedObjectsClient: savedObjects.client,
+      http: core.http,
       uiSettings,
     });
 
@@ -159,17 +151,14 @@ export class DataPublicPlugin
       }))
     );
 
-    uiActions.addTriggerAction(
-      APPLY_FILTER_TRIGGER,
-      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
-    );
-
+    const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
       actions: {
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
       },
       autocomplete: this.autocomplete.start(),
+      datatableUtilities,
       fieldFormats,
       indexPatterns: dataViews,
       dataViews,
@@ -178,20 +167,7 @@ export class DataPublicPlugin
       nowProvider: this.nowProvider,
     };
 
-    const SearchBar = createSearchBar({
-      core,
-      data: dataServices,
-      storage: this.storage,
-      usageCollection: this.usageCollection,
-    });
-
-    return {
-      ...dataServices,
-      ui: {
-        IndexPatternSelect: createIndexPatternSelect(dataViews),
-        SearchBar,
-      },
-    };
+    return dataServices;
   }
 
   public stop() {

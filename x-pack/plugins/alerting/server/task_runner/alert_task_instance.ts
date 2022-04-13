@@ -10,30 +10,30 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
 import {
-  SanitizedAlert,
-  AlertTaskState,
-  alertParamsSchema,
-  alertStateSchema,
-  AlertTaskParams,
-  AlertTypeParams,
+  SanitizedRule,
+  RuleTaskState,
+  ruleParamsSchema,
+  ruleStateSchema,
+  RuleTaskParams,
+  RuleTypeParams,
 } from '../../common';
 
 export interface AlertTaskInstance extends ConcreteTaskInstance {
-  state: AlertTaskState;
-  params: AlertTaskParams;
+  state: RuleTaskState;
+  params: RuleTaskParams;
 }
 
 const enumerateErrorFields = (e: t.Errors) =>
   `${e.map(({ context }) => context.map(({ key }) => key).join('.'))}`;
 
-export function taskInstanceToAlertTaskInstance<Params extends AlertTypeParams>(
+export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
   taskInstance: ConcreteTaskInstance,
-  alert?: SanitizedAlert<Params>
+  alert?: SanitizedRule<Params>
 ): AlertTaskInstance {
   return {
     ...taskInstance,
     params: pipe(
-      alertParamsSchema.decode(taskInstance.params),
+      ruleParamsSchema.decode(taskInstance.params),
       fold((e: t.Errors) => {
         throw new Error(
           `Task "${taskInstance.id}" ${
@@ -43,7 +43,7 @@ export function taskInstanceToAlertTaskInstance<Params extends AlertTypeParams>(
       }, t.identity)
     ),
     state: pipe(
-      alertStateSchema.decode(taskInstance.state),
+      ruleStateSchema.decode(taskInstance.state),
       fold((e: t.Errors) => {
         throw new Error(
           `Task "${taskInstance.id}" ${

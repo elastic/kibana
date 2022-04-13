@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState, useContext } from 'react';
+import { useCallback, useState, useContext, useEffect } from 'react';
 import createContainer from 'constate';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../../legacy_shims';
-import { GlobalStateContext } from '../../application/global_state_context';
+import { GlobalStateContext } from '../contexts/global_state_context';
 
 interface TimeOptions {
   from: string;
@@ -22,9 +22,6 @@ export const DEFAULT_TIMERANGE: TimeOptions = {
   interval: '>=10s',
 };
 
-const DEFAULT_REFRESH_INTERVAL_VALUE = 10000;
-const DEFAULT_REFRESH_INTERVAL_PAUSE = false;
-
 export const useMonitoringTime = () => {
   const { services } = useKibana<{ data: any }>();
   const state = useContext(GlobalStateContext);
@@ -35,8 +32,8 @@ export const useMonitoringTime = () => {
   };
 
   const { value, pause } = services.data?.query.timefilter.timefilter.getRefreshInterval();
-  const [refreshInterval, setRefreshInterval] = useState(value || DEFAULT_REFRESH_INTERVAL_VALUE);
-  const [isPaused, setIsPaused] = useState(pause || DEFAULT_REFRESH_INTERVAL_PAUSE);
+  const [refreshInterval, setRefreshInterval] = useState(value);
+  const [isPaused, setIsPaused] = useState(pause);
   const [currentTimerange, setTimeRange] = useState<TimeOptions>(defaultTimeRange);
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -52,6 +49,18 @@ export const useMonitoringTime = () => {
     },
     [currentTimerange, setTimeRange, state]
   );
+
+  useEffect(() => {
+    const sub = Legacy.shims.timefilter.getTimeUpdate$().subscribe(function onTimeUpdate() {
+      const updatedTime = Legacy.shims.timefilter.getTime();
+      setTimeRange({ ...currentTimerange, ...updatedTime });
+      state.time = { ...updatedTime };
+      state.save?.();
+    });
+
+    return () => sub.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     currentTimerange,

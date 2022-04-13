@@ -42,13 +42,17 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
-                      data-euiicon-type="clock"
-                    />
+                      data-euiicon-type="calendar"
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -67,10 +71,38 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                 onClick={[Function]}
               >
                 Last 1 year
+              </button>
+            </div>
+          </div>
+          <div
+            className="euiPopover euiPopover--anchorDownCenter"
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                disabled={false}
+                onClick={[Function]}
+                title="Auto refresh is on and set to 1 second"
+                type="button"
+              >
                 <span
-                  className="euiSuperDatePicker__prettyFormatLink"
+                  className="euiButtonContent euiButtonEmpty__content"
                 >
-                  Show dates
+                  <span
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="timeRefresh"
+                    size="m"
+                  >
+                    
+                  </span>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    1 s
+                  </span>
                 </span>
               </button>
             </div>
@@ -124,13 +156,17 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
-                      data-euiicon-type="clock"
-                    />
+                      data-euiicon-type="calendar"
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -188,6 +224,39 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
               </div>
             </div>
           </div>
+          <div
+            className="euiPopover euiPopover--anchorDownCenter"
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                disabled={false}
+                onClick={[Function]}
+                title="Auto refresh is on and set to 1 second"
+                type="button"
+              >
+                <span
+                  className="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="timeRefresh"
+                    size="m"
+                  >
+                    
+                  </span>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    1 s
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -237,13 +306,17 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
-                      data-euiicon-type="clock"
-                    />
+                      data-euiicon-type="calendar"
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -262,10 +335,38 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                 onClick={[Function]}
               >
                 Last 30 days
+              </button>
+            </div>
+          </div>
+          <div
+            className="euiPopover euiPopover--anchorDownCenter"
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                disabled={false}
+                onClick={[Function]}
+                title="Auto refresh is on and set to 1 second"
+                type="button"
+              >
                 <span
-                  className="euiSuperDatePicker__prettyFormatLink"
+                  className="euiButtonContent euiButtonEmpty__content"
                 >
-                  Show dates
+                  <span
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="timeRefresh"
+                    size="m"
+                  >
+                    
+                  </span>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    1 s
+                  </span>
                 </span>
               </button>
             </div>
@@ -319,13 +420,17 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
-                      data-euiicon-type="clock"
-                    />
+                      data-euiicon-type="calendar"
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -344,10 +449,38 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                 onClick={[Function]}
               >
                 Last 24 hours
+              </button>
+            </div>
+          </div>
+          <div
+            className="euiPopover euiPopover--anchorDownCenter"
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                disabled={false}
+                onClick={[Function]}
+                title="Auto refresh is on and set to 1 second"
+                type="button"
+              >
                 <span
-                  className="euiSuperDatePicker__prettyFormatLink"
+                  className="euiButtonContent euiButtonEmpty__content"
                 >
-                  Show dates
+                  <span
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="timeRefresh"
+                    size="m"
+                  >
+                    
+                  </span>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    1 s
+                  </span>
                 </span>
               </button>
             </div>
@@ -401,13 +534,17 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                     color="inherit"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
                     <span
-                      data-euiicon-type="clock"
-                    />
+                      data-euiicon-type="calendar"
+                    >
+                      
+                    </span>
                   </span>
                 </span>
               </button>
@@ -463,6 +600,39 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+          <div
+            className="euiPopover euiPopover--anchorDownCenter"
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <button
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                disabled={false}
+                onClick={[Function]}
+                title="Auto refresh is on and set to 1 second"
+                type="button"
+              >
+                <span
+                  className="euiButtonContent euiButtonEmpty__content"
+                >
+                  <span
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="timeRefresh"
+                    size="m"
+                  >
+                    
+                  </span>
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    1 s
+                  </span>
+                </span>
+              </button>
             </div>
           </div>
         </div>

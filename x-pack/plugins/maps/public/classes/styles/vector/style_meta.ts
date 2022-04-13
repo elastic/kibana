@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  StyleMetaDescriptor,
-  RangeFieldMeta,
-  CategoryFieldMeta,
-} from '../../../../common/descriptor_types';
+import { StyleMetaDescriptor, RangeFieldMeta, Category } from '../../../../common/descriptor_types';
 
 export class StyleMeta {
   private readonly _descriptor: StyleMetaDescriptor;
@@ -23,10 +19,10 @@ export class StyleMeta {
       : null;
   }
 
-  getCategoryFieldMetaDescriptor(fieldName: string): CategoryFieldMeta | null {
-    return this._descriptor.fieldMeta[fieldName] && this._descriptor.fieldMeta[fieldName].categories
-      ? this._descriptor.fieldMeta[fieldName].categories!
-      : null;
+  getCategoryFieldMetaDescriptor(fieldName: string): Category[] {
+    return this._descriptor.fieldMeta[fieldName]
+      ? this._descriptor.fieldMeta[fieldName].categories
+      : [];
   }
 
   isPointsOnly(): boolean {

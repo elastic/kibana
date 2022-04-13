@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -16,126 +15,145 @@ import {
   EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
 import { i18n } from '@kbn/i18n';
-import { useToasts } from '../../../../../common/lib/kibana';
-import { useHostIsolationExceptionsSelector } from '../hooks';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo } from 'react';
+import { useMutation } from 'react-query';
+import { AutoFocusButton } from '../../../../../common/components/autofocus_button/autofocus_button';
+import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import {
-  getDeleteError,
-  getItemToDelete,
-  isDeletionInProgress,
-  wasDeletionSuccessful,
-} from '../../store/selector';
-import { HostIsolationExceptionsPageAction } from '../../store/action';
+  getArtifactPoliciesIdByTag,
+  isGlobalPolicyEffected,
+} from '../../../../components/effected_policy_select/utils';
+import { deleteOneHostIsolationExceptionItem } from '../../service';
 
-export const HostIsolationExceptionDeleteModal = memo<{}>(() => {
-  const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
-  const toasts = useToasts();
+export const HostIsolationExceptionDeleteModal = memo(
+  ({
+    item,
+    onCancel,
+  }: {
+    item: ExceptionListItemSchema;
+    onCancel: (forceRefresh?: boolean) => void;
+  }) => {
+    const toasts = useToasts();
+    const http = useHttp();
 
-  const isDeleting = useHostIsolationExceptionsSelector(isDeletionInProgress);
-  const exception = useHostIsolationExceptionsSelector(getItemToDelete);
-  const wasDeleted = useHostIsolationExceptionsSelector(wasDeletionSuccessful);
-  const deleteError = useHostIsolationExceptionsSelector(getDeleteError);
+    const mutation = useMutation(
+      () => {
+        return deleteOneHostIsolationExceptionItem(http, item.id);
+      },
+      {
+        onError: (error: Error) => {
+          toasts.addDanger(
+            i18n.translate(
+              'xpack.securitySolution.hostIsolationExceptions.deletionDialog.deleteFailure',
+              {
+                defaultMessage:
+                  'Unable to remove "{name}" from the host isolation exceptions list. Reason: {message}',
+                values: { name: item?.name, message: error.message },
+              }
+            )
+          );
+          onCancel(true);
+        },
+        onSuccess: () => {
+          toasts.addSuccess(
+            i18n.translate(
+              'xpack.securitySolution.hostIsolationExceptions.deletionDialog.deleteSuccess',
+              {
+                defaultMessage:
+                  '"{name}" has been removed from the host isolation exceptions list.',
+                values: { name: item?.name },
+              }
+            )
+          );
+          onCancel(true);
+        },
+      }
+    );
 
-  const onCancel = useCallback(() => {
-    dispatch({ type: 'hostIsolationExceptionsMarkToDelete', payload: undefined });
-  }, [dispatch]);
+    const handleConfirmButton = () => {
+      mutation.mutate();
+    };
 
-  const onConfirm = useCallback(() => {
-    dispatch({ type: 'hostIsolationExceptionsSubmitDelete' });
-  }, [dispatch]);
+    const handleCancelButton = () => {
+      onCancel();
+    };
 
-  // Show toast for success
-  useEffect(() => {
-    if (wasDeleted) {
-      toasts.addSuccess(
-        i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.deletionDialog.deleteSuccess',
-          {
-            defaultMessage: '"{name}" has been removed from the Host Isolation Exceptions list.',
-            values: { name: exception?.name },
-          }
-        )
-      );
-
-      dispatch({ type: 'hostIsolationExceptionsMarkToDelete', payload: undefined });
-    }
-  }, [dispatch, exception?.name, toasts, wasDeleted]);
-
-  // show toast for failures
-  useEffect(() => {
-    if (deleteError) {
-      toasts.addDanger(
-        i18n.translate(
-          'xpack.securitySolution.hostIsolationExceptions.deletionDialog.deleteFailure',
-          {
-            defaultMessage:
-              'Unable to remove "{name}" from the Host Isolation Exceptions list. Reason: {message}',
-            values: { name: exception?.name, message: deleteError.message },
-          }
-        )
-      );
-    }
-  }, [deleteError, exception?.name, toasts]);
-
-  return (
-    <EuiModal onClose={onCancel}>
-      <EuiModalHeader data-test-subj="hostIsolationExceptionsDeleteModalHeader">
-        <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.title"
-            defaultMessage="Delete Host Isolation Exception"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-
-      <EuiModalBody data-test-subj="hostIsolationExceptionsFilterDeleteModalBody">
-        <EuiText>
-          <p>
+    return (
+      <EuiModal onClose={() => onCancel()}>
+        <EuiModalHeader data-test-subj="hostIsolationExceptionsDeleteModalHeader">
+          <EuiModalHeaderTitle>
             <FormattedMessage
-              id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.subtitle"
-              defaultMessage='You are deleting exception "{name}".'
-              values={{ name: <b className="eui-textBreakWord">{exception?.name}</b> }}
+              id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.title"
+              defaultMessage="Delete host isolation exception"
             />
-          </p>
-          <p>
+          </EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody data-test-subj="hostIsolationExceptionsFilterDeleteModalBody">
+          <EuiText>
+            <EuiCallOut
+              data-test-subj="hostIsolationExceptionsDeleteModalCallout"
+              title={i18n.translate(
+                'xpack.securitySolution.hostIsolationExceptions.deletionDialog.calloutTitle',
+                {
+                  defaultMessage: 'Warning',
+                }
+              )}
+              color="danger"
+              iconType="alert"
+            >
+              <p data-test-subj="hostIsolationExceptionsDeleteModalCalloutMessage">
+                <FormattedMessage
+                  id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.calloutMessage"
+                  defaultMessage="Deleting this entry will remove it from {count} associated {count, plural, one {policy} other {policies}}."
+                  values={{
+                    count: isGlobalPolicyEffected(Array.from(item.tags || []))
+                      ? 'all'
+                      : getArtifactPoliciesIdByTag(item.tags).length,
+                  }}
+                />
+              </p>
+            </EuiCallOut>
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.confirmation"
+                defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+              />
+            </p>
+          </EuiText>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty
+            onClick={handleCancelButton}
+            isDisabled={mutation.isLoading}
+            data-test-subj="hostIsolationExceptionsDeleteModalCancelButton"
+          >
             <FormattedMessage
-              id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.confirmation"
-              defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+              id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.cancel"
+              defaultMessage="Cancel"
             />
-          </p>
-        </EuiText>
-      </EuiModalBody>
+          </EuiButtonEmpty>
 
-      <EuiModalFooter>
-        <EuiButtonEmpty
-          onClick={onCancel}
-          isDisabled={isDeleting}
-          data-test-subj="hostIsolationExceptionsDeleteModalCancelButton"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.cancel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-
-        <EuiButton
-          fill
-          color="danger"
-          onClick={onConfirm}
-          isLoading={isDeleting}
-          data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.confirmButton"
-            defaultMessage="Remove exception"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  );
-});
+          <AutoFocusButton
+            fill
+            color="danger"
+            onClick={handleConfirmButton}
+            isLoading={mutation.isLoading}
+            data-test-subj="hostIsolationExceptionsDeleteModalConfirmButton"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.hostIsolationExceptions.deletionDialog.confirmButton"
+              defaultMessage="Delete"
+            />
+          </AutoFocusButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+  }
+);
 
 HostIsolationExceptionDeleteModal.displayName = 'HostIsolationExceptionDeleteModal';

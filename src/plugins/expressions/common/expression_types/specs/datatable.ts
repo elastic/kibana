@@ -8,11 +8,11 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
+import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
-import { SerializedFieldFormat } from '../../types';
 
 const name = 'datatable';
 
@@ -92,11 +92,44 @@ export interface DatatableColumn {
 }
 
 /**
+ * Metadata with statistics about the `Datatable` source.
+ */
+export interface DatatableMetaStatistics {
+  /**
+   * Total hits number returned for the request generated the `Datatable`.
+   */
+  totalCount?: number;
+}
+
+/**
+ * The `Datatable` meta information.
+ */
+export interface DatatableMeta {
+  /**
+   * Statistics about the `Datatable` source.
+   */
+  statistics?: DatatableMetaStatistics;
+
+  /**
+   * The `Datatable` type (e.g. `essql`, `eql`, `esdsl`, etc.).
+   */
+  type?: string;
+
+  /**
+   * The `Datatable` data source.
+   */
+  source?: string;
+
+  [key: string]: unknown;
+}
+
+/**
  * A `Datatable` in Canvas is a unique structure that represents tabulated data.
  */
 export interface Datatable {
   type: typeof name;
   columns: DatatableColumn[];
+  meta?: DatatableMeta;
   rows: DatatableRow[];
 }
 

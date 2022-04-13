@@ -12,22 +12,26 @@ import { PluginServices } from '../../../../../src/plugins/presentation_util/pub
 import { CanvasCustomElementService } from './custom_element';
 import { CanvasEmbeddablesService } from './embeddables';
 import { CanvasExpressionsService } from './expressions';
+import { CanvasFiltersService } from './filters';
 import { CanvasLabsService } from './labs';
 import { CanvasNavLinkService } from './nav_link';
 import { CanvasNotifyService } from './notify';
 import { CanvasPlatformService } from './platform';
 import { CanvasReportingService } from './reporting';
+import { CanvasVisualizationsService } from './visualizations';
 import { CanvasWorkpadService } from './workpad';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
   embeddables: CanvasEmbeddablesService;
   expressions: CanvasExpressionsService;
+  filters: CanvasFiltersService;
   labs: CanvasLabsService;
   navLink: CanvasNavLinkService;
   notify: CanvasNotifyService;
   platform: CanvasPlatformService;
   reporting: CanvasReportingService;
+  visualizations: CanvasVisualizationsService;
   workpad: CanvasWorkpadService;
 }
 
@@ -39,9 +43,12 @@ export const useEmbeddablesService = () =>
   (() => pluginServices.getHooks().embeddables.useService())();
 export const useExpressionsService = () =>
   (() => pluginServices.getHooks().expressions.useService())();
+export const useFiltersService = () => (() => pluginServices.getHooks().filters.useService())();
 export const useLabsService = () => (() => pluginServices.getHooks().labs.useService())();
 export const useNavLinkService = () => (() => pluginServices.getHooks().navLink.useService())();
 export const useNotifyService = () => (() => pluginServices.getHooks().notify.useService())();
 export const usePlatformService = () => (() => pluginServices.getHooks().platform.useService())();
 export const useReportingService = () => (() => pluginServices.getHooks().reporting.useService())();
+export const useVisualizationsService = () =>
+  (() => pluginServices.getHooks().visualizations.useService())();
 export const useWorkpadService = () => (() => pluginServices.getHooks().workpad.useService())();

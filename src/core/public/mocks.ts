@@ -13,6 +13,7 @@ import { CoreContext, PluginInitializerContext, AppMountParameters } from '.';
 // Import values from their individual modules instead.
 import { ScopedHistory } from './application';
 
+import { analyticsServiceMock } from './analytics/analytics_service.mock';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
@@ -25,9 +26,13 @@ import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+import { themeServiceMock } from './theme/theme_service.mock';
+import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
+export { analyticsServiceMock } from './analytics/analytics_service.mock';
 export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
@@ -39,6 +44,7 @@ export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { applicationServiceMock } from './application/application_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export { themeServiceMock } from './theme/theme_service.mock';
 
 function createCoreSetupMock({
   basePath = '',
@@ -50,8 +56,10 @@ function createCoreSetupMock({
   pluginStartContract?: any;
 } = {}) {
   const mock = {
+    analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     application: applicationServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
+    executionContext: executionContextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
     getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, any, any]>, []>(() =>
       Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
@@ -63,6 +71,7 @@ function createCoreSetupMock({
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
     },
+    theme: themeServiceMock.createSetupContract(),
   };
 
   return mock;
@@ -70,9 +79,11 @@ function createCoreSetupMock({
 
 function createCoreStartMock({ basePath = '' } = {}) {
   const mock = {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
+    executionContext: executionContextServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract({ basePath }),
     i18n: i18nServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
@@ -80,6 +91,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     deprecations: deprecationsServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
     },
@@ -156,6 +168,7 @@ function createAppMountParametersMock(appBasePath = '') {
     appBasePath,
     element: document.createElement('div'),
     history,
+    theme$: themeServiceMock.createTheme$(),
     onAppLeave: jest.fn(),
     setHeaderActionMenu: jest.fn(),
   };
@@ -169,5 +182,5 @@ export const coreMock = {
   createStart: createCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
   createStorage: createStorageMock,
-  createAppMountParamters: createAppMountParametersMock,
+  createAppMountParameters: createAppMountParametersMock,
 };

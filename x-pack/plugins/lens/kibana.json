@@ -6,6 +6,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "dataViews",
     "charts",
     "expressions",
     "fieldFormats",
@@ -18,14 +19,19 @@
     "embeddable",
     "share",
     "presentationUtil",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor",
+    "expressionGauge",
+    "expressionHeatmap",
+    "eventAnnotation"
   ],
   "optionalPlugins": [
+    "expressionXY",
     "usageCollection",
     "taskManager",
     "globalSearch",
     "savedObjectsTagging",
-    "spaces"
+    "spaces",
+    "discover"
   ],
   "configPath": [
     "xpack",
@@ -35,6 +41,7 @@
     "common/constants"
   ],
   "requiredBundles": [
+    "unifiedSearch",
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",

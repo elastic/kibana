@@ -21,10 +21,12 @@ export type TestSubjects =
   | 'deleteTemplatesConfirmation'
   | 'documentationLink'
   | 'emptyPrompt'
+  | 'forcemergeIndexMenuButton'
   | 'filterList.filterItem'
   | 'ilmPolicyLink'
   | 'includeStatsSwitch'
   | 'includeManagedSwitch'
+  | 'indexContextMenu'
   | 'indexManagementHeaderContent'
   | 'indexTable'
   | 'indexTableIncludeHiddenIndicesToggle'
@@ -57,4 +59,8 @@ export type TestSubjects =
   | 'templatesTab'
   | 'templateTable'
   | 'title'
-  | 'viewButton';
+  | 'unfreezeIndexMenuButton'
+  | 'updateEditIndexSettingsButton'
+  | 'updateIndexSettingsErrorCallout'
+  | 'viewButton'
+  | 'detailPanelTabSelected';

@@ -12,7 +12,12 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
+import {
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../../../../common/constants';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
@@ -30,31 +35,48 @@ import {
 
 // The outer most level reducer defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final request object will be nested.
-// For example, `destinationIndex` and `destinationPipeline` will later be nested under `dest`.
+// For example, `destinationIndex` and `destinationIngestPipeline` will later be nested under `dest`.
 type EditTransformFormFields =
   | 'description'
   | 'destinationIndex'
-  | 'destinationPipeline'
+  | 'destinationIngestPipeline'
   | 'frequency'
   | 'docsPerSecond'
   | 'maxPageSearchSize'
   | 'retentionPolicyField'
   | 'retentionPolicyMaxAge';
+
 type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
 
-// The inner reducers apply validation based on supplied attributes of each field.
 export interface FormField {
-  formFieldName: string;
+  formFieldName: EditTransformFormFields;
   configFieldName: string;
   defaultValue: string;
   dependsOn: EditTransformFormFields[];
   errorMessages: string[];
   isNullable: boolean;
   isOptional: boolean;
+  section?: EditTransformFormSections;
   validator: keyof typeof validate;
   value: string;
   valueParser: (value: string) => any;
 }
+
+// Defining these sections is only necessary for options where a reset/deletion of that part of the
+// configuration is supported by the API. For example, this isn't suitable to use with `dest` since
+// this overall part of the configuration is not optional. However, `retention_policy` is optional,
+// so we need to support to recognize this based on the form state and be able to reset it by
+// created a request body containing `{ retention_policy: null }`.
+type EditTransformFormSections = 'retentionPolicy';
+
+export interface FormSection {
+  formSectionName: EditTransformFormSections;
+  configFieldName: string;
+  defaultEnabled: boolean;
+  enabled: boolean;
+}
+
+type EditTransformFlyoutSectionsState = Record<EditTransformFormSections, FormSection>;
 
 // The reducers and utility functions in this file provide the following features:
 // - getDefaultState()
@@ -66,7 +88,7 @@ export interface FormField {
 // - formReducerFactory() / formFieldReducer()
 //   These nested reducers take care of updating and validating the form state.
 //
-// - applyFormFieldsToTransformConfig() (iterates over getUpdateValue())
+// - applyFormStateToTransformConfig() (iterates over getUpdateValue())
 //   Once a user hits the update button, these functions take care of extracting the information
 //   necessary to create the update request. They take into account whether a field needs to
 //   be included at all in the request (for example, if it hadn't been changed).
@@ -221,18 +243,47 @@ export const initializeField = (
   };
 };
 
+export const initializeSection = (
+  formSectionName: EditTransformFormSections,
+  configFieldName: string,
+  config: TransformConfigUnion,
+  overloads?: Partial<FormSection>
+): FormSection => {
+  const defaultEnabled = overloads?.defaultEnabled ?? false;
+  const rawEnabled = getNestedProperty(config, configFieldName, undefined);
+  const enabled = rawEnabled !== undefined && rawEnabled !== null;
+
+  return {
+    formSectionName,
+    configFieldName,
+    defaultEnabled,
+    enabled,
+  };
+};
+
 export interface EditTransformFlyoutState {
   formFields: EditTransformFlyoutFieldsState;
+  formSections: EditTransformFlyoutSectionsState;
   isFormTouched: boolean;
   isFormValid: boolean;
 }
 
-// This is not a redux type action,
-// since for now we only have one action type.
-interface Action {
+// Actions for fields and sections
+interface FormFieldAction {
   field: EditTransformFormFields;
   value: string;
 }
+function isFormFieldAction(action: unknown): action is FormFieldAction {
+  return isPopulatedObject(action, ['field']);
+}
+interface FormSectionAction {
+  section: EditTransformFormSections;
+  enabled: boolean;
+}
+function isFormSectionAction(action: unknown): action is FormSectionAction {
+  return isPopulatedObject(action, ['section']);
+}
+type Action = FormFieldAction | FormSectionAction;
 
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.
@@ -240,11 +291,17 @@ interface Action {
 const getUpdateValue = (
   attribute: EditTransformFormFields,
   config: TransformConfigUnion,
-  formState: EditTransformFlyoutFieldsState,
+  formState: EditTransformFlyoutState,
   enforceFormValue = false
 ) => {
-  const formStateAttribute = formState[attribute];
+  const { formFields, formSections } = formState;
+  const formStateAttribute = formFields[attribute];
   const fallbackValue = formStateAttribute.isNullable ? null : formStateAttribute.defaultValue;
+
+  const enabledBasedOnSection =
+    formStateAttribute.section !== undefined
+      ? formSections[formStateAttribute.section].enabled
+      : true;
 
   const formValue =
     formStateAttribute.value !== ''
@@ -264,25 +321,43 @@ const getUpdateValue = (
         }, {})
       : {};
 
-  if (formValue === formStateAttribute.defaultValue && formStateAttribute.isOptional) {
-    return formValue !== configValue ? dependsOnConfig : {};
+  if (
+    formValue === formStateAttribute.defaultValue &&
+    formValue === configValue &&
+    formStateAttribute.isOptional
+  ) {
+    return {};
   }
 
-  return formValue !== configValue || enforceFormValue
-    ? setNestedProperty(dependsOnConfig, formStateAttribute.configFieldName, formValue)
+  // If the resettable section the form field belongs to is disabled,
+  // the whole section will be set to `null` to do the actual reset.
+  if (formStateAttribute.section !== undefined && !enabledBasedOnSection) {
+    return setNestedProperty(
+      dependsOnConfig,
+      formSections[formStateAttribute.section].configFieldName,
+      null
+    );
+  }
+
+  return enabledBasedOnSection && (formValue !== configValue || enforceFormValue)
+    ? setNestedProperty(
+        dependsOnConfig,
+        formStateAttribute.configFieldName,
+        formValue === '' && formStateAttribute.isOptional ? undefined : formValue
+      )
     : {};
 };
 
 // Takes in the form configuration and returns a
 // request object suitable to be sent to the
 // transform update API endpoint.
-export const applyFormFieldsToTransformConfig = (
+export const applyFormStateToTransformConfig = (
   config: TransformConfigUnion,
-  formState: EditTransformFlyoutFieldsState
+  formState: EditTransformFlyoutState
 ): PostTransformsUpdateRequestSchema =>
   // Iterates over all form fields and only if necessary applies them to
   // the request object used for updating the transform.
-  (Object.keys(formState) as EditTransformFormFields[]).reduce(
+  (Object.keys(formState.formFields) as EditTransformFormFields[]).reduce(
     (updateConfig, field) => merge({ ...updateConfig }, getUpdateValue(field, config, formState)),
     {}
   );
@@ -294,22 +369,29 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
     // top level attributes
     description: initializeField('description', 'description', config),
     frequency: initializeField('frequency', 'frequency', config, {
-      defaultValue: '1m',
+      defaultValue: DEFAULT_TRANSFORM_FREQUENCY,
       validator: 'frequency',
     }),
 
     // dest.*
     destinationIndex: initializeField('destinationIndex', 'dest.index', config, {
-      dependsOn: ['destinationPipeline'],
+      dependsOn: ['destinationIngestPipeline'],
       isOptional: false,
     }),
-    destinationPipeline: initializeField('destinationPipeline', 'dest.pipeline', config, {
-      dependsOn: ['destinationIndex'],
-    }),
+    destinationIngestPipeline: initializeField(
+      'destinationIngestPipeline',
+      'dest.pipeline',
+      config,
+      {
+        dependsOn: ['destinationIndex'],
+        isOptional: true,
+      }
+    ),
 
     // settings.*
     docsPerSecond: initializeField('docsPerSecond', 'settings.docs_per_second', config, {
       isNullable: true,
+      isOptional: true,
       validator: 'integerAboveZero',
       valueParser: (v) => (v === '' ? null : +v),
     }),
@@ -318,7 +400,9 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
       'settings.max_page_search_size',
       config,
       {
-        defaultValue: '500',
+        defaultValue: `${DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE}`,
+        isNullable: true,
+        isOptional: true,
         validator: 'integerRange10To10000',
         valueParser: (v) => +v,
       }
@@ -329,7 +413,12 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
       'retentionPolicyField',
       'retention_policy.time.field',
       config,
-      { dependsOn: ['retentionPolicyMaxAge'], isNullable: false, isOptional: true }
+      {
+        dependsOn: ['retentionPolicyMaxAge'],
+        isNullable: false,
+        isOptional: true,
+        section: 'retentionPolicy',
+      }
     ),
     retentionPolicyMaxAge: initializeField(
       'retentionPolicyMaxAge',
@@ -339,9 +428,13 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         dependsOn: ['retentionPolicyField'],
         isNullable: false,
         isOptional: true,
+        section: 'retentionPolicy',
         validator: 'retentionPolicyMaxAge',
       }
     ),
+  },
+  formSections: {
+    retentionPolicy: initializeSection('retentionPolicy', 'retention_policy', config),
   },
   isFormTouched: false,
   isFormValid: true,
@@ -369,27 +462,49 @@ const formFieldReducer = (state: FormField, value: string): FormField => {
   };
 };
 
+const formSectionReducer = (state: FormSection, enabled: boolean): FormSection => {
+  return {
+    ...state,
+    enabled,
+  };
+};
+
+const getFieldValues = (fields: EditTransformFlyoutFieldsState) =>
+  Object.values(fields).map((f) => f.value);
+const getSectionValues = (sections: EditTransformFlyoutSectionsState) =>
+  Object.values(sections).map((s) => s.enabled);
+
 // Main form reducer triggers
 // - `formFieldReducer` to update the actions field
 // - compares the most recent state against the original one to update `isFormTouched`
 // - sets `isFormValid` to have a flag if any of the form fields contains an error.
 export const formReducerFactory = (config: TransformConfigUnion) => {
   const defaultState = getDefaultState(config);
-  const defaultFieldValues = Object.values(defaultState.formFields).map((f) => f.value);
+  const defaultFieldValues = getFieldValues(defaultState.formFields);
+  const defaultSectionValues = getSectionValues(defaultState.formSections);
 
-  return (state: EditTransformFlyoutState, { field, value }: Action): EditTransformFlyoutState => {
-    const formFields = {
-      ...state.formFields,
-      [field]: formFieldReducer(state.formFields[field], value),
-    };
+  return (state: EditTransformFlyoutState, action: Action): EditTransformFlyoutState => {
+    const formFields = isFormFieldAction(action)
+      ? {
+          ...state.formFields,
+          [action.field]: formFieldReducer(state.formFields[action.field], action.value),
+        }
+      : state.formFields;
+
+    const formSections = isFormSectionAction(action)
+      ? {
+          ...state.formSections,
+          [action.section]: formSectionReducer(state.formSections[action.section], action.enabled),
+        }
+      : state.formSections;
 
     return {
       ...state,
       formFields,
-      isFormTouched: !isEqual(
-        defaultFieldValues,
-        Object.values(formFields).map((f) => f.value)
-      ),
+      formSections,
+      isFormTouched:
+        !isEqual(defaultFieldValues, getFieldValues(formFields)) ||
+        !isEqual(defaultSectionValues, getSectionValues(formSections)),
       isFormValid: isFormValid(formFields),
     };
   };

@@ -6,20 +6,28 @@
  */
 
 export default function ({ loadTestFile, getService }) {
+  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
   describe('Maps endpoints', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+      );
       await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+      );
     });
 
     describe('', () => {
+      loadTestFile(require.resolve('./maps_telemetry'));
       loadTestFile(require.resolve('./get_indexes_matching_pattern'));
       loadTestFile(require.resolve('./create_doc_source'));
       loadTestFile(require.resolve('./validate_drawing_index'));
@@ -30,7 +38,6 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./migrations'));
       loadTestFile(require.resolve('./get_tile'));
       loadTestFile(require.resolve('./get_grid_tile'));
-      loadTestFile(require.resolve('./proxy_api'));
     });
   });
 }

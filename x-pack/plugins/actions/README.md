@@ -33,29 +33,39 @@ Table of Contents
     - [actionsClient.execute(options)](#actionsclientexecuteoptions)
       - [Example](#example-2)
 - [Built-in Action Types](#built-in-action-types)
-  - [ServiceNow](#servicenow)
+  - [ServiceNow ITSM](#servicenow-itsm)
     - [`params`](#params)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
       - [`subActionParams (getFields)`](#subactionparams-getfields)
       - [`subActionParams (getIncident)`](#subactionparams-getincident)
       - [`subActionParams (getChoices)`](#subactionparams-getchoices)
-  - [Jira](#jira)
+  - [ServiceNow Sec Ops](#servicenow-sec-ops)
     - [`params`](#params-1)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
       - [`subActionParams (getIncident)`](#subactionparams-getincident-1)
+      - [`subActionParams (getChoices)`](#subactionparams-getchoices-1)
+  - [ServiceNow ITOM](#servicenow-itom)
+    - [`params`](#params-2)
+      - [`subActionParams (addEvent)`](#subactionparams-addevent)
+      - [`subActionParams (getChoices)`](#subactionparams-getchoices-2)
+  - [Jira](#jira)
+    - [`params`](#params-3)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
+      - [`subActionParams (getIncident)`](#subactionparams-getincident-2)
       - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
       - [`subActionParams (fieldsByIssueType)`](#subactionparams-fieldsbyissuetype)
       - [`subActionParams (issues)`](#subactionparams-issues)
       - [`subActionParams (issue)`](#subactionparams-issue)
-      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
-  - [IBM Resilient](#ibm-resilient)
-    - [`params`](#params-2)
-      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
       - [`subActionParams (getFields)`](#subactionparams-getfields-2)
+  - [IBM Resilient](#ibm-resilient)
+    - [`params`](#params-4)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-3)
       - [`subActionParams (incidentTypes)`](#subactionparams-incidenttypes)
       - [`subActionParams (severity)`](#subactionparams-severity)
   - [Swimlane](#swimlane)
-    - [`params`](#params-3)
+    - [`params`](#params-5)
   - [| severity    | The severity of the incident.    | string _(optional)_ |](#-severity-----the-severity-of-the-incident-----string-optional-)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
@@ -246,9 +256,9 @@ Kibana ships with a set of built-in action types. See [Actions and connector typ
 
 In addition to the documented configurations, several built in action type offer additional `params` configurations.
 
-## ServiceNow
+## ServiceNow ITSM
 
-The [ServiceNow user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+The [ServiceNow ITSM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
 ### `params`
 
 | Property        | Description                                                                                        | Type   |
@@ -265,16 +275,18 @@ The [ServiceNow user documentation `params`](https://www.elastic.co/guide/en/kib
 
 The following table describes the properties of the `incident` object.
 
-| Property          | Description                                                                                                      | Type                |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------- |
-| short_description | The title of the incident.                                                                                       | string              |
-| description       | The description of the incident.                                                                                 | string _(optional)_ |
-| externalId        | The ID of the incident in ServiceNow. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_ |
-| severity          | The severity in ServiceNow.                                                                                      | string _(optional)_ |
-| urgency           | The urgency in ServiceNow.                                                                                       | string _(optional)_ |
-| impact            | The impact in ServiceNow.                                                                                        | string _(optional)_ |
-| category          | The category in ServiceNow.                                                                                      | string _(optional)_ |
-| subcategory       | The subcategory in ServiceNow.                                                                                   | string _(optional)_ |
+| Property            | Description                                                                                                      | Type                |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------- |
+| short_description   | The title of the incident.                                                                                       | string              |
+| description         | The description of the incident.                                                                                 | string _(optional)_ |
+| externalId          | The ID of the incident in ServiceNow. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_ |
+| severity            | The severity in ServiceNow.                                                                                      | string _(optional)_ |
+| urgency             | The urgency in ServiceNow.                                                                                       | string _(optional)_ |
+| impact              | The impact in ServiceNow.                                                                                        | string _(optional)_ |
+| category            | The category in ServiceNow.                                                                                      | string _(optional)_ |
+| subcategory         | The subcategory in ServiceNow.                                                                                   | string _(optional)_ |
+| correlation_id      | The correlation id of the incident.                                                                              | string _(optional)_ |
+| correlation_display | The correlation display of the ServiceNow.                                                                       | string _(optional)_ |
 
 #### `subActionParams (getFields)`
 
@@ -289,12 +301,101 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 #### `subActionParams (getChoices)`
 
-| Property | Description                                                  | Type     |
-| -------- | ------------------------------------------------------------ | -------- |
-| fields   | An array of fields. Example: `[priority, category, impact]`. | string[] |
+| Property | Description                                        | Type     |
+| -------- | -------------------------------------------------- | -------- |
+| fields   | An array of fields. Example: `[category, impact]`. | string[] |
 
 ---
 
+## ServiceNow Sec Ops
+
+The [ServiceNow SecOps user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-sir-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+
+### `params`
+
+| Property        | Description                                                                                        | Type   |
+| --------------- | -------------------------------------------------------------------------------------------------- | ------ |
+| subAction       | The subaction to perform. It can be `pushToService`, `getFields`, `getIncident`, and `getChoices`. | string |
+| subActionParams | The parameters of the subaction.                                                                   | object |
+
+#### `subActionParams (pushToService)`
+
+| Property | Description                                                                                                   | Type                  |
+| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
+| incident | The ServiceNow security incident.                                                                             | object                |
+| comments | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`. | object[] _(optional)_ |
+
+The following table describes the properties of the `incident` object.
+
+| Property            | Description                                                                                                                                 | Type                              |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| short_description   | The title of the security incident.                                                                                                         | string                            |
+| description         | The description of the security incident.                                                                                                   | string _(optional)_               |
+| externalId          | The ID of the security incident in ServiceNow. If present, the security incident is updated. Otherwise, a new security incident is created. | string _(optional)_               |
+| priority            | The priority in ServiceNow.                                                                                                                 | string _(optional)_               |
+| dest_ip             | A list of destination IPs related to the security incident. The IPs will be added as observables to the security incident.                  | (string \| string[]) _(optional)_ |
+| source_ip           | A list of source IPs related to the security incident. The IPs will be added as observables to the security incident.                       | (string \| string[]) _(optional)_ |
+| malware_hash        | A list of malware hashes related to the security incident. The hashes  will be added as observables to the security incident.               | (string \| string[]) _(optional)_ |
+| malware_url         | A list of malware URLs related to the security incident. The URLs will be added as observables to the security incident.                    | (string \| string[]) _(optional)_ |
+| category            | The category in ServiceNow.                                                                                                                 | string _(optional)_               |
+| subcategory         | The subcategory in ServiceNow.                                                                                                              | string _(optional)_               |
+| correlation_id      | The correlation id of the security incident.                                                                                                | string _(optional)_               |
+| correlation_display | The correlation display of the security incident.                                                                                           | string _(optional)_               |
+
+#### `subActionParams (getFields)`
+
+No parameters for the `getFields` subaction. Provide an empty object `{}`.
+
+#### `subActionParams (getIncident)`
+
+| Property   | Description                                    | Type   |
+| ---------- | ---------------------------------------------- | ------ |
+| externalId | The ID of the security incident in ServiceNow. | string |
+
+
+#### `subActionParams (getChoices)`
+
+| Property | Description                                          | Type     |
+| -------- | ---------------------------------------------------- | -------- |
+| fields   | An array of fields. Example: `[priority, category]`. | string[] |
+
+---
+## ServiceNow ITOM
+
+The [ServiceNow ITOM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-itom-action-type.html) lists configuration properties for the `addEvent` subaction. In addition, several other subaction types are available.
+### `params`
+
+| Property        | Description                                                       | Type   |
+| --------------- | ----------------------------------------------------------------- | ------ |
+| subAction       | The subaction to perform. It can be `addEvent`, and `getChoices`. | string |
+| subActionParams | The parameters of the subaction.                                  | object |
+
+#### `subActionParams (addEvent)`
+
+
+| Property        | Description                                                                                                                      | Type                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| source          | The name of the event source type.                                                                                               | string _(optional)_ |
+| event_class     | Specific instance of the source.                                                                                                 | string _(optional)_ |
+| resource        | The name of the resource.                                                                                                        | string _(optional)_ |
+| node            | The Host that the event was triggered for.                                                                                       | string _(optional)_ |
+| metric_name     | Name of the metric.                                                                                                              | string _(optional)_ |
+| type            | The type of event.                                                                                                               | string _(optional)_ |
+| severity        | The category in ServiceNow.                                                                                                      | string _(optional)_ |
+| description     | The subcategory in ServiceNow.                                                                                                   | string _(optional)_ |
+| additional_info | Any additional information about the event.                                                                                      | string _(optional)_ |
+| message_key     | This value is used for de-duplication of events. All actions sharing this key will be associated with the same ServiceNow alert. | string _(optional)_ |
+| time_of_event   | The time of the event.                                                                                                           | string _(optional)_ |
+
+Refer to [ServiceNow documentation](https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.html) for more information about the properties.
+
+#### `subActionParams (getChoices)`
+
+| Property | Description                                | Type     |
+| -------- | ------------------------------------------ | -------- |
+| fields   | An array of fields. Example: `[severity]`. | string[] |
+
+---
 ## Jira
 
 The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/master/jira-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
@@ -357,6 +458,7 @@ No parameters for the `issueTypes` subaction. Provide an empty object `{}`.
 No parameters for the `getFields` subaction. Provide an empty object `{}`.
 
 ---
+
 ## IBM Resilient
 
 The [IBM Resilient user documentation `params`](https://www.elastic.co/guide/en/kibana/master/resilient-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
@@ -453,6 +555,8 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
 When creating a new action type, your plugin will eventually call `server.plugins.actions.setup.registerType()` to register the type with the actions plugin, but there are some additional things to think about about and implement.
 
 Consider working with the alerting team on early structure /design feedback of new actions, especially as the APIs and infrastructure are still under development.
+
+Don't forget to ping @elastic/security-detections-response to see if the new connector should be enabled within their solution.
 
 ## licensing
 

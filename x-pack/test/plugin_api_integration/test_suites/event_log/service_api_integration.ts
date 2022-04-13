@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         .find((val: string) => val === '--xpack.eventLog.indexEntries=true');
       const result = await isIndexingEntries();
       const exists = await es.indices.exists({ index: '.kibana-event-log-*' });
-      expect(exists.body).to.be.eql(true);
+      expect(exists).to.be.eql(true);
       expect(configValue).to.be.eql(
         `--xpack.eventLog.indexEntries=${result.body.isIndexingEntries}`
       );
@@ -150,6 +150,21 @@ export default function ({ getService }: FtrProviderContext) {
         },
         kibana: {
           saved_objects: [savedObject],
+          space_ids: ['space id'],
+          alert: {
+            rule: {
+              execution: {
+                uuid: '1fef0e1a-25ba-11ec-9621-0242ac130002',
+                status: 'succeeded',
+                status_order: 10,
+                metrics: {
+                  total_indexing_duration_ms: 1000,
+                  total_search_duration_ms: 2000,
+                  execution_gap_duration_s: 3000,
+                },
+              },
+            },
+          },
           alerting: {
             instance_id: 'alert instance id',
             action_group_id: 'alert action group',
@@ -244,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function fetchEvents(savedObjectType: string, savedObjectId: string) {
     log.debug(`Fetching events of Saved Object ${savedObjectId}`);
     return await supertest
-      .get(`/api/event_log/${savedObjectType}/${savedObjectId}/_find`)
+      .get(`/internal/event_log/${savedObjectType}/${savedObjectId}/_find`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   }

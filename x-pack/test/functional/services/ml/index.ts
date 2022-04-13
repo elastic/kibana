@@ -13,6 +13,7 @@ import { MachineLearningAPIProvider } from './api';
 import { MachineLearningCommonAPIProvider } from './common_api';
 import { MachineLearningCommonConfigsProvider } from './common_config';
 import { MachineLearningCommonUIProvider } from './common_ui';
+import { MachineLearningCommonDataGridProvider } from './common_data_grid';
 import { MachineLearningCustomUrlsProvider } from './custom_urls';
 import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytics';
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
@@ -24,6 +25,7 @@ import { MachineLearningDataVisualizerProvider } from './data_visualizer';
 import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
 import { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
 import { MachineLearningDataVisualizerIndexPatternManagementProvider } from './data_visualizer_index_pattern_management';
+import { MachineLearningForecastProvider } from './forecast';
 import { MachineLearningJobManagementProvider } from './job_management';
 import { MachineLearningJobSelectionProvider } from './job_selection';
 import { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
@@ -53,10 +55,12 @@ import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embedda
 import { TrainedModelsProvider } from './trained_models';
 import { TrainedModelsTableProvider } from './trained_models_table';
 import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
+import { MlNodesPanelProvider } from './ml_nodes_list';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
+  const commonDataGrid = MachineLearningCommonDataGridProvider(context);
 
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
@@ -67,7 +71,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dashboardJobSelectionTable = MachineLearningDashboardJobSelectionTableProvider(context);
   const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(
     context,
-    commonUI,
     dashboardJobSelectionTable
   );
 
@@ -80,7 +83,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
     context,
-    commonUI
+    commonUI,
+    commonDataGrid
   );
   const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
@@ -93,6 +97,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataVisualizerIndexPatternManagement =
     MachineLearningDataVisualizerIndexPatternManagementProvider(context, dataVisualizerTable);
 
+  const forecast = MachineLearningForecastProvider(context);
   const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
@@ -118,11 +123,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataFrameAnalyticsTable
   );
   const testExecution = MachineLearningTestExecutionProvider(context);
-  const testResources = MachineLearningTestResourcesProvider(context);
-  const alerting = MachineLearningAlertingProvider(context, commonUI);
+  const testResources = MachineLearningTestResourcesProvider(context, api);
+  const alerting = MachineLearningAlertingProvider(context, api, commonUI);
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, api, commonUI);
-  const trainedModelsTable = TrainedModelsTableProvider(context);
+  const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
+  const mlNodesPanel = MlNodesPanelProvider(context);
 
   return {
     anomaliesTable,
@@ -131,6 +137,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     api,
     commonAPI,
     commonConfig,
+    commonDataGrid,
     commonUI,
     customUrls,
     dashboardJobSelectionTable,
@@ -146,6 +153,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerIndexBased,
     dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
+    forecast,
     jobAnnotations,
     jobManagement,
     jobSelection,
@@ -171,5 +179,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     testResources,
     trainedModels,
     trainedModelsTable,
+    mlNodesPanel,
   };
 }

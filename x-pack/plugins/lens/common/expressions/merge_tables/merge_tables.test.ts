@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { mergeTables } from './index';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ExpressionValueSearchContext } from 'src/plugins/data/public';
 import {
   Datatable,
@@ -54,16 +55,17 @@ describe('lens_merge_tables', () => {
     });
   });
 
-  it('should store the current tables in the tables inspector', () => {
-    const adapters: DefaultInspectorAdapters = {
+  it('should reset the current tables in the tables inspector', () => {
+    const adapters = {
       tables: new TablesAdapter(),
-      requests: {} as never,
-    };
+    } as DefaultInspectorAdapters;
+
+    const resetSpy = jest.spyOn(adapters.tables, 'reset');
+
     mergeTables.fn(null, { layerIds: ['first', 'second'], tables: [sampleTable1, sampleTable2] }, {
       inspectorAdapters: adapters,
     } as ExecutionContext<DefaultInspectorAdapters, ExpressionValueSearchContext>);
-    expect(adapters.tables!.tables.first).toBe(sampleTable1);
-    expect(adapters.tables!.tables.second).toBe(sampleTable2);
+    expect(resetSpy).toHaveBeenCalled();
   });
 
   it('should pass the date range along', () => {

@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../plugins/saved_objects/public';
+import type { SavedObjectsMigrationVersion, SavedObjectsResolveResponse } from 'src/core/public';
 import {
   IAggConfigs,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
   TimefilterContract,
   AggConfigSerialized,
 } from '../../../plugins/data/public';
+import type { ISearchSource } from '../../data/common';
 import { ExpressionAstExpression } from '../../expressions/public';
 
-import type { SerializedVis, Vis } from './vis';
+import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';
-import type { VisParams } from '../common';
+import type { VisParams, SerializedVis } from '../common';
 
 export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {
@@ -32,13 +33,44 @@ export interface ISavedVis {
   title: string;
   description?: string;
   visState: SavedVisState;
-  searchSourceFields?: SearchSourceFields;
+  searchSourceFields?: SerializedSearchSourceFields;
   uiStateJSON?: string;
   savedSearchRefName?: string;
   savedSearchId?: string;
+  sharingSavedObjectProps?: {
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+    errorJSON?: string;
+  };
 }
 
-export interface VisSavedObject extends SavedObject, ISavedVis {}
+export interface VisSavedObject extends ISavedVis {
+  lastSavedTitle: string;
+  getEsType: () => string;
+  getDisplayName?: () => string;
+  displayName: string;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  searchSource?: ISearchSource;
+  version?: string;
+  tags?: string[];
+}
+
+export interface SaveVisOptions {
+  confirmOverwrite?: boolean;
+  isTitleDuplicateConfirmed?: boolean;
+  onTitleDuplicate?: () => void;
+  copyOnSave?: boolean;
+}
+
+export interface GetVisOptions {
+  id?: string;
+  searchSource?: boolean;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  savedSearchId?: string;
+  type?: string;
+  indexPattern?: string;
+}
 
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;

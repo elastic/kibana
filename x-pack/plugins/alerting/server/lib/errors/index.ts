@@ -14,5 +14,8 @@ export function isErrorThatHandlesItsOwnResponse(
   return typeof (e as ErrorThatHandlesItsOwnResponse).sendResponse === 'function';
 }
 
-export { ErrorThatHandlesItsOwnResponse, ElasticsearchError, getEsErrorMessage };
-export { AlertTypeDisabledError, AlertTypeDisabledReason } from './alert_type_disabled';
+export type { ErrorThatHandlesItsOwnResponse, ElasticsearchError };
+export { getEsErrorMessage };
+export type { RuleTypeDisabledReason } from './rule_type_disabled';
+export { RuleTypeDisabledError } from './rule_type_disabled';
+export { RuleMutedError } from './rule_muted';

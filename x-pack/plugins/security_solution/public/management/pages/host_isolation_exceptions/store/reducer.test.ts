@@ -12,7 +12,7 @@ import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants'
 import { hostIsolationExceptionsPageReducer } from './reducer';
 import { getCurrentLocation } from './selector';
 
-describe('Host Isolation Exceptions Reducer', () => {
+describe('Host isolation exceptions Reducer', () => {
   let initialState: HostIsolationExceptionsPageState;
 
   beforeEach(() => {
@@ -34,6 +34,7 @@ describe('Host Isolation Exceptions Reducer', () => {
         expect(getCurrentLocation(result)).toEqual({
           filter: '',
           id: undefined,
+          included_policies: '',
           page_index: 0,
           page_size: 10,
           show: undefined,

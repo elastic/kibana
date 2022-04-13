@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { Alert } from '../../../alerting/common';
+import type { HttpSetup } from 'kibana/public';
+import { Rule } from '../../../alerting/common';
 
 const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts'];
 
-export async function getObservabilityAlerts({ core }: { core: CoreStart }) {
+export async function getObservabilityAlerts({ http }: { http: HttpSetup }) {
   try {
-    const { data = [] }: { data: Alert[] } =
-      (await core.http.get('/api/alerts/_find', {
+    const { data = [] }: { data: Rule[] } =
+      (await http.get('/api/alerts/_find', {
         query: {
           page: 1,
           per_page: 20,

@@ -24,12 +24,13 @@ export function crowdstrikeLogsSpecProvider(context: TutorialContext): TutorialS
   return {
     id: 'crowdstrikeLogs',
     name: i18n.translate('home.tutorials.crowdstrikeLogs.nameTitle', {
-      defaultMessage: 'CrowdStrike logs',
+      defaultMessage: 'CrowdStrike Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.crowdstrikeLogs.shortDescription', {
-      defaultMessage: 'Collect CrowdStrike Falcon logs using the Falcon SIEM Connector.',
+      defaultMessage:
+        'Collect and parse logs from CrowdStrike Falcon using the Falcon SIEM Connector with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.crowdstrikeLogs.longDescription', {
       defaultMessage:
@@ -57,8 +58,8 @@ export function crowdstrikeLogsSpecProvider(context: TutorialContext): TutorialS
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

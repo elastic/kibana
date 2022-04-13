@@ -43,7 +43,7 @@ const {
 export const TEST_CASE_OBJECTS: Record<string, { type: string; id: string }> = deepFreeze({
   SHAREABLE_TYPE: { type: 'sharedtype', id: CASES.EACH_SPACE.id }, // contains references to four other objects
   SHAREABLE_TYPE_DOES_NOT_EXIST: { type: 'sharedtype', id: 'does-not-exist' },
-  NON_SHAREABLE_TYPE: { type: 'dashboard', id: 'my_dashboard' }, // one of these exists in each space
+  NON_SHAREABLE_TYPE: { type: 'isolatedtype', id: 'my_isolated_object' }, // one of these exists in each space
 });
 // Expected results for each space are defined here since they are used in multiple test suites
 export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]> = {
@@ -65,7 +65,6 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       id: CASES.DEFAULT_ONLY.id,
       spaces: [DEFAULT_SPACE_ID],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
-      spacesWithMatchingAliases: [SPACE_1_ID, SPACE_2_ID], // aliases with a matching targetType and sourceId exist in two other spaces
     },
     {
       type: 'sharedtype',
@@ -113,6 +112,7 @@ export const EXPECTED_RESULTS: Record<string, SavedObjectReferenceWithContext[]>
       id: CASES.SPACE_1_ONLY.id,
       spaces: [SPACE_1_ID],
       inboundReferences: [{ ...TEST_CASE_OBJECTS.SHAREABLE_TYPE, name: 'refname' }],
+      spacesWithMatchingAliases: [DEFAULT_SPACE_ID, SPACE_2_ID], // aliases with a matching targetType and sourceId exist in two other spaces
     },
     {
       type: 'sharedtype',

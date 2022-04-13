@@ -12,7 +12,8 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious MS Office Child Process",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : (\"eqnedt32.exe\", \"excel.exe\", \"fltldr.exe\", \"msaccess.exe\", \"mspub.exe\", \"powerpnt.exe\", \"winword.exe\") and\n  process.name : (\"Microsoft.Workflow.Compiler.exe\", \"arp.exe\", \"atbroker.exe\", \"bginfo.exe\", \"bitsadmin.exe\", \"cdb.exe\", \"certutil.exe\",\n                \"cmd.exe\", \"cmstp.exe\", \"cscript.exe\", \"csi.exe\", \"dnx.exe\", \"dsget.exe\", \"dsquery.exe\", \"forfiles.exe\", \"fsi.exe\",\n                \"ftp.exe\", \"gpresult.exe\", \"hostname.exe\", \"ieexec.exe\", \"iexpress.exe\", \"installutil.exe\", \"ipconfig.exe\", \"mshta.exe\",\n                \"msxsl.exe\", \"nbtstat.exe\", \"net.exe\", \"net1.exe\", \"netsh.exe\", \"netstat.exe\", \"nltest.exe\", \"odbcconf.exe\", \"ping.exe\",\n                \"powershell.exe\", \"pwsh.exe\", \"qprocess.exe\", \"quser.exe\", \"qwinsta.exe\", \"rcsi.exe\", \"reg.exe\", \"regasm.exe\", \"regsvcs.exe\",\n                \"regsvr32.exe\", \"sc.exe\", \"schtasks.exe\", \"systeminfo.exe\", \"tasklist.exe\", \"tracert.exe\", \"whoami.exe\",\n                \"wmic.exe\", \"wscript.exe\", \"xwizard.exe\", \"explorer.exe\", \"rundll32.exe\", \"hh.exe\")\n",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : (\"eqnedt32.exe\", \"excel.exe\", \"fltldr.exe\", \"msaccess.exe\", \"mspub.exe\", \"powerpnt.exe\", \"winword.exe\") and\n  process.name : (\"Microsoft.Workflow.Compiler.exe\", \"arp.exe\", \"atbroker.exe\", \"bginfo.exe\", \"bitsadmin.exe\", \"cdb.exe\", \"certutil.exe\",\n                \"cmd.exe\", \"cmstp.exe\", \"control.exe\", \"cscript.exe\", \"csi.exe\", \"dnx.exe\", \"dsget.exe\", \"dsquery.exe\", \"forfiles.exe\", \n                \"fsi.exe\", \"ftp.exe\", \"gpresult.exe\", \"hostname.exe\", \"ieexec.exe\", \"iexpress.exe\", \"installutil.exe\", \"ipconfig.exe\", \n                \"mshta.exe\", \"msxsl.exe\", \"nbtstat.exe\", \"net.exe\", \"net1.exe\", \"netsh.exe\", \"netstat.exe\", \"nltest.exe\", \"odbcconf.exe\", \n                \"ping.exe\", \"powershell.exe\", \"pwsh.exe\", \"qprocess.exe\", \"quser.exe\", \"qwinsta.exe\", \"rcsi.exe\", \"reg.exe\", \"regasm.exe\", \n                \"regsvcs.exe\", \"regsvr32.exe\", \"sc.exe\", \"schtasks.exe\", \"systeminfo.exe\", \"tasklist.exe\", \"tracert.exe\", \"whoami.exe\",\n                \"wmic.exe\", \"wscript.exe\", \"xwizard.exe\", \"explorer.exe\", \"rundll32.exe\", \"hh.exe\")\n",
   "risk_score": 47,
   "rule_id": "a624863f-a70d-417f-a7d2-7a404638d47f",
   "severity": "medium",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 8
+  "version": 10
 }

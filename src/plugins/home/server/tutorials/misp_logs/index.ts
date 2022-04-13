@@ -24,12 +24,12 @@ export function mispLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'mispLogs',
     name: i18n.translate('home.tutorials.mispLogs.nameTitle', {
-      defaultMessage: 'MISP threat intel logs',
+      defaultMessage: 'MISP threat intel Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.mispLogs.shortDescription', {
-      defaultMessage: 'Collect MISP threat intelligence data with Filebeat.',
+      defaultMessage: 'Collect and parse logs from MISP threat intelligence with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mispLogs.longDescription', {
       defaultMessage:
@@ -57,8 +57,8 @@ export function mispLogsSpecProvider(context: TutorialContext): TutorialSchema {
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/misp_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['network', 'security', 'azure'],
   };
 }

@@ -18,7 +18,7 @@ import {
   setDatasource,
   requestDatasource,
 } from './datasource';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings
@@ -34,7 +34,7 @@ export const datasourceSaga = ({
 }: GraphStoreDependencies) => {
   function* fetchFields(action: Action<IndexpatternDatasource>) {
     try {
-      const indexPattern: IndexPattern = yield call(indexPatternProvider.get, action.payload.id);
+      const indexPattern: DataView = yield call(indexPatternProvider.get, action.payload.id);
       yield put(loadFields(mapFields(indexPattern)));
       yield put(datasourceLoaded());
       const advancedSettings = settingsSelector(yield select());
@@ -44,8 +44,8 @@ export const datasourceSaga = ({
       // in case of errors, reset the datasource and show notification
       yield put(setDatasource({ type: 'none' }));
       notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern "{name}" not found',
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
           values: {
             name: action.payload.title,
           },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import React, { ReactElement } from 'react';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
@@ -89,6 +89,7 @@ const getOverflowButtonLazy = (props: OverflowButtonProps) => {
 };
 
 export const getHoverActions = (store?: Store): HoverActionsConfig => ({
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   getAddToTimelineButton: getAddToTimelineButtonLazy.bind(null, store!),
   getColumnToggleButton: getColumnToggleButtonLazy,
   getCopyButton: getCopyButtonLazy,

@@ -85,7 +85,6 @@ const originalPolicy: SerializedPolicy = {
           include: { test: 'my_value' },
           exclude: { test: 'my_value' },
         },
-        freeze: {},
         readonly: {},
         set_priority: {
           priority: 12,
@@ -139,20 +138,34 @@ describe('deserializer and serializer', () => {
     serializer = createSerializer(cloneDeep(policy));
   });
 
-  it('preserves any unknown policy settings', () => {
-    const thisTestPolicy = cloneDeep(originalPolicy);
-    // We populate all levels of the policy with entries our UI does not know about
-    populateWithUnknownEntries(thisTestPolicy);
-    serializer = createSerializer(thisTestPolicy);
+  describe('unknown policy settings', function () {
+    it('preserves any unknown properties', () => {
+      const thisTestPolicy = cloneDeep(originalPolicy);
+      // We populate all levels of the policy with entries our UI does not know about
+      populateWithUnknownEntries(thisTestPolicy);
+      serializer = createSerializer(thisTestPolicy);
 
-    const copyOfThisTestPolicy = cloneDeep(thisTestPolicy);
+      const copyOfThisTestPolicy = cloneDeep(thisTestPolicy);
 
-    const _formInternal = deserializer(thisTestPolicy);
-    expect(serializer(_formInternal)).toEqual(thisTestPolicy);
+      const _formInternal = deserializer(thisTestPolicy);
+      expect(serializer(_formInternal)).toEqual(thisTestPolicy);
 
-    // Assert that the policy we passed in is unaltered after deserialization and serialization
-    expect(thisTestPolicy).not.toBe(copyOfThisTestPolicy);
-    expect(thisTestPolicy).toEqual(copyOfThisTestPolicy);
+      // Assert that the policy we passed in is unaltered after deserialization and serialization
+      expect(thisTestPolicy).not.toBe(copyOfThisTestPolicy);
+      expect(thisTestPolicy).toEqual(copyOfThisTestPolicy);
+    });
+
+    it('except freeze action in the cold phase', () => {
+      const policyWithoutFreeze = cloneDeep(originalPolicy);
+
+      const policyWithFreeze = cloneDeep(policyWithoutFreeze);
+      // add a freeze action to the cold phase
+      policyWithFreeze.phases.cold!.actions!.freeze = {};
+      serializer = createSerializer(policyWithFreeze);
+
+      const _formInternal = deserializer(policyWithFreeze);
+      expect(serializer(_formInternal)).toEqual(policyWithoutFreeze);
+    });
   });
 
   it('removes all phases if they were disabled in the form', () => {
@@ -238,14 +251,6 @@ describe('deserializer and serializer', () => {
     expect(result.phases.hot!.actions.set_priority).toBeUndefined();
     expect(result.phases.warm!.actions.set_priority).toBeUndefined();
     expect(result.phases.cold!.actions.set_priority).toBeUndefined();
-  });
-
-  it('removes freeze setting in the cold phase if it is disabled in the form', () => {
-    formInternal._meta.cold.freezeEnabled = false;
-
-    const result = serializer(formInternal);
-
-    expect(result.phases.cold!.actions.freeze).toBeUndefined();
   });
 
   it('removes node attribute allocation when it is not selected in the form', () => {

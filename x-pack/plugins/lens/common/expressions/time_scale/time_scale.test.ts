@@ -6,7 +6,9 @@
  */
 
 import moment from 'moment';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { Datatable } from 'src/plugins/expressions/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { TimeRange } from 'src/plugins/data/public';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
@@ -387,5 +389,35 @@ describe('time_scale', () => {
     );
 
     expect(result.rows.map(({ scaledMetric }) => scaledMetric)).toEqual([1, 1, 1, 1, 1]);
+  });
+
+  it('should be sync except for timezone getter to prevent timezone leakage', async () => {
+    let resolveTimezonePromise: (value: string | PromiseLike<string>) => void;
+    const timezonePromise = new Promise<string>((res) => {
+      resolveTimezonePromise = res;
+    });
+    const timeScaleResolved = jest.fn((x) => x);
+    const delayedTimeScale = getTimeScale(() => timezonePromise);
+    const delayedTimeScaleWrapper = functionWrapper(delayedTimeScale);
+    const result = delayedTimeScaleWrapper(
+      {
+        ...emptyTable,
+      },
+      {
+        ...defaultArgs,
+      }
+    ).then(timeScaleResolved) as Promise<Datatable>;
+
+    expect(result instanceof Promise).toBe(true);
+    // wait a tick
+    await new Promise((r) => setTimeout(r, 0));
+    // time scale is not done yet because it's waiting for the timezone
+    expect(timeScaleResolved).not.toHaveBeenCalled();
+    // resolve timezone
+    resolveTimezonePromise!('UTC');
+    // wait a tick
+    await new Promise((r) => setTimeout(r, 0));
+    // should resolve now without another async dependency
+    expect(timeScaleResolved).toHaveBeenCalled();
   });
 });

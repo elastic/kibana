@@ -10,3 +10,13 @@ export const configureClientMock = jest.fn();
 jest.doMock('./configure_client', () => ({
   configureClient: configureClientMock,
 }));
+
+export const createTransportMock = jest.fn();
+jest.doMock('./create_transport', () => ({
+  createTransport: createTransportMock,
+}));
+
+export const createInternalErrorHandlerMock = jest.fn();
+jest.doMock('./retry_unauthorized', () => ({
+  createInternalErrorHandler: createInternalErrorHandlerMock,
+}));

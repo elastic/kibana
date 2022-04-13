@@ -19,7 +19,6 @@ import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 
@@ -49,15 +48,11 @@ export const readRulesRoute = (
 
       const { id, rule_id: ruleId } = request.query;
 
-      const rulesClient = context.alerting?.getRulesClient();
-
       try {
-        if (!rulesClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-
-        const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+        const rulesClient = context.alerting.getRulesClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = context.core.savedObjects.client;
+
         const rule = await readRules({
           id,
           isRuleRegistryEnabled,
@@ -70,23 +65,12 @@ export const readRulesRoute = (
             ruleAlertId: rule.id,
             logger,
           });
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
-            ruleId: rule.id,
-            spaceId: context.securitySolution.getSpaceId(),
-          });
-          const [currentStatus] = ruleStatuses;
-          if (currentStatus != null && rule.executionStatus.status === 'error') {
-            currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt =
-              rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate =
-              rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.status = RuleExecutionStatus.failed;
-          }
+
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
+
           const transformed = transform(
             rule,
-            currentStatus,
+            ruleExecutionSummary,
             isRuleRegistryEnabled,
             legacyRuleActions
           );

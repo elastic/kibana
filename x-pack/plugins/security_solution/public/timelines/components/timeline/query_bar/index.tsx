@@ -11,12 +11,11 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { FilterStateStore, Filter, Query } from '@kbn/es-query';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import {
-  Query,
-  Filter,
-  esFilters,
+
+import type {
   FilterManager,
   SavedQuery,
   SavedQueryTimeFilter,
@@ -81,8 +80,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields, indexPattern } = useSourcererScope(SourcererScopeName.timeline);
-
+    const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',
@@ -244,27 +242,19 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                     (f) => f.meta.controlledBy === TIMELINE_FILTER_DROP_AREA
                   )
                 : -1;
-            savedQueryServices.saveQuery(
-              {
-                ...newSavedQuery.attributes,
-                filters:
-                  newSavedQuery.attributes.filters != null
-                    ? dataProviderFilterExists > -1
-                      ? [
-                          ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
-                          getDataProviderFilter(dataProvidersDsl),
-                          ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
-                        ]
-                      : [
-                          ...newSavedQuery.attributes.filters,
-                          getDataProviderFilter(dataProvidersDsl),
-                        ]
-                    : [],
-              },
-              {
-                overwrite: true,
-              }
-            );
+            savedQueryServices.updateQuery(newSavedQuery.id, {
+              ...newSavedQuery.attributes,
+              filters:
+                newSavedQuery.attributes.filters != null
+                  ? dataProviderFilterExists > -1
+                    ? [
+                        ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
+                        getDataProviderFilter(dataProvidersDsl),
+                        ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
+                      ]
+                    : [...newSavedQuery.attributes.filters, getDataProviderFilter(dataProvidersDsl)]
+                  : [],
+            });
           }
         } else {
           setSavedQueryId(null);
@@ -309,7 +299,7 @@ export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
       value: dataProviderDsl,
     },
     $state: {
-      store: esFilters.FilterStateStore.APP_STATE,
+      store: FilterStateStore.APP_STATE,
     },
   };
 };

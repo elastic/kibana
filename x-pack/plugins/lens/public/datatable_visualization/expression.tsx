@@ -8,12 +8,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-
+import { I18nProvider } from '@kbn/i18n-react';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from 'src/plugins/data/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DatatableComponent } from './components/table_basic';
 
 import type { ILensInterpreterRenderHandlers } from '../types';
@@ -25,6 +25,7 @@ export const getDatatableRenderer = (dependencies: {
   getType: Promise<(name: string) => IAggType>;
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
+  theme: ThemeServiceStart;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -39,7 +40,7 @@ export const getDatatableRenderer = (dependencies: {
     handlers: ILensInterpreterRenderHandlers
   ) => {
     const resolvedGetType = await dependencies.getType;
-    const { hasCompatibleActions } = handlers;
+    const { hasCompatibleActions, isInteractive } = handlers;
 
     // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
@@ -69,18 +70,21 @@ export const getDatatableRenderer = (dependencies: {
     }
 
     ReactDOM.render(
-      <I18nProvider>
-        <DatatableComponent
-          {...config}
-          formatFactory={dependencies.formatFactory}
-          dispatchEvent={handlers.event}
-          renderMode={handlers.getRenderMode()}
-          paletteService={dependencies.paletteService}
-          getType={resolvedGetType}
-          rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
-          uiSettings={dependencies.uiSettings}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={dependencies.theme.theme$}>
+        <I18nProvider>
+          <DatatableComponent
+            {...config}
+            formatFactory={dependencies.formatFactory}
+            dispatchEvent={handlers.event}
+            renderMode={handlers.getRenderMode()}
+            paletteService={dependencies.paletteService}
+            getType={resolvedGetType}
+            rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+            interactive={isInteractive()}
+            uiSettings={dependencies.uiSettings}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode,
       () => {
         handlers.done();

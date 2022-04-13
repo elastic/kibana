@@ -7,7 +7,8 @@
  */
 
 import type { Fit, Position } from '@elastic/charts';
-import type { Style, Labels, PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { Style, Labels } from '../../../../charts/public';
 import type {
   SchemaConfig,
   ExpressionValueXYDimension,
@@ -123,6 +124,7 @@ export interface VisParams {
   addTimeMarker: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: number;
   categoryAxes: CategoryAxis[];
   orderBucketsBySum?: boolean;
   labels: Labels;
@@ -145,6 +147,7 @@ export interface VisParams {
   palette: PaletteOutput;
   fillOpacity?: number;
   fittingFunction?: Exclude<Fit, 'explicit'>;
+  ariaLabel?: string;
 }
 
 export interface XYVisConfig {
@@ -162,6 +165,7 @@ export interface XYVisConfig {
   addTimeMarker: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: number;
   orderBucketsBySum?: boolean;
   labels: ExpressionValueLabel;
   thresholdLine: ExpressionValueThresholdLine;
@@ -185,4 +189,5 @@ export interface XYVisConfig {
   seriesDimension?: ExpressionValueXYDimension[];
   splitRowDimension?: ExpressionValueXYDimension[];
   splitColumnDimension?: ExpressionValueXYDimension[];
+  ariaLabel?: string;
 }

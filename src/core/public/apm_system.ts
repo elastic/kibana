@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ApmBase, AgentConfigOptions } from '@elastic/apm-rum';
+import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum';
 import { modifyUrl } from '@kbn/std';
+import { CachedResourceObserver } from './apm_resource_counter';
 import type { InternalApplicationStart } from './application';
+import { ExecutionContextStart } from './execution_context';
 
 /** "GET protocol://hostname:port/pathname" */
 const HTTP_REQUEST_TRANSACTION_NAME_REGEX =
@@ -26,21 +28,28 @@ interface ApmConfig extends AgentConfigOptions {
 
 interface StartDeps {
   application: InternalApplicationStart;
+  executionContext: ExecutionContextStart;
 }
 
 export class ApmSystem {
   private readonly enabled: boolean;
+  private pageLoadTransaction?: Transaction;
+  private resourceObserver: CachedResourceObserver;
+  private apm?: ApmBase;
+
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
    * configuration if server is started with elastic.apm.* config.
    */
   constructor(private readonly apmConfig?: ApmConfig, private readonly basePath = '') {
     this.enabled = apmConfig != null && !!apmConfig.active;
+    this.resourceObserver = new CachedResourceObserver();
   }
 
   async setup() {
     if (!this.enabled) return;
     const { init, apm } = await import('@elastic/apm-rum');
+    this.apm = apm;
     const { globalLabels, ...apmConfig } = this.apmConfig!;
     if (globalLabels) {
       apm.addLabels(globalLabels);
@@ -49,23 +58,70 @@ export class ApmSystem {
     this.addHttpRequestNormalization(apm);
 
     init(apmConfig);
+    // hold page load transaction blocks a transaction implicitly created by init.
+    this.holdPageLoadTransaction(apm);
   }
 
   async start(start?: StartDeps) {
     if (!this.enabled || !start) return;
+
+    this.markPageLoadStart();
+
+    start.executionContext.context$.subscribe((c) => {
+      // We're using labels because we want the context to be indexed
+      // https://www.elastic.co/guide/en/apm/get-started/current/metadata.html
+      const apmContext = start.executionContext.getAsLabels();
+      this.apm?.addLabels(apmContext);
+    });
+
+    // TODO: Start a new transaction every page change instead of every app change.
+
     /**
      * Register listeners for navigation changes and capture them as
      * route-change transactions after Kibana app is bootstrapped
      */
     start.application.currentAppId$.subscribe((appId) => {
-      const apmInstance = (window as any).elasticApm;
-      if (appId && apmInstance && typeof apmInstance.startTransaction === 'function') {
-        apmInstance.startTransaction(`/app/${appId}`, 'route-change', {
+      if (appId && this.apm) {
+        this.closePageLoadTransaction();
+        this.apm.startTransaction(appId, 'app-change', {
           managed: true,
           canReuse: true,
         });
       }
     });
+  }
+
+  /* Hold the page load transaction open, until all resources actually finish loading */
+  private holdPageLoadTransaction(apm: ApmBase) {
+    const transaction = apm.getCurrentTransaction();
+
+    // Keep the page load transaction open until all resources finished loading
+    if (transaction && transaction.type === 'page-load') {
+      this.pageLoadTransaction = transaction;
+      // @ts-expect-error 2339  block is a private property of Transaction interface
+      this.pageLoadTransaction.block(true);
+      this.pageLoadTransaction.mark('apm-setup');
+    }
+  }
+
+  /* Close and clear the page load transaction */
+  private closePageLoadTransaction() {
+    if (this.pageLoadTransaction) {
+      const loadCounts = this.resourceObserver.getCounts();
+      this.pageLoadTransaction.addLabels({
+        'loaded-resources': loadCounts.networkOrDisk,
+        'cached-resources': loadCounts.memory,
+      });
+      this.resourceObserver.destroy();
+      this.pageLoadTransaction.end();
+      this.pageLoadTransaction = undefined;
+    }
+  }
+
+  private markPageLoadStart() {
+    if (this.pageLoadTransaction) {
+      this.pageLoadTransaction.mark('apm-start');
+    }
   }
 
   /**

@@ -9,7 +9,7 @@
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
-import { GetAuthHeaders } from './auth_headers_storage';
+import { IAuthHeadersStorage } from './auth_headers_storage';
 import { IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
@@ -313,14 +313,6 @@ export interface HttpServiceSetup {
   basePath: IBasePath;
 
   /**
-   * Auth status.
-   * See {@link HttpAuth}
-   *
-   * @deprecated use {@link HttpServiceStart.auth | the start contract} instead.
-   */
-  auth: HttpAuth;
-
-  /**
    * The CSP config used for Kibana.
    */
   csp: ICspConfig;
@@ -398,7 +390,7 @@ export interface InternalHttpServiceSetup
   ) => IRouter<Context>;
   registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
-  getAuthHeaders: GetAuthHeaders;
+  authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContext,
     ContextName extends keyof Context
@@ -407,6 +399,7 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: RequestHandlerContextProvider<Context, ContextName>
   ) => RequestHandlerContextContainer;
+
   registerPrebootRoutes(path: string, callback: (router: IRouter) => void): void;
 }
 

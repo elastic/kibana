@@ -8,7 +8,6 @@
 
 import { fetchStreaming } from './fetch_streaming';
 import { mockXMLHttpRequest } from '../test_helpers/xhr';
-import { of } from 'rxjs';
 import { promisify } from 'util';
 import { deflate } from 'zlib';
 const pDeflate = promisify(deflate);
@@ -23,6 +22,7 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 const setup = () => {
   const { xhr, XMLHttpRequest } = mockXMLHttpRequest();
   window.XMLHttpRequest = XMLHttpRequest;
+  (xhr as any).status = 200;
   return { xhr };
 };
 
@@ -30,7 +30,7 @@ test('returns XHR request', () => {
   setup();
   const { xhr } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
   expect(typeof xhr.readyState).toBe('number');
 });
@@ -39,7 +39,7 @@ test('returns stream', () => {
   setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
   expect(typeof stream.subscribe).toBe('function');
 });
@@ -48,7 +48,7 @@ test('promise resolves when request completes', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   let resolved = false;
@@ -81,7 +81,7 @@ test('promise resolves when compressed request completes', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(false),
+    getIsCompressionDisabled: () => false,
   });
 
   let resolved = false;
@@ -116,7 +116,7 @@ test('promise resolves when compressed chunked request completes', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(false),
+    getIsCompressionDisabled: () => false,
   });
 
   let resolved = false;
@@ -160,7 +160,7 @@ test('streams incoming text as it comes through, according to separators', async
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   const spy = jest.fn();
@@ -201,7 +201,7 @@ test('completes stream observable when request finishes', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   const spy = jest.fn();
@@ -226,7 +226,7 @@ test('completes stream observable when aborted', async () => {
   const { stream } = fetchStreaming({
     url: 'http://example.com',
     signal: abort.signal,
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   const spy = jest.fn();
@@ -252,7 +252,7 @@ test('promise throws when request errors', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   const spy = jest.fn();
@@ -279,7 +279,7 @@ test('stream observable errors when request errors', async () => {
   const env = setup();
   const { stream } = fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   const spy = jest.fn();
@@ -312,7 +312,7 @@ test('sets custom headers', async () => {
       'Content-Type': 'text/plain',
       Authorization: 'Bearer 123',
     },
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   expect(env.xhr.setRequestHeader).toHaveBeenCalledWith('Content-Type', 'text/plain');
@@ -326,7 +326,7 @@ test('uses credentials', async () => {
 
   fetchStreaming({
     url: 'http://example.com',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   expect(env.xhr.withCredentials).toBe(true);
@@ -342,7 +342,7 @@ test('opens XHR request and sends specified body', async () => {
     url: 'http://elastic.co',
     method: 'GET',
     body: 'foobar',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
 
   expect(env.xhr.open).toHaveBeenCalledTimes(1);
@@ -355,7 +355,7 @@ test('uses POST request method by default', async () => {
   const env = setup();
   fetchStreaming({
     url: 'http://elastic.co',
-    compressionDisabled$: of(true),
+    getIsCompressionDisabled: () => true,
   });
   expect(env.xhr.open).toHaveBeenCalledWith('POST', 'http://elastic.co');
 });

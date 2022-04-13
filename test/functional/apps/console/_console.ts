@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
-      const expectedResponseContains = '"timed_out" : false,';
+      const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();
@@ -79,16 +79,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1000, 1100);
       const afterSize = await editor.getSize();
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
-    });
-
-    it('should provide basic auto-complete functionality', async () => {
-      // Ensure that the text area can be interacted with
-      await PageObjects.console.dismissTutorial();
-      expect(await PageObjects.console.hasAutocompleter()).to.be(false);
-      await PageObjects.console.promptAutocomplete();
-      await retry.waitFor('autocomplete to be visible', () =>
-        PageObjects.console.hasAutocompleter()
-      );
     });
 
     describe('with a data URI in the load_from query', () => {

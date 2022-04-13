@@ -15,7 +15,6 @@ export type {
   FieldVisStats,
   Percentile,
 } from './field_request_config';
-export type InputData = any[];
 
 export interface DataVisualizerTableState {
   pageSize: number;

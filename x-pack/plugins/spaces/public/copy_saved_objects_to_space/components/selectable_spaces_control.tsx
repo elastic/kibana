@@ -11,7 +11,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiIconTip, EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';

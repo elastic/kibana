@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { layerTypes } from '../../../common';
@@ -44,18 +44,6 @@ describe('Axes Settings', () => {
   it('should disable the popover if the isDisabled property is true', () => {
     const component = shallow(<AxisSettingsPopover {...props} isDisabled />);
     expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
-  });
-
-  it('should show the axes title on the corresponding input text', () => {
-    const component = shallow(<AxisSettingsPopover {...props} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').prop('value')).toBe(
-      'My custom X axis title'
-    );
-  });
-
-  it('should disable the input text if the switch is off', () => {
-    const component = shallow(<AxisSettingsPopover {...props} isAxisTitleVisible={false} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').prop('disabled')).toBe(true);
   });
 
   it('has the tickLabels switch on by default', () => {
@@ -101,11 +89,9 @@ describe('Axes Settings', () => {
     expect(props.setOrientation).toHaveBeenCalled();
   });
 
-  it('should disable the orientation group if the tickLabels are set to not visible', () => {
+  it('should hide the orientation group if the tickLabels are set to not visible', () => {
     const component = shallow(<AxisSettingsPopover {...props} areTickLabelsVisible={false} />);
-    expect(
-      component.find('[data-test-subj="lnsXY_axisOrientation_groups"]').prop('isDisabled')
-    ).toEqual(true);
+    expect(component.exists('[data-test-subj="lnsXY_axisOrientation_groups"]')).toEqual(false);
   });
 
   it('hides the endzone visibility flag if no setter is passed in', () => {
@@ -135,8 +121,11 @@ describe('Axes Settings', () => {
           setExtent={setSpy}
         />
       );
-      const lower = component.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
-      const upper = component.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
+      const rangeInput = component
+        .find('[data-test-subj="lnsXY_axisExtent_customBounds"]')
+        .shallow();
+      const lower = rangeInput.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
+      const upper = rangeInput.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
       expect(lower.prop('value')).toEqual(123);
       expect(upper.prop('value')).toEqual(456);
     });

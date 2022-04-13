@@ -7,9 +7,10 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ToastsStart } from 'kibana/public';
 import React from 'react';
+import { themeServiceMock, applicationServiceMock } from '../../../../../src/core/public/mocks';
 import { TableListView } from './table_list_view';
 
 const requiredProps = {
@@ -24,6 +25,8 @@ const requiredProps = {
   tableCaption: 'test caption',
   toastNotifications: {} as ToastsStart,
   findItems: jest.fn(() => Promise.resolve({ total: 0, hits: [] })),
+  theme: themeServiceMock.createStartContract(),
+  application: applicationServiceMock.createStartContract(),
 };
 
 describe('TableListView', () => {

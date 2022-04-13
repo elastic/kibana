@@ -10,7 +10,7 @@ import { Dispatch } from 'redux';
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter, Query } from '@kbn/es-query';
 import { inputsActions, sourcererActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -28,7 +28,7 @@ import {
   queryTimelineById,
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
-import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 
 export const useSetInitialStateFromUrl = () => {
@@ -55,16 +55,17 @@ export const useSetInitialStateFromUrl = () => {
           updateTimerange(newUrlStateString, dispatch);
         }
         if (urlKey === CONSTANTS.sourcerer) {
-          const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
+          const sourcererState = decodeRisonUrlState<SourcererUrlState>(newUrlStateString);
           if (sourcererState != null) {
             const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
               (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
             ) as SourcererScopeName[];
             activeScopes.forEach((scope) =>
               dispatch(
-                sourcererActions.setSelectedIndexPatterns({
+                sourcererActions.setSelectedDataView({
                   id: scope,
-                  selectedPatterns: sourcererState[scope] ?? [],
+                  selectedDataViewId: sourcererState[scope]?.id ?? null,
+                  selectedPatterns: sourcererState[scope]?.selectedPatterns ?? [],
                 })
               )
             );
@@ -124,7 +125,7 @@ export const useSetInitialStateFromUrl = () => {
     [dispatch, updateTimeline, updateTimelineIsLoading]
   );
 
-  return setInitialStateFromUrl;
+  return Object.freeze({ setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading });
 };
 
 const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {

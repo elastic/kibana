@@ -9,6 +9,8 @@
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
+
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 interface SaveDashboardOptions {
@@ -49,6 +51,13 @@ export class DashboardPageObject extends FtrService {
     await this.esArchiver.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
+  }
+
+  public async expectAppStateRemovedFromURL() {
+    this.retry.try(async () => {
+      const url = await this.browser.getCurrentUrl();
+      expect(url.indexOf('_a')).to.be(-1);
+    });
   }
 
   public async preserveCrossAppState() {
@@ -291,7 +300,34 @@ export class DashboardPageObject extends FtrService {
     });
   }
 
+  public async clearUnsavedChanges() {
+    this.log.debug('clearUnsavedChanges');
+    let switchMode = false;
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+      switchMode = true;
+    }
+    await this.retry.try(async () => {
+      // avoid flaky test by surrounding in retry
+      await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await this.clickQuickSave();
+      await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    });
+    if (switchMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+  }
+
   public async clickNewDashboard(continueEditing = false) {
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    if (!continueEditing && discardButtonExists) {
+      this.log.debug('found discard button');
+      await this.testSubjects.click('discardDashboardPromptButton');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      if (confirmation) {
+        await this.common.clickConfirmOnModal();
+      }
+    }
     await this.listingTable.clickNewButton('createDashboardPromptButton');
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
@@ -305,6 +341,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickNewDashboardExpectWarning(continueEditing = false) {
+    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    if (!continueEditing && discardButtonExists) {
+      this.log.debug('found discard button');
+      await this.testSubjects.click('discardDashboardPromptButton');
+      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      if (confirmation) {
+        await this.common.clickConfirmOnModal();
+      }
+    }
     await this.listingTable.clickNewButton('createDashboardPromptButton');
     await this.testSubjects.existOrFail('dashboardCreateConfirm');
     if (continueEditing) {
@@ -516,6 +561,27 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
+  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  public async getVisibilityOfPanelTitles() {
+    this.log.debug('in getVisibilityOfPanels');
+    // only works if the dashboard is in view mode
+    const inViewMode = await this.getIsInViewMode();
+    if (!inViewMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+    const visibilities: boolean[] = [];
+    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
+    for (const titleObject of titleObjects) {
+      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+      visibilities.push(exists);
+    }
+    // return to edit mode if a switch to view mode above was necessary
+    if (!inViewMode) {
+      await this.switchToEditMode();
+    }
+    return visibilities;
+  }
+
   public async getPanelDimensions() {
     const panels = await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
     return await Promise.all(
@@ -600,6 +666,11 @@ export class DashboardPageObject extends FtrService {
     const count = await this.getSharedItemsCount();
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));
+  }
+
+  public async verifyNoRenderErrors() {
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    expect(errorEmbeddables.length).to.be(0);
   }
 
   public async getSharedContainerData() {

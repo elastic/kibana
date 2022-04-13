@@ -9,6 +9,8 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,34 +22,42 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { ImpactBar } from '../ImpactBar';
-import { TransactionDetailLink } from '../Links/apm/transaction_detail_link';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../charts/helper/get_timeseries_color';
+import { ImpactBar } from '../impact_bar';
+import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { getLatencyColumnLabel } from './get_latency_column_label';
 
 type TransactionGroupMainStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 type ServiceTransactionGroupItem = ValuesType<
   TransactionGroupMainStatistics['transactionGroups']
 >;
 type TransactionGroupDetailedStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
 export function getColumns({
   serviceName,
   latencyAggregationType,
+  transactionGroupDetailedStatisticsLoading,
   transactionGroupDetailedStatistics,
   comparisonEnabled,
   shouldShowSparkPlots = true,
+  offset,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
+  transactionGroupDetailedStatisticsLoading: boolean;
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
+  offset?: string;
 }): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
@@ -67,6 +77,8 @@ export function getColumns({
                 transactionName={name}
                 transactionType={type}
                 latencyAggregationType={latencyAggregationType}
+                comparisonEnabled={comparisonEnabled}
+                offset={offset}
               >
                 {name}
               </TransactionDetailLink>
@@ -85,16 +97,23 @@ export function getColumns({
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.LATENCY_AVG
+        );
+
         return (
           <ListMetric
-            color="euiColorVis1"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asMillisecondDuration(latency)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -113,16 +132,23 @@ export function getColumns({
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]
             ?.throughput;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.THROUGHPUT
+        );
+
         return (
           <ListMetric
-            color="euiColorVis0"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asTransactionRate(throughput)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -130,9 +156,32 @@ export function getColumns({
     {
       field: 'errorRate',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        { defaultMessage: 'Failed transaction rate' }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.transactionsTableColumnErrorRateTip',
+            {
+              defaultMessage:
+                "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
+              {
+                defaultMessage: 'Failed transaction rate',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { errorRate, name }) => {
@@ -140,16 +189,23 @@ export function getColumns({
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;
         const previousTimeseries =
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
+
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
+
         return (
           <ListMetric
-            color="euiColorVis7"
+            color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
             }
             valueLabel={asPercent(errorRate, 1)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -157,9 +213,32 @@ export function getColumns({
     {
       field: 'impact',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnImpact',
-        { defaultMessage: 'Impact' }
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.transactionsTableColumnImpactTip',
+            {
+              defaultMessage:
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.transactionsTableColumnImpact',
+              {
+                defaultMessage: 'Impact',
+              }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {

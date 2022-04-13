@@ -10,17 +10,16 @@ import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
-import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import {
   ServiceOverviewInstancesTable,
   TableOptions,
 } from './service_overview_instances_table';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;
@@ -28,9 +27,9 @@ interface ServiceOverviewInstancesChartAndTableProps {
 }
 
 type ApiResponseMainStats =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type ApiResponseDetailedStats =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATS = {
   currentPeriodItems: [] as ApiResponseMainStats['currentPeriod'],
@@ -73,21 +72,18 @@ export function ServiceOverviewInstancesChartAndTable({
   const { direction, field } = sort;
 
   const {
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      comparisonEnabled,
+      offset,
+      latencyAggregationType,
+    },
   } = useApmParams('/services/{serviceName}/overview');
 
-  const {
-    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useUrlParams();
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const {
     data: mainStatsData = INITIAL_STATE_MAIN_STATS,
@@ -98,25 +94,26 @@ export function ServiceOverviewInstancesChartAndTable({
         return;
       }
 
-      return callApmApi({
-        endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              environment,
+              kuery,
+              latencyAggregationType:
+                latencyAggregationType as LatencyAggregationType,
+              start,
+              end,
+              transactionType,
+              offset: comparisonEnabled ? offset : undefined,
+            },
           },
-          query: {
-            environment,
-            kuery,
-            latencyAggregationType,
-            start,
-            end,
-            transactionType,
-            comparisonStart,
-            comparisonEnd,
-          },
-        },
-      }).then((response) => {
+        }
+      ).then((response) => {
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
           requestId: uuid(),
@@ -138,8 +135,8 @@ export function ServiceOverviewInstancesChartAndTable({
       pageIndex,
       field,
       direction,
-      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
-      comparisonType,
+      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
+      offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
     ]
@@ -166,22 +163,24 @@ export function ServiceOverviewInstancesChartAndTable({
     direction
   ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
-  const { data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS } =
-    useFetcher(
-      (callApmApi) => {
-        if (
-          !start ||
-          !end ||
-          !transactionType ||
-          !latencyAggregationType ||
-          !currentPeriodItemsCount
-        ) {
-          return;
-        }
+  const {
+    data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
+    status: detailedStatsStatus,
+  } = useFetcher(
+    (callApmApi) => {
+      if (
+        !start ||
+        !end ||
+        !transactionType ||
+        !latencyAggregationType ||
+        !currentPeriodItemsCount
+      ) {
+        return;
+      }
 
-        return callApmApi({
-          endpoint:
-            'GET /api/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
+        {
           params: {
             path: {
               serviceName,
@@ -189,7 +188,8 @@ export function ServiceOverviewInstancesChartAndTable({
             query: {
               environment,
               kuery,
-              latencyAggregationType,
+              latencyAggregationType:
+                latencyAggregationType as LatencyAggregationType,
               start,
               end,
               numBuckets: 20,
@@ -197,17 +197,17 @@ export function ServiceOverviewInstancesChartAndTable({
               serviceNodeIds: JSON.stringify(
                 currentPeriodOrderedItems.map((item) => item.serviceNodeName)
               ),
-              comparisonStart,
-              comparisonEnd,
+              offset: comparisonEnabled ? offset : undefined,
             },
           },
-        });
-      },
-      // only fetches detailed statistics when requestId is invalidated by main statistics api call
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [requestId],
-      { preservePreviousData: false }
-    );
+        }
+      );
+    },
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId],
+    { preservePreviousData: false }
+  );
 
   return (
     <>
@@ -225,6 +225,10 @@ export function ServiceOverviewInstancesChartAndTable({
             mainStatsItems={currentPeriodOrderedItems}
             mainStatsStatus={mainStatsStatus}
             mainStatsItemCount={currentPeriodItemsCount}
+            detailedStatsLoading={
+              detailedStatsStatus === FETCH_STATUS.LOADING ||
+              detailedStatsStatus === FETCH_STATUS.NOT_INITIATED
+            }
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}

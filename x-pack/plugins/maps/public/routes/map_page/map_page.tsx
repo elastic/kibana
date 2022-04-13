@@ -10,7 +10,11 @@ import { Provider } from 'react-redux';
 import type { AppMountParameters } from 'kibana/public';
 import type { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapApp } from './map_app';
-import { SavedMap, getInitialLayersFromUrlParam } from './saved_map';
+import {
+  SavedMap,
+  getInitialLayersFromUrlParam,
+  getOpenLayerWizardFromUrlParam,
+} from './saved_map';
 import { MapEmbeddableInput } from '../../embeddable/types';
 
 interface Props {
@@ -20,6 +24,7 @@ interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
+  originatingPath?: string;
   history: AppMountParameters['history'];
 }
 
@@ -43,8 +48,10 @@ export class MapPage extends Component<Props, State> {
         mapEmbeddableInput: props.mapEmbeddableInput,
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,
+        originatingPath: props.originatingPath,
         stateTransfer: props.stateTransfer,
         onSaveCallback: this.updateSaveCounter,
+        defaultLayerWizard: getOpenLayerWizardFromUrlParam() || '',
       }),
       saveCounter: 0,
     };

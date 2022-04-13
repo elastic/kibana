@@ -7,7 +7,7 @@
 
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Histogram,
   HistogramPoint,
@@ -37,12 +37,16 @@ export const useMonitorHistogram = ({ items }: { items: MonitorSummary[] }) => {
     monitorIds
   );
 
-  const { data, loading } = useEsSearch<Ping, typeof queryParams>(queryParams, [
-    JSON.stringify(monitorIds),
-    lastRefresh,
-  ]);
+  const { data, loading } = useEsSearch<Ping, typeof queryParams>(
+    queryParams,
+    [JSON.stringify(monitorIds), lastRefresh],
+    {
+      name: 'getMonitorDownHistory',
+    }
+  );
 
   const histogramBuckets = data?.aggregations?.histogram.buckets ?? [];
+  // @ts-ignore 4.3.5 upgrade
   const simplified = histogramBuckets.map((histogramBucket) => {
     const byId: { [key: string]: number } = {};
     histogramBucket.by_id.buckets.forEach((idBucket) => {

@@ -81,8 +81,8 @@ describe('CredentialsList', () => {
         ],
       });
       const wrapper = shallow(<CredentialsList />);
-      const { items } = wrapper.find(EuiBasicTable).props();
-      expect(items.map((i: ApiToken) => i.id)).toEqual([undefined, 1, 2]);
+      const items = wrapper.find(EuiBasicTable).props().items as ApiToken[];
+      expect(items.map((i) => i.id)).toEqual([undefined, 1, 2]);
     });
   });
 
@@ -131,7 +131,7 @@ describe('CredentialsList', () => {
         pageIndex: 5,
         pageSize: 55,
         totalItemCount: 1004,
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       });
     });
   });

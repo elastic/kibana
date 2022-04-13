@@ -28,6 +28,7 @@ export const AssetsFacetGroup = ({ width }: Args) => {
       <Component
         assets={{
           kibana: {
+            csp_rule_template: [],
             dashboard: [],
             visualization: [],
             index_pattern: [],
@@ -36,15 +37,17 @@ export const AssetsFacetGroup = ({ width }: Args) => {
             lens: [],
             security_rule: [],
             ml_module: [],
+            tag: [],
+            osquery_pack_asset: [],
           },
           elasticsearch: {
             component_template: [],
             data_stream_ilm_policy: [],
-            data_stream: [],
             ilm_policy: [],
             index_template: [],
             ingest_pipeline: [],
             transform: [],
+            ml_model: [],
           },
         }}
       />

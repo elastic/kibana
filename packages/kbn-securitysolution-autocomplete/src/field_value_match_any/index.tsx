@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
@@ -26,9 +26,9 @@ import { paramIsValid } from '../param_is_valid';
 
 interface AutocompleteFieldMatchAnyProps {
   placeholder: string;
-  selectedField: IndexPatternFieldBase | undefined;
+  selectedField: DataViewFieldBase | undefined;
   selectedValue: string[];
-  indexPattern: IndexPatternBase | undefined;
+  indexPattern: DataViewBase | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;

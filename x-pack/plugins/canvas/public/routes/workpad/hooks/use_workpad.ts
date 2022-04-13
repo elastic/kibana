@@ -16,11 +16,16 @@ import { setAssets } from '../../../state/actions/assets';
 // @ts-expect-error
 import { setZoomScale } from '../../../state/actions/transient';
 import { CanvasWorkpad } from '../../../../types';
+import type { ResolveWorkpadResponse } from '../../../services/workpad';
 
 const getWorkpadLabel = () =>
   i18n.translate('xpack.canvas.workpadResolve.redirectLabel', {
     defaultMessage: 'Workpad',
   });
+
+interface ResolveInfo extends Omit<ResolveWorkpadResponse, 'workpad'> {
+  id: string;
+}
 
 export const useWorkpad = (
   workpadId: string,
@@ -28,36 +33,58 @@ export const useWorkpad = (
   getRedirectPath: (workpadId: string) => string
 ): [CanvasWorkpad | undefined, string | Error | undefined] => {
   const workpadService = useWorkpadService();
+  const workpadResolve = workpadService.resolve;
   const platformService = usePlatformService();
   const dispatch = useDispatch();
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
 
+  const [resolveInfo, setResolveInfo] = useState<ResolveInfo | undefined>(undefined);
+
   useEffect(() => {
     (async () => {
       try {
         const {
-          outcome,
-          aliasId,
           workpad: { assets, ...workpad },
-        } = await workpadService.resolve(workpadId);
+          ...resolveProps
+        } = await workpadResolve(workpadId);
 
-        if (outcome === 'conflict') {
-          workpad.aliasId = aliasId;
-        }
+        setResolveInfo({ id: workpadId, ...resolveProps });
 
-        dispatch(setAssets(assets));
-        dispatch(setWorkpad(workpad, { loadPages }));
-        dispatch(setZoomScale(1));
+        // If it's an alias match, we know we are going to redirect so don't even dispatch that we got the workpad
+        if (storedWorkpad.id !== workpadId && resolveProps.outcome !== 'aliasMatch') {
+          workpad.aliasId = resolveProps.aliasId;
 
-        if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
-          platformService.redirectLegacyUrl(`#${getRedirectPath(aliasId)}`, getWorkpadLabel());
+          dispatch(setAssets(assets));
+          dispatch(setWorkpad(workpad, { loadPages }));
+          dispatch(setZoomScale(1));
         }
       } catch (e) {
         setError(e as Error | string);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadService, getRedirectPath, platformService]);
+  }, [workpadId, dispatch, setError, loadPages, workpadResolve, storedWorkpad.id]);
+
+  useEffect(() => {
+    // If the resolved info is not for the current workpad id, bail out
+    if (resolveInfo && resolveInfo.id !== workpadId) {
+      return;
+    }
+
+    (async () => {
+      if (!resolveInfo) return;
+
+      const { aliasId, outcome, aliasPurpose } = resolveInfo;
+      if (outcome === 'aliasMatch' && platformService.redirectLegacyUrl && aliasId) {
+        const redirectPath = getRedirectPath(aliasId);
+        await platformService.redirectLegacyUrl({
+          path: `#${redirectPath}`,
+          aliasPurpose,
+          objectNoun: getWorkpadLabel(),
+        });
+      }
+    })();
+  }, [workpadId, resolveInfo, getRedirectPath, platformService]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };

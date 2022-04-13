@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'test_logstash_reader',
           'global_visualize_all',
         ],
-        false
+        { skipBrowserRefresh: true }
       );
     });
     after(async () => {
@@ -69,7 +69,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+      await retry.try(async () => {
+        await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
+      });
 
       await retry.try(async () => {
         await testSubjects.click('applyFiltersPopoverButton');
@@ -88,8 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
-    // setting set in kibana.yml to work (not enabled by default)
-    it('should be able to drill down to discover', async () => {
+    // setting set in kibana.yml to test (not enabled by default)
+    it('should hide old "explore underlying data" action', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
@@ -99,13 +102,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.dashboard.saveDashboard('lnsDrilldown');
       await panelActions.openContextMenu();
-      await testSubjects.clickWhenNotDisabled('embeddablePanelAction-ACTION_EXPLORE_DATA');
-      await PageObjects.discover.waitForDiscoverAppOnScreen();
 
-      const el = await testSubjects.find('indexPattern-switch-link');
-      const text = await el.getVisibleText();
-
-      expect(text).to.be('logstash-*');
+      expect(await testSubjects.exists('embeddablePanelAction-ACTION_EXPLORE_DATA')).not.to.be.ok();
     });
 
     it('should be able to add filters by clicking in pie chart', async () => {

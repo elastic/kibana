@@ -31,6 +31,18 @@ jest.mock('../../../common/components/link_to');
 describe('NetworkHttp Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
+  const defaultProps = {
+    data: mockData.edges,
+    fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.pageInfo),
+    id: 'http',
+    isInspect: false,
+    loading: false,
+    loadPage,
+    setQuerySkip: jest.fn(),
+    showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockData.pageInfo),
+    totalCount: mockData.totalCount,
+    type: networkModel.NetworkType.page,
+  };
 
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
@@ -44,17 +56,7 @@ describe('NetworkHttp Table Component', () => {
     test('it renders the default NetworkHttp table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkHttpTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="http"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={networkModel.NetworkType.page}
-          />
+          <NetworkHttpTable {...defaultProps} />
         </ReduxStoreProvider>
       );
 
@@ -66,21 +68,11 @@ describe('NetworkHttp Table Component', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <NetworkHttpTable
-            data={mockData.edges}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.pageInfo)}
-            id="http"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockData.pageInfo)}
-            totalCount={mockData.totalCount}
-            type={networkModel.NetworkType.page}
-          />
+          <NetworkHttpTable {...defaultProps} />
         </TestProviders>
       );
 
-      expect(store.getState().network.page.queries!.http.sort).toEqual({
+      expect(store.getState().network.page.queries?.http.sort).toEqual({
         direction: 'desc',
       });
 
@@ -88,7 +80,7 @@ describe('NetworkHttp Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.http.sort).toEqual({
+      expect(store.getState().network.page.queries?.http.sort).toEqual({
         direction: 'asc',
       });
       expect(wrapper.find('.euiTable thead tr th button').first().find('svg')).toBeTruthy();

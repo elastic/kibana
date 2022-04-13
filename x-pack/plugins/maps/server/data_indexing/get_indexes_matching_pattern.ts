@@ -14,7 +14,7 @@ export async function getMatchingIndexes(
   logger: Logger
 ) {
   try {
-    const { body: indexResults } = await asCurrentUser.cat.indices({
+    const indexResults = await asCurrentUser.cat.indices({
       index: indexPattern,
       format: 'JSON',
     });

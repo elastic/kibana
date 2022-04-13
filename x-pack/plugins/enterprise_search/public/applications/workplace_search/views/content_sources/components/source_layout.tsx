@@ -8,23 +8,24 @@
 import React from 'react';
 
 import { useValues } from 'kea';
-import moment from 'moment';
 
 import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { PageTemplateProps } from '../../../../shared/layout';
 import { AppLogic } from '../../../app_logic';
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../../components/layout';
 import { NAV } from '../../../constants';
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 
 import {
+  DOWNLOAD_DIAGNOSTIC_BUTTON,
   SOURCE_DISABLED_CALLOUT_TITLE,
   SOURCE_DISABLED_CALLOUT_DESCRIPTION,
   SOURCE_DISABLED_CALLOUT_BUTTON,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
+import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 import { SourceInfoCard } from './source_info_card';
 
 export const SourceLayout: React.FC<PageTemplateProps> = ({
@@ -32,19 +33,14 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
   pageChrome = [],
   ...props
 }) => {
-  const { contentSource, dataLoading } = useValues(SourceLogic);
+  const { contentSource, dataLoading, diagnosticDownloadButtonVisible } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
-  const { name, createdAt, serviceType, isFederatedSource, supportedByLicense } = contentSource;
+  const { name, supportedByLicense } = contentSource;
 
   const pageHeader = (
     <>
-      <SourceInfoCard
-        sourceName={name}
-        sourceType={serviceType}
-        dateCreated={moment(createdAt).format('MMMM D, YYYY')}
-        isFederatedSource={isFederatedSource}
-      />
+      <SourceInfoCard contentSource={contentSource} />
       <EuiHorizontalRule />
     </>
   );
@@ -53,11 +49,18 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
     <>
       <EuiCallOut title={SOURCE_DISABLED_CALLOUT_TITLE} color="warning" iconType="alert">
         <p>{SOURCE_DISABLED_CALLOUT_DESCRIPTION}</p>
-        <EuiButton color="warning" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+        <EuiButton color="warning" href={docLinks.licenseManagement}>
           {SOURCE_DISABLED_CALLOUT_BUTTON}
         </EuiButton>
       </EuiCallOut>
       <EuiSpacer />
+    </>
+  );
+
+  const downloadDiagnosticButton = (
+    <>
+      <DownloadDiagnosticsButton label={DOWNLOAD_DIAGNOSTIC_BUTTON} />
+      <EuiSpacer size="xl" />
     </>
   );
 
@@ -69,6 +72,7 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
       {...props}
       pageChrome={[NAV.SOURCES, name || '...', ...pageChrome]}
     >
+      {diagnosticDownloadButtonVisible && downloadDiagnosticButton}
       {!supportedByLicense && callout}
       {pageHeader}
       {children}

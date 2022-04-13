@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { SavedObjectsFindOptionsReference } from 'kibana/server';
 import { Logger } from 'src/core/server';
 
-import { AlertServices } from '../../../../../alerting/server';
+import { RuleExecutorServices } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
@@ -17,13 +18,14 @@ import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_type
 import { legacyGetRuleActionsFromSavedObject } from './legacy_utils';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
+import { initPromisePool } from '../../../utils/promise_pool';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 interface LegacyGetBulkRuleActionsSavedObject {
   alertIds: string[];
-  savedObjectsClient: AlertServices['savedObjectsClient'];
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
   logger: Logger;
 }
 
@@ -39,15 +41,29 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
     id: alertId,
     type: 'alert',
   }));
-  const {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    saved_objects,
-  } = await savedObjectsClient.find<LegacyIRuleActionsAttributesSavedObjectAttributes>({
-    type: legacyRuleActionsSavedObjectType,
-    perPage: 10000,
-    hasReference: references,
+  const { results, errors } = await initPromisePool({
+    concurrency: 1,
+    items: chunk(references, 1000),
+    executor: (referencesChunk) =>
+      savedObjectsClient
+        .find<LegacyIRuleActionsAttributesSavedObjectAttributes>({
+          type: legacyRuleActionsSavedObjectType,
+          perPage: 10000,
+          hasReference: referencesChunk,
+        })
+        .catch((error) => {
+          logger.error(
+            `Error fetching rule actions: ${error instanceof Error ? error.message : String(error)}`
+          );
+          throw error;
+        }),
   });
-  return saved_objects.reduce(
+  if (errors.length) {
+    throw new AggregateError(errors, 'Error fetching rule actions');
+  }
+
+  const savedObjects = results.flatMap(({ result }) => result.saved_objects);
+  return savedObjects.reduce(
     (acc: { [key: string]: LegacyRulesActionsSavedObject }, savedObject) => {
       const ruleAlertId = savedObject.references.find((reference) => {
         // Find the first rule alert and assume that is the one we want since we should only ever have 1.

@@ -14,15 +14,15 @@ import { Observable, Subscription } from 'rxjs';
 import { LicensingPluginStart } from '../../../licensing/server';
 import { ILicense, LicenseType } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
-import { getAlertTypeFeatureUsageName } from './get_alert_type_feature_usage_name';
+import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 import {
-  AlertType,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleType,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
-import { AlertTypeDisabledError } from './errors/alert_type_disabled';
+import { RuleTypeDisabledError } from './errors/rule_type_disabled';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
@@ -68,21 +68,21 @@ export class LicenseState {
     this._notifyUsage = notifyUsage;
   }
 
-  public getLicenseCheckForAlertType(
-    alertTypeId: string,
-    alertTypeName: string,
+  public getLicenseCheckForRuleType(
+    ruleTypeId: string,
+    ruleTypeName: string,
     minimumLicenseRequired: LicenseType,
     { notifyUsage }: { notifyUsage: boolean } = { notifyUsage: false }
   ): { isValid: true } | { isValid: false; reason: 'unavailable' | 'expired' | 'invalid' } {
     if (notifyUsage) {
-      this.notifyUsage(alertTypeName, minimumLicenseRequired);
+      this.notifyUsage(ruleTypeName, minimumLicenseRequired);
     }
 
     if (!this.license?.isAvailable) {
       return { isValid: false, reason: 'unavailable' };
     }
 
-    const check = this.license.check(alertTypeId, minimumLicenseRequired);
+    const check = this.license.check(ruleTypeId, minimumLicenseRequired);
 
     switch (check.state) {
       case 'expired':
@@ -98,10 +98,10 @@ export class LicenseState {
     }
   }
 
-  private notifyUsage(alertTypeName: string, minimumLicenseRequired: LicenseType) {
+  private notifyUsage(ruleTypeName: string, minimumLicenseRequired: LicenseType) {
     // No need to notify usage on basic alert types
     if (this._notifyUsage && minimumLicenseRequired !== 'basic') {
-      this._notifyUsage(getAlertTypeFeatureUsageName(alertTypeName));
+      this._notifyUsage(getRuleTypeFeatureUsageName(ruleTypeName));
     }
   }
 
@@ -147,16 +147,16 @@ export class LicenseState {
     }
   }
 
-  public ensureLicenseForAlertType<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams,
-    State extends AlertTypeState,
+  public ensureLicenseForRuleType<
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams,
+    State extends RuleTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string
   >(
-    alertType: AlertType<
+    ruleType: RuleType<
       Params,
       ExtractedParams,
       State,
@@ -166,12 +166,12 @@ export class LicenseState {
       RecoveryActionGroupId
     >
   ) {
-    this.notifyUsage(alertType.name, alertType.minimumLicenseRequired);
+    this.notifyUsage(ruleType.name, ruleType.minimumLicenseRequired);
 
-    const check = this.getLicenseCheckForAlertType(
-      alertType.id,
-      alertType.name,
-      alertType.minimumLicenseRequired
+    const check = this.getLicenseCheckForRuleType(
+      ruleType.id,
+      ruleType.name,
+      ruleType.minimumLicenseRequired
     );
 
     if (check.isValid) {
@@ -179,33 +179,33 @@ export class LicenseState {
     }
     switch (check.reason) {
       case 'unavailable':
-        throw new AlertTypeDisabledError(
+        throw new RuleTypeDisabledError(
           i18n.translate('xpack.alerting.serverSideErrors.unavailableLicenseErrorMessage', {
             defaultMessage:
-              'Alert type {alertTypeId} is disabled because license information is not available at this time.',
+              'Rule type {ruleTypeId} is disabled because license information is not available at this time.',
             values: {
-              alertTypeId: alertType.id,
+              ruleTypeId: ruleType.id,
             },
           }),
           'license_unavailable'
         );
       case 'expired':
-        throw new AlertTypeDisabledError(
+        throw new RuleTypeDisabledError(
           i18n.translate('xpack.alerting.serverSideErrors.expirerdLicenseErrorMessage', {
             defaultMessage:
-              'Alert type {alertTypeId} is disabled because your {licenseType} license has expired.',
-            values: { alertTypeId: alertType.id, licenseType: this.license!.type },
+              'Rule type {ruleTypeId} is disabled because your {licenseType} license has expired.',
+            values: { ruleTypeId: ruleType.id, licenseType: this.license!.type },
           }),
           'license_expired'
         );
       case 'invalid':
-        throw new AlertTypeDisabledError(
+        throw new RuleTypeDisabledError(
           i18n.translate('xpack.alerting.serverSideErrors.invalidLicenseErrorMessage', {
             defaultMessage:
-              'Alert {alertTypeId} is disabled because it requires a {licenseType} license. Go to License Management to view upgrade options.',
+              'Rule {ruleTypeId} is disabled because it requires a {licenseType} license. Go to License Management to view upgrade options.',
             values: {
-              alertTypeId: alertType.id,
-              licenseType: capitalize(alertType.minimumLicenseRequired),
+              ruleTypeId: ruleType.id,
+              licenseType: capitalize(ruleType.minimumLicenseRequired),
             },
           }),
           'license_invalid'

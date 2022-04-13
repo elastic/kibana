@@ -7,11 +7,13 @@
  */
 
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
+export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
   CREATE_NEW_DASHBOARD_URL: '/create',
   VIEW_DASHBOARD_URL: '/view',
+  PRINT_DASHBOARD_URL: '/print',
   ADD_EMBEDDABLE_ID: 'addEmbeddableId',
   ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
   DASHBOARDS_ID: 'dashboards',

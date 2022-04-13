@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import {
   HostsKpiQueries,
   HostsKpiHostsStrategyResponse,
@@ -17,7 +17,6 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiHostsQuery } from './query.hosts_kpi_hosts.dsl';
 import { formatGeneralHistogramData } from '../common';
-import { buildHostsKpiHostsQueryEntities } from './query.hosts_kpi_hosts_entities.dsl';
 
 export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
   buildDsl: (options: HostsKpiHostsRequestOptions) => buildHostsKpiHostsQuery(options),
@@ -27,30 +26,6 @@ export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = 
   ): Promise<HostsKpiHostsStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildHostsKpiHostsQuery(options))],
-    };
-
-    const hostsHistogram = getOr(
-      null,
-      'aggregations.hosts_histogram.buckets',
-      response.rawResponse
-    );
-    return {
-      ...response,
-      inspect,
-      hosts: getOr(null, 'aggregations.hosts.value', response.rawResponse),
-      hostsHistogram: formatGeneralHistogramData(hostsHistogram),
-    };
-  },
-};
-
-export const hostsKpiHostsEntities: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
-  buildDsl: (options: HostsKpiHostsRequestOptions) => buildHostsKpiHostsQueryEntities(options),
-  parse: async (
-    options: HostsKpiHostsRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<HostsKpiHostsStrategyResponse> => {
-    const inspect = {
-      dsl: [inspectStringifyObject(buildHostsKpiHostsQueryEntities(options))],
     };
 
     const hostsHistogram = getOr(

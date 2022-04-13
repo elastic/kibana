@@ -9,65 +9,63 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SnapshotNode } from '../../../../../common/http_api';
 import { SavedView } from '../../../../containers/saved_view/saved_view';
 import { AutoSizer } from '../../../../components/auto_sizer';
-import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
 import { NodesOverview } from './nodes_overview';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
-import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
-import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { InfraFormatterType } from '../../../../lib/lib';
+import {
+  DEFAULT_LEGEND,
+  useWaffleOptionsContext,
+  WaffleLegendOptions,
+} from '../hooks/use_waffle_options';
+import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../lib/lib';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
-import { IntervalLabel } from './waffle/interval_label';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
-import { Legend } from './waffle/legend';
+import { LegendControls } from './waffle/legend_controls';
+
+interface Props {
+  shouldLoadDefault: boolean;
+  currentView: SavedView<any> | null;
+  reload: () => Promise<any>;
+  interval: string;
+  nodes: SnapshotNode[];
+  loading: boolean;
+}
+
+interface LegendControlOptions {
+  auto: boolean;
+  bounds: InfraWaffleMapBounds;
+  legend: WaffleLegendOptions;
+}
 
 export const Layout = React.memo(
-  ({
-    shouldLoadDefault,
-    currentView,
-  }: {
-    shouldLoadDefault: boolean;
-    currentView: SavedView<any> | null;
-  }) => {
+  ({ shouldLoadDefault, currentView, reload, interval, nodes, loading }: Props) => {
     const [showLoading, setShowLoading] = useState(true);
-    const { sourceId, source } = useSourceContext();
     const {
       metric,
       groupBy,
       sort,
       nodeType,
-      accountId,
-      region,
       changeView,
       view,
       autoBounds,
       boundsOverride,
       legend,
+      changeBoundsOverride,
+      changeAutoBounds,
+      changeLegend,
     } = useWaffleOptionsContext();
     const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
-    const { filterQueryAsJson, applyFilterQuery } = useWaffleFiltersContext();
-    const { loading, nodes, reload, interval } = useSnapshot(
-      filterQueryAsJson,
-      [metric],
-      groupBy,
-      nodeType,
-      sourceId,
-      currentTime,
-      accountId,
-      region,
-      false
-    );
-
+    const { applyFilterQuery } = useWaffleFiltersContext();
     const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
     const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
     const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
@@ -78,7 +76,6 @@ export const Layout = React.memo(
       legend: createLegend(legendPalette, legendSteps, legendReverseColors),
       metric,
       sort,
-      fields: source?.configuration?.fields,
       groupBy,
     };
 
@@ -91,7 +88,6 @@ export const Layout = React.memo(
       isAutoReloading ? 5000 : null
     );
 
-    const intervalAsString = convertIntervalToString(interval);
     const dataBounds = calculateBoundsFromNodes(nodes);
     const bounds = autoBounds ? dataBounds : boundsOverride;
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -132,6 +128,15 @@ export const Layout = React.memo(
       setShowLoading(!hasNodes);
     }, [nodes]);
 
+    const handleLegendControlChange = useCallback(
+      (opts: LegendControlOptions) => {
+        changeBoundsOverride(opts.bounds);
+        changeAutoBounds(opts.auto);
+        changeLegend(opts.legend);
+      },
+      [changeBoundsOverride, changeAutoBounds, changeLegend]
+    );
+
     return (
       <>
         <PageContent>
@@ -151,12 +156,26 @@ export const Layout = React.memo(
                           gutterSize="m"
                         >
                           <Toolbar nodeType={nodeType} currentTime={currentTime} />
-                          <EuiFlexItem grow={false} className="eui-hideFor--s eui-hideFor--xs">
-                            <IntervalLabel intervalAsString={intervalAsString} />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <ViewSwitcher view={view} onChange={changeView} />
-                          </EuiFlexItem>
+                          <EuiFlexGroup
+                            responsive={false}
+                            style={{ margin: 0, justifyContent: 'end' }}
+                          >
+                            {view === 'map' && (
+                              <EuiFlexItem grow={false}>
+                                <LegendControls
+                                  options={legend != null ? legend : DEFAULT_LEGEND}
+                                  dataBounds={dataBounds}
+                                  bounds={bounds}
+                                  autoBounds={autoBounds}
+                                  boundsOverride={boundsOverride}
+                                  onChange={handleLegendControlChange}
+                                />
+                              </EuiFlexItem>
+                            )}
+                            <EuiFlexItem grow={false}>
+                              <ViewSwitcher view={view} onChange={changeView} />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         </EuiFlexGroup>
                       </TopActionContainer>
                       <AutoSizer bounds>
@@ -184,14 +203,7 @@ export const Layout = React.memo(
                                 interval={interval}
                                 formatter={formatter}
                                 width={width}
-                              >
-                                <Legend
-                                  formatter={formatter}
-                                  bounds={bounds}
-                                  dataBounds={dataBounds}
-                                  legend={options.legend}
-                                />
-                              </BottomDrawer>
+                              />
                             )}
                           </>
                         )}

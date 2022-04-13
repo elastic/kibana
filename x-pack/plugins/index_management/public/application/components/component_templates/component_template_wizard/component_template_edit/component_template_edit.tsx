@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';

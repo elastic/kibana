@@ -14,10 +14,10 @@ import { overallMetric, OverallMetricArgs } from '../overall_metric';
 describe('interpreter/functions#overall_metric', () => {
   const fn = functionWrapper(overallMetric);
   const runFn = (input: Datatable, args: OverallMetricArgs) =>
-    fn(input, args, {} as ExecutionContext) as Datatable;
+    fn(input, args, {} as ExecutionContext) as Promise<Datatable>;
 
-  it('ignores null or undefined with sum', () => {
-    const result = runFn(
+  it('ignores null or undefined with sum', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -33,8 +33,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([12, 12, 12, 12]);
   });
 
-  it('ignores null or undefined with average', () => {
-    const result = runFn(
+  it('ignores null or undefined with average', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -50,8 +50,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([3, 3, 3, 3, 3]);
   });
 
-  it('ignores null or undefined with min', () => {
-    const result = runFn(
+  it('ignores null or undefined with min', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -67,8 +67,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([1, 1, 1, 1, 1]);
   });
 
-  it('ignores null or undefined with max', () => {
-    const result = runFn(
+  it('ignores null or undefined with max', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -84,8 +84,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([-1, -1, -1, -1, -1]);
   });
 
-  it('calculates overall sum for multiple series', () => {
-    const result = runFn(
+  it('calculates overall sum for multiple series', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -118,8 +118,8 @@ describe('interpreter/functions#overall_metric', () => {
     ]);
   });
 
-  it('treats missing split column as separate series', () => {
-    const result = runFn(
+  it('treats missing split column as separate series', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -142,7 +142,7 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([1, 2, 3, 1, 3, 1, 2, 2]);
   });
 
-  it('treats null like undefined and empty string for split columns', () => {
+  it('treats null like undefined and empty string for split columns', async () => {
     const table: Datatable = {
       type: 'datatable',
       columns: [
@@ -162,7 +162,7 @@ describe('interpreter/functions#overall_metric', () => {
       ],
     };
 
-    const result = runFn(table, {
+    const result = await runFn(table, {
       inputColumnId: 'val',
       outputColumnId: 'output',
       by: ['split'],
@@ -180,7 +180,7 @@ describe('interpreter/functions#overall_metric', () => {
       3 + 5 + 7 + 9,
     ]);
 
-    const result2 = runFn(table, {
+    const result2 = await runFn(table, {
       inputColumnId: 'val',
       outputColumnId: 'output',
       by: ['split'],
@@ -188,7 +188,7 @@ describe('interpreter/functions#overall_metric', () => {
     });
     expect(result2.rows.map((row) => row.output)).toEqual([6, 8, 9, 6, 9, 6, 9, 8, 9]);
 
-    const result3 = runFn(table, {
+    const result3 = await runFn(table, {
       inputColumnId: 'val',
       outputColumnId: 'output',
       by: ['split'],
@@ -207,8 +207,8 @@ describe('interpreter/functions#overall_metric', () => {
     ]);
   });
 
-  it('handles array values', () => {
-    const result = runFn(
+  it('handles array values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -224,8 +224,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([28, 28, 28, 28]);
   });
 
-  it('takes array values into account for average calculation', () => {
-    const result = runFn(
+  it('takes array values into account for average calculation', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -241,7 +241,7 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([3, 3]);
   });
 
-  it('handles array values for split columns', () => {
+  it('handles array values for split columns', async () => {
     const table: Datatable = {
       type: 'datatable',
       columns: [
@@ -261,7 +261,7 @@ describe('interpreter/functions#overall_metric', () => {
       ],
     };
 
-    const result = runFn(table, {
+    const result = await runFn(table, {
       inputColumnId: 'val',
       outputColumnId: 'output',
       by: ['split'],
@@ -279,7 +279,7 @@ describe('interpreter/functions#overall_metric', () => {
       3 + 5 + 7 + 9 + 99,
     ]);
 
-    const result2 = runFn(table, {
+    const result2 = await runFn(table, {
       inputColumnId: 'val',
       outputColumnId: 'output',
       by: ['split'],
@@ -288,8 +288,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result2.rows.map((row) => row.output)).toEqual([6, 11, 99, 6, 99, 6, 99, 11, 99]);
   });
 
-  it('calculates cumulative sum for multiple series by multiple split columns', () => {
-    const result = runFn(
+  it('calculates cumulative sum for multiple series by multiple split columns', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -313,8 +313,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([1 + 4, 2, 3, 1 + 4, 5, 6, 7 + 8, 7 + 8]);
   });
 
-  it('splits separate series by the string representation of the cell values', () => {
-    const result = runFn(
+  it('splits separate series by the string representation of the cell values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -334,8 +334,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([1 + 2, 1 + 2, 10 + 11, 10 + 11]);
   });
 
-  it('casts values to number before calculating cumulative sum', () => {
-    const result = runFn(
+  it('casts values to number before calculating cumulative sum', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -346,8 +346,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([7, 7, 7, 7]);
   });
 
-  it('casts values to number before calculating metric for NaN like values', () => {
-    const result = runFn(
+  it('casts values to number before calculating metric for NaN like values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -358,8 +358,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([NaN, NaN, NaN, NaN]);
   });
 
-  it('skips undefined and null values', () => {
-    const result = runFn(
+  it('skips undefined and null values', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
@@ -380,8 +380,8 @@ describe('interpreter/functions#overall_metric', () => {
     expect(result.rows.map((row) => row.output)).toEqual([4, 4, 4, 4, 4, 4, 4, 4, 4]);
   });
 
-  it('copies over meta information from the source column', () => {
-    const result = runFn(
+  it('copies over meta information from the source column', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -422,8 +422,8 @@ describe('interpreter/functions#overall_metric', () => {
     });
   });
 
-  it('sets output name on output column if specified', () => {
-    const result = runFn(
+  it('sets output name on output column if specified', async () => {
+    const result = await runFn(
       {
         type: 'datatable',
         columns: [
@@ -451,7 +451,7 @@ describe('interpreter/functions#overall_metric', () => {
     });
   });
 
-  it('returns source table if input column does not exist', () => {
+  it('returns source table if input column does not exist', async () => {
     const input: Datatable = {
       type: 'datatable',
       columns: [
@@ -466,12 +466,12 @@ describe('interpreter/functions#overall_metric', () => {
       rows: [{ val: 5 }],
     };
     expect(
-      runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output', metric: 'sum' })
+      await runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output', metric: 'sum' })
     ).toBe(input);
   });
 
-  it('throws an error if output column exists already', () => {
-    expect(() =>
+  it('throws an error if output column exists already', async () => {
+    await expect(
       runFn(
         {
           type: 'datatable',
@@ -488,6 +488,6 @@ describe('interpreter/functions#overall_metric', () => {
         },
         { inputColumnId: 'val', outputColumnId: 'val', metric: 'max' }
       )
-    ).toThrow();
+    ).rejects.toBeDefined();
   });
 });

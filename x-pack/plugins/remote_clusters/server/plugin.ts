@@ -11,7 +11,7 @@ import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/se
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
-import { ConfigType } from './config';
+import { RemoteClustersConfig, RemoteClustersConfig7x } from './config';
 import {
   registerGetRoute,
   registerAddRoute,
@@ -30,7 +30,7 @@ export class RemoteClustersServerPlugin
 {
   licenseStatus: LicenseStatus;
   log: Logger;
-  config: ConfigType;
+  config: RemoteClustersConfig | RemoteClustersConfig7x;
 
   constructor({ logger, config }: PluginInitializerContext) {
     this.log = logger.get();

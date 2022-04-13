@@ -25,7 +25,6 @@ import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type Buckets = Array<{
@@ -56,6 +55,7 @@ export const useMatrixHistogram = ({
   isPtrIncluded,
   onError,
   stackByField,
+  runtimeMappings,
   startDate,
   threshold,
   skip = false,
@@ -70,33 +70,20 @@ export const useMatrixHistogram = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const { getTransformChangesIfTheyExist } = useTransforms();
-
-  const {
-    indices: initialIndexName,
-    factoryQueryType: initialFactoryQueryType,
-    histogramType: initialHistogramType,
-    timerange: initialTimerange,
-  } = getTransformChangesIfTheyExist({
-    histogramType,
-    factoryQueryType: MatrixHistogramQuery,
-    indices: indexNames,
-    filterQuery,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
 
   const [matrixHistogramRequest, setMatrixHistogramRequest] =
     useState<MatrixHistogramRequestOptions>({
-      defaultIndex: initialIndexName,
-      factoryQueryType: initialFactoryQueryType,
+      defaultIndex: indexNames,
+      factoryQueryType: MatrixHistogramQuery,
       filterQuery: createFilter(filterQuery),
-      histogramType: initialHistogramType ?? histogramType,
-      timerange: initialTimerange,
+      histogramType: histogramType ?? histogramType,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
       stackByField,
+      runtimeMappings,
       threshold,
       ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
       ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
@@ -168,31 +155,17 @@ export const useMatrixHistogram = ({
   );
 
   useEffect(() => {
-    const {
-      indices,
-      factoryQueryType,
-      histogramType: newHistogramType,
-      timerange,
-    } = getTransformChangesIfTheyExist({
-      histogramType,
-      factoryQueryType: MatrixHistogramQuery,
-      indices: indexNames,
-      filterQuery,
-      timerange: {
-        interval: '12h',
-        from: startDate,
-        to: endDate,
-      },
-    });
-
     setMatrixHistogramRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indices,
-        factoryQueryType,
+        defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
-        histogramType: newHistogramType ?? histogramType,
-        timerange,
+        histogramType,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
         stackByField,
         threshold,
         ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
@@ -213,7 +186,6 @@ export const useMatrixHistogram = ({
     threshold,
     isPtrIncluded,
     docValueFields,
-    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {
@@ -226,6 +198,14 @@ export const useMatrixHistogram = ({
       abortCtrl.current.abort();
     };
   }, [matrixHistogramRequest, hostsSearch, skip]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   const runMatrixHistogramSearch = useCallback(
     (to: string, from: string) => {

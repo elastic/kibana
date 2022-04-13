@@ -1,0 +1,230 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldIcon changes fill when scripted is true 1`] = `
+<EuiToken
+  aria-label="test"
+  className="kbnFieldIcon"
+  fill="dark"
+  iconType="tokenNumber"
+  size="s"
+  title="test"
+/>
+`;
+
+exports[`FieldIcon renders an icon for an unknown type 1`] = `
+<EuiToken
+  aria-label="test"
+  className="kbnFieldIcon"
+  color="gray"
+  iconType="questionInCircle"
+  size="s"
+  title="test"
+/>
+`;
+
+exports[`FieldIcon renders known field types _source is rendered 1`] = `
+<EuiToken
+  aria-label="_source"
+  className="kbnFieldIcon"
+  color="gray"
+  iconType="editorCodeBlock"
+  size="s"
+  title="_source"
+/>
+`;
+
+exports[`FieldIcon renders known field types boolean is rendered 1`] = `
+<EuiToken
+  aria-label="boolean"
+  className="kbnFieldIcon"
+  iconType="tokenBoolean"
+  size="s"
+  title="boolean"
+/>
+`;
+
+exports[`FieldIcon renders known field types conflict is rendered 1`] = `
+<EuiToken
+  aria-label="conflict"
+  className="kbnFieldIcon"
+  color="euiColorVis9"
+  iconType="alert"
+  shape="square"
+  size="s"
+  title="conflict"
+/>
+`;
+
+exports[`FieldIcon renders known field types date is rendered 1`] = `
+<EuiToken
+  aria-label="date"
+  className="kbnFieldIcon"
+  iconType="tokenDate"
+  size="s"
+  title="date"
+/>
+`;
+
+exports[`FieldIcon renders known field types date_range is rendered 1`] = `
+<EuiToken
+  aria-label="date_range"
+  className="kbnFieldIcon"
+  iconType="tokenDate"
+  size="s"
+  title="date_range"
+/>
+`;
+
+exports[`FieldIcon renders known field types geo_point is rendered 1`] = `
+<EuiToken
+  aria-label="geo_point"
+  className="kbnFieldIcon"
+  iconType="tokenGeo"
+  size="s"
+  title="geo_point"
+/>
+`;
+
+exports[`FieldIcon renders known field types geo_shape is rendered 1`] = `
+<EuiToken
+  aria-label="geo_shape"
+  className="kbnFieldIcon"
+  iconType="tokenGeo"
+  size="s"
+  title="geo_shape"
+/>
+`;
+
+exports[`FieldIcon renders known field types histogram is rendered 1`] = `
+<EuiToken
+  aria-label="histogram"
+  className="kbnFieldIcon"
+  iconType="tokenHistogram"
+  size="s"
+  title="histogram"
+/>
+`;
+
+exports[`FieldIcon renders known field types ip is rendered 1`] = `
+<EuiToken
+  aria-label="ip"
+  className="kbnFieldIcon"
+  iconType="tokenIP"
+  size="s"
+  title="ip"
+/>
+`;
+
+exports[`FieldIcon renders known field types ip_range is rendered 1`] = `
+<EuiToken
+  aria-label="ip_range"
+  className="kbnFieldIcon"
+  iconType="tokenIP"
+  size="s"
+  title="ip_range"
+/>
+`;
+
+exports[`FieldIcon renders known field types keyword is rendered 1`] = `
+<EuiToken
+  aria-label="keyword"
+  className="kbnFieldIcon"
+  iconType="tokenKeyword"
+  size="s"
+  title="keyword"
+/>
+`;
+
+exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
+<EuiToken
+  aria-label="murmur3"
+  className="kbnFieldIcon"
+  iconType="tokenSearchType"
+  size="s"
+  title="murmur3"
+/>
+`;
+
+exports[`FieldIcon renders known field types nested is rendered 1`] = `
+<EuiToken
+  aria-label="nested"
+  className="kbnFieldIcon"
+  iconType="tokenNested"
+  size="s"
+  title="nested"
+/>
+`;
+
+exports[`FieldIcon renders known field types number is rendered 1`] = `
+<EuiToken
+  aria-label="number"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="number"
+/>
+`;
+
+exports[`FieldIcon renders known field types number_range is rendered 1`] = `
+<EuiToken
+  aria-label="number_range"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="number_range"
+/>
+`;
+
+exports[`FieldIcon renders known field types string is rendered 1`] = `
+<EuiToken
+  aria-label="string"
+  className="kbnFieldIcon"
+  iconType="tokenString"
+  size="s"
+  title="string"
+/>
+`;
+
+exports[`FieldIcon renders known field types text is rendered 1`] = `
+<EuiToken
+  aria-label="text"
+  className="kbnFieldIcon"
+  iconType="tokenString"
+  size="s"
+  title="text"
+/>
+`;
+
+exports[`FieldIcon renders known field types version is rendered 1`] = `
+<EuiToken
+  aria-label="version"
+  className="kbnFieldIcon"
+  iconType="tokenTag"
+  size="s"
+  title="version"
+/>
+`;
+
+exports[`FieldIcon renders with className if provided 1`] = `
+<EuiToken
+  aria-label="test"
+  className="kbnFieldIcon myClass"
+  color="gray"
+  iconType="questionInCircle"
+  size="s"
+  title="test"
+/>
+`;
+
+exports[`FieldIcon supports same props as EuiToken 1`] = `
+<EuiToken
+  aria-label="test"
+  className="kbnFieldIcon"
+  color="euiColorVis0"
+  fill="none"
+  iconType="tokenNumber"
+  shape="circle"
+  size="l"
+  title="test"
+/>
+`;

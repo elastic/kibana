@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import bluebird from 'bluebird';
+import pMap from 'p-map';
 import { schema } from '@kbn/config-schema';
-import { GetAgentPoliciesResponseItem, AGENT_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
-import { PLUGIN_ID } from '../../../common';
+import { filter, uniq, map } from 'lodash';
+import { satisfies } from 'semver';
+import {
+  GetAgentPoliciesResponseItem,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PackagePolicy,
+} from '../../../../fleet/common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
@@ -23,33 +30,42 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const soClient = context.core.savedObjects.client;
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+        osqueryContext.getStartServices
+      );
+      const agentService = osqueryContext.service.getAgentService();
+      const agentPolicyService = osqueryContext.service.getAgentPolicyService();
+      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-      // TODO: Use getAgentPoliciesHandler from x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts
-      const body = await osqueryContext.service.getAgentPolicyService()?.list(soClient, {
-        ...(request.query || {}),
-        perPage: 100,
-      });
+      const { items: packagePolicies } = (await packagePolicyService?.list(
+        internalSavedObjectsClient,
+        {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: 1000,
+          page: 1,
+        }
+      )) ?? { items: [] as PackagePolicy[] };
+      const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+        satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+      );
+      const agentPolicyIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
+      const agentPolicies = await agentPolicyService?.getByIds(
+        internalSavedObjectsClient,
+        agentPolicyIds
+      );
 
-      if (body?.items) {
-        await bluebird.map(
-          body.items,
+      if (agentPolicies?.length) {
+        await pMap(
+          agentPolicies,
           (agentPolicy: GetAgentPoliciesResponseItem) =>
-            osqueryContext.service
-              .getAgentService()
-              ?.listAgents(esClient, {
-                showInactive: false,
-                perPage: 0,
-                page: 1,
-                kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${agentPolicy.id}`,
-              })
+            agentService?.asInternalUser
+              .getAgentStatusForAgentPolicy(agentPolicy.id)
               .then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
           { concurrency: 10 }
         );
       }
 
-      return response.ok({ body });
+      return response.ok({ body: agentPolicies });
     }
   );
 };

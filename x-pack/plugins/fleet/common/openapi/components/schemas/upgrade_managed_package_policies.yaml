@@ -1,0 +1,12 @@
+title: Upgrade managed package policies result
+type: object
+properties:
+  packagePolicyId:
+    type: string
+  diff:
+    # type:
+  errors:
+    type: any
+  required:
+    - packagePolicyId
+    - errors

@@ -8,6 +8,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
+import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
@@ -35,22 +36,20 @@ export const configSchema = schema.object({
   hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
     defaultValue: 'http://localhost:9200',
   }),
+  maxSockets: schema.number({ defaultValue: Infinity, min: 1 }),
+  compression: schema.boolean({ defaultValue: false }),
   username: schema.maybe(
-    schema.conditional(
-      schema.contextRef('dist'),
-      false,
-      schema.string({
-        validate: (rawConfig) => {
-          if (rawConfig === 'elastic') {
-            return (
-              'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-              'privilege-related issues. You should use the "kibana_system" user instead.'
-            );
-          }
-        },
-      }),
-      schema.string()
-    )
+    schema.string({
+      validate: (rawConfig) => {
+        if (rawConfig === 'elastic') {
+          return (
+            'value of "elastic" is forbidden. This is a superuser account that cannot write to system indices that Kibana needs to ' +
+            'function. Use a service account token instead. Learn more: ' +
+            'https://www.elastic.co/guide/en/elasticsearch/reference/8.0/service-accounts.html' // we don't have a way to pass a branch into the config schema; hardcoding this one link to the 8.0 docs is OK
+          );
+        }
+      },
+    })
   ),
   password: schema.maybe(schema.string()),
   serviceAccountToken: schema.maybe(
@@ -171,51 +170,90 @@ export const configSchema = schema.object({
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
-  (settings, fromPath, addDeprecation) => {
+  (settings, fromPath, addDeprecation, { branch }) => {
     const es = settings[fromPath];
     if (!es) {
       return;
     }
-    if (es.username === 'elastic') {
+
+    if (es.username === 'kibana') {
+      const username = es.username;
       addDeprecation({
-        message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+        configPath: `${fromPath}.username`,
+        title: i18n.translate('core.deprecations.elasticsearchUsername.title', {
+          defaultMessage: 'Using "elasticsearch.username: {username}" is deprecated',
+          values: { username },
+        }),
+        message: i18n.translate('core.deprecations.elasticsearchUsername.message', {
+          defaultMessage:
+            'Kibana is configured to authenticate to Elasticsearch with the "{username}" user. Use a service account token instead.',
+          values: { username },
+        }),
+        level: 'warning',
+        documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${branch}/service-accounts.html`,
         correctiveActions: {
-          manualSteps: [`Replace [${fromPath}.username] from "elastic" to "kibana_system".`],
-        },
-      });
-    } else if (es.username === 'kibana') {
-      addDeprecation({
-        message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
-        correctiveActions: {
-          manualSteps: [`Replace [${fromPath}.username] from "kibana" to "kibana_system".`],
+          manualSteps: [
+            i18n.translate('core.deprecations.elasticsearchUsername.manualSteps1', {
+              defaultMessage:
+                'Use the elasticsearch-service-tokens CLI tool to create a new service account token for the "elastic/kibana" service account.',
+            }),
+            i18n.translate('core.deprecations.elasticsearchUsername.manualSteps2', {
+              defaultMessage: 'Add the "elasticsearch.serviceAccountToken" setting to kibana.yml.',
+            }),
+            i18n.translate('core.deprecations.elasticsearchUsername.manualSteps3', {
+              defaultMessage:
+                'Remove "elasticsearch.username" and "elasticsearch.password" from kibana.yml.',
+            }),
+          ],
         },
       });
     }
+
+    const addSslDeprecation = (existingSetting: string, missingSetting: string) => {
+      addDeprecation({
+        configPath: existingSetting,
+        title: i18n.translate('core.deprecations.elasticsearchSSL.title', {
+          defaultMessage: 'Using "{existingSetting}" without "{missingSetting}" has no effect',
+          values: { existingSetting, missingSetting },
+        }),
+        message: i18n.translate('core.deprecations.elasticsearchSSL.message', {
+          defaultMessage:
+            'Use both "{existingSetting}" and "{missingSetting}" to enable Kibana to use Mutual TLS authentication with Elasticsearch.',
+          values: { existingSetting, missingSetting },
+        }),
+        level: 'warning',
+        documentationUrl: `https://www.elastic.co/guide/en/kibana/${branch}/elasticsearch-mutual-tls.html`,
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('core.deprecations.elasticsearchSSL.manualSteps1', {
+              defaultMessage: 'Add the "{missingSetting}" setting to kibana.yml.',
+              values: { missingSetting },
+            }),
+            i18n.translate('core.deprecations.elasticsearchSSL.manualSteps2', {
+              defaultMessage:
+                'Alternatively, if you don\'t want to use Mutual TLS authentication, remove "{existingSetting}" from kibana.yml.',
+              values: { existingSetting },
+            }),
+          ],
+        },
+      });
+    };
+
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
-      addDeprecation({
-        message: `Setting [${fromPath}.ssl.key] without [${fromPath}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
-        correctiveActions: {
-          manualSteps: [
-            `Set [${fromPath}.ssl.certificate] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
-          ],
-        },
-      });
+      addSslDeprecation(`${fromPath}.ssl.key`, `${fromPath}.ssl.certificate`);
     } else if (es.ssl?.certificate !== undefined && es.ssl?.key === undefined) {
+      addSslDeprecation(`${fromPath}.ssl.certificate`, `${fromPath}.ssl.key`);
+    }
+
+    if (es.logQueries === true) {
       addDeprecation({
-        message: `Setting [${fromPath}.ssl.certificate] without [${fromPath}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
-        correctiveActions: {
-          manualSteps: [
-            `Set [${fromPath}.ssl.key] in your kibana configs to enable TLS client authentication to Elasticsearch.`,
-          ],
-        },
-      });
-    } else if (es.logQueries === true) {
-      addDeprecation({
-        message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers".`,
+        configPath: `${fromPath}.logQueries`,
+        level: 'warning',
+        message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.query" context in "logging.loggers".`,
         correctiveActions: {
           manualSteps: [
             `Remove Setting [${fromPath}.logQueries] from your kibana configs`,
-            `Set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers".`,
+            `Set the log level to "debug" for the "elasticsearch.query" context in "logging.loggers".`,
           ],
         },
       });
@@ -260,6 +298,16 @@ export class ElasticsearchConfig {
    * Version of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to.
    */
   public readonly apiVersion: string;
+
+  /**
+   * The maximum number of sockets that can be used for communications with elasticsearch.
+   */
+  public readonly maxSockets: number;
+
+  /**
+   * Whether to use compression for communications with elasticsearch.
+   */
+  public readonly compression: boolean;
 
   /**
    * Hosts that the client will connect to. If sniffing is enabled, this list will
@@ -363,6 +411,8 @@ export class ElasticsearchConfig {
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
     this.customHeaders = rawConfig.customHeaders;
+    this.maxSockets = rawConfig.maxSockets;
+    this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;

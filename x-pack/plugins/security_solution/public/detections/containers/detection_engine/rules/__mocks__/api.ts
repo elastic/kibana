@@ -6,21 +6,24 @@
  */
 
 import {
+  GetAggregateRuleExecutionEventsResponse,
+  RulesSchema,
+} from '../../../../../../common/detection_engine/schemas/response';
+
+import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { savedRuleMock, rulesMock } from '../mock';
+
+import {
   PatchRuleProps,
   CreateRulesProps,
   UpdateRulesProps,
   PrePackagedRulesStatusResponse,
   BasicFetchProps,
-  RuleStatusResponse,
   Rule,
   FetchRuleProps,
   FetchRulesResponse,
   FetchRulesProps,
 } from '../types';
-import { savedRuleMock, rulesMock } from '../mock';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response';
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
   Promise.resolve(getRulesSchemaMock());
@@ -49,78 +52,55 @@ export const getPrePackagedRulesStatus = async ({
 export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> =>
   Promise.resolve(true);
 
-export const getRuleStatusById = async ({
-  id,
-  signal,
-}: {
-  id: string;
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> =>
-  Promise.resolve({
-    myOwnRuleID: {
-      current_status: {
-        alert_id: 'alertId',
-        status_date: 'mm/dd/yyyyTHH:MM:sssz',
-        status: RuleExecutionStatus.succeeded,
-        last_failure_at: null,
-        last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-        last_failure_message: null,
-        last_success_message: 'it is a success',
-        gap: null,
-        bulk_create_time_durations: ['2235.01'],
-        search_after_time_durations: ['616.97'],
-        last_look_back_date: '2020-03-19T00:32:07.996Z', // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
-      },
-      failures: [],
-    },
-  });
-
-export const getRulesStatusByIds = async ({
-  ids,
-  signal,
-}: {
-  ids: string[];
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> =>
-  Promise.resolve({
-    '12345678987654321': {
-      current_status: {
-        alert_id: 'alertId',
-        status_date: 'mm/dd/yyyyTHH:MM:sssz',
-        status: RuleExecutionStatus.succeeded,
-        last_failure_at: null,
-        last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-        last_failure_message: null,
-        last_success_message: 'it is a success',
-        gap: null,
-        bulk_create_time_durations: ['2235.01'],
-        search_after_time_durations: ['616.97'],
-        last_look_back_date: '2020-03-19T00:32:07.996Z', // NOTE: This is no longer used on the UI, but left here in case users are using it within the API
-      },
-      failures: [],
-    },
-  });
-
 export const fetchRuleById = jest.fn(
   async ({ id, signal }: FetchRuleProps): Promise<Rule> => savedRuleMock
 );
 
-export const fetchRules = async ({
-  filterOptions = {
-    filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
-    showCustomRules: false,
-    showElasticRules: false,
-    tags: [],
-  },
-  pagination = {
-    page: 1,
-    perPage: 20,
-    total: 0,
-  },
+export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
+  Promise.resolve(rulesMock);
+
+export const fetchRuleExecutionEvents = async ({
+  ruleId,
+  start,
+  end,
+  filters,
   signal,
-}: FetchRulesProps): Promise<FetchRulesResponse> => Promise.resolve(rulesMock);
+}: {
+  ruleId: string;
+  start: string;
+  end: string;
+  filters?: string;
+  signal?: AbortSignal;
+}): Promise<GetAggregateRuleExecutionEventsResponse> => {
+  return Promise.resolve({
+    events: [
+      {
+        duration_ms: 3866,
+        es_search_duration_ms: 1236,
+        execution_uuid: '88d15095-7937-462c-8f21-9763e1387cad',
+        gap_duration_ms: 0,
+        indexing_duration_ms: 95,
+        message:
+          "rule executed: siem.queryRule:fb1fc150-a292-11ec-a2cf-c1b28b0392b0: 'Lots of Execution Events'",
+        num_active_alerts: 0,
+        num_errored_actions: 0,
+        num_new_alerts: 0,
+        num_recovered_alerts: 0,
+        num_succeeded_actions: 1,
+        num_triggered_actions: 1,
+        schedule_delay_ms: -127535,
+        search_duration_ms: 1255,
+        security_message: 'succeeded',
+        security_status: 'succeeded',
+        status: 'success',
+        timed_out: false,
+        timestamp: '2022-03-13T06:04:05.838Z',
+        total_search_duration_ms: 0,
+      },
+    ],
+    total: 1,
+  });
+};
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);

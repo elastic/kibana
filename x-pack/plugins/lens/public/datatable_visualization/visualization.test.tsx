@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
-import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
+import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
@@ -18,6 +18,7 @@ import {
 } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { layerTypes } from '../../common';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -28,6 +29,7 @@ function mockFrame(): FramePublicAPI {
 
 const datatableVisualization = getDatatableVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
+  theme: themeServiceMock.createStartContract(),
 });
 
 describe('Datatable Visualization', () => {
@@ -134,6 +136,36 @@ describe('Datatable Visualization', () => {
       });
 
       expect(suggestions.length).toBeGreaterThan(0);
+    });
+
+    it('should reject suggestion with static value', () => {
+      function staticValueCol(columnId: string): TableSuggestionColumn {
+        return {
+          columnId,
+          operation: {
+            dataType: 'number',
+            label: `Static value: ${columnId}`,
+            isBucketed: false,
+            isStaticValue: true,
+          },
+        };
+      }
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          columns: [{ columnId: 'col1' }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [staticValueCol('col1'), strCol('col2')],
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions).toHaveLength(0);
     });
 
     it('should retain width and hidden config from existing state', () => {
@@ -338,7 +370,10 @@ describe('Datatable Visualization', () => {
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
 
       expect(
         datatableVisualization.getConfiguration({
@@ -453,23 +488,42 @@ describe('Datatable Visualization', () => {
   });
 
   describe('#toExpression', () => {
-    it('reorders the rendered colums based on the order from the datasource', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
+    const getDatatableExpressionArgs = (state: DatatableVisualizationState) =>
+      buildExpression(
+        datatableVisualization.toExpression(state, frame.datasourceLayers) as Ast
+      ).findFunction('lens_datatable')[0].arguments;
+
+    const defaultExpressionTableState = {
+      layerId: 'a',
+      layerType: layerTypes.DATA,
+      columns: [{ columnId: 'b' }, { columnId: 'c' }],
+    };
+
+    let datasource: DatasourceMock;
+    let frame: FramePublicAPI;
+
+    beforeEach(() => {
+      datasource = createMockDatasource('test');
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
+
+      frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+    });
+
+    it('reorders the rendered colums based on the order from the datasource', () => {
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         isBucketed: false, // <= make them metrics
         label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
       });
 
       const expression = datatableVisualization.toExpression(
-        {
-          layerId: 'a',
-          layerType: layerTypes.DATA,
-          columns: [{ columnId: 'b' }, { columnId: 'c' }],
-        },
+        defaultExpressionTableState,
         frame.datasourceLayers
       ) as Ast;
 
@@ -509,26 +563,127 @@ describe('Datatable Visualization', () => {
     });
 
     it('returns no expression if the metric dimension is not defined', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         isBucketed: true, // move it from the metric to the break down by side
         label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
       });
 
       const expression = datatableVisualization.toExpression(
-        {
-          layerId: 'a',
-          layerType: layerTypes.DATA,
-          columns: [{ columnId: 'b' }, { columnId: 'c' }],
-        },
+        defaultExpressionTableState,
         frame.datasourceLayers
       );
 
       expect(expression).toEqual(null);
+    });
+
+    it('sets pagination based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).pageSize).toEqual([]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          paging: { size: 20, enabled: false },
+        }).pageSize
+      ).toEqual([]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          paging: { size: 20, enabled: true },
+        }).pageSize
+      ).toEqual([20]);
+    });
+
+    it('sets rowHeight "auto" fit based on state', () => {
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).fitRowToContent
+      ).toEqual([false]);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
+          .fitRowToContent
+      ).toEqual([false]);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'custom' })
+          .fitRowToContent
+      ).toEqual([false]);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'auto' })
+          .fitRowToContent
+      ).toEqual([true]);
+    });
+
+    it('sets rowHeightLines fit based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).rowHeightLines).toEqual(
+        [1]
+      );
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
+          .rowHeightLines
+      ).toEqual([1]);
+
+      // should ignore lines value based on mode
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: 'single',
+          rowHeightLines: 5,
+        }).rowHeightLines
+      ).toEqual([1]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: 'custom',
+          rowHeightLines: 5,
+        }).rowHeightLines
+      ).toEqual([5]);
+
+      // should fallback to 2 for custom in case it's not set
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: 'custom',
+        }).rowHeightLines
+      ).toEqual([2]);
+    });
+
+    it('sets headerRowHeight && headerRowHeightLines correctly', () => {
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
+      ).toEqual([1]);
+
+      // should fallback to single in case it's not set
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
+      ).toEqual(['single']);
+
+      expect(
+        getDatatableExpressionArgs({ ...defaultExpressionTableState, headerRowHeight: 'single' })
+          .headerRowHeightLines
+      ).toEqual([1]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: 'custom',
+          headerRowHeightLines: 5,
+        }).headerRowHeightLines
+      ).toEqual([5]);
+
+      // should fallback to 2 for custom in case it's not set
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: 'custom',
+        }).headerRowHeightLines
+      ).toEqual([2]);
     });
   });
 
@@ -537,11 +692,16 @@ describe('Datatable Visualization', () => {
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         isBucketed: true, // move it from the metric to the break down by side
         label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
       });
 
       const error = datatableVisualization.getErrorMessages({
@@ -557,11 +717,16 @@ describe('Datatable Visualization', () => {
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
         isBucketed: false, // keep it a metric
         label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
       });
 
       const error = datatableVisualization.getErrorMessages({
@@ -626,6 +791,24 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         ...currentState,
         columns: [{ columnId: 'saved', width: undefined }],
+      });
+    });
+
+    it('should update page size', () => {
+      const currentState: DatatableVisualizationState = {
+        layerId: 'foo',
+        layerType: layerTypes.DATA,
+        columns: [{ columnId: 'saved', width: 5000 }],
+        paging: { enabled: true, size: 10 },
+      };
+      expect(
+        datatableVisualization.onEditAction!(currentState, {
+          name: 'edit',
+          data: { action: 'pagesize', size: 30 },
+        })
+      ).toEqual({
+        ...currentState,
+        paging: { enabled: true, size: 30 },
       });
     });
   });

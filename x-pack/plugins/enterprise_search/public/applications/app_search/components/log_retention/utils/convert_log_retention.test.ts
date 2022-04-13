@@ -21,6 +21,16 @@ describe('convertLogRetentionFromServerToClient', () => {
           enabled: true,
           retention_policy: { is_default: true, min_age_days: 180 },
         },
+        audit: {
+          disabled_at: null,
+          enabled: true,
+          retention_policy: { is_default: true, min_age_days: 180 },
+        },
+        crawler: {
+          disabled_at: null,
+          enabled: true,
+          retention_policy: { is_default: true, min_age_days: 180 },
+        },
       })
     ).toEqual({
       analytics: {
@@ -29,6 +39,16 @@ describe('convertLogRetentionFromServerToClient', () => {
         retentionPolicy: { isDefault: true, minAgeDays: 180 },
       },
       api: {
+        disabledAt: null,
+        enabled: true,
+        retentionPolicy: { isDefault: true, minAgeDays: 180 },
+      },
+      audit: {
+        disabledAt: null,
+        enabled: true,
+        retentionPolicy: { isDefault: true, minAgeDays: 180 },
+      },
+      crawler: {
         disabledAt: null,
         enabled: true,
         retentionPolicy: { isDefault: true, minAgeDays: 180 },
@@ -49,6 +69,16 @@ describe('convertLogRetentionFromServerToClient', () => {
           enabled: true,
           retention_policy: { is_default: true, min_age_days: null },
         },
+        audit: {
+          disabled_at: null,
+          enabled: true,
+          retention_policy: { is_default: true, min_age_days: null },
+        },
+        crawler: {
+          disabled_at: null,
+          enabled: true,
+          retention_policy: { is_default: true, min_age_days: null },
+        },
       })
     ).toEqual({
       analytics: {
@@ -57,6 +87,16 @@ describe('convertLogRetentionFromServerToClient', () => {
         retentionPolicy: null,
       },
       api: {
+        disabledAt: null,
+        enabled: true,
+        retentionPolicy: { isDefault: true, minAgeDays: null },
+      },
+      audit: {
+        disabledAt: null,
+        enabled: true,
+        retentionPolicy: { isDefault: true, minAgeDays: null },
+      },
+      crawler: {
         disabledAt: null,
         enabled: true,
         retentionPolicy: { isDefault: true, minAgeDays: null },

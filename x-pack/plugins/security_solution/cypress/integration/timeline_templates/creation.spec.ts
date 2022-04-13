@@ -26,9 +26,9 @@ import {
   TIMELINES_FAVORITE,
 } from '../../screens/timelines';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteTimelines } from '../../tasks/common';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
   addDescriptionToTimeline,
@@ -49,13 +49,17 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timel
 import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline Templates', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+  });
+  beforeEach(() => {
+    deleteTimelines();
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
   it('Creates a timeline template', async () => {
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    visitWithoutDateRange(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();
     populateTimeline();
@@ -70,7 +74,7 @@ describe('Timeline Templates', () => {
     addNameToTimeline(getTimeline().title);
 
     cy.wait('@timeline').then(({ response }) => {
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
 
       addDescriptionToTimeline(getTimeline().description);
       addNotesToTimeline(getTimeline().notes);
@@ -103,7 +107,7 @@ describe('Timeline Templates', () => {
 
   it('Create template from timeline', () => {
     createTimeline(getTimeline());
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    visitWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
     expandEventAction();
     clickingOnCreateTemplateFromTimelineBtn();

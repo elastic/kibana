@@ -7,13 +7,13 @@
 
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeFormatter } from '../../../../observability/public';
+import { getInventoryViewInAppUrl } from '../../../common/alerting/metrics/alert_link';
 
 export const formatReason: ObservabilityRuleTypeFormatter = ({ fields }) => {
   const reason = fields[ALERT_REASON] ?? '-';
-  const link = '/app/metrics/inventory'; // TODO https://github.com/elastic/kibana/issues/106497
 
   return {
     reason,
-    link,
+    link: getInventoryViewInAppUrl(fields),
   };
 };

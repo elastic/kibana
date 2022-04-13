@@ -23,10 +23,8 @@ kibana_vars=(
     apm_oss.sourcemapIndices
     apm_oss.spanIndices
     apm_oss.transactionIndices
-    console.enabled
     console.proxyConfig
     console.proxyFilter
-    csp.rules
     csp.strict
     csp.warnLegacyBrowsers
     csp.script_src
@@ -67,7 +65,6 @@ kibana_vars=(
     elasticsearch.username
     enterpriseSearch.accessCheckTimeout
     enterpriseSearch.accessCheckTimeoutWarning
-    enterpriseSearch.enabled
     enterpriseSearch.host
     externalUrl.policy
     i18n.locale
@@ -88,8 +85,6 @@ kibana_vars=(
     logging.root.appenders
     logging.root.level
     map.includeElasticMapsService
-    map.proxyElasticMapsServiceInMaps
-    map.regionmap
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom
     map.tilemap.options.minZoom
@@ -97,13 +92,11 @@ kibana_vars=(
     map.tilemap.url
     migrations.batchSize
     migrations.maxBatchSizeBytes
-    migrations.enableV2
     migrations.pollInterval
     migrations.retryAttempts
     migrations.scrollDuration
     migrations.skip
     monitoring.cluster_alerts.email_notifications.email_address
-    monitoring.enabled
     monitoring.kibana.collection.enabled
     monitoring.kibana.collection.interval
     monitoring.ui.container.elasticsearch.enabled
@@ -177,8 +170,8 @@ kibana_vars=(
     status.v6ApiFormat
     telemetry.allowChangingOptInStatus
     telemetry.enabled
+    telemetry.hidePrivacyStatement
     telemetry.optIn
-    telemetry.optInStatusUrl
     telemetry.sendUsageTo
     telemetry.sendUsageFrom
     tilemap.options.attribution
@@ -186,7 +179,6 @@ kibana_vars=(
     tilemap.options.minZoom
     tilemap.options.subdomains
     tilemap.url
-    url_drilldown.enabled
     vega.enableExternalUrls
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
@@ -208,10 +200,21 @@ kibana_vars=(
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.rules.execution.timeout
+    xpack.alerting.rules.execution.ruleTypeOverrides
+    xpack.alerting.cancelAlertsOnRuleTimeout
+    xpack.alerting.rules.minimumScheduleInterval.value
+    xpack.alerting.rules.minimumScheduleInterval.enforce
+    xpack.alerting.rules.execution.actions.max
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
-    xpack.apm.enabled
+    xpack.apm.indices.error
+    xpack.apm.indices.metric
+    xpack.apm.indices.onboarding
+    xpack.apm.indices.sourcemap
+    xpack.apm.indices.span
+    xpack.apm.indices.transaction
     xpack.apm.maxServiceEnvironments
     xpack.apm.searchAggregatedTransactions
     xpack.apm.serviceMapEnabled
@@ -225,7 +228,6 @@ kibana_vars=(
     xpack.banners.placement
     xpack.banners.textColor
     xpack.banners.textContent
-    xpack.canvas.enabled
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
     xpack.code.indexRepoFrequencyMs
@@ -257,14 +259,11 @@ kibana_vars=(
     xpack.fleet.agents.fleet_server.hosts
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
-    xpack.fleet.enabled
     xpack.fleet.packages
+    xpack.fleet.registryProxyUrl
     xpack.fleet.registryUrl
     xpack.graph.canEditDrillDownUrls
-    xpack.graph.enabled
     xpack.graph.savePolicy
-    xpack.grokdebugger.enabled
-    xpack.infra.enabled
     xpack.infra.query.partitionFactor
     xpack.infra.query.partitionSize
     xpack.infra.sources.default.fields.container
@@ -277,13 +276,9 @@ kibana_vars=(
     xpack.infra.sources.default.metricAlias
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
-    xpack.license_management.enabled
-    xpack.maps.enabled
-    xpack.ml.enabled
     xpack.observability.annotations.index
     xpack.observability.unsafe.alertingExperience.enabled
     xpack.observability.unsafe.cases.enabled
-    xpack.painless_lab.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
@@ -329,9 +324,7 @@ kibana_vars=(
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
     xpack.reporting.roles.enabled
-    xpack.rollup.enabled
     xpack.ruleRegistry.write.enabled
-    xpack.searchprofiler.enabled
     xpack.security.audit.appender.fileName
     xpack.security.audit.appender.layout.highlight
     xpack.security.audit.appender.layout.pattern
@@ -356,7 +349,6 @@ kibana_vars=(
     xpack.security.authc.saml.realm
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
-    xpack.security.enabled
     xpack.security.encryptionKey
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
@@ -369,8 +361,7 @@ kibana_vars=(
     xpack.security.showInsecureClusterWarning
     xpack.securitySolution.alertMergeStrategy
     xpack.securitySolution.alertIgnoreFields
-    xpack.securitySolution.endpointResultListDefaultFirstPageIndex
-    xpack.securitySolution.endpointResultListDefaultPageSize
+    xpack.securitySolution.maxExceptionsImportSize
     xpack.securitySolution.maxRuleImportExportSize
     xpack.securitySolution.maxRuleImportPayloadBytes
     xpack.securitySolution.maxTimelineImportExportSize
@@ -378,9 +369,7 @@ kibana_vars=(
     xpack.securitySolution.packagerTaskInterval
     xpack.securitySolution.prebuiltRulesFromFileSystem
     xpack.securitySolution.prebuiltRulesFromSavedObjects
-    xpack.spaces.enabled
     xpack.spaces.maxSpaces
-    xpack.task_manager.index
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles
     xpack.task_manager.max_workers
@@ -393,6 +382,9 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.task_manager.event_loop_delay.monitor
+    xpack.task_manager.event_loop_delay.warn_threshold
+    xpack.uptime.index
 )
 
 longopts=''

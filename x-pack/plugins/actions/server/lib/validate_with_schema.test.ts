@@ -7,7 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+import {
+  validateParams,
+  validateConfig,
+  validateSecrets,
+  validateConnector,
+} from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
@@ -47,6 +52,9 @@ test('should validate when there are no individual validators', () => {
 
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
+
+  result = validateConnector(actionType, { config: testValue });
+  expect(result).toBeNull();
 });
 
 test('should validate when validators return incoming value', () => {
@@ -60,6 +68,7 @@ test('should validate when validators return incoming value', () => {
       params: selfValidator,
       config: selfValidator,
       secrets: selfValidator,
+      connector: () => null,
     },
   };
 
@@ -74,6 +83,9 @@ test('should validate when validators return incoming value', () => {
 
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(testValue);
+
+  result = validateConnector(actionType, { config: testValue, secrets: { user: 'test' } });
+  expect(result).toBeNull();
 });
 
 test('should validate when validators return different values', () => {
@@ -88,6 +100,7 @@ test('should validate when validators return different values', () => {
       params: selfValidator,
       config: selfValidator,
       secrets: selfValidator,
+      connector: () => null,
     },
   };
 
@@ -102,6 +115,9 @@ test('should validate when validators return different values', () => {
 
   result = validateSecrets(actionType, testValue);
   expect(result).toEqual(returnedValue);
+
+  result = validateConnector(actionType, { config: testValue, secrets: { user: 'test' } });
+  expect(result).toBeNull();
 });
 
 test('should throw with expected error when validators fail', () => {
@@ -119,6 +135,7 @@ test('should throw with expected error when validators fail', () => {
       params: erroringValidator,
       config: erroringValidator,
       secrets: erroringValidator,
+      connector: () => 'test error',
     },
   };
 
@@ -135,6 +152,10 @@ test('should throw with expected error when validators fail', () => {
   expect(() => validateSecrets(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
     `"error validating action type secrets: test error"`
   );
+
+  expect(() =>
+    validateConnector(actionType, { config: testValue, secrets: { user: 'test' } })
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type connector: test error"`);
 });
 
 test('should work with @kbn/config-schema', () => {
@@ -148,6 +169,7 @@ test('should work with @kbn/config-schema', () => {
       params: testSchema,
       config: testSchema,
       secrets: testSchema,
+      connector: () => null,
     },
   };
 
@@ -157,4 +179,53 @@ test('should work with @kbn/config-schema', () => {
   expect(() => validateParams(actionType, { bar: 2 })).toThrowErrorMatchingInlineSnapshot(
     `"error validating action params: [foo]: expected value of type [string] but got [undefined]"`
   );
+});
+
+describe('validateConnectors', () => {
+  const testValue = { any: ['old', 'thing'] };
+  const selfValidator = { validate: (value: Record<string, unknown>) => value };
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    executor,
+    validate: {
+      params: selfValidator,
+      config: selfValidator,
+      secrets: selfValidator,
+      connector: () => null,
+    },
+  };
+
+  test('should throw error when connector config is null', () => {
+    expect(() =>
+      validateConnector(actionType, { config: null, secrets: { user: 'test' } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: config must be defined"`
+    );
+  });
+
+  test('should throw error when connector config is undefined', () => {
+    expect(() =>
+      validateConnector(actionType, { config: undefined, secrets: { user: 'test' } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: config must be defined"`
+    );
+  });
+
+  test('should throw error when connector secrets is null', () => {
+    expect(() =>
+      validateConnector(actionType, { config: testValue, secrets: null })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: secrets must be defined"`
+    );
+  });
+
+  test('should throw error when connector secrets is undefined', () => {
+    expect(() =>
+      validateConnector(actionType, { config: testValue, secrets: undefined })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: secrets must be defined"`
+    );
+  });
 });

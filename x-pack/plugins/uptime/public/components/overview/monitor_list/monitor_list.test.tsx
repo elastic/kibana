@@ -15,19 +15,12 @@ import {
   Ping,
   MonitorSummary,
 } from '../../../../common/runtime_types';
-import { MonitorListComponent, noItemsMessage } from './monitor_list';
-import * as redux from 'react-redux';
+import { MonitorListComponent } from './monitor_list';
 import moment from 'moment';
-import { IHttpFetchError } from '../../../../../../../src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '../../../../../../../src/core/public';
 import { mockMoment } from '../../../lib/helper/test_helpers';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { NO_DATA_MESSAGE } from './translations';
-
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
 
 const testFooPings: Ping[] = [
   makePing({
@@ -62,7 +55,7 @@ const testFooPings: Ping[] = [
 const testFooSummary: MonitorSummary = {
   monitor_id: 'foo',
   state: {
-    monitor: { type: 'http' },
+    monitor: { type: 'http', duration: { us: 1000 } },
     summaryPings: testFooPings,
     summary: {
       up: 1,
@@ -97,7 +90,7 @@ const testBarPings: Ping[] = [
 const testBarSummary: MonitorSummary = {
   monitor_id: 'bar',
   state: {
-    monitor: { type: 'http' },
+    monitor: { type: 'http', duration: { us: 1000 } },
     summaryPings: testBarPings,
     summary: {
       up: 2,
@@ -135,12 +128,6 @@ describe('MonitorList component', () => {
   };
 
   beforeEach(() => {
-    const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
-    useDispatchSpy.mockReturnValue(jest.fn());
-
-    const useSelectorSpy = jest.spyOn(redux, 'useSelector');
-    useSelectorSpy.mockReturnValue(true);
-
     localStorageMock = {
       getItem: jest.fn().mockImplementation(() => '25'),
       setItem: jest.fn(),
@@ -162,6 +149,7 @@ describe('MonitorList component', () => {
         }}
         pageSize={10}
         setPageSize={jest.fn()}
+        refreshedMonitorIds={[]}
       />
     );
     expect(await findByText(NO_DATA_MESSAGE)).toBeInTheDocument();
@@ -176,6 +164,7 @@ describe('MonitorList component', () => {
         }}
         pageSize={10}
         setPageSize={jest.fn()}
+        refreshedMonitorIds={[]}
       />
     );
 
@@ -191,11 +180,12 @@ describe('MonitorList component', () => {
       <MonitorListComponent
         monitorList={{
           list: getMonitorList(),
-          error: new Error('foo message') as IHttpFetchError,
+          error: new Error('foo message') as IHttpFetchError<ResponseErrorBody>,
           loading: false,
         }}
         pageSize={10}
         setPageSize={jest.fn()}
+        refreshedMonitorIds={[]}
       />
     );
 
@@ -232,6 +222,7 @@ describe('MonitorList component', () => {
           }}
           pageSize={10}
           setPageSize={jest.fn()}
+          refreshedMonitorIds={[]}
         />
       );
 
@@ -260,6 +251,7 @@ describe('MonitorList component', () => {
             }}
             pageSize={10}
             setPageSize={jest.fn()}
+            refreshedMonitorIds={[]}
           />
         );
 
@@ -289,6 +281,7 @@ describe('MonitorList component', () => {
             }}
             pageSize={10}
             setPageSize={jest.fn()}
+            refreshedMonitorIds={[]}
           />
         );
 
@@ -299,26 +292,6 @@ describe('MonitorList component', () => {
           expect(queryByText('Downtime history')).not.toBeInTheDocument();
         });
       });
-    });
-  });
-
-  describe('noItemsMessage', () => {
-    it('returns loading message while loading', () => {
-      expect(noItemsMessage(true)).toEqual(`Loading...`);
-    });
-
-    it('returns loading message when filters are defined and loading', () => {
-      expect(noItemsMessage(true, 'filters')).toEqual(`Loading...`);
-    });
-
-    it('returns no monitors selected when filters are defined and not loading', () => {
-      expect(noItemsMessage(false, 'filters')).toEqual(
-        `No monitors found for selected filter criteria`
-      );
-    });
-
-    it('returns no data message when no filters and not loading', () => {
-      expect(noItemsMessage(false)).toEqual(`No uptime monitors found`);
     });
   });
 });

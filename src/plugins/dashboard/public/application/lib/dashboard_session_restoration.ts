@@ -7,18 +7,19 @@
  */
 
 import { History } from 'history';
-import { DashboardConstants } from '../..';
+import { DashboardAppLocatorParams, DashboardConstants } from '../..';
 import { DashboardState } from '../../types';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getQueryParams } from '../../services/kibana_utils';
 import { createQueryParamObservable } from '../../../../kibana_utils/public';
-import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../../url_generator';
 import {
   DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
+  SearchSessionInfoProvider,
 } from '../../services/data';
 import { stateToRawDashboardState } from './convert_dashboard_state';
+import { DASHBOARD_APP_LOCATOR } from '../../locator';
 
 export const getSearchSessionIdFromURL = (history: History): string | undefined =>
   getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
@@ -32,16 +33,14 @@ export function createSessionRestorationDataProvider(deps: {
   getAppState: () => DashboardState;
   getDashboardTitle: () => string;
   getDashboardId: () => string;
-}) {
+}): SearchSessionInfoProvider<DashboardAppLocatorParams> {
   return {
     getName: async () => deps.getDashboardTitle(),
-    getUrlGeneratorData: async () => {
-      return {
-        urlGeneratorId: DASHBOARD_APP_URL_GENERATOR,
-        initialState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: false }),
-        restoreState: getUrlGeneratorState({ ...deps, shouldRestoreSearchSession: true }),
-      };
-    },
+    getLocatorData: async () => ({
+      id: DASHBOARD_APP_LOCATOR,
+      initialState: getLocatorParams({ ...deps, shouldRestoreSearchSession: false }),
+      restoreState: getLocatorParams({ ...deps, shouldRestoreSearchSession: true }),
+    }),
   };
 }
 
@@ -93,7 +92,7 @@ export function enableDashboardSearchSessions({
  * Fetches the state to store when a session is saved so that this dashboard can be recreated exactly
  * as it was.
  */
-function getUrlGeneratorState({
+function getLocatorParams({
   data,
   getAppState,
   kibanaVersion,
@@ -105,7 +104,7 @@ function getUrlGeneratorState({
   getAppState: () => DashboardState;
   getDashboardId: () => string;
   shouldRestoreSearchSession: boolean;
-}): DashboardUrlGeneratorState {
+}): DashboardAppLocatorParams {
   const appState = stateToRawDashboardState({ state: getAppState(), version: kibanaVersion });
   const { filterManager, queryString } = data.query;
   const { timefilter } = data.query.timefilter;

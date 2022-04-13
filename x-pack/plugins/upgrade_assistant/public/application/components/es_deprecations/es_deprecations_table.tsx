@@ -26,14 +26,16 @@ import {
   Query,
 } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
+import { useAppContext } from '../../app_context';
 import {
   MlSnapshotsTableRow,
   DefaultTableRow,
   IndexSettingsTableRow,
   ReindexTableRow,
+  ClusterSettingsTableRow,
 } from './deprecation_types';
 import { DeprecationTableColumns } from '../types';
-import { DEPRECATION_TYPE_MAP } from '../constants';
+import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
 
 const i18nTexts = {
   refreshButtonLabel: i18n.translate(
@@ -99,15 +101,27 @@ const cellToLabelMap = {
 };
 
 const cellTypes = Object.keys(cellToLabelMap) as DeprecationTableColumns[];
-const pageSizeOptions = [50, 100, 200];
+const pageSizeOptions = PAGINATION_CONFIG.pageSizeOptions;
 
-const renderTableRowCells = (deprecation: EnrichedDeprecationInfo) => {
+const renderTableRowCells = (
+  deprecation: EnrichedDeprecationInfo,
+  mlUpgradeModeEnabled: boolean
+) => {
   switch (deprecation.correctiveAction?.type) {
     case 'mlSnapshot':
-      return <MlSnapshotsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+      return (
+        <MlSnapshotsTableRow
+          deprecation={deprecation}
+          rowFieldNames={cellTypes}
+          mlUpgradeModeEnabled={mlUpgradeModeEnabled}
+        />
+      );
 
     case 'indexSetting':
       return <IndexSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+
+    case 'clusterSetting':
+      return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'reindex':
       return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
@@ -146,12 +160,19 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
   deprecations = [],
   reload,
 }) => {
+  const {
+    services: { api },
+  } = useAppContext();
+
+  const { data } = api.useLoadMlUpgradeMode();
+  const mlUpgradeModeEnabled = !!data?.mlUpgradeModeEnabled;
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     isSortAscending: true,
     sortField: 'isCritical',
   });
 
-  const [itemsPerPage, setItemsPerPage] = useState(pageSizeOptions[0]);
+  const [itemsPerPage, setItemsPerPage] = useState(PAGINATION_CONFIG.initialPageSize);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState<Query>(EuiSearchBar.Query.MATCH_ALL);
   const [searchError, setSearchError] = useState<{ message: string } | undefined>(undefined);
@@ -261,7 +282,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiTable>
+      <EuiTable data-test-subj="esDeprecationsTable">
         <EuiTableHeader>
           {Object.entries(cellToLabelMap).map(([fieldName, cell]) => {
             return (
@@ -281,7 +302,11 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
         {filteredDeprecations.length === 0 ? (
           <EuiTableBody>
             <EuiTableRow data-test-subj="noDeprecationsRow">
-              <EuiTableRowCell align="center" colSpan={cellTypes.length} isMobileFullWidth={true}>
+              <EuiTableRowCell
+                align="center"
+                colSpan={cellTypes.length}
+                mobileOptions={{ width: '100%' }}
+              >
                 {i18nTexts.noDeprecationsMessage}
               </EuiTableRowCell>
             </EuiTableRow>
@@ -291,7 +316,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             {visibleDeprecations.map((deprecation, index) => {
               return (
                 <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-                  {renderTableRowCells(deprecation)}
+                  {renderTableRowCells(deprecation, mlUpgradeModeEnabled)}
                 </EuiTableRow>
               );
             })}

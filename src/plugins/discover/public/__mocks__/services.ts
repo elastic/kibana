@@ -13,13 +13,15 @@ import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { savedSearchMock } from './saved_search';
-import { UI_SETTINGS } from '../../../data/common';
+import { UI_SETTINGS } from '../../../data/public';
 import { TopNavMenu } from '../../../navigation/public';
 import { FORMATS_UI_SETTINGS } from 'src/plugins/field_formats/common';
+import { LocalStorageMock } from './local_storage_mock';
+import { fieldFormatsMock } from '../../../field_formats/common/mocks';
 const dataPlugin = dataPluginMock.createStartContract();
 
 export const discoverServiceMock = {
@@ -44,9 +46,10 @@ export const discoverServiceMock = {
       save: true,
     },
   },
+  fieldFormats: fieldFormatsMock,
   filterManager: dataPlugin.query.filterManager,
   uiSettings: {
-    get: (key: string) => {
+    get: jest.fn((key: string) => {
       if (key === 'fields:popularLimit') {
         return 5;
       } else if (key === DEFAULT_COLUMNS_SETTING) {
@@ -63,8 +66,10 @@ export const discoverServiceMock = {
         return false;
       } else if (key === SAMPLE_SIZE_SETTING) {
         return 250;
+      } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
+        return 50;
       }
-    },
+    }),
     isDefault: (key: string) => {
       return true;
     },
@@ -72,13 +77,12 @@ export const discoverServiceMock = {
   http: {
     basePath: '/',
   },
-  indexPatternFieldEditor: {
+  dataViewFieldEditor: {
     openEditor: jest.fn(),
     userPermissions: {
       editIndexPattern: jest.fn(),
     },
   },
-  getSavedSearchById: (id?: string) => Promise.resolve(savedSearchMock),
   navigation: {
     ui: { TopNavMenu },
   },
@@ -89,7 +93,6 @@ export const discoverServiceMock = {
     useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
     useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
   },
-  storage: {
-    get: jest.fn(),
-  },
+  storage: new LocalStorageMock({}) as unknown as Storage,
+  addBasePath: jest.fn(),
 } as unknown as DiscoverServices;

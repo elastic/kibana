@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectAttributes } from 'kibana/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { AggConfigSerialized } from 'src/plugins/data/common';
+import { AggConfigSerialized, SerializedSearchSourceFields } from 'src/plugins/data/common';
 
 export interface VisParams {
   [key: string]: any;
@@ -31,4 +32,21 @@ export interface VisualizationSavedObjectAttributes extends SavedObjectAttribute
   version: number;
   visState: string;
   uiStateJSON: string;
+}
+
+export interface SerializedVisData {
+  expression?: string;
+  aggs: AggConfigSerialized[];
+  searchSource: SerializedSearchSourceFields;
+  savedSearchId?: string;
+}
+
+export interface SerializedVis<T = VisParams> {
+  id?: string;
+  title: string;
+  description?: string;
+  type: string;
+  params: T;
+  uiState?: any;
+  data: SerializedVisData;
 }

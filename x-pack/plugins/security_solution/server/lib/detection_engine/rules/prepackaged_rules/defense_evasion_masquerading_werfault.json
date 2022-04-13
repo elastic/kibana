@@ -15,7 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Windows Error Manager Masquerading",
-  "query": "sequence by host.id, process.entity_id with maxspan = 5s\n  [process where event.type:\"start\" and process.name : (\"wermgr.exe\", \"WerFault.exe\") and process.args_count == 1]\n  [network where process.name : (\"wermgr.exe\", \"WerFault.exe\") and network.protocol != \"dns\" and\n    network.direction == \"outgoing\" and destination.ip !=\"::1\" and destination.ip !=\"127.0.0.1\"\n  ]\n",
+  "query": "sequence by host.id, process.entity_id with maxspan = 5s\n  [process where event.type:\"start\" and process.name : (\"wermgr.exe\", \"WerFault.exe\") and process.args_count == 1]\n  [network where process.name : (\"wermgr.exe\", \"WerFault.exe\") and network.protocol != \"dns\" and\n    network.direction : (\"outgoing\", \"egress\") and destination.ip !=\"::1\" and destination.ip !=\"127.0.0.1\"\n  ]\n",
   "references": [
     "https://twitter.com/SBousseaden/status/1235533224337641473",
     "https://www.hexacorn.com/blog/2019/09/20/werfault-command-line-switches-v0-1/",
@@ -49,5 +49,5 @@
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 4
 }

@@ -16,10 +16,10 @@ import {
 } from '../../../../common/store/test_utils';
 import {
   Immutable,
-  HostResultList,
   HostIsolationResponse,
   ISOLATION_ACTIONS,
   ActivityLog,
+  MetadataListResponse,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
@@ -30,7 +30,6 @@ import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import {
-  createUninitialisedResourceState,
   createLoadingResourceState,
   FailedResourceState,
   isFailedResourceState,
@@ -50,7 +49,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../policy/store/services/ingest', () => ({
+jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
@@ -73,8 +72,8 @@ describe('endpoint list middleware', () => {
   let actionSpyMiddleware;
   let history: History<never>;
 
-  const getEndpointListApiResponse = (): HostResultList => {
-    return mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
+  const getEndpointListApiResponse = (): MetadataListResponse => {
+    return mockEndpointResultList({ pageSize: 1, page: 0, total: 10 });
   };
 
   const dispatchUserChangedUrlToEndpointList = (locationOverrides: Partial<Location> = {}) => {
@@ -106,25 +105,26 @@ describe('endpoint list middleware', () => {
   it('handles `userChangedUrl`', async () => {
     endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
-    fakeHttpServices.post.mockResolvedValue(apiResponse);
-    expect(fakeHttpServices.post).not.toHaveBeenCalled();
+    fakeHttpServices.get.mockResolvedValue(apiResponse);
+    expect(fakeHttpServices.get).not.toHaveBeenCalled();
 
     dispatchUserChangedUrlToEndpointList();
     await waitForAction('serverReturnedEndpointList');
-    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
-      body: JSON.stringify({
-        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
-        filters: { kql: '' },
-      }),
+    expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {
+      query: {
+        page: '0',
+        pageSize: '10',
+        kuery: '',
+      },
     });
-    expect(listData(getState())).toEqual(apiResponse.hosts);
+    expect(listData(getState())).toEqual(apiResponse.data);
   });
 
   it('handles `appRequestedEndpointList`', async () => {
     endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
-    fakeHttpServices.post.mockResolvedValue(apiResponse);
-    expect(fakeHttpServices.post).not.toHaveBeenCalled();
+    fakeHttpServices.get.mockResolvedValue(apiResponse);
+    expect(fakeHttpServices.get).not.toHaveBeenCalled();
 
     // First change the URL
     dispatchUserChangedUrlToEndpointList();
@@ -145,13 +145,14 @@ describe('endpoint list middleware', () => {
       waitForAction('serverReturnedAgenstWithEndpointsTotal'),
     ]);
 
-    expect(fakeHttpServices.post).toHaveBeenCalledWith(HOST_METADATA_LIST_ROUTE, {
-      body: JSON.stringify({
-        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
-        filters: { kql: '' },
-      }),
+    expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {
+      query: {
+        page: '0',
+        pageSize: '10',
+        kuery: '',
+      },
     });
-    expect(listData(getState())).toEqual(apiResponse.hosts);
+    expect(listData(getState())).toEqual(apiResponse.data);
   });
 
   describe('handling of IsolateEndpointHost action', () => {
@@ -243,7 +244,7 @@ describe('endpoint list middleware', () => {
     });
 
     const endpointList = getEndpointListApiResponse();
-    const agentId = endpointList.hosts[0].metadata.agent.id;
+    const agentId = endpointList.data[0].metadata.agent.id;
     const search = getEndpointDetailsPath({
       name: 'endpointActivityLog',
       selected_endpoint: agentId,
@@ -255,9 +256,7 @@ describe('endpoint list middleware', () => {
     const dispatchGetActivityLogLoading = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
-        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+        payload: createLoadingResourceState(),
       });
     };
 
@@ -389,7 +388,6 @@ describe('endpoint list middleware', () => {
 
     it('should call get Activity Log API with correct paging options', async () => {
       dispatchUserChangedUrl();
-
       const updatePagingDispatched = waitForAction('endpointDetailsActivityLogUpdatePaging');
       dispatchGetActivityLogPaging({ page: 3 });
 
@@ -518,7 +516,7 @@ describe('endpoint list middleware', () => {
     });
 
     const endpointList = getEndpointListApiResponse();
-    const agentId = endpointList.hosts[0].metadata.agent.id;
+    const agentId = endpointList.data[0].metadata.agent.id;
     const search = getEndpointDetailsPath({
       name: 'endpointDetails',
       selected_endpoint: agentId,

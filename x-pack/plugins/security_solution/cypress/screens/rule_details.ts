@@ -33,6 +33,8 @@ export const DETAILS_TITLE = '.euiDescriptionList__title';
 
 export const EXCEPTIONS_TAB = '[data-test-subj="exceptionsTab"]';
 
+export const EXCEPTIONS_TAB_SEARCH = '[data-test-subj="exceptionsHeaderSearch"]';
+
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
@@ -58,13 +60,13 @@ export const FIELDS_BROWSER_BTN =
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
-export const RULE_ABOUT_DETAILS_HEADER_TOGGLE = '[data-test-subj="stepAboutDetailsToggle"]';
-
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 
 export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 
 export const RISK_SCORE_DETAILS = 'Risk score';
+
+export const INDICATOR_PREFIX_OVERRIDE = 'Indicator prefix override';
 
 export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
@@ -83,8 +85,6 @@ export const RUNS_EVERY_DETAILS = 'Runs every';
 export const SCHEDULE_DETAILS =
   '[data-test-subj=schedule] [data-test-subj="listItemColumnStepRuleDescription"]';
 
-export const SCHEDULE_STEP = '[data-test-subj="schedule"]  .euiDescriptionList__description';
-
 export const SEVERITY_DETAILS = 'Severity';
 
 export const TAGS_DETAILS = 'Tags';
@@ -98,9 +98,6 @@ export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
 export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;
 };
-
-export const getDetails = (title: string) =>
-  cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
 
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');

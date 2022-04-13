@@ -1,0 +1,66 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the use of Windows API functions that are commonly abused by malware and security tools to load malicious code or inject it into remote processes.",
+  "false_positives": [
+    "Legitimate PowerShell scripts that make use of these functions."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Potential Process Injection via PowerShell",
+  "note": "## Triage and analysis.\n\n### Investigating Potential Process Injection via PowerShell\n\nPowerShell is one of the main tools system administrators use for automation, report routines, and other tasks. This\nmakes it available for use in various environments, and creates an attractive way for attackers to execute code.\n\nPowerShell also has solid capabilities to make the interaction with the Win32 API in an uncomplicated and reliable way,\nlike the execution of inline C# code, PSReflect, Get-ProcAddress, etc.\n\nRed Team tooling and malware developers take advantage of these capabilities to develop stagers and loaders that inject\npayloads directly into the memory without touching the disk to circumvent file-based security protections.\n\n#### Possible investigation steps\n\n- Examine script content that triggered the detection. \n- Investigate the script execution chain (parent process tree).\n- Inspect any file or network events from the suspicious PowerShell host process instance.\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Consider whether the user needs PowerShell to complete its tasks.\n- Check if the imported function was executed and which process it targeted.\n- Check if the injected code can be retrieved (hardcoded in the script or on command line logs).\n\n### False positive analysis\n\n- This activity is unlikely to happen legitimately. Benign true positives (B-TPs) can be added as exceptions if necessary.\n\n### Related rules\n\n- PowerShell PSReflect Script - 56f2e9b5-4803-4e44-a0a4-a52dc79d57fe\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Quarantine the involved host for forensic investigation, as well as eradication and recovery activities.\n- Configure AppLocker or equivalent software to restrict access to PowerShell for regular users.\n- Reset the password for the user account.\n\n## Config\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nAdministrative Templates > \nWindows PowerShell > \nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+  "query": "event.category:process and \n  powershell.file.script_block_text : (\n   (VirtualAlloc or VirtualAllocEx or VirtualProtect or LdrLoadDll or LoadLibrary or LoadLibraryA or\n      LoadLibraryEx or GetProcAddress or OpenProcess or OpenProcessToken or AdjustTokenPrivileges) and\n   (WriteProcessMemory or CreateRemoteThread or NtCreateThreadEx or CreateThread or QueueUserAPC or\n      SuspendThread or ResumeThread or GetDelegateForFunctionPointer)\n  )\n",
+  "references": [
+    "https://github.com/EmpireProject/Empire/blob/master/data/module_source/management/Invoke-PSInject.ps1",
+    "https://github.com/EmpireProject/Empire/blob/master/data/module_source/management/Invoke-ReflectivePEInjection.ps1",
+    "https://github.com/BC-SECURITY/Empire/blob/master/empire/server/data/module_source/credentials/Invoke-Mimikatz.ps1"
+  ],
+  "risk_score": 73,
+  "rule_id": "2e29e96a-b67c-455a-afe4-de6183431d0d",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/",
+          "subtechnique": [
+            {
+              "id": "T1055.001",
+              "name": "Dynamic-link Library Injection",
+              "reference": "https://attack.mitre.org/techniques/T1055/001/"
+            },
+            {
+              "id": "T1055.002",
+              "name": "Portable Executable Injection",
+              "reference": "https://attack.mitre.org/techniques/T1055/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

@@ -16,8 +16,11 @@ import { useDeleteAction, DeleteActionModal } from '../action_delete';
 import { useDiscoverAction } from '../action_discover';
 import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
+import { useResetAction, ResetActionModal } from '../action_reset';
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
+import { useCreateAlertRuleAction } from '../action_create_alert';
+import { StopActionModal } from '../action_stop/stop_action_modal';
 
 export const useActions = ({
   forceDisable,
@@ -33,18 +36,23 @@ export const useActions = ({
   const deleteAction = useDeleteAction(forceDisable);
   const discoverAction = useDiscoverAction(forceDisable);
   const editAction = useEditAction(forceDisable, transformNodes);
+  const resetAction = useResetAction(forceDisable);
   const startAction = useStartAction(forceDisable, transformNodes);
   const stopAction = useStopAction(forceDisable);
+  const createAlertRuleAction = useCreateAlertRuleAction(forceDisable);
 
   return {
     modals: (
       <>
+        {resetAction.isModalVisible && <ResetActionModal {...resetAction} />}
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
+        {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
+
         {editAction.config && editAction.isFlyoutVisible && (
           <EditTransformFlyout
             closeFlyout={editAction.closeFlyout}
             config={editAction.config}
-            indexPatternId={editAction.indexPatternId}
+            dataViewId={editAction.dataViewId}
           />
         )}
         {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
@@ -52,11 +60,13 @@ export const useActions = ({
     ),
     actions: [
       discoverAction.action,
+      createAlertRuleAction.action,
       startAction.action,
       stopAction.action,
       editAction.action,
       cloneAction.action,
       deleteAction.action,
+      resetAction.action,
     ],
   };
 };

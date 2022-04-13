@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const basePath = '/app/apm/settings/customize-ui';
+const basePath = '/app/apm/settings/custom-links';
 
 describe('Custom links', () => {
   beforeEach(() => {

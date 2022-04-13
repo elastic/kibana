@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { VersionedState } from 'src/plugins/kibana_utils/common';
-import { LocatorPublic } from '../locators';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorPublic, ILocatorClient, LocatorData } from '../locators';
 
 /**
  * A factory for Short URL Service. We need this factory as the dependency
@@ -17,9 +16,14 @@ import { LocatorPublic } from '../locators';
  * request and the current Kibana version. On the client, the Short URL Service
  * needs no dependencies.
  */
-export interface IShortUrlClientFactory<D> {
-  get(dependencies: D): IShortUrlClient;
+export interface IShortUrlClientFactory<D, Client extends IShortUrlClient = IShortUrlClient> {
+  get(dependencies: D): Client;
 }
+
+export type IShortUrlClientFactoryProvider<
+  D,
+  ShortUrlClient extends IShortUrlClient = IShortUrlClient
+> = (params: { locators: ILocatorClient }) => IShortUrlClientFactory<D, ShortUrlClient>;
 
 /**
  * CRUD-like API for short URLs.
@@ -128,14 +132,4 @@ export interface ShortUrlData<LocatorParams extends SerializableRecord = Seriali
   readonly locator: LocatorData<LocatorParams>;
 }
 
-/**
- * Represents a serializable state of a locator. Includes locator ID, version
- * and its params.
- */
-export interface LocatorData<LocatorParams extends SerializableRecord = SerializableRecord>
-  extends VersionedState<LocatorParams> {
-  /**
-   * Locator ID.
-   */
-  id: string;
-}
+export type { LocatorData };

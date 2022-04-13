@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { buildEsQuery, DataViewBase, Query } from '@kbn/es-query';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { esQuery, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
-
-type ParsedQuery = ReturnType<typeof esQuery.buildEsQuery>;
+import { useKibanaQuerySettings } from '../../../utils/use_kibana_query_settings';
+import { BuiltEsQuery } from '../log_stream';
 
 interface ILogFilterState {
   filterQuery: {
-    parsedQuery: ParsedQuery;
+    parsedQuery: BuiltEsQuery;
     serializedQuery: string;
     originalQuery: Query;
   } | null;
@@ -33,12 +33,13 @@ const initialLogFilterState: ILogFilterState = {
 
 const validationDebounceTimeout = 1000; // milliseconds
 
-export const useLogFilterState = ({ indexPattern }: { indexPattern: IIndexPattern }) => {
+export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase }) => {
   const [logFilterState, setLogFilterState] = useState<ILogFilterState>(initialLogFilterState);
+  const kibanaQuerySettings = useKibanaQuerySettings();
 
   const parseQuery = useCallback(
-    (filterQuery: Query) => esQuery.buildEsQuery(indexPattern, filterQuery, []),
-    [indexPattern]
+    (filterQuery: Query) => buildEsQuery(indexPattern, filterQuery, [], kibanaQuerySettings),
+    [indexPattern, kibanaQuerySettings]
   );
 
   const setLogFilterQueryDraft = useCallback((filterQueryDraft: Query) => {

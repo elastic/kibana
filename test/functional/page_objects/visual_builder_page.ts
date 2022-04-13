@@ -450,19 +450,27 @@ export class VisualBuilderPageObject extends FtrService {
     return await tableView.getVisibleText();
   }
 
+  private async switchTab(visType: string, tab: string) {
+    const testSubj = `${visType}Editor${tab}Btn`;
+    await this.retry.try(async () => {
+      await this.testSubjects.click(testSubj);
+      await this.header.waitUntilLoadingHasFinished();
+      if (!(await (await this.testSubjects.find(testSubj)).elementHasClass('euiTab-isSelected'))) {
+        throw new Error('tab not active');
+      }
+    });
+  }
+
   public async clickPanelOptions(tabName: string) {
-    await this.testSubjects.click(`${tabName}EditorPanelOptionsBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab(tabName, 'PanelOptions');
   }
 
   public async clickDataTab(tabName: string) {
-    await this.testSubjects.click(`${tabName}EditorDataBtn`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab(tabName, 'Data');
   }
 
   public async clickAnnotationsTab() {
-    await this.testSubjects.click('timeSeriesEditorAnnotationsBtn');
-    await this.header.waitUntilLoadingHasFinished();
+    await this.switchTab('timeSeries', 'Annotations');
   }
 
   public async clickAnnotationsAddDataSourceButton() {
@@ -485,33 +493,20 @@ export class VisualBuilderPageObject extends FtrService {
     await annotationRowTemplateInput.type(template);
   }
 
-  public async getAnnotationsCount() {
-    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
-    return annotationsIcons.length;
-  }
-
-  public async clickAnnotationIcon(nth: number = 0) {
-    const annotationsIcons = (await this.find.allByCssSelector('.echAnnotation')) ?? [];
-    await annotationsIcons[nth].click();
-  }
-
-  public async getAnnotationTooltipHeader() {
-    const annotationTooltipHeader = await this.find.byClassName('echAnnotation__header');
-    return await annotationTooltipHeader.getVisibleText();
-  }
-
-  public async getAnnotationTooltipDetails() {
-    const annotationTooltipDetails = await this.find.byClassName('echAnnotation__details');
-    return await annotationTooltipDetails.getVisibleText();
-  }
-
   public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
-    const isPopoverOpened = await this.testSubjects.exists(
-      'switchIndexPatternSelectionModePopoverContent'
-    );
-    if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
-      await this.testSubjects.click('switchIndexPatternSelectionModePopoverButton');
-    }
+    await this.retry.try(async () => {
+      const isPopoverOpened = await this.testSubjects.exists(
+        'switchIndexPatternSelectionModePopoverContent'
+      );
+      if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
+        await this.testSubjects.click('switchIndexPatternSelectionModePopoverButton');
+      }
+      if (shouldOpen) {
+        await this.testSubjects.existOrFail('switchIndexPatternSelectionModePopoverContent');
+      } else {
+        await this.testSubjects.missingOrFail('switchIndexPatternSelectionModePopoverContent');
+      }
+    });
   }
 
   public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
@@ -657,7 +652,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setBackgroundColor(colorHex: string): Promise<void> {
     await this.clickColorPicker();
     await this.checkColorPickerPopUpIsPresent();
-    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.clickColorPicker();
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
@@ -670,7 +668,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
     await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
-    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.clickColorPicker(nth);
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
@@ -718,7 +719,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async checkPreviewIsDisabled(): Promise<void> {
     this.log.debug(`Check no data message is present`);
-    await this.testSubjects.existOrFail('timeseriesVis > visNoResult', { timeout: 5000 });
+    await this.testSubjects.existOrFail('visualization-error', { timeout: 5000 });
   }
 
   public async cloneSeries(nth: number = 0): Promise<void> {
@@ -781,9 +782,22 @@ export class VisualBuilderPageObject extends FtrService {
     await this.setMetricsGroupBy('terms');
     await this.common.sleep(1000);
     const byField = await this.testSubjects.find('groupByField');
-    await this.comboBox.setElement(byField, field);
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(byField, field);
+    });
 
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
+  }
+
+  public async setAnotherGroupByTermsField(field: string) {
+    const fieldSelectAddButtons = await this.testSubjects.findAll('fieldSelectItemAddBtn');
+    await fieldSelectAddButtons[fieldSelectAddButtons.length - 1].click();
+    await this.common.sleep(2000);
+    const byFields = await this.testSubjects.findAll('fieldSelectItem');
+    const selectedByField = byFields[byFields.length - 1];
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(selectedByField, field);
+    });
   }
 
   public async setMetricsGroupByFiltering(include?: string, exclude?: string) {
@@ -801,9 +815,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async checkSelectedMetricsGroupByValue(value: string) {
-    const groupBy = await this.find.byCssSelector(
-      '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
-    );
+    const groupBy = await this.testSubjects.find('groupBySelect');
     return await this.comboBox.isOptionSelected(groupBy, value);
   }
 
@@ -822,9 +834,14 @@ export class VisualBuilderPageObject extends FtrService {
     await filterLabelInput[nth].type(label);
   }
 
-  public async setChartType(type: string, nth: number = 0) {
+  public async setChartType(type: 'Bar' | 'Line', nth: number = 0) {
     const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesChartTypeComboBox');
     return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], type);
+  }
+
+  public async setStackedType(stackedType: string, nth: number = 0) {
+    const seriesChartTypeComboBoxes = await this.testSubjects.findAll('seriesStackedComboBox');
+    return await this.comboBox.setElement(seriesChartTypeComboBoxes[nth], stackedType);
   }
 
   public async setSeriesFilter(query: string) {
@@ -865,6 +882,10 @@ export class VisualBuilderPageObject extends FtrService {
     await optionInput.type(query);
   }
 
+  public async clickSeriesLegendItem(name: string) {
+    await this.find.clickByCssSelector(`[data-ech-series-name="${name}"] .echLegendItem__label`);
+  }
+
   public async toggleNewChartsLibraryWithDebug(enabled: boolean) {
     await this.elasticChart.setNewChartUiDebugFlag(enabled);
   }
@@ -883,7 +904,11 @@ export class VisualBuilderPageObject extends FtrService {
     return legendItems.map(({ name }) => name);
   }
 
-  public async getChartItems(chartData?: DebugState, itemType: 'areas' | 'bars' = 'areas') {
+  public async getChartItems(
+    chartData?: DebugState,
+    itemType: 'areas' | 'bars' | 'annotations' = 'areas'
+  ) {
+    await this.header.waitUntilLoadingHasFinished();
     return (await this.getChartDebugState(chartData))?.[itemType];
   }
 
@@ -895,6 +920,14 @@ export class VisualBuilderPageObject extends FtrService {
   public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
     const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
+  }
+
+  public async getAnnotationsData(chartData?: DebugState) {
+    const annotations = (await this.getChartItems(
+      chartData,
+      'annotations'
+    )) as DebugState['annotations'];
+    return annotations?.map(({ data }) => data);
   }
 
   public async getVisualizeError() {

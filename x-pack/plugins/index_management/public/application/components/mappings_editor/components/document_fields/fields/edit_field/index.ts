@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export {
-  EditFieldContainer,
-  defaultFlyoutProps,
-  Props as EditFieldContainerProps,
-} from './edit_field_container';
+export type { Props as EditFieldContainerProps } from './edit_field_container';
+export { EditFieldContainer, defaultFlyoutProps } from './edit_field_container';
 
 export * from './basic_parameters_section';
 

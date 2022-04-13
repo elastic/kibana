@@ -6,7 +6,7 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import {
@@ -16,41 +16,25 @@ import {
 
 import * as i18n from '../../components/alerts_table/translations';
 
-/**
- * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
- * plus additional TGrid column properties
- */
-export const columns: Array<
+const baseColumns: Array<
   Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
 > = [
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: '@timestamp',
-    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    displayAsText: i18n.ALERTS_HEADERS_RULE,
-    id: 'signal.rule.name',
-    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    linkField: 'signal.rule.id',
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
-    id: 'signal.rule.severity',
+    id: 'kibana.alert.severity',
     initialWidth: 105,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_RISK_SCORE,
-    id: 'signal.rule.risk_score',
+    id: 'kibana.alert.risk_score',
     initialWidth: 100,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
-    id: 'signal.reason',
+    id: 'kibana.alert.reason',
     initialWidth: 450,
   },
   {
@@ -77,4 +61,37 @@ export const columns: Array<
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
   },
+];
+
+/**
+ * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,
+ * plus additional TGrid column properties
+ */
+export const columns: Array<
+  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
+> = [
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: '@timestamp',
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    displayAsText: i18n.ALERTS_HEADERS_RULE,
+    id: 'kibana.alert.rule.name',
+    initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    linkField: 'kibana.alert.rule.uuid',
+  },
+  ...baseColumns,
+];
+
+export const rulePreviewColumns: Array<
+  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
+> = [
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'kibana.alert.original_time',
+    initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH + 10,
+  },
+  ...baseColumns,
 ];

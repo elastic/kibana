@@ -13,9 +13,10 @@ import {
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
-  PostTrustedAppCreateResponse,
   MaybeImmutable,
   GetTrustedAppsListResponse,
+  TrustedApp,
+  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
@@ -24,10 +25,8 @@ import {
   GetPackagePoliciesResponse,
   UpdatePackagePolicyResponse,
 } from '../../../../../fleet/common';
-import { AsyncResourceState } from '../../state';
 import { ImmutableMiddlewareAPI } from '../../../common/store';
 import { AppAction } from '../../../common/store/actions';
-import { TrustedAppsService } from '../trusted_apps/service';
 
 export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 
@@ -42,7 +41,6 @@ export type MiddlewareRunner = (
 
 export interface MiddlewareRunnerContext {
   coreStart: CoreStart;
-  trustedAppsService: TrustedAppsService;
 }
 
 export type PolicyDetailsSelector<T = unknown> = (
@@ -78,35 +76,22 @@ export interface PolicyAssignedTrustedApps {
   artifacts: GetTrustedAppsListResponse;
 }
 
+export interface PolicyRemoveTrustedApps {
+  artifacts: TrustedApp[];
+  response: PutTrustedAppUpdateResponse[];
+}
+
 /**
  * Policy artifacts store state
  */
 export interface PolicyArtifactsState {
   /** artifacts location params  */
   location: PolicyDetailsArtifactsPageLocation;
-  /** A list of artifacts can be linked to the policy  */
-  assignableList: AsyncResourceState<GetTrustedAppsListResponse>;
-  /** Represents if available trusted apps entries exist, regardless of whether the list is showing results  */
-  assignableListEntriesExist: AsyncResourceState<boolean>;
-  /** A list of trusted apps going to be updated  */
-  trustedAppsToUpdate: AsyncResourceState<PostTrustedAppCreateResponse[]>;
-  /** Represents if there is any trusted app existing  */
-  doesAnyTrustedAppExists: AsyncResourceState<boolean>;
-  /** List of artifacts currently assigned to the policy (body specific and global) */
-  assignedList: AsyncResourceState<PolicyAssignedTrustedApps>;
-  /** A list of all available polices */
-  policies: AsyncResourceState<GetPolicyListResponse>;
-}
-
-export enum OS {
-  windows = 'windows',
-  mac = 'mac',
-  linux = 'linux',
 }
 
 export interface PolicyDetailsArtifactsPageListLocationParams {
-  page_index: number;
-  page_size: number;
+  page: number;
+  pageSize: number;
   filter: string;
 }
 
@@ -166,8 +151,8 @@ export type PolicyProtection =
       UIPolicyConfig['windows'],
       'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
     >
-  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection'>
-  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection'>;
+  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
 export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
 

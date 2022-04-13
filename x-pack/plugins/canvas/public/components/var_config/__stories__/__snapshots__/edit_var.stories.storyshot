@@ -20,7 +20,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -47,7 +49,9 @@ Array [
             color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
+          >
+            
+          </span>
           <span
             className="euiCallOutHeader__title"
           >
@@ -72,6 +76,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -104,6 +109,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -118,6 +124,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -141,6 +148,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -234,7 +242,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -252,7 +260,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -307,7 +317,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -334,7 +346,9 @@ Array [
             color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
+          >
+            
+          </span>
           <span
             className="euiCallOutHeader__title"
           >
@@ -359,6 +373,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -391,6 +406,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -405,6 +421,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -428,6 +445,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -462,7 +480,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -480,7 +498,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -535,7 +555,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -562,7 +584,9 @@ Array [
             color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
+          >
+            
+          </span>
           <span
             className="euiCallOutHeader__title"
           >
@@ -587,6 +611,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -619,6 +644,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -633,6 +659,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -656,6 +683,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -690,7 +718,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -708,7 +736,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -763,7 +793,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -790,6 +822,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -822,6 +855,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -836,6 +870,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -859,6 +894,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -893,7 +929,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill euiButton-isDisabled"
+            className="euiButton euiButton--success euiButton--small euiButton--fill euiButton-isDisabled"
             disabled={true}
             onClick={[Function]}
             style={
@@ -911,7 +947,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >

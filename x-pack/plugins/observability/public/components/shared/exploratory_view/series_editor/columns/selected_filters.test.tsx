@@ -7,18 +7,20 @@
 
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../../rtl_helpers';
+import { mockAppDataView, mockDataView, mockUxSeries, render } from '../../rtl_helpers';
 import { SelectedFilters } from './selected_filters';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('SelectedFilters', function () {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   const dataViewSeries = getDefaultConfigs({
     reportType: 'data-distribution',
-    indexPattern: mockIndexPattern,
+    dataView: mockDataView,
     dataType: 'ux',
+    reportConfigMap: obsvReportConfigMap,
   });
 
   it('should render properly', async function () {

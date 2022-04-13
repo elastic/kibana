@@ -10,12 +10,12 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
-import { replace } from '../../shared/Links/url_helpers';
+import { replace } from '../../shared/links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
+import { isServerlessAgent } from '../../../../common/agent_name';
 
 export function TransactionOverview() {
   const {
@@ -25,15 +25,15 @@ export function TransactionOverview() {
       rangeFrom,
       rangeTo,
       transactionType: transactionTypeFromUrl,
+      comparisonEnabled,
+      offset,
     },
   } = useApmParams('/services/{serviceName}/transactions');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
-    kuery,
-  });
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { transactionType, serviceName, fallbackToTransactions, runtimeName } =
+    useApmServiceContext();
 
   const history = useHistory();
 
@@ -47,6 +47,8 @@ export function TransactionOverview() {
   if (!serviceName) {
     return null;
   }
+
+  const isServerless = isServerlessAgent(runtimeName);
 
   return (
     <>
@@ -65,6 +67,9 @@ export function TransactionOverview() {
         environment={environment}
         start={start}
         end={end}
+        isServerlessContext={isServerless}
+        comparisonEnabled={comparisonEnabled}
+        offset={offset}
       />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
@@ -76,6 +81,7 @@ export function TransactionOverview() {
           kuery={kuery}
           start={start}
           end={end}
+          saveTableOptionsToUrl
         />
       </EuiPanel>
     </>

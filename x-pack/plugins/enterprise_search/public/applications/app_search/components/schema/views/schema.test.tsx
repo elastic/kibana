@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
 import { SchemaAddFieldModal } from '../../../../shared/schema';
-import { getPageHeaderActions } from '../../../../test_helpers';
+import { getPageHeaderActions, getPageTitle, getPageDescription } from '../../../../test_helpers';
 
 import { SchemaCallouts, SchemaTable } from '../components';
 
@@ -29,6 +29,7 @@ describe('Schema', () => {
     hasSchemaChanged: false,
     isUpdating: false,
     isModalOpen: false,
+    myRole: { canManageEngines: true },
   };
   const actions = {
     loadSchema: jest.fn(),
@@ -60,13 +61,21 @@ describe('Schema', () => {
   describe('page action buttons', () => {
     const subject = () => getPageHeaderActions(shallow(<Schema />));
 
-    it('renders', () => {
+    it('renders buttons when access allows', () => {
       const wrapper = subject();
+
       expect(wrapper.find(EuiButton)).toHaveLength(2);
     });
 
+    it('does not render buttons when access disallowed', () => {
+      setMockValues({ ...values, myRole: { canManageEngines: false } });
+      const wrapper = subject();
+
+      expect(wrapper.find(EuiButton)).toHaveLength(0);
+    });
+
     it('renders loading/disabled state when schema is updating', () => {
-      setMockValues({ isUpdating: true });
+      setMockValues({ ...values, isUpdating: true });
       const wrapper = subject();
 
       expect(wrapper.find('[data-test-subj="updateSchemaButton"]').prop('isLoading')).toBe(true);
@@ -115,9 +124,18 @@ describe('Schema', () => {
   });
 
   it('renders a modal that lets a user add a new schema field', () => {
-    setMockValues({ isModalOpen: true });
+    setMockValues({ ...values, isModalOpen: true });
     const wrapper = shallow(<Schema />);
 
     expect(wrapper.find(SchemaAddFieldModal)).toHaveLength(1);
+  });
+
+  it('renders a read-only header for elasticsearch engines', () => {
+    setMockValues({ ...values, isElasticsearchEngine: true });
+    const title = getPageTitle(shallow(<Schema />));
+    const description = getPageDescription(shallow(<Schema />));
+
+    expect(title).toBe('Engine schema');
+    expect(description).toBe('View schema field types.');
   });
 });

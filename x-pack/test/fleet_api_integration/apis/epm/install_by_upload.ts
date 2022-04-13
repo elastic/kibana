@@ -12,10 +12,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const dockerServers = getService('dockerServers');
 
   const testPkgArchiveTgz = path.join(
@@ -47,11 +49,12 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
   );
 
-  const testPkgKey = 'apache-0.1.4';
+  const testPkgName = 'apache';
+  const testPkgVersion = '0.1.4';
   const server = dockerServers.get('registry');
 
-  const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+  const deletePackage = async (name: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
   describe('installs packages from direct upload', async () => {
@@ -60,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
     afterEach(async () => {
       if (server) {
         // remove the packages just in case it being installed will affect other tests
-        await deletePackage(testPkgKey);
+        await deletePackage(testPkgName, testPkgVersion);
       }
     });
 
@@ -72,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/gzip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(29);
+      expect(res.body.items.length).to.be(29);
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {
@@ -83,21 +86,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.response.length).to.be(29);
-
-      const packageInfoRes = await supertest
-        .get(`/api/fleet/epm/packages/${testPkgKey}`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-
-      delete packageInfoRes.body.response.latestVersion;
-      delete packageInfoRes.body.response.savedObject.attributes.install_started_at;
-      delete packageInfoRes.body.response.savedObject.version;
-      delete packageInfoRes.body.response.savedObject.updated_at;
-      delete packageInfoRes.body.response.savedObject.coreMigrationVersion;
-      delete packageInfoRes.body.response.savedObject.migrationVersion;
-
-      expectSnapshot(packageInfoRes.body.response).toMatch();
+      expect(res.body.items.length).to.be(29);
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
@@ -189,6 +178,28 @@ export default function (providerContext: FtrProviderContext) {
       expect(res.error.text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Name thisIsATypo and version 0.1.4 do not match top-level directory apache-0.1.4"}'
       );
+    });
+
+    it('should not allow users without all access', async () => {
+      const buf = fs.readFileSync(testPkgArchiveTgz);
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/gzip')
+        .send(buf)
+        .expect(403);
+    });
+
+    it('should not allow non superusers', async () => {
+      const buf = fs.readFileSync(testPkgArchiveTgz);
+      await supertestWithoutAuth
+        .post(`/api/fleet/epm/packages`)
+        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/gzip')
+        .send(buf)
+        .expect(403);
     });
   });
 }

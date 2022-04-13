@@ -73,7 +73,7 @@ export function maybeCollectReferences({
   apiDec,
   captureReferences,
 }: MaybeCollectReferencesOpt): ApiReference[] | undefined {
-  if (Node.isReferenceFindableNode(node)) {
+  if (Node.isReferenceFindable(node)) {
     return captureReferences || apiDec.deprecated
       ? getReferences({ node, plugins, currentPluginId, log })
       : undefined;

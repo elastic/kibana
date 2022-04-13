@@ -19,11 +19,26 @@ import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { TimelineId, ActionProps, OnPinEvent } from '../../../../../../common/types/timeline';
+import {
+  setActiveTabTimeline,
+  updateTimelineGraphEventId,
+  updateTimelineSessionViewConfig,
+} from '../../../../store/timeline/actions';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../../../common/containers/use_full_screen';
+import {
+  TimelineId,
+  ActionProps,
+  OnPinEvent,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -34,7 +49,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
   checked,
   columnValues,
-  data,
   ecsData,
   eventId,
   eventIdToNoteIds,
@@ -90,21 +104,76 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
   const eventType = getEventType(ecsData);
 
-  const isContextMenuDisabled = useMemo(
-    () =>
+  const isContextMenuDisabled = useMemo(() => {
+    return (
       eventType !== 'signal' &&
-      !(
-        (ecsData.event?.kind?.includes('event') || ecsData.event?.kind?.includes('alert')) &&
-        ecsData.agent?.type?.includes('endpoint')
-      ),
-    [eventType, ecsData.event?.kind, ecsData.agent?.type]
-  );
+      !(ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'))
+    );
+  }, [ecsData, eventType]);
+
+  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const { setGlobalFullScreen } = useGlobalFullScreen();
+  const { setTimelineFullScreen } = useTimelineFullScreen();
+  const handleClick = useCallback(() => {
+    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
+    if (timelineId === TimelineId.active) {
+      if (dataGridIsFullScreen) {
+        setTimelineFullScreen(true);
+      }
+      dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
+    } else {
+      if (dataGridIsFullScreen) {
+        setGlobalFullScreen(true);
+      }
+    }
+  }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
+
+  const sessionViewConfig = useMemo(() => {
+    const { process, _id, timestamp } = ecsData;
+    const sessionEntityId = process?.entry_leader?.entity_id?.[0];
+
+    if (sessionEntityId === undefined) {
+      return null;
+    }
+
+    const jumpToEntityId = process?.entity_id?.[0];
+    const investigatedAlertId = eventType === 'signal' || eventType === 'eql' ? _id : undefined;
+    const jumpToCursor =
+      (investigatedAlertId && ecsData.kibana?.alert.original_time?.[0]) || timestamp;
+
+    return {
+      sessionEntityId,
+      jumpToEntityId,
+      jumpToCursor,
+      investigatedAlertId,
+    };
+  }, [ecsData, eventType]);
+
+  const openSessionView = useCallback(() => {
+    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+    if (timelineId === TimelineId.active) {
+      if (dataGridIsFullScreen) {
+        setTimelineFullScreen(true);
+      }
+      if (sessionViewConfig !== null) {
+        dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
+      }
+    } else {
+      if (dataGridIsFullScreen) {
+        setGlobalFullScreen(true);
+      }
+    }
+    if (sessionViewConfig !== null) {
+      dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig }));
+    }
+  }, [dispatch, timelineId, sessionViewConfig, setGlobalFullScreen, setTimelineFullScreen]);
 
   return (
     <ActionsContainer>
       {showCheckboxes && !tGridEnabled && (
         <div key="select-event-container" data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             {loadingEventIds.includes(eventId) ? (
               <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
             ) : (
@@ -120,24 +189,24 @@ const ActionsComponent: React.FC<ActionProps> = ({
         </div>
       )}
       <div key="expand-event">
-        <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
             <EuiButtonIcon
               aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
               data-test-subj="expand-event"
               iconType="expand"
               onClick={onEventDetailsPanelOpened}
+              size="s"
             />
           </EuiToolTip>
         </EventsTdContent>
       </div>
       <>
-        {timelineId !== TimelineId.active && eventType === 'signal' && (
+        {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
             key="investigate-in-timeline"
             ecsRowData={ecsData}
-            nonEcsRowData={data}
           />
         )}
 
@@ -171,6 +240,42 @@ const ActionsComponent: React.FC<ActionProps> = ({
           refetch={refetch ?? noop}
           onRuleChange={onRuleChange}
         />
+        {isDisabled === false ? (
+          <div>
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip
+                data-test-subj="view-in-analyzer-tool-tip"
+                content={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW({
+                    ariaRowindex,
+                    columnValues,
+                  })}
+                  data-test-subj="view-in-analyzer"
+                  iconType="analyzeEvent"
+                  onClick={handleClick}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
+        ) : null}
+        {sessionViewConfig !== null ? (
+          <div>
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>
+                <EuiButtonIcon
+                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                  data-test-subj="session-view-button"
+                  iconType="sessionViewer"
+                  onClick={openSessionView}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
+        ) : null}
       </>
     </ActionsContainer>
   );

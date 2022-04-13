@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
 const ARCHIVE = resolve(
@@ -44,7 +44,7 @@ export default ({ getPageObjects, getService }) => {
           await retry.try(async () => {
             const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
             expect(await executionFailureResultCallout.getVisibleText()).to.be(
-              'Test failed to run\nThe following error was found:\nerror sending email\nDetails:\nMail command failed: 550 5.7.1 Relaying denied'
+              'Test failed to run\nThe following error was found:\nerror validating action type connector: secrets must be defined'
             );
           });
           expect(true).to.be(true);

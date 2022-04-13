@@ -7,23 +7,21 @@
 
 import { getData } from '../../../kibana_services';
 import { MapsAppState } from '../url_state';
+import { SerializedMapState } from './types';
 
 export function getInitialQuery({
-  mapStateJSON,
+  serializedMapState,
   appState = {},
 }: {
-  mapStateJSON?: string;
+  serializedMapState?: SerializedMapState;
   appState: MapsAppState;
 }) {
   if (appState.query) {
     return appState.query;
   }
 
-  if (mapStateJSON) {
-    const mapState = JSON.parse(mapStateJSON);
-    if (mapState.query) {
-      return mapState.query;
-    }
+  if (serializedMapState?.query) {
+    return serializedMapState.query;
   }
 
   return getData().query.queryString.getDefaultQuery();

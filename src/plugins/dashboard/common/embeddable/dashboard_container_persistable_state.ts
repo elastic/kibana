@@ -12,9 +12,17 @@ import {
   EmbeddableStateWithType,
 } from '../../../embeddable/common';
 import { SavedObjectReference } from '../../../../core/types';
-import { DashboardContainerStateWithType, DashboardPanelState } from '../types';
+import {
+  DashboardContainerControlGroupInput,
+  DashboardContainerStateWithType,
+  DashboardPanelState,
+} from '../types';
+import { CONTROL_GROUP_TYPE } from '../../../controls/common';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
+
+const controlGroupReferencePrefix = 'controlGroup_';
+const controlGroupId = 'dashboard_control_group';
 
 export const createInject = (
   persistableStateService: EmbeddablePersistableStateService
@@ -69,6 +77,27 @@ export const createInject = (
       }
     }
 
+    // since the controlGroup is not part of the panels array, its references need to be injected separately
+    if ('controlGroupInput' in workingState && workingState.controlGroupInput) {
+      const controlGroupReferences = references
+        .filter((reference) => reference.name.indexOf(controlGroupReferencePrefix) === 0)
+        .map((reference) => ({
+          ...reference,
+          name: reference.name.replace(controlGroupReferencePrefix, ''),
+        }));
+
+      const { type, ...injectedControlGroupState } = persistableStateService.inject(
+        {
+          ...workingState.controlGroupInput,
+          type: CONTROL_GROUP_TYPE,
+          id: controlGroupId,
+        },
+        controlGroupReferences
+      );
+      workingState.controlGroupInput =
+        injectedControlGroupState as unknown as DashboardContainerControlGroupInput;
+    }
+
     return workingState as EmbeddableStateWithType;
   };
 };
@@ -108,16 +137,35 @@ export const createExtract = (
         });
 
         // We're going to prefix the names of the references so that we don't end up with dupes (from visualizations for instance)
-        const prefixedReferences = panelReferences.map((reference) => ({
-          ...reference,
-          name: `${prefix}${reference.name}`,
-        }));
+        const prefixedReferences = panelReferences
+          .filter((reference) => reference.type !== 'tag') // panel references should never contain tags. If they do, they must be removed
+          .map((reference) => ({
+            ...reference,
+            name: `${prefix}${reference.name}`,
+          }));
 
         references.push(...prefixedReferences);
 
         const { type, ...restOfState } = panelState;
         workingState.panels[key].explicitInput = restOfState as EmbeddableInput;
       }
+    }
+
+    // since the controlGroup is not part of the panels array, its references need to be extracted separately
+    if ('controlGroupInput' in workingState && workingState.controlGroupInput) {
+      const { state: extractedControlGroupState, references: controlGroupReferences } =
+        persistableStateService.extract({
+          ...workingState.controlGroupInput,
+          type: CONTROL_GROUP_TYPE,
+          id: controlGroupId,
+        });
+      workingState.controlGroupInput =
+        extractedControlGroupState as unknown as DashboardContainerControlGroupInput;
+      const prefixedControlGroupReferences = controlGroupReferences.map((reference) => ({
+        ...reference,
+        name: `${controlGroupReferencePrefix}${reference.name}`,
+      }));
+      references.push(...prefixedControlGroupReferences);
     }
 
     return { state: workingState as EmbeddableStateWithType, references };

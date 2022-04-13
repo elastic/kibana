@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
@@ -20,6 +20,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiAccordion.isLoading': i18n.translate('core.euiAccordion.isLoading', {
       defaultMessage: 'Loading',
     }),
+    'euiAutoRefresh.autoRefreshLabel': i18n.translate('core.euiAutoRefresh.autoRefreshLabel', {
+      defaultMessage: 'Auto refresh',
+    }),
+    'euiAutoRefresh.buttonLabelOff': i18n.translate('core.euiAutoRefresh.buttonLabelOff', {
+      defaultMessage: 'Auto refresh is off',
+    }),
+    'euiAutoRefresh.buttonLabelOn': ({ prettyInterval }: EuiValues) =>
+      i18n.translate('core.euiAutoRefresh.buttonLabelOn', {
+        defaultMessage: 'Auto refresh is on and set to {prettyInterval}',
+        values: { prettyInterval },
+      }),
     'euiBasicTable.selectAllRows': i18n.translate('core.euiBasicTable.selectAllRows', {
       defaultMessage: 'Select all rows',
       description: 'ARIA and displayed label on a checkbox to select all table rows',
@@ -64,10 +75,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       }),
     'euiBasicTable.tablePagination': ({ tableCaption }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tablePagination', {
-        defaultMessage: 'Pagination for preceding table: {tableCaption}',
+        defaultMessage: 'Pagination for table: {tableCaption}',
         values: { tableCaption },
         description: 'Screen reader text to describe the pagination controls',
       }),
+    'euiBasicTable.noItemsMessage': i18n.translate('core.euiBasicTable.noItemsMessage', {
+      defaultMessage: 'No items found',
+    }),
     'euiBottomBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
       i18n.translate('core.euiBottomBar.customScreenReaderAnnouncement', {
         defaultMessage:
@@ -123,22 +137,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCodeBlock.fullscreenExpand': i18n.translate('core.euiCodeBlock.fullscreenExpand', {
       defaultMessage: 'Expand',
       description: 'ARIA label for a button that enters fullscreen view',
-    }),
-    'euiCodeEditor.startEditing': i18n.translate('core.euiCodeEditor.startEditing', {
-      defaultMessage: 'Press Enter to start editing.',
-      description: 'Screen reader text to prompt editing',
-    }),
-    'euiCodeEditor.startInteracting': i18n.translate('core.euiCodeEditor.startInteracting', {
-      defaultMessage: 'Press Enter to start interacting with the code.',
-      description: 'Screen reader text to prompt interaction',
-    }),
-    'euiCodeEditor.stopEditing': i18n.translate('core.euiCodeEditor.stopEditing', {
-      defaultMessage: "When you're done, press Escape to stop editing.",
-      description: 'Screen reader text to describe ending editing',
-    }),
-    'euiCodeEditor.stopInteracting': i18n.translate('core.euiCodeEditor.stopInteracting', {
-      defaultMessage: "When you're done, press Escape to stop interacting with the code.",
-      description: 'Screen reader text to describe ending interactions',
     }),
     'euiCollapsedItemActions.allActions': i18n.translate(
       'core.euiCollapsedItemActions.allActions',
@@ -308,6 +306,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Select sorting method for {display}',
         values: { display },
       }),
+    'euiComboBox.listboxAriaLabel': i18n.translate('core.euiComboBox.listboxAriaLabel', {
+      defaultMessage: 'Choose from the following options',
+    }),
     'euiComboBoxOptionsList.allOptionsSelected': i18n.translate(
       'core.euiComboBoxOptionsList.allOptionsSelected',
       {
@@ -399,8 +400,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Row: {row}; Column: {col}',
         values: { row, col },
       }),
-    'euiDataGridCellButtons.expandButtonTitle': i18n.translate(
-      'core.euiDataGridCellButtons.expandButtonTitle',
+    'euiDataGridCellActions.expandButtonTitle': i18n.translate(
+      'core.euiDataGridCellActions.expandButtonTitle',
       {
         defaultMessage: 'Click or hit enter to interact with cell content',
       }
@@ -486,18 +487,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
-    'euiDataGridToolbar.fullScreenButton': i18n.translate(
-      'core.euiDataGridToolbar.fullScreenButton',
-      {
-        defaultMessage: 'Full screen',
-      }
-    ),
-    'euiDataGridToolbar.fullScreenButtonActive': i18n.translate(
-      'core.euiDataGridToolbar.fullScreenButtonActive',
-      {
-        defaultMessage: 'Exit full screen',
-      }
-    ),
     'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
       i18n.translate('core.euiDatePopoverButton.invalidTitle', {
         defaultMessage: 'Invalid date: {title}',
@@ -508,6 +497,42 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Update needed: {title}',
         values: { title },
       }),
+    'euiDisplaySelector.buttonText': i18n.translate('core.euiDisplaySelector.buttonText', {
+      defaultMessage: 'Display options',
+    }),
+    'euiDisplaySelector.resetButtonText': i18n.translate(
+      'core.euiDisplaySelector.resetButtonText',
+      {
+        defaultMessage: 'Reset to default',
+      }
+    ),
+    'euiDisplaySelector.densityLabel': i18n.translate('core.euiDisplaySelector.densityLabel', {
+      defaultMessage: 'Density',
+    }),
+    'euiDisplaySelector.labelCompact': i18n.translate('core.euiDisplaySelector.labelCompact', {
+      defaultMessage: 'Compact',
+    }),
+    'euiDisplaySelector.labelNormal': i18n.translate('core.euiDisplaySelector.labelNormal', {
+      defaultMessage: 'Normal',
+    }),
+    'euiDisplaySelector.labelExpanded': i18n.translate('core.euiDisplaySelector.labelExpanded', {
+      defaultMessage: 'Expanded',
+    }),
+    'euiDisplaySelector.labelSingle': i18n.translate('core.euiDisplaySelector.labelSingle', {
+      defaultMessage: 'Single',
+    }),
+    'euiDisplaySelector.labelAuto': i18n.translate('core.euiDisplaySelector.labelAuto', {
+      defaultMessage: 'Auto fit',
+    }),
+    'euiDisplaySelector.labelCustom': i18n.translate('core.euiDisplaySelector.labelCustom', {
+      defaultMessage: 'Custom',
+    }),
+    'euiDisplaySelector.rowHeightLabel': i18n.translate('core.euiDisplaySelector.rowHeightLabel', {
+      defaultMessage: 'Row height',
+    }),
+    'euiDisplaySelector.lineCountLabel': i18n.translate('core.euiDisplaySelector.lineCountLabel', {
+      defaultMessage: 'Lines per row',
+    }),
     'euiFieldPassword.showPassword': i18n.translate('core.euiFieldPassword.showPassword', {
       defaultMessage:
         'Show password as plain text. Note: this will visually expose your password on the screen.',
@@ -552,6 +577,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label on a button that removes any entry in a form field',
       }
     ),
+    'euiFullscreenSelector.fullscreenButton': i18n.translate(
+      'core.euiFullscreenSelector.fullscreenButton',
+      {
+        defaultMessage: 'Enter fullscreen',
+      }
+    ),
+    'euiFullscreenSelector.fullscreenButtonActive': i18n.translate(
+      'core.euiFullscreenSelector.fullscreenButtonActive',
+      {
+        defaultMessage: 'Exit fullscreen',
+      }
+    ),
     'euiHeaderLinks.appNavigation': i18n.translate('core.euiHeaderLinks.appNavigation', {
       defaultMessage: 'App menu',
       description: 'ARIA label on a `nav` element',
@@ -564,12 +601,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiImage.closeImage': ({ alt }: EuiValues) =>
       i18n.translate('core.euiImage.closeImage', {
-        defaultMessage: 'Close full screen {alt} image',
+        defaultMessage: 'Close fullscreen {alt} image',
         values: { alt },
       }),
     'euiImage.openImage': ({ alt }: EuiValues) =>
       i18n.translate('core.euiImage.openImage', {
-        defaultMessage: 'Open full screen {alt} image',
+        defaultMessage: 'Open fullscreen {alt} image',
         values: { alt },
       }),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
@@ -634,17 +671,29 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Syntax help',
       }
     ),
-    'euiMarkdownEditorFooter.descriptionPrefix': i18n.translate(
-      'core.euiMarkdownEditorFooter.descriptionPrefix',
+    'euiMarkdownEditorFooter.mdSyntaxLink': i18n.translate(
+      'core.euiMarkdownEditorFooter.mdSyntaxLink',
+      {
+        defaultMessage: 'GitHub flavored markdown',
+      }
+    ),
+    'euiMarkdownEditorFooter.syntaxModalDescriptionPrefix': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxModalDescriptionPrefix',
       {
         defaultMessage: 'This editor uses',
       }
     ),
-    'euiMarkdownEditorFooter.descriptionSuffix': i18n.translate(
-      'core.euiMarkdownEditorFooter.descriptionSuffix',
+    'euiMarkdownEditorFooter.syntaxModalDescriptionSuffix': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxModalDescriptionSuffix',
       {
         defaultMessage:
           'You can also utilize these additional syntax plugins to add rich content to your text.',
+      }
+    ),
+    'euiMarkdownEditorFooter.syntaxPopoverDescription': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxPopoverDescription',
+      {
+        defaultMessage: 'This editor uses',
       }
     ),
     'euiMarkdownEditorToolbar.editor': i18n.translate('core.euiMarkdownEditorToolbar.editor', {
@@ -664,6 +713,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '+ {messagesLength} more',
         values: { messagesLength },
       }),
+    'euiErrorBoundary.error': i18n.translate('core.euiErrorBoundary.error', {
+      defaultMessage: 'Error',
+      description: 'Error boundary for uncaught exceptions when rendering part of the application',
+    }),
     'euiNotificationEventMessages.accordionAriaLabelButtonText': ({
       messagesLength,
       eventName,
@@ -705,11 +758,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'hide',
       }
     ),
-    'euiPagination.nextPage': ({ page }: EuiValues) =>
-      i18n.translate('core.euiPagination.nextPage', {
-        defaultMessage: 'Next page, {page}',
-        values: { page },
-      }),
     'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
       <FormattedMessage
         id="core.euiPagination.pageOfTotalCompressed"
@@ -717,20 +765,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ page, total }}
       />
     ),
-    'euiPagination.previousPage': ({ page }: EuiValues) =>
-      i18n.translate('core.euiPagination.previousPage', {
-        defaultMessage: 'Previous page, {page}',
-        values: { page },
-      }),
-    'euiPagination.disabledPreviousPage': i18n.translate(
-      'core.euiPagination.disabledPreviousPage',
-      {
-        defaultMessage: 'Previous page',
-      }
-    ),
-    'euiPagination.disabledNextPage': i18n.translate('core.euiPagination.disabledNextPage', {
-      defaultMessage: 'Next page',
-    }),
     'euiPagination.firstRangeAriaLabel': ({ lastPage }: EuiValues) =>
       i18n.translate('core.euiPagination.firstRangeAriaLabel', {
         defaultMessage: 'Skipping pages 2 to {lastPage}',
@@ -741,6 +775,21 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Skipping pages {firstPage} to {lastPage}',
         values: { firstPage, lastPage },
       }),
+    'euiPagination.last': i18n.translate('core.euiPagination.last', {
+      defaultMessage: 'Last',
+    }),
+    'euiPagination.page': i18n.translate('core.euiPagination.page', {
+      defaultMessage: 'Page',
+    }),
+    'euiPagination.of': i18n.translate('core.euiPagination.of', {
+      defaultMessage: 'of',
+    }),
+    'euiPagination.collection': i18n.translate('core.euiPagination.collection', {
+      defaultMessage: 'collection',
+    }),
+    'euiPagination.fromEndLabel': i18n.translate('core.euiPagination.fromEndLabel', {
+      defaultMessage: 'from end',
+    }),
     'euiPaginationButton.longPageString': ({ page, totalPages }: EuiValues) =>
       i18n.translate('core.euiPaginationButton.longPageString', {
         defaultMessage: 'Page {page} of {totalPages}',
@@ -753,6 +802,24 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page },
         description: 'Text to describe the current page of a paginated section',
       }),
+    'euiPaginationButtonArrow.nextPage': i18n.translate('core.euiPaginationButtonArrow.nextPage', {
+      defaultMessage: 'Next page',
+    }),
+    'euiPaginationButtonArrow.previousPage': i18n.translate(
+      'core.euiPaginationButtonArrow.previousPage',
+      {
+        defaultMessage: 'Previous page',
+      }
+    ),
+    'euiPaginationButtonArrow.firstPage': i18n.translate(
+      'core.euiPaginationButtonArrow.firstPage',
+      {
+        defaultMessage: 'First page',
+      }
+    ),
+    'euiPaginationButtonArrow.lastPage': i18n.translate('core.euiPaginationButtonArrow.lastPage', {
+      defaultMessage: 'Last page',
+    }),
     'euiPinnableListGroup.pinExtraActionLabel': i18n.translate(
       'core.euiPinnableListGroup.pinExtraActionLabel',
       {
@@ -776,6 +843,279 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{value}%',
         values: { value },
       }),
+    'euiPrettyDuration.lastDurationSeconds': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationSeconds', {
+        defaultMessage: 'Last {duration, plural, one {# second} other {# seconds}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationSeconds': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationSeconds', {
+        defaultMessage: 'Next {duration, plural, one {# second} other {# seconds}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationMinutes': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationMinutes', {
+        defaultMessage: 'Last {duration, plural, one {# minute} other {# minutes}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationMinutes': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationMinutes', {
+        defaultMessage: 'Next {duration, plural, one {# minute} other {# minutes}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationHours': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationHours', {
+        defaultMessage: 'Last {duration, plural, one {# hour} other {# hours}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationHours': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationHours', {
+        defaultMessage: 'Next {duration, plural, one {# hour} other {# hours}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationDays': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationDays', {
+        defaultMessage: 'Last {duration, plural, one {# day} other {# days}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nexttDurationDays': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nexttDurationDays', {
+        defaultMessage: 'Next {duration, plural, one {# day} other {# days}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationWeeks': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationWeeks', {
+        defaultMessage: 'Last {duration, plural, one {# week} other {# weeks}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationWeeks': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationWeeks', {
+        defaultMessage: 'Next {duration, plural, one {# week} other {# weeks}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationMonths': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationMonths', {
+        defaultMessage: 'Last {duration, plural, one {# month} other {# months}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationMonths': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationMonths', {
+        defaultMessage: 'Next {duration, plural, one {# month} other {# months}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.lastDurationYears': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.lastDurationYears', {
+        defaultMessage: 'Last {duration, plural, one {# year} other {# years}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.nextDurationYears': ({ duration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.nextDurationYears', {
+        defaultMessage: 'Next {duration, plural, one {# year} other {# years}}',
+        values: { duration },
+      }),
+    'euiPrettyDuration.durationRoundedToSecond': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToSecond', {
+        defaultMessage: '{prettyDuration} rounded to the second',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToMinute': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToMinute', {
+        defaultMessage: '{prettyDuration} rounded to the minute',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToHour': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToHour', {
+        defaultMessage: '{prettyDuration} rounded to the hour',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToDay': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToDay', {
+        defaultMessage: '{prettyDuration} rounded to the day',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToWeek': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToWeek', {
+        defaultMessage: '{prettyDuration} rounded to the week',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToMonth': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToMonth', {
+        defaultMessage: '{prettyDuration} rounded to the month',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.durationRoundedToYear': ({ prettyDuration }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.durationRoundedToYear', {
+        defaultMessage: '{prettyDuration} rounded to the year',
+        values: { prettyDuration },
+      }),
+    'euiPrettyDuration.now': i18n.translate('core.euiPrettyDuration.now', {
+      defaultMessage: 'now',
+    }),
+    'euiPrettyDuration.invalid': i18n.translate('core.euiPrettyDuration.invalid', {
+      defaultMessage: 'Invalid date',
+    }),
+    'euiPrettyDuration.fallbackDuration': ({ displayFrom, displayTo }: EuiValues) =>
+      i18n.translate('core.euiPrettyDuration.fallbackDuration', {
+        defaultMessage: '{displayFrom} to {displayTo}',
+        values: { displayFrom, displayTo },
+      }),
+    'euiPrettyInterval.seconds': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.seconds', {
+        defaultMessage: '{interval, plural, one {# second} other {# seconds}}',
+        values: { interval },
+      }),
+    'euiPrettyInterval.minutes': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.minutes', {
+        defaultMessage: '{interval, plural, one {# minute} other {# minutes}}',
+        values: { interval },
+      }),
+    'euiPrettyInterval.hours': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.hours', {
+        defaultMessage: '{interval, plural, one {# hour} other {# hours}}',
+        values: { interval },
+      }),
+    'euiPrettyInterval.days': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.days', {
+        defaultMessage: '{interval, plural, one {# day} other {# days}}',
+        values: { interval },
+      }),
+    'euiPrettyInterval.secondsShorthand': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.secondsShorthand', {
+        defaultMessage: '{interval} s',
+        values: { interval },
+      }),
+    'euiPrettyInterval.minutesShorthand': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.minutesShorthand', {
+        defaultMessage: '{interval} m',
+        values: { interval },
+      }),
+    'euiPrettyInterval.hoursShorthand': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.hoursShorthand', {
+        defaultMessage: '{interval} h',
+        values: { interval },
+      }),
+    'euiPrettyInterval.daysShorthand': ({ interval }: EuiValues) =>
+      i18n.translate('core.euiPrettyInterval.daysShorthand', {
+        defaultMessage: '{interval} d',
+        values: { interval },
+      }),
+    'euiPrettyInterval.off': i18n.translate('core.euiPrettyInterval.off', {
+      defaultMessage: 'Off',
+    }),
+    'euiTimeOptions.last': i18n.translate('core.euiTimeOptions.last', {
+      defaultMessage: 'Last',
+    }),
+    'euiTimeOptions.next': i18n.translate('core.euiTimeOptions.next', {
+      defaultMessage: 'Next',
+    }),
+    'euiTimeOptions.seconds': i18n.translate('core.euiTimeOptions.seconds', {
+      defaultMessage: 'Seconds',
+    }),
+    'euiTimeOptions.minutes': i18n.translate('core.euiTimeOptions.minutes', {
+      defaultMessage: 'Minutes',
+    }),
+    'euiTimeOptions.hours': i18n.translate('core.euiTimeOptions.hours', {
+      defaultMessage: 'Hours',
+    }),
+    'euiTimeOptions.days': i18n.translate('core.euiTimeOptions.days', {
+      defaultMessage: 'Days',
+    }),
+    'euiTimeOptions.weeks': i18n.translate('core.euiTimeOptions.weeks', {
+      defaultMessage: 'Weeks',
+    }),
+    'euiTimeOptions.months': i18n.translate('core.euiTimeOptions.months', {
+      defaultMessage: 'Months',
+    }),
+    'euiTimeOptions.years': i18n.translate('core.euiTimeOptions.years', {
+      defaultMessage: 'Years',
+    }),
+    'euiTimeOptions.secondsAgo': i18n.translate('core.euiTimeOptions.secondsAgo', {
+      defaultMessage: 'Seconds ago',
+    }),
+    'euiTimeOptions.minutesAgo': i18n.translate('core.euiTimeOptions.minutesAgo', {
+      defaultMessage: 'Minutes ago',
+    }),
+    'euiTimeOptions.hoursAgo': i18n.translate('core.euiTimeOptions.hoursAgo', {
+      defaultMessage: 'Hours ago',
+    }),
+    'euiTimeOptions.daysAgo': i18n.translate('core.euiTimeOptions.daysAgo', {
+      defaultMessage: 'Days ago',
+    }),
+    'euiTimeOptions.weeksAgo': i18n.translate('core.euiTimeOptions.weeksAgo', {
+      defaultMessage: 'Weeks ago',
+    }),
+    'euiTimeOptions.monthsAgo': i18n.translate('core.euiTimeOptions.monthsAgo', {
+      defaultMessage: 'Months ago',
+    }),
+    'euiTimeOptions.yearsAgo': i18n.translate('core.euiTimeOptions.yearsAgo', {
+      defaultMessage: 'Years ago',
+    }),
+    'euiTimeOptions.secondsFromNow': i18n.translate('core.euiTimeOptions.secondsFromNow', {
+      defaultMessage: 'Seconds from now',
+    }),
+    'euiTimeOptions.minutesFromNow': i18n.translate('core.euiTimeOptions.minutesFromNow', {
+      defaultMessage: 'Minutes from now',
+    }),
+    'euiTimeOptions.hoursFromNow': i18n.translate('core.euiTimeOptions.hoursFromNow', {
+      defaultMessage: 'Hours from now',
+    }),
+    'euiTimeOptions.daysFromNow': i18n.translate('core.euiTimeOptions.daysFromNow', {
+      defaultMessage: 'Days from now',
+    }),
+    'euiTimeOptions.weeksFromNow': i18n.translate('core.euiTimeOptions.weeksFromNow', {
+      defaultMessage: 'Weeks from now',
+    }),
+    'euiTimeOptions.monthsFromNow': i18n.translate('core.euiTimeOptions.monthsFromNow', {
+      defaultMessage: 'Months from now',
+    }),
+    'euiTimeOptions.yearsFromNow': i18n.translate('core.euiTimeOptions.yearsFromNow', {
+      defaultMessage: 'Years from now',
+    }),
+    'euiTimeOptions.roundToSecond': i18n.translate('core.euiTimeOptions.roundToSecond', {
+      defaultMessage: 'Round to the second',
+    }),
+    'euiTimeOptions.roundToMinute': i18n.translate('core.euiTimeOptions.roundToMinute', {
+      defaultMessage: 'Round to the minute',
+    }),
+    'euiTimeOptions.roundToHour': i18n.translate('core.euiTimeOptions.roundToHour', {
+      defaultMessage: 'Round to the hour',
+    }),
+    'euiTimeOptions.roundToDay': i18n.translate('core.euiTimeOptions.roundToDay', {
+      defaultMessage: 'Round to the day',
+    }),
+    'euiTimeOptions.roundToWeek': i18n.translate('core.euiTimeOptions.roundToWeek', {
+      defaultMessage: 'Round to the week',
+    }),
+    'euiTimeOptions.roundToMonth': i18n.translate('core.euiTimeOptions.roundToMonth', {
+      defaultMessage: 'Round to the month',
+    }),
+    'euiTimeOptions.roundToYear': i18n.translate('core.euiTimeOptions.roundToYear', {
+      defaultMessage: 'Round to the year',
+    }),
+    'euiTimeOptions.today': i18n.translate('core.euiTimeOptions.today', {
+      defaultMessage: 'Today',
+    }),
+    'euiTimeOptions.thisWeek': i18n.translate('core.euiTimeOptions.thisWeek', {
+      defaultMessage: 'This week',
+    }),
+    'euiTimeOptions.thisMonth': i18n.translate('core.euiTimeOptions.thisMonth', {
+      defaultMessage: 'This month',
+    }),
+    'euiTimeOptions.thisYear': i18n.translate('core.euiTimeOptions.thisYear', {
+      defaultMessage: 'This year',
+    }),
+    'euiTimeOptions.yesterday': i18n.translate('core.euiTimeOptions.yesterday', {
+      defaultMessage: 'Yesterday',
+    }),
+    'euiTimeOptions.weekToDate': i18n.translate('core.euiTimeOptions.weekToDate', {
+      defaultMessage: 'Week to date',
+    }),
+    'euiTimeOptions.monthToDate': i18n.translate('core.euiTimeOptions.monthToDate', {
+      defaultMessage: 'Month to date',
+    }),
+    'euiTimeOptions.yearToDate': i18n.translate('core.euiTimeOptions.yearToDate', {
+      defaultMessage: 'Year to date',
+    }),
     'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
       defaultMessage: 'Apply',
     }),
@@ -808,33 +1148,61 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiRecentlyUsed.legend': i18n.translate('core.euiRecentlyUsed.legend', {
       defaultMessage: 'Recently used date ranges',
     }),
-    'euiRefreshInterval.fullDescription': ({ optionValue, optionText }: EuiValues) =>
-      i18n.translate('core.euiRefreshInterval.fullDescription', {
-        defaultMessage: 'Refresh interval currently set to {optionValue} {optionText}.',
-        values: { optionValue, optionText },
-      }),
     'euiRefreshInterval.legend': i18n.translate('core.euiRefreshInterval.legend', {
       defaultMessage: 'Refresh every',
     }),
-    'euiRefreshInterval.start': i18n.translate('core.euiRefreshInterval.start', {
-      defaultMessage: 'Start',
+    'euiRefreshInterval.fullDescriptionOff': ({ optionValue, optionText }: EuiValues) =>
+      i18n.translate('core.euiRefreshInterval.fullDescriptionOff', {
+        defaultMessage: 'Refresh is off, interval set to {optionValue} {optionText}.',
+        values: { optionValue, optionText },
+      }),
+    'euiRefreshInterval.fullDescriptionOn': ({ optionValue, optionText }: EuiValues) =>
+      i18n.translate('core.euiRefreshInterval.fullDescriptionOn', {
+        defaultMessage: 'Refresh is on, interval set to {optionValue} {optionText}.',
+        values: { optionValue, optionText },
+      }),
+    'euiDatePopoverContent.startDateLabel': i18n.translate(
+      'core.euiDatePopoverContent.startDateLabel',
+      { defaultMessage: 'Start date' }
+    ),
+    'euiDatePopoverContent.endDateLabel': i18n.translate(
+      'core.euiDatePopoverContent.endDateLabel',
+      { defaultMessage: 'End date' }
+    ),
+    'euiDatePopoverContent.absoluteTabLabel': i18n.translate(
+      'core.euiDatePopoverContent.absoluteTabLabel',
+      { defaultMessage: 'Absolute' }
+    ),
+    'euiDatePopoverContent.relativeTabLabel': i18n.translate(
+      'core.euiDatePopoverContent.relativeTabLabel',
+      { defaultMessage: 'Relative' }
+    ),
+    'euiDatePopoverContent.nowTabLabel': i18n.translate('core.euiDatePopoverContent.nowTabLabel', {
+      defaultMessage: 'Now',
     }),
-    'euiRefreshInterval.stop': i18n.translate('core.euiRefreshInterval.stop', {
-      defaultMessage: 'Stop',
-    }),
+    'euiDatePopoverContent.nowTabContent': i18n.translate(
+      'core.euiDatePopoverContent.nowTabContent',
+      {
+        defaultMessage:
+          'Setting the time to "now" means that on every refresh this time will be set to the time of the refresh.',
+      }
+    ),
+    'euiDatePopoverContent.nowTabButtonStart': i18n.translate(
+      'core.euiDatePopoverContent.nowTabButtonStart',
+      { defaultMessage: 'Set start date and time to now' }
+    ),
+    'euiDatePopoverContent.nowTabButtonEnd': i18n.translate(
+      'core.euiDatePopoverContent.nowTabButtonEnd',
+      { defaultMessage: 'Set end date and time to now' }
+    ),
+    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
+      i18n.translate('core.euiAbsoluteTab.dateFormatError', {
+        defaultMessage: 'Expected format: {dateFormat}',
+        values: { dateFormat },
+      }),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
       i18n.translate('core.euiRelativeTab.fullDescription', {
         defaultMessage: 'The unit is changeable. Currently set to {unit}.',
-        values: { unit },
-      }),
-    'euiRelativeTab.relativeDate': ({ position }: EuiValues) =>
-      i18n.translate('core.euiRelativeTab.relativeDate', {
-        defaultMessage: '{position} date',
-        values: { position },
-      }),
-    'euiRelativeTab.roundingLabel': ({ unit }: EuiValues) =>
-      i18n.translate('core.euiRelativeTab.roundingLabel', {
-        defaultMessage: 'Round to the {unit}',
         values: { unit },
       }),
     'euiRelativeTab.unitInputLabel': i18n.translate('core.euiRelativeTab.unitInputLabel', {
@@ -845,6 +1213,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiRelativeTab.numberInputLabel': i18n.translate('core.euiRelativeTab.numberInputLabel', {
       defaultMessage: 'Time span amount',
+    }),
+    'euiRelativeTab.dateInputError': i18n.translate('core.euiRelativeTab.dateInputError', {
+      defaultMessage: 'Must be a valid range',
     }),
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',
@@ -888,13 +1259,37 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ searchValue }}
       />
     ),
+    'euiSelectable.screenReaderInstructions': i18n.translate(
+      'core.euiSelectable.screenReaderInstructions',
+      {
+        defaultMessage:
+          'Use up and down arrows to move focus over options. Enter to select. Escape to collapse options.',
+      }
+    ),
+    'euiSelectable.searchResults': ({ resultsLength }: EuiValues) =>
+      i18n.translate('core.euiSelectable.searchResults', {
+        defaultMessage: '{resultsLength, plural, one {# result} other {# results}} available',
+        values: { resultsLength },
+      }),
     'euiSelectable.placeholderName': i18n.translate('core.euiSelectable.placeholderName', {
       defaultMessage: 'Filter options',
     }),
+    'euiSelectableListItem.checkedOption': i18n.translate(
+      'core.euiSelectableListItem.checkedOption',
+      {
+        defaultMessage: 'Checked option.',
+      }
+    ),
+    'euiSelectableListItem.checkedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.checkedOptionInstructions',
+      {
+        defaultMessage: 'To uncheck this option, press enter.',
+      }
+    ),
     'euiSelectableListItem.includedOption': i18n.translate(
       'core.euiSelectableListItem.includedOption',
       {
-        defaultMessage: 'Included option.',
+        defaultMessage: 'Selected option.',
       }
     ),
     'euiSelectableListItem.includedOptionInstructions': i18n.translate(
@@ -912,7 +1307,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
       'core.euiSelectableListItem.excludedOptionInstructions',
       {
-        defaultMessage: 'To deselect this option, press enter.',
+        defaultMessage: 'To uncheck this option, press enter.',
+      }
+    ),
+    'euiSelectableListItem.unckeckedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.unckeckedOptionInstructions',
+      {
+        defaultMessage: 'To select this option, press enter.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
@@ -1022,34 +1423,35 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} is loading',
         values: { number },
       }),
-    'euiStyleSelector.buttonText': i18n.translate('core.euiStyleSelector.buttonText', {
-      defaultMessage: 'Density',
+    'euiSuggest.stateSavedTooltip': i18n.translate('core.euiSuggest.stateSavedTooltip', {
+      defaultMessage: 'Saved.',
     }),
-    'euiStyleSelector.buttonLegend': i18n.translate('core.euiStyleSelector.buttonLegend', {
-      defaultMessage: 'Select the display density for the data grid',
+
+    'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
+      defaultMessage: 'Changes have not been saved.',
     }),
-    'euiStyleSelector.labelExpanded': i18n.translate('core.euiStyleSelector.labelExpanded', {
-      defaultMessage: 'Expanded density',
+
+    'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {
+      defaultMessage: 'State: loading.',
     }),
-    'euiStyleSelector.labelNormal': i18n.translate('core.euiStyleSelector.labelNormal', {
-      defaultMessage: 'Normal density',
+
+    'euiSuggest.stateSaved': i18n.translate('core.euiSuggest.stateSaved', {
+      defaultMessage: 'State: saved.',
     }),
-    'euiStyleSelector.labelCompact': i18n.translate('core.euiStyleSelector.labelCompact', {
-      defaultMessage: 'Compact density',
+
+    'euiSuggest.stateUnsaved': i18n.translate('core.euiSuggest.stateUnsaved', {
+      defaultMessage: 'State: unsaved.',
     }),
-    'euiSuperDatePicker.showDatesButtonLabel': i18n.translate(
-      'core.euiSuperDatePicker.showDatesButtonLabel',
+    'euiSuggest.stateUnchanged': i18n.translate('core.euiSuggest.stateUnchanged', {
+      defaultMessage: 'State: unchanged.',
+    }),
+    'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
+      'core.euiSuperSelect.screenReaderAnnouncement',
       {
-        defaultMessage: 'Show dates',
-        description: 'Displayed in a button that shows date picker',
+        defaultMessage:
+          'You are in a form selector and must select a single option. Use the up and down keys to navigate or escape to close.',
       }
     ),
-    'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
-      i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
-        defaultMessage:
-          'You are in a form selector of {optionsCount} items and must select a single option. Use the up and down keys to navigate or escape to close.',
-        values: { optionsCount },
-      }),
     'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
       i18n.translate('core.euiSuperSelectControl.selectAnOption', {
         defaultMessage: 'Select an option: {selectedValue}, is selected',
@@ -1096,6 +1498,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { innerText, description },
         description: 'Displayed in a cell in the header of the table to describe the field',
       }),
+    'euiTablePagination.allRows': i18n.translate('core.euiTablePagination.allRows', {
+      defaultMessage: 'Showing all rows',
+      description: 'Displayed in a button that toggles a table pagination menu',
+    }),
     'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
       defaultMessage: 'Rows per page',
       description: 'Displayed in a button that toggles a table pagination menu',
@@ -1106,6 +1512,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Displayed in a button that toggles the number of visible rows',
         values: { rowsPerPage },
       }),
+    'euiTablePagination.rowsPerPageOptionShowAllRows': i18n.translate(
+      'core.euiTablePagination.rowsPerPageOptionShowAllRows',
+      {
+        defaultMessage: 'Show all rows',
+        description: 'Displayed in a button that toggles the number of visible rows',
+      }
+    ),
     'euiTableSortMobile.sorting': i18n.translate('core.euiTableSortMobile.sorting', {
       defaultMessage: 'Sorting',
       description: 'Displayed in a button that toggles a table sorting menu',

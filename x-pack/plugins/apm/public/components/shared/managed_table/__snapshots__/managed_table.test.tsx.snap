@@ -35,13 +35,23 @@ exports[`ManagedTable should render a page-full of items, with defaults 1`] = `
     ]
   }
   loading={false}
-  noItemsMessage="No items found"
+  noItemsMessage={
+    <EuiI18n
+      default="No items found"
+      token="euiBasicTable.noItemsMessage"
+    />
+  }
   onChange={[Function]}
   pagination={
     Object {
-      "hidePerPageOptions": true,
       "pageIndex": 0,
-      "pageSize": 10,
+      "pageSize": 25,
+      "pageSizeOptions": Array [
+        10,
+        25,
+        50,
+      ],
+      "showPerPageOptions": true,
       "totalItemCount": 3,
     }
   }
@@ -85,13 +95,23 @@ exports[`ManagedTable should render when specifying initial values 1`] = `
     ]
   }
   loading={false}
-  noItemsMessage="No items found"
+  noItemsMessage={
+    <EuiI18n
+      default="No items found"
+      token="euiBasicTable.noItemsMessage"
+    />
+  }
   onChange={[Function]}
   pagination={
     Object {
-      "hidePerPageOptions": false,
       "pageIndex": 1,
       "pageSize": 2,
+      "pageSizeOptions": Array [
+        10,
+        25,
+        50,
+      ],
+      "showPerPageOptions": false,
       "totalItemCount": 3,
     }
   }

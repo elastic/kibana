@@ -18,21 +18,26 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
+  hasSimpleExecutableName,
+  isPathValid,
   ConditionEntryField,
+  OperatingSystem,
+} from '@kbn/securitysolution-utils';
+import { EuiFormProps } from '@elastic/eui/src/components/form/form';
+
+import {
+  TrustedAppConditionEntry,
   EffectScope,
   MacosLinuxConditionEntry,
   MaybeImmutable,
   NewTrustedApp,
-  OperatingSystem,
 } from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
-  isPathValid,
+  getDuplicateFields,
 } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
   isGlobalEffectScope,
   isMacosLinuxTrustedAppCondition,
@@ -40,14 +45,15 @@ import {
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
 import { defaultConditionEntry } from '../../store/builders';
-import { OS_TITLES } from '../translations';
+import { CONDITION_FIELD_TITLE, OS_TITLES } from '../translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useLicense } from '../../../../../common/hooks/use_license';
 import {
   EffectedPolicySelect,
   EffectedPolicySelection,
   EffectedPolicySelectProps,
-} from './effected_policy_select';
-import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+} from '../../../../components/effected_policy_select';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -85,7 +91,9 @@ const addResultToValidation = (
     };
   }
   const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]![type].push(errorMarkup);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]!.isInvalid = true;
 };
 
@@ -132,7 +140,29 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
       })
     );
   } else {
+    const duplicated = getDuplicateFields(values.entries as TrustedAppConditionEntry[]);
+    if (duplicated.length) {
+      isValid = false;
+      duplicated.forEach((field) => {
+        addResultToValidation(
+          validation,
+          'entries',
+          'errors',
+          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldDuplicatedMsg', {
+            defaultMessage: '{field} cannot be added more than once',
+            values: { field: CONDITION_FIELD_TITLE[field] },
+          })
+        );
+      });
+    }
     values.entries.forEach((entry, index) => {
+      const isValidPathEntry = isPathValid({
+        os: values.os,
+        field: entry.field,
+        type: entry.type,
+        value: entry.value,
+      });
+
       if (!entry.field || !entry.value.trim()) {
         isValid = false;
         addResultToValidation(
@@ -158,9 +188,7 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
             values: { row: index + 1 },
           })
         );
-      } else if (
-        !isPathValid({ os: values.os, field: entry.field, type: entry.type, value: entry.value })
-      ) {
+      } else if (!isValidPathEntry) {
         addResultToValidation(
           validation,
           'entries',
@@ -169,6 +197,22 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
             defaultMessage: '[{row}] Path may be formed incorrectly; verify value',
             values: { row: index + 1 },
           })
+        );
+      } else if (
+        isValidPathEntry &&
+        !hasSimpleExecutableName({ os: values.os, value: entry.value, type: entry.type })
+      ) {
+        addResultToValidation(
+          validation,
+          'entries',
+          'warnings',
+          i18n.translate(
+            'xpack.securitySolution.trustedapps.create.conditionFieldDegradedPerformanceMsg',
+            {
+              defaultMessage: `[{row}] A wildcard in the filename will affect the endpoint's performance`,
+              values: { row: index + 1 },
+            }
+          )
         );
       }
     });
@@ -189,6 +233,9 @@ export type CreateTrustedAppFormProps = Pick<
 > & {
   /** The trusted app values that will be passed to the form */
   trustedApp: MaybeImmutable<NewTrustedApp>;
+  isEditMode: boolean;
+  isDirty: boolean;
+  wasByPolicy: boolean;
   onChange: (state: TrustedAppFormState) => void;
   /** Setting passed on to the EffectedPolicySelect component */
   policies: Pick<EffectedPolicySelectProps, 'options' | 'isLoading'>;
@@ -196,14 +243,29 @@ export type CreateTrustedAppFormProps = Pick<
   fullWidth?: boolean;
 };
 export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
-  ({ fullWidth, onChange, trustedApp: _trustedApp, policies = { options: [] }, ...formProps }) => {
+  ({
+    fullWidth,
+    isEditMode,
+    isDirty,
+    wasByPolicy,
+    onChange,
+    trustedApp: _trustedApp,
+    policies = { options: [] },
+    ...formProps
+  }) => {
     const trustedApp = _trustedApp as NewTrustedApp;
 
     const dataTestSubj = formProps['data-test-subj'];
 
-    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-      'trustedAppsByPolicyEnabled'
-    );
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+
+    const isGlobal = useMemo(() => {
+      return isGlobalEffectScope(trustedApp.effectScope);
+    }, [trustedApp]);
+
+    const showAssignmentSection = useMemo(() => {
+      return isPlatinumPlus || (isEditMode && (!isGlobal || (wasByPolicy && isGlobal && isDirty)));
+    }, [isEditMode, isGlobal, isDirty, isPlatinumPlus, wasByPolicy]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -213,7 +275,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     // We create local state for the list of policies because we want the selected policies to
     // persist while the user is on the form and possibly toggling between global/non-global
     const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-      isGlobal: isGlobalEffectScope(trustedApp.effectScope),
+      isGlobal,
       selected: [],
     });
 
@@ -406,7 +468,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     }, [notifyOfChange, trustedApp]);
 
     // Anytime the TrustedApp has an effective scope of `policies`, then ensure that
-    // those polices are selected in the UI while at teh same time preserving prior
+    // those polices are selected in the UI while at the same time preserving prior
     // selections (UX requirement)
     useEffect(() => {
       setSelectedPolicies((currentSelection) => {
@@ -455,7 +517,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             onChange={handleDomChangeEvents}
             onBlur={handleDomBlurEvents}
             fullWidth
-            required
+            required={wasVisited?.name}
             maxLength={256}
             data-test-subj={getTestId('nameTextField')}
           />
@@ -472,7 +534,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             value={trustedApp.description}
             onChange={handleDomChangeEvents}
             fullWidth
-            compressed={isTrustedAppsByPolicyEnabled}
+            compressed
             maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
@@ -530,16 +592,24 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        {isTrustedAppsByPolicyEnabled ? (
+        {showAssignmentSection ? (
           <>
             <EuiHorizontalRule />
             <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
               <EffectedPolicySelect
-                isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
+                isGlobal={isGlobal}
+                isPlatinumPlus={isPlatinumPlus}
                 selected={selectedPolicies.selected}
                 options={policies.options}
                 onChange={handlePolicySelectChange}
                 isLoading={policies?.isLoading}
+                description={i18n.translate(
+                  'xpack.securitySolution.trustedApps.assignmentSectionDescription',
+                  {
+                    defaultMessage:
+                      'Assign this trusted application globally across all policies, or assign it to specific policies.',
+                  }
+                )}
                 data-test-subj={getTestId('effectedPolicies')}
               />
             </EuiFormRow>

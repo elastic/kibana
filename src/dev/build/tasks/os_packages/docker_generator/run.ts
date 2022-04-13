@@ -10,7 +10,8 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { kibanaPackageJson } from '@kbn/utils';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
@@ -31,13 +32,15 @@ export async function runDockerGenerator(
     context: boolean;
     image: boolean;
     ubi?: boolean;
+    ubuntu?: boolean;
     ironbank?: boolean;
     cloud?: boolean;
     dockerBuildDate?: string;
   }
 ) {
-  // UBI var config
-  const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
+  let baseOSImage = '';
+  if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
+  if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   const ubiVersionTag = 'ubi8';
 
   let imageFlavor = '';
@@ -71,6 +74,11 @@ export async function runDockerGenerator(
       : []),
   ];
 
+  const dockerPush = config.getDockerPush();
+  const dockerTagQualifier = config.getDockerTagQualfiier();
+  const dockerCrossCompile = config.getDockerCrossCompile();
+  const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
+
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
@@ -82,15 +90,20 @@ export async function runDockerGenerator(
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
+    dockerPush,
+    dockerTagQualifier,
+    dockerCrossCompile,
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,
+    ubuntu: flags.ubuntu,
     cloud: flags.cloud,
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
+    publicArtifactSubdomain,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -99,7 +112,7 @@ export async function runDockerGenerator(
     arm64: 'aarch64',
   };
   const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
-  if (flags.architecture && !buildArchitectureSupported) {
+  if (flags.architecture && !buildArchitectureSupported && !dockerCrossCompile) {
     return;
   }
 

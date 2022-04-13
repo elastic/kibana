@@ -12,14 +12,14 @@ import { RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
-  AlertTaskState,
+  RuleTaskState,
 } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<AlertTaskState> = ({
+const rewriteBodyRes: RewriteResponseCase<RuleTaskState> = ({
   alertTypeState,
   alertInstances,
   previousStartedAt,

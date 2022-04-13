@@ -114,6 +114,9 @@ describe('Terms Agg', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {
+                          "emptyAsNull": Array [
+                            false,
+                          ],
                           "enabled": Array [
                             true,
                           ],
@@ -286,7 +289,19 @@ describe('Terms Agg', () => {
         { typesRegistry: mockAggTypesRegistry() }
       );
       const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
       expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
+    });
+
+    test('should override "hasPrecisionError" for the "terms" bucket type', () => {
+      const aggConfigs = getAggConfigs();
+      const { type } = aggConfigs.aggs[0];
+
+      expect(type.hasPrecisionError).toBeInstanceOf(Function);
+
+      expect(type.hasPrecisionError!({})).toBeFalsy();
+      expect(type.hasPrecisionError!({ doc_count_error_upper_bound: 0 })).toBeFalsy();
+      expect(type.hasPrecisionError!({ doc_count_error_upper_bound: -1 })).toBeTruthy();
     });
   });
 });

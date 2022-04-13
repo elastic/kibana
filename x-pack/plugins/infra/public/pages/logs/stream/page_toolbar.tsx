@@ -6,9 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput } from '../../../../../../../src/plugins/unified_search/public';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
@@ -18,12 +21,11 @@ import { LogFilterState } from '../../../containers/logs/log_filter';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
 import { LogPositionState } from '../../../containers/logs/log_position';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 
 export const LogsToolbar = () => {
-  const { derivedIndexPattern } = useLogSourceContext();
+  const { derivedDataView } = useLogViewContext();
   const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } = useContext(
     LogViewConfiguration.Context
   );
@@ -56,7 +58,7 @@ export const LogsToolbar = () => {
           <QueryStringInput
             disableLanguageSwitcher={true}
             iconType="search"
-            indexPatterns={[derivedIndexPattern]}
+            indexPatterns={[derivedDataView as DataView]}
             isInvalid={!isFilterQueryDraftValid}
             onChange={(query: Query) => {
               setSurroundingLogsId(null);

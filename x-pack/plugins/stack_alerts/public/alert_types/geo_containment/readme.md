@@ -43,7 +43,7 @@ quantities of data the frequency listed below (20000ms = 20s) or higher:
 There are 3 separate tabs you'll need for a combination of loading and viewing the
 data. Since you'll be jumping between them, it might be easiest to just open them
 upfront. Each is preceded by `https://localhost:5601/<your dev env prefix>/app/`:
-- Stack Management > Index Patterns: `management/kibana/indexPatterns`
+- Stack Management > Data Views: `management/kibana/dataViews`
 - Stack Management > Alerts & Actions: `management/insightsAndAlerting/triggersActions/alerts`
 - Maps: `maps`
 
@@ -58,11 +58,11 @@ _ When finished uploading and adding the layer, save the map using a name of you
 choice.
 - Keep the Maps tab open, you'll come back to this
 
-### 7. Create index pattern for generated tracks
-- Go to the index pattern tab to create a new index pattern.
+### 7. Create data view for generated tracks
+- Go to the data view tab to create a new data view.
 - Give it the index name `mtatracks*`
 - For `Time field` select `@timestamp`
-- Click `Create index pattern`
+- Click `Create data view`
 - Leave this tab open, you'll come back to this
 
 ### 8. Create containment alert
@@ -102,11 +102,11 @@ Entity: {{context.entityId}} with document ID: {{context.entityDocumentId}} has 
   - Boundary layer
     - This layer should already be added from when you uploaded the GeoJSON
       file earlier. If it's not already added, it can be added by selecting `Documents`
-      > `Index patterns` > `nyc-neighborhoods` then accept the defaults and add the layer. 
+      > `Data views` > `nyc-neighborhoods` then accept the defaults and add the layer. 
   - Vehicle tracks
-    - Add `Tracks` > `Index patterns` > `mtatracks*`, accept the defaults selected and set `Entity` > `entity_id`. Add the layer and style appropriately.
+    - Add `Tracks` > `Data views` > `mtatracks*`, accept the defaults selected and set `Entity` > `entity_id`. Add the layer and style appropriately.
   - Last known location
-    - Add `Documents` > `Index patterns` > `mtatracks*` and select `Show top hits per entity`
+    - Add `Documents` > `Data views` > `mtatracks*` and select `Show top hits per entity`
     - For `Entity` select `entity_id` and add the layer. 
     - The only required setting on the following screen is to set `Sorting` to sort on `@timestamp`
 - Update time scope of data

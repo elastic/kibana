@@ -10,58 +10,16 @@ import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
 } from '../../../common/source_configuration/source_configuration';
+import {
+  SavedObjectAttributesWithReferences,
+  extractSavedObjectReferences as genericExtractSavedObjectReferences,
+  resolveSavedObjectReferences as genericResolveSavedObjectReferences,
+} from '../../saved_objects/references';
 import { SavedObjectReferenceResolutionError } from './errors';
 
-const logIndexPatternReferenceName = 'log_index_pattern_0';
-
-interface SavedObjectAttributesWithReferences<SavedObjectAttributes> {
-  attributes: SavedObjectAttributes;
-  references: SavedObjectReference[];
-}
-
-/**
- * Rewrites a source configuration such that well-known saved object references
- * are extracted in the `references` array and replaced by the appropriate
- * name. This is the inverse operation to `resolveSavedObjectReferences`.
- */
-export const extractSavedObjectReferences = (
-  sourceConfiguration: InfraSourceConfiguration
-): SavedObjectAttributesWithReferences<InfraSourceConfiguration> =>
-  [
-    extractLogIndicesSavedObjectReferences,
-    extractInventorySavedViewReferences,
-    extractMetricsExplorerSavedViewReferences,
-  ].reduce<SavedObjectAttributesWithReferences<InfraSourceConfiguration>>(
-    ({ attributes: accumulatedAttributes, references: accumulatedReferences }, extract) => {
-      const { attributes, references } = extract(accumulatedAttributes);
-      return {
-        attributes,
-        references: [...accumulatedReferences, ...references],
-      };
-    },
-    {
-      attributes: sourceConfiguration,
-      references: [],
-    }
-  );
-
-/**
- * Rewrites a source configuration such that well-known saved object references
- * are resolved from the `references` argument and replaced by the real saved
- * object ids. This is the inverse operation to `extractSavedObjectReferences`.
- */
-export const resolveSavedObjectReferences = (
-  attributes: InfraSavedSourceConfiguration,
-  references: SavedObjectReference[]
-): InfraSavedSourceConfiguration =>
-  [
-    resolveLogIndicesSavedObjectReferences,
-    resolveInventoryViewSavedObjectReferences,
-    resolveMetricsExplorerSavedObjectReferences,
-  ].reduce<InfraSavedSourceConfiguration>(
-    (accumulatedAttributes, resolve) => resolve(accumulatedAttributes, references),
-    attributes
-  );
+export const logIndexPatternReferenceName = 'log_index_pattern_0';
+export const inventoryDefaultViewReferenceName = 'inventory-saved-view-0';
+export const metricsExplorerDefaultViewReferenceName = 'metrics-explorer-saved-view-0';
 
 const extractLogIndicesSavedObjectReferences = (
   sourceConfiguration: InfraSourceConfiguration
@@ -91,15 +49,19 @@ const extractLogIndicesSavedObjectReferences = (
   }
 };
 
-const extractInventorySavedViewReferences = (
+export const extractInventorySavedViewReferences = (
   sourceConfiguration: InfraSourceConfiguration
 ): SavedObjectAttributesWithReferences<InfraSourceConfiguration> => {
   const { inventoryDefaultView } = sourceConfiguration;
-  if (inventoryDefaultView && inventoryDefaultView !== '0') {
+  if (
+    inventoryDefaultView &&
+    inventoryDefaultView !== '0' &&
+    inventoryDefaultView !== inventoryDefaultViewReferenceName
+  ) {
     const inventoryDefaultViewReference: SavedObjectReference = {
       id: inventoryDefaultView,
       type: 'inventory-view',
-      name: 'inventory-saved-view-0',
+      name: inventoryDefaultViewReferenceName,
     };
     const attributes: InfraSourceConfiguration = {
       ...sourceConfiguration,
@@ -117,15 +79,19 @@ const extractInventorySavedViewReferences = (
   }
 };
 
-const extractMetricsExplorerSavedViewReferences = (
+export const extractMetricsExplorerSavedViewReferences = (
   sourceConfiguration: InfraSourceConfiguration
 ): SavedObjectAttributesWithReferences<InfraSourceConfiguration> => {
   const { metricsExplorerDefaultView } = sourceConfiguration;
-  if (metricsExplorerDefaultView && metricsExplorerDefaultView !== '0') {
+  if (
+    metricsExplorerDefaultView &&
+    metricsExplorerDefaultView !== '0' &&
+    metricsExplorerDefaultView !== metricsExplorerDefaultViewReferenceName
+  ) {
     const metricsExplorerDefaultViewReference: SavedObjectReference = {
       id: metricsExplorerDefaultView,
       type: 'metrics-explorer-view',
-      name: 'metrics-explorer-saved-view-0',
+      name: metricsExplorerDefaultViewReferenceName,
     };
     const attributes: InfraSourceConfiguration = {
       ...sourceConfiguration,
@@ -176,12 +142,12 @@ const resolveInventoryViewSavedObjectReferences = (
 ): InfraSavedSourceConfiguration => {
   if (attributes.inventoryDefaultView && attributes.inventoryDefaultView !== '0') {
     const inventoryViewReference = references.find(
-      (reference) => reference.name === 'inventory-saved-view-0'
+      (reference) => reference.name === inventoryDefaultViewReferenceName
     );
 
     if (inventoryViewReference == null) {
       throw new SavedObjectReferenceResolutionError(
-        'Failed to resolve Inventory default view "inventory-saved-view-0".'
+        `Failed to resolve Inventory default view "${inventoryDefaultViewReferenceName}".`
       );
     }
 
@@ -200,12 +166,12 @@ const resolveMetricsExplorerSavedObjectReferences = (
 ): InfraSavedSourceConfiguration => {
   if (attributes.metricsExplorerDefaultView && attributes.metricsExplorerDefaultView !== '0') {
     const metricsExplorerViewReference = references.find(
-      (reference) => reference.name === 'metrics-explorer-saved-view-0'
+      (reference) => reference.name === metricsExplorerDefaultViewReferenceName
     );
 
     if (metricsExplorerViewReference == null) {
       throw new SavedObjectReferenceResolutionError(
-        'Failed to resolve Metrics Explorer default view "metrics-explorer-saved-view-0".'
+        `Failed to resolve Metrics Explorer default view "${metricsExplorerDefaultViewReferenceName}".`
       );
     }
 
@@ -217,3 +183,25 @@ const resolveMetricsExplorerSavedObjectReferences = (
     return attributes;
   }
 };
+
+/**
+ * Rewrites a source configuration such that well-known saved object references
+ * are extracted in the `references` array and replaced by the appropriate
+ * name. This is the inverse operation to `resolveSavedObjectReferences`.
+ */
+export const extractSavedObjectReferences = genericExtractSavedObjectReferences([
+  extractLogIndicesSavedObjectReferences,
+  extractInventorySavedViewReferences,
+  extractMetricsExplorerSavedViewReferences,
+]);
+
+/**
+ * Rewrites a source configuration such that well-known saved object references
+ * are resolved from the `references` argument and replaced by the real saved
+ * object ids. This is the inverse operation to `extractSavedObjectReferences`.
+ */
+export const resolveSavedObjectReferences = genericResolveSavedObjectReferences([
+  resolveLogIndicesSavedObjectReferences,
+  resolveInventoryViewSavedObjectReferences,
+  resolveMetricsExplorerSavedObjectReferences,
+]);

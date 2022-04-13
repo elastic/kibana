@@ -26,6 +26,7 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
     Array [
       Object {
         "awaitingNodeAssignment": false,
+        "bucketSpanSeconds": 900,
         "datafeedId": "datafeed-linux_anomalous_network_activity_ecs",
         "datafeedIndices": Array [
           "auditbeat-*",
@@ -55,6 +56,7 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
       },
       Object {
         "awaitingNodeAssignment": false,
+        "bucketSpanSeconds": 900,
         "datafeedId": "datafeed-rare_process_by_host_linux_ecs",
         "datafeedIndices": Array [
           "auditbeat-*",
@@ -81,6 +83,7 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
       },
       Object {
         "awaitingNodeAssignment": false,
+        "bucketSpanSeconds": 900,
         "datafeedId": "",
         "datafeedIndices": Array [],
         "datafeedState": "",
@@ -114,9 +117,9 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
   onChange={[Function]}
   pagination={
     Object {
-      "hidePerPageOptions": true,
       "pageIndex": 0,
       "pageSize": 5,
+      "showPerPageOptions": false,
       "totalItemCount": 3,
     }
   }

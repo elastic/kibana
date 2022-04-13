@@ -91,7 +91,7 @@
   }
 
   &::before {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 1;
@@ -118,33 +118,5 @@
     to {
       opacity: 1;
     }
-  }
-}
-
-@mixin kbnThemeStyle($theme, $mode: 'both') {
-  $themes:  'v7', 'v8';
-  @if (index($themes, $theme)) {
-    @if ($mode == 'both') {
-      $themeLight: $theme + 'light';
-      $themeDark: $theme + 'dark';
-      // $kbnThemeVersion comes from the active theme's globals file (e.g. _globals_v8light.scss)
-      @if ($kbnThemeVersion == $themeLight or $kbnThemeVersion == $themeDark) {
-        @content;
-      }
-    } @else if ($mode == 'light') {
-      $themeLight: $theme + 'light';
-      @if ($kbnThemeVersion == $themeLight) {
-        @content;
-      }
-    } @else if ($mode == 'dark') {
-      $themeDark: $theme + 'dark';
-      @if ($kbnThemeVersion == $themeDark) {
-        @content;
-      }
-    } @else {
-      @warn 'The second parameter must be a valid mode (light, dark, or both) -- got #{$mode}';
-    }
-  } @else {
-    @warn 'Invalid $theme. Valid options are: #{$themes}. Got #{$theme} instead';
   }
 }

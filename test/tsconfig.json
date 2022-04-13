@@ -5,7 +5,11 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "types": ["node", "resize-observer-polyfill", "@emotion/react/types/css-prop"]
+    "types": [
+      "node", 
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+    ]
   },
   "include": [
     "**/*",
@@ -18,6 +22,7 @@
   ],
   "exclude": [
     "target/**/*",
+    "analytics/__fixtures__/plugins/**/*",
     "interpreter_functional/plugins/**/*",
     "plugin_functional/plugins/**/*",
     "server_integration/__fixtures__/plugins/**/*",
@@ -42,6 +47,7 @@
     { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../src/plugins/navigation/tsconfig.json" },
+    { "path": "../src/plugins/unified_search/tsconfig.json" },
     { "path": "../src/plugins/newsfeed/tsconfig.json" },
     { "path": "../src/plugins/saved_objects/tsconfig.json" },
     { "path": "../src/plugins/saved_objects_management/tsconfig.json" },
@@ -51,8 +57,11 @@
     { "path": "../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../src/plugins/url_forwarding/tsconfig.json" },
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../src/plugins/index_pattern_management/tsconfig.json" },
-    { "path": "../src/plugins/visualize/tsconfig.json" },
+    { "path": "../src/plugins/data_view_management/tsconfig.json" },
+    { "path": "../src/plugins/visualizations/tsconfig.json" },
+    { "path": "analytics/__fixtures__/plugins/analytics_ftr_helpers/tsconfig.json"},
+    { "path": "analytics/__fixtures__/plugins/analytics_plugin_a/tsconfig.json"},
+    { "path": "interactive_setup_api_integration/fixtures/test_endpoints/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_app_status/tsconfig.json" },
     { "path": "plugin_functional/plugins/core_provider_plugin/tsconfig.json" },
     { "path": "server_integration/__fixtures__/plugins/status_plugin_a/tsconfig.json" },

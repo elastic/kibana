@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
+
 import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';
-import { withAppContext } from './app_context.mock';
+import { WithAppDependencies } from './setup_environment';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     onRouter: (router) => registerRouter(router),
     initialEntries: [`${ROUTES.API_ROOT}/watches/watch/${WATCH_ID}/edit`],
@@ -21,15 +23,14 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(withAppContext(WatchEdit), testBedConfig);
-
 export interface WatchEditTestBed extends TestBed<WatchEditSubjects> {
   actions: {
     clickSubmitButton: () => void;
   };
 }
 
-export const setup = async (): Promise<WatchEditTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<WatchEditTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(WatchEdit, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   /**

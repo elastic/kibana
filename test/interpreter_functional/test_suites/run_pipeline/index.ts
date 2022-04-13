@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
+        'bfetch:disableCompression': true, // makes it easier to debug while developing tests
       });
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
@@ -43,5 +44,11 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./esaggs'));
     loadTestFile(require.resolve('./esaggs_timeshift'));
+    loadTestFile(require.resolve('./esaggs_multiterms'));
+    loadTestFile(require.resolve('./esaggs_sampler'));
+    loadTestFile(require.resolve('./esaggs_significanttext'));
+    loadTestFile(require.resolve('./esaggs_rareterms'));
+    loadTestFile(require.resolve('./esaggs_topmetrics'));
+    loadTestFile(require.resolve('./esaggs_histogram'));
   });
 }

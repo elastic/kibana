@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
-import { EsQueryAlertParams } from './alert_type_params';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RuleExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
+import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
 
 // alert type context provided to actions
 
-type AlertInfo = Pick<AlertExecutorOptions, 'name'>;
+type AlertInfo = Pick<RuleExecutorOptions, 'name'>;
 
 export interface ActionContext extends EsQueryAlertActionContext {
   // a short pre-constructed message which may be used in an action field
@@ -30,12 +30,15 @@ export interface EsQueryAlertActionContext extends AlertInstanceContext {
   conditions: string;
   // query matches
   hits: estypes.SearchHit[];
+  // a link to see records that triggered the alert for Discover alert
+  // a link which navigates to stack management in case of Elastic query alert
+  link: string;
 }
 
 export function addMessages(
   alertInfo: AlertInfo,
   baseContext: EsQueryAlertActionContext,
-  params: EsQueryAlertParams
+  params: OnlyEsQueryAlertParams | OnlySearchSourceAlertParams
 ): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
     defaultMessage: `alert '{name}' matched query`,
@@ -50,13 +53,15 @@ export function addMessages(
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}
-- Timestamp: {date}`,
+- Timestamp: {date}
+- Link: {link}`,
     values: {
       name: alertInfo.name,
       value: baseContext.value,
       conditions: baseContext.conditions,
       window,
       date: baseContext.date,
+      link: baseContext.link,
     },
   });
 

@@ -9,19 +9,27 @@ import { SpacesPlugin } from './plugin';
 
 export { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
 
-export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
+export type { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 
 export type { Space, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 export type { SpacesData, SpacesDataEntry, SpacesApi } from './types';
 
+export type { SpacesManager } from './spaces_manager';
+
 export type {
   CopyToSpaceFlyoutProps,
   CopyToSpaceSavedObjectTarget,
+  CopySavedObjectsToSpaceResponse,
 } from './copy_saved_objects_to_space';
 
 export type {
   LegacyUrlConflictProps,
+  EmbeddableLegacyUrlConflictProps,
+  RedirectLegacyUrlParams,
+} from './legacy_urls';
+
+export type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from './share_saved_objects_to_space';

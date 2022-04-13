@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
+import { docLinks } from '../../../../shared/doc_links';
+
 import { EmptyState } from './';
 
 describe('EmptyState', () => {
@@ -21,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Add documents to adjust settings');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining('/result-settings-guide.html')
+      expect.stringContaining(docLinks.appSearchResultSettings)
     );
   });
 });

@@ -12,6 +12,7 @@ export const clearSearchBar = () => {
 };
 
 export const kqlSearch = (search: string) => {
+  clearSearchBar();
   cy.get(KQL_INPUT).type(search);
 };
 
@@ -21,8 +22,4 @@ export const navigateFromHeaderTo = (page: string) => {
 
 export const refreshPage = () => {
   cy.get(REFRESH_BUTTON).click({ force: true }).should('not.have.text', 'Updating');
-};
-
-export const waitForThePageToBeUpdated = () => {
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };

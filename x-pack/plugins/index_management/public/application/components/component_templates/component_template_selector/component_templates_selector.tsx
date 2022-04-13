@@ -8,7 +8,7 @@
 import classNames from 'classnames';
 import React, { useState, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { ComponentTemplateListItem } from '../../../../../common';
@@ -156,7 +156,6 @@ export const ComponentTemplatesSelector = ({
       {/* Selection */}
       <EuiFlexItem
         className={classNames('componentTemplatesSelector__selection', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'componentTemplatesSelector__selection--is-empty': !hasSelection,
         })}
         data-test-subj="componentTemplatesSelection"

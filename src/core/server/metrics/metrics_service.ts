@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReplaySubject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { firstValueFrom, ReplaySubject } from 'rxjs';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -17,7 +16,7 @@ import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 
-interface MetricsServiceSetupDeps {
+export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
 }
 
@@ -38,10 +37,9 @@ export class MetricsService
   }
 
   public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
-    const config = await this.coreContext.configService
-      .atPath<OpsConfigType>(opsConfig.path)
-      .pipe(first())
-      .toPromise();
+    const config = await firstValueFrom(
+      this.coreContext.configService.atPath<OpsConfigType>(opsConfig.path)
+    );
 
     this.metricsCollector = new OpsMetricsCollector(http.server, {
       logger: this.logger,

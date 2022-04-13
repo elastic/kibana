@@ -6,14 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ConnectorTypes } from '../../../common';
 import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
-import { getConnectorIcon } from '../utils';
+import { getConnectorIcon, isDeprecatedConnector } from '../utils';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 export interface Props {
   connectors: ActionConnector[];
@@ -22,7 +22,6 @@ export interface Props {
   onChange: (id: string) => void;
   selectedConnector: string;
   appendAddConnectorButton?: boolean;
-  hideConnectorServiceNowSir?: boolean;
 }
 
 const ICON_SIZE = 'm';
@@ -57,6 +56,11 @@ const addNewConnector = {
   'data-test-subj': 'dropdown-connector-add-connector',
 };
 
+const StyledEuiIconTip = euiStyled(EuiIconTip)`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS}
+  margin-bottom: 0 !important;
+`;
+
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,
   disabled,
@@ -64,31 +68,40 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   onChange,
   selectedConnector,
   appendAddConnectorButton = false,
-  hideConnectorServiceNowSir = false,
 }) => {
   const { triggersActionsUi } = useKibana().services;
   const connectorsAsOptions = useMemo(() => {
     const connectorsFormatted = connectors.reduce(
       (acc, connector) => {
-        if (hideConnectorServiceNowSir && connector.actionTypeId === ConnectorTypes.serviceNowSIR) {
-          return acc;
-        }
-
         return [
           ...acc,
           {
             value: connector.id,
             inputDisplay: (
-              <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIconExtended
                     type={getConnectorIcon(triggersActionsUi, connector.actionTypeId)}
                     size={ICON_SIZE}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <span>{connector.name}</span>
+                <EuiFlexItem grow={false}>
+                  <span>
+                    {connector.name}
+                    {isDeprecatedConnector(connector) && ` (${i18n.DEPRECATED_TOOLTIP_TEXT})`}
+                  </span>
                 </EuiFlexItem>
+                {isDeprecatedConnector(connector) && (
+                  <EuiFlexItem grow={false}>
+                    <StyledEuiIconTip
+                      aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
+                      size={ICON_SIZE}
+                      type="alert"
+                      color="warning"
+                      content={i18n.DEPRECATED_TOOLTIP_CONTENT}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             ),
             'data-test-subj': `dropdown-connector-${connector.id}`,
@@ -119,5 +132,6 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
     />
   );
 };
+ConnectorsDropdownComponent.displayName = 'ConnectorsDropdown';
 
 export const ConnectorsDropdown = React.memo(ConnectorsDropdownComponent);

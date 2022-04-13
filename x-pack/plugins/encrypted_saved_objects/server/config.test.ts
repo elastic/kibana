@@ -11,7 +11,6 @@ describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "keyRotation": Object {
           "decryptionOnlyKeys": Array [],
@@ -21,7 +20,6 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "keyRotation": Object {
           "decryptionOnlyKeys": Array [],
@@ -32,7 +30,6 @@ describe('config schema', () => {
     expect(ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true }))
       .toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "encryptionKey": "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
         "keyRotation": Object {
           "decryptionOnlyKeys": Array [],
@@ -42,7 +39,6 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "keyRotation": Object {
           "decryptionOnlyKeys": Array [],
         },
@@ -61,7 +57,6 @@ describe('config schema', () => {
       )
     ).toMatchInlineSnapshot(`
       Object {
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "keyRotation": Object {
           "decryptionOnlyKeys": Array [

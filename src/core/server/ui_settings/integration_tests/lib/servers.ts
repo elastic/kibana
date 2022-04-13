@@ -8,7 +8,7 @@
 
 import type supertest from 'supertest';
 import type { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 
 import {
   createTestServers,
@@ -26,7 +26,7 @@ let kbn: TestKibanaUtils;
 
 interface AllServices {
   savedObjectsClient: SavedObjectsClientContract;
-  esClient: KibanaClient;
+  esClient: Client;
   uiSettings: IUiSettingsClient;
   supertest: (method: HttpMethod, path: string) => supertest.Test;
 }

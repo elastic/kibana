@@ -6,15 +6,28 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "scripts/**/*",
+    "server/**/*",
+    "types/**/*"
+  ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../src/plugins/custom_integrations/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../file_upload/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
+    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" },
+    { "path": "../cloud/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" }
   ]
 }

@@ -16,11 +16,12 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const dockerServers = getService('dockerServers');
 
-  const mappingsPackage = 'overrides-0.1.0';
+  const mappingsPackage = 'overrides';
+  const mappingsPackageVersion = '0.1.0';
   const server = dockerServers.get('registry');
 
-  const deletePackage = async (pkgkey: string) =>
-    supertest.delete(`/api/fleet/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+  const deletePackage = async (pkg: string, version: string) =>
+    supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
 
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
@@ -28,54 +29,60 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
-        await deletePackage(mappingsPackage);
+        await deletePackage(mappingsPackage, mappingsPackageVersion);
       }
     });
 
     it('should install the overrides package correctly', async function () {
       let { body } = await supertest
-        .post(`/api/fleet/epm/packages/${mappingsPackage}`)
+        .post(`/api/fleet/epm/packages/${mappingsPackage}/${mappingsPackageVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const templateName = body.response[0].id;
+      const templateName = body.items[0].id;
 
-      const { body: indexTemplateResponse } = await es.transport.request({
-        method: 'GET',
-        path: `/_index_template/${templateName}`,
-      });
+      const { body: indexTemplateResponse } = await es.transport.request<any>(
+        {
+          method: 'GET',
+          path: `/_index_template/${templateName}`,
+        },
+        { meta: true }
+      );
 
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
-        `${templateName}@mappings`,
-        `${templateName}@settings`,
+        `${templateName}@package`,
         `${templateName}@custom`,
-        '.fleet_component_template-1',
+        '.fleet_globals-1',
+        '.fleet_agent_id_verification-1',
       ]);
 
-      ({ body } = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${templateName}@mappings`,
-      }));
+      ({ body } = await es.transport.request(
+        {
+          method: 'GET',
+          path: `/_component_template/${templateName}@package`,
+        },
+        {
+          meta: true,
+        }
+      ));
 
-      // The mappings override provided in the package is set in the mappings component template
+      // The mappings override provided in the package is set in the package component template
       expect(body.component_templates[0].component_template.template.mappings.dynamic).to.be(false);
 
-      ({ body } = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${templateName}@settings`,
-      }));
-
-      // The settings override provided in the package is set in the settings component template
+      // The settings override provided in the package is set in the package component template
       expect(
         body.component_templates[0].component_template.template.settings.index.lifecycle.name
       ).to.be('reference');
 
-      ({ body } = await es.transport.request({
-        method: 'GET',
-        path: `/_component_template/${templateName}@custom`,
-      }));
+      ({ body } = await es.transport.request(
+        {
+          method: 'GET',
+          path: `/_component_template/${templateName}@custom`,
+        },
+        { meta: true }
+      ));
 
       // The user_settings component template is an empty/stub template at first
       const storedTemplate = body.component_templates[0].component_template.template.settings;
@@ -99,19 +106,20 @@ export default function (providerContext: FtrProviderContext) {
       }));
 
       // simulate the result
-      ({ body } = await es.transport.request({
-        method: 'POST',
-        path: `/_index_template/_simulate/${templateName}`,
-        // body: indexTemplate, // I *think* this should work, but it doesn't
-        body: {
-          index_patterns: [`${templateName}-*`],
-          composed_of: [
-            `${templateName}@mappings`,
-            `${templateName}@settings`,
-            `${templateName}@custom`,
-          ],
+      ({ body } = await es.transport.request(
+        {
+          method: 'POST',
+          path: `/_index_template/_simulate/${templateName}`,
+          // body: indexTemplate, // I *think* this should work, but it doesn't
+          body: {
+            index_patterns: [`${templateName}-*`],
+            composed_of: [`${templateName}@package`, `${templateName}@custom`],
+          },
         },
-      }));
+        { meta: true }
+      ));
+      // omit routings
+      delete body.template.settings.index.routing;
 
       expect(body).to.eql({
         template: {
@@ -121,11 +129,34 @@ export default function (providerContext: FtrProviderContext) {
               lifecycle: {
                 name: 'overridden by user',
               },
+              mapping: {
+                total_fields: {
+                  limit: '10000',
+                },
+              },
               number_of_shards: '3',
             },
           },
           mappings: {
             dynamic: 'false',
+            properties: {
+              '@timestamp': {
+                type: 'date',
+              },
+              data_stream: {
+                properties: {
+                  dataset: {
+                    type: 'constant_keyword',
+                  },
+                  namespace: {
+                    type: 'constant_keyword',
+                  },
+                  type: {
+                    type: 'constant_keyword',
+                  },
+                },
+              },
+            },
           },
           aliases: {},
         },

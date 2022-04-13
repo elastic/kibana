@@ -13,10 +13,7 @@ export interface PostFleetSetupResponse {
 export interface GetFleetStatusResponse {
   isReady: boolean;
   missing_requirements: Array<
-    | 'tls_required'
-    | 'api_keys'
-    | 'fleet_admin_user'
-    | 'fleet_server'
-    | 'encrypted_saved_object_encryption_key_required'
+    'security_required' | 'tls_required' | 'api_keys' | 'fleet_admin_user' | 'fleet_server'
   >;
+  missing_optional_features: Array<'encrypted_saved_object_encryption_key_required'>;
 }

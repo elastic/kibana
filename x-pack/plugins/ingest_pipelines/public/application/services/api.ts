@@ -7,7 +7,7 @@
 
 import { HttpSetup } from 'src/core/public';
 
-import { Pipeline } from '../../../common/types';
+import { FieldCopyAction, Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import {
   UseRequestConfig,
@@ -129,6 +129,15 @@ export class ApiService {
       method: 'get',
     });
 
+    return result;
+  }
+
+  public async parseCsv(reqBody: { file: string; copyAction: FieldCopyAction }) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/parse_csv`,
+      method: 'post',
+      body: JSON.stringify(reqBody),
+    });
     return result;
   }
 }

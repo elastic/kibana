@@ -85,15 +85,12 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).toHaveBeenCalledTimes(2);
+      expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
-      expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:version');
     });
 
     it('calls getThemeTag with the correct parameters', async () => {
-      uiSettingsClient.get.mockImplementation((settingName) => {
-        return Promise.resolve(settingName === 'theme:darkMode' ? true : 'v8');
-      });
+      uiSettingsClient.get.mockResolvedValue(true);
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -126,15 +123,12 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).toHaveBeenCalledTimes(2);
+      expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
-      expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:version');
     });
 
     it('calls getThemeTag with the correct parameters', async () => {
-      uiSettingsClient.get.mockImplementation((settingName) => {
-        return Promise.resolve(settingName === 'theme:darkMode' ? true : 'v8');
-      });
+      uiSettingsClient.get.mockResolvedValue(true);
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -186,18 +180,22 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  it('calls getPluginsBundlePaths with the correct parameters', async () => {
-    const request = httpServerMock.createKibanaRequest();
+  [false, true].forEach((isAnonymousPage) => {
+    it(`calls getPluginsBundlePaths with the correct parameters when isAnonymousPage=${isAnonymousPage}`, async () => {
+      const request = httpServerMock.createKibanaRequest();
 
-    await renderer({
-      request,
-      uiSettingsClient,
-    });
+      await renderer({
+        request,
+        uiSettingsClient,
+        isAnonymousPage,
+      });
 
-    expect(getPluginsBundlePathsMock).toHaveBeenCalledTimes(1);
-    expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
-      uiPlugins,
-      regularBundlePath: '/base-path/42/bundles',
+      expect(getPluginsBundlePathsMock).toHaveBeenCalledTimes(1);
+      expect(getPluginsBundlePathsMock).toHaveBeenCalledWith({
+        isAnonymousPage,
+        uiPlugins,
+        regularBundlePath: '/base-path/42/bundles',
+      });
     });
   });
 

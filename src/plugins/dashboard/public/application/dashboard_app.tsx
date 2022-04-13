@@ -11,13 +11,14 @@ import React, { useEffect, useMemo } from 'react';
 
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
-import { useKibana } from '../../../kibana_react/public';
+import { useKibana, useExecutionContext } from '../../../kibana_react/public';
 import {
   getDashboardBreadcrumb,
   getDashboardTitle,
   leaveConfirmStrings,
 } from '../dashboard_strings';
-import { EmbeddableRenderer } from '../services/embeddable';
+import { createDashboardEditUrl } from '../dashboard_constants';
+import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
@@ -34,7 +35,7 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, uiSettings, data } =
+  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
     useKibana<DashboardAppServices>().services;
 
   const kbnUrlStateStorage = useMemo(
@@ -47,10 +48,15 @@ export function DashboardApp({
     [core.notifications.toasts, history, uiSettings]
   );
 
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: savedDashboardId || 'new',
+  });
+
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
     history,
-    redirectTo,
     savedDashboardId,
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
@@ -100,15 +106,38 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
+  const printMode = useMemo(
+    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,
+    [dashboardAppState]
+  );
+
+  useEffect(() => {
+    if (!embedSettings) chrome.setIsVisible(!printMode);
+  }, [chrome, printMode, embedSettings]);
+
   return (
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          <DashboardTopNav
-            redirectTo={redirectTo}
-            embedSettings={embedSettings}
-            dashboardAppState={dashboardAppState}
-          />
+          {!printMode && (
+            <DashboardTopNav
+              redirectTo={redirectTo}
+              embedSettings={embedSettings}
+              dashboardAppState={dashboardAppState}
+            />
+          )}
+
+          {dashboardAppState.savedDashboard.outcome === 'conflict' &&
+          dashboardAppState.savedDashboard.id &&
+          dashboardAppState.savedDashboard.aliasId
+            ? spacesService?.ui.components.getLegacyUrlConflict({
+                currentObjectId: dashboardAppState.savedDashboard.id,
+                otherObjectId: dashboardAppState.savedDashboard.aliasId,
+                otherObjectPath: `#${createDashboardEditUrl(
+                  dashboardAppState.savedDashboard.aliasId
+                )}${history.location.search}`,
+              })
+            : null}
           <div className="dashboardViewport">
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>

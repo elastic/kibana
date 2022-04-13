@@ -32,6 +32,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionItem
+          disableActions={false}
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           onDeleteException={jest.fn()}
@@ -51,6 +52,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionItem
+          disableActions={false}
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           onDeleteException={jest.fn()}
@@ -70,6 +72,30 @@ describe('ExceptionItem', () => {
     );
   });
 
+  it('it does not render edit or delete action buttons when "disableActions" is "true"', () => {
+    const mockOnEditException = jest.fn();
+    const exceptionItem = getExceptionListItemSchemaMock();
+
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <ExceptionItem
+          disableActions
+          loadingItemIds={[]}
+          commentsAccordionId={'accordion--comments'}
+          onDeleteException={jest.fn()}
+          onEditException={mockOnEditException}
+          exceptionItem={exceptionItem}
+        />
+      </ThemeProvider>
+    );
+
+    const editBtn = wrapper.find('[data-test-subj="exceptionsViewerEditBtn"] button');
+    const deleteBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button');
+
+    expect(editBtn).toHaveLength(0);
+    expect(deleteBtn).toHaveLength(0);
+  });
+
   it('it invokes "onEditException" when edit button clicked', () => {
     const mockOnEditException = jest.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -77,6 +103,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionItem
+          disableActions={false}
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           onDeleteException={jest.fn()}
@@ -99,6 +126,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionItem
+          disableActions={false}
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           onDeleteException={mockOnDeleteException}
@@ -108,8 +136,8 @@ describe('ExceptionItem', () => {
       </ThemeProvider>
     );
 
-    const editBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
-    editBtn.simulate('click');
+    const deleteBtn = wrapper.find('[data-test-subj="exceptionsViewerDeleteBtn"] button').at(0);
+    deleteBtn.simulate('click');
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
       id: '1',
@@ -124,6 +152,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionItem
+          disableActions={false}
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           onDeleteException={mockOnDeleteException}
@@ -143,6 +172,7 @@ describe('ExceptionItem', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionItem
+          disableActions={false}
           loadingItemIds={[]}
           commentsAccordionId={'accordion--comments'}
           onDeleteException={mockOnDeleteException}

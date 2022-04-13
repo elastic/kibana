@@ -28,7 +28,7 @@ describe('getDateString', () => {
 
 describe('getStatusColor', () => {
   it('returns a valid EUI badge color based on the status code', () => {
-    expect(getStatusColor(200)).toEqual('secondary');
+    expect(getStatusColor(200)).toEqual('success');
     expect(getStatusColor(301)).toEqual('primary');
     expect(getStatusColor(404)).toEqual('warning');
     expect(getStatusColor(503)).toEqual('danger');

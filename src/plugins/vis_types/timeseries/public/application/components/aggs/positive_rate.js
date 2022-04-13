@@ -24,7 +24,7 @@ import {
   EuiLink,
   EuiComboBox,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
@@ -111,7 +111,11 @@ export const PositiveRateAgg = (props) => {
             restrict={[KBN_FIELD_TYPES.NUMBER]}
             indexPattern={indexPattern}
             value={model.field}
-            onChange={handleSelectChange('field')}
+            onChange={(value) =>
+              handleChange({
+                field: value?.[0],
+              })
+            }
             uiRestrictions={props.uiRestrictions}
             fullWidth
           />

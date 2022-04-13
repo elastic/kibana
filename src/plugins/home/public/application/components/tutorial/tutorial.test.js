@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Tutorial } from './tutorial';
 
@@ -15,6 +15,7 @@ jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     http: {
       post: jest.fn().mockImplementation(async () => ({ count: 1 })),
+      basePath: { prepend: (path) => `/foo/${path}` },
     },
     getBasePath: jest.fn(() => 'path'),
     chrome: {
@@ -33,11 +34,6 @@ jest.mock('../../kibana_services', () => ({
     },
   }),
 }));
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
 
 function buildInstructionSet(type) {
   return {

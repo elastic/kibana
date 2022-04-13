@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { Router, Switch, Route } from 'react-router-dom';
 
-import { useKibana } from '../shared_imports';
+import { useKibana, useExecutionContext } from '../shared_imports';
 
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
 
@@ -21,7 +21,13 @@ import {
   SectionLoading,
 } from '../shared_imports';
 
-import { PipelinesList, PipelinesCreate, PipelinesEdit, PipelinesClone } from './sections';
+import {
+  PipelinesList,
+  PipelinesCreate,
+  PipelinesEdit,
+  PipelinesClone,
+  PipelinesCreateFromCsv,
+} from './sections';
 import { ROUTES } from './services/navigation';
 
 export const AppWithoutRouter = () => (
@@ -30,6 +36,7 @@ export const AppWithoutRouter = () => (
     <Route exact path={ROUTES.clone} component={PipelinesClone} />
     <Route exact path={ROUTES.create} component={PipelinesCreate} />
     <Route exact path={ROUTES.edit} component={PipelinesEdit} />
+    <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
     {/* Catch all */}
     <Route component={PipelinesList} />
   </Switch>
@@ -37,7 +44,12 @@ export const AppWithoutRouter = () => (
 
 export const App: FunctionComponent = () => {
   const { apiError } = useAuthorizationContext();
-  const { history } = useKibana().services;
+  const { history, executionContext } = useKibana().services;
+
+  useExecutionContext(executionContext!, {
+    type: 'application',
+    page: 'ingestPipelines',
+  });
 
   if (apiError) {
     return (

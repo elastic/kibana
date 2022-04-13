@@ -16,7 +16,7 @@ export interface OpsServerMetrics
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [concurrent\_connections](./kibana-plugin-core-server.opsservermetrics.concurrent_connections.md) | <code>number</code> | number of current concurrent connections to the server |
-|  [requests](./kibana-plugin-core-server.opsservermetrics.requests.md) | <code>{</code><br/><code>        disconnects: number;</code><br/><code>        total: number;</code><br/><code>        statusCodes: Record&lt;number, number&gt;;</code><br/><code>    }</code> | server requests stats |
-|  [response\_times](./kibana-plugin-core-server.opsservermetrics.response_times.md) | <code>{</code><br/><code>        avg_in_millis: number;</code><br/><code>        max_in_millis: number;</code><br/><code>    }</code> | server response time stats |
+|  [concurrent\_connections](./kibana-plugin-core-server.opsservermetrics.concurrent_connections.md) | number | number of current concurrent connections to the server |
+|  [requests](./kibana-plugin-core-server.opsservermetrics.requests.md) | { disconnects: number; total: number; statusCodes: Record&lt;number, number&gt;; } | server requests stats |
+|  [response\_times](./kibana-plugin-core-server.opsservermetrics.response_times.md) | { avg\_in\_millis: number; max\_in\_millis: number; } | server response time stats |
 

@@ -7,7 +7,9 @@
  */
 
 import React, { createContext, useContext, useEffect } from 'react';
-import { NotificationsSetup } from 'kibana/public';
+import { Observable } from 'rxjs';
+import type { NotificationsSetup, CoreTheme, DocLinksStart, HttpSetup } from 'kibana/public';
+
 import { History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { MetricsTracker } from '../../types';
@@ -21,11 +23,14 @@ interface ContextServices {
   objectStorageClient: ObjectStorageClient;
   trackUiMetric: MetricsTracker;
   esHostService: EsHostService;
+  http: HttpSetup;
 }
 
 export interface ContextValue {
   services: ContextServices;
   docLinkVersion: string;
+  theme$: Observable<CoreTheme>;
+  docLinks: DocLinksStart['links'];
 }
 
 interface ContextProps {

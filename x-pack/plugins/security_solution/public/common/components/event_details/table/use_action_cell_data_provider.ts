@@ -25,7 +25,7 @@ import {
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/renderers/bytes';
 import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
-import { PORT_NAMES } from '../../../../network/components/port';
+import { PORT_NAMES } from '../../../../network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
 import { BrowserField } from '../../../containers/source';
 import { DataProvider, IS_OPERATOR } from '../../../../../common/types';
@@ -92,15 +92,17 @@ export const useActionCellDataProvider = ({
         } else if (fieldType === IP_FIELD_TYPE) {
           id = `formatted-ip-data-provider-${contextId}-${field}-${value}-${eventId}`;
           if (isString(value) && !isEmpty(value)) {
+            let addresses = value;
             try {
-              const addresses = JSON.parse(value);
-              if (isArray(addresses)) {
-                valueAsString = addresses.join(',');
-                addresses.forEach((ip) => memo.dataProvider.push(getDataProvider(field, id, ip)));
-              }
+              addresses = JSON.parse(value);
             } catch (_) {
               // Default to keeping the existing string value
             }
+            if (isArray(addresses)) {
+              valueAsString = addresses.join(',');
+              addresses.forEach((ip) => memo.dataProvider.push(getDataProvider(field, id, ip)));
+            }
+            memo.dataProvider.push(getDataProvider(field, id, addresses));
             memo.stringValues.push(valueAsString);
             return memo;
           }

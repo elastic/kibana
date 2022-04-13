@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { APP_ID, SecurityPageName } from '../../../../common/constants';
+import { EuiButtonEmpty, EuiText, EuiToolTip } from '@elastic/eui';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const NavigateToHost: React.FC<{ name: string }> = ({ name }): JSX.Element => {
@@ -27,15 +27,17 @@ export const NavigateToHost: React.FC<{ name: string }> = ({ name }): JSX.Elemen
           query: { match_phrase: { 'host.name': name } },
         },
       ]);
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
       });
     },
     [filterManager, name, navigateToApp]
   );
   return (
-    <EuiButtonEmpty color="text" onClick={goToHostPage} size="xs">
-      <EuiText size="s">{name}</EuiText>
-    </EuiButtonEmpty>
+    <EuiToolTip content={name} position="top">
+      <EuiButtonEmpty color="text" onClick={goToHostPage} size="xs">
+        <EuiText size="s">{name}</EuiText>
+      </EuiButtonEmpty>
+    </EuiToolTip>
   );
 };

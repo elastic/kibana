@@ -12,7 +12,9 @@ import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { IEditorController, EditorRenderProps } from 'src/plugins/visualize/public';
+import { IEditorController, EditorRenderProps } from 'src/plugins/visualizations/public';
+import { KibanaThemeProvider } from '../../kibana_react/public';
+import { getTheme } from './services';
 
 // @ts-ignore
 const DefaultEditor = lazy(() => import('./default_editor'));
@@ -27,29 +29,31 @@ class DefaultEditorController implements IEditorController {
 
   render(props: EditorRenderProps) {
     render(
-      <EuiErrorBoundary>
-        <Suspense
-          fallback={
-            <div
-              style={{
-                display: 'flex',
-                flex: '1 1 auto',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <EuiLoadingChart size="xl" mono />
-            </div>
-          }
-        >
-          <DefaultEditor
-            eventEmitter={this.eventEmitter}
-            embeddableHandler={this.embeddableHandler}
-            vis={this.vis}
-            {...props}
-          />
-        </Suspense>
-      </EuiErrorBoundary>,
+      <KibanaThemeProvider theme$={getTheme().theme$}>
+        <EuiErrorBoundary>
+          <Suspense
+            fallback={
+              <div
+                style={{
+                  display: 'flex',
+                  flex: '1 1 auto',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <EuiLoadingChart size="xl" mono />
+              </div>
+            }
+          >
+            <DefaultEditor
+              eventEmitter={this.eventEmitter}
+              embeddableHandler={this.embeddableHandler}
+              vis={this.vis}
+              {...props}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
+      </KibanaThemeProvider>,
       this.el
     );
   }

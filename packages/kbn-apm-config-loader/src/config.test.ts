@@ -5,23 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Labels } from 'elastic-apm-node';
+import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
   packageMock,
   mockedRootDir,
   gitRevExecMock,
-  devConfigMock,
   readUuidFileMock,
   resetAllMocks,
 } from './config.test.mocks';
 
-import { ApmConfiguration } from './config';
+import { ApmConfiguration, CENTRALIZED_SERVICE_BASE_CONFIG } from './config';
 
 describe('ApmConfiguration', () => {
   beforeEach(() => {
     // start with an empty env to avoid CI from spoiling snapshots, env is unique for each jest file
     process.env = {};
-
     packageMock.raw = {
       version: '8.0.0',
       build: {
@@ -86,16 +84,18 @@ describe('ApmConfiguration', () => {
     let config = new ApmConfiguration(mockedRootDir, {}, false);
     expect(config.getConfig('serviceName')).toMatchInlineSnapshot(`
       Object {
-        "active": false,
+        "active": true,
         "breakdownMetrics": true,
         "captureSpanStackTraces": false,
         "centralConfig": false,
+        "contextPropagationOnly": true,
         "environment": "development",
         "globalLabels": Object {},
         "logUncaughtExceptions": true,
         "metricsInterval": "30s",
-        "secretToken": "ZQHYvrmXEx04ozge8F",
-        "serverUrl": "https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io",
+        "propagateTracestate": true,
+        "secretToken": "JpBCcOQxN81D5yucs2",
+        "serverUrl": "https://kibana-cloud-apm.apm.us-east-1.aws.found.io",
         "serviceName": "serviceName",
         "serviceVersion": "8.0.0",
         "transactionSampleRate": 1,
@@ -105,23 +105,25 @@ describe('ApmConfiguration', () => {
     config = new ApmConfiguration(mockedRootDir, {}, true);
     expect(config.getConfig('serviceName')).toMatchInlineSnapshot(`
       Object {
-        "active": false,
+        "active": true,
         "breakdownMetrics": false,
         "captureBody": "off",
         "captureHeaders": false,
         "captureSpanStackTraces": false,
         "centralConfig": false,
+        "contextPropagationOnly": true,
         "environment": "development",
         "globalLabels": Object {
           "git_rev": "sha",
         },
         "logUncaughtExceptions": true,
         "metricsInterval": "120s",
-        "secretToken": "ZQHYvrmXEx04ozge8F",
-        "serverUrl": "https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io",
+        "propagateTracestate": true,
+        "secretToken": "JpBCcOQxN81D5yucs2",
+        "serverUrl": "https://kibana-cloud-apm.apm.us-east-1.aws.found.io",
         "serviceName": "serviceName",
         "serviceVersion": "8.0.0",
-        "transactionSampleRate": 1,
+        "transactionSampleRate": 0.1,
       }
     `);
   });
@@ -146,82 +148,183 @@ describe('ApmConfiguration', () => {
     );
   });
 
-  it('loads the configuration from the dev config is present', () => {
-    devConfigMock.raw = {
-      active: true,
-      serverUrl: 'https://dev-url.co',
-    };
-    const config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: true,
-        serverUrl: 'https://dev-url.co',
-      })
-    );
+  describe('env vars', () => {
+    beforeEach(() => {
+      delete process.env.ELASTIC_APM_ENVIRONMENT;
+      delete process.env.ELASTIC_APM_SECRET_TOKEN;
+      delete process.env.ELASTIC_APM_SERVER_URL;
+      delete process.env.NODE_ENV;
+    });
+
+    it('correctly sets environment by reading env vars', () => {
+      let config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'development',
+        })
+      );
+
+      process.env.NODE_ENV = 'production';
+      config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'production',
+        })
+      );
+
+      process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
+      config = new ApmConfiguration(mockedRootDir, {}, false);
+      expect(config.getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          environment: 'ci',
+        })
+      );
+    });
+
+    it('uses default config if serverUrl is not set', () => {
+      process.env.ELASTIC_APM_SECRET_TOKEN = 'banana';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig).toHaveProperty(
+        'secretToken',
+        (CENTRALIZED_SERVICE_BASE_CONFIG as AgentConfigOptions).secretToken
+      );
+      expect(serverConfig).toHaveProperty('serverUrl', CENTRALIZED_SERVICE_BASE_CONFIG.serverUrl);
+    });
+
+    it('uses env vars config if serverUrl is set', () => {
+      process.env.ELASTIC_APM_SECRET_TOKEN = 'banana';
+      process.env.ELASTIC_APM_SERVER_URL = 'http://banana.com/';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig).toHaveProperty('secretToken', process.env.ELASTIC_APM_SECRET_TOKEN);
+      expect(serverConfig).toHaveProperty('serverUrl', process.env.ELASTIC_APM_SERVER_URL);
+    });
   });
 
-  it('does not load the configuration from the dev config in distributable', () => {
-    devConfigMock.raw = {
-      active: true,
-      serverUrl: 'https://dev-url.co',
-    };
-    const config = new ApmConfiguration(mockedRootDir, {}, true);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: false,
-      })
-    );
-  });
-
-  it('overwrites the standard config file with the dev config', () => {
-    const kibanaConfig = {
-      elastic: {
-        apm: {
+  describe('contextPropagationOnly', () => {
+    it('sets "active: true" and "contextPropagationOnly: true" by default', () => {
+      expect(new ApmConfiguration(mockedRootDir, {}, false).getConfig('serviceName')).toEqual(
+        expect.objectContaining({
           active: true,
-          serverUrl: 'https://url',
-          secretToken: 'secret',
+          contextPropagationOnly: true,
+        })
+      );
+
+      expect(new ApmConfiguration(mockedRootDir, {}, true).getConfig('serviceName')).toEqual(
+        expect.objectContaining({
+          active: true,
+          contextPropagationOnly: true,
+        })
+      );
+    });
+
+    it('value from config overrides the default', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: false,
+            contextPropagationOnly: false,
+          },
         },
-      },
-    };
-    devConfigMock.raw = {
-      active: true,
-      serverUrl: 'https://dev-url.co',
-    };
-    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        active: true,
-        serverUrl: 'https://dev-url.co',
-        secretToken: 'secret',
-      })
-    );
-  });
+      };
 
-  it('correctly sets environment by reading env vars', () => {
-    delete process.env.ELASTIC_APM_ENVIRONMENT;
-    delete process.env.NODE_ENV;
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: false,
+          contextPropagationOnly: false,
+        })
+      );
 
-    let config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'development',
-      })
-    );
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: false,
+          contextPropagationOnly: false,
+        })
+      );
+    });
 
-    process.env.NODE_ENV = 'production';
-    config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'production',
-      })
-    );
+    it('is "false" if "active: true" configured and "contextPropagationOnly" is not specified', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: true,
+          },
+        },
+      };
 
-    process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
-    config = new ApmConfiguration(mockedRootDir, {}, false);
-    expect(config.getConfig('serviceName')).toEqual(
-      expect.objectContaining({
-        environment: 'ci',
-      })
-    );
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: true,
+          contextPropagationOnly: false,
+        })
+      );
+
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: true,
+          contextPropagationOnly: false,
+        })
+      );
+    });
+
+    it('throws if "active: false" set without configuring "contextPropagationOnly: false"', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: false,
+          },
+        },
+      };
+
+      expect(() =>
+        new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false"`
+      );
+
+      expect(() =>
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false"`
+      );
+    });
+
+    it('does not throw if "active: false" and "contextPropagationOnly: false" configured', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: false,
+            contextPropagationOnly: false,
+          },
+        },
+      };
+
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, false).getConfig('serviceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: false,
+          contextPropagationOnly: false,
+        })
+      );
+
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('serviceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: false,
+          contextPropagationOnly: false,
+        })
+      );
+    });
   });
 });

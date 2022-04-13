@@ -23,10 +23,12 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
+import type { PluginStart as DataViewsPluginStart } from '../../../../src/plugins/data_views/server';
 import type {
   FieldFormatsSetup,
   FieldFormatsStart,
 } from '../../../../src/plugins/field_formats/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -60,12 +62,15 @@ export interface PluginsSetup {
   alerting?: AlertingPlugin['setup'];
   actions?: ActionsPlugin['setup'];
   usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface PluginsStart {
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
   fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface RouteInitialization {

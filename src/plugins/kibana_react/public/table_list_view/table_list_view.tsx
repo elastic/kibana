@@ -19,8 +19,8 @@ import {
   SearchFilterConfig,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpFetchError, ToastsStart } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from 'kibana/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import { KibanaPageTemplate } from '../page_template';
@@ -57,6 +57,8 @@ export interface TableListViewProps<V> {
    */
   tableCaption: string;
   searchFilters?: SearchFilterConfig[];
+  theme: ThemeServiceStart;
+  application: ApplicationStart;
 }
 
 export interface TableListViewState<V> {
@@ -177,7 +179,8 @@ class TableListView<V extends {}> extends React.Component<
             id="kibana-react.tableListView.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
             values={{ entityName: this.props.entityName }}
-          />
+          />,
+          { theme$: this.props.theme.theme$ }
         ),
         text: `${error}`,
       });
@@ -273,6 +276,11 @@ class TableListView<V extends {}> extends React.Component<
 
   renderListingLimitWarning() {
     if (this.state.showLimitError) {
+      const canEditAdvancedSettings = this.props.application.capabilities.advancedSettings.save;
+      const setting = 'savedObjects:listingLimit';
+      const advancedSettingsLink = this.props.application.getUrlForApp('management', {
+        path: `/kibana/settings?query=${setting}`,
+      });
       return (
         <React.Fragment>
           <EuiCallOut
@@ -286,25 +294,39 @@ class TableListView<V extends {}> extends React.Component<
             iconType="help"
           >
             <p>
-              <FormattedMessage
-                id="kibana-react.tableListView.listing.listingLimitExceededDescription"
-                defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
+              {canEditAdvancedSettings ? (
+                <FormattedMessage
+                  id="kibana-react.tableListView.listing.listingLimitExceededDescription"
+                  defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
                 the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
-                values={{
-                  entityNamePlural: this.props.entityNamePlural,
-                  totalItems: this.state.totalItems,
-                  listingLimitValue: this.props.listingLimit,
-                  listingLimitText: <strong>listingLimit</strong>,
-                  advancedSettingsLink: (
-                    <EuiLink href="#/management/kibana/settings">
-                      <FormattedMessage
-                        id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
-                        defaultMessage="Advanced Settings"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
+                  values={{
+                    entityNamePlural: this.props.entityNamePlural,
+                    totalItems: this.state.totalItems,
+                    listingLimitValue: this.props.listingLimit,
+                    listingLimitText: <strong>listingLimit</strong>,
+                    advancedSettingsLink: (
+                      <EuiLink href={advancedSettingsLink}>
+                        <FormattedMessage
+                          id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
+                          defaultMessage="Advanced Settings"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="kibana-react.tableListView.listing.listingLimitExceededDescriptionNoPermissions"
+                  defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
+                  the table below from displaying more than {listingLimitValue}. Contact your system administrator to change this setting."
+                  values={{
+                    entityNamePlural: this.props.entityNamePlural,
+                    totalItems: this.state.totalItems,
+                    listingLimitValue: this.props.listingLimit,
+                    listingLimitText: <strong>listingLimit</strong>,
+                  }}
+                />
+              )}
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />

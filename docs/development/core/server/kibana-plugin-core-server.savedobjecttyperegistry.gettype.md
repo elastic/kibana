@@ -16,9 +16,9 @@ getType(type: string): SavedObjectsType<any> | undefined;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
+|  type | string |  |
 
 <b>Returns:</b>
 
-`SavedObjectsType<any> | undefined`
+SavedObjectsType&lt;any&gt; \| undefined
 

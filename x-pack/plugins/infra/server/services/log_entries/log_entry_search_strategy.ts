@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { concat, defer, of, forkJoin } from 'rxjs';
+import { concat, defer, of } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
 import type {
   IEsSearchRequest,
@@ -25,24 +25,23 @@ import {
   LogEntrySearchResponsePayload,
   logEntrySearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entry';
-import type { IInfraSources } from '../../lib/sources';
 import {
   createAsyncRequestRTs,
   createErrorFromShardFailure,
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
+import { LogViewsServiceStart } from '../log_views/types';
 import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
-import { resolveLogSourceConfiguration } from '../../../common/log_sources';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;
 
 export const logEntrySearchStrategyProvider = ({
   data,
-  sources,
+  logViews,
 }: {
   data: DataPluginStart;
-  sources: IInfraSources;
+  logViews: LogViewsServiceStart;
 }): ISearchStrategy<LogEntrySearchRequest, LogEntrySearchResponse> => {
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 
@@ -51,21 +50,8 @@ export const logEntrySearchStrategyProvider = ({
       defer(() => {
         const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
-        const resolvedSourceConfiguration$ = defer(() =>
-          forkJoin([
-            sources.getSourceConfiguration(
-              dependencies.savedObjectsClient,
-              request.params.sourceId
-            ),
-            data.indexPatterns.indexPatternsServiceFactory(
-              dependencies.savedObjectsClient,
-              dependencies.esClient.asCurrentUser
-            ),
-          ]).pipe(
-            concatMap(([sourceConfiguration, indexPatternsService]) =>
-              resolveLogSourceConfiguration(sourceConfiguration.configuration, indexPatternsService)
-            )
-          )
+        const resolvedLogView$ = defer(() =>
+          logViews.getScopedClient(dependencies.request).getResolvedLogView(request.params.sourceId)
         ).pipe(take(1), shareReplay(1));
 
         const recoveredRequest$ = of(request).pipe(
@@ -76,7 +62,7 @@ export const logEntrySearchStrategyProvider = ({
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            resolvedSourceConfiguration$.pipe(
+            resolvedLogView$.pipe(
               map(
                 ({
                   indices,
@@ -84,7 +70,6 @@ export const logEntrySearchStrategyProvider = ({
                   tiebreakerField,
                   runtimeMappings,
                 }): IEsSearchRequest => ({
-                  // @ts-expect-error `Field` is not assignable to `SearchRequest.docvalue_fields`
                   params: createGetLogEntryQuery(
                     indices,
                     params.logEntryId,

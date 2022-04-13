@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
+import { docLinks } from '../../../../shared/doc_links';
+
 import { EmptyMetaEnginesState } from './';
 
 describe('EmptyMetaEnginesState', () => {
@@ -21,7 +23,7 @@ describe('EmptyMetaEnginesState', () => {
 
     expect(wrapper.find('h3').text()).toEqual('Create your first meta engine');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining('/meta-engines-guide.html')
+      expect.stringContaining(docLinks.appSearchMetaEngines)
     );
   });
 });

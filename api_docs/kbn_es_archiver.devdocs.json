@@ -1,0 +1,456 @@
+{
+  "id": "@kbn/es-archiver",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/es-archiver",
+        "id": "def-server.EsArchiver",
+        "type": "Class",
+        "tags": [],
+        "label": "EsArchiver",
+        "description": [],
+        "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-server.EsArchiver.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Options"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-server.EsArchiver.save",
+            "type": "Function",
+            "tags": [
+              "property",
+              "property"
+            ],
+            "label": "save",
+            "description": [
+              "\nExtract data and mappings from an elasticsearch index and store\nit in the baseDir so it can be used later to recreate the index.\n"
+            ],
+            "signature": [
+              "(path: string, indices: string | string[], { raw, keepIndexNames, query, }?: { raw?: boolean | undefined; keepIndexNames?: boolean | undefined; query?: Record<string, any> | undefined; }) => Promise<Record<string, ",
+              "IndexStats",
+              ">>"
+            ],
+            "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.save.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [
+                  "- relative path to the archive, resolved relative to this.baseDir which defaults to REPO_ROOT"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.save.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "indices",
+                "description": [
+                  "- the indices to archive"
+                ],
+                "signature": [
+                  "string | string[]"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.save.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n      raw = false,\n      keepIndexNames = false,\n      query,\n    }",
+                "description": [],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-server.EsArchiver.save.$3.raw",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "raw",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-server.EsArchiver.save.$3.keepIndexNames",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "keepIndexNames",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-server.EsArchiver.save.$3.query",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "query",
+                    "description": [],
+                    "signature": [
+                      "Record<string, any> | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-server.EsArchiver.load",
+            "type": "Function",
+            "tags": [
+              "property",
+              "property",
+              "property"
+            ],
+            "label": "load",
+            "description": [
+              "\nLoad an index from an archive\n"
+            ],
+            "signature": [
+              "(path: string, { skipExisting, useCreate, docsOnly, }?: { skipExisting?: boolean | undefined; useCreate?: boolean | undefined; docsOnly?: boolean | undefined; }) => Promise<Record<string, ",
+              "IndexStats",
+              ">>"
+            ],
+            "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.load.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [
+                  "- relative path to the archive to load, resolved relative to this.baseDir which defaults to REPO_ROOT"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.load.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n      skipExisting = false,\n      useCreate = false,\n      docsOnly = false,\n    }",
+                "description": [],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-server.EsArchiver.load.$2.skipExisting",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "skipExisting",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-server.EsArchiver.load.$2.useCreate",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "useCreate",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/es-archiver",
+                    "id": "def-server.EsArchiver.load.$2.docsOnly",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "docsOnly",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                    "deprecated": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-server.EsArchiver.unload",
+            "type": "Function",
+            "tags": [],
+            "label": "unload",
+            "description": [
+              "\nRemove the indexes in elasticsearch that have data in an archive.\n"
+            ],
+            "signature": [
+              "(path: string) => Promise<Record<string, ",
+              "IndexStats",
+              ">>"
+            ],
+            "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.unload.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [
+                  "- relative path to the archive to unload, resolved relative to this.baseDir which defaults to REPO_ROOT"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-server.EsArchiver.rebuildAll",
+            "type": "Function",
+            "tags": [],
+            "label": "rebuildAll",
+            "description": [
+              "\nParse and reformat all of the archives. This is primarily helpful\nfor working on the esArchiver.\n"
+            ],
+            "signature": [
+              "(dir: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.rebuildAll.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dir",
+                "description": [
+                  "- relative path to a directory which contains archives, resolved relative to this.baseDir which defaults to REPO_ROOT"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-server.EsArchiver.edit",
+            "type": "Function",
+            "tags": [],
+            "label": "edit",
+            "description": [
+              "\nExtract the gzipped files in an archive, then call the handler. When it\nresolves re-archive the gzipped files.\n"
+            ],
+            "signature": [
+              "(path: string, handler: () => Promise<void>) => Promise<void>"
+            ],
+            "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.edit.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [
+                  "optional prefix to limit archives that are extracted"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.edit.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  "() => Promise<void>"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-server.EsArchiver.loadIfNeeded",
+            "type": "Function",
+            "tags": [],
+            "label": "loadIfNeeded",
+            "description": [
+              "\nJust like load, but skips any existing index\n"
+            ],
+            "signature": [
+              "(name: string) => Promise<Record<string, ",
+              "IndexStats",
+              ">>"
+            ],
+            "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-server.EsArchiver.loadIfNeeded.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/es-archiver",
+            "id": "def-server.EsArchiver.emptyKibanaIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "emptyKibanaIndex",
+            "description": [
+              "\nDelete any Kibana indices, and initialize the Kibana index as Kibana would do\non startup."
+            ],
+            "signature": [
+              "() => Promise<Record<string, ",
+              "IndexStats",
+              ">>"
+            ],
+            "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/es-archiver",
+        "id": "def-server.runCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCli",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-es-archiver/src/cli.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

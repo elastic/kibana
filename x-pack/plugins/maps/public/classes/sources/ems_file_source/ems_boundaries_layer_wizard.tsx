@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { VectorLayer } from '../../layers/vector_layer';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { EMSFileSource, getSourceTitle } from './ems_file_source';
 
 // @ts-ignore
 import { getEMSSettings } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_icon';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
+import { EMSBoundariesLayerIcon } from '../../layers/wizards/icons/ems_boundaries_layer_icon';
 
 function getDescription() {
   const emsSettings = getEMSSettings();
@@ -29,6 +29,8 @@ function getDescription() {
 }
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.EMS_BOUNDARIES,
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const emsSettings = getEMSSettings();
@@ -46,7 +48,7 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
-      const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayers([layerDescriptor]);
     };
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;

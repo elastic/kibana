@@ -13,9 +13,11 @@ import {
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { CurationsLogic } from './';
 
@@ -92,7 +94,7 @@ describe('CurationsLogic', () => {
     });
 
     describe('onSelectPageTab', () => {
-      it('should set the selected page tab', () => {
+      it('should set the selected page tab and clear flash messages', () => {
         mount();
 
         CurationsLogic.actions.onSelectPageTab('settings');
@@ -101,23 +103,13 @@ describe('CurationsLogic', () => {
           ...DEFAULT_VALUES,
           selectedPageTab: 'settings',
         });
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
     });
   });
 
   describe('listeners', () => {
     describe('loadCurations', () => {
-      it('should set dataLoading state', () => {
-        mount({ dataLoading: false });
-
-        CurationsLogic.actions.loadCurations();
-
-        expect(CurationsLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: true,
-        });
-      });
-
       it('should make an API call and set curations & meta state', async () => {
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_CURATIONS_RESPONSE));
         mount();
@@ -140,14 +132,9 @@ describe('CurationsLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         CurationsLogic.actions.loadCurations();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 

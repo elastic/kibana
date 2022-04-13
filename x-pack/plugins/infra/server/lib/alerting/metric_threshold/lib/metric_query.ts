@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
-import { MetricExpressionParams, Aggregators } from '../types';
-import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
-
-const COMPOSITE_RESULTS_PER_PAGE = 100;
+import { createPercentileAggregation } from './create_percentile_aggregation';
 
 const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
   filterQuery
@@ -21,8 +20,8 @@ const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, 
 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
-  timefield: string,
   timeframe: { start: number; end: number },
+  compositeSize: number,
   groupBy?: string | string[],
   filterQuery?: string
 ) => {
@@ -56,9 +55,9 @@ export const getElasticsearchMetricQuery = (
       ? {
           aggregatedIntervals: {
             date_histogram: {
-              field: timefield,
+              field: TIMESTAMP_FIELD,
               fixed_interval: interval,
-              offset: calculateDateHistogramOffset({ from, to, interval, field: timefield }),
+              offset: calculateDateHistogramOffset({ from, to, interval }),
               extended_bounds: {
                 min: from,
                 max: to,
@@ -73,7 +72,7 @@ export const getElasticsearchMetricQuery = (
     ? {
         groupings: {
           composite: {
-            size: COMPOSITE_RESULTS_PER_PAGE,
+            size: compositeSize,
             sources: Array.isArray(groupBy)
               ? groupBy.map((field, index) => ({
                   [`groupBy${index}`]: {
@@ -120,6 +119,7 @@ export const getElasticsearchMetricQuery = (
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
   return {
+    track_total_hits: true,
     query: {
       bool: {
         filter: [

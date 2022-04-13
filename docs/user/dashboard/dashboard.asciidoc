@@ -5,7 +5,7 @@
 --
 **_Visualize your data with dashboards._**
 
-The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<index-patterns, index patterns>> into a collection of panels 
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of panels 
 that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. 
 
 [role="screenshot"]
@@ -53,7 +53,7 @@ To create dashboards, you must meet the minimum requirements.
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
 
 * When the read-only indicator appears, you have insufficient privileges
 to create or save dashboards, and the options to create and save dashboards are not visible. For more information,
@@ -87,7 +87,7 @@ To create panels from the dashboard toolbar, use one of the following options:
 
 * *Create visualization* &mdash; Opens the drag-and-drop editor, which is the recommended way to create visualization panels.
 
-* *All types* &mdash; Opens the menu for all of the editors and panel types. 
+* *Select type* &mdash; Opens the menu for all of the editors and panel types. 
 
 To create panels from the *Visualize Library*:
 
@@ -361,17 +361,31 @@ To exit *Edit* mode, click *Switch to view mode*.
 
 [float]
 [[download-csv]]
-== Download panel data
+== View the panel data and requests
 
-Download panel data in a CSV file. When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer index names.
+View the data in visualizations and the requests that collect the data. 
 
-. Open the panel menu, then select *Inspect*.
+. Open the panel menu, then click *More > Inspect*.
 
-. Click *Download CSV*, then select the format type from the dropdown:
+. View and download the panel data.
+
+.. Open the *View* dropdown, then click *Data*.
+
+.. Click *Download CSV*, then select the format type from the dropdown:
 
 * *Formatted CSV* &mdash; Contains human-readable dates and numbers.
 
 * *Unformatted* &mdash; Best used for computer use.
++
+When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer {data-source} names.
+
+. View the requests that collect the data.
+
+.. Open the *View* dropdown, then click *Requests*.
+
+.. From the dropdown, select the requests you want to view.
+
+.. To view the requests in *Console*, click *Request*, then click *Open in Console*.
 
 [float]
 [[share-the-dashboard]]

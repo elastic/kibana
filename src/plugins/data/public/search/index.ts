@@ -8,46 +8,56 @@
 
 export * from './expressions';
 
-export {
+export type {
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
   SearchUsageCollector,
 } from './types';
 
-export {
-  ES_SEARCH_STRATEGY,
+export type {
   EsQuerySortValue,
-  extractReferences as extractSearchSourceReferences,
-  getSearchParamsFromRequest,
   IEsSearchRequest,
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  injectReferences as injectSearchSourceReferences,
   ISearchGeneric,
   ISearchSource,
-  parseSearchSourceJSON,
   SearchError,
   SearchRequest,
-  SearchSource,
   SearchSourceDependencies,
   SearchSourceFields,
-  SortDirection,
+  SerializedSearchSourceFields,
 } from '../../common/search';
 export {
-  SessionService,
+  ES_SEARCH_STRATEGY,
+  extractReferences as extractSearchSourceReferences,
+  getSearchParamsFromRequest,
+  injectReferences as injectSearchSourceReferences,
+  parseSearchSourceJSON,
+  SearchSource,
+  SortDirection,
+  checkColumnForPrecisionError,
+} from '../../common/search';
+export type {
   ISessionService,
   SearchSessionInfoProvider,
+  ISessionsClient,
+  WaitUntilNextSessionCompletesOptions,
+} from './session';
+export {
+  SessionService,
   SearchSessionState,
   SessionsClient,
-  ISessionsClient,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
-  WaitUntilNextSessionCompletesOptions,
 } from './session';
 export { getEsPreference } from './es_search';
+export { handleResponse } from './fetch';
 
-export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
+export type { SearchInterceptorDeps } from './search_interceptor';
+export { SearchInterceptor } from './search_interceptor';
 export * from './errors';
+
+export { SearchService } from './search_service';

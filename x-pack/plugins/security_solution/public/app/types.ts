@@ -18,7 +18,7 @@ import {
 import { RouteProps } from 'react-router-dom';
 import { AppMountParameters } from '../../../../../src/core/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
-import { StartedSubPlugins, StartServices } from '../types';
+import { StartServices } from '../types';
 
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
@@ -26,7 +26,7 @@ import { StartedSubPlugins, StartServices } from '../types';
 export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
-  subPlugins: StartedSubPlugins;
+  subPluginRoutes: RouteProps[];
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -52,8 +52,8 @@ export interface SecuritySubPlugin {
 
 export type SecuritySubPluginKeyStore =
   | 'hosts'
+  | 'users'
   | 'network'
-  | 'ueba'
   | 'timeline'
   | 'hostList'
   | 'alertList'

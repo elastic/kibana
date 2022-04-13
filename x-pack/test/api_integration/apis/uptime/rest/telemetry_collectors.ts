@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         'downMonitorId',
         1,
         1,
-        1,
+        10 * 1000,
         {
           observer,
           monitor: {
@@ -78,7 +78,15 @@ export default function ({ getService }: FtrProviderContext) {
         'down'
       );
 
-      await makeChecksWithStatus(es, 'mixMonitorId', 1, 1, 1, { observer: observer2 }, 'down');
+      await makeChecksWithStatus(
+        es,
+        'mixMonitorId',
+        1,
+        1,
+        30 * 1000,
+        { observer: observer2 },
+        'down'
+      );
       await es.indices.refresh();
     });
 
@@ -102,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
           dateEnd: 'now/d',
           autoRefreshEnabled: true,
           refreshTelemetryHistory: true,
+          refreshEsData: true,
         })
         .expect(200);
 
@@ -110,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitor_page: 1,
         no_of_unique_monitors: 4,
         settings_page: 0,
-        monitor_frequency: [120, 0.001, 60, 60],
+        monitor_frequency: [10, 30, 60, 60],
         monitor_name_stats: { min_length: 7, max_length: 22, avg_length: 12 },
         no_of_unique_observer_locations: 3,
         observer_location_name_stats: { min_length: 2, max_length: 7, avg_length: 4.8 },

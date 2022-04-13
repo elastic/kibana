@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { KibanaRequest } from 'kibana/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
@@ -19,20 +20,14 @@ import {
   ReadOperations,
   AlertingAuthorizationEntity,
 } from './alerting_authorization';
-import { alertingAuthorizationAuditLoggerMock } from './audit_logger.mock';
-import { AlertingAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryRuleType } from '../rule_type_registry';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
 const request = {} as KibanaRequest;
-
-const auditLogger = alertingAuthorizationAuditLoggerMock.create();
-const realAuditLogger = new AlertingAuthorizationAuditLogger();
 
 const getSpace = jest.fn();
 const getSpaceId = () => 'space1';
@@ -189,15 +184,6 @@ const myFeatureWithoutAlerting = mockFeature('myOtherApp');
 
 beforeEach(() => {
   jest.resetAllMocks();
-  auditLogger.logAuthorizationFailure.mockImplementation((username, ...args) =>
-    realAuditLogger.getAuthorizationMessage(AuthorizationResult.Unauthorized, ...args)
-  );
-  auditLogger.logAuthorizationSuccess.mockImplementation((username, ...args) =>
-    realAuditLogger.getAuthorizationMessage(AuthorizationResult.Authorized, ...args)
-  );
-  auditLogger.logUnscopedAuthorizationFailure.mockImplementation(
-    (username, operation) => `Unauthorized ${username}/${operation}`
-  );
   ruleTypeRegistry.get.mockImplementation((id) => ({
     id,
     name: 'My Alert Type',
@@ -232,7 +218,6 @@ describe('AlertingAuthorization', () => {
         request,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -247,7 +232,6 @@ describe('AlertingAuthorization', () => {
         request,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -270,7 +254,6 @@ describe('AlertingAuthorization', () => {
         ruleTypeRegistry,
         authorization,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -296,7 +279,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -326,19 +308,6 @@ describe('AlertingAuthorization', () => {
       expect(checkPrivileges).toHaveBeenCalledWith({
         kibana: [mockAuthorizationAction('myType', 'myApp', 'rule', 'create')],
       });
-
-      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "myApp",
-            "create",
-            "rule",
-          ]
-        `);
     });
 
     test('ensures the user has privileges to execute alerts for the specified rule type and operation without consumer when producer and consumer are the same', async () => {
@@ -352,7 +321,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -382,19 +350,6 @@ describe('AlertingAuthorization', () => {
       expect(checkPrivileges).toHaveBeenCalledWith({
         kibana: [mockAuthorizationAction('myType', 'myApp', 'alert', 'update')],
       });
-
-      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "myApp",
-            "update",
-            "alert",
-          ]
-        `);
     });
 
     test('ensures the user has privileges to execute rules for the specified rule type and operation without consumer when consumer is alerts', async () => {
@@ -408,7 +363,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -444,19 +398,6 @@ describe('AlertingAuthorization', () => {
       expect(checkPrivileges).toHaveBeenCalledWith({
         kibana: [mockAuthorizationAction('myType', 'myApp', 'rule', 'create')],
       });
-
-      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "alerts",
-            "create",
-            "rule",
-          ]
-        `);
     });
 
     test('ensures the user has privileges to execute alerts for the specified rule type and operation without consumer when consumer is alerts', async () => {
@@ -470,7 +411,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -506,19 +446,6 @@ describe('AlertingAuthorization', () => {
       expect(checkPrivileges).toHaveBeenCalledWith({
         kibana: [mockAuthorizationAction('myType', 'myApp', 'alert', 'update')],
       });
-
-      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "alerts",
-            "update",
-            "alert",
-          ]
-        `);
     });
 
     test('ensures the user has privileges to execute rules for the specified rule type, operation and producer when producer is different from consumer', async () => {
@@ -538,7 +465,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -571,19 +497,6 @@ describe('AlertingAuthorization', () => {
           mockAuthorizationAction('myType', 'myApp', 'rule', 'create'),
         ],
       });
-
-      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "myOtherApp",
-            "create",
-            "rule",
-          ]
-        `);
     });
 
     test('ensures the user has privileges to execute alerts for the specified rule type, operation and producer when producer is different from consumer', async () => {
@@ -603,7 +516,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -636,19 +548,6 @@ describe('AlertingAuthorization', () => {
           mockAuthorizationAction('myType', 'myApp', 'alert', 'update'),
         ],
       });
-
-      expect(auditLogger.logAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "myOtherApp",
-            "update",
-            "alert",
-          ]
-        `);
     });
 
     test('throws if user lacks the required rule privileges for the consumer', async () => {
@@ -662,7 +561,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -694,19 +592,6 @@ describe('AlertingAuthorization', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to create a \\"myType\\" rule for \\"myOtherApp\\""`
       );
-
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "myOtherApp",
-            "create",
-            "rule",
-          ]
-        `);
     });
 
     test('throws if user lacks the required alert privileges for the consumer', async () => {
@@ -720,7 +605,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -756,19 +640,6 @@ describe('AlertingAuthorization', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to update a \\"myType\\" alert for \\"myAppRulesOnly\\""`
       );
-
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "myAppRulesOnly",
-            "update",
-            "alert",
-          ]
-        `);
     });
 
     test('throws if user lacks the required privileges for the producer', async () => {
@@ -782,7 +653,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -814,19 +684,6 @@ describe('AlertingAuthorization', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to update a \\"myType\\" alert by \\"myApp\\""`
       );
-
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            1,
-            "myApp",
-            "update",
-            "alert",
-          ]
-        `);
     });
 
     test('throws if user lacks the required privileges for both consumer and producer', async () => {
@@ -840,7 +697,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -872,19 +728,6 @@ describe('AlertingAuthorization', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to create a \\"myType\\" alert for \\"myOtherApp\\""`
       );
-
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            "some-user",
-            "myType",
-            0,
-            "myOtherApp",
-            "create",
-            "alert",
-          ]
-        `);
     });
   });
 
@@ -931,7 +774,6 @@ describe('AlertingAuthorization', () => {
         request,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -951,7 +793,6 @@ describe('AlertingAuthorization', () => {
         request,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -966,8 +807,6 @@ describe('AlertingAuthorization', () => {
         }
       );
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
     });
     test('creates a filter based on the privileged types', async () => {
       const { authorization } = mockSecurity();
@@ -985,7 +824,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1001,11 +839,10 @@ describe('AlertingAuthorization', () => {
           })
         ).filter
       ).toEqual(
-        esKuery.fromKueryExpression(
+        fromKueryExpression(
           `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
         )
       );
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
     });
     test('throws if user has no privileges to any rule type', async () => {
       const { authorization } = mockSecurity();
@@ -1034,7 +871,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1047,8 +883,9 @@ describe('AlertingAuthorization', () => {
             consumer: 'consumer-field',
           },
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized some-user/find"`);
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to find rules for any rule types"`
+      );
     });
     test('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
       const { authorization } = mockSecurity();
@@ -1090,7 +927,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1110,18 +946,6 @@ describe('AlertingAuthorization', () => {
       }).toThrowErrorMatchingInlineSnapshot(
         `"Unauthorized to find a \\"myAppAlertType\\" alert for \\"myOtherApp\\""`
       );
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationFailure).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logAuthorizationFailure.mock.calls[0]).toMatchInlineSnapshot(`
-            Array [
-              "some-user",
-              "myAppAlertType",
-              0,
-              "myOtherApp",
-              "find",
-              "alert",
-            ]
-          `);
     });
     test('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {
       const { authorization } = mockSecurity();
@@ -1163,7 +987,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1181,8 +1004,6 @@ describe('AlertingAuthorization', () => {
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
       }).not.toThrow();
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
     });
     test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
       const { authorization } = mockSecurity();
@@ -1237,46 +1058,25 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-      const { ensureRuleTypeIsAuthorized, logSuccessfulAuthorization } =
-        await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+      const { ensureRuleTypeIsAuthorized } = await alertAuthorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Rule,
+        {
           type: AlertingAuthorizationFilterType.KQL,
           fieldNames: {
             ruleTypeId: 'ruleId',
             consumer: 'consumer',
           },
-        });
+        }
+      );
       expect(() => {
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
         ensureRuleTypeIsAuthorized('mySecondAppAlertType', 'myOtherApp', 'rule');
         ensureRuleTypeIsAuthorized('myAppAlertType', 'myOtherApp', 'rule');
       }).not.toThrow();
-      expect(auditLogger.logAuthorizationSuccess).not.toHaveBeenCalled();
-      expect(auditLogger.logAuthorizationFailure).not.toHaveBeenCalled();
-      logSuccessfulAuthorization();
-      expect(auditLogger.logBulkAuthorizationSuccess).toHaveBeenCalledTimes(1);
-      expect(auditLogger.logBulkAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
-            Array [
-              "some-user",
-              Array [
-                Array [
-                  "myAppAlertType",
-                  "myOtherApp",
-                ],
-                Array [
-                  "mySecondAppAlertType",
-                  "myOtherApp",
-                ],
-              ],
-              0,
-              "find",
-              "rule",
-            ]
-          `);
     });
 
     // This is a specific use case currently for alerts as data
@@ -1287,7 +1087,6 @@ describe('AlertingAuthorization', () => {
         request,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1341,7 +1140,6 @@ describe('AlertingAuthorization', () => {
         request,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1466,7 +1264,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1562,7 +1359,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1667,7 +1463,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1784,7 +1579,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1894,7 +1688,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });
@@ -1968,7 +1761,6 @@ describe('AlertingAuthorization', () => {
         authorization,
         ruleTypeRegistry,
         features,
-        auditLogger,
         getSpace,
         getSpaceId,
       });

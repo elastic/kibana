@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useCallback, useMemo, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { ConnectorTypes, ActionConnector } from '../../../common';
+import { ActionConnector } from '../../../common/api';
 import {
   UseField,
   useFormData,
@@ -21,12 +21,13 @@ import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { FormProps, schema } from './schema';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+import * as i18n from '../../common/translations';
 
 interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
   isLoadingConnectors: boolean;
-  hideConnectorServiceNowSir?: boolean;
 }
 
 interface ConnectorsFieldProps {
@@ -34,27 +35,13 @@ interface ConnectorsFieldProps {
   field: FieldHook<FormProps['fields']>;
   isEdit: boolean;
   setErrors: (errors: boolean) => void;
-  hideConnectorServiceNowSir?: boolean;
 }
 
-const ConnectorFields = ({
-  connectors,
-  isEdit,
-  field,
-  setErrors,
-  hideConnectorServiceNowSir = false,
-}: ConnectorsFieldProps) => {
+const ConnectorFields = ({ connectors, isEdit, field, setErrors }: ConnectorsFieldProps) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const { setValue } = field;
-  let connector = getConnectorById(connectorId, connectors) ?? null;
+  const connector = getConnectorById(connectorId, connectors) ?? null;
 
-  if (
-    connector &&
-    hideConnectorServiceNowSir &&
-    connector.actionTypeId === ConnectorTypes.serviceNowSIR
-  ) {
-    connector = null;
-  }
   return (
     <ConnectorFieldsForm
       connector={connector}
@@ -64,15 +51,12 @@ const ConnectorFields = ({
     />
   );
 };
+ConnectorFields.displayName = 'ConnectorFields';
 
-const ConnectorComponent: React.FC<Props> = ({
-  connectors,
-  hideConnectorServiceNowSir = false,
-  isLoading,
-  isLoadingConnectors,
-}) => {
+const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
   const { getFields, setFieldValue } = useFormContext();
   const { connector: configurationConnector } = useCaseConfigure();
+  const { actions } = useApplicationCapabilities();
 
   const handleConnectorChange = useCallback(() => {
     const { fields } = getFields();
@@ -80,21 +64,10 @@ const ConnectorComponent: React.FC<Props> = ({
   }, [getFields]);
 
   const defaultConnectorId = useMemo(() => {
-    if (
-      hideConnectorServiceNowSir &&
-      configurationConnector.type === ConnectorTypes.serviceNowSIR
-    ) {
-      return 'none';
-    }
     return connectors.some((connector) => connector.id === configurationConnector.id)
       ? configurationConnector.id
       : 'none';
-  }, [
-    configurationConnector.id,
-    configurationConnector.type,
-    connectors,
-    hideConnectorServiceNowSir,
-  ]);
+  }, [configurationConnector.id, connectors]);
 
   useEffect(
     () => setFieldValue('connectorId', defaultConnectorId),
@@ -105,6 +78,14 @@ const ConnectorComponent: React.FC<Props> = ({
     config: schema.connectorId as FieldConfig,
     connectors,
   });
+
+  if (!actions.read) {
+    return (
+      <EuiText data-test-subj="create-case-connector-permissions-error-msg" size="s">
+        <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+      </EuiText>
+    );
+  }
 
   return (
     <EuiFlexGroup>
@@ -117,7 +98,6 @@ const ConnectorComponent: React.FC<Props> = ({
           componentProps={{
             connectors,
             handleChange: handleConnectorChange,
-            hideConnectorServiceNowSir,
             dataTestSubj: 'caseConnectors',
             disabled: isLoading || isLoadingConnectors,
             idAria: 'caseConnectors',
@@ -131,7 +111,6 @@ const ConnectorComponent: React.FC<Props> = ({
           component={ConnectorFields}
           componentProps={{
             connectors,
-            hideConnectorServiceNowSir,
             isEdit: true,
           }}
         />

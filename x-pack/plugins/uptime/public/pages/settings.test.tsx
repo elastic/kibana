@@ -29,7 +29,7 @@ describe('settings', () => {
     it('handles no spaces error', async () => {
       const { getByText, getByTestId } = render(<SettingsPage />);
 
-      expect(getByText('heartbeat-8*,synthetics-*'));
+      expect(getByText('heartbeat-8*,heartbeat-7*,synthetics-*'));
 
       fireEvent.input(getByTestId('heartbeat-indices-input-loaded'), {
         target: { value: 'heartbeat-8*, synthetics-*' },
@@ -41,7 +41,7 @@ describe('settings', () => {
     it('it show select a connector flyout', async () => {
       const { getByText, getByTestId } = render(<SettingsPage />);
 
-      expect(getByText('heartbeat-8*,synthetics-*'));
+      expect(getByText('heartbeat-8*,heartbeat-7*,synthetics-*'));
 
       fireEvent.click(getByTestId('createConnectorButton'));
       await waitFor(() => expect(getByText('Select a connector')));

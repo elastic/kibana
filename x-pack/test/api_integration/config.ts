@@ -25,16 +25,19 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-        '--map.proxyElasticMapsServiceInMaps=true',
         '--xpack.security.session.idleTimeout=3600000', // 1 hour
         '--telemetry.optIn=true',
-        '--xpack.fleet.enabled=true',
         '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
         '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
         '--xpack.data_enhanced.search.sessions.notTouchedTimeout=15s', // shorten notTouchedTimeout for quicker testing
         '--xpack.data_enhanced.search.sessions.trackingInterval=5s', // shorten trackingInterval for quicker testing
         '--xpack.data_enhanced.search.sessions.cleanupInterval=5s', // shorten cleanupInterval for quicker testing
         '--xpack.ruleRegistry.write.enabled=true',
+        '--xpack.ruleRegistry.write.enabled=true',
+        '--xpack.ruleRegistry.write.cache.enabled=false',
+        '--xpack.uptime.service.password=test',
+        '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
       ],
     },
     esTestCluster: {
@@ -42,6 +45,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         'node.attr.name=apiIntegrationTestNode',
+        'path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2,/tmp/cloud-snapshots/',
       ],
     },
   };

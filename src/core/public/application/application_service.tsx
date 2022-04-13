@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, Subject, Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
@@ -15,6 +15,7 @@ import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
+import type { ThemeServiceStart } from '../theme';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -30,6 +31,7 @@ import {
   InternalApplicationStart,
   Mounter,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
@@ -44,6 +46,7 @@ interface SetupDeps {
 
 interface StartDeps {
   http: HttpStart;
+  theme: ThemeServiceStart;
   overlays: OverlayStart;
 }
 
@@ -65,10 +68,12 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   return appendAppPath(appBasePath, path);
 };
 
-const getAppDeepLinkPath = (mounters: Map<string, Mounter>, appId: string, deepLinkId: string) => {
-  return mounters.get(appId)?.deepLinkPaths[deepLinkId];
+const getAppDeepLinkPath = (app: App<any>, appId: string, deepLinkId: string) => {
+  const flattenedLinks = flattenDeepLinks(app.deepLinks);
+  return flattenedLinks[deepLinkId];
 };
 
+const applicationIdRegexp = /^[a-zA-Z0-9_:-]+$/;
 const allApplicationsFilter = '__ALL__';
 
 interface AppUpdaterWrapper {
@@ -94,7 +99,7 @@ export class ApplicationService {
   private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
   private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
@@ -115,7 +120,7 @@ export class ApplicationService {
       createBrowserHistory({
         basename,
         getUserConfirmation: getUserConfirmationHandler({
-          overlayPromise: this.overlayStart$.pipe(take(1)).toPromise(),
+          overlayPromise: firstValueFrom(this.overlayStart$.pipe(take(1))),
         }),
       });
 
@@ -151,21 +156,27 @@ export class ApplicationService {
       };
     };
 
+    const validateApp = (app: App<unknown>) => {
+      if (this.registrationClosed) {
+        throw new Error(`Applications cannot be registered after "setup"`);
+      } else if (!applicationIdRegexp.test(app.id)) {
+        throw new Error(
+          `Invalid application id: it can only be composed of alphanum chars, '-' and '_'`
+        );
+      } else if (this.apps.has(app.id)) {
+        throw new Error(`An application is already registered with the id "${app.id}"`);
+      } else if (findMounter(this.mounters, app.appRoute)) {
+        throw new Error(`An application is already registered with the appRoute "${app.appRoute}"`);
+      } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
+        throw new Error('Cannot register an application route that includes HTTP base path');
+      }
+    };
+
     return {
       register: (plugin, app: App<any>) => {
         app = { appRoute: `/app/${app.id}`, ...app };
 
-        if (this.registrationClosed) {
-          throw new Error(`Applications cannot be registered after "setup"`);
-        } else if (this.apps.has(app.id)) {
-          throw new Error(`An application is already registered with the id "${app.id}"`);
-        } else if (findMounter(this.mounters, app.appRoute)) {
-          throw new Error(
-            `An application is already registered with the appRoute "${app.appRoute}"`
-          );
-        } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
-          throw new Error('Cannot register an application route that includes HTTP base path');
-        }
+        validateApp(app);
 
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
@@ -180,7 +191,6 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
-          deepLinkPaths: toDeepLinkPaths(app.deepLinks),
           exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
@@ -191,7 +201,7 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -232,23 +242,31 @@ export class ApplicationService {
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
-      { deepLinkId, path, state, replace = false, openInNewTab = false }: NavigateToAppOptions = {}
+      {
+        deepLinkId,
+        path,
+        state,
+        replace = false,
+        openInNewTab = false,
+        skipAppLeave = false,
+      }: NavigateToAppOptions = {}
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
-      const shouldNavigate = navigatingToSameApp
-        ? true
-        : await this.shouldNavigate(overlays, appId);
+      const shouldNavigate =
+        navigatingToSameApp || skipAppLeave ? true : await this.shouldNavigate(overlays, appId);
+
+      const targetApp = applications$.value.get(appId);
 
       if (shouldNavigate) {
-        if (deepLinkId) {
-          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+        if (deepLinkId && targetApp) {
+          const deepLinkPath = getAppDeepLinkPath(targetApp, appId, deepLinkId);
           if (deepLinkPath) {
             path = appendAppPath(deepLinkPath, path);
           }
         }
         if (path === undefined) {
-          path = applications$.value.get(appId)?.defaultPath;
+          path = targetApp?.defaultPath;
         }
         if (openInNewTab) {
           this.openInNewTab!(getAppUrl(availableMounters, appId, path));
@@ -288,8 +306,9 @@ export class ApplicationService {
           deepLinkId,
         }: { path?: string; absolute?: boolean; deepLinkId?: string } = {}
       ) => {
-        if (deepLinkId) {
-          const deepLinkPath = getAppDeepLinkPath(availableMounters, appId, deepLinkId);
+        const targetApp = applications$.value.get(appId);
+        if (deepLinkId && targetApp) {
+          const deepLinkPath = getAppDeepLinkPath(targetApp, appId, deepLinkId);
           if (deepLinkPath) {
             path = appendAppPath(deepLinkPath, path);
           }
@@ -299,12 +318,19 @@ export class ApplicationService {
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp,
-      navigateToUrl: async (url) => {
+      navigateToUrl: async (
+        url: string,
+        { skipAppLeave = false, forceRedirect = false }: NavigateToUrlOptions = {}
+      ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
-        if (appInfo) {
-          return navigateToApp(appInfo.app, { path: appInfo.path });
-        } else {
+        if ((forceRedirect || !appInfo) === true) {
+          if (skipAppLeave) {
+            window.removeEventListener('beforeunload', this.onBeforeUnload);
+          }
           return this.redirectTo!(url);
+        }
+        if (appInfo) {
+          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
         }
       },
       getComponent: () => {
@@ -314,6 +340,7 @@ export class ApplicationService {
         return (
           <AppRouter
             history={this.history}
+            theme$={theme.theme$}
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
@@ -359,6 +386,8 @@ export class ApplicationService {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
         'data-test-subj': 'appLeaveConfirmModal',
+        confirmButtonText: action.confirmButtonText,
+        buttonColor: action.buttonColor,
       });
       if (!confirmed) {
         if (action.callback) {
@@ -436,12 +465,12 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   }));
 };
 
-const toDeepLinkPaths = (deepLinks?: AppDeepLink[]): Mounter['deepLinkPaths'] => {
+const flattenDeepLinks = (deepLinks?: AppDeepLink[]): Record<string, string> => {
   if (!deepLinks) {
     return {};
   }
-  return deepLinks.reduce((deepLinkPaths: Mounter['deepLinkPaths'], deepLink) => {
+  return deepLinks.reduce((deepLinkPaths: Record<string, string>, deepLink) => {
     if (deepLink.path) deepLinkPaths[deepLink.id] = deepLink.path;
-    return { ...deepLinkPaths, ...toDeepLinkPaths(deepLink.deepLinks) };
+    return { ...deepLinkPaths, ...flattenDeepLinks(deepLink.deepLinks) };
   }, {});
 };

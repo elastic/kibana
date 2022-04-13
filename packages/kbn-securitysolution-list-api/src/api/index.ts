@@ -231,7 +231,7 @@ const fetchExceptionLists = async ({
   signal,
 }: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> => {
   const query = {
-    filter: filters,
+    filter: filters || undefined,
     namespace_type: namespaceTypes,
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
@@ -558,7 +558,7 @@ export const exportExceptionList = async ({
   signal,
 }: ExportExceptionListProps): Promise<Blob> =>
   http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
-    method: 'GET',
+    method: 'POST',
     query: { id, list_id: listId, namespace_type: namespaceType },
     signal,
   });

@@ -6,16 +6,21 @@
  */
 
 /* eslint-disable no-console */
-
+const { times } = require('lodash');
 const path = require('path');
 const yargs = require('yargs');
 const childProcess = require('child_process');
 
 const { argv } = yargs(process.argv.slice(2))
+  .option('kibana-install-dir', {
+    default: '',
+    type: 'string',
+    description: 'Path to the Kibana install directory',
+  })
   .option('server', {
     default: false,
     type: 'boolean',
-    description: 'Start Elasticsearch and kibana',
+    description: 'Start Elasticsearch and Kibana',
   })
   .option('runner', {
     default: false,
@@ -23,14 +28,30 @@ const { argv } = yargs(process.argv.slice(2))
     description:
       'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
   })
+  .option('grep', {
+    alias: 'spec',
+    default: false,
+    type: 'string',
+    description:
+      'Specify the spec files to run (use doublequotes for glob matching)',
+  })
   .option('open', {
     default: false,
     type: 'boolean',
     description: 'Opens the Cypress Test Runner',
   })
+  .option('bail', {
+    default: false,
+    type: 'boolean',
+    description: 'stop tests after the first failure',
+  })
+  .option('times', {
+    type: 'number',
+    description: 'Repeat the test n number of times',
+  })
   .help();
 
-const { server, runner, open } = argv;
+const { server, runner, open, grep, bail, kibanaInstallDir } = argv;
 
 const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
@@ -41,9 +62,33 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
-const config = open ? './cypress_open.ts' : './cypress_run.ts';
+const config = open ? './ftr_config_open.ts' : './ftr_config_run.ts';
+const grepArg = grep ? `--grep "${grep}"` : '';
+const bailArg = bail ? `--bail` : '';
+const cmd = `node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`;
 
-childProcess.execSync(
-  `node ../../../../scripts/${ftrScript} --config ${config}`,
-  { cwd: e2eDir, stdio: 'inherit' }
-);
+function runTests() {
+  console.log(`Running "${cmd}"`);
+  childProcess.execSync(cmd, { cwd: e2eDir, stdio: 'inherit' });
+}
+
+if (argv.times) {
+  const runCounter = { succeeded: 0, failed: 0, remaining: argv.times };
+  let exitStatus = 0;
+  times(argv.times, () => {
+    try {
+      runTests();
+      runCounter.succeeded++;
+    } catch (e) {
+      exitStatus = 1;
+      runCounter.failed++;
+    }
+    runCounter.remaining--;
+    if (argv.times > 1) {
+      console.log(runCounter);
+    }
+  });
+  process.exit(exitStatus);
+} else {
+  runTests();
+}

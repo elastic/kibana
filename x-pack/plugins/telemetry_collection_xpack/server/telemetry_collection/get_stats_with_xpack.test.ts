@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { coreMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 import { SavedObjectsClient } from '../../../../../src/core/server';
@@ -69,31 +69,25 @@ const mockUsageCollection = (kibanaUsage: Record<string, unknown> = kibana) => {
 function mockEsClient() {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // mock for license should return a basic license
-  esClient.license.get.mockResolvedValue(
+  esClient.license.get.mockResponse(
     // @ts-expect-error we only care about the response body
-    { body: { license: { type: 'basic' } } }
+    { license: { type: 'basic' } }
   );
   // mock for xpack usage should return an empty object
-  esClient.xpack.usage.mockResolvedValue(
+  esClient.xpack.usage.mockResponse(
     // @ts-expect-error we only care about the response body
-    { body: {} }
+    {}
   );
   // mock for nodes usage should resolve for this test
-  esClient.nodes.usage.mockResolvedValue(
-    // @ts-expect-error we only care about the response body
-    { body: { cluster_name: 'test cluster', nodes: nodesUsage } }
-  );
+  esClient.nodes.usage.mockResponse({ cluster_name: 'test cluster', nodes: nodesUsage });
   // mock for info should resolve for this test
-  esClient.info.mockResolvedValue(
-    // @ts-expect-error we only care about the response body
-    {
-      body: {
-        cluster_uuid: 'test',
-        cluster_name: 'test',
-        version: { number: '8.0.0' } as estypes.ElasticsearchVersionInfo,
-      } as estypes.InfoResponse,
-    }
-  );
+  esClient.info.mockResponse({
+    cluster_uuid: 'test',
+    cluster_name: 'test',
+    version: { number: '8.0.0' } as estypes.ElasticsearchVersionInfo,
+  } as estypes.InfoResponse);
+  // @ts-expect-error empty response
+  esClient.cluster.stats.mockResponse({});
 
   return esClient;
 }
@@ -118,7 +112,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         esClient,
         usageCollection,
         soClient,
-        kibanaRequest: undefined,
+        refreshCache: false,
       },
       context
     );
@@ -140,7 +134,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         esClient,
         usageCollection,
         soClient,
-        kibanaRequest: undefined,
+        refreshCache: false,
       },
       context
     );
@@ -167,7 +161,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
         esClient,
         usageCollection,
         soClient,
-        kibanaRequest: undefined,
+        refreshCache: false,
       },
       context
     );

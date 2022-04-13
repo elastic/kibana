@@ -9,24 +9,18 @@
 import { i18n } from '@kbn/i18n';
 import type { Map, Style, MapboxOptions } from '@kbn/mapbox-gl';
 
-import { View, parse } from 'vega';
+import { View, parse, expressionFunction } from 'vega';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
 
 import { initTmsRasterLayer, initVegaLayer } from './layers';
 import { VegaBaseView } from '../vega_base_view';
-import { getMapServiceSettings } from '../../services';
-import { getAttributionsForTmsService } from './map_service_settings';
-import type { MapServiceSettings } from './map_service_settings';
+import { getUISettings } from '../../services';
 
-import {
-  defaultMapConfig,
-  defaultMabBoxStyle,
-  userConfiguredLayerId,
-  vegaLayerId,
-} from './constants';
+import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 import './vega_map_view.scss';
+import { TMS_IN_YML_ID } from './service_settings/service_settings_types';
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   const mapCanvas = mapBoxInstance.getCanvas();
@@ -51,17 +45,32 @@ async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   }
 }
 
-export class VegaMapView extends VegaBaseView {
-  private mapServiceSettings: MapServiceSettings = getMapServiceSettings();
-  private emsTileLayer = this.getEmsTileLayer();
+type SetMapViewArgs =
+  | [number, number, number]
+  | [number, number]
+  | [[number, number], number]
+  | [[number, number]]
+  | [[[number, number], [number, number]]];
 
-  private getEmsTileLayer() {
-    const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
-
-    if (mapStyle) {
-      return emsTileServiceId ?? this.mapServiceSettings.defaultTmsLayer();
+expressionFunction(
+  'setMapView',
+  function handlerFwd(
+    this: {
+      context: { dataflow: { _kibanaView: VegaMapView; runAfter: (fn: () => void) => void } };
+    },
+    ...args: SetMapViewArgs
+  ) {
+    const view = this.context.dataflow;
+    if (!('setMapViewHandler' in view._kibanaView)) {
+      // not a map view, don't do anything
+      return;
     }
+    view.runAfter(() => view._kibanaView.setMapViewHandler(...args));
   }
+);
+
+export class VegaMapView extends VegaBaseView {
+  private mapBoxInstance?: Map;
 
   private get shouldShowZoomControl() {
     return Boolean(this._parser.mapConfig.zoomControl);
@@ -85,6 +94,17 @@ export class VegaMapView extends VegaBaseView {
     };
   }
 
+  private async getEmsTileLayerId() {
+    const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
+    //
+    if (mapStyle) {
+      const isDarkMode: boolean = getUISettings().get('theme:darkMode');
+      return emsTileServiceId
+        ? emsTileServiceId
+        : await this._serviceSettings.getDefaultTmsLayer(isDarkMode);
+    }
+  }
+
   private async initMapContainer(vegaView: View) {
     let style: Style = defaultMabBoxStyle;
     let customAttribution: MapboxOptions['customAttribution'] = [];
@@ -93,24 +113,26 @@ export class VegaMapView extends VegaBaseView {
       maxZoom: defaultMapConfig.maxZoom,
     };
 
-    if (this.emsTileLayer && this.emsTileLayer !== userConfiguredLayerId) {
-      const tmsService = await this.mapServiceSettings.getTmsService(this.emsTileLayer);
+    const emsTileLayer = await this.getEmsTileLayerId();
+    if (emsTileLayer && emsTileLayer !== TMS_IN_YML_ID) {
+      const tmsService = await this._serviceSettings.getTmsService(emsTileLayer);
 
       if (!tmsService) {
         this.onWarn(
           i18n.translate('visTypeVega.mapView.mapStyleNotFoundWarningMessage', {
             defaultMessage: '{mapStyleParam} was not found',
-            values: { mapStyleParam: `"emsTileServiceId":${this.emsTileLayer}` },
+            values: { mapStyleParam: `"emsTileServiceId":${emsTileLayer}` },
           })
         );
         return;
       }
-      zoomSettings.maxZoom = (await tmsService.getMaxZoom()) ?? defaultMapConfig.maxZoom;
-      zoomSettings.minZoom = (await tmsService.getMinZoom()) ?? defaultMapConfig.minZoom;
-      customAttribution = getAttributionsForTmsService(tmsService);
+      zoomSettings.maxZoom = defaultMapConfig.maxZoom;
+      zoomSettings.minZoom = defaultMapConfig.minZoom;
+      customAttribution = this._serviceSettings.getAttributionsFromTMSServce(tmsService);
       style = (await tmsService.getVectorStyleSheet()) as Style;
     } else {
-      customAttribution = this.mapServiceSettings.config.tilemap.options.attribution;
+      const config = this._serviceSettings.getTileMapConfig();
+      customAttribution = config.options.attribution;
     }
 
     // In some cases, Vega may be initialized twice, e.g. after awaiting...
@@ -127,14 +149,14 @@ export class VegaMapView extends VegaBaseView {
 
       const initMapComponents = () => {
         this.initControls(mapBoxInstance);
-        this.initLayers(mapBoxInstance, vegaView);
+        this.initLayers(mapBoxInstance, vegaView, emsTileLayer);
 
         this._addDestroyHandler(() => {
           if (mapBoxInstance.getLayer(vegaLayerId)) {
             mapBoxInstance.removeLayer(vegaLayerId);
           }
-          if (mapBoxInstance.getLayer(userConfiguredLayerId)) {
-            mapBoxInstance.removeLayer(userConfiguredLayerId);
+          if (mapBoxInstance.getLayer(TMS_IN_YML_ID)) {
+            mapBoxInstance.removeLayer(TMS_IN_YML_ID);
           }
           mapBoxInstance.remove();
         });
@@ -143,6 +165,7 @@ export class VegaMapView extends VegaBaseView {
       };
 
       mapBoxInstance.once('load', initMapComponents);
+      this.mapBoxInstance = mapBoxInstance;
     });
   }
 
@@ -158,14 +181,13 @@ export class VegaMapView extends VegaBaseView {
     mapBoxInstance.touchZoomRotate.disableRotation();
   }
 
-  private initLayers(mapBoxInstance: Map, vegaView: View) {
-    const shouldShowUserConfiguredLayer = this.emsTileLayer === userConfiguredLayerId;
+  private initLayers(mapBoxInstance: Map, vegaView: View, emsTileLayer: string) {
+    const shouldShowUserConfiguredLayer = emsTileLayer === TMS_IN_YML_ID;
 
     if (shouldShowUserConfiguredLayer) {
-      const { url, options } = this.mapServiceSettings.config.tilemap;
-
+      const { url, options } = this._serviceSettings.getTileMapConfig();
       initTmsRasterLayer({
-        id: userConfiguredLayerId,
+        id: TMS_IN_YML_ID,
         map: mapBoxInstance,
         context: {
           tiles: [url!],
@@ -181,7 +203,7 @@ export class VegaMapView extends VegaBaseView {
       map: mapBoxInstance,
       context: {
         vegaView,
-        vegaControls: this._$controls.get(0),
+        vegaControls: this._$controls?.get(0),
         updateVegaView,
       },
     });
@@ -197,5 +219,91 @@ export class VegaMapView extends VegaBaseView {
     this.setView(vegaView);
 
     await this.initMapContainer(vegaView);
+  }
+
+  protected async onViewContainerResize() {
+    this.mapBoxInstance?.resize();
+  }
+
+  public setMapViewHandler(...args: SetMapViewArgs) {
+    if (!this.mapBoxInstance) {
+      return;
+    }
+    function throwError() {
+      throw new Error(
+        i18n.translate('visTypeVega.visualization.setMapViewErrorMessage', {
+          defaultMessage:
+            'Unexpected setMapView() parameters. It could be called with a bounding box setMapView([[longitude1,latitude1],[longitude2,latitude2]]), or it could be the center point setMapView([longitude, latitude], optional_zoom), or it can be used as setMapView(latitude, longitude, optional_zoom)',
+        })
+      );
+    }
+
+    function checkArray(
+      val: number | [number, number] | [[number, number], [number, number]]
+    ): [number, number] {
+      if (
+        !Array.isArray(val) ||
+        val.length !== 2 ||
+        typeof val[0] !== 'number' ||
+        typeof val[1] !== 'number'
+      ) {
+        throwError();
+      }
+      return val as [number, number];
+    }
+
+    let lng: number | undefined;
+    let lat: number | undefined;
+    let zoom: number | undefined;
+    switch (args.length) {
+      default:
+        throwError();
+        break;
+      case 1: {
+        const arg = args[0];
+        if (
+          Array.isArray(arg) &&
+          arg.length === 2 &&
+          Array.isArray(arg[0]) &&
+          Array.isArray(arg[1])
+        ) {
+          // called with a bounding box, need to reverse order
+          const [lng1, lat1] = checkArray(arg[0]);
+          const [lng2, lat2] = checkArray(arg[1]);
+          this.mapBoxInstance.fitBounds([
+            { lat: lat1, lng: lng1 },
+            { lat: lat2, lng: lng2 },
+          ]);
+        } else {
+          // called with a center point and no zoom
+          [lng, lat] = checkArray(arg);
+        }
+        break;
+      }
+      case 2:
+        if (Array.isArray(args[0])) {
+          [lng, lat] = checkArray(args[0]);
+          zoom = args[1];
+        } else {
+          [lat, lng] = args;
+        }
+        break;
+      case 3:
+        [lat, lng, zoom] = args;
+        break;
+    }
+
+    if (lat !== undefined && lng !== undefined) {
+      if (typeof lat !== 'number' || typeof lng !== 'number') {
+        throwError();
+      }
+      if (zoom !== undefined && typeof zoom !== 'number') {
+        throwError();
+      }
+      this.mapBoxInstance.setCenter({ lat, lng });
+      if (zoom !== undefined) {
+        this.mapBoxInstance.zoomTo(zoom);
+      }
+    }
   }
 }

@@ -17,14 +17,9 @@ import {
 } from '@kbn/mapbox-gl';
 import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import {
-  FEATURE_ID_PROPERTY_NAME,
-  GEO_JSON_TYPE,
-  LON_INDEX,
-  RawValue,
-} from '../../../../common/constants';
+import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
 import {
   GEOMETRY_FILTER_ACTION,
   TooltipFeature,
@@ -33,7 +28,6 @@ import {
 } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
 import { FeatureGeometryFilterForm } from './features_tooltip';
-import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
@@ -78,17 +72,25 @@ export interface Props {
 }
 
 export class TooltipControl extends Component<Props, {}> {
+  private _isMapRemoved = false;
+
   componentDidMount() {
     this.props.mbMap.on('mouseout', this._onMouseout);
     this.props.mbMap.on('mousemove', this._updateHoverTooltipState);
     this.props.mbMap.on('click', this._lockTooltip);
+    this.props.mbMap.on('remove', this._setIsMapRemoved);
   }
 
   componentWillUnmount() {
     this.props.mbMap.off('mouseout', this._onMouseout);
     this.props.mbMap.off('mousemove', this._updateHoverTooltipState);
     this.props.mbMap.off('click', this._lockTooltip);
+    this.props.mbMap.off('remove', this._setIsMapRemoved);
   }
+
+  _setIsMapRemoved = () => {
+    this._isMapRemoved = true;
+  };
 
   _onMouseout = () => {
     this._updateHoverTooltipState.cancel();
@@ -132,7 +134,13 @@ export class TooltipControl extends Component<Props, {}> {
     }) as IVectorLayer;
   }
 
-  _loadPreIndexedShape = async ({ layerId, featureId }: { layerId: string; featureId: string }) => {
+  _loadPreIndexedShape = async ({
+    layerId,
+    featureId,
+  }: {
+    layerId: string;
+    featureId?: string | number;
+  }) => {
     const tooltipLayer = this._findLayerById(layerId);
     if (!tooltipLayer || typeof featureId === 'undefined') {
       return null;
@@ -152,7 +160,7 @@ export class TooltipControl extends Component<Props, {}> {
     tooltipId,
   }: {
     layerId: string;
-    featureId: string;
+    featureId?: string | number;
     tooltipId: string;
   }): TooltipFeatureAction[] {
     const actions = [];
@@ -203,7 +211,8 @@ export class TooltipControl extends Component<Props, {}> {
       if (!layer) {
         break;
       }
-      const featureId = mbFeature.properties?.[FEATURE_ID_PROPERTY_NAME];
+
+      const featureId = layer.getFeatureId(mbFeature);
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
@@ -272,6 +281,11 @@ export class TooltipControl extends Component<Props, {}> {
   };
 
   _updateHoverTooltipState = _.debounce((e: MapMouseEvent) => {
+    if (this._isMapRemoved) {
+      // ignore debounced events after mbMap.remove is called.
+      return;
+    }
+
     if (this.props.filterModeActive || this.props.hasLockedTooltips || this.props.drawModeActive) {
       // ignore hover events when in draw mode or when there are locked tooltips
       return;
@@ -284,9 +298,10 @@ export class TooltipControl extends Component<Props, {}> {
     }
 
     const targetMbFeature = mbFeatures[0];
-    if (this.props.openTooltips[0] && this.props.openTooltips[0].features.length) {
+    const layer = this._getLayerByMbLayerId(targetMbFeature.layer.id);
+    if (layer && this.props.openTooltips[0] && this.props.openTooltips[0].features.length) {
       const firstFeature = this.props.openTooltips[0].features[0];
-      if (targetMbFeature.properties?.[FEATURE_ID_PROPERTY_NAME] === firstFeature.id) {
+      if (layer.getFeatureId(targetMbFeature) === firstFeature.id) {
         // ignore hover events when hover tooltip is all ready opened for feature
         return;
       }
@@ -312,7 +327,7 @@ export class TooltipControl extends Component<Props, {}> {
       (accumulator: string[], layer: ILayer) => {
         // tooltips are only supported for vector layers, filter out all other layer types
         return layer.isVisible() && isVectorLayer(layer)
-          ? accumulator.concat(layer.getMbLayerIds())
+          ? accumulator.concat((layer as IVectorLayer).getMbTooltipLayerIds())
           : accumulator;
       },
       []
@@ -347,7 +362,6 @@ export class TooltipControl extends Component<Props, {}> {
     ] as [MbPoint, MbPoint];
     return this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbLayerIds,
-      filter: EXCLUDE_TOO_MANY_FEATURES_BOX,
     });
   }
 

@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-export const CLOSE_MODAL = '[data-test-subj="modal-inspect-close"]';
-
 export const EVENTS_VIEWER_FIELDS_BUTTON =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
 
-export const EVENTS_VIEWER_PANEL = '[data-test-subj="events-viewer-panel"]';
-
 export const FIELDS_BROWSER_CONTAINER = '[data-test-subj="fields-browser-container"]';
-
-export const HEADER_SUBTITLE =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="header-panel-subtitle"]';
 
 export const HOST_GEO_CITY_NAME_CHECKBOX = '[data-test-subj="field-host.geo.city_name-checkbox"]';
 
@@ -31,9 +24,6 @@ export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
 
 export const INSPECT_QUERY =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="inspect-icon-button"]';
-
-export const LOAD_MORE =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="TimelineMoreButton"';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 

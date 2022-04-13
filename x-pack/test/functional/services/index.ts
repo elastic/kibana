@@ -27,13 +27,20 @@ import {
   MonitoringBeatsListingProvider,
   MonitoringBeatDetailProvider,
   MonitoringBeatsSummaryStatusProvider,
+  MonitoringLogstashOverviewProvider,
+  MonitoringLogstashNodesProvider,
+  MonitoringLogstashNodeDetailProvider,
   MonitoringLogstashPipelinesProvider,
+  MonitoringLogstashPipelineViewerProvider,
   MonitoringLogstashSummaryStatusProvider,
   MonitoringKibanaOverviewProvider,
   MonitoringKibanaInstancesProvider,
   MonitoringKibanaInstanceProvider,
   MonitoringKibanaSummaryStatusProvider,
   MonitoringSetupModeProvider,
+  MonitoringAlertsProvider,
+  MonitoringEnterpriseSearchOverviewProvider,
+  MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
 } from './monitoring';
 // @ts-ignore not ts yet
@@ -61,6 +68,8 @@ import {
 } from './dashboard';
 import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
+import { CompareImagesProvider } from './compare_images';
+import { CasesServiceProvider } from './cases';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -87,13 +96,20 @@ export const services = {
   monitoringBeatsListing: MonitoringBeatsListingProvider,
   monitoringBeatDetail: MonitoringBeatDetailProvider,
   monitoringBeatsSummaryStatus: MonitoringBeatsSummaryStatusProvider,
+  monitoringLogstashOverview: MonitoringLogstashOverviewProvider,
+  monitoringLogstashNodes: MonitoringLogstashNodesProvider,
+  monitoringLogstashNodeDetail: MonitoringLogstashNodeDetailProvider,
   monitoringLogstashPipelines: MonitoringLogstashPipelinesProvider,
+  monitoringLogstashPipelineViewer: MonitoringLogstashPipelineViewerProvider,
   monitoringLogstashSummaryStatus: MonitoringLogstashSummaryStatusProvider,
   monitoringKibanaOverview: MonitoringKibanaOverviewProvider,
   monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
   monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
   monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
+  monitoringEnterpriseSearchOverview: MonitoringEnterpriseSearchOverviewProvider,
+  monitoringEnterpriseSearchSummaryStatus: MonitoringEnterpriseSearchSummaryStatusProvider,
   monitoringSetupMode: MonitoringSetupModeProvider,
+  monitoringAlerts: MonitoringAlertsProvider,
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
@@ -112,4 +128,6 @@ export const services = {
   reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
+  compareImages: CompareImagesProvider,
+  cases: CasesServiceProvider,
 };

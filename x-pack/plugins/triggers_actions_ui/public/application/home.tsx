@@ -6,11 +6,12 @@
  */
 
 import React, { lazy, useEffect } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { Route, RouteComponentProps, Switch, Redirect } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToRules } from './constants';
+import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
+import { Section, routeToConnectors, routeToRules, routeToInternalAlerts } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
@@ -23,7 +24,8 @@ import { suspendedComponentWithProps } from './lib/suspended_component_with_prop
 const ActionsConnectorsList = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_list')
 );
-const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
+const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
+const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {
   section: Section;
@@ -38,9 +40,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   const {
     chrome,
     application: { capabilities },
+
     setBreadcrumbs,
     docLinks,
   } = useKibana().services;
+  const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{
@@ -62,6 +66,18 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         <FormattedMessage
           id="xpack.triggersActionsUI.home.connectorsTabTitle"
           defaultMessage="Connectors"
+        />
+      ),
+    });
+  }
+
+  if (isInternalAlertsTableEnabled) {
+    tabs.push({
+      id: 'alerts',
+      name: (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.home.TabTitle"
+          defaultMessage="Alerts (Internal use only)"
         />
       ),
     });
@@ -132,8 +148,17 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             <Route
               exact
               path={routeToRules}
-              component={suspendedComponentWithProps(AlertsList, 'xl')}
+              component={suspendedComponentWithProps(RulesList, 'xl')}
             />
+            {isInternalAlertsTableEnabled ? (
+              <Route
+                exact
+                path={routeToInternalAlerts}
+                component={suspendedComponentWithProps(AlertsPage, 'xl')}
+              />
+            ) : (
+              <Redirect to={routeToRules} />
+            )}
           </Switch>
         </HealthCheck>
       </HealthContextProvider>

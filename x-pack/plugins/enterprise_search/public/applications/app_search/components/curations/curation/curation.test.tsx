@@ -14,6 +14,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EnterpriseSearchPageTemplateWrapper } from '../../../../shared/layout';
 import { rerender } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
@@ -26,6 +27,7 @@ import { Curation } from './';
 
 describe('Curation', () => {
   const values = {
+    dataLoading: false,
     isAutomated: true,
   };
 
@@ -47,6 +49,13 @@ describe('Curation', () => {
     mockUseParams.mockReturnValueOnce({ curationId: 'cur-987654321' });
     rerender(wrapper);
     expect(actions.loadCuration).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders a loading view when loading', () => {
+    setMockValues({ dataLoading: true });
+    const wrapper = shallow(<Curation />);
+
+    expect(wrapper.is(EnterpriseSearchPageTemplateWrapper)).toBe(true);
   });
 
   it('renders a view for automated curations', () => {

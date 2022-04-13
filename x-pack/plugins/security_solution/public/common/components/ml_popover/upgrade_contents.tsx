@@ -17,7 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useBasePath } from '../../lib/kibana';
 import * as i18n from './translations';
 

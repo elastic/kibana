@@ -7,13 +7,15 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiInMemoryTable,
   EuiLink,
   EuiButton,
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
+  EuiPopover,
+  EuiContextMenu,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -37,6 +39,30 @@ export const PipelineTable: FunctionComponent<Props> = ({
 }) => {
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
+  const [showPopover, setShowPopover] = useState(false);
+
+  const createMenuItems = [
+    /**
+     * Create pipeline
+     */
+    {
+      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
+        defaultMessage: 'New pipeline',
+      }),
+      ...reactRouterNavigate(history, '/create'),
+      'data-test-subj': `createNewPipeline`,
+    },
+    /**
+     * Create pipeline from CSV
+     */
+    {
+      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineFromCsvButtonLabel', {
+        defaultMessage: 'New pipeline from CSV',
+      }),
+      ...reactRouterNavigate(history, '/csv_create'),
+      'data-test-subj': `createPipelineFromCsv`,
+    },
+  ];
 
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
@@ -75,7 +101,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         <EuiButton
           key="reloadButton"
           iconType="refresh"
-          color="secondary"
+          color="success"
           data-test-subj="reloadButton"
           onClick={onReloadClick}
         >
@@ -83,17 +109,37 @@ export const PipelineTable: FunctionComponent<Props> = ({
             defaultMessage: 'Reload',
           })}
         </EuiButton>,
-        <EuiButton
-          fill
-          iconType="plusInCircle"
-          data-test-subj="createPipelineButton"
-          key="createPipelineButton"
-          {...reactRouterNavigate(history, '/create')}
+        <EuiPopover
+          isOpen={showPopover}
+          closePopover={() => setShowPopover(false)}
+          button={
+            <EuiButton
+              fill
+              iconSide="right"
+              iconType="arrowDown"
+              data-test-subj="createPipelineDropdown"
+              key="createPipelineDropdown"
+              onClick={() => setShowPopover((previousBool) => !previousBool)}
+            >
+              {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
+                defaultMessage: 'Create pipeline',
+              })}
+            </EuiButton>
+          }
+          panelPaddingSize="none"
+          repositionOnScroll
         >
-          {i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
-            defaultMessage: 'Create pipeline',
-          })}
-        </EuiButton>,
+          <EuiContextMenu
+            initialPanelId={0}
+            data-test-subj="autoFollowPatternActionContextMenu"
+            panels={[
+              {
+                id: 0,
+                items: createMenuItems,
+              },
+            ]}
+          />
+        </EuiPopover>,
       ],
       box: {
         incremental: true,

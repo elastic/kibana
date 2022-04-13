@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { cloneDeepWith } from 'lodash';
 import { Key, Origin, WebDriver } from 'selenium-webdriver';
-// @ts-ignore internal modules are not typed
-import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';
@@ -25,9 +23,8 @@ class BrowserService extends FtrService {
    * Keyboard events
    */
   public readonly keys = Key;
-  public readonly isFirefox: boolean = this.browserType === Browsers.Firefox;
-  public readonly isChromium: boolean =
-    this.browserType === Browsers.Chrome || this.browserType === Browsers.ChromiumEdge;
+  public readonly isFirefox: boolean;
+  public readonly isChromium: boolean;
 
   private readonly log = this.ctx.getService('log');
 
@@ -37,6 +34,9 @@ class BrowserService extends FtrService {
     private readonly driver: WebDriver
   ) {
     super(ctx);
+    this.isFirefox = this.browserType === Browsers.Firefox;
+    this.isChromium =
+      this.browserType === Browsers.Chrome || this.browserType === Browsers.ChromiumEdge;
   }
 
   /**
@@ -303,7 +303,7 @@ class BrowserService extends FtrService {
       to
     );
     // wait for 150ms to make sure the script has run
-    await delay(150);
+    await setTimeoutAsync(150);
   }
 
   /**

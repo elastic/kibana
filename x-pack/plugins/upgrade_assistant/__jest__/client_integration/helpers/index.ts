@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { setup as setupOverviewPage, OverviewTestBed } from './overview.helpers';
-export { setup as setupElasticsearchPage, ElasticsearchTestBed } from './elasticsearch.helpers';
-export { setup as setupKibanaPage, KibanaTestBed } from './kibana.helpers';
-
-export { setupEnvironment } from './setup_environment';
+export { setupEnvironment, WithAppDependencies, kibanaVersion } from './setup_environment';
+export { advanceTime } from './time_manipulation';
+export { getAppContextMock } from './app_context.mock';

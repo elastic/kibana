@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { FileDataVisualizer, FileDataVisualizerSpec } from './file_data_visualizer';
+export type { FileDataVisualizerSpec } from './file_data_visualizer';
+export { FileDataVisualizer } from './file_data_visualizer';

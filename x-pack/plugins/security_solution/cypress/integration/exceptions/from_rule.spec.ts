@@ -8,53 +8,45 @@
 import { getException } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
-import { ALERTS_COUNT, NUMBER_OF_ALERTS } from '../../screens/alerts';
-import { RULE_STATUS } from '../../screens/create_new_rule';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
-import {
-  goToClosedAlerts,
-  goToManageAlertsDetectionRules,
-  goToOpenedAlerts,
-  waitForAlertsIndexToBeCreated,
-} from '../../tasks/alerts';
+import { goToClosedAlerts, goToOpenedAlerts } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
-  activatesRule,
+  enablesRule,
   addsExceptionFromRuleSettings,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/rule_details';
-import { refreshPage } from '../../tasks/security_header';
 
-import { ALERTS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 
-describe('From rule', () => {
+describe.skip('From rule', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsIndexToBeCreated();
-    createCustomRule(getNewRule(), 'rule_testing', '10s');
-    goToManageAlertsDetectionRules();
-    goToRuleDetails();
+    login();
+  });
 
-    cy.get(RULE_STATUS).should('have.text', '—');
-
+  beforeEach(() => {
     esArchiverLoad('auditbeat_for_exceptions');
-    activatesRule();
+    deleteAlertsAndRules();
+    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing');
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    goToRuleDetails();
+    enablesRule();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
-    refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alerts`);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alert`);
   });
 
   afterEach(() => {
@@ -62,40 +54,33 @@ describe('From rule', () => {
     esArchiverUnload('auditbeat_for_exceptions2');
   });
 
-  // TODO: Unskip the test when `https://github.com/elastic/kibana/issues/108244` it is fixed
-  it.skip('Creates an exception and deletes it', () => {
+  it('Creates an exception and deletes it', () => {
     goToExceptionsTab();
     addsExceptionFromRuleSettings(getException());
     esArchiverLoad('auditbeat_for_exceptions2');
     waitForTheRuleToBeExecuted();
     goToAlertsTab();
-    refreshPage();
 
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '0 alerts');
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
 
     goToClosedAlerts();
-    refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alerts`);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alert`);
 
     goToOpenedAlerts();
     waitForTheRuleToBeExecuted();
-    refreshPage();
 
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '0 alerts');
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
 
     goToExceptionsTab();
     removeException();
-    refreshPage();
+    esArchiverLoad('auditbeat_for_exceptions2');
     goToAlertsTab();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
-    refreshPage();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alerts`);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS} alert`);
   });
 });

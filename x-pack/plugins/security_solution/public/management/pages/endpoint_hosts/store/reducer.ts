@@ -50,9 +50,9 @@ const handleEndpointDetailsActivityLogChanged: CaseReducer<EndpointDetailsActivi
         }
       : { ...state.endpointDetails.activityLog };
   return {
-    ...state!,
+    ...state,
     endpointDetails: {
-      ...state.endpointDetails!,
+      ...state.endpointDetails,
       activityLog: {
         ...updatedActivityLog,
         logData: action.payload,
@@ -95,20 +95,13 @@ const handleMetadataTransformStatsChanged: CaseReducer<MetadataTransformStatsCha
 /* eslint-disable-next-line complexity */
 export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
-    const {
-      hosts,
-      total,
-      request_page_size: pageSize,
-      request_page_index: pageIndex,
-      policy_info: policyVersionInfo,
-    } = action.payload;
+    const { data, total, page, pageSize } = action.payload;
     return {
       ...state,
-      hosts,
+      hosts: data,
       total,
+      pageIndex: page,
       pageSize,
-      pageIndex,
-      policyVersionInfo,
       loading: false,
       error: undefined,
     };
@@ -181,7 +174,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     return {
       ...state,
       endpointDetails: {
-        ...state.endpointDetails!,
+        ...state.endpointDetails,
         activityLog: {
           ...state.endpointDetails.activityLog,
           paging: {
@@ -195,7 +188,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     return {
       ...state,
       endpointDetails: {
-        ...state.endpointDetails!,
+        ...state.endpointDetails,
         activityLog: {
           ...state.endpointDetails.activityLog,
           paging: {
@@ -458,6 +451,7 @@ const handleEndpointIsolationRequestStateChanged: ImmutableReducer<
   AppAction & { type: 'endpointIsolationRequestStateChange' }
 > = (state, action) => {
   return {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     ...state!,
     isolationRequestState: action.payload,
   };

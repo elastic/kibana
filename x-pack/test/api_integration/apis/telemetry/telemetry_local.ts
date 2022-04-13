@@ -43,11 +43,11 @@ export default function ({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ unencrypted: true })
+        .send({ unencrypted: true, refreshCache: true })
         .expect(200);
 
       expect(body.length).to.be(1);
-      stats = body[0];
+      stats = body[0].stats;
     });
 
     it('should pass the schema validation', () => {

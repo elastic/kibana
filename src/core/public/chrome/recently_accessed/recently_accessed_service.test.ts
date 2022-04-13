@@ -44,11 +44,9 @@ describe('RecentlyAccessed#start()', () => {
   let originalLocalStorage: Storage;
   beforeAll(() => {
     originalLocalStorage = window.localStorage;
-    // @ts-expect-error
     window.localStorage = new LocalStorageMock();
   });
   beforeEach(() => localStorage.clear());
-  // @ts-expect-error
   afterAll(() => (window.localStorage = originalLocalStorage));
 
   const getStart = async () => {
@@ -92,7 +90,7 @@ describe('RecentlyAccessed#start()', () => {
 
   it('exposes an observable', async () => {
     const { recentlyAccessed } = await getStart();
-    const stop$ = new Subject();
+    const stop$ = new Subject<void>();
     const observedValues$ = recentlyAccessed
       .get$()
       .pipe(bufferCount(3), takeUntil(stop$))

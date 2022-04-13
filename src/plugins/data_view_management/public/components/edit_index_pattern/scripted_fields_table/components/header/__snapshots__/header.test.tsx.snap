@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<Component
+  history={
+    Object {
+      "action": "PUSH",
+      "block": [MockFunction],
+      "createHref": [MockFunction],
+      "createSubHistory": [MockFunction],
+      "go": [MockFunction],
+      "goBack": [MockFunction],
+      "goForward": [MockFunction],
+      "length": 1,
+      "listen": [MockFunction],
+      "location": Object {
+        "hash": "",
+        "key": undefined,
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [MockFunction],
+      "replace": [MockFunction],
+    }
+  }
+  indexPatternId="test"
+  location={Object {}}
+  match={Object {}}
+>
+  <EuiFlexGroup
+    alignItems="center"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem>
+        <div
+          className="euiFlexItem"
+        >
+          <EuiText
+            size="s"
+          >
+            <div
+              className="euiText euiText--small"
+            >
+              <p>
+                <FormattedMessage
+                  defaultMessage="Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched."
+                  id="indexPatternManagement.editIndexPattern.scriptedLabel"
+                  values={Object {}}
+                >
+                  <span>
+                    Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched.
+                  </span>
+                </FormattedMessage>
+                <br />
+                <EuiIcon
+                  color="warning"
+                  style={
+                    Object {
+                      "marginRight": "4px",
+                    }
+                  }
+                  type="alert"
+                >
+                  <span
+                    color="warning"
+                    data-euiicon-type="alert"
+                    style={
+                      Object {
+                        "marginRight": "4px",
+                      }
+                    }
+                  />
+                </EuiIcon>
+                <FormattedMessage
+                  defaultMessage="Scripted fields are deprecated. Use {runtimeDocs} instead."
+                  id="indexPatternManagement.editIndexPattern.deprecation"
+                  values={
+                    Object {
+                      "runtimeDocs": <EuiLink
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          defaultMessage="runtime fields"
+                          id="indexPatternManagement.header.runtimeLink"
+                          values={Object {}}
+                        />
+                      </EuiLink>,
+                    }
+                  }
+                >
+                  <span>
+                    Scripted fields are deprecated. Use 
+                    <EuiLink
+                      target="_blank"
+                    >
+                      <button
+                        className="euiLink euiLink--primary"
+                        disabled={false}
+                        type="button"
+                      >
+                        <FormattedMessage
+                          defaultMessage="runtime fields"
+                          id="indexPatternManagement.header.runtimeLink"
+                          values={Object {}}
+                        >
+                          <span>
+                            runtime fields
+                          </span>
+                        </FormattedMessage>
+                      </button>
+                    </EuiLink>
+                     instead.
+                  </span>
+                </FormattedMessage>
+              </p>
+            </div>
+          </EuiText>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</Component>
+`;

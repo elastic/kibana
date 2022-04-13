@@ -14,6 +14,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
 import { escape } from 'he';
 
+import { BuildkiteMetadata } from './buildkite_metadata';
 import { TestFailure } from './get_failures';
 
 const findScreenshots = (dirPath: string, allScreenshots: string[] = []) => {
@@ -37,7 +38,11 @@ const findScreenshots = (dirPath: string, allScreenshots: string[] = []) => {
   return allScreenshots;
 };
 
-export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
+export function reportFailuresToFile(
+  log: ToolingLog,
+  failures: TestFailure[],
+  bkMeta: BuildkiteMetadata
+) {
   if (!failures?.length) {
     return;
   }
@@ -76,28 +81,15 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
       .flat()
       .join('\n');
 
-    // Buildkite steps that use `parallelism` need a numerical suffix added to identify them
-    // We should also increment the number by one, since it's 0-based
-    const jobNumberSuffix = process.env.BUILDKITE_PARALLEL_JOB
-      ? ` #${parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10) + 1}`
-      : '';
-
-    const buildUrl = process.env.BUILDKITE_BUILD_URL || '';
-    const jobUrl = process.env.BUILDKITE_JOB_ID
-      ? `${buildUrl}#${process.env.BUILDKITE_JOB_ID}`
-      : '';
-
     const failureJSON = JSON.stringify(
       {
         ...failure,
         hash,
-        buildId: process.env.BUJILDKITE_BUILD_ID || '',
-        jobId: process.env.BUILDKITE_JOB_ID || '',
-        url: buildUrl,
-        jobUrl,
-        jobName: process.env.BUILDKITE_LABEL
-          ? `${process.env.BUILDKITE_LABEL}${jobNumberSuffix}`
-          : '',
+        buildId: bkMeta.buildId,
+        jobId: bkMeta.jobId,
+        url: bkMeta.url,
+        jobUrl: bkMeta.jobUrl,
+        jobName: bkMeta.jobName,
       },
       null,
       2
@@ -149,11 +141,11 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
           </small>
         </p>
         ${
-          jobUrl
+          bkMeta.jobUrl
             ? `<p>
               <small>
                 <strong>Buildkite Job</strong><br />
-                <a href="${escape(jobUrl)}">${escape(jobUrl)}</a>
+                <a href="${escape(bkMeta.jobUrl)}">${escape(bkMeta.jobUrl)}</a>
               </small>
             </p>`
             : ''

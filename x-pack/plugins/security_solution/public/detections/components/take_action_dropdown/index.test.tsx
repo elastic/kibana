@@ -11,14 +11,20 @@ import { waitFor } from '@testing-library/react';
 import { TakeActionDropdown, TakeActionDropdownProps } from '.';
 import { mockAlertDetailsData } from '../../../common/components/event_details/__mocks__';
 import { mockEcsDataWithAlert } from '../../../common/mock/mock_detection_alerts';
-import { TimelineEventsDetailsItem, TimelineId } from '../../../../common';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineId } from '../../../../common/types';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
+import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-jest.mock('../../../common/hooks/endpoint/use_isolate_privileges', () => ({
-  useIsolationPrivileges: jest.fn().mockReturnValue({ isAllowed: true }),
+jest.mock('../../../common/components/user_privileges');
+
+jest.mock('../user_info', () => ({
+  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -28,6 +34,12 @@ jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () =
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
 }));
 jest.mock('../../../cases/components/use_insert_timeline');
+
+jest.mock('../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+  }),
+}));
 
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
@@ -56,6 +68,8 @@ jest.mock('../../containers/detection_engine/alerts/use_host_isolation_status', 
   };
 });
 
+jest.mock('../../../common/components/user_privileges');
+
 describe('take action dropdown', () => {
   const defaultProps: TakeActionDropdownProps = {
     detailsData: mockAlertDetailsData as TimelineEventsDetailsItem[],
@@ -68,7 +82,9 @@ describe('take action dropdown', () => {
     onAddExceptionTypeClick: jest.fn(),
     onAddIsolationStatusClick: jest.fn(),
     refetch: jest.fn(),
+    refetchFlyoutData: jest.fn(),
     timelineId: TimelineId.active,
+    onOsqueryClick: jest.fn(),
   };
 
   beforeAll(() => {
@@ -79,8 +95,12 @@ describe('take action dropdown', () => {
         services: {
           ...mockStartServicesMock,
           timelines: { ...mockTimelines },
+          cases: mockCasesContract(),
+          osquery: {
+            isOsqueryAvailable: jest.fn().mockReturnValue(true),
+          },
           application: {
-            capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+            capabilities: { siem: { crud_alerts: true, read_alerts: true }, osquery: true },
           },
         },
       };
@@ -178,6 +198,97 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').first().text()
         ).toEqual('Investigate in timeline');
+      });
+    });
+    test('should render "Run Osquery"', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="osquery-action-item"]').first().text()).toEqual(
+          'Run Osquery'
+        );
+      });
+    });
+  });
+
+  describe('should correctly enable/disable the "Add Endpoint event filter" button', () => {
+    let wrapper: ReactWrapper;
+
+    const getEcsDataWithAgentType = (agentType: string) => ({
+      ...mockEcsDataWithAlert,
+      agent: {
+        type: [agentType],
+      },
+    });
+
+    const modifiedMockDetailsData = mockAlertDetailsData
+      .map((obj) => {
+        if (obj.field === 'kibana.alert.rule.uuid') {
+          return null;
+        }
+        if (obj.field === 'event.kind') {
+          return {
+            category: 'event',
+            field: 'event.kind',
+            values: ['event'],
+            originalValue: 'event',
+          };
+        }
+        return obj;
+      })
+      .filter((obj) => obj) as TimelineEventsDetailsItem[];
+
+    test('should enable the "Add Endpoint event filter" button if provided endpoint event', async () => {
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('endpoint')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+        ).toBeEnabled();
+      });
+    });
+
+    test('should disable the "Add Endpoint event filter" button if no endpoint management privileges', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
+      });
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('endpoint')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
+        ).toBeDisabled();
+      });
+    });
+
+    test('should hide the "Add Endpoint event filter" button if provided no event from endpoint', async () => {
+      wrapper = mount(
+        <TestProviders>
+          <TakeActionDropdown
+            {...defaultProps}
+            detailsData={modifiedMockDetailsData}
+            ecsData={getEcsDataWithAgentType('filesbeat')}
+          />
+        </TestProviders>
+      );
+      wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+      await waitFor(() => {
+        expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
       });
     });
   });

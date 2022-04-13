@@ -4,11 +4,11 @@ slug: /kibana-dev-docs/api/expressionTagcloud
 title: "expressionTagcloud"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the expressionTagcloud plugin
-date: 2020-11-16
+date: 2022-04-05
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'expressionTagcloud']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import expressionTagcloudObj from './expression_tagcloud.json';
+import expressionTagcloudObj from './expression_tagcloud.devdocs.json';
 
 Expression Tagcloud plugin adds a `tagcloud` renderer and function to the expression plugin. The renderer will display the `Wordcloud` chart.
 
@@ -16,9 +16,9 @@ Contact [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) 
 
 **Code health stats**
 
-| Public API count  | Any count | Items lacking comments | Missing exports | 
+| Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 5 | 0 | 5 | 0 |
+| 7 | 0 | 7 | 0 |
 
 ## Client
 
@@ -26,6 +26,9 @@ Contact [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) 
 <DocDefinitionList data={[expressionTagcloudObj.client.start]}/>
 
 ## Common
+
+### Objects
+<DocDefinitionList data={expressionTagcloudObj.common.objects}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={expressionTagcloudObj.common.misc}/>

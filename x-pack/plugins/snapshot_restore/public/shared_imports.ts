@@ -5,24 +5,33 @@
  * 2.0.
  */
 
+export type {
+  Error,
+  Frequency,
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestResponse,
+  UseRequestConfig,
+} from '../../../../src/plugins/es_ui_shared/public';
+
 export {
   AuthorizationProvider,
   CronEditor,
-  Error,
-  Frequency,
   NotAuthorizedSection,
   SectionError,
   PageError,
   PageLoading,
   sendRequest,
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestResponse,
   useAuthorizationContext,
   useRequest,
-  UseRequestConfig,
   WithPrivileges,
   EuiCodeEditor,
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+
+export {
+  reactRouterNavigate,
+  KibanaThemeProvider,
+  useExecutionContext,
+} from '../../../../src/plugins/kibana_react/public';

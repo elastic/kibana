@@ -7,9 +7,11 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import { upperFirst } from 'lodash';
 
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
 
 export interface TrainedModelRowData {
   id: string;
@@ -19,7 +21,10 @@ export interface TrainedModelRowData {
 
 export type MlTrainedModelsTable = ProvidedType<typeof TrainedModelsTableProvider>;
 
-export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
+export function TrainedModelsTableProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -74,13 +79,13 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
     }
 
     public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlAnalyticsRefreshListButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlAnalyticsRefreshListButton loaded', { timeout: 30 * 1000 });
+      await testSubjects.existOrFail('~mlRefreshPageButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlRefreshPageButton loaded', { timeout: 30 * 1000 });
     }
 
     public async refreshModelsTable() {
       await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await testSubjects.click('~mlRefreshPageButton');
       await this.waitForRefreshButtonLoaded();
       await this.waitForModelsToLoad();
     }
@@ -146,8 +151,8 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       // 'Created at' will be different on each run,
       // so we will just assert that the value is in the expected timestamp format.
       expect(modelRow.createdAt).to.match(
-        /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
-        `Expected trained model row created at time to have same format as '2019-12-05 12:28:34' (got '${modelRow.createdAt}')`
+        /^\w{3}\s\d+,\s\d{4}\s@\s\d{2}:\d{2}:\d{2}\.\d{3}$/,
+        `Expected trained model row created at time to have same format as 'Dec 5, 2019 @ 12:28:34.594' (got '${modelRow.createdAt}')`
       );
     }
 
@@ -207,6 +212,65 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
     public async clickDeleteAction(modelId: string) {
       await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeleteAction'));
       await this.assertDeleteModalExists();
+    }
+
+    public async ensureRowIsExpanded(modelId: string) {
+      await this.filterWithSearchString(modelId);
+      await retry.tryForTime(10 * 1000, async () => {
+        if (!(await testSubjects.exists('mlTrainedModelRowDetails'))) {
+          await testSubjects.click(`${this.rowSelector(modelId)} > mlModelsTableRowDetailsToggle`);
+          await testSubjects.existOrFail('mlTrainedModelRowDetails', { timeout: 1000 });
+        }
+      });
+      await mlCommonUI.waitForRefreshButtonEnabled();
+    }
+
+    public async assertTabContent(
+      type: 'details' | 'stats' | 'inferenceConfig' | 'pipelines',
+      expectVisible = true
+    ) {
+      const tabTestSubj = `mlTrainedModel${upperFirst(type)}`;
+      const tabContentTestSubj = `mlTrainedModel${upperFirst(type)}Content`;
+
+      if (!expectVisible) {
+        await testSubjects.missingOrFail(tabTestSubj);
+        return;
+      }
+
+      await testSubjects.existOrFail(tabTestSubj);
+      await testSubjects.click(tabTestSubj);
+      await testSubjects.existOrFail(tabContentTestSubj);
+    }
+
+    public async assertDetailsTabContent(expectVisible = true) {
+      await this.assertTabContent('details', expectVisible);
+    }
+
+    public async assertInferenceConfigTabContent(expectVisible = true) {
+      await this.assertTabContent('inferenceConfig', expectVisible);
+    }
+
+    public async assertStatsTabContent(expectVisible = true) {
+      await this.assertTabContent('stats', expectVisible);
+    }
+
+    public async assertPipelinesTabContent(
+      expectVisible = true,
+      pipelinesExpectOptions?: Array<{ pipelineName: string; expectDefinition: boolean }>
+    ) {
+      await this.assertTabContent('pipelines', expectVisible);
+
+      if (Array.isArray(pipelinesExpectOptions)) {
+        for (const p of pipelinesExpectOptions) {
+          if (p.expectDefinition) {
+            await testSubjects.existOrFail(`mlTrainedModelPipelineEditButton_${p.pipelineName}`);
+            await testSubjects.existOrFail(`mlTrainedModelPipelineDefinition_${p.pipelineName}`);
+          } else {
+            await testSubjects.missingOrFail(`mlTrainedModelPipelineEditButton_${p.pipelineName}`);
+            await testSubjects.missingOrFail(`mlTrainedModelPipelineDefinition_${p.pipelineName}`);
+          }
+        }
+      }
     }
   })();
 }

@@ -107,8 +107,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         after(async function () {
           await kibanaServer.uiSettings.replace({});
         });
-        it('doc view should show Time and _source columns', async function () {
-          const expectedHeader = 'Time\n_source';
+        it('doc view should show @timestamp and _source columns', async function () {
+          const expectedHeader = '@timestamp\n_source';
           const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
           const docHeaderText = await docHeader.getVisibleText();
           expect(docHeaderText).to.be(expectedHeader);

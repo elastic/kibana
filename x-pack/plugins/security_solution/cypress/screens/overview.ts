@@ -55,7 +55,7 @@ export const STAT_PACKAGE = {
   domId: '[data-test-subj="host-stat-auditbeatPackage"]',
 };
 export const STAT_PROCESS = {
-  value: '1',
+  value: '2',
   domId: '[data-test-subj="host-stat-auditbeatProcess"]',
 };
 export const STAT_USER = {
@@ -144,15 +144,12 @@ export const OVERVIEW_HOST_STATS = '[data-test-subj="overview-hosts-stats"]';
 
 export const OVERVIEW_NETWORK_STATS = '[data-test-subj="overview-network-stats"]';
 
-export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="empty-page"]';
+export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="siem-landing-page"]';
 
 export const OVERVIEW_REVENT_TIMELINES = '[data-test-subj="overview-recent-timelines"]';
 
 export const OVERVIEW_CTI_LINKS = '[data-test-subj="cti-dashboard-links"]';
 export const OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL = '[data-test-subj="cti-inner-panel-danger"]';
-export const OVERVIEW_CTI_LINKS_WARNING_INNER_PANEL = '[data-test-subj="cti-inner-panel-warning"]';
-export const OVERVIEW_CTI_LINKS_INFO_INNER_PANEL = '[data-test-subj="cti-inner-panel-info"]';
-export const OVERVIEW_CTI_VIEW_DASHBOARD_BUTTON = '[data-test-subj="cti-view-dashboard-button"]';
 export const OVERVIEW_CTI_TOTAL_EVENT_COUNT = `${OVERVIEW_CTI_LINKS} [data-test-subj="header-panel-subtitle"]`;
 export const OVERVIEW_CTI_ENABLE_MODULE_BUTTON = '[data-test-subj="cti-enable-module-button"]';
 
@@ -166,3 +163,5 @@ export const OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON =
 export const OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT = `${OVERVIEW_RISKY_HOSTS_LINKS} [data-test-subj="header-panel-subtitle"]`;
 export const OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON =
   '[data-test-subj="risky-hosts-enable-module-button"]';
+
+export const OVERVIEW_ALERTS_HISTOGRAM = '[data-test-subj="alerts-histogram-panel"]';

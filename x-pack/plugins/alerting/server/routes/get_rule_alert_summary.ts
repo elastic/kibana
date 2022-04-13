@@ -8,12 +8,12 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
-import { GetAlertInstanceSummaryParams } from '../rules_client';
+import { GetAlertSummaryParams } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
-  AlertInstanceSummary,
+  AlertSummary,
 } from '../types';
 
 const paramSchema = schema.object({
@@ -22,33 +22,40 @@ const paramSchema = schema.object({
 
 const querySchema = schema.object({
   date_start: schema.maybe(schema.string()),
+  number_of_executions: schema.maybe(schema.number()),
 });
 
-const rewriteReq: RewriteRequestCase<GetAlertInstanceSummaryParams> = ({
+const rewriteReq: RewriteRequestCase<GetAlertSummaryParams> = ({
   date_start: dateStart,
+  number_of_executions: numberOfExecutions,
   ...rest
 }) => ({
   ...rest,
+  numberOfExecutions,
   dateStart,
 });
-const rewriteBodyRes: RewriteResponseCase<AlertInstanceSummary> = ({
-  alertTypeId,
+
+const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
+  ruleTypeId,
   muteAll,
   statusStartDate,
   statusEndDate,
   errorMessages,
   lastRun,
-  instances: alerts,
+  executionDuration: { valuesWithTimestamp, ...executionDuration },
   ...rest
 }) => ({
   ...rest,
-  alerts,
-  rule_type_id: alertTypeId,
+  rule_type_id: ruleTypeId,
   mute_all: muteAll,
   status_start_date: statusStartDate,
   status_end_date: statusEndDate,
   error_messages: errorMessages,
   last_run: lastRun,
+  execution_duration: {
+    ...executionDuration,
+    values_with_timestamp: valuesWithTimestamp,
+  },
 });
 
 export const getRuleAlertSummaryRoute = (
@@ -67,7 +74,7 @@ export const getRuleAlertSummaryRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
-        const summary = await rulesClient.getAlertInstanceSummary(rewriteReq({ id, ...req.query }));
+        const summary = await rulesClient.getAlertSummary(rewriteReq({ id, ...req.query }));
         return res.ok({ body: rewriteBodyRes(summary) });
       })
     )

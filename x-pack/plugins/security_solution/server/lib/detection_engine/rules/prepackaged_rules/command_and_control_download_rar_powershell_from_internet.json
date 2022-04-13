@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Detects a Roshal Archive (RAR) file or PowerShell script downloaded from the internet by an internal host. Gaining initial access to a system and then downloading encoded or encrypted tools to move laterally is a common practice for adversaries as a way to protect their more valuable tools and TTPs (tactics, techniques, and procedures). This may be atypical behavior for a managed network and can be indicative of malware, exfiltration, or command and control.",
+  "description": "Detects a Roshal Archive (RAR) file or PowerShell script downloaded from the internet by an internal host. Gaining initial access to a system and then downloading encoded or encrypted tools to move laterally is a common practice for adversaries as a way to protect their more valuable tools and tactics, techniques, and procedures (TTPs). This may be atypical behavior for a managed network and can be indicative of malware, exfiltration, or command and control.",
   "false_positives": [
     "Downloading RAR or PowerShell files from the Internet may be expected for certain systems. This rule should be tailored to either exclude systems as sources or destinations in which this behavior is expected."
   ],
@@ -13,7 +13,7 @@
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "lucene",
+  "language": "kuery",
   "license": "Elastic License v2",
   "name": "Roshal Archive (RAR) or PowerShell File Downloaded from the Internet",
   "note": "## Threat intel\n\nThis activity has been observed in FIN7 campaigns.",
@@ -52,5 +52,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 9
 }

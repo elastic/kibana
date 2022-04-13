@@ -1,6 +1,6 @@
 {
   "baseUrl": "http://localhost:5601",
-  "defaultCommandTimeout": 60000,
+  "defaultCommandTimeout": 120000,
   "execTimeout": 120000,
   "pageLoadTimeout": 120000,
   "nodeVersion": "system",
@@ -11,6 +11,11 @@
   "trashAssetsBeforeRuns": false,
   "video": false,
   "videosFolder": "../../../target/kibana-security-solution/cypress/videos",
-  "viewportHeight": 900,
-  "viewportWidth": 1440
+  "viewportHeight": 946,
+  "viewportWidth": 1680,
+  "env": {
+    "protocol": "http",
+    "hostname": "localhost",
+    "configport": "5601"
+  }
 }

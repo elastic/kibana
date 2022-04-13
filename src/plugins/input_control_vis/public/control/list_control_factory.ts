@@ -9,11 +9,11 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
-  IndexPatternField,
   TimefilterContract,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
+import { DataViewField } from '../../../data_views/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
@@ -26,7 +26,7 @@ function getEscapedQuery(query = '') {
 }
 
 interface TermsAggArgs {
-  field?: IndexPatternField;
+  field?: DataViewField;
   size: number | null;
   direction: string;
   query?: string;
@@ -127,7 +127,7 @@ export class ListControl extends Control<PhraseFilterManager> {
 
     const fieldName = this.filterManager.fieldName;
     const settings = await this.getSettings();
-    const initialSearchSourceState: SearchSourceFields = {
+    const initialSearchSourceState: SerializedSearchSourceFields = {
       timeout: `${settings.autocompleteTimeout}ms`,
       terminate_after: Number(settings.autocompleteTerminateAfter),
     };

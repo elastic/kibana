@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '../../../../../../src/plugins/data/common';
+import { FilterStateStore } from '@kbn/es-query';
 
 import {
   TimelineId,
@@ -1955,6 +1955,7 @@ export const mockTimelineModel: TimelineModel = {
   columns: mockTimelineModelColumns,
   defaultColumns: mockTimelineModelColumns,
   dataProviders: [],
+  dataViewId: null,
   dateRange: {
     end: '2020-03-18T13:52:38.929Z',
     start: '2020-03-18T13:46:38.929Z',
@@ -2010,6 +2011,7 @@ export const mockTimelineModel: TimelineModel = {
   savedObjectId: 'ef579e40-jibber-jabber',
   selectAll: false,
   selectedEventIds: {},
+  sessionViewConfig: null,
   show: false,
   showCheckboxes: false,
   sort: [
@@ -2091,6 +2093,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
         queryMatch: { field: '_id', operator: ':', value: '1' },
       },
     ],
+    dataViewId: null,
     dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
@@ -2130,6 +2133,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     savedObjectId: null,
     selectAll: false,
     selectedEventIds: {},
+    sessionViewConfig: null,
     show: false,
     showCheckboxes: false,
     sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],

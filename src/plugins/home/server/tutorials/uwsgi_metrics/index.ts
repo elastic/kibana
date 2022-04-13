@@ -23,16 +23,16 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
   return {
     id: 'uwsgiMetrics',
     name: i18n.translate('home.tutorials.uwsgiMetrics.nameTitle', {
-      defaultMessage: 'uWSGI metrics',
+      defaultMessage: 'uWSGI Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uwsgiMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the uWSGI server.',
+      defaultMessage: 'Collect metrics from uWSGI servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.uwsgiMetrics.longDescription', {
       defaultMessage:
-        'The `uwsgi` Metricbeat module fetches internal metrics from the uWSGI server. \
+        'The `uwsgi` Metricbeat module fetches metrics from uWSGI server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-uwsgi.html',
@@ -57,8 +57,8 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/uwsgi_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['web', 'security'],
   };
 }

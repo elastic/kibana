@@ -6,7 +6,7 @@
  */
 
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../common/constants';
-import { esFilters } from '../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { MapsAppLocatorDefinition } from './locators';
 import { SerializableRecord } from '@kbn/utility-types';
 import { LayerDescriptor } from '../common/descriptor_types';
@@ -52,7 +52,7 @@ describe('visualize url generator', () => {
       {
         id: LAYER_ID,
         visible: true,
-        type: LAYER_TYPE.VECTOR,
+        type: LAYER_TYPE.GEOJSON_VECTOR,
         sourceDescriptor: {
           id: LAYER_ID,
           type: SOURCE_TYPES.ES_SEARCH,
@@ -70,7 +70,7 @@ describe('visualize url generator', () => {
 
     expect(location).toMatchObject({
       app: 'maps',
-      path: `/map#/?_g=()&_a=()&initialLayers=(id%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CsourceDescriptor%3A(geoField%3Atest%2Cid%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CindexPatternId%3A'90943e30-9a47-11e8-b64d-95841ca0b247'%2Clabel%3A'Sample%20Data'%2CscalingType%3ALIMIT%2CtooltipProperties%3A!()%2Ctype%3AES_SEARCH)%2Ctype%3AVECTOR%2Cvisible%3A!t)`,
+      path: `/map#/?_g=()&_a=()&initialLayers=(id%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CsourceDescriptor%3A(geoField%3Atest%2Cid%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CindexPatternId%3A'90943e30-9a47-11e8-b64d-95841ca0b247'%2Clabel%3A'Sample%20Data'%2CscalingType%3ALIMIT%2CtooltipProperties%3A!()%2Ctype%3AES_SEARCH)%2Ctype%3AGEOJSON_VECTOR%2Cvisible%3A!t)`,
       state: {},
     });
   });
@@ -100,7 +100,7 @@ describe('visualize url generator', () => {
           },
           query: { query: 'q1' },
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
         },
       ],

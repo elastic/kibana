@@ -6,9 +6,13 @@
  */
 
 import { FormatFactory } from '../../common';
-import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
-import { Datatable, SerializedFieldFormat } from '../../../../../src/plugins/expressions/public';
-import type { IFieldFormat } from '../../../../../src/plugins/field_formats/common';
+import { AxisExtentConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { Datatable } from '../../../../../src/plugins/expressions/public';
+import type {
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '../../../../../src/plugins/field_formats/common';
+import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {
   layer: string;
@@ -30,7 +34,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string, Datatable>) {
+export function groupAxesByType(layers: XYDataLayerConfig[], tables?: Record<string, Datatable>) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -94,7 +98,7 @@ export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string,
 }
 
 export function getAxesConfiguration(
-  layers: XYLayerConfig[],
+  layers: XYDataLayerConfig[],
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
   formatFactory?: FormatFactory

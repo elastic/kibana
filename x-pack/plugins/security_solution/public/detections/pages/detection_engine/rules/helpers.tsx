@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
@@ -19,12 +19,12 @@ import {
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { Filter } from '@kbn/es-query';
 import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
@@ -174,6 +174,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     timestampOverride: timestampOverride ?? '',
     name,
     description,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     note: note!,
     references,
     severity: {

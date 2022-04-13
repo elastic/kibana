@@ -10,11 +10,12 @@
 ```typescript
 export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObject<T>, 'attributes' | 'references'> 
 ```
+<b>Extends:</b> Omit&lt;SavedObject&lt;T&gt;, 'attributes' \| 'references'&gt;
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [attributes](./kibana-plugin-core-server.savedobjectsupdateresponse.attributes.md) | <code>Partial&lt;T&gt;</code> |  |
-|  [references](./kibana-plugin-core-server.savedobjectsupdateresponse.references.md) | <code>SavedObjectReference[] &#124; undefined</code> |  |
+|  [attributes](./kibana-plugin-core-server.savedobjectsupdateresponse.attributes.md) | Partial&lt;T&gt; |  |
+|  [references](./kibana-plugin-core-server.savedobjectsupdateresponse.references.md) | SavedObjectReference\[\] \| undefined |  |
 

@@ -30,10 +30,11 @@ import {
   Pagination,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
@@ -92,18 +93,21 @@ const RootContainer = styled.div`
   }
 `;
 
-const DefaultNoItemsFound = memo(() => {
-  return (
-    <EuiEmptyPrompt
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.paginatedContent.noItemsFoundTitle"
-          defaultMessage="No items found"
-        />
-      }
-    />
-  );
-});
+const DefaultNoItemsFound = memo<{ 'data-test-subj'?: string }>(
+  ({ 'data-test-subj': dataTestSubj }) => {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj={dataTestSubj}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.paginatedContent.noItemsFoundTitle"
+            defaultMessage="No items found"
+          />
+        }
+      />
+    );
+  }
+);
 
 DefaultNoItemsFound.displayName = 'DefaultNoItemsFound';
 
@@ -164,14 +168,26 @@ export const PaginatedContent = memo(
 
     const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
       (pageSize) => {
-        onChange({ pageSize, pageIndex: pagination?.pageIndex || 0 });
+        if (pagination?.pageIndex) {
+          const pageIndex = Math.floor(
+            ((pagination?.pageIndex ?? MANAGEMENT_DEFAULT_PAGE) *
+              (pagination?.pageSize ?? MANAGEMENT_DEFAULT_PAGE_SIZE)) /
+              pageSize
+          );
+          onChange({
+            pageSize,
+            pageIndex: isNaN(pageIndex) ? MANAGEMENT_DEFAULT_PAGE : pageIndex,
+          });
+        } else {
+          onChange({ pageSize, pageIndex: MANAGEMENT_DEFAULT_PAGE });
+        }
       },
-      [onChange, pagination?.pageIndex]
+      [onChange, pagination]
     );
 
     const handlePageChange: EuiTablePaginationProps['onChangePage'] = useCallback(
       (pageIndex) => {
-        onChange({ pageIndex, pageSize: pagination?.pageSize || 10 });
+        onChange({ pageIndex, pageSize: pagination?.pageSize || MANAGEMENT_DEFAULT_PAGE_SIZE });
       },
       [onChange, pagination?.pageSize]
     );
@@ -203,6 +219,7 @@ export const PaginatedContent = memo(
             key = item[itemId] as unknown as Key;
           } else {
             if (itemKeys.has(item)) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               key = itemKeys.get(item)!;
             } else {
               key = generateUUI();
@@ -213,7 +230,8 @@ export const PaginatedContent = memo(
           return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
-      if (!loading) return noItemsMessage || <DefaultNoItemsFound />;
+      if (!loading)
+        return noItemsMessage || <DefaultNoItemsFound data-test-subj={getTestId('noResults')} />;
     }, [
       ItemComponent,
       error,
@@ -252,7 +270,7 @@ export const PaginatedContent = memo(
               itemsPerPage={pagination.pageSize}
               itemsPerPageOptions={pagination.pageSizeOptions}
               pageCount={pageCount}
-              hidePerPageOptions={pagination.hidePerPageOptions}
+              showPerPageOptions={pagination.showPerPageOptions}
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={handlePageChange}
             />

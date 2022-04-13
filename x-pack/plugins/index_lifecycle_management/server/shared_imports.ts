@@ -6,4 +6,4 @@
  */
 
 export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
-export { ILicense, LicenseType } from '../../licensing/common/types';
+export type { ILicense, LicenseType } from '../../licensing/common/types';

@@ -8,11 +8,10 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
-  EuiButton,
   EuiBottomBar,
   EuiCallOut,
   EuiFlexGroup,
@@ -41,11 +40,14 @@ import {
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
-  sendUpgradePackagePolicy,
   sendUpgradePackagePolicyDryRun,
+  useAuthz,
 } from '../../../hooks';
-import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
-import { Loading, Error, ExtensionWrapper } from '../../../components';
+import {
+  useBreadcrumbs as useIntegrationsBreadcrumbs,
+  useGetOnePackagePolicy,
+} from '../../../../integrations/hooks';
+import { Loading, Error, ExtensionWrapper, EuiButtonWithTooltip } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
 import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
@@ -61,21 +63,39 @@ import type {
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
+import { pkgKeyFromPackageInfo } from '../../../services';
+
+import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
     params: { packagePolicyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
-  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} />;
+  const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
+
+  const extensionView = useUIExtension(
+    packagePolicy.data?.item?.package?.name ?? '',
+    'package-policy-edit'
+  );
+
+  return (
+    <EditPackagePolicyForm
+      packagePolicyId={packagePolicyId}
+      // If an extension opts in to this `useLatestPackageVersion` flag, we want to display
+      // the edit form in an "upgrade" state regardless of whether the user intended to
+      // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
+      // set to use the latest version of the package, not its current version.
+      forceUpgrade={extensionView?.useLatestPackageVersion}
+    />
+  );
 });
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
-  isUpgrade?: boolean;
+  forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
-}>(({ packagePolicyId, isUpgrade = false, from = 'edit' }) => {
+}>(({ packagePolicyId, forceUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -100,6 +120,16 @@ export const EditPackagePolicyForm = memo<{
   const [originalPackagePolicy, setOriginalPackagePolicy] =
     useState<GetOnePackagePolicyResponse['item']>();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
+
+  const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
+
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+
+  useEffect(() => {
+    if (forceUpgrade) {
+      setIsUpgrade(true);
+    }
+  }, [forceUpgrade]);
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -128,11 +158,24 @@ export const EditPackagePolicyForm = memo<{
           setAgentPolicy(agentPolicyData.item);
         }
 
-        const { data: upgradePackagePolicyDryRunData } = await sendUpgradePackagePolicyDryRun([
-          packagePolicyId,
-        ]);
+        const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
+          await sendUpgradePackagePolicyDryRun([packagePolicyId]);
 
-        if (upgradePackagePolicyDryRunData) {
+        if (upgradePackagePolicyDryRunError) {
+          throw upgradePackagePolicyDryRunError;
+        }
+
+        const hasUpgrade = upgradePackagePolicyDryRunData
+          ? hasUpgradeAvailable(upgradePackagePolicyDryRunData)
+          : false;
+
+        // If the dry run data doesn't indicate a difference in version numbers, flip the form back
+        // to its non-upgrade state, even if we were initially set to the upgrade view
+        if (!hasUpgrade) {
+          setIsUpgrade(false);
+        }
+
+        if (upgradePackagePolicyDryRunData && hasUpgrade) {
           setDryRunData(upgradePackagePolicyDryRunData);
         }
 
@@ -169,7 +212,28 @@ export const EditPackagePolicyForm = memo<{
             ...restOfPackagePolicy,
             inputs: baseInputs.map((input: any) => {
               // Remove `compiled_input` from all input info, we assign this after saving
-              const { streams, compiled_input: compiledInput, ...restOfInput } = input;
+              const { streams, compiled_input: compiledInput, vars, ...restOfInput } = input;
+              let basePolicyInputVars: any =
+                isUpgrade &&
+                basePolicy.inputs.find(
+                  (i) => i.type === input.type && i.policy_template === input.policy_template
+                )?.vars;
+              let newVars = vars;
+              if (basePolicyInputVars && vars) {
+                // merging vars from dry run with updated ones
+                basePolicyInputVars = Object.keys(vars).reduce(
+                  (acc, curr) => ({ ...acc, [curr]: basePolicyInputVars[curr] }),
+                  {}
+                );
+                newVars = {
+                  ...vars,
+                  ...basePolicyInputVars,
+                };
+              }
+              // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
+              if (basePackage.name === 'apm') {
+                newVars = fixApmDurationVars(newVars);
+              }
               return {
                 ...restOfInput,
                 streams: streams.map((stream: any) => {
@@ -177,6 +241,7 @@ export const EditPackagePolicyForm = memo<{
                   const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),
+                vars: newVars,
               };
             }),
             package: basePackage,
@@ -195,15 +260,25 @@ export const EditPackagePolicyForm = memo<{
             }
 
             const { data: packageData } = await sendGetPackageInfoByKey(
-              pkgKeyFromPackageInfo(_packageInfo!)
+              _packageInfo!.name,
+              _packageInfo!.version
             );
 
-            if (packageData?.response) {
-              setPackageInfo(packageData.response);
-              setValidationResults(
-                validatePackagePolicy(newPackagePolicy, packageData.response, safeLoad)
+            if (packageData?.item) {
+              setPackageInfo(packageData.item);
+
+              const newValidationResults = validatePackagePolicy(
+                newPackagePolicy,
+                packageData.item,
+                safeLoad
               );
-              setFormState('VALID');
+              setValidationResults(newValidationResults);
+
+              if (validationHasErrors(newValidationResults)) {
+                setFormState('INVALID');
+              } else {
+                setFormState('VALID');
+              }
             }
           }
         }
@@ -256,6 +331,7 @@ export const EditPackagePolicyForm = memo<{
   // Update package policy method
   const updatePackagePolicy = useCallback(
     (updatedFields: Partial<UpdatePackagePolicy>) => {
+      setIsEdited(true);
       const newPackagePolicy = {
         ...packagePolicy,
         ...updatedFields,
@@ -270,6 +346,8 @@ export const EditPackagePolicyForm = memo<{
         : false;
       if (!hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
@@ -316,10 +394,12 @@ export const EditPackagePolicyForm = memo<{
   }, [from, getHref, packageInfo, policyId]);
 
   // Save package policy
+  const [isEdited, setIsEdited] = useState(false);
   const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
   const savePackagePolicy = async () => {
     setFormState('LOADING');
-    const result = await sendUpdatePackagePolicy(packagePolicyId, packagePolicy);
+    const { elasticsearch, ...restPackagePolicy } = packagePolicy; // ignore 'elasticsearch' property since it fails route validation
+    const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
     setFormState('SUBMITTED');
     return result;
   };
@@ -336,29 +416,6 @@ export const EditPackagePolicyForm = memo<{
 
     const { error } = await savePackagePolicy();
     if (!error) {
-      if (isUpgrade) {
-        const { error: upgradeError } = await sendUpgradePackagePolicy([packagePolicyId]);
-
-        if (upgradeError) {
-          notifications.toasts.addError(upgradeError, {
-            title: i18n.translate('xpack.fleet.upgradePackagePolicy.failedNotificationTitle', {
-              defaultMessage: 'Error upgrading {packagePolicyName}',
-              values: {
-                packagePolicyName: packagePolicy.name,
-              },
-            }),
-            toastMessage: i18n.translate(
-              'xpack.fleet.editPackagePolicy.failedConflictNotificationMessage',
-              {
-                defaultMessage: `Data is out of date. Refresh the page to get the latest policy.`,
-              }
-            ),
-          });
-
-          return;
-        }
-      }
-
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
@@ -417,7 +474,7 @@ export const EditPackagePolicyForm = memo<{
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
-    from,
+    from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
     cancelUrl,
     agentPolicy,
     packageInfo,
@@ -455,6 +512,7 @@ export const EditPackagePolicyForm = memo<{
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}
               submitAttempted={formState === 'INVALID'}
+              isUpdate={true}
             />
           )}
 
@@ -575,20 +633,44 @@ export const EditPackagePolicyForm = memo<{
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButton
+                      <EuiButtonWithTooltip
                         onClick={onSubmit}
                         isLoading={formState === 'LOADING'}
-                        disabled={formState !== 'VALID'}
+                        // Allow to save only if the package policy is upgraded or had been edited
+                        isDisabled={
+                          !canWriteIntegrationPolicies ||
+                          formState !== 'VALID' ||
+                          (!isEdited && !isUpgrade)
+                        }
+                        tooltip={
+                          !canWriteIntegrationPolicies
+                            ? {
+                                content: (
+                                  <FormattedMessage
+                                    id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                  />
+                                ),
+                              }
+                            : undefined
+                        }
                         iconType="save"
                         color="primary"
                         fill
                         data-test-subj="saveIntegration"
                       >
-                        <FormattedMessage
-                          id="xpack.fleet.editPackagePolicy.saveButton"
-                          defaultMessage="Save integration"
-                        />
-                      </EuiButton>
+                        {isUpgrade ? (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.upgradeButton"
+                            defaultMessage="Upgrade integration"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.saveButton"
+                            defaultMessage="Save integration"
+                          />
+                        )}
+                      </EuiButtonWithTooltip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -611,13 +693,17 @@ const Breadcrumb = memo<{
 }>(({ agentPolicyName, from, packagePolicyName, pkgkey, pkgTitle, policyId }) => {
   let breadcrumb = <PoliciesBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
 
-  if (
-    from === 'package' ||
-    from === 'package-edit' ||
-    from === 'upgrade-from-integrations-policy-list'
-  ) {
+  if (from === 'package' || from === 'package-edit') {
     breadcrumb = (
       <IntegrationsBreadcrumb pkgkey={pkgkey} pkgTitle={pkgTitle} policyName={packagePolicyName} />
+    );
+  } else if (from === 'upgrade-from-integrations-policy-list') {
+    breadcrumb = (
+      <IntegrationsUpgradeBreadcrumb
+        pkgkey={pkgkey}
+        pkgTitle={pkgTitle}
+        policyName={packagePolicyName}
+      />
     );
   } else if (from === 'upgrade-from-fleet-policy-list') {
     breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
@@ -643,6 +729,15 @@ const PoliciesBreadcrumb: React.FunctionComponent<{
   return null;
 };
 
+const IntegrationsUpgradeBreadcrumb = memo<{
+  pkgTitle: string;
+  policyName: string;
+  pkgkey: string;
+}>(({ pkgTitle, policyName, pkgkey }) => {
+  useIntegrationsBreadcrumbs('integration_policy_upgrade', { policyName, pkgTitle, pkgkey });
+  return null;
+});
+
 const UpgradeBreadcrumb: React.FunctionComponent<{
   policyName: string;
   policyId: string;
@@ -650,6 +745,12 @@ const UpgradeBreadcrumb: React.FunctionComponent<{
   useBreadcrumbs('upgrade_package_policy', { policyName, policyId });
   return null;
 };
+
+const FlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+  }
+`;
 
 const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
@@ -664,12 +765,6 @@ const UpgradeStatusCallout: React.FunctionComponent<{
 
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
 
-  const FlyoutBody = styled(EuiFlyoutBody)`
-    .euiFlyoutBody__overflowContent {
-      padding: 0;
-    }
-  `;
-
   return (
     <>
       {isPreviousVersionFlyoutOpen && currentPackagePolicy && (
@@ -680,7 +775,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
                 <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">
                   <FormattedMessage
                     id="xpack.fleet.upgradePackagePolicy.previousVersionFlyout.title"
-                    defaultMessage="'{name}' package policy"
+                    defaultMessage="'{name}' integration policy"
                     values={{ name: currentPackagePolicy?.name }}
                   />
                 </h2>
@@ -688,11 +783,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
             </EuiFlyoutHeader>
             <FlyoutBody>
               <EuiCodeBlock isCopyable fontSize="m" whiteSpace="pre">
-                {JSON.stringify(
-                  storedPackagePoliciesToAgentInputs([currentPackagePolicy]),
-                  null,
-                  2
-                )}
+                {JSON.stringify(dryRunData[0].agent_diff?.[0] || [], null, 2)}
               </EuiCodeBlock>
             </FlyoutBody>
           </EuiFlyout>

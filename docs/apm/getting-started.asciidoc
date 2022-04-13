@@ -41,7 +41,7 @@ Notice something awry? Select a service or trace and dive deeper with:
 * <<metrics>>
 
 TIP: Want to learn more about the Elastic APM ecosystem?
-See the {apm-get-started-ref}/overview.html[APM Overview].
+See the {apm-guide-ref}/apm-overview.html[APM Overview].
 
 include::services.asciidoc[]
 

@@ -8,11 +8,12 @@
 import { PluginStartContract as TriggersActionsUiStartContract } from '../../triggers_actions_ui/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 
-export {
+export type {
   PluginSetupContract as AlertingSetup,
-  AlertType,
+  RuleType,
   RuleParamsAndRefs,
-  AlertExecutorOptions,
+  RuleExecutorOptions,
+  RuleTypeParams,
 } from '../../alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 

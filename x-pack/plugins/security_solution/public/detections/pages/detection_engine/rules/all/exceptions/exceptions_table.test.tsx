@@ -11,12 +11,14 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockHistory } from '../../../../../../common/utils/route/index.test';
 import { getExceptionListSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import { useUserData } from '../../../../../components/user_info';
 
 import { ExceptionListsTable } from './exceptions_table';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
 
+jest.mock('../../../../../components/user_info');
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('./use_all_exception_lists');
 jest.mock('@kbn/securitysolution-list-hooks');
@@ -27,8 +29,8 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
   return {
@@ -39,15 +41,6 @@ jest.mock('@kbn/i18n/react', () => {
 
 jest.mock('../../../../../containers/detection_engine/lists/use_lists_config', () => ({
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
-}));
-
-jest.mock('../../../../../components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([
-    {
-      loading: false,
-      canUserCRUD: false,
-    },
-  ]),
 }));
 
 describe('ExceptionListsTable', () => {
@@ -86,9 +79,17 @@ describe('ExceptionListsTable', () => {
         endpoint_list: exceptionList1,
       },
     ]);
+
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        loading: false,
+        canUserCRUD: false,
+        canUserREAD: false,
+      },
+    ]);
   });
 
-  it('renders delete option disabled if list is "endpoint_list"', async () => {
+  it('does not render delete option if list is "endpoint_list"', async () => {
     const wrapper = mount(
       <TestProviders>
         <ExceptionListsTable />
@@ -97,15 +98,34 @@ describe('ExceptionListsTable', () => {
     expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(0).text()).toEqual(
       'endpoint_list'
     );
-    expect(
-      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
-    ).toBeTruthy();
 
     expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(1).text()).toEqual(
       'not_endpoint_list'
     );
+    expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(1);
     expect(
-      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(1).prop('disabled')
+      wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button').at(0).prop('disabled')
     ).toBeFalsy();
+  });
+
+  it('does not render delete option if user is read only', async () => {
+    (useUserData as jest.Mock).mockReturnValue([
+      {
+        loading: false,
+        canUserCRUD: false,
+        canUserREAD: true,
+      },
+    ]);
+
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionListsTable />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionsTableListId"]').at(1).text()).toEqual(
+      'not_endpoint_list'
+    );
+    expect(wrapper.find('[data-test-subj="exceptionsTableDeleteButton"] button')).toHaveLength(0);
   });
 });

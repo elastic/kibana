@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import '../../../../../__mocks__/shallow_useeffect.mock';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { fullContentSources } from '../../../../__mocks__/content_sources.mock';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -12,9 +16,24 @@ import moment from 'moment';
 
 import { EuiFieldNumber } from '@elastic/eui';
 
+import { SyncJobType } from '../../../../types';
+
 import { FrequencyItem } from './frequency_item';
 
 describe('FrequencyItem', () => {
+  const setSyncFrequency = jest.fn();
+  const mockActions = {
+    setSyncFrequency,
+  };
+  const mockValues = {
+    contentSource: fullContentSources[0],
+  };
+
+  beforeEach(() => {
+    setMockActions(mockActions);
+    setMockValues(mockValues);
+  });
+
   const estimate = {
     duration: 'PT3D',
     nextStart: '2021-09-27T21:39:24+00:00',
@@ -22,6 +41,7 @@ describe('FrequencyItem', () => {
   };
 
   const props = {
+    type: 'full' as SyncJobType,
     label: 'Item',
     description: 'My item',
     duration: 'PT2D',
@@ -72,5 +92,40 @@ describe('FrequencyItem', () => {
         (wrapper.find('[data-test-subj="nextStartSummary"]').prop('values') as any)!.nextStartTime
       ).toEqual('in 2 days');
     });
+  });
+
+  describe('onChange handlers', () => {
+    it('calls setSyncFrequency for "days"', () => {
+      const wrapper = shallow(<FrequencyItem {...props} />);
+      wrapper
+        .find('[data-test-subj="durationDays"]')
+        .simulate('change', { target: { value: '3' } });
+
+      expect(setSyncFrequency).toHaveBeenCalledWith('full', '3', 'days');
+    });
+
+    it('calls setSyncFrequency for "hours"', () => {
+      const wrapper = shallow(<FrequencyItem {...props} />);
+      wrapper
+        .find('[data-test-subj="durationHours"]')
+        .simulate('change', { target: { value: '3' } });
+
+      expect(setSyncFrequency).toHaveBeenCalledWith('full', '3', 'hours');
+    });
+
+    it('calls setSyncFrequency for "minutes"', () => {
+      const wrapper = shallow(<FrequencyItem {...props} />);
+      wrapper
+        .find('[data-test-subj="durationMinutes"]')
+        .simulate('change', { target: { value: '3' } });
+
+      expect(setSyncFrequency).toHaveBeenCalledWith('full', '3', 'minutes');
+    });
+  });
+
+  it('handles edge case where estimate is empty', () => {
+    const wrapper = shallow(<FrequencyItem {...props} estimate={{}} />);
+
+    expect(wrapper.find('[data-test-subj="SyncEstimates"]')).toHaveLength(0);
   });
 });

@@ -19,7 +19,7 @@ import { APPLIES_TO } from '../../../../../common/constants/detector_rule';
 import { formatValue } from '../../../formatters/format_value';
 import { getAppliesToValueFromAnomaly } from '../utils';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class EditConditionLink extends Component {
   static propTypes = {

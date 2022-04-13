@@ -7,4 +7,5 @@
 
 export { getIndexPattern } from './get_index_pattern';
 export { explorerReducer } from './reducer';
-export { getExplorerDefaultState, ExplorerState } from './state';
+export type { ExplorerState } from './state';
+export { getExplorerDefaultState } from './state';

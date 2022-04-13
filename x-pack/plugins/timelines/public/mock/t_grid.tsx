@@ -8,10 +8,10 @@
 import React from 'react';
 import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
-import { mockBrowserFields, mockDocValueFields } from './browser_fields';
+import { mockBrowserFields, mockDocValueFields, mockRuntimeMappings } from './browser_fields';
 import { mockDataProviders } from './mock_data_providers';
 import { mockTimelineData } from './mock_timeline_data';
-import { ColumnHeaderOptions, TimelineId } from '../../common';
+import { ColumnHeaderOptions, TimelineId } from '../../common/types';
 import { mockIndexNames, mockIndexPattern } from './index_pattern';
 import { EventRenderedViewProps } from '../components/t_grid/event_rendered_view';
 
@@ -88,10 +88,13 @@ const columnHeaders: ColumnHeaderOptions[] = [
 
 export const tGridIntegratedProps: TGridIntegratedProps = {
   additionalFilters: null,
+  appId: '',
   browserFields: mockBrowserFields,
   columns: columnHeaders,
   dataProviders: mockDataProviders,
+  dataViewId: 'data-view-id',
   deletedEventIds: [],
+  disabledCellActions: [],
   docValueFields: mockDocValueFields,
   end: '2021-08-19T00:30:00.000Z',
   entityType: 'alerts',
@@ -114,6 +117,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   },
   renderCellValue: () => null,
   rowRenderers: [],
+  runtimeMappings: mockRuntimeMappings,
   setQuery: () => null,
   sort: [
     {
@@ -129,6 +133,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
 
 export const eventRenderedProps: EventRenderedViewProps = {
   alertToolbar: <></>,
+  appId: '',
   browserFields: mockBrowserFields,
   events: mockTimelineData,
   leadingControlColumns: [],

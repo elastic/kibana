@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
@@ -20,13 +20,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('full screen mode', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('option not available in edit mode', async () => {
@@ -92,6 +99,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isChromeVisible).to.be(true);
       });
       await filterBar.removeFilter('bytes');
+    });
+
+    it('exits full screen mode when back button pressed', async () => {
+      await PageObjects.dashboard.clickFullScreenMode();
+      await browser.goBack();
+      await retry.try(async () => {
+        const isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+      });
+
+      await browser.goForward();
+      await retry.try(async () => {
+        const isChromeVisible = await PageObjects.common.isChromeVisible();
+        expect(isChromeVisible).to.be(true);
+      });
     });
   });
 }

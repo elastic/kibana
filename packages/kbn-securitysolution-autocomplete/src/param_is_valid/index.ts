@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import dateMath from '@kbn/datemath';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { checkEmptyValue } from '../check_empty_value';
 
 import * as i18n from '../translations';
@@ -22,7 +22,7 @@ import * as i18n from '../translations';
  */
 export const paramIsValid = (
   param: string | undefined,
-  field: IndexPatternFieldBase | undefined,
+  field: DataViewFieldBase | undefined,
   isRequired: boolean,
   touched: boolean
 ): string | undefined => {

@@ -27,7 +27,7 @@ import {
 import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { IVectorSource } from '../../sources/vector_source';
-import { VectorLayer } from './vector_layer';
+import { AbstractVectorLayer } from './vector_layer';
 
 class MockSource {
   cloneDescriptor() {
@@ -64,7 +64,7 @@ describe('cloneDescriptor', () => {
     };
 
     test('Should update data driven styling properties using join fields', async () => {
-      const layerDescriptor = VectorLayer.createDescriptor({
+      const layerDescriptor = AbstractVectorLayer.createDescriptor({
         style: styleDescriptor,
         joins: [
           {
@@ -83,9 +83,10 @@ describe('cloneDescriptor', () => {
           },
         ],
       });
-      const layer = new VectorLayer({
+      const layer = new AbstractVectorLayer({
         layerDescriptor,
         source: new MockSource() as unknown as IVectorSource,
+        customIcons: [],
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
@@ -105,7 +106,7 @@ describe('cloneDescriptor', () => {
     });
 
     test('Should update data driven styling properties using join fields when metrics are not provided', async () => {
-      const layerDescriptor = VectorLayer.createDescriptor({
+      const layerDescriptor = AbstractVectorLayer.createDescriptor({
         style: styleDescriptor,
         joins: [
           {
@@ -120,9 +121,10 @@ describe('cloneDescriptor', () => {
           },
         ],
       });
-      const layer = new VectorLayer({
+      const layer = new AbstractVectorLayer({
         layerDescriptor,
         source: new MockSource() as unknown as IVectorSource,
+        customIcons: [],
       });
       const clonedDescriptor = await layer.cloneDescriptor();
       const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;

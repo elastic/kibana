@@ -7,20 +7,21 @@
         "node_modules/@kbn/*",
         "bazel-out/darwin-fastbuild/bin/packages/kbn-*",
         "bazel-out/k8-fastbuild/bin/packages/kbn-*",
-        "bazel-out/x64_windows-fastbuild/bin/packages/kbn-*",
+        "bazel-out/x64_windows-fastbuild/bin/packages/kbn-*"
       ],
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "@emotion/core": [
-        "typings/@emotion"
-      ],
+      "@emotion/core": ["typings/@emotion"],
+      "resize-observer-polyfill": ["typings/resize-observer-polyfill"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
     // Enables all strict type checking options.
     "strict": true,
+    // for now, don't use unknown in catch
+    "useUnknownInCatchVariables": false,
     // All TS projects should be composite and only include the files they select, and ref the files outside of the project
     "composite": true,
     // save information about the project graph on disk
@@ -31,7 +32,8 @@
     "lib": [
       "esnext",
       // includes support for browser APIs
-      "dom"
+      "dom",
+      "DOM.Iterable"
     ],
     // Node 8 should support everything output by esnext, we override this
     // in webpack with loader-level compiler options
@@ -67,8 +69,9 @@
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom",
-      "resize-observer-polyfill",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
     ]
   }
 }

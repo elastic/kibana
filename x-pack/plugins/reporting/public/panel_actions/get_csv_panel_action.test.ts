@@ -10,25 +10,33 @@ import { first } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
 import type { SearchSource } from 'src/plugins/data/common';
 import type { SavedSearch } from 'src/plugins/discover/public';
+import { LicenseCheckState } from '../../../licensing/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import type { ILicense, LicensingPluginSetup } from '../../../licensing/public';
+import { licensingMock } from '../../../licensing/public/mocks';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
 import type { ActionContext } from './get_csv_panel_action';
 import { ReportingCsvPanelAction } from './get_csv_panel_action';
-
-type LicenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
 
 const core = coreMock.createSetup();
 let apiClient: ReportingAPIClient;
 
 describe('GetCsvReportPanelAction', () => {
   let context: ActionContext;
-  let mockLicense$: (state?: LicenseResults) => Rx.Observable<ILicense>;
+  let mockLicenseState: LicenseCheckState;
   let mockSearchSource: SearchSource;
   let mockStartServicesPayload: [CoreStart, ReportingPublicPluginStartDendencies, unknown];
   let mockStartServices$: Rx.Observable<typeof mockStartServicesPayload>;
+
+  const mockLicense$ = () => {
+    const license = licensingMock.createLicense();
+    license.check = jest.fn(() => ({
+      message: `check-foo state: ${mockLicenseState}`,
+      state: mockLicenseState,
+    }));
+    return new Rx.BehaviorSubject(license);
+  };
 
   beforeAll(() => {
     if (typeof window.URL.revokeObjectURL === 'undefined') {
@@ -38,17 +46,15 @@ describe('GetCsvReportPanelAction', () => {
         value: () => {},
       });
     }
+
+    core.http.post.mockResolvedValue({});
   });
 
   beforeEach(() => {
     apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
     jest.spyOn(apiClient, 'createImmediateReport');
 
-    mockLicense$ = (state: LicenseResults = 'valid') => {
-      return Rx.of({
-        check: jest.fn().mockImplementation(() => ({ state })),
-      }) as unknown as LicensingPluginSetup['license$'];
-    };
+    mockLicenseState = 'valid';
 
     mockStartServicesPayload = [
       {
@@ -57,7 +63,8 @@ describe('GetCsvReportPanelAction', () => {
       } as unknown as CoreStart,
       {
         data: dataPluginMock.createStartContract(),
-      } as ReportingPublicPluginStartDendencies,
+        licensing: { ...licensingMock.createStart(), license$: mockLicense$() },
+      } as unknown as ReportingPublicPluginStartDendencies,
       null,
     ];
     mockStartServices$ = Rx.from(Promise.resolve(mockStartServicesPayload));
@@ -93,7 +100,6 @@ describe('GetCsvReportPanelAction', () => {
     const panel = new ReportingCsvPanelAction({
       core,
       apiClient,
-      license$: mockLicense$(),
       startServices$: mockStartServices$,
       usesUiCapabilities: true,
     });
@@ -107,7 +113,7 @@ describe('GetCsvReportPanelAction', () => {
       columns: [],
       objectType: 'downloadCsv',
       searchSource: {},
-      title: undefined,
+      title: '',
       version: '7.15.0',
     });
   });
@@ -130,7 +136,6 @@ describe('GetCsvReportPanelAction', () => {
     const panel = new ReportingCsvPanelAction({
       core,
       apiClient,
-      license$: mockLicense$(),
       startServices$: mockStartServices$,
       usesUiCapabilities: true,
     });
@@ -144,7 +149,7 @@ describe('GetCsvReportPanelAction', () => {
       columns: ['column_a', 'column_b'],
       objectType: 'downloadCsv',
       searchSource: { testData: 'testDataValue' },
-      title: undefined,
+      title: '',
       version: '7.15.0',
     });
   });
@@ -153,7 +158,6 @@ describe('GetCsvReportPanelAction', () => {
     const panel = new ReportingCsvPanelAction({
       core,
       apiClient,
-      license$: mockLicense$(),
       startServices$: mockStartServices$,
       usesUiCapabilities: true,
     });
@@ -169,7 +173,6 @@ describe('GetCsvReportPanelAction', () => {
     const panel = new ReportingCsvPanelAction({
       core,
       apiClient,
-      license$: mockLicense$(),
       startServices$: mockStartServices$,
       usesUiCapabilities: true,
     });
@@ -187,7 +190,6 @@ describe('GetCsvReportPanelAction', () => {
     const panel = new ReportingCsvPanelAction({
       core,
       apiClient,
-      license$: mockLicense$(),
       startServices$: mockStartServices$,
       usesUiCapabilities: true,
     });
@@ -200,18 +202,16 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   it(`doesn't allow downloads with bad licenses`, async () => {
-    const licenseMock$ = mockLicense$('invalid');
+    mockLicenseState = 'invalid';
+
     const plugin = new ReportingCsvPanelAction({
       core,
       apiClient,
-      license$: licenseMock$,
       startServices$: mockStartServices$,
       usesUiCapabilities: true,
     });
 
     await mockStartServices$.pipe(first()).toPromise();
-    await licenseMock$.pipe(first()).toPromise();
-
     expect(await plugin.isCompatible(context)).toEqual(false);
   });
 
@@ -219,7 +219,6 @@ describe('GetCsvReportPanelAction', () => {
     const panel = new ReportingCsvPanelAction({
       core,
       apiClient,
-      license$: mockLicense$(),
       startServices$: mockStartServices$,
       usesUiCapabilities: true,
     });
@@ -232,23 +231,15 @@ describe('GetCsvReportPanelAction', () => {
 
   describe('Application UI Capabilities', () => {
     it(`doesn't allow downloads when UI capability is not enabled`, async () => {
-      mockStartServicesPayload = [
-        { application: { capabilities: {} } } as unknown as CoreStart,
-        {
-          data: dataPluginMock.createStartContract(),
-        } as ReportingPublicPluginStartDendencies,
-        null,
-      ];
-      const startServices$ = Rx.from(Promise.resolve(mockStartServicesPayload));
+      mockStartServicesPayload[0].application = { capabilities: {} } as CoreStart['application'];
       const plugin = new ReportingCsvPanelAction({
         core,
         apiClient,
-        license$: mockLicense$(),
-        startServices$,
+        startServices$: mockStartServices$,
         usesUiCapabilities: true,
       });
 
-      await startServices$.pipe(first()).toPromise();
+      await mockStartServices$.pipe(first()).toPromise();
 
       expect(await plugin.isCompatible(context)).toEqual(false);
     });
@@ -257,7 +248,6 @@ describe('GetCsvReportPanelAction', () => {
       const plugin = new ReportingCsvPanelAction({
         core,
         apiClient,
-        license$: mockLicense$(),
         startServices$: mockStartServices$,
         usesUiCapabilities: true,
       });
@@ -271,7 +261,6 @@ describe('GetCsvReportPanelAction', () => {
       const plugin = new ReportingCsvPanelAction({
         core,
         apiClient,
-        license$: mockLicense$(),
         startServices$: mockStartServices$,
         usesUiCapabilities: false,
       });

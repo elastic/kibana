@@ -31,5 +31,13 @@ export const Example: Story<Args> = (args) => {
 };
 Example.args = {
   agentName: 'java',
+  query: {
+    environment: 'ENVIRONMENT_ALL',
+    kuery: '',
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+    serviceGroup: '',
+    comparisonEnabled: false,
+  },
   serviceName: 'opbeans-java',
 };

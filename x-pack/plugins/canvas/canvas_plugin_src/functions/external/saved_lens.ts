@@ -6,12 +6,11 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
 import { Filter as DataFilter } from '@kbn/es-query';
 import { TimeRange } from 'src/plugins/data/common';
-import { EmbeddableInput } from 'src/plugins/embeddable/common';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
+import { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -27,7 +26,7 @@ interface Arguments {
 }
 
 export type SavedLensInput = EmbeddableInput & {
-  id: string;
+  savedObjectId: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
   palette?: PaletteOutput;
@@ -73,18 +72,19 @@ export function savedLens(): ExpressionFunctionDefinition<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (input, args) => {
+    fn: (input, { id, timerange, title, palette }) => {
       const filters = input ? input.and : [];
 
       return {
         type: EmbeddableExpressionType,
         input: {
-          id: args.id,
+          id,
+          savedObjectId: id,
           filters: getQueryFilters(filters),
-          timeRange: args.timerange || defaultTimeRange,
-          title: args.title === null ? undefined : args.title,
+          timeRange: timerange || defaultTimeRange,
+          title: title === null ? undefined : title,
           disableTriggers: true,
-          palette: args.palette,
+          palette,
         },
         embeddableType: EmbeddableTypes.lens,
         generatedAt: Date.now(),

@@ -17,22 +17,16 @@ import {
   CommonAlertParams,
   AlertVersions,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import {
-  RULE_ELASTICSEARCH_VERSION_MISMATCH,
-  LEGACY_RULE_DETAILS,
-  INDEX_PATTERN_ELASTICSEARCH,
-} from '../../common/constants';
+import { Alert } from '../../../alerting/server';
+import { RULE_ELASTICSEARCH_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerting/common';
+import { SanitizedRule } from '../../../alerting/common';
 import { Globals } from '../static_globals';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 
 export class ElasticsearchVersionMismatchRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_ELASTICSEARCH_VERSION_MISMATCH,
       name: LEGACY_RULE_DETAILS[RULE_ELASTICSEARCH_VERSION_MISMATCH].label,
@@ -55,17 +49,11 @@ export class ElasticsearchVersionMismatchRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: string[]
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
     const elasticsearchVersions = await fetchElasticsearchVersions(
       esClient,
       clusters,
-      esIndexPattern,
       Globals.app.config.ui.max_bucket_size,
       params.filterQuery
     );
@@ -99,7 +87,7 @@ export class ElasticsearchVersionMismatchRule extends BaseRule {
   }
 
   protected async executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

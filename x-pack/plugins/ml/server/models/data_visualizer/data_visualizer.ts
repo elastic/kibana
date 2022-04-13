@@ -180,7 +180,7 @@ type BatchStats =
 
 const getAggIntervals = async (
   { asCurrentUser }: IScopedClusterClient,
-  indexPatternTitle: string,
+  indexPattern: string,
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
@@ -204,8 +204,8 @@ const getAggIntervals = async (
     return aggs;
   }, {} as Record<string, object>);
 
-  const { body } = await asCurrentUser.search({
-    index: indexPatternTitle,
+  const body = await asCurrentUser.search({
+    index: indexPattern,
     size: 0,
     body: {
       query,
@@ -239,7 +239,7 @@ const getAggIntervals = async (
 // export for re-use by transforms plugin
 export const getHistogramsForFields = async (
   client: IScopedClusterClient,
-  indexPatternTitle: string,
+  indexPattern: string,
   query: any,
   fields: HistogramField[],
   samplerShardSize: number,
@@ -248,7 +248,7 @@ export const getHistogramsForFields = async (
   const { asCurrentUser } = client;
   const aggIntervals = await getAggIntervals(
     client,
-    indexPatternTitle,
+    indexPattern,
     query,
     fields,
     samplerShardSize,
@@ -290,8 +290,8 @@ export const getHistogramsForFields = async (
     return [];
   }
 
-  const { body } = await asCurrentUser.search({
-    index: indexPatternTitle,
+  const body = await asCurrentUser.search({
+    index: indexPattern,
     size: 0,
     body: {
       query,
@@ -446,7 +446,7 @@ export class DataVisualizer {
   // returned array depend on the type of the field (keyword, number, date etc).
   // Sampling will be used if supplied samplerShardSize > 0.
   async getHistogramsForFields(
-    indexPatternTitle: string,
+    indexPattern: string,
     query: any,
     fields: HistogramField[],
     samplerShardSize: number,
@@ -454,7 +454,7 @@ export class DataVisualizer {
   ): Promise<any> {
     return await getHistogramsForFields(
       this._client,
-      indexPatternTitle,
+      indexPattern,
       query,
       fields,
       samplerShardSize,
@@ -666,7 +666,7 @@ export class DataVisualizer {
         : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       track_total_hits: true,
       size,
@@ -757,7 +757,7 @@ export class DataVisualizer {
     };
     filterCriteria.push({ exists: { field } });
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -802,7 +802,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -907,7 +907,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -1030,7 +1030,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -1106,7 +1106,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -1175,7 +1175,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -1240,7 +1240,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,

@@ -17,19 +17,33 @@ const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
 // it will search both --inspect and --inspect-brk
 const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
-const urlPartsSchema = () =>
+const maybeRequireKeys = (keys: string[], schemas: Record<string, Joi.Schema>) => {
+  if (!keys.length) {
+    return schemas;
+  }
+
+  const withRequires: Record<string, Joi.Schema> = {};
+  for (const [key, schema] of Object.entries(schemas)) {
+    withRequires[key] = keys.includes(key) ? schema.required() : schema;
+  }
+  return withRequires;
+};
+
+const urlPartsSchema = ({ requiredKeys }: { requiredKeys?: string[] } = {}) =>
   Joi.object()
-    .keys({
-      protocol: Joi.string().valid('http', 'https').default('http'),
-      hostname: Joi.string().hostname().default('localhost'),
-      port: Joi.number(),
-      auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
-      username: Joi.string(),
-      password: Joi.string(),
-      pathname: Joi.string().regex(/^\//, 'start with a /'),
-      hash: Joi.string().regex(/^\//, 'start with a /'),
-      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
-    })
+    .keys(
+      maybeRequireKeys(requiredKeys ?? [], {
+        protocol: Joi.string().valid('http', 'https').default('http'),
+        hostname: Joi.string().hostname().default('localhost'),
+        port: Joi.number(),
+        auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
+        username: Joi.string(),
+        password: Joi.string(),
+        pathname: Joi.string().regex(/^\//, 'start with a /'),
+        hash: Joi.string().regex(/^\//, 'start with a /'),
+        certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
+      })
+    )
     .default();
 
 const appUrlPartsSchema = () =>
@@ -89,6 +103,7 @@ export const schema = Joi.object()
       })
       .default(),
 
+    servicesRequiredForTestAnalysis: Joi.array().items(Joi.string()).default([]),
     services: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
 
     pageObjects: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
@@ -99,6 +114,7 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
+        kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
         navigateStatusPageCheck: Joi.number().default(250),
 
@@ -122,6 +138,7 @@ export const schema = Joi.object()
     mochaOpts: Joi.object()
       .keys({
         bail: Joi.boolean().default(false),
+        dryRun: Joi.boolean().default(false),
         grep: Joi.string(),
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
@@ -150,7 +167,10 @@ export const schema = Joi.object()
 
     mochaReporter: Joi.object()
       .keys({
-        captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        captureLogOutput: Joi.boolean().default(
+          !!process.env.CI && !process.env.DISABLE_CI_LOG_OUTPUT_CAPTURE
+        ),
+        sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
 
@@ -167,18 +187,25 @@ export const schema = Joi.object()
     servers: Joi.object()
       .keys({
         kibana: urlPartsSchema(),
-        elasticsearch: urlPartsSchema(),
+        elasticsearch: urlPartsSchema({
+          requiredKeys: ['port'],
+        }),
       })
       .default(),
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('basic'),
+        license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array(),
+        serverArgs: Joi.array().items(Joi.string()),
         esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
+        ccs: Joi.object().keys({
+          remoteClusterUrl: Joi.string().uri({
+            scheme: /https?/,
+          }),
+        }),
       })
       .default(),
 
@@ -271,6 +298,7 @@ export const schema = Joi.object()
     security: Joi.object()
       .keys({
         roles: Joi.object().default(),
+        remoteEsRoles: Joi.object(),
         defaultRoles: Joi.array()
           .items(Joi.string())
           .when('$primary', {

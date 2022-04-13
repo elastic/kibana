@@ -22,12 +22,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../../common/lib/keury';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { OverviewEmpty } from '../../../../overview/components/overview_empty';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useNetworkDetails } from '../../../../network/containers/details';
 import { networkModel } from '../../../../network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
+import { LandingCards } from '../../../../common/components/landing_cards';
 
 interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTarget };
@@ -98,9 +98,9 @@ export const ExpandableNetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(uiSettings),
+    config: getEsQueryConfig(uiSettings),
     indexPattern,
     queries: [query],
     filters,
@@ -141,6 +141,6 @@ export const ExpandableNetworkDetails = ({
       narrowDateRange={narrowDateRange}
     />
   ) : (
-    <OverviewEmpty />
+    <LandingCards />
   );
 };

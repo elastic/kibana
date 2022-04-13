@@ -2,9 +2,11 @@
 
 Team assignment occurs once per ci run.
 
-The "orchestration" entry point is a [Jenkinsfile Scripted Pipeline](https://github.com/elastic/kibana/blob/f73bc48b3bbbb5ad2042c1aa267aea2150b7b742/.ci/Jenkinsfile_coverage#L21)  
-This Jenkinsfile runs a [shell script](https://github.com/elastic/kibana/blob/master/src/dev/code_coverage/shell_scripts/generate_team_assignments_and_ingest_coverage.sh#L33) that kicks everything off.  
-The end result is the data is ingested to our [Kibana Stats Cluster](https://kibana-stats.elastic.dev/app/dashboards#/view/58b8db70-62f9-11ea-8312-7f2d69b79843?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-7d%2Cto%3Anow)))
+The entry point is a [yaml config](https://buildkite.com/elastic/kibana-code-coverage-main/steps)  
+Within the yaml config, [this shell script](https://github.com/elastic/kibana/blob/main/.buildkite/scripts/steps/code_coverage/reporting/ingestData.sh) is used.  
+Search for `node scripts/generate_team_assignments.js` and you'll see how it is generated before ingestion begins.  
+The generated file's path is passed to the ingestion system via an environment variable: `--teamAssignmentsPath $TEAM_ASSIGN_PATH`  
+The ingestion system uses it [here](https://github.com/elastic/kibana/blob/main/src/dev/code_coverage/ingest_coverage/index.js#L33).  
 
 ## Team Assignment Parsing (from .github/CODEOWNERS)  
 We add additional metadata to the CODEOWNERS file.  

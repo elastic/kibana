@@ -6,11 +6,13 @@
  */
 
 export { Actions } from './actions';
-export {
-  AuthorizationService,
+export type {
   AuthorizationServiceSetup,
   AuthorizationServiceSetupInternal,
 } from './authorization_service';
-export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
-export { CheckPrivilegesPayload } from './types';
-export { transformElasticsearchRoleToRole, ElasticsearchRole } from './roles';
+export { AuthorizationService } from './authorization_service';
+export type { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
+export type { CheckPrivilegesPayload } from './types';
+export type { ElasticsearchRole } from './roles';
+export { transformElasticsearchRoleToRole } from './roles';
+export type { CasesSupportedOperations } from './privileges';

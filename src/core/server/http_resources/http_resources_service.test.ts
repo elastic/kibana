@@ -73,7 +73,7 @@ describe('HttpResources service', () => {
               kibanaRequest,
               context.core.uiSettings.client,
               {
-                includeUserSettings: true,
+                isAnonymousPage: false,
                 vars: {
                   apmConfig,
                 },
@@ -119,7 +119,7 @@ describe('HttpResources service', () => {
               kibanaRequest,
               context.core.uiSettings.client,
               {
-                includeUserSettings: false,
+                isAnonymousPage: true,
                 vars: {
                   apmConfig,
                 },

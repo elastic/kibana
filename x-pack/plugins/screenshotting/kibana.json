@@ -1,0 +1,14 @@
+{
+  "id": "screenshotting",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Kibana Reporting Services",
+    "githubTeam": "kibana-reporting-services"
+  },
+  "description": "Kibana Screenshotting Plugin",
+  "requiredPlugins": ["expressions", "screenshotMode"],
+  "configPath": ["xpack", "screenshotting"],
+  "server": true,
+  "ui": true
+}

@@ -9,3 +9,8 @@ export { toSentenceSerial } from './to_sentence_serial';
 export { getAsLocalDateTimeString } from './get_as_local_datetime_string';
 export { mimeType } from './mime_types';
 export { readUploadedFileAsBase64 } from './read_uploaded_file_as_base64';
+export { readUploadedFileAsText } from './read_uploaded_file_as_text';
+export { handlePrivateKeyUpload } from './handle_private_key_upload';
+export { hasMultipleConnectorOptions } from './has_multiple_connector_options';
+export { isNotNullish } from './is_not_nullish';
+export { sortByName } from './sort_by_name';

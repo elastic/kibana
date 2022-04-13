@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DOCS_PREFIX } from '../../../routes';
+import { LOG_SETTINGS_DOCS_URL } from '../../../routes';
 
 import { LogRetentionLogic, LogRetentionOptions, LogRetentionMessage } from '../../log_retention';
 
@@ -32,6 +32,8 @@ export const LogRetentionPanel: React.FC = () => {
   const hasILM = logRetention !== null;
   const analyticsLogRetentionSettings = logRetention?.[LogRetentionOptions.Analytics];
   const apiLogRetentionSettings = logRetention?.[LogRetentionOptions.API];
+  const auditLogRetentionSettings = logRetention?.[LogRetentionOptions.Audit];
+  const crawlerLogRetentionSettings = logRetention?.[LogRetentionOptions.Crawler];
 
   useEffect(() => {
     fetchLogRetention();
@@ -100,6 +102,60 @@ export const LogRetentionPanel: React.FC = () => {
           data-test-subj="LogRetentionPanelAPISwitch"
         />
       </EuiText>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <EuiSwitch
+          label={
+            <>
+              <strong>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.crawler.label',
+                  {
+                    defaultMessage: 'Web Crawler Logs',
+                  }
+                )}
+              </strong>
+              {': '}
+              {hasILM && (
+                <EuiTextColor color="subdued">
+                  <LogRetentionMessage type={LogRetentionOptions.Crawler} />
+                </EuiTextColor>
+              )}
+            </>
+          }
+          checked={!!crawlerLogRetentionSettings?.enabled}
+          onChange={() => toggleLogRetention(LogRetentionOptions.Crawler)}
+          disabled={isLogRetentionUpdating}
+          data-test-subj="LogRetentionPanelCrawlerSwitch"
+        />
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <EuiSwitch
+          label={
+            <>
+              <strong>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.audit.label',
+                  {
+                    defaultMessage: 'Log audit events',
+                  }
+                )}
+              </strong>
+              {': '}
+              {hasILM && (
+                <EuiTextColor color="subdued">
+                  <LogRetentionMessage type={LogRetentionOptions.Audit} />
+                </EuiTextColor>
+              )}
+            </>
+          }
+          checked={!!auditLogRetentionSettings?.enabled}
+          onChange={() => toggleLogRetention(LogRetentionOptions.Audit)}
+          disabled={isLogRetentionUpdating}
+          data-test-subj="LogRetentionPanelAuditSwitch"
+        />
+      </EuiText>
       <EuiSpacer size="l" />
       <EuiText size="xs" color="subdued">
         <p>
@@ -107,7 +163,7 @@ export const LogRetentionPanel: React.FC = () => {
             defaultMessage: 'Log retention is determined by the ILM policies for your deployment.',
           })}
           <br />
-          <EuiLink href={`${DOCS_PREFIX}/logs.html`} target="_blank">
+          <EuiLink href={LOG_SETTINGS_DOCS_URL} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
               defaultMessage: 'Learn more about log retention for Enterprise Search.',
             })}

@@ -38,6 +38,7 @@ import {
   NullableProps,
   RecordOfOptions,
   RecordOfType,
+  SchemaStructureEntry,
   StringOptions,
   StringType,
   Type,
@@ -49,7 +50,8 @@ import {
   StreamType,
 } from './types';
 
-export { ObjectType, TypeOf, Type, Props, NullableProps };
+export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
+export { ObjectType, Type };
 export { ByteSizeValue } from './byte_size_value';
 export { SchemaTypeError, ValidationError } from './errors';
 export { isConfigSchema } from './typeguards';

@@ -83,11 +83,14 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
   const latest = summaryPings[summaryPings.length - 1];
   return {
     monitor_id: latest.monitor.id,
+    configId: latest.config_id,
     state: {
       timestamp: latest.timestamp,
       monitor: {
         name: latest.monitor?.name,
         type: latest.monitor?.type,
+        duration: latest.monitor?.duration,
+        checkGroup: latest.monitor?.check_group,
       },
       url: latest.url ?? {},
       summary: {
@@ -102,6 +105,7 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
         geo: { name: summaryPings.map((p) => p.observer?.geo?.name ?? '').filter((n) => n !== '') },
       },
       service: summaryPings.find((p) => p.service?.name)?.service,
+      error: latest.error,
     },
   };
 };
@@ -165,5 +169,5 @@ export const query = async (
     },
   };
 
-  return await queryContext.search(params);
+  return await queryContext.search(params, 'getMonitorList-refinePotentialMatches');
 };

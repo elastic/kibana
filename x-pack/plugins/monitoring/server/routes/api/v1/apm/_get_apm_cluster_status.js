@@ -7,9 +7,9 @@
 
 import { getApmsForClusters } from '../../../../lib/apm/get_apms_for_clusters';
 
-export const getApmClusterStatus = (req, apmIndexPattern, { clusterUuid }) => {
+export const getApmClusterStatus = (req, { clusterUuid }) => {
   const clusters = [{ cluster_uuid: clusterUuid }];
-  return getApmsForClusters(req, apmIndexPattern, clusters).then((apms) => {
+  return getApmsForClusters(req, clusters).then((apms) => {
     const [{ stats, config }] = apms;
     return {
       ...stats,

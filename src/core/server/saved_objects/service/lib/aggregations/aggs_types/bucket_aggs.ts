@@ -13,10 +13,16 @@ import { sortOrderSchema } from './common_schemas';
  * Schemas for the Bucket aggregations.
  *
  * Currently supported:
+ * - date_range
  * - filter
  * - histogram
  * - nested
+ * - reverse_nested
  * - terms
+ *
+ * Not fully supported:
+ * - filter
+ * - filters
  *
  * Not implemented:
  * - adjacency_matrix
@@ -24,9 +30,7 @@ import { sortOrderSchema } from './common_schemas';
  * - children
  * - composite
  * - date_histogram
- * - date_range
  * - diversified_sampler
- * - filters
  * - geo_distance
  * - geohash_grid
  * - geotile_grid
@@ -37,16 +41,37 @@ import { sortOrderSchema } from './common_schemas';
  * - parent
  * - range
  * - rare_terms
- * - reverse_nested
  * - sampler
  * - significant_terms
  * - significant_text
  * - variable_width_histogram
  */
 
+// TODO: it would be great if we could recursively build the schema since the aggregation have be nested
+// For more details see how the types are defined in the elasticsearch javascript client:
+// https://github.com/elastic/elasticsearch-js/blob/4ad5daeaf401ce8ebb28b940075e0a67e56ff9ce/src/api/typesWithBodyKey.ts#L5295
+const termSchema = s.object({
+  term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
+});
+
+// TODO: it would be great if we could recursively build the schema since the aggregation have be nested
+// For more details see how the types are defined in the elasticsearch javascript client:
+// https://github.com/elastic/elasticsearch-js/blob/4ad5daeaf401ce8ebb28b940075e0a67e56ff9ce/src/api/typesWithBodyKey.ts#L5295
+const boolSchema = s.object({
+  bool: s.object({
+    must_not: s.oneOf([termSchema]),
+  }),
+});
+
 export const bucketAggsSchemas: Record<string, ObjectType> = {
-  filter: s.object({
-    term: s.recordOf(s.string(), s.oneOf([s.string(), s.boolean(), s.number()])),
+  date_range: s.object({
+    field: s.string(),
+    format: s.string(),
+    ranges: s.arrayOf(s.object({ from: s.maybe(s.string()), to: s.maybe(s.string()) })),
+  }),
+  filter: termSchema,
+  filters: s.object({
+    filters: s.recordOf(s.string(), s.oneOf([termSchema, boolSchema])),
   }),
   histogram: s.object({
     field: s.maybe(s.string()),
@@ -75,6 +100,9 @@ export const bucketAggsSchemas: Record<string, ObjectType> = {
   }),
   nested: s.object({
     path: s.string(),
+  }),
+  reverse_nested: s.object({
+    path: s.maybe(s.string()),
   }),
   terms: s.object({
     field: s.maybe(s.string()),

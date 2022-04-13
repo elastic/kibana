@@ -12,12 +12,13 @@ import { multiPoint } from '@turf/helpers';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
+import { makePublicExecutionContext } from '../../../util';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -81,9 +82,7 @@ export class ESPewPewSource extends AbstractESAggSource {
         value: sourceTitle,
       },
       {
-        label: i18n.translate('xpack.maps.source.pewPew.indexPatternLabel', {
-          defaultMessage: 'Index pattern',
-        }),
+        label: getDataViewLabel(),
         value: indexPatternTitle,
       },
       {
@@ -165,6 +164,7 @@ export class ESPewPewSource extends AbstractESAggSource {
         defaultMessage: 'Source-destination connections request',
       }),
       searchSessionId: searchFilters.searchSessionId,
+      executionContext: makePublicExecutionContext('es_pew_pew_source:connections'),
     });
 
     const { featureCollection } = convertToLines(esResponse);
@@ -201,10 +201,13 @@ export class ESPewPewSource extends AbstractESAggSource {
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({
-        abortSignal: abortController.signal,
-        legacyHitsTotal: false,
-      });
+      const { rawResponse: esResp } = await searchSource
+        .fetch$({
+          abortSignal: abortController.signal,
+          legacyHitsTotal: false,
+          executionContext: makePublicExecutionContext('es_pew_pew_source:bounds'),
+        })
+        .toPromise();
       if (esResp.aggregations.destFitToBounds.bounds) {
         corners.push([
           esResp.aggregations.destFitToBounds.bounds.top_left.lon,

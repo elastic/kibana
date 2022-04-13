@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { first, filter, take, switchMap } from 'rxjs/operators';
+import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { filter, take, switchMap } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
@@ -23,14 +23,18 @@ import {
   InternalElasticsearchServiceStart,
 } from '../elasticsearch';
 import { InternalDeprecationsServiceSetup } from '../deprecations';
-import { KibanaConfigType } from '../kibana_config';
 import {
   SavedObjectsConfigType,
   SavedObjectsMigrationConfigType,
   SavedObjectConfig,
 } from './saved_objects_config';
 import { KibanaRequest, InternalHttpServiceSetup } from '../http';
-import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsType,
+  SavedObjectStatusMeta,
+  SavedObjectAttributes,
+} from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -46,6 +50,8 @@ import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+
+const kibanaIndex = '.kibana';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -111,6 +117,7 @@ export interface SavedObjectsServiceSetup {
    * // src/plugins/my_plugin/server/saved_objects/my_type.ts
    * import { SavedObjectsType } from 'src/core/server';
    * import * as migrations from './migrations';
+   * import * as schemas from './schemas';
    *
    * export const myType: SavedObjectsType = {
    *   name: 'MyType',
@@ -130,6 +137,10 @@ export interface SavedObjectsServiceSetup {
    *     '2.0.0': migrations.migrateToV2,
    *     '2.1.0': migrations.migrateToV2_1
    *   },
+   *   schemas: {
+   *     '2.0.0': schemas.v2,
+   *     '2.1.0': schemas.v2_1,
+   *   },
    * };
    *
    * // src/plugins/my_plugin/server/plugin.ts
@@ -143,7 +154,14 @@ export interface SavedObjectsServiceSetup {
    * }
    * ```
    */
-  registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
+  registerType: <Attributes extends SavedObjectAttributes = any>(
+    type: SavedObjectsType<Attributes>
+  ) => void;
+
+  /**
+   * Returns the default index used for saved objects.
+   */
+  getKibanaIndex: () => string;
 }
 
 /**
@@ -272,6 +290,7 @@ export class SavedObjectsService
   implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart>
 {
   private logger: Logger;
+  private readonly kibanaVersion: string;
 
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
@@ -284,6 +303,9 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
+    this.kibanaVersion = SavedObjectsService.stripVersionQualifier(
+      this.coreContext.env.packageInfo.version
+    );
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -292,26 +314,19 @@ export class SavedObjectsService
     this.setupDeps = setupDeps;
     const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
 
-    const savedObjectsConfig = await this.coreContext.configService
-      .atPath<SavedObjectsConfigType>('savedObjects')
-      .pipe(first())
-      .toPromise();
-    const savedObjectsMigrationConfig = await this.coreContext.configService
-      .atPath<SavedObjectsMigrationConfigType>('migrations')
-      .pipe(first())
-      .toPromise();
+    const savedObjectsConfig = await firstValueFrom(
+      this.coreContext.configService.atPath<SavedObjectsConfigType>('savedObjects')
+    );
+    const savedObjectsMigrationConfig = await firstValueFrom(
+      this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
+    );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
-
-    const kibanaConfig = await this.coreContext.configService
-      .atPath<KibanaConfigType>('kibana')
-      .pipe(first())
-      .toPromise();
 
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
-        kibanaConfig,
+        kibanaIndex,
         savedObjectsConfig: this.config,
-        kibanaVersion: this.coreContext.env.packageInfo.version,
+        kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
       })
     );
@@ -323,9 +338,9 @@ export class SavedObjectsService
       coreUsageData,
       logger: this.logger,
       config: this.config,
-      migratorPromise: this.migrator$.pipe(first()).toPromise(),
-      kibanaConfig,
-      kibanaVersion: this.coreContext.env.packageInfo.version,
+      migratorPromise: firstValueFrom(this.migrator$),
+      kibanaIndex,
+      kibanaVersion: this.kibanaVersion,
     });
 
     registerCoreObjectTypes(this.typeRegistry);
@@ -361,30 +376,25 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
+      getKibanaIndex: () => kibanaIndex,
     };
   }
 
-  public async start(
-    { elasticsearch, pluginsInitialized = true }: SavedObjectsStartDeps,
-    migrationsRetryDelay?: number
-  ): Promise<InternalSavedObjectsServiceStart> {
+  public async start({
+    elasticsearch,
+    pluginsInitialized = true,
+  }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
     }
 
     this.logger.debug('Starting SavedObjects service');
 
-    const kibanaConfig = await this.coreContext.configService
-      .atPath<KibanaConfigType>('kibana')
-      .pipe(first())
-      .toPromise();
     const client = elasticsearch.client;
 
     const migrator = this.createMigrator(
-      kibanaConfig,
       this.config.migration,
-      elasticsearch.client.asInternalUser,
-      migrationsRetryDelay
+      elasticsearch.client.asInternalUser
     );
 
     this.migrator$.next(migrator);
@@ -442,7 +452,7 @@ export class SavedObjectsService
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
-        kibanaConfig.index,
+        kibanaIndex,
         esClient,
         this.logger.get('repository'),
         includedHiddenTypes
@@ -498,19 +508,24 @@ export class SavedObjectsService
   public async stop() {}
 
   private createMigrator(
-    kibanaConfig: KibanaConfigType,
     soMigrationsConfig: SavedObjectsMigrationConfigType,
-    client: ElasticsearchClient,
-    migrationsRetryDelay?: number
+    client: ElasticsearchClient
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
-      kibanaVersion: this.coreContext.env.packageInfo.version,
+      kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
-      kibanaConfig,
+      kibanaIndex,
       client,
-      migrationsRetryDelay,
     });
+  }
+
+  /**
+   * Coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha)
+   * to regular semver (x.y.z).
+   */
+  private static stripVersionQualifier(version: string) {
+    return version.split('-')[0];
   }
 }

@@ -11,8 +11,7 @@ import { format } from 'url';
 import del from 'del';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
-import { Client } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/dev-utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
@@ -51,7 +50,7 @@ export interface ICluster {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
-  getClient: () => KibanaClient;
+  getClient: () => Client;
   getHostUrls: () => string[];
 }
 
@@ -137,7 +136,15 @@ export interface CreateTestEsClusterOptions {
    * }
    */
   port?: number;
+  /**
+   * Should this ES cluster use SSL?
+   */
   ssl?: boolean;
+  /**
+   * Explicit transport port for a single node to run on, or a string port range to use eg. '9300-9400'
+   * defaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`
+   */
+  transportPort?: number | string;
 }
 
 export function createTestEsCluster<
@@ -156,13 +163,14 @@ export function createTestEsCluster<
     esJavaOpts,
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
+    transportPort,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
 
   const defaultEsArgs = [
     `cluster.name=${clusterName}`,
-    `transport.port=${esTestConfig.getTransportPort()}`,
+    `transport.port=${transportPort ?? esTestConfig.getTransportPort()}`,
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
       ? ['discovery.type=zen', `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
@@ -245,9 +253,10 @@ export function createTestEsCluster<
             esArgs: assignArgs(esArgs, overriddenArgs),
             esJavaOpts,
             // If we have multiple nodes, we shouldn't try setting up the native realm
-            // right away, or ES will complain as the cluster isn't ready. So we only
+            // right away or wait for ES to be green, the cluster isn't ready. So we only
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+            skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
           });
         });
       }
@@ -280,9 +289,10 @@ export function createTestEsCluster<
     /**
      * Returns an ES Client to the configured cluster
      */
-    getClient(): KibanaClient {
+    getClient(): Client {
       return new Client({
         node: this.getHostUrls()[0],
+        Connection: HttpConnection,
       });
     }
 

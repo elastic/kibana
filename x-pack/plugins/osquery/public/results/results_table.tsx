@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, keys, map } from 'lodash/fp';
+import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
 import {
   EuiCallOut,
   EuiCode,
@@ -17,8 +17,10 @@ import {
   EuiLoadingContent,
   EuiProgress,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '../../../fleet/public';
@@ -31,9 +33,10 @@ import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
-} from '../scheduled_query_groups/scheduled_query_group_queries_status_table';
+} from '../packs/pack_queries_status_table';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { useActionDetails } from '../actions/use_action_details';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -43,6 +46,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
+  hideFullscreen?: true;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -50,9 +54,12 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   agentIds,
   startDate,
   endDate,
+  hideFullscreen,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
+  const { data: actionDetails } = useActionDetails({ actionId });
+
   const {
     // @ts-expect-error update types
     data: { aggregations },
@@ -72,7 +79,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const getFleetAppUrl = useCallback(
     (agentId) =>
       getUrlForApp('fleet', {
-        path: `#` + pagePathGetters.agent_details({ agentId })[1],
+        path: pagePathGetters.agent_details({ agentId })[1],
       }),
     [getUrlForApp]
   );
@@ -100,7 +107,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const { data: allResultsData, isFetched } = useAllResults({
+  const {
+    data: allResultsData,
+    isFetched,
+    isLoading,
+  } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -116,6 +127,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const columnVisibility = useMemo(
     () => ({ visibleColumns, setVisibleColumns }),
     [visibleColumns, setVisibleColumns]
+  );
+
+  const ecsMappingColumns = useMemo(
+    () => keys(get('actionDetails._source.data.ecs_mapping', actionDetails) || {}),
+    [actionDetails]
   );
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
@@ -135,9 +151,22 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
         }
 
+        if (ecsMappingColumns.includes(columnId)) {
+          const ecsFieldValue = get(columnId, data[rowIndex % pagination.pageSize]?._source);
+
+          if (isArray(ecsFieldValue) || isObject(ecsFieldValue)) {
+            try {
+              return JSON.stringify(ecsFieldValue, null, 2);
+              // eslint-disable-next-line no-empty
+            } catch (e) {}
+          }
+
+          return ecsFieldValue ?? '-';
+        }
+
         return !isEmpty(value) ? value : '-';
       },
-    [getFleetAppUrl, pagination.pageSize]
+    [ecsMappingColumns, getFleetAppUrl, pagination.pageSize]
   );
 
   const tableSorting = useMemo(
@@ -155,17 +184,71 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [onChangeItemsPerPage, onChangePage, pagination]
   );
 
+  const ecsMapping = useMemo(() => {
+    const mapping = get('actionDetails._source.data.ecs_mapping', actionDetails);
+    if (!mapping) return;
+
+    return reduce(
+      (acc, [key, value]) => {
+        // @ts-expect-error update types
+        if (value?.field) {
+          // @ts-expect-error update types
+          acc[value?.field] = [...(acc[value?.field] ?? []), key];
+        }
+        return acc;
+      },
+      {},
+      Object.entries(mapping)
+    );
+  }, [actionDetails]);
+
+  const getHeaderDisplay = useCallback(
+    (columnName: string) => {
+      // @ts-expect-error update types
+      if (ecsMapping && ecsMapping[columnName]) {
+        return (
+          <>
+            {columnName}{' '}
+            <EuiIconTip
+              size="s"
+              content={
+                <>
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryResults.table.fieldMappedLabel"
+                    defaultMessage="Field is mapped to"
+                  />
+                  {`:`}
+                  <ul>
+                    {
+                      // @ts-expect-error update types
+                      ecsMapping[columnName].map((fieldName) => (
+                        <li key={fieldName}>{fieldName}</li>
+                      ))
+                    }
+                  </ul>
+                </>
+              }
+              type="indexMapping"
+            />
+          </>
+        );
+      }
+    },
+    [ecsMapping]
+  );
+
   useEffect(() => {
-    if (!allResultsData?.edges) {
+    if (!allResultsData?.columns.length) {
       return;
     }
 
-    const newColumns = keys(allResultsData?.edges[0]?.fields)
-      .sort()
-      .reduce(
-        (acc, fieldName) => {
-          const { data, seen } = acc;
-          if (fieldName === 'agent.name') {
+    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...allResultsData?.columns];
+
+    const newColumns = fields.reduce(
+      (acc, fieldName) => {
+        const { data, seen } = acc;
+        if (fieldName === 'agent.name') {
+          if (!seen.has(fieldName)) {
             data.push({
               id: fieldName,
               displayAsText: i18n.translate(
@@ -176,37 +259,57 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
               ),
               defaultSortDirection: Direction.asc,
             });
-
-            return acc;
-          }
-
-          if (fieldName.startsWith('osquery.')) {
-            const displayAsText = fieldName.split('.')[1];
-            if (!seen.has(displayAsText)) {
-              data.push({
-                id: fieldName,
-                displayAsText,
-                defaultSortDirection: Direction.asc,
-              });
-              seen.add(displayAsText);
-            }
-            return acc;
+            seen.add(fieldName);
           }
 
           return acc;
-        },
-        { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
-      ).data;
+        }
 
-    if (!isEqual(columns, newColumns)) {
-      setColumns(newColumns);
-      setVisibleColumns(map('id', newColumns));
-    }
-  }, [columns, allResultsData?.edges]);
+        if (ecsMappingColumns.includes(fieldName)) {
+          if (!seen.has(fieldName)) {
+            data.push({
+              id: fieldName,
+              displayAsText: fieldName,
+              defaultSortDirection: Direction.asc,
+            });
+            seen.add(fieldName);
+          }
+          return acc;
+        }
+
+        if (fieldName.startsWith('osquery.')) {
+          const displayAsText = fieldName.split('.')[1];
+          const hasNumberType = fields.includes(`${fieldName}.number`);
+          if (!seen.has(displayAsText)) {
+            const id = hasNumberType ? fieldName + '.number' : fieldName;
+            data.push({
+              id,
+              displayAsText,
+              display: getHeaderDisplay(displayAsText),
+              defaultSortDirection: Direction.asc,
+              ...(hasNumberType ? { schema: 'numeric' } : {}),
+            });
+            seen.add(displayAsText);
+          }
+          return acc;
+        }
+
+        return acc;
+      },
+      { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
+    ).data;
+
+    setColumns((currentColumns) =>
+      !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
+    );
+    setVisibleColumns(map('id', newColumns));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
 
   const toolbarVisibility = useMemo(
     () => ({
-      showStyleSelector: false,
+      showDisplaySelector: false,
+      showFullScreenSelector: !hideFullscreen,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -224,7 +327,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </>
       ),
     }),
-    [actionId, endDate, startDate]
+    [actionId, endDate, startDate, hideFullscreen]
   );
 
   useEffect(
@@ -232,19 +335,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       setIsLive(() => {
         if (!agentIds?.length || expired) return false;
 
-        const uniqueAgentsRepliedCount =
-          // @ts-expect-error-type
-          allResultsData?.rawResponse.aggregations?.unique_agents.value ?? 0;
-
-        return !!(uniqueAgentsRepliedCount !== agentIds?.length - aggregations.failed);
+        return !!(aggregations.totalResponded !== agentIds?.length);
       }),
-    [
-      agentIds?.length,
-      aggregations.failed,
-      // @ts-expect-error-type
-      allResultsData?.rawResponse.aggregations?.unique_agents.value,
-      expired,
-    ]
+    [agentIds?.length, aggregations.failed, aggregations.totalResponded, expired]
   );
 
   if (!hasActionResultsPrivileges) {
@@ -261,7 +354,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     );
   }
 
-  if (!isFetched) {
+  if (isLoading) {
     return <EuiLoadingContent lines={5} />;
   }
 
@@ -269,7 +362,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" />}
 
-      {isFetched && !allResultsData?.edges.length ? (
+      {isFetched && !allResultsData?.edges.length && !aggregations?.totalRowCount ? (
         <>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
           <EuiSpacer />
@@ -278,6 +371,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
+            data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}
             columnVisibility={columnVisibility}

@@ -5,14 +5,12 @@
   "description": "Identifies potential behavior of SharpRDP, which is a tool that can be used to perform authenticated command execution against a remote target via Remote Desktop Protocol (RDP) for the purposes of lateral movement.",
   "from": "now-9m",
   "index": [
-    "logs-endpoint.events.*",
-    "winlogbeat-*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential SharpRDP Behavior",
-  "query": "/* Incoming RDP followed by a new RunMRU string value set to cmd, powershell, taskmgr or tsclient, followed by process execution within 1m */\n\nsequence by host.id with maxspan=1m\n  [network where event.type == \"start\" and process.name : \"svchost.exe\" and destination.port == 3389 and \n   network.direction == \"incoming\" and network.transport == \"tcp\" and\n   source.address != \"127.0.0.1\" and source.address != \"::1\"\n  ]\n\n  [registry where process.name : \"explorer.exe\" and \n   registry.path : (\"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\RunMRU\\\\*\") and\n   registry.data.strings : (\"cmd.exe*\", \"powershell.exe*\", \"taskmgr*\", \"\\\\\\\\tsclient\\\\*.exe\\\\*\")\n  ]\n  \n  [process where event.type in (\"start\", \"process_started\") and\n   (process.parent.name : (\"cmd.exe\", \"powershell.exe\", \"taskmgr.exe\") or process.args : (\"\\\\\\\\tsclient\\\\*.exe\")) and \n   not process.name : \"conhost.exe\"\n   ]\n",
+  "query": "/* Incoming RDP followed by a new RunMRU string value set to cmd, powershell, taskmgr or tsclient, followed by process execution within 1m */\n\nsequence by host.id with maxspan=1m\n  [network where event.type == \"start\" and process.name : \"svchost.exe\" and destination.port == 3389 and \n   network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n   source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n  ]\n\n  [registry where process.name : \"explorer.exe\" and \n   registry.path : (\"HKEY_USERS\\\\*\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\RunMRU\\\\*\") and\n   registry.data.strings : (\"cmd.exe*\", \"powershell.exe*\", \"taskmgr*\", \"\\\\\\\\tsclient\\\\*.exe\\\\*\")\n  ]\n  \n  [process where event.type in (\"start\", \"process_started\") and\n   (process.parent.name : (\"cmd.exe\", \"powershell.exe\", \"taskmgr.exe\") or process.args : (\"\\\\\\\\tsclient\\\\*.exe\")) and \n   not process.name : \"conhost.exe\"\n   ]\n",
   "references": [
     "https://posts.specterops.io/revisiting-remote-desktop-lateral-movement-8fb905cb46c3",
     "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Lateral%20Movement/LM_sysmon_3_12_13_1_SharpRDP.evtx"
@@ -39,11 +37,18 @@
         {
           "id": "T1021",
           "name": "Remote Services",
-          "reference": "https://attack.mitre.org/techniques/T1021/"
+          "reference": "https://attack.mitre.org/techniques/T1021/",
+          "subtechnique": [
+            {
+              "id": "T1021.001",
+              "name": "Remote Desktop Protocol",
+              "reference": "https://attack.mitre.org/techniques/T1021/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 6
 }

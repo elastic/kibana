@@ -39,6 +39,7 @@ const validLicenseSchema = schema.oneOf([
 const validSubFeaturePrivilegeLicensesSchema = schema.oneOf([
   schema.literal('platinum'),
   schema.literal('enterprise'),
+  schema.literal('gold'),
   schema.literal('trial'),
 ]);
 
@@ -75,6 +76,8 @@ const appCategorySchema = schema.object({
 
 const kibanaPrivilegeSchema = schema.object({
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
+  requireAllSpaces: schema.maybe(schema.boolean()),
+  disabled: schema.maybe(schema.boolean()),
   management: schema.maybe(managementSchema),
   catalogue: schema.maybe(catalogueSchema),
   api: schema.maybe(schema.arrayOf(schema.string())),

@@ -9,18 +9,19 @@
 import React, { Component, Fragment, ComponentType } from 'react';
 
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IndexPattern, IndexPatternField, IndexPatternSelectProps } from '../../../../data/public';
+import { IndexPatternSelectProps } from '../../../../unified_search/public';
+import { DataView, DataViewField } from '../../../../data_views/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface RangeControlEditorProps {
   controlIndex: number;
   controlParams: ControlParams;
-  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<DataView>;
   handleFieldNameChange: (fieldName: string) => void;
   handleIndexPatternChange: (indexPatternId: string) => void;
   handleOptionsChange: <T extends keyof ControlParamsOptions>(
@@ -35,7 +36,7 @@ interface RangeControlEditorState {
   IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
 }
 
-function filterField(field: IndexPatternField) {
+function filterField(field: DataViewField) {
   return field.type === 'number';
 }
 
@@ -52,9 +53,9 @@ export class RangeControlEditor extends Component<
   }
 
   async getIndexPatternSelect() {
-    const [, { data }] = await this.props.deps.core.getStartServices();
+    const [, { unifiedSearch }] = await this.props.deps.core.getStartServices();
     this.setState({
-      IndexPatternSelect: data.ui.IndexPatternSelect,
+      IndexPatternSelect: unifiedSearch.ui.IndexPatternSelect,
     });
   }
 

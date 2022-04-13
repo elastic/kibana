@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { from, of } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { firstValueFrom, from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import {
-  fieldList,
-  FieldSpec,
-  IIndexPattern,
-  IndexPattern,
-  IndexPatternsContract,
-  RuntimeField,
-} from 'src/plugins/data/common';
+import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
+import { fieldList, FieldSpec } from '../../../../../src/plugins/data/common';
 
 type IndexPatternMock = Pick<
-  IndexPattern,
+  DataView,
   | 'fields'
   | 'getComputedFields'
+  | 'getRuntimeMappings'
   | 'getFieldByName'
   | 'getTimeField'
   | 'id'
@@ -27,8 +23,9 @@ type IndexPatternMock = Pick<
   | 'title'
   | 'type'
 >;
-type IndexPatternMockSpec = Pick<IIndexPattern, 'id' | 'title' | 'type' | 'timeFieldName'> & {
+type IndexPatternMockSpec = Pick<DataView, 'id' | 'title' | 'type' | 'timeFieldName'> & {
   fields: FieldSpec[];
+  runtimeFields?: estypes.MappingRuntimeFields;
 };
 
 export const createIndexPatternMock = ({
@@ -36,6 +33,7 @@ export const createIndexPatternMock = ({
   title,
   type = undefined,
   fields,
+  runtimeFields,
   timeFieldName,
 }: IndexPatternMockSpec): IndexPatternMock => {
   const indexPatternFieldList = fieldList(fields);
@@ -49,21 +47,12 @@ export const createIndexPatternMock = ({
     isTimeBased: () => timeFieldName != null,
     getFieldByName: (fieldName) => indexPatternFieldList.find(({ name }) => name === fieldName),
     getComputedFields: () => ({
-      runtimeFields: indexPatternFieldList.reduce<Record<string, RuntimeField>>(
-        (accumulatedFields, { name, runtimeField }) => ({
-          ...accumulatedFields,
-          ...(runtimeField != null
-            ? {
-                [name]: runtimeField,
-              }
-            : {}),
-        }),
-        {}
-      ),
+      runtimeFields: runtimeFields ?? {},
       scriptFields: {},
       storedFields: [],
       docvalueFields: [],
     }),
+    getRuntimeMappings: () => runtimeFields ?? {},
   };
 };
 
@@ -71,21 +60,21 @@ export const createIndexPatternsMock = (
   asyncDelay: number,
   indexPatterns: IndexPatternMock[]
 ): {
-  getIdsWithTitle: IndexPatternsContract['getIdsWithTitle'];
-  get: (...args: Parameters<IndexPatternsContract['get']>) => Promise<IndexPatternMock>;
+  getIdsWithTitle: DataViewsContract['getIdsWithTitle'];
+  get: (...args: Parameters<DataViewsContract['get']>) => Promise<IndexPatternMock>;
 } => {
   return {
     async getIdsWithTitle(_refresh?: boolean) {
       const indexPatterns$ = of(
         indexPatterns.map(({ id = 'unknown_id', title }) => ({ id, title }))
       );
-      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
+      return await firstValueFrom(indexPatterns$.pipe(delay(asyncDelay)));
     },
     async get(indexPatternId: string) {
       const indexPatterns$ = from(
         indexPatterns.filter((indexPattern) => indexPattern.id === indexPatternId)
       );
-      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
+      return await firstValueFrom(indexPatterns$.pipe(delay(asyncDelay)));
     },
   };
 };

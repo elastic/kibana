@@ -12,7 +12,6 @@ fi
 echo "--- Upload Build Artifacts"
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
 cd "$KIBANA_DIR/target"
-mv kibana-*-linux-x86_64.tar.gz kibana-default.tar.gz
-buildkite-agent artifact upload kibana-default.tar.gz
-buildkite-agent artifact upload kibana-default-plugins.tar.gz
+cp kibana-*-linux-x86_64.tar.gz kibana-default.tar.gz
+buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
 cd -

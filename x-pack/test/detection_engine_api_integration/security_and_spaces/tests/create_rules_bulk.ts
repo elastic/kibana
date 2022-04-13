@@ -7,10 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_STATUS_URL,
-} from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -30,26 +27,24 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('create_rules_bulk', () => {
-    describe('validation errors', () => {
-      it('should give a 200 even if the index does not exist as all bulks return a 200 but have an error of 409 bad request in the body', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+    describe('deprecations', () => {
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log);
+      });
+
+      it('should return a warning header', async () => {
+        const { header } = await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule()])
           .expect(200);
 
-        expect(body).to.eql([
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
-          },
-        ]);
+        expect(header.warning).to.be(
+          '299 Kibana "Deprecated endpoint: /api/detection_engine/rules/_bulk_create API is deprecated since v8.2. Please use the /api/detection_engine/rules/_bulk_action API instead. See https://www.elastic.co/guide/en/security/master/rule-api-overview.html for more detail."'
+        );
       });
     });
 
@@ -63,17 +58,17 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule()])
           .expect(200);
@@ -94,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
        When the api key is updated before / while the rule is executing, the alert
        executor no longer has access to a service to update the rule status
        saved object in Elasticsearch. Because of this, we cannot set the rule into
-       a 'failure' state, so the user ends up seeing 'going to run' as that is the
+       a 'failure' state, so the user ends up seeing 'running' as that is the
        last status set for the rule before it erupts in an error that cannot be
        recorded inside of the executor.
 
@@ -104,25 +99,17 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
         const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([simpleRule])
           .expect(200);
 
-        await waitForRuleSuccessOrStatus(supertest, body[0].id);
-
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [body[0].id] })
-          .expect(200);
-
-        expect(statusBody[body[0].id].current_status.status).to.eql('succeeded');
+        await waitForRuleSuccessOrStatus(supertest, log, body[0].id);
       });
 
       it('should create a single rule without a rule_id', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRuleWithoutRuleId()])
           .expect(200);
@@ -133,7 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id twice', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule(), getSimpleRule()])
           .expect(200);
@@ -151,13 +138,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id that already exists', async () => {
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule()])
           .expect(200);
 
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'foo')
           .send([getSimpleRule()])
           .expect(200);

@@ -108,7 +108,7 @@ export const DOCUMENT_PERMISSIONS_TEXT = i18n.translate(
 export const DOCUMENT_PERMISSIONS_DISABLED_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.documentPermissionsDisabled.text',
   {
-    defaultMessage: 'Disabled for this sources',
+    defaultMessage: 'Disabled for this source',
   }
 );
 
@@ -147,13 +147,6 @@ export const EXTERNAL_IDENTITIES_LINK = i18n.translate(
   }
 );
 
-export const ACCESS_TOKEN_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.accessToken.label',
-  {
-    defaultMessage: 'Access Token',
-  }
-);
-
 export const ID_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.id.label', {
   defaultMessage: 'Source Identifier',
 });
@@ -169,7 +162,7 @@ export const DOC_PERMISSIONS_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.docPermissions.description',
   {
     defaultMessage:
-      'Document-level permissions manage content access content on individual or group attributes. Allow or deny access to specific documents.',
+      'Document-level permissions manage content access on individual or group attributes. Allow or deny access to specific documents.',
   }
 );
 
@@ -377,6 +370,13 @@ export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
   }
 );
 
+export const DOWNLOAD_DIAGNOSTIC_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.downloadDiagnosticButton',
+  {
+    defaultMessage: 'Download diagnostic bundle',
+  }
+);
+
 export const SOURCE_NAME_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceName.label',
   {
@@ -527,11 +527,11 @@ export const SOURCE_OVERVIEW_TITLE = i18n.translate(
   }
 );
 
-export const SOURCE_SYNCRONIZATION_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationDescription',
+export const SOURCE_SYNCHRONIZATION_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationDescription',
   {
     defaultMessage:
-      'DO NOT TRANSLATE, temporary placeholder: Sync chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'Enable or disable synchronization of data from this content source to Workplace Search.',
   }
 );
 
@@ -539,43 +539,96 @@ export const SOURCE_FREQUENCY_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.sourceFrequencyDescription',
   {
     defaultMessage:
-      'DO NOT TRANSLATE, temporary placeholder: Frequency chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'Manage the frequency of data synchronization from Workplace search to this content source. Sync more frequently to ensure your data is up to date. Sync less frequently to reduce the burden on third party servers.',
   }
 );
 
-export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsDescription',
+export const SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsDescription',
   {
     defaultMessage:
-      'DO NOT TRANSLATE, temporary placeholder: Objects chupa chups dragée gummi bears jelly beans brownie. Fruitcake pie chocolate cake caramels carrot cake cotton candy dragée sweet roll soufflé.',
+      'Flexibly manage the documents to be synchronized and made available for search using granular controls below.',
   }
 );
 
-export const SOURCE_OBJECTS_AND_ASSETS_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsLabel',
+export const SOURCE_ASSETS_AND_OBJECTS_LEARN_MORE_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsLearnMoreLink',
   {
-    defaultMessage: 'Object and details to include in search results',
+    defaultMessage: 'Learn more about sync objects types.',
   }
 );
 
-export const SOURCE_SYNCRONIZATION_TOGGLE_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleLabel',
+export const SOURCE_ASSETS_AND_OBJECTS_ASSETS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsAssetsLabel',
+  { defaultMessage: 'Assets' }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsLabel',
+  { defaultMessage: 'Objects' }
+);
+
+export const SOURCE_SYNCHRONIZATION_TOGGLE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationToggleLabel',
   {
     defaultMessage: 'Synchronize this source',
   }
 );
 
-export const SOURCE_SYNCRONIZATION_TOGGLE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationToggleDescription',
+export const SOURCE_SYNCHRONIZATION_TOGGLE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationToggleDescription',
   {
     defaultMessage: 'Source content will automatically be kept in sync.',
   }
 );
 
-export const SOURCE_SYNCRONIZATION_FREQUENCY_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncronizationFrequencyTitle',
+export const SOURCE_SYNCHRONIZATION_FREQUENCY_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationFrequencyTitle',
   {
-    defaultMessage: 'Syncronization frequency',
+    defaultMessage: 'Synchronization frequency',
+  }
+);
+
+export const SOURCE_SYNCHRONIZATION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationTitle',
+  {
+    defaultMessage: 'Synchronization',
+  }
+);
+
+export const SOURCE_SYNCHRONIZATION_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSynchronizationButtonLabel',
+  {
+    defaultMessage: 'Synchronize content',
+  }
+);
+
+export const SOURCE_SYNC_FREQUENCY_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncFrequencyLinkLabel',
+  {
+    defaultMessage: 'sync frequency',
+  }
+);
+
+export const SOURCE_BLOCKED_TIME_WINDOWS_LINK_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceBlockedTimeWindowsLinkLabel',
+  {
+    defaultMessage: 'blocked time windows',
+  }
+);
+
+export const SOURCE_SYNC_CONFIRM_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncConfirmTitle',
+  {
+    defaultMessage: 'Start new content sync?',
+  }
+);
+
+export const SOURCE_SYNC_CONFIRM_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceSyncConfirmMessage',
+  {
+    defaultMessage:
+      'Are you sure you would like to continue with this request and stop all other syncs?',
   }
 );
 
@@ -593,13 +646,6 @@ export const BLOCKED_TIME_WINDOWS_TITLE = i18n.translate(
   }
 );
 
-export const SYNCHRONIZATION_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationLinkLabel',
-  {
-    defaultMessage: 'Learn more about synchronization',
-  }
-);
-
 export const SYNCHRONIZATION_DISABLED_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationDisabledTitle',
   {
@@ -611,27 +657,6 @@ export const SYNCHRONIZATION_DISABLED_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.synchronizationDisabledDescription',
   {
     defaultMessage: 'Contact your administrator to enable synchronization controls.',
-  }
-);
-
-export const DIFFERENT_SYNC_TYPES_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.differentSyncTypesLinkLabel',
-  {
-    defaultMessage: 'Learn more about different sync types',
-  }
-);
-
-export const SYNC_BEST_PRACTICES_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncBestPracticesLinkLabel',
-  {
-    defaultMessage: 'Learn more about sync best practices',
-  }
-);
-
-export const SYNC_OBJECTS_TYPES_LINK_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncObjectsTypesLinkLabel',
-  {
-    defaultMessage: 'Learn more about sync objects types',
   }
 );
 
@@ -702,20 +727,6 @@ export const BLOCKED_EMPTY_STATE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.blockedEmptyStateDescription',
   {
     defaultMessage: 'Add a blocked time window to only perform syncs at the right time.',
-  }
-);
-
-export const SYNC_ENABLED_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncEnabledMessage',
-  {
-    defaultMessage: 'Source synchronization enabled.',
-  }
-);
-
-export const SYNC_DISABLED_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.syncDisabledMessage',
-  {
-    defaultMessage: 'Source synchronization disabled.',
   }
 );
 

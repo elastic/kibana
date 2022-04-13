@@ -14,11 +14,11 @@ curl localhost:5601/api/fleet/epm/packages
 Install a package:
 
 ```
-curl -X POST localhost:5601/api/fleet/epm/packages/iptables-1.0.4
+curl -X POST localhost:5601/api/fleet/epm/packages/iptables/1.0.4
 ```
 
 Delete a package:
 
 ```
-curl -X DELETE localhost:5601/api/fleet/epm/packages/iptables-1.0.4
+curl -X DELETE localhost:5601/api/fleet/epm/packages/iptables/1.0.4
 ```

@@ -7,7 +7,8 @@
 
 import './mocks';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '@kbn/test/jest';
+export type { TestBed } from '@kbn/test-jest-helpers';
+export { nextTick, getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 
 export {
   setupEnvironment,
@@ -16,4 +17,6 @@ export {
   kibanaVersion,
 } from './setup_environment';
 
-export { TestSubjects } from './test_subjects';
+export type { TestSubjects } from './test_subjects';
+
+export * from './fixtures';

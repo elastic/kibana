@@ -6,10 +6,8 @@
  */
 
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
-import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 
-export type UrlParams = {
+export interface UrlParams {
   detailTab?: string;
   end?: string;
   flyoutDetailTab?: string;
@@ -17,8 +15,6 @@ export type UrlParams = {
   environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
-  exactStart?: string;
-  exactEnd?: string;
   refreshInterval?: number;
   refreshPaused?: boolean;
   sortDirection?: string;
@@ -37,8 +33,8 @@ export type UrlParams = {
   percentile?: number;
   latencyAggregationType?: LatencyAggregationType;
   comparisonEnabled?: boolean;
-  comparisonType?: TimeRangeComparisonType;
-} & Partial<Record<UxLocalUIFilterName, string>>;
+  offset?: string;
+}
 
 export type UxUrlParams = UrlParams;
 export type ApmUrlParams = Omit<UrlParams, 'environment' | 'kuery'>;

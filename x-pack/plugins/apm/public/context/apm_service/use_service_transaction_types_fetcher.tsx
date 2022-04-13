@@ -21,13 +21,15 @@ export function useServiceTransactionTypesFetcher({
   const { data = INITIAL_DATA } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/transaction_types',
-          params: {
-            path: { serviceName },
-            query: { start, end },
-          },
-        });
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transaction_types',
+          {
+            params: {
+              path: { serviceName },
+              query: { start, end },
+            },
+          }
+        );
       }
     },
     [serviceName, start, end]

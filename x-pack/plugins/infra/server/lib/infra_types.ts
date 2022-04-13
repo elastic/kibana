@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
+import type { IBasePath } from 'kibana/server';
 import { handleEsError } from '../../../../../src/plugins/es_ui_shared/server';
-import { InfraConfig } from '../plugin';
-import { GetLogQueryFields } from '../services/log_queries/get_log_query_fields';
 import { RulesServiceSetup } from '../services/rules';
+import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
@@ -27,8 +28,10 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   framework: KibanaFramework;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
-  getLogQueryFields: GetLogQueryFields;
   handleEsError: typeof handleEsError;
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
+  getStartServices: InfraPluginStartServicesAccessor;
+  logger: Logger;
+  basePath: IBasePath;
 }

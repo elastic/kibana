@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FunctionFormComponent } from './function_form_component';
+import { FunctionFormComponent as Component } from './function_form_component';
 import { FunctionUnknown } from './function_unknown';
 import { FunctionFormContextPending } from './function_form_context_pending';
 import { FunctionFormContextError } from './function_form_context_error';
@@ -56,5 +56,5 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
     );
   }
 
-  return <FunctionFormComponent {...props} />;
+  return <Component {...props} />;
 };

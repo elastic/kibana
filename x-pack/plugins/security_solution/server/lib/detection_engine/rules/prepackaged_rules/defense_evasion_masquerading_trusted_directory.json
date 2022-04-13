@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies execution from a directory masquerading as the Windows Program Files directories. These paths are trusted and usually host trusted third party programs. An adversary may leverage masquerading, along with low privileges to bypass detections whitelisting those folders.",
+  "description": "Identifies execution from a directory masquerading as the Windows Program Files directories. These paths are trusted and usually host trusted third party programs. An adversary may leverage masquerading, along with low privileges to bypass detections allowlisting those folders.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Program Files Directory Masquerading",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type == \"start\" and\n process.executable : \"C:\\\\*Program*Files*\\\\*.exe\" and\n not process.executable : (\"C:\\\\Program Files\\\\*.exe\", \"C:\\\\Program Files (x86)\\\\*.exe\", \"C:\\\\Users\\\\*.exe\", \"C:\\\\ProgramData\\\\*.exe\")\n",
   "risk_score": 47,
   "rule_id": "32c5cf9c-2ef8-4e87-819e-5ccb7cd18b14",
@@ -35,12 +36,19 @@
         {
           "id": "T1036",
           "name": "Masquerading",
-          "reference": "https://attack.mitre.org/techniques/T1036/"
+          "reference": "https://attack.mitre.org/techniques/T1036/",
+          "subtechnique": [
+            {
+              "id": "T1036.005",
+              "name": "Match Legitimate Name or Location",
+              "reference": "https://attack.mitre.org/techniques/T1036/005/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 7
 }

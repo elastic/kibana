@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { flatten } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
 import {
@@ -18,18 +16,6 @@ import {
   QuerySuggestionTypes,
 } from '../../../../../../../src/plugins/data/public';
 import { KqlQuerySuggestionProvider } from './types';
-
-const getDescription = (field: IFieldType) => {
-  return (
-    <p>
-      <FormattedMessage
-        id="data.kueryAutocomplete.filterResultsDescription"
-        defaultMessage="Filter results that contain {fieldName}"
-        values={{ fieldName: <span className="kbnSuggestionItem__callout">{field.name}</span> }}
-      />
-    </p>
-  );
-};
 
 const keywordComparator = (first: IFieldType, second: IFieldType) => {
   const extensions = ['raw', 'keyword'];
@@ -72,7 +58,6 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
               field.name.slice(field.subType.nested.path.length + 1)
             )}  }`
           : `${escapeKuery(field.name.slice(nestedPath ? nestedPath.length + 1 : 0))} `;
-      const description = getDescription(field);
       const cursorIndex =
         field.subType && field.subType.nested && remainingPath.length > 0
           ? text.length - 2
@@ -81,7 +66,6 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
       return {
         type: QuerySuggestionTypes.Field,
         text,
-        description,
         start,
         end,
         cursorIndex,

@@ -14,7 +14,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { Capabilities } from 'src/core/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
@@ -27,7 +27,8 @@ import {
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { useLinkProps } from '../../../../hooks/use_link_props';
+import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
+import { useLinkProps } from '../../../../../../observability/public';
 
 export interface Props {
   options: MetricsExplorerOptions;
@@ -44,13 +45,13 @@ const fieldToNodeType = (
   groupBy: string | string[]
 ): InventoryItemType | undefined => {
   const fields = Array.isArray(groupBy) ? groupBy : [groupBy];
-  if (fields.includes(source.fields.host)) {
+  if (fields.includes(HOST_FIELD)) {
     return 'host';
   }
-  if (fields.includes(source.fields.pod)) {
+  if (fields.includes(POD_FIELD)) {
     return 'pod';
   }
-  if (fields.includes(source.fields.container)) {
+  if (fields.includes(CONTAINER_FIELD)) {
     return 'container';
   }
 };

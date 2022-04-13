@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
 
 import {

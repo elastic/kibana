@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LensIconChartHeatmap } from '../assets/chart_heatmap';
+import { HeatmapIcon } from '../../../../../src/plugins/chart_expressions/expression_heatmap/public';
 
 export const LENS_HEATMAP_RENDERER = 'lens_heatmap_renderer';
 
@@ -24,9 +24,9 @@ export const CHART_SHAPES = {
 export const CHART_NAMES = {
   heatmap: {
     shapeType: CHART_SHAPES.HEATMAP,
-    icon: LensIconChartHeatmap,
+    icon: HeatmapIcon,
     label: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
-      defaultMessage: 'Heatmap',
+      defaultMessage: 'Heat map',
     }),
     groupLabel,
   },
@@ -38,8 +38,8 @@ export const GROUP_ID = {
   CELL: 'cell',
 } as const;
 
-export const FUNCTION_NAME = 'lens_heatmap';
+export const FUNCTION_NAME = 'heatmap';
 
-export const LEGEND_FUNCTION = 'lens_heatmap_legendConfig';
+export const LEGEND_FUNCTION = 'heatmap_legend';
 
-export const HEATMAP_GRID_FUNCTION = 'lens_heatmap_grid';
+export const HEATMAP_GRID_FUNCTION = 'heatmap_grid';

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { licenseCheck, UMLicenseCheck } from './license';
+export type { UMLicenseCheck } from './license';
+export { licenseCheck } from './license';

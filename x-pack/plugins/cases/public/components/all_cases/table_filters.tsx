@@ -8,16 +8,17 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
-import { CaseStatuses, CaseStatusWithAllStatus, StatusAll } from '../../../common';
+import { StatusAll, CaseStatusWithAllStatus } from '../../../common/ui/types';
+import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
-
 import * as i18n from './translations';
+
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
   countInProgressCases: number | null;
@@ -26,6 +27,9 @@ interface CasesTableFiltersProps {
   initial: FilterOptions;
   setFilterRefetch: (val: () => void) => void;
   hiddenStatuses?: CaseStatusWithAllStatus[];
+  availableSolutions: string[];
+  displayCreateCaseButton?: boolean;
+  onCreateCasePressed?: () => void;
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -47,6 +51,7 @@ const defaultInitial = {
   reporters: [],
   status: StatusAll,
   tags: [],
+  owner: [],
 };
 
 const CasesTableFiltersComponent = ({
@@ -57,12 +62,16 @@ const CasesTableFiltersComponent = ({
   initial = defaultInitial,
   setFilterRefetch,
   hiddenStatuses,
+  availableSolutions,
+  displayCreateCaseButton,
+  onCreateCasePressed,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map((r) => r.full_name ?? r.username ?? '')
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
+  const [selectedOwner, setSelectedOwner] = useState(initial.owner);
   const { tags, fetchTags } = useGetTags();
   const { reporters, respReporters, fetchReporters } = useGetReporters();
 
@@ -107,6 +116,16 @@ const CasesTableFiltersComponent = ({
     [onFilterChanged, selectedTags]
   );
 
+  const handleSelectedSolution = useCallback(
+    (newOwner) => {
+      if (!isEqual(newOwner, selectedOwner) && newOwner.length) {
+        setSelectedOwner(newOwner);
+        onFilterChanged({ owner: newOwner });
+      }
+    },
+    [onFilterChanged, selectedOwner]
+  );
+
   useEffect(() => {
     if (selectedTags.length) {
       const newTags = selectedTags.filter((t) => tags.includes(t));
@@ -141,6 +160,12 @@ const CasesTableFiltersComponent = ({
     }),
     [countClosedCases, countInProgressCases, countOpenCases]
   );
+
+  const handleOnCreateCasePressed = useCallback(() => {
+    if (onCreateCasePressed) {
+      onCreateCasePressed();
+    }
+  }, [onCreateCasePressed]);
 
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -182,8 +207,28 @@ const CasesTableFiltersComponent = ({
             options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
           />
+          {availableSolutions.length > 1 && (
+            <FilterPopover
+              buttonLabel={i18n.SOLUTION}
+              onSelectedOptionsChanged={handleSelectedSolution}
+              selectedOptions={selectedOwner}
+              options={availableSolutions}
+            />
+          )}
         </EuiFilterGroup>
       </EuiFlexItem>
+      {displayCreateCaseButton && onCreateCasePressed ? (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={handleOnCreateCasePressed}
+            iconType="plusInCircle"
+            data-test-subj="cases-table-add-case-filter-bar"
+          >
+            {i18n.CREATE_CASE_TITLE}
+          </EuiButton>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };

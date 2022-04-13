@@ -1,6 +1,7 @@
 {
   "author": [
-    "Elastic"
+    "Elastic",
+    "Austin Songer"
   ],
   "description": "Identifies suspicious commands being used with certutil.exe. CertUtil is a native Windows component which is part of Certificate Services. CertUtil is often abused by attackers to live off the land for stealthier command and control or data exfiltration.",
   "from": "now-9m",
@@ -12,7 +13,8 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious CertUtil Commands",
-  "query": "process where event.type == \"start\" and\n  (process.name : \"certutil.exe\" or process.pe.original_file_name == \"CertUtil.exe\") and \n  process.args : (\"?decode\", \"?encode\", \"?urlcache\", \"?verifyctl\", \"?encodehex\", \"?decodehex\")\n",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "process where event.type == \"start\" and\n  (process.name : \"certutil.exe\" or process.pe.original_file_name == \"CertUtil.exe\") and \n  process.args : (\"?decode\", \"?encode\", \"?urlcache\", \"?verifyctl\", \"?encodehex\", \"?decodehex\", \"?exportPFX\")\n",
   "references": [
     "https://twitter.com/Moriarty_Meng/status/984380793383370752",
     "https://twitter.com/egre55/status/1087685529016193025",
@@ -46,7 +48,9 @@
       ]
     }
   ],
+  "timeline_id": "e70679c2-6cde-4510-9764-4823df18f7db",
+  "timeline_title": "Comprehensive Process Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 11
 }

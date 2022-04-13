@@ -1107,6 +1107,9 @@ export const mockTimelineData: TimelineItem[] = [
               field: ['source.ip'],
               type: ['ip'],
             },
+            feed: {
+              name: ['feed_name'],
+            },
           },
         ],
       },
@@ -1549,6 +1552,7 @@ export const mockTgridModel: TGridModel = {
     },
   ],
   dataProviders: [],
+  dataViewId: null,
   defaultColumns: [],
   queryFields: [],
   dateRange: {
@@ -1562,8 +1566,6 @@ export const mockTgridModel: TGridModel = {
   selectAll: false,
   id: 'ef579e40-jibber-jabber',
   indexNames: [],
-  isAddToExistingCaseOpen: false,
-  isCreateNewCaseOpen: false,
   isLoading: false,
   isSelectAllChecked: false,
   kqlQuery: {
@@ -1584,4 +1586,5 @@ export const mockTgridModel: TGridModel = {
   ],
   title: 'Test rule',
   version: '1',
+  timelineType: 'default',
 };

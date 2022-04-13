@@ -56,7 +56,9 @@ export const SchemaBaseLogic = kea<MakeLogicType<SchemaBaseValues, SchemaBaseAct
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/internal/app_search/engines/${engineName}/schema`);
+        const response = await http.get<SchemaApiResponse | MetaEngineSchemaApiResponse>(
+          `/internal/app_search/engines/${engineName}/schema`
+        );
         actions.onSchemaLoad(response);
       } catch (e) {
         flashAPIErrors(e);

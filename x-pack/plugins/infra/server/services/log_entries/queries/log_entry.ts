@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../../../../common/typed_json';
 import {
@@ -32,7 +32,6 @@ export const createGetLogEntryQuery = (
       },
     },
     fields: ['*'],
-    // @ts-expect-error @elastic/elasticsearch doesn't declare "runtime_mappings" property
     runtime_mappings: runtimeMappings,
     sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
     _source: false,

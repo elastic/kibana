@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../job_creator_context';
 

@@ -5,34 +5,63 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent } from '@testing-library/react';
+import React from 'react';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { HTTPAdvancedFields } from './advanced_fields';
-import { ConfigKeys, DataStream, HTTPMethod, IHTTPAdvancedFields, Validation } from '../types';
 import {
-  HTTPAdvancedFieldsContextProvider,
   defaultHTTPAdvancedFields as defaultConfig,
+  HTTPAdvancedFieldsContextProvider,
 } from '../contexts';
+import {
+  ConfigKey,
+  DataStream,
+  HTTPAdvancedFields as HTTPAdvancedFieldsType,
+  HTTPMethod,
+  Validation,
+} from '../types';
 import { validate as centralValidation } from '../validation';
+import { HTTPAdvancedFields } from './advanced_fields';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
+jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
+
 const defaultValidation = centralValidation[DataStream.HTTP];
 
 describe('<HTTPAdvancedFields />', () => {
+  const onFieldBlur = jest.fn();
+
   const WrappedComponent = ({
     defaultValues,
     validate = defaultValidation,
+    children,
   }: {
-    defaultValues?: IHTTPAdvancedFields;
+    defaultValues?: HTTPAdvancedFieldsType;
     validate?: Validation;
+    children?: React.ReactNode;
   }) => {
     return (
       <HTTPAdvancedFieldsContextProvider defaultValues={defaultValues}>
-        <HTTPAdvancedFields validate={validate} />
+        <HTTPAdvancedFields validate={validate} onFieldBlur={onFieldBlur}>
+          {children}
+        </HTTPAdvancedFields>
       </HTTPAdvancedFieldsContextProvider>
     );
   };
@@ -56,25 +85,25 @@ describe('<HTTPAdvancedFields />', () => {
     const username = getByLabelText('Username') as HTMLInputElement;
     const password = getByLabelText('Password') as HTMLInputElement;
     expect(requestMethod).toBeInTheDocument();
-    expect(requestMethod.value).toEqual(defaultConfig[ConfigKeys.REQUEST_METHOD_CHECK]);
+    expect(requestMethod.value).toEqual(defaultConfig[ConfigKey.REQUEST_METHOD_CHECK]);
     expect(requestHeaders).toBeInTheDocument();
     expect(requestBody).toBeInTheDocument();
     expect(indexResponseBody).toBeInTheDocument();
     expect(indexResponseBody.checked).toBe(true);
     expect(indexResponseBodySelect).toBeInTheDocument();
-    expect(indexResponseBodySelect.value).toEqual(defaultConfig[ConfigKeys.RESPONSE_BODY_INDEX]);
+    expect(indexResponseBodySelect.value).toEqual(defaultConfig[ConfigKey.RESPONSE_BODY_INDEX]);
     expect(indexResponseHeaders).toBeInTheDocument();
     expect(indexResponseHeaders.checked).toBe(true);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKey.PROXY_URL]);
     expect(responseStatusEquals).toBeInTheDocument();
     expect(responseBodyContains).toBeInTheDocument();
     expect(responseBodyDoesNotContain).toBeInTheDocument();
     expect(responseHeadersContain).toBeInTheDocument();
     expect(username).toBeInTheDocument();
-    expect(username.value).toBe(defaultConfig[ConfigKeys.USERNAME]);
+    expect(username.value).toBe(defaultConfig[ConfigKey.USERNAME]);
     expect(password).toBeInTheDocument();
-    expect(password.value).toBe(defaultConfig[ConfigKeys.PASSWORD]);
+    expect(password.value).toBe(defaultConfig[ConfigKey.PASSWORD]);
   });
 
   it('handles changing fields', () => {
@@ -102,5 +131,27 @@ describe('<HTTPAdvancedFields />', () => {
     expect(requestHeaders).toBeInTheDocument();
     expect(indexResponseBody.checked).toBe(false);
     expect(indexResponseHeaders.checked).toBe(false);
+  });
+
+  it('calls onBlur', () => {
+    const { getByLabelText } = render(<WrappedComponent />);
+
+    const username = getByLabelText('Username') as HTMLInputElement;
+    const requestMethod = getByLabelText('Request method') as HTMLInputElement;
+    const indexResponseBody = getByLabelText('Index response body') as HTMLInputElement;
+
+    [username, requestMethod, indexResponseBody].forEach((field) => fireEvent.blur(field));
+
+    expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.USERNAME);
+    expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.REQUEST_METHOD_CHECK);
+    expect(onFieldBlur).toHaveBeenCalledWith(ConfigKey.RESPONSE_BODY_INDEX);
+  });
+
+  it('renders upstream fields', () => {
+    const upstreamFieldsText = 'Monitor Advanced field section';
+    const { getByText } = render(<WrappedComponent>{upstreamFieldsText}</WrappedComponent>);
+
+    const upstream = getByText(upstreamFieldsText) as HTMLInputElement;
+    expect(upstream).toBeInTheDocument();
   });
 });

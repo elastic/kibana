@@ -12,12 +12,14 @@ import {
   getEmptyFindResult,
   getAlertMock,
   getFindResultWithSingleHit,
+  getBasicEmptySearchResponse,
+  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { importRulesRoute } from './import_rules_route';
-import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
+import * as createRulesAndExceptionsStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
@@ -51,8 +53,9 @@ describe.each([
     clients.rulesClient.update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
+    clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     importRulesRoute(server.router, config, ml, isRuleRegistryEnabled);
   });
@@ -74,21 +77,6 @@ describe.each([
         message: "Can't import more than 10000 rules",
         status_code: 500,
       });
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
-      const response = await server.inject(request, context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
-    it('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      // @ts-expect-error
-      const response = await server.inject(request, contextWithoutSecuritySolution);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
   });
 
@@ -114,12 +102,15 @@ describe.each([
         ],
         success: false,
         success_count: 0,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
-    test('returns error if createPromiseFromStreams throws error', async () => {
+    test('returns error if createRulesAndExceptionsStreamFromNdJson throws error', async () => {
       const transformMock = jest
-        .spyOn(createRulesStreamFromNdJson, 'createRulesStreamFromNdJson')
+        .spyOn(createRulesAndExceptionsStreamFromNdJson, 'createRulesAndExceptionsStreamFromNdJson')
         .mockImplementation(() => {
           throw new Error('Test error');
         });
@@ -133,7 +124,9 @@ describe.each([
     test('returns an error if the index does not exist when rule registry not enabled', async () => {
       clients.appClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
       context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          getBasicNoShardsSearchResponse()
+        )
       );
       const response = await server.inject(request, context);
       expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
@@ -182,6 +175,9 @@ describe.each([
         errors: [],
         success: true,
         success_count: 1,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -203,6 +199,9 @@ describe.each([
         ],
         success: false,
         success_count: 0,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -226,6 +225,9 @@ describe.each([
           ],
           success: false,
           success_count: 0,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -243,6 +245,9 @@ describe.each([
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
     });
@@ -260,6 +265,9 @@ describe.each([
         errors: [],
         success: true,
         success_count: 2,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -273,6 +281,9 @@ describe.each([
         errors: [],
         success: true,
         success_count: 9999,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -309,6 +320,9 @@ describe.each([
         ],
         success: false,
         success_count: 0,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -332,6 +346,9 @@ describe.each([
           ],
           success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -346,6 +363,9 @@ describe.each([
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
     });
@@ -375,6 +395,9 @@ describe.each([
           ],
           success: false,
           success_count: 2,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -388,6 +411,9 @@ describe.each([
           errors: [],
           success: true,
           success_count: 3,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
     });

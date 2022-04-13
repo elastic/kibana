@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a child process is spawned by the screensaver engine process, which is consistent with an attacker's malicious payload being executed after the screensaver activated on the endpoint. An adversary can maintain persistence on a macOS endpoint by creating a malicious screensaver (.saver) file and configuring the screensaver plist file to execute code each time the screensaver is activated.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Unexpected Child Process of macOS Screensaver Engine",
+  "note": "## Triage and analysis\n\n- Analyze the descendant processes of the ScreenSaverEngine process for malicious code and suspicious behavior such\nas a download of a payload from a server.\n- Review the installed and activated screensaver on the host. Triage the screensaver (.saver) file that was triggered to\nidentify whether the file is malicious or not.\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "process where event.type == \"start\" and process.parent.name == \"ScreenSaverEngine\"\n",
+  "references": [
+    "https://posts.specterops.io/saving-your-access-d562bf5bf90b",
+    "https://github.com/D00MFist/PersistentJXA"
+  ],
+  "risk_score": 47,
+  "rule_id": "48d7f54d-c29e-4430-93a9-9db6b5892270",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

@@ -7,13 +7,15 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlApi } from './api';
 import { MlCommonUI } from './common_ui';
 import { ML_ALERT_TYPES } from '../../../../plugins/ml/common/constants/alerts';
-import { Alert } from '../../../../plugins/alerting/common';
+import { Rule } from '../../../../plugins/alerting/common';
 import { MlAnomalyDetectionAlertParams } from '../../../../plugins/ml/common/types/alerts';
 
 export function MachineLearningAlertingProvider(
   { getService }: FtrProviderContext,
+  mlApi: MlApi,
   mlCommonUI: MlCommonUI
 ) {
   const retry = getService('retry');
@@ -153,16 +155,17 @@ export function MachineLearningAlertingProvider(
     },
 
     async cleanAnomalyDetectionRules() {
-      const { body: anomalyDetectionRules } = await supertest
+      const { body: anomalyDetectionRules, status: findResponseStatus } = await supertest
         .get(`/api/alerting/rules/_find`)
         .query({ filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}` })
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+        .set('kbn-xsrf', 'foo');
+      mlApi.assertResponseStatusCode(200, findResponseStatus, anomalyDetectionRules);
 
-      for (const rule of anomalyDetectionRules.data as Array<
-        Alert<MlAnomalyDetectionAlertParams>
-      >) {
-        await supertest.delete(`/api/alerting/rule/${rule.id}`).set('kbn-xsrf', 'foo').expect(204);
+      for (const rule of anomalyDetectionRules.data as Array<Rule<MlAnomalyDetectionAlertParams>>) {
+        const { body, status } = await supertest
+          .delete(`/api/alerting/rule/${rule.id}`)
+          .set('kbn-xsrf', 'foo');
+        mlApi.assertResponseStatusCode(204, status, body);
       }
     },
   };

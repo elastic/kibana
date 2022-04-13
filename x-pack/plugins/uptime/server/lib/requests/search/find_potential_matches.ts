@@ -7,6 +7,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { QueryContext } from './query_context';
+import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 
 /**
  * This is the first phase of the query. In it, we find all monitor IDs that have ever matched the given filters.
@@ -40,7 +41,7 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
     body,
   };
 
-  const response = await queryContext.search(params);
+  const response = await queryContext.search(params, 'getMonitorList-potentialMatches');
   return response;
 };
 
@@ -50,6 +51,10 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
   if (queryContext.statusFilter) {
     filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
   }
+
+  filters.push({ exists: { field: 'summary' } });
+
+  filters.push(EXCLUDE_RUN_ONCE_FILTER);
 
   const body = {
     size: 0,

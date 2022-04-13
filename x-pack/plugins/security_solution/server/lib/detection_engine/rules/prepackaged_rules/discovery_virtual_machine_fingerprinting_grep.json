@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to get detailed information about the operating system and hardware. This rule identifies common locations used to discover virtual machine hardware by a non-root user. This technique has been used by the Pupy RAT and other malware.",
+  "false_positives": [
+    "Certain tools or automated software may enumerate hardware information. These tools can be exempted via user name or process arguments to eliminate potential noise."
+  ],
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Virtual Machine Fingerprinting via Grep",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "process where event.type == \"start\" and\n process.name in (\"grep\", \"egrep\") and user.id != \"0\" and\n process.args : (\"parallels*\", \"vmware*\", \"virtualbox*\") and process.args : \"Manufacturer*\" and \n not process.parent.executable in (\"/Applications/Docker.app/Contents/MacOS/Docker\", \"/usr/libexec/kcare/virt-what\")\n",
+  "references": [
+    "https://objective-see.com/blog/blog_0x4F.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "c85eb82c-d2c8-485c-a36f-534f914b7663",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Linux",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1082",
+          "name": "System Information Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1082/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

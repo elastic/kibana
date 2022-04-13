@@ -16,11 +16,11 @@ resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedO
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { readStream, createNewCopies, namespace, retries, } | <code>SavedObjectsResolveImportErrorsOptions</code> |  |
+|  { readStream, createNewCopies, namespace, retries, } | SavedObjectsResolveImportErrorsOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsImportResponse>`
+Promise&lt;SavedObjectsImportResponse&gt;
 
 ## Exceptions
 

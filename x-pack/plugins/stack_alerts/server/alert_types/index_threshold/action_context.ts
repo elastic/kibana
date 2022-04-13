@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { Params } from './alert_type_params';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
+import { RuleExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
 
 // alert type context provided to actions
 
-type AlertInfo = Pick<AlertExecutorOptions, 'name'>;
+type RuleInfo = Pick<RuleExecutorOptions, 'name'>;
 
 export interface ActionContext extends BaseActionContext {
   // a short pre-constructed message which may be used in an action field
@@ -27,43 +27,72 @@ export interface BaseActionContext extends AlertInstanceContext {
   // the date the alert was run as an ISO date
   date: string;
   // the value that met the threshold
-  value: number;
+  value: number | string;
   // threshold conditions
   conditions: string;
 }
 
-export function addMessages(
-  alertInfo: AlertInfo,
-  baseContext: BaseActionContext,
-  params: Params
-): ActionContext {
-  const title = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeContextSubjectTitle', {
+const DEFAULT_TITLE = (name: string, group: string) =>
+  i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeContextSubjectTitle', {
     defaultMessage: 'alert {name} group {group} met threshold',
-    values: {
-      name: alertInfo.name,
-      group: baseContext.group,
-    },
+    values: { name, group },
   });
 
-  const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
-  const message = i18n.translate(
-    'xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription',
-    {
-      defaultMessage: `alert '{name}' is active for group '{group}':
+const RECOVERY_TITLE = (name: string, group: string) =>
+  i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeRecoveryContextSubjectTitle', {
+    defaultMessage: 'alert {name} group {group} recovered',
+    values: { name, group },
+  });
+
+const DEFAULT_MESSAGE = (name: string, context: BaseActionContext, window: string) =>
+  i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeContextMessageDescription', {
+    defaultMessage: `alert '{name}' is active for group '{group}':
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}
 - Timestamp: {date}`,
-      values: {
-        name: alertInfo.name,
-        group: baseContext.group,
-        value: baseContext.value,
-        conditions: baseContext.conditions,
-        window,
-        date: baseContext.date,
-      },
-    }
-  );
+    values: {
+      name,
+      group: context.group,
+      value: context.value,
+      conditions: context.conditions,
+      window,
+      date: context.date,
+    },
+  });
+
+const RECOVERY_MESSAGE = (name: string, context: BaseActionContext, window: string) =>
+  i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeRecoveryContextMessageDescription', {
+    defaultMessage: `alert '{name}' is recovered for group '{group}':
+
+- Value: {value}
+- Conditions Met: {conditions} over {window}
+- Timestamp: {date}`,
+    values: {
+      name,
+      group: context.group,
+      value: context.value,
+      conditions: context.conditions,
+      window,
+      date: context.date,
+    },
+  });
+
+export function addMessages(
+  ruleInfo: RuleInfo,
+  baseContext: BaseActionContext,
+  params: Params,
+  isRecoveryMessage?: boolean
+): ActionContext {
+  const title = isRecoveryMessage
+    ? RECOVERY_TITLE(ruleInfo.name, baseContext.group)
+    : DEFAULT_TITLE(ruleInfo.name, baseContext.group);
+
+  const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
+
+  const message = isRecoveryMessage
+    ? RECOVERY_MESSAGE(ruleInfo.name, baseContext, window)
+    : DEFAULT_MESSAGE(ruleInfo.name, baseContext, window);
 
   return { ...baseContext, title, message };
 }

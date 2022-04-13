@@ -1,0 +1,1457 @@
+{
+  "id": "eventLog",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.ClusterClientAdapter",
+        "type": "Class",
+        "tags": [],
+        "label": "ClusterClientAdapter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "eventLog",
+            "scope": "server",
+            "docId": "kibEventLogPluginApi",
+            "section": "def-server.ClusterClientAdapter",
+            "text": "ClusterClientAdapter"
+          },
+          "<TDoc>"
+        ],
+        "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "ConstructorOpts"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.shutdown",
+            "type": "Function",
+            "tags": [],
+            "label": "shutdown",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.indexDocument",
+            "type": "Function",
+            "tags": [],
+            "label": "indexDocument",
+            "description": [],
+            "signature": [
+              "(doc: TDoc) => void"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.indexDocument.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  "TDoc"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.indexDocuments",
+            "type": "Function",
+            "tags": [],
+            "label": "indexDocuments",
+            "description": [],
+            "signature": [
+              "(docs: TDoc[]) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.indexDocuments.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "docs",
+                "description": [],
+                "signature": [
+                  "TDoc[]"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.doesIlmPolicyExist",
+            "type": "Function",
+            "tags": [],
+            "label": "doesIlmPolicyExist",
+            "description": [],
+            "signature": [
+              "(policyName: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.doesIlmPolicyExist.$1",
+                "type": "string",
+                "tags": [],
+                "label": "policyName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.createIlmPolicy",
+            "type": "Function",
+            "tags": [],
+            "label": "createIlmPolicy",
+            "description": [],
+            "signature": [
+              "(policyName: string, policy: Record<string, unknown>) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIlmPolicy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "policyName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIlmPolicy.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "policy",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.doesIndexTemplateExist",
+            "type": "Function",
+            "tags": [],
+            "label": "doesIndexTemplateExist",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.doesIndexTemplateExist.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.createIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "createIndexTemplate",
+            "description": [],
+            "signature": [
+              "(name: string, template: Record<string, unknown>) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIndexTemplate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIndexTemplate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "template",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.getExistingLegacyIndexTemplates",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingLegacyIndexTemplates",
+            "description": [],
+            "signature": [
+              "(indexTemplatePattern: string) => Promise<",
+              "IndicesGetTemplateResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.getExistingLegacyIndexTemplates.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexTemplatePattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.setLegacyIndexTemplateToHidden",
+            "type": "Function",
+            "tags": [],
+            "label": "setLegacyIndexTemplateToHidden",
+            "description": [],
+            "signature": [
+              "(indexTemplateName: string, currentIndexTemplate: ",
+              "IndicesTemplateMapping",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.setLegacyIndexTemplateToHidden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexTemplateName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.setLegacyIndexTemplateToHidden.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "currentIndexTemplate",
+                "description": [],
+                "signature": [
+                  "IndicesTemplateMapping"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.getExistingIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndices",
+            "description": [],
+            "signature": [
+              "(indexPattern: string) => Promise<",
+              "IndicesGetSettingsResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.getExistingIndices.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.setIndexToHidden",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexToHidden",
+            "description": [],
+            "signature": [
+              "(indexName: string) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.setIndexToHidden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.getExistingIndexAliases",
+            "type": "Function",
+            "tags": [],
+            "label": "getExistingIndexAliases",
+            "description": [],
+            "signature": [
+              "(indexPattern: string) => Promise<",
+              "IndicesGetAliasResponse",
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.getExistingIndexAliases.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.setIndexAliasToHidden",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexAliasToHidden",
+            "description": [],
+            "signature": [
+              "(aliasName: string, currentAliasData: ",
+              "ParsedIndexAlias",
+              "[]) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.setIndexAliasToHidden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "aliasName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.setIndexAliasToHidden.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "currentAliasData",
+                "description": [],
+                "signature": [
+                  "ParsedIndexAlias",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.doesAliasExist",
+            "type": "Function",
+            "tags": [],
+            "label": "doesAliasExist",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.doesAliasExist.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.createIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "createIndex",
+            "description": [],
+            "signature": [
+              "(name: string, body?: Record<string, unknown>) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.createIndex.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "body",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "queryEventsBySavedObjects",
+            "description": [],
+            "signature": [
+              "(queryOptions: ",
+              "FindEventsOptionsBySavedObjectFilter",
+              ") => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.QueryEventsBySavedObjectResult",
+                "text": "QueryEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.queryEventsBySavedObjects.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "queryOptions",
+                "description": [],
+                "signature": [
+                  "FindEventsOptionsBySavedObjectFilter"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.aggregateEventsBySavedObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "aggregateEventsBySavedObjects",
+            "description": [],
+            "signature": [
+              "(queryOptions: ",
+              "AggregateEventsOptionsBySavedObjectFilter",
+              ") => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.AggregateEventsBySavedObjectResult",
+                "text": "AggregateEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.aggregateEventsBySavedObjects.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "queryOptions",
+                "description": [],
+                "signature": [
+                  "AggregateEventsOptionsBySavedObjectFilter"
+                ],
+                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.createReadySignal",
+        "type": "Function",
+        "tags": [],
+        "label": "createReadySignal",
+        "description": [],
+        "signature": [
+          "() => ",
+          "ReadySignal",
+          "<T>"
+        ],
+        "path": "x-pack/plugins/event_log/server/lib/ready_signal.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.AggregateEventsBySavedObjectResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggregateEventsBySavedObjectResult",
+        "description": [],
+        "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.AggregateEventsBySavedObjectResult.aggregations",
+            "type": "Object",
+            "tags": [],
+            "label": "aggregations",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "AggregationsAggregate",
+              "> | undefined"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.IEventLogClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEventLogClient",
+        "description": [],
+        "path": "x-pack/plugins/event_log/server/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.findEventsBySavedObjectIds",
+            "type": "Function",
+            "tags": [],
+            "label": "findEventsBySavedObjectIds",
+            "description": [],
+            "signature": [
+              "(type: string, ids: string[], options?: Partial<",
+              "FindOptionsType",
+              "> | undefined, legacyIds?: string[] | undefined) => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.QueryEventsBySavedObjectResult",
+                "text": "QueryEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  "FindOptionsType",
+                  "> | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.findEventsBySavedObjectIds.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "legacyIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds",
+            "type": "Function",
+            "tags": [],
+            "label": "aggregateEventsBySavedObjectIds",
+            "description": [],
+            "signature": [
+              "(type: string, ids: string[], options?: Partial<",
+              "AggregateOptionsType",
+              "> | undefined, legacyIds?: string[] | undefined) => Promise<",
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.AggregateEventsBySavedObjectResult",
+                "text": "AggregateEventsBySavedObjectResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  "AggregateOptionsType",
+                  "> | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogClient.aggregateEventsBySavedObjectIds.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "legacyIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.IEventLogger",
+        "type": "Interface",
+        "tags": [],
+        "label": "IEventLogger",
+        "description": [],
+        "path": "x-pack/plugins/event_log/server/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogger.logEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "logEvent",
+            "description": [],
+            "signature": [
+              "(properties: ",
+              "IEvent",
+              ") => void"
+            ],
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogger.logEvent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "properties",
+                "description": [],
+                "signature": [
+                  "IEvent"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogger.startTiming",
+            "type": "Function",
+            "tags": [],
+            "label": "startTiming",
+            "description": [],
+            "signature": [
+              "(event: ",
+              "IEvent",
+              ") => void"
+            ],
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogger.startTiming.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "IEvent"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogger.stopTiming",
+            "type": "Function",
+            "tags": [],
+            "label": "stopTiming",
+            "description": [],
+            "signature": [
+              "(event: ",
+              "IEvent",
+              ") => void"
+            ],
+            "path": "x-pack/plugins/event_log/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.IEventLogger.stopTiming.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "IEvent"
+                ],
+                "path": "x-pack/plugins/event_log/server/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.QueryEventsBySavedObjectResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "QueryEventsBySavedObjectResult",
+        "description": [],
+        "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.QueryEventsBySavedObjectResult.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.QueryEventsBySavedObjectResult.per_page",
+            "type": "number",
+            "tags": [],
+            "label": "per_page",
+            "description": [],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.QueryEventsBySavedObjectResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.QueryEventsBySavedObjectResult.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "(Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; number_of_scheduled_actions?: number | undefined; number_of_searches?: number | undefined; total_indexing_duration_ms?: number | undefined; es_search_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; schedule_delay?: number | undefined; scheduled?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; outcome?: string | undefined; category?: string[] | undefined; url?: string | undefined; end?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}> | undefined)[]"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.IEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "IEvent",
+        "description": [],
+        "signature": [
+          "DeepPartial<DeepWriteable<Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; number_of_scheduled_actions?: number | undefined; number_of_searches?: number | undefined; total_indexing_duration_ms?: number | undefined; es_search_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; schedule_delay?: number | undefined; scheduled?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; outcome?: string | undefined; category?: string[] | undefined; url?: string | undefined; end?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}>>> | undefined"
+        ],
+        "path": "x-pack/plugins/event_log/generated/schemas.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.IValidatedEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "IValidatedEvent",
+        "description": [],
+        "signature": [
+          "Readonly<{ user?: Readonly<{ name?: string | undefined; } & {}> | undefined; message?: string | undefined; error?: Readonly<{ message?: string | undefined; type?: string | undefined; id?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; tags?: string[] | undefined; kibana?: Readonly<{ alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; execution?: Readonly<{ status?: string | undefined; metrics?: Readonly<{ number_of_triggered_actions?: number | undefined; number_of_scheduled_actions?: number | undefined; number_of_searches?: number | undefined; total_indexing_duration_ms?: number | undefined; es_search_duration_ms?: number | undefined; total_search_duration_ms?: number | undefined; execution_gap_duration_s?: number | undefined; } & {}> | undefined; uuid?: string | undefined; status_order?: number | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; } & {}>[] | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; schedule_delay?: number | undefined; scheduled?: string | undefined; } & {}> | undefined; space_ids?: string[] | undefined; } & {}> | undefined; log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; rule?: Readonly<{ id?: string | undefined; description?: string | undefined; name?: string | undefined; version?: string | undefined; license?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; uuid?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; type?: string[] | undefined; id?: string | undefined; outcome?: string | undefined; category?: string[] | undefined; url?: string | undefined; end?: string | undefined; original?: string | undefined; duration?: number | undefined; code?: string | undefined; action?: string | undefined; kind?: string | undefined; hash?: string | undefined; severity?: number | undefined; created?: string | undefined; dataset?: string | undefined; ingested?: string | undefined; module?: string | undefined; provider?: string | undefined; reason?: string | undefined; reference?: string | undefined; risk_score?: number | undefined; risk_score_norm?: number | undefined; sequence?: number | undefined; timezone?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; } & {}> | undefined"
+        ],
+        "path": "x-pack/plugins/event_log/generated/schemas.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-server.SAVED_OBJECT_REL_PRIMARY",
+        "type": "string",
+        "tags": [],
+        "label": "SAVED_OBJECT_REL_PRIMARY",
+        "description": [],
+        "signature": [
+          "\"primary\""
+        ],
+        "path": "x-pack/plugins/event_log/server/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "eventLog",
+      "id": "def-server.IEventLogService",
+      "type": "Interface",
+      "tags": [],
+      "label": "IEventLogService",
+      "description": [],
+      "path": "x-pack/plugins/event_log/server/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.isLoggingEntries",
+          "type": "Function",
+          "tags": [],
+          "label": "isLoggingEntries",
+          "description": [],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.isIndexingEntries",
+          "type": "Function",
+          "tags": [],
+          "label": "isIndexingEntries",
+          "description": [],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.registerProviderActions",
+          "type": "Function",
+          "tags": [],
+          "label": "registerProviderActions",
+          "description": [],
+          "signature": [
+            "(provider: string, actions: string[]) => void"
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.registerProviderActions.$1",
+              "type": "string",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.registerProviderActions.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "actions",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.isProviderActionRegistered",
+          "type": "Function",
+          "tags": [],
+          "label": "isProviderActionRegistered",
+          "description": [],
+          "signature": [
+            "(provider: string, action: string) => boolean"
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.isProviderActionRegistered.$1",
+              "type": "string",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.isProviderActionRegistered.$2",
+              "type": "string",
+              "tags": [],
+              "label": "action",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.getProviderActions",
+          "type": "Function",
+          "tags": [],
+          "label": "getProviderActions",
+          "description": [],
+          "signature": [
+            "() => Map<string, Set<string>>"
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.registerSavedObjectProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "registerSavedObjectProvider",
+          "description": [],
+          "signature": [
+            "(type: string, provider: ",
+            "SavedObjectProvider",
+            ") => void"
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.registerSavedObjectProvider.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.registerSavedObjectProvider.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                "SavedObjectProvider"
+              ],
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.getLogger",
+          "type": "Function",
+          "tags": [],
+          "label": "getLogger",
+          "description": [],
+          "signature": [
+            "(properties: ",
+            "IEvent",
+            ") => ",
+            {
+              "pluginId": "eventLog",
+              "scope": "server",
+              "docId": "kibEventLogPluginApi",
+              "section": "def-server.IEventLogger",
+              "text": "IEventLogger"
+            }
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogService.getLogger.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "properties",
+              "description": [],
+              "signature": [
+                "IEvent"
+              ],
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "deprecated": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.getIndexPattern",
+          "type": "Function",
+          "tags": [],
+          "label": "getIndexPattern",
+          "description": [],
+          "signature": [
+            "() => string"
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogService.isEsContextReady",
+          "type": "Function",
+          "tags": [],
+          "label": "isEsContextReady",
+          "description": [],
+          "signature": [
+            "() => Promise<boolean>"
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "eventLog",
+      "id": "def-server.IEventLogClientService",
+      "type": "Interface",
+      "tags": [],
+      "label": "IEventLogClientService",
+      "description": [],
+      "path": "x-pack/plugins/event_log/server/types.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "eventLog",
+          "id": "def-server.IEventLogClientService.getClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getClient",
+          "description": [],
+          "signature": [
+            "(request: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => ",
+            {
+              "pluginId": "eventLog",
+              "scope": "server",
+              "docId": "kibEventLogPluginApi",
+              "section": "def-server.IEventLogClient",
+              "text": "IEventLogClient"
+            }
+          ],
+          "path": "x-pack/plugins/event_log/server/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "eventLog",
+              "id": "def-server.IEventLogClientService.getClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/plugins/event_log/server/types.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "eventLog",
+        "id": "def-common.BASE_EVENT_LOG_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_EVENT_LOG_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/event_log\""
+        ],
+        "path": "x-pack/plugins/event_log/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -6,4 +6,5 @@
  */
 
 export { FullTimeRangeSelector } from './full_time_range_selector';
-export { getTimeFilterRange, TimeRange } from './full_time_range_selector_service';
+export type { TimeRange } from './full_time_range_selector_service';
+export { getTimeFilterRange } from './full_time_range_selector_service';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SemVer } from 'semver';
 import type { IRouter } from 'src/core/server';
 
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -33,4 +34,5 @@ export interface RouteDependencies {
   lib: {
     handleEsError: typeof handleEsError;
   };
+  kibanaVersion: SemVer;
 }

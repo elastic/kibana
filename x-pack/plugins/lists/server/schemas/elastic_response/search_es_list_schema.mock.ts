@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   DATE_NOW,
@@ -50,7 +50,6 @@ export const getSearchListMock = (): estypes.SearchResponse<SearchEsListSchema> 
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListMock(),
-        _type: '',
       },
     ],
     max_score: 0,

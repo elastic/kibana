@@ -14,13 +14,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { Source } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
-import { Prompt } from '../../../utils/navigation_warning_prompt';
-import { FieldsConfigurationPanel } from './fields_configuration_panel';
+import { Prompt } from '../../../../../observability/public';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
@@ -120,17 +119,6 @@ export const SourceConfigurationSettings = ({
           isLoading={isLoading}
           metricAliasFieldProps={indicesConfigurationProps.metricAlias}
           readOnly={!isWriteable}
-        />
-      </EuiPanel>
-      <EuiSpacer />
-      <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
-        <FieldsConfigurationPanel
-          containerFieldProps={indicesConfigurationProps.containerField}
-          hostFieldProps={indicesConfigurationProps.hostField}
-          isLoading={isLoading}
-          podFieldProps={indicesConfigurationProps.podField}
-          readOnly={!isWriteable}
-          timestampFieldProps={indicesConfigurationProps.timestampField}
         />
       </EuiPanel>
       <EuiSpacer />

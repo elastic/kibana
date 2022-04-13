@@ -28,8 +28,8 @@ export const buildEventEnrichmentQuery: SecuritySolutionFactory<CtiQueries.event
     ];
 
     return {
-      allowNoIndices: true,
-      ignoreUnavailable: true,
+      allow_no_indices: true,
+      ignore_unavailable: true,
       index: defaultIndex,
       body: {
         _source: false,

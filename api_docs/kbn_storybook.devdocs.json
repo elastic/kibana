@@ -1,0 +1,375 @@
+{
+  "id": "@kbn/storybook",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/storybook",
+        "id": "def-server.mergeWebpackFinal",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeWebpackFinal",
+        "description": [],
+        "signature": [
+          "(extraConfig: ",
+          "Configuration",
+          ") => { webpackFinal: (config: ",
+          "Configuration",
+          ") => ",
+          "Configuration",
+          "; }"
+        ],
+        "path": "packages/kbn-storybook/src/lib/default_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.mergeWebpackFinal.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "extraConfig",
+            "description": [],
+            "signature": [
+              "Configuration"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/storybook",
+        "id": "def-server.runStorybookCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runStorybookCli",
+        "description": [],
+        "signature": [
+          "({ configDir, name }: { configDir: string; name: string; }) => void"
+        ],
+        "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.runStorybookCli.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ configDir, name }",
+            "description": [],
+            "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.runStorybookCli.$1.configDir",
+                "type": "string",
+                "tags": [],
+                "label": "configDir",
+                "description": [],
+                "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.runStorybookCli.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/storybook",
+        "id": "def-server.defaultConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultConfig",
+        "description": [],
+        "path": "packages/kbn-storybook/src/lib/default_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.addons",
+            "type": "Array",
+            "tags": [],
+            "label": "addons",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.stories",
+            "type": "Array",
+            "tags": [],
+            "label": "stories",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.typescript",
+            "type": "Object",
+            "tags": [],
+            "label": "typescript",
+            "description": [],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfig.typescript.reactDocgen",
+                "type": "boolean",
+                "tags": [],
+                "label": "reactDocgen",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfig.features.postcss",
+                "type": "boolean",
+                "tags": [],
+                "label": "postcss",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.babel",
+            "type": "Function",
+            "tags": [],
+            "label": "babel",
+            "description": [
+              "// @ts-expect-error StorybookConfig type is incomplete\n// https://storybook.js.org/docs/react/configure/babel#custom-configuration"
+            ],
+            "signature": [
+              "(options: any) => Promise<any>"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfig.babel.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.webpackFinal",
+            "type": "Function",
+            "tags": [],
+            "label": "webpackFinal",
+            "description": [],
+            "signature": [
+              "(config: ",
+              "Configuration",
+              ", options: ",
+              "Options",
+              ") => { resolve: { alias: { '@emotion/core': string; '@emotion/styled': string; 'emotion-theming': string; }; modules?: string[] | undefined; descriptionFiles?: string[] | undefined; mainFields?: string[] | string[][] | undefined; aliasFields?: string[] | string[][] | undefined; mainFiles?: string[] | undefined; extensions?: string[] | undefined; enforceExtension?: boolean | undefined; unsafeCache?: boolean | {} | undefined; cachePredicate?: ((data: { path: string; request: string; }) => boolean) | undefined; plugins?: ",
+              "ResolvePlugin",
+              "[] | undefined; symlinks?: boolean | undefined; cacheWithContext?: boolean | undefined; roots?: string[] | undefined; }; mode?: \"none\" | \"production\" | \"development\" | undefined; name?: string | undefined; context?: string | undefined; entry?: string | string[] | ",
+              "Entry",
+              " | ",
+              "EntryFunc",
+              " | undefined; devtool?: ",
+              "Options",
+              ".Devtool | undefined; output?: ",
+              "Output",
+              " | undefined; module?: ",
+              "Module",
+              " | undefined; resolveLoader?: ",
+              "ResolveLoader",
+              " | undefined; externals?: ",
+              "ExternalsElement",
+              " | ",
+              "ExternalsElement",
+              "[] | undefined; target?: \"node\" | \"web\" | \"webworker\" | \"async-node\" | \"node-webkit\" | \"atom\" | \"electron\" | \"electron-renderer\" | \"electron-preload\" | \"electron-main\" | ((compiler?: any) => void) | undefined; bail?: boolean | undefined; profile?: boolean | undefined; cache?: boolean | object | undefined; watch?: boolean | undefined; watchOptions?: ",
+              "ICompiler",
+              ".WatchOptions | undefined; node?: false | ",
+              "Node",
+              " | undefined; amd?: { [moduleName: string]: boolean; } | undefined; recordsPath?: string | undefined; recordsInputPath?: string | undefined; recordsOutputPath?: string | undefined; plugins?: ",
+              "Plugin",
+              "[] | undefined; stats?: ",
+              "Stats",
+              ".ToStringOptions | undefined; performance?: false | ",
+              "Options",
+              ".Performance | undefined; parallelism?: number | undefined; optimization?: ",
+              "Options",
+              ".Optimization | undefined; infrastructureLogging?: ",
+              "Options",
+              ".InfrastructureLogging | undefined; }"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfig.webpackFinal.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Configuration"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfig.webpackFinal.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Options"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/storybook",
+        "id": "def-server.defaultConfigWebFinal",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultConfigWebFinal",
+        "description": [],
+        "path": "packages/kbn-storybook/src/lib/default_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfigWebFinal.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfigWebFinal.webpackFinal",
+            "type": "Function",
+            "tags": [],
+            "label": "webpackFinal",
+            "description": [],
+            "signature": [
+              "(config: ",
+              "Configuration",
+              ") => ",
+              "Configuration"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfigWebFinal.webpackFinal.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Configuration"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

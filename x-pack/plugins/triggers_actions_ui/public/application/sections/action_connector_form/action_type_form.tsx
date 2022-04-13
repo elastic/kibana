@@ -7,35 +7,32 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
   EuiFormRow,
-  EuiComboBox,
   EuiAccordion,
   EuiButtonIcon,
   EuiButtonEmpty,
   EuiIconTip,
   EuiText,
   EuiFormLabel,
-  EuiFormControlLayout,
   EuiSuperSelect,
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { partition, pick } from 'lodash';
-import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
+import { partition } from 'lodash';
+import { ActionVariable, RuleActionParam } from '../../../../../alerting/common';
 import {
   IErrorObject,
-  AlertAction,
+  RuleAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
-  REQUIRED_ACTION_VARIABLES,
 } from '../../../types';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -43,15 +40,16 @@ import { ActionAccordionFormProps, ActionGroupWithMessageVariables } from './act
 import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
+import { ConnectorsSelection } from './connectors_selection';
 
 export type ActionTypeFormProps = {
-  actionItem: AlertAction;
+  actionItem: RuleAction;
   actionConnector: ActionConnector;
   index: number;
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
-  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
+  setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -140,32 +138,6 @@ export const ActionTypeForm = ({
   }, [actionItem]);
 
   const canSave = hasSaveActionsCapability(capabilities);
-  const getSelectedOptions = (actionItemId: string) => {
-    const selectedConnector = connectors.find((connector) => connector.id === actionItemId);
-    if (
-      !selectedConnector ||
-      // if selected connector is not preconfigured and action type is for preconfiguration only,
-      // do not show regular connectors of this type
-      (actionTypesIndex &&
-        !actionTypesIndex[selectedConnector.actionTypeId].enabledInConfig &&
-        !selectedConnector.isPreconfigured)
-    ) {
-      return [];
-    }
-    const optionTitle = `${selectedConnector.name} ${
-      selectedConnector.isPreconfigured ? preconfiguredMessage : ''
-    }`;
-    return [
-      {
-        label: optionTitle,
-        value: optionTitle,
-        id: actionItemId,
-        'data-test-subj': 'itemActionConnector',
-      },
-    ];
-  };
-
-  const actionType = actionTypesIndex[actionItem.actionTypeId];
 
   const actionGroupDisplay = (
     actionGroupId: string,
@@ -189,18 +161,6 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
-  const optionsList = connectors
-    .filter(
-      (connectorItem) =>
-        connectorItem.actionTypeId === actionItem.actionTypeId &&
-        // include only enabled by config connectors or preconfigured
-        (actionType.enabledInConfig || connectorItem.isPreconfigured)
-    )
-    .map(({ name, id, isPreconfigured }) => ({
-      label: `${name} ${isPreconfigured ? preconfiguredMessage : ''}`,
-      key: id,
-      id,
-    }));
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
 
@@ -214,90 +174,73 @@ export const ActionTypeForm = ({
     <>
       {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
         <>
-          <EuiFlexGroup component="div">
-            <EuiFlexItem grow={true}>
-              <EuiFormControlLayout
-                fullWidth
-                prepend={
-                  <EuiFormLabel
-                    htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
-                      defaultMessage="Run when"
-                    />
-                  </EuiFormLabel>
-                }
-              >
-                <EuiSuperSelect
-                  fullWidth
-                  id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
-                  data-test-subj={`addNewActionConnectorActionGroup-${index}`}
-                  options={actionGroups.map(({ id: value, name }) => ({
-                    value,
-                    inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
-                    disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
-                    'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
-                  }))}
-                  valueOfSelected={selectedActionGroup.id}
-                  onChange={(group) => {
-                    setActionGroupIdByIndex(group, index);
-                    setActionGroup(group);
-                  }}
+          <EuiSuperSelect
+            prepend={
+              <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
+                  defaultMessage="Run when"
                 />
-              </EuiFormControlLayout>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiFormLabel>
+            }
+            fullWidth
+            id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+            data-test-subj={`addNewActionConnectorActionGroup-${index}`}
+            options={actionGroups.map(({ id: value, name }) => ({
+              value,
+              inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
+              disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
+              'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
+            }))}
+            valueOfSelected={selectedActionGroup.id}
+            onChange={(group) => {
+              setActionGroupIdByIndex(group, index);
+              setActionGroup(group);
+            }}
+          />
+
           <EuiSpacer size="l" />
         </>
       )}
-      <EuiFlexGroup component="div">
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
+            defaultMessage="{connectorInstance} connector"
+            values={{
+              connectorInstance: actionTypesIndex
+                ? actionTypesIndex[actionConnector.actionTypeId].name
+                : actionConnector.actionTypeId,
+            }}
+          />
+        }
+        labelAppend={
+          canSave &&
+          actionTypesIndex &&
+          actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
+              onClick={onAddConnector}
+            >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
-                defaultMessage="{connectorInstance} connector"
-                values={{
-                  connectorInstance: actionTypesIndex
-                    ? actionTypesIndex[actionConnector.actionTypeId].name
-                    : actionConnector.actionTypeId,
-                }}
+                defaultMessage="Add connector"
+                id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
               />
-            }
-            labelAppend={
-              canSave &&
-              actionTypesIndex &&
-              actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
-                <EuiButtonEmpty
-                  size="xs"
-                  data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
-                  onClick={onAddConnector}
-                >
-                  <FormattedMessage
-                    defaultMessage="Add connector"
-                    id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
-                  />
-                </EuiButtonEmpty>
-              ) : null
-            }
-          >
-            <EuiComboBox
-              fullWidth
-              singleSelection={{ asPlainText: true }}
-              options={optionsList}
-              id={`selectActionConnector-${actionItem.id}`}
-              data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
-              selectedOptions={getSelectedOptions(actionItem.id)}
-              onChange={(selectedOptions) => {
-                onConnectorSelected(selectedOptions[0].id ?? '');
-              }}
-              isClearable={false}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiButtonEmpty>
+          ) : null
+        }
+      >
+        <ConnectorsSelection
+          actionItem={actionItem}
+          accordionIndex={index}
+          actionTypesIndex={actionTypesIndex}
+          actionTypeRegistered={actionTypeRegistered}
+          connectors={connectors}
+          onConnectorSelected={onConnectorSelected}
+        />
+      </EuiFormRow>
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
         <EuiErrorBoundary>
@@ -402,9 +345,8 @@ function getAvailableActionVariables(
   actionGroup?: ActionGroupWithMessageVariables
 ) {
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
-    actionGroup?.omitOptionalMessageVariables
-      ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
-      : actionVariables
+    actionVariables,
+    actionGroup?.omitMessageVariables
   );
 
   // partition deprecated items so they show up last

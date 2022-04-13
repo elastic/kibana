@@ -6,13 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
-import { ReportingCore } from '../..';
+import { i18n } from '@kbn/i18n';
+import type { KibanaRequest, KibanaResponseFactory, Logger } from 'kibana/server';
+import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
-import { JobParamsPDFLegacy } from '../../export_types/printable_pdf/types';
-import { checkParamsVersion, cryptoFactory, LevelLogger } from '../../lib';
+import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
-import { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -30,7 +30,7 @@ export class RequestHandler {
     private context: ReportingRequestHandlerContext,
     private req: KibanaRequest,
     private res: KibanaResponseFactory,
-    private logger: LevelLogger
+    private logger: Logger
   ) {}
 
   private async encryptHeaders() {
@@ -53,7 +53,7 @@ export class RequestHandler {
     }
 
     const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger.clone([exportType.id])),
+      exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
       reporting.getStore(),
     ]);
 
@@ -99,13 +99,13 @@ export class RequestHandler {
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
 
+    // 6. Log the action with event log
+    reporting.getEventLogger(report, task).logScheduleTask();
+
     return report;
   }
 
-  public async handleGenerateRequest(
-    exportTypeId: string,
-    jobParams: BaseParams | JobParamsPDFLegacy
-  ) {
+  public async handleGenerateRequest(exportTypeId: string, jobParams: BaseParams) {
     // ensure the async dependencies are loaded
     if (!this.context.reporting) {
       return handleUnavailable(this.res);
@@ -153,7 +153,13 @@ export class RequestHandler {
       });
     }
 
-    // unknown error, can't convert to 4xx
-    throw err;
+    return this.res.customError({
+      statusCode: 500,
+      body:
+        err?.message ||
+        i18n.translate('xpack.reporting.errorHandler.unknownError', {
+          defaultMessage: 'Unknown error',
+        }),
+    });
   }
 }

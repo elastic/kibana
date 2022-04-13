@@ -17,10 +17,6 @@ export type FieldFormatsContentType = 'html' | 'text';
  */
 export interface HtmlContextTypeOptions {
   field?: { name: string };
-  // TODO: get rid of indexPattern dep completely
-  indexPattern?: {
-    formatHit: (hit: { highlight: Record<string, string[]> }) => Record<string, string>;
-  };
   hit?: { highlight: Record<string, string[]> };
 }
 
@@ -65,6 +61,7 @@ export enum FIELD_FORMAT_IDS {
   DATE = 'date',
   DATE_NANOS = 'date_nanos',
   DURATION = 'duration',
+  GEO_POINT = 'geo_point',
   IP = 'ip',
   NUMBER = 'number',
   PERCENT = 'percent',

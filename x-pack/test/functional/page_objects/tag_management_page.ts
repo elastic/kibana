@@ -245,8 +245,15 @@ export class TagManagementPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly settings = this.ctx.getPageObject('settings');
 
-  public readonly tagModal = new TagModal(this.ctx, this);
-  public readonly assignFlyout = new TagAssignmentFlyout(this.ctx, this);
+  public readonly tagModal: TagModal;
+  public readonly assignFlyout: TagAssignmentFlyout;
+
+  constructor(ctx: FtrProviderContext) {
+    super(ctx);
+
+    this.tagModal = new TagModal(this.ctx, this);
+    this.assignFlyout = new TagAssignmentFlyout(this.ctx, this);
+  }
 
   /**
    * Navigate to the tag management section, by accessing the management app, then clicking
@@ -316,6 +323,26 @@ export class TagManagementPageObject extends FtrService {
       return actionPresent;
     } else {
       return await this.testSubjects.exists(`tagsTableAction-${action}`);
+    }
+  }
+
+  async clickActionItem(action: string) {
+    const rows = await this.testSubjects.findAll('tagsTableRow');
+    const firstRow = rows[0];
+    // if there is more than 2 actions, they are wrapped in a popover that opens from a new action.
+    const menuActionPresent = await this.testSubjects.descendantExists(
+      'euiCollapsedItemActionsButton',
+      firstRow
+    );
+    if (menuActionPresent) {
+      const actionButton = await this.testSubjects.findDescendant(
+        'euiCollapsedItemActionsButton',
+        firstRow
+      );
+      await actionButton.click();
+      await this.testSubjects.click(`tagsTableAction-${action}`);
+    } else {
+      await this.testSubjects.click(`tagsTableAction-${action}`);
     }
   }
 

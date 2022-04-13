@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { of } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import 'jest-canvas-mock';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { TimeCache } from './time_cache';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
@@ -17,7 +19,7 @@ describe(`VegaParser.parseAsync`, () => {
   function check(spec, useResize, expectedSpec, warnCount) {
     return async () => {
       const searchApiStub = {
-        search: jest.fn(() => ({ toPromise: jest.fn(() => Promise.resolve({})) })),
+        search: jest.fn(() => of({})),
         resetSearchStats: jest.fn(),
       };
       expectedSpec = expectedSpec || cloneDeep(spec);
@@ -81,6 +83,20 @@ describe(`VegaParser.parseAsync`, () => {
       })
     )
   );
+
+  test(`should return a specific error in case of $schema URL not valid`, async () => {
+    const vp = new VegaParser({
+      $schema: 'https://vega.github.io/schema/vega-lite/v4.jsonanythingtobreakthis',
+      mark: 'circle',
+      encoding: { row: { field: 'a' } },
+    });
+
+    await vp.parseAsync();
+
+    expect(vp.error).toBe(
+      'The URL for the JSON "$schema" is incorrect. Correct the URL, then click Update.'
+    );
+  });
 });
 
 describe(`VegaParser._setDefaultValue`, () => {
@@ -212,7 +228,12 @@ describe('VegaParser._resolveEsQueries', () => {
           },
         };
       };
-      const vp = new VegaParser(spec, searchApiStub, 0, 0, mockGetServiceSettings);
+      const tc = new (class extends TimeCache {
+        getTimeBounds() {
+          return { min: 123456, max: 654321 };
+        }
+      })();
+      const vp = new VegaParser(spec, searchApiStub, tc, 0, mockGetServiceSettings);
       await vp._resolveDataUrls();
 
       expect(vp.spec).toEqual(expected);
@@ -249,6 +270,20 @@ describe('VegaParser._resolveEsQueries', () => {
     check(
       { data: { url: { '%type%': 'emsfile', name: 'file1' } } },
       { data: { url: bypassExternalUrlCheck('url1') } }
+    )
+  );
+  test(
+    'timefilter_min',
+    check(
+      { data: { url: 'http://example.com?min=%timefilter_min%' } },
+      { data: { url: 'http://example.com?min=123456' } }
+    )
+  );
+  test(
+    'timefilter_max',
+    check(
+      { data: { url: 'http://example.com?min=%timefilter_max%' } },
+      { data: { url: 'http://example.com?min=654321' } }
     )
   );
 });

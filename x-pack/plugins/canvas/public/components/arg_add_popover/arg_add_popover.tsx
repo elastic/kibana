@@ -11,7 +11,6 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
-import type { Arg } from '../../expression_types/arg';
 
 const strings = {
   getAddAriaLabel: () =>
@@ -20,8 +19,10 @@ const strings = {
     }),
 };
 
-interface ArgOptions {
-  arg: Arg;
+export interface ArgOptions {
+  name?: string;
+  displayName?: string;
+  help?: string;
   onValueAdd: () => void;
 }
 
@@ -49,9 +50,9 @@ export const ArgAddPopover: FC<Props> = ({ options }) => {
       {({ closePopover }) =>
         options.map((opt) => (
           <ArgAdd
-            key={`${opt.arg.name}-add`}
-            displayName={opt.arg.displayName ?? ''}
-            help={opt.arg.help ?? ''}
+            key={`${opt.name}-add`}
+            displayName={opt.displayName ?? ''}
+            help={opt.help ?? ''}
             onValueAdd={() => {
               opt.onValueAdd();
               closePopover();

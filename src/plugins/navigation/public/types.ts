@@ -7,7 +7,7 @@
  */
 
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
-import { DataPublicPluginStart } from '../../data/public';
+import { UnifiedSearchPublicPluginStart } from '../../unified_search/public';
 
 export interface NavigationPublicPluginSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
@@ -20,5 +20,5 @@ export interface NavigationPublicPluginStart {
 }
 
 export interface NavigationPluginStartDependencies {
-  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

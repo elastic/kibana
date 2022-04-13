@@ -13,8 +13,6 @@ import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
 import { TimeUnit } from './datetime';
 import { Maybe } from '../../../typings/common';
 import { isFiniteNumber } from '../is_finite_number';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { ThroughputUnit } from '../../../server/lib/helpers/calculate_throughput';
 
 interface FormatterOptions {
   defaultValue?: string;
@@ -182,13 +180,12 @@ export function asTransactionRate(value: Maybe<number>) {
   });
 }
 
-export function asExactTransactionRate(value: number, unit: ThroughputUnit) {
+export function asExactTransactionRate(value: number) {
   return i18n.translate('xpack.apm.exactTransactionRateLabel', {
-    defaultMessage: `{value} { unit, select, minute {tpm} other {tps} }`,
-    values: { value: asDecimalOrInteger(value), unit },
+    defaultMessage: `{value} tpm`,
+    values: { value: asDecimalOrInteger(value) },
   });
 }
-
 /**
  * Converts value and returns it formatted - 00 unit
  */

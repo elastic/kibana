@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, KibanaRequest, IScopedClusterClient } from 'kibana/server';
-import { Module } from '../../../common/types/modules';
+import type {
+  SavedObjectsClientContract,
+  KibanaRequest,
+  IScopedClusterClient,
+} from 'kibana/server';
+import type { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+import type { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 import type { MlClient } from '../../lib/ml_client';
-import { JobSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 const callAs = () => Promise.resolve({ body: {} });
 
@@ -28,8 +33,9 @@ describe('ML - data recognizer', () => {
       find: jest.fn(),
       bulkCreate: jest.fn(),
     } as unknown as SavedObjectsClientContract,
-    {} as JobSavedObjectService,
-    { headers: { authorization: '' } } as KibanaRequest
+    { find: jest.fn() } as unknown as DataViewsService,
+    {} as MLSavedObjectService,
+    { headers: { authorization: '' } } as unknown as KibanaRequest
   );
 
   describe('jobOverrides', () => {

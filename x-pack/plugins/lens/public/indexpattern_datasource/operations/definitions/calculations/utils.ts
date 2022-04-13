@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
+import type { AstFunction } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import { LayerType, layerTypes } from '../../../../../common';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
@@ -24,7 +24,7 @@ export const buildLabelFunction =
   };
 
 export function checkForDataLayerType(layerType: LayerType, name: string) {
-  if (layerType === layerTypes.THRESHOLD) {
+  if (layerType === layerTypes.REFERENCELINE) {
     return [
       i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
         defaultMessage: '{name} is disabled for this type of layer.',
@@ -143,7 +143,7 @@ export function dateBasedOperationToExpression(
   columnId: string,
   functionName: string,
   additionalArgs: Record<string, unknown[]> = {}
-): ExpressionFunctionAST[] {
+): AstFunction[] {
   const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
   const dateColumnIndex = buckets.findIndex(
@@ -174,7 +174,7 @@ export function optionallHistogramBasedOperationToExpression(
   columnId: string,
   functionName: string,
   additionalArgs: Record<string, unknown[]> = {}
-): ExpressionFunctionAST[] {
+): AstFunction[] {
   const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
   const nonHistogramColumns = buckets.filter(

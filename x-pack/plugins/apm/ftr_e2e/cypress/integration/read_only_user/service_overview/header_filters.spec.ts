@@ -5,9 +5,11 @@
  * 2.0.
  */
 import url from 'url';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
+import { synthtrace } from '../../../../synthtrace';
+import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
 const serviceOverviewHref = url.format({
   pathname: '/app/apm/services/opbeans-node/overview',
@@ -16,48 +18,57 @@ const serviceOverviewHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint: '/api/apm/services/opbeans-node/transactions/charts/latency?*',
+    endpoint:
+      '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
     name: 'latencyChartRequest',
   },
   {
-    endpoint: '/api/apm/services/opbeans-node/throughput?*',
+    endpoint: '/internal/apm/services/opbeans-node/throughput?*',
     name: 'throughputChartRequest',
   },
   {
-    endpoint: '/api/apm/services/opbeans-node/transactions/charts/error_rate?*',
+    endpoint:
+      '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
     name: 'errorRateChartRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
+      '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
     name: 'transactionGroupsDetailedRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-node/service_overview_instances/detailed_statistics?*',
+      '/internal/apm/services/opbeans-node/service_overview_instances/detailed_statistics?*',
     name: 'instancesDetailedRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
+      '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
     name: 'instancesMainStatisticsRequest',
   },
   {
-    endpoint: '/api/apm/services/opbeans-node/error_groups/main_statistics?*',
-    name: 'errorGroupsMainStatisticsRequest',
-  },
-  {
-    endpoint: '/api/apm/services/opbeans-node/transaction/charts/breakdown?*',
+    endpoint:
+      '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
     name: 'transactonBreakdownRequest',
   },
   {
     endpoint:
-      '/api/apm/services/opbeans-node/transactions/groups/main_statistics?*',
+      '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
     name: 'transactionsGroupsMainStatisticsRequest',
   },
 ];
 
 describe('Service overview - header filters', () => {
+  before(async () => {
+    await synthtrace.index(
+      opbeans({ from: new Date(start).getTime(), to: new Date(end).getTime() })
+    );
+  });
+
+  after(async () => {
+    await synthtrace.clean();
+  });
+
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
@@ -128,7 +139,7 @@ describe('Service overview - header filters', () => {
         .find('li')
         .first()
         .click();
-      cy.get('[data-test-subj="suggestionContainer"]').realPress('{enter}');
+      cy.get('[data-test-subj="headerFilterKuerybar"]').type('{enter}');
       cy.url().should('include', '&kuery=transaction.name');
     });
   });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { ElasticsearchError, ElasticsearchErrorCausedByObject } from './types';
 
 const getEsCause = (

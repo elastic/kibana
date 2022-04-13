@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Comparator, AlertStates } from './types';
+import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import {
+  formatDurationFromTimeUnitChar,
+  TimeUnitChar,
+} from '../../../../../observability/common/utils/formatters/duration';
+import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
   'xpack.infra.metrics.alerting.threshold.documentCount',
@@ -35,43 +40,6 @@ export const stateToAlertMessage = {
 
 const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;
-
-const comparatorToI18n = (comparator: Comparator, threshold: number[], currentValue: number) => {
-  const gtText = i18n.translate('xpack.infra.metrics.alerting.threshold.gtComparator', {
-    defaultMessage: 'greater than',
-  });
-  const ltText = i18n.translate('xpack.infra.metrics.alerting.threshold.ltComparator', {
-    defaultMessage: 'less than',
-  });
-  const eqText = i18n.translate('xpack.infra.metrics.alerting.threshold.eqComparator', {
-    defaultMessage: 'equal to',
-  });
-
-  switch (comparator) {
-    case Comparator.BETWEEN:
-      return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenComparator', {
-        defaultMessage: 'between',
-      });
-    case Comparator.OUTSIDE_RANGE:
-      return i18n.translate('xpack.infra.metrics.alerting.threshold.outsideRangeComparator', {
-        defaultMessage: 'not between',
-      });
-    case Comparator.GT:
-      return gtText;
-    case Comparator.LT:
-      return ltText;
-    case Comparator.GT_OR_EQ:
-    case Comparator.LT_OR_EQ: {
-      if (currentValue === threshold[0]) {
-        return eqText;
-      } else if (currentValue < threshold[0]) {
-        return ltText;
-      } else {
-        return gtText;
-      }
-    }
-  }
-};
 
 const recoveredComparatorToI18n = (
   comparator: Comparator,
@@ -108,32 +76,41 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
   });
 };
 
+const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? 'all hosts' : group);
+
 export const buildFiredAlertReason: (alertResult: {
+  group: string;
   metric: string;
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ metric, comparator, threshold, currentValue }) =>
+  timeSize: number;
+  timeUnit: TimeUnitChar;
+}) => string = ({ group, metric, comparator, threshold, currentValue, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{metric} is {comparator} a threshold of {threshold} (current value is {currentValue})',
+      '{metric} is {currentValue} in the last {duration} for {group}. Alert when {comparator} {threshold}.',
     values: {
+      group: formatGroup(group),
       metric,
-      comparator: comparatorToI18n(comparator, threshold.map(toNumber), toNumber(currentValue)),
+      comparator,
       threshold: thresholdToI18n(threshold),
       currentValue,
+      duration: formatDurationFromTimeUnitChar(timeSize, timeUnit),
     },
   });
 
+// Once recovered reason messages are re-enabled, checkout this issue https://github.com/elastic/kibana/issues/121272 regarding latest reason format
 export const buildRecoveredAlertReason: (alertResult: {
+  group: string;
   metric: string;
   comparator: Comparator;
   threshold: Array<number | string>;
   currentValue: number | string;
-}) => string = ({ metric, comparator, threshold, currentValue }) =>
+}) => string = ({ group, metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.recoveredAlertReason', {
     defaultMessage:
-      '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue})',
+      '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
       metric,
       comparator: recoveredComparatorToI18n(
@@ -143,19 +120,22 @@ export const buildRecoveredAlertReason: (alertResult: {
       ),
       threshold: thresholdToI18n(threshold),
       currentValue,
+      group,
     },
   });
 
 export const buildNoDataAlertReason: (alertResult: {
+  group: string;
   metric: string;
   timeSize: number;
   timeUnit: string;
-}) => string = ({ metric, timeSize, timeUnit }) =>
+}) => string = ({ group, metric, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.noDataAlertReason', {
-    defaultMessage: '{metric} has reported no data over the past {interval}',
+    defaultMessage: '{metric} reported no data in the last {interval} for {group}',
     values: {
       metric,
       interval: `${timeSize}${timeUnit}`,
+      group: formatGroup(group),
     },
   });
 
@@ -164,6 +144,14 @@ export const buildErrorAlertReason = (metric: string) =>
     defaultMessage: 'Elasticsearch failed when attempting to query data for {metric}',
     values: {
       metric,
+    },
+  });
+
+export const buildInvalidQueryAlertReason = (filterQueryText: string) =>
+  i18n.translate('xpack.infra.metrics.alerting.threshold.queryErrorAlertReason', {
+    defaultMessage: 'Alert is using a malformed KQL query: {filterQueryText}',
+    values: {
+      filterQueryText,
     },
   });
 
@@ -184,8 +172,7 @@ export const alertStateActionVariableDescription = i18n.translate(
 export const reasonActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.reasonActionVariableDescription',
   {
-    defaultMessage:
-      'A description of why the alert is in this state, including which metrics have crossed which thresholds',
+    defaultMessage: 'A concise description of the reason for the alert',
   }
 );
 
@@ -217,5 +204,13 @@ export const thresholdActionVariableDescription = i18n.translate(
   {
     defaultMessage:
       'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+  }
+);
+
+export const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
   }
 );

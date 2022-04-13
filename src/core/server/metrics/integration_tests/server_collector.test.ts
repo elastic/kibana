@@ -15,8 +15,7 @@ import { HttpService, IRouter } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { ServerMetricsCollector } from '../collectors/server';
-
-const requestWaitDelay = 25;
+import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
 describe('ServerMetricsCollector', () => {
   let server: HttpService;
@@ -48,6 +47,7 @@ describe('ServerMetricsCollector', () => {
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
       return res.ok({ body: '' });
     });
+
     await server.start();
 
     let metrics = await collector.collect();
@@ -76,39 +76,49 @@ describe('ServerMetricsCollector', () => {
 
   it('collect disconnects requests infos', async () => {
     const never = new Promise((resolve) => undefined);
-    const hitSubject = new BehaviorSubject(0);
+    const disconnectRequested$ = new Subject<void>(); // Controls the number of requests in the /disconnect endpoint
+    const disconnectAborted$ = new Subject<void>(); // Controls the abort event in the /disconnect endpoint
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
       return res.ok({ body: '' });
     });
     router.get({ path: '/disconnect', validate: false }, async (ctx, req, res) => {
-      hitSubject.next(hitSubject.value + 1);
-      await never;
+      disconnectRequested$.next();
+      req.events.aborted$.subscribe(() => {
+        disconnectAborted$.next();
+      });
+      await never; // Never resolve the request
       return res.ok({ body: '' });
     });
     await server.start();
 
     await sendGet('/');
+
+    // Subscribe to expect 2 requests to /disconnect
+    const waitFor2Requests = disconnectRequested$.pipe(take(2)).toPromise();
+
     const discoReq1 = sendGet('/disconnect').end();
     const discoReq2 = sendGet('/disconnect').end();
 
-    await hitSubject
-      .pipe(
-        filter((count) => count >= 2),
-        take(1)
-      )
-      .toPromise();
+    // Wait for 2 requests to /disconnect
+    await waitFor2Requests;
 
     let metrics = await collector.collect();
     expect(metrics.requests).toEqual(
       expect.objectContaining({
         total: 3,
         disconnects: 0,
+        statusCodes: expect.objectContaining({ '200': 1 }),
       })
     );
 
+    // Subscribe to the aborted$ event
+    const waitFor1stAbort = disconnectAborted$.pipe(take(1)).toPromise();
+
     discoReq1.abort();
-    await delay(requestWaitDelay);
+
+    // Wait for the aborted$ event
+    await waitFor1stAbort;
 
     metrics = await collector.collect();
     expect(metrics.requests).toEqual(
@@ -118,8 +128,13 @@ describe('ServerMetricsCollector', () => {
       })
     );
 
+    // Subscribe to the aborted$ event
+    const waitFor2ndAbort = disconnectAborted$.pipe(take(1)).toPromise();
+
     discoReq2.abort();
-    await delay(requestWaitDelay);
+
+    // Wait for the aborted$ event
+    await waitFor2ndAbort;
 
     metrics = await collector.collect();
     expect(metrics.requests).toEqual(
@@ -147,14 +162,14 @@ describe('ServerMetricsCollector', () => {
     await Promise.all([sendGet('/no-delay'), sendGet('/250-ms')]);
     let metrics = await collector.collect();
 
-    expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(125);
-    expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(250);
+    expect(metrics.response_times?.avg_in_millis).toBeGreaterThanOrEqual(125);
+    expect(metrics.response_times?.max_in_millis).toBeGreaterThanOrEqual(250);
 
     await Promise.all([sendGet('/500-ms'), sendGet('/500-ms')]);
     metrics = await collector.collect();
 
-    expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(250);
-    expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+    expect(metrics.response_times?.avg_in_millis).toBeGreaterThanOrEqual(250);
+    expect(metrics.response_times?.max_in_millis).toBeGreaterThanOrEqual(500);
   });
 
   it('collect connection count', async () => {
@@ -195,6 +210,9 @@ describe('ServerMetricsCollector', () => {
 
     waitSubject.next('go');
     await Promise.all([res1, res2]);
+    // Give the event-loop one more cycle to allow concurrent connections to be
+    // up to date before collecting
+    await setTimeoutPromise(0);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
   });

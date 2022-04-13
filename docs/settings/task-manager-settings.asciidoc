@@ -9,54 +9,64 @@ Task Manager runs background tasks by polling for work on an interval.  You can 
 
 [float]
 [[task-manager-settings]]
-==== Task Manager settings 
+==== Task Manager settings
 
-[cols="2*<"]
-|===
-| `xpack.task_manager.max_attempts`
-  | The maximum number of times a task will be attempted before being abandoned as failed.  Defaults to 3.
 
-| `xpack.task_manager.poll_interval`
-  | How often, in milliseconds, the task manager will look for more work.  Defaults to 3000 and cannot be lower than 100.
 
-| `xpack.task_manager.request_capacity`
-  | How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
+`xpack.task_manager.max_attempts`::
+The maximum number of times a task will be attempted before being abandoned as failed.  Defaults to 3.
 
-| `xpack.task_manager.index`
-  | The name of the index used to store task information.  Defaults to `.kibana_task_manager`.
+`xpack.task_manager.poll_interval`::
+How often, in milliseconds, the task manager will look for more work.  Defaults to 3000 and cannot be lower than 100.
 
-  | `xpack.task_manager.max_workers`
-  | The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
-    Starting in 8.0, it will not be possible to set the value greater than 100.
+`xpack.task_manager.request_capacity`::
+How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
 
-  | `xpack.task_manager.`
-  `monitored_stats_health_verbose_log.enabled`
-  | This flag will enable automatic warn and error logging if task manager self detects a performance issue, such as the time between when a task is scheduled to execute and when it actually executes. Defaults to false.
+`xpack.task_manager.max_workers`::
+The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
+Starting in 8.0, it will not be possible to set the value greater than 100.
 
-  | `xpack.task_manager.`
-  `monitored_stats_health_verbose_log.`
-  `warn_delayed_task_start_in_seconds`
-  | The amount of seconds we allow a task to delay before printing a warning server log.  Defaults to 60.
+`xpack.task_manager.monitored_stats_health_verbose_log.enabled`::
+This flag will enable automatic warn and error logging if task manager self detects a performance issue, such as the time between when a task is scheduled to execute and when it actually executes. Defaults to false.
 
-  | `xpack.task_manager.ephemeral_tasks.enabled`
-  | Enables an experimental feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them.
-    These action tasks will reduce the latency of the time it takes an action to run after it's triggered, but are not persisted as SavedObjects.
-    These non-persisted action tasks have a risk that they won't be run at all if the Kibana instance running them exits unexpectedly. Defaults to false.
+`xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds`::
+The amount of seconds we allow a task to delay before printing a warning server log.  Defaults to 60.
 
-  | `xpack.task_manager.ephemeral_tasks.request_capacity`
-  | Sets the size of the ephemeral queue defined above. Defaults to 10.
-|===
+`xpack.task_manager.ephemeral_tasks.enabled`::
+Enables a technical preview feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them.
+These action tasks will reduce the latency of the time it takes an action to run after it's triggered, but are not persisted as SavedObjects.
+These non-persisted action tasks have a risk that they won't be run at all if the Kibana instance running them exits unexpectedly. Defaults to false.
+
+`xpack.task_manager.ephemeral_tasks.request_capacity`::
+Sets the size of the ephemeral queue defined above. Defaults to 10.
+
+`xpack.task_manager.event_loop_delay.monitor`::
+Enables event loop delay monitoring, which will log a warning when a task causes an event loop delay which exceeds the `warn_threshold` setting.  Defaults to true.
+
+`xpack.task_manager.event_loop_delay.warn_threshold`::
+Sets the amount of event loop delay during a task execution which will cause a warning to be logged. Defaults to 5000 milliseconds (5 seconds).
 
 [float]
 [[task-manager-health-settings]]
-==== Task Manager Health settings 
+==== Task Manager Health settings
 
 Settings that configure the <<task-manager-health-monitoring>> endpoint.
 
-[cols="2*<"]
-|===
-| `xpack.task_manager.`
-`monitored_task_execution_thresholds`
-  | Configures the threshold of failed task executions at which point the `warn` or `error` health status is set under each task type execution status (under `stats.runtime.value.execution.result_frequency_percent_as_number[${task type}].status`). This setting allows configuration of both the default level and a custom task type specific level. By default, this setting is configured to mark the health of every task type as `warning` when it exceeds 80% failed executions, and as `error` at 90%. Custom configurations allow you to reduce this threshold to catch failures sooner for task types that you might consider critical, such as alerting tasks. This value can be set to any number between 0 to 100, and a threshold is hit when the value *exceeds* this number. This means that you can avoid setting the status to `error` by setting the threshold at 100, or hit `error` the moment any task fails by setting the threshold to 0 (as it will exceed 0 once a single failure occurs).
-
-|===
+`xpack.task_manager.monitored_task_execution_thresholds`::
+Configures the threshold of failed task executions at which point the `warn` or
+`error` health status is set under each task type execution status
+(under `stats.runtime.value.execution.result_frequency_percent_as_number[${task type}].status`).
++
+This setting allows configuration of both the default level and a
+custom task type specific level. By default, this setting is configured to mark
+the health of every task type as `warning` when it exceeds 80% failed executions,
+and as `error` at 90%.
++
+Custom configurations allow you to reduce this threshold to catch failures sooner
+for task types that you might consider critical, such as alerting tasks.
++
+This value can be set to any number between 0 to 100, and a threshold is hit
+when the value *exceeds* this number. This means that you can avoid setting the
+status to `error` by setting the threshold at 100, or hit `error` the moment
+any task fails by setting the threshold to 0 (as it will exceed 0 once a
+single failure occurs).

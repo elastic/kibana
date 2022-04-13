@@ -20,9 +20,8 @@ configuration using `${MY_ENV_VAR}` syntax.
 [cols="2*<"]
 |===
 
-| `console.enabled:`
- | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-Toggling this causes the server to regenerate assets on the next startup,
+| `console.ui.enabled:`
+| Toggling this causes the server to regenerate assets on the next startup,
 which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
@@ -91,6 +90,10 @@ enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
+|[[elasticsearch-maxSockets]] `elasticsearch.maxSockets`
+ | The maximum number of sockets that can be used for communications with elasticsearch.
+*Default: `Infinity`*
+
 | `elasticsearch.customHeaders:`
  | Header names and values to send to {es}. Any custom headers cannot be
 overwritten by client-side headers, regardless of the
@@ -111,7 +114,7 @@ in this setting.
  currently do not have an inspector, for example Timelion and Monitoring.
  *Default: `false`*
 
-The following example shows a valid `elasticsearch.query` logger configuration:
+The following example shows a valid verbose `elasticsearch.query` logger configuration:
 |===
 
 [source,text]
@@ -124,7 +127,7 @@ logging:
         type: pattern
         highlight: true
   root:
-    appenders: [default, console_appender]
+    appenders: [console_appender]
     level: warn
   loggers:
     - name: elasticsearch.query
@@ -152,6 +155,9 @@ This value must be a positive integer. *Default: `30000`*
 | `elasticsearch.shardTimeout:`
  | Time in milliseconds for {es} to wait for responses from shards.
 Set to 0 to disable. *Default: `30000`*
+
+| `elasticsearch.compression:`
+| Specifies whether {kib} should use compression for communications with {es}. *Default: `false`*
 
 | `elasticsearch.sniffInterval:`
  | Time in milliseconds between requests to check {es} for an updated list of
@@ -276,27 +282,12 @@ on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
 |[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
- | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+ | If your {es} is protected with basic authentication, this token provides the credentials
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
-| `enterpriseSearch.host`
-  | The URL of your Enterprise Search instance
-
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
-
-|[[kibana-index]] `kibana.index:`
- | deprecated:[7.11.0,This setting will be removed in 8.0.] Multitenancy by
- changing `kibana.index` will not be supported starting in 8.0. See
- https://ela.st/kbn-remove-legacy-multitenancy[8.0 Breaking Changes] for more
- details.
- +
- {kib} uses an index in {es} to store saved searches, visualizations, and
- dashboards. {kib} creates a new index if the index doesn’t already exist. If
- you configure a custom index, the name must be lowercase, and conform to the
- {es} {ref}/indices-create-index.html[index name limitations].
- *Default: `".kibana"`*
 
 | `data.autocomplete.valueSuggestions.timeout:` {ess-icon}
  | Time in milliseconds to wait for autocomplete suggestions from {es}.
@@ -311,50 +302,54 @@ suggestions. This value must be a whole number greater than zero.
 
 [NOTE]
 ============
-To reload the logging settings, send a SIGHUP signal to {kib}.
+To reload the <<logging-settings, logging settings>>, send a SIGHUP signal to {kib}.
+For more logging configuration options, see the <<logging-configuration, Configure Logging in {kib}>> guide.
 ============
 
 [cols="2*<"]
 |===
 
 |[[logging-root]] `logging.root:`
-| The {kibana-ref}/logging-service.html#logging-service[`root` logger] has a dedicated configuration node since this context name is special and is pre-configured for logging by default.
-// TODO: add link to the advanced logging documentation.
+| The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` _must_ also be explicitly configured.
 
 |[[logging-root-appenders]] `logging.root.appenders:`
-| A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that must be included in the list. This is the configuration that all custom loggers will use unless they're re-configured explicitly. Additional appenders, if configured, can be included in the list.
+| A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that logs to stdout with a `pattern` layout. This is the configuration that all custom loggers will use unless they're re-configured explicitly. You can override the default behavior by configuring a different <<logging-appenders, appender>> to apply to `root`.
 
 |[[logging-root-level]] `logging.root.level:` {ess-icon}
-| Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs. *Default: `info`*.
+| Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. *Default: `info`*.
 
-|[[logging-loggers]] `logging.loggers:`
+2+a|
+[TIP]
+============
+Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging <<logging-cli-migration, cli commands>> to set log level to `verbose` or silence all logs.
+============
+
+The following example shows a valid verbose `logging.root` configuration:
+|===
+
+[source,text]
+--
+logging:
+  appenders:
+    console_appender:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+  root:
+    appenders: [console_appender]
+    level: all
+--
+
+[cols="2*<"]
+|===
+
+|[[logging-loggers]] `logging.loggers[]:`
  | Allows you to <<customize-specific-log-records,customize a specific logger instance>>.
 
-| `logging.loggers.name:`
-| Specific logger instance.
+| `logging.appenders[]:`
+| <<logging-appenders, Appenders>> define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
 
-| `logging.loggers.level:`
-| Level at which a log record should be shown. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_.
-
-| `logging.loggers.appenders:`
-| Specific appender format to apply for a particular logger context.
-
-| `logging.appenders:`
-| {kibana-ref}/logging-service.html#logging-appenders[Appenders] define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
-// TODO: add link to the advanced logging documentation.
-
-| `logging.appenders.console:`
-| Appender to use for logging records to *stdout*. By default, uses the `[%date][%level][%logger] %message` **pattern** layout. To use a **json**, set the <<log-in-json-ECS-example,layout type to `json`>>.
-
-| `logging.appenders.file:`
-| Allows you to specify a fileName to send log records to on disk. To send <<log-to-file-example,all log records to file>>, add the file appender to `root.appenders`.
-
-| `logging.appenders.rolling-file:`
-| Similar to Log4j's `RollingFileAppender`, this appender will log into a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: `size-limit` and `time-interval`.
-
-The size limit policy will perform a rollover when the log file reaches a maximum `size`. *Default 100mb*
-
-The time interval policy will rotate the log file every given interval of time. *Default 24h*
 
 | `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
@@ -363,13 +358,8 @@ When `includeElasticMapsService` is turned off, only tile layer configured by <<
 | `map.emsUrl:`
  | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
 
-| `map.proxyElasticMapsServiceInMaps:`
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
- Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
-requests through the {kib} server. *Default: `false`*
-
 | [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
- | The map attribution string.
+ | The map attribution string. Provide attributions in markdown and use `\|` to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
 
 | [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon}
@@ -384,10 +374,10 @@ used by the tile service. Specify the position of the subdomain the URL with
 the token `{s}`.
 
 | [[tilemap-url]] `map.tilemap.url:` {ess-icon}
- | The URL to the tileservice that {kib} uses
-to display map tiles in tilemap visualizations. By default,
-{kib} reads this URL from an external metadata service, but users can
-override this parameter to use their own Tile Map Service. For example:
+ | The URL to the service that {kib} uses
+as the default basemap in <<maps, maps>> and <<vega-with-a-map, vega maps>>. By default,
+{kib} sets a basemap from the <<maps-connect-to-ems, Elastic Maps Service>>, but users can
+point to their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
 | `migrations.batchSize:`
@@ -395,9 +385,6 @@ override this parameter to use their own Tile Map Service. For example:
 
  | `migrations.maxBatchSizeBytes:`
  | Defines the maximum payload size for indexing batches of upgraded saved objects to avoid migrations failing due to a 413 Request Entity Too Large response from Elasticsearch. This value should be lower than or equal to your Elasticsearch cluster's `http.max_content_length` configuration option. *Default: `100mb`*
-
-| `migrations.enableV2:`
- | experimental[]. Enables the new Saved Objects migration algorithm. For information about the migration algorithm, refer to <<upgrade-migrations>>. When `migrations v2` is stable, the setting will be removed in an upcoming release without any further notice. Setting the value to `false` causes {kib} to use the legacy migration algorithm, which shipped in 7.11 and earlier versions. *Default: `true`*
 
 | `migrations.retryAttempts:`
  | The number of times migrations retry temporary failures, such as a network timeout, 503 status code, or `snapshot_in_progress_exception`. When upgrade migrations frequently fail after exhausting all retry attempts with a message such as `Unable to complete the [...] step after 15 attempts, terminating.`, increase the setting value. *Default: `15`*
@@ -502,8 +489,7 @@ To disable, set to `null`. *Default:* `null`
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
 {kib} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors:
-'self'` directive to the `Content-Security-Policy` response header (if you are using the default CSP rules), and adds the `X-Frame-Options:
-SAMEORIGIN` response header. *Default:* `false`
+'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. *Default:* `false`
 
 | `server.customResponseHeaders:` {ess-icon}
  | Header names and values to
@@ -688,22 +674,44 @@ out through *Advanced Settings*. *Default: `true`*
  | Set this value to true to allow Vega to use any URL to access external data
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
+| `xpack.ccr.ui.enabled`
+| Set this value to false to disable the Cross-Cluster Replication UI.
+*Default: `true`*
+
 |[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
+
+  When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>. 
 
 |[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
 `exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
-| `xpack.license_management.enabled`
- | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-Set this value to false to disable the License Management UI.
+| `xpack.ilm.ui.enabled`
+ | Set this value to false to disable the Index Lifecycle Policies UI.
 *Default: `true`*
 
-| `xpack.rollup.enabled:`
- | deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-Set this value to false to disable the Rollup UI. *Default: true*
+| `xpack.index_management.ui.enabled`
+ | Set this value to false to disable the Index Management UI.
+*Default: `true`*
+
+| `xpack.license_management.ui.enabled`
+ | Set this value to false to disable the License Management UI.
+*Default: `true`*
+
+| `xpack.remote_clusters.ui.enabled`
+ | Set this value to false to disable the Remote Clusters UI.
+*Default: `true`*
+
+| `xpack.rollup.ui.enabled:`
+ | Set this value to false to disable the Rollup Jobs UI. *Default: true*
+
+| `xpack.snapshot_restore.ui.enabled:`
+ | Set this value to false to disable the Snapshot and Restore UI. *Default: true*
+
+| `xpack.upgrade_assistant.ui.enabled:`
+ | Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 | `i18n.locale` {ess-icon}
  | Set this value to change the {kib} interface language.
@@ -714,18 +722,16 @@ Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
 include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
-include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
-include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
+include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]
 include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
 include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
 include::{kib-repo-dir}/settings/logging-settings.asciidoc[]
 include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
 include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
-include::{kib-repo-dir}/settings/ml-settings.asciidoc[]
 include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
 include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
-include::secure-settings.asciidoc[]
 include::{kib-repo-dir}/settings/search-sessions-settings.asciidoc[]
+include::secure-settings.asciidoc[]
 include::{kib-repo-dir}/settings/security-settings.asciidoc[]
 include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
 include::{kib-repo-dir}/settings/task-manager-settings.asciidoc[]

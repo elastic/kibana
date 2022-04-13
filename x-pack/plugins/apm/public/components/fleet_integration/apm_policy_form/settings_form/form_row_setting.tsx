@@ -15,13 +15,20 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import styled from 'styled-components';
 import { FormRowOnChange } from './';
 import { SettingsRow } from '../typings';
+import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
+
+const FixedHeightDiv = styled.div`
+  height: 300px;
+`;
 
 interface Props {
   row: SettingsRow;
   value?: any;
   onChange: FormRowOnChange;
+  isDisabled?: boolean;
 }
 
 const ENABLED_LABEL = i18n.translate(
@@ -33,11 +40,13 @@ const DISABLED_LABEL = i18n.translate(
   { defaultMessage: 'Disabled' }
 );
 
-export function FormRowSetting({ row, value, onChange }: Props) {
+export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
   switch (row.type) {
     case 'boolean': {
       return (
         <EuiSwitch
+          data-test-subj={row.dataTestSubj}
+          disabled={isDisabled}
           label={row.placeholder || (value ? ENABLED_LABEL : DISABLED_LABEL)}
           checked={value}
           onChange={(e) => {
@@ -50,9 +59,10 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'text': {
       return (
         <EuiFieldText
-          readOnly={row.readOnly}
+          data-test-subj={row.dataTestSubj}
+          disabled={isDisabled}
           value={value}
-          prepend={row.readOnly ? <EuiIcon type="lock" /> : undefined}
+          prepend={isDisabled ? <EuiIcon type="lock" /> : undefined}
           onChange={(e) => {
             onChange(row.key, e.target.value);
           }}
@@ -62,6 +72,8 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'area': {
       return (
         <EuiTextArea
+          data-test-subj={row.dataTestSubj}
+          disabled={isDisabled}
           value={value}
           onChange={(e) => {
             onChange(row.key, e.target.value);
@@ -73,6 +85,8 @@ export function FormRowSetting({ row, value, onChange }: Props) {
     case 'integer': {
       return (
         <EuiFieldNumber
+          data-test-subj={row.dataTestSubj}
+          disabled={isDisabled}
           value={value}
           onChange={(e) => {
             onChange(row.key, e.target.value);
@@ -86,6 +100,7 @@ export function FormRowSetting({ row, value, onChange }: Props) {
         : [];
       return (
         <EuiComboBox
+          data-test-subj={row.dataTestSubj}
           noSuggestions
           placeholder={i18n.translate(
             'xpack.apm.fleet_integration.settings.selectOrCreateOptions',
@@ -104,6 +119,37 @@ export function FormRowSetting({ row, value, onChange }: Props) {
           }}
           isClearable={true}
         />
+      );
+    }
+    case 'yaml': {
+      return (
+        <FixedHeightDiv>
+          <CodeEditor
+            languageId="yaml"
+            width="100%"
+            height="300px"
+            value={value}
+            onChange={(val) => {
+              onChange(row.key, val);
+            }}
+            options={{
+              ariaLabel: i18n.translate(
+                'xpack.apm.fleet_integration.settings.yamlCodeEditor',
+                {
+                  defaultMessage: 'YAML Code Editor',
+                }
+              ),
+              wordWrap: 'off',
+              tabSize: 2,
+              // To avoid left margin
+              lineNumbers: 'off',
+              lineNumbersMinChars: 0,
+              folding: false,
+              lineDecorationsWidth: 0,
+              overviewRulerBorder: false,
+            }}
+          />
+        </FixedHeightDiv>
       );
     }
     default:

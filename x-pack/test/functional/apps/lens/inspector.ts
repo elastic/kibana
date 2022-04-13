@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const elasticChart = getService('elasticChart');
   const inspector = getService('inspector');
+  const testSubjects = getService('testSubjects');
 
   describe('lens inspector', () => {
     before(async () => {
@@ -31,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       await inspector.open('lnsApp_inspectButton');
     });
@@ -54,6 +55,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should inspect request data', async () => {
       await inspector.openInspectorRequestsView();
       expect(await inspector.getRequestNames()).to.be('Data,Other bucket');
+    });
+
+    it('should close the inspector when navigating away from Lens', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      expect(await testSubjects.exists('inspectorPanel')).to.be(false);
     });
   });
 }

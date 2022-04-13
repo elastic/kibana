@@ -41,16 +41,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.security.session.lifespan=5s',
-        '--xpack.security.session.cleanupInterval=10s',
+        '--xpack.security.session.lifespan=10s',
+        '--xpack.security.session.cleanupInterval=20s',
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { basic1: { order: 0 } },
           saml: {
             saml_fallback: { order: 1, realm: 'saml1' },
-            saml_override: { order: 2, realm: 'saml1', session: { lifespan: '1m' } },
+            saml_override: { order: 2, realm: 'saml1', session: { lifespan: '2m' } },
             saml_disable: { order: 3, realm: 'saml1', session: { lifespan: 0 } },
           },
         })}`,
+        // Exclude Uptime tasks to not interfere (additional ES load) with the session cleanup task.
+        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['UPTIME:*'])}`,
       ],
     },
 

@@ -26,7 +26,25 @@ describe('findAll', () => {
     savedObjectsClient = savedObjectsClientMock.create();
   });
 
-  it('calls the saved object client with the correct parameters', async () => {
+  it('calls `client.createPointInTimeFinder` with the correct parameters', async () => {
+    const query: SavedObjectsFindOptions = {
+      type: ['some-type', 'another-type'],
+    };
+
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 1,
+      per_page: 20,
+      page: 1,
+    });
+
+    await findAll(savedObjectsClient, query);
+
+    expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(query);
+  });
+
+  it('returns the results from the PIT search', async () => {
     const query: SavedObjectsFindOptions = {
       type: ['some-type', 'another-type'],
     };
@@ -41,45 +59,40 @@ describe('findAll', () => {
     const results = await findAll(savedObjectsClient, query);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      ...query,
-      page: 1,
-    });
+    expect(savedObjectsClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ...query,
+      })
+    );
 
     expect(results).toEqual([createObj(1), createObj(2)]);
   });
 
-  it('recursively call find until all objects are fetched', async () => {
+  it('works when the PIT search returns multiple batches', async () => {
     const query: SavedObjectsFindOptions = {
       type: ['some-type', 'another-type'],
+      perPage: 2,
     };
     const objPerPage = 2;
 
-    savedObjectsClient.find.mockImplementation(({ page }) => {
-      const firstInPage = (page! - 1) * objPerPage + 1;
+    let callCount = 0;
+    savedObjectsClient.find.mockImplementation(({}) => {
+      callCount++;
+      const firstInPage = (callCount - 1) * objPerPage + 1;
       return Promise.resolve({
-        saved_objects: [createObj(firstInPage), createObj(firstInPage + 1)],
+        saved_objects:
+          callCount > 3
+            ? [createObj(firstInPage)]
+            : [createObj(firstInPage), createObj(firstInPage + 1)],
         total: objPerPage * 3,
         per_page: objPerPage,
-        page: page!,
+        page: callCount!,
       });
     });
 
     const results = await findAll(savedObjectsClient, query);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
-    expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      ...query,
-      page: 1,
-    });
-    expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      ...query,
-      page: 2,
-    });
-    expect(savedObjectsClient.find).toHaveBeenCalledWith({
-      ...query,
-      page: 3,
-    });
 
-    expect(results).toEqual(times(6, (num) => createObj(num + 1)));
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(4);
+    expect(results).toEqual(times(7, (num) => createObj(num + 1)));
   });
 });

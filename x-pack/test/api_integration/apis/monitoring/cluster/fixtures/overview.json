@@ -1,104 +1,122 @@
-[{
-  "cluster_uuid": "y1qOsQPiRrGtmdEuM3APJw",
-  "cluster_name": "singlecluster",
-  "version": "7.0.0-alpha1",
-  "license": {
-    "status": "active",
-    "type": "gold",
-    "expiry_date_in_millis": 1914278399999
-  },
-  "elasticsearch": {
-    "cluster_stats": {
-      "indices": {
-        "count": 17,
-        "docs": {
-          "count": 4001,
-          "deleted": 99
-        },
-        "shards": {
-          "total": 98,
-          "primaries": 49
-        },
-        "store": {
-          "size_in_bytes": 11826390
-        }
-      },
-      "nodes": {
-        "fs": {
-          "total_in_bytes": 499065712640,
-          "available_in_bytes": 201386397696
-        },
-        "count": {
-          "total": 2
-        },
-        "jvm": {
-          "max_uptime_in_millis": 1201658,
-          "mem": {
-            "heap_used_in_bytes": 551929768,
-            "heap_max_in_bytes": 1257111552
+[
+  {
+    "cluster_uuid": "y1qOsQPiRrGtmdEuM3APJw",
+    "cluster_name": "singlecluster",
+    "version": "7.0.0-alpha1",
+    "license": {
+      "status": "active",
+      "type": "gold",
+      "expiry_date_in_millis": 1914278399999
+    },
+    "elasticsearch": {
+      "cluster_stats": {
+        "indices": {
+          "count": 17,
+          "docs": {
+            "deleted": 99,
+            "count": 4001
+          },
+          "shards": {
+            "total": 98,
+            "primaries": 49
+          },
+          "store": {
+            "size_in_bytes": 11826390
           }
+        },
+        "nodes": {
+          "fs": {
+            "total_in_bytes": 499065712640,
+            "available_in_bytes": 201386397696
+          },
+          "count": {
+            "total": 2
+          },
+          "jvm": {
+            "max_uptime_in_millis": 1201658,
+            "mem": {
+              "heap_max_in_bytes": 1257111552,
+              "heap_used_in_bytes": 551929768
+            }
+          }
+        },
+        "status": "green"
+      },
+      "logs": {
+        "enabled": false,
+        "types": [],
+        "reason": {
+          "indexPatternExists": false,
+          "indexPatternInTimeRangeExists": false,
+          "typeExistsAtAnyTime": false,
+          "typeExists": false,
+          "usingStructuredLogs": false,
+          "clusterExists": false,
+          "nodeExists": null,
+          "indexExists": null
         }
-      },
-      "status": "green"
+      }
     },
-    "logs": {
-      "enabled": false,
-      "reason": {
-        "clusterExists": false,
-        "indexPatternExists": false,
-        "indexPatternInTimeRangeExists": false,
-        "nodeExists": null,
-        "indexExists": null,
-        "typeExists": false,
-        "typeExistsAtAnyTime": false,
-        "usingStructuredLogs": false
+    "logstash": {
+      "node_count": 1,
+      "events_in_total": 31,
+      "events_out_total": 31,
+      "avg_memory": 1038876672,
+      "avg_memory_used": 479515336,
+      "max_uptime": 603966,
+      "pipeline_count": 1,
+      "queue_types": {
+        "memory": 1,
+        "persisted": 0
       },
-      "types": []
-    }
-  },
-  "logstash": {
-    "node_count": 1,
-    "events_in_total": 31,
-    "events_out_total": 31,
-    "avg_memory": 1038876672,
-    "avg_memory_used": 479515336,
-    "max_uptime": 603966,
-    "pipeline_count": 1,
-    "queue_types": {
-      "memory": 1,
-      "persisted": 0
+      "versions": [
+        "7.0.0-alpha1"
+      ]
     },
-    "versions": ["7.0.0-alpha1"]
-  },
-  "kibana": {
-    "status": "green",
-    "requests_total": 914,
-    "concurrent_connections": 646,
-    "response_time_max": 2873,
-    "memory_size": 196005888,
-    "memory_limit": 1501560832,
-    "count": 1
-  },
-  "beats": {
-    "totalEvents": 0,
-    "bytesSent": 0,
+    "kibana": {
+      "status": "green",
+      "requests_total": 914,
+      "concurrent_connections": 646,
+      "response_time_max": 2873,
+      "memory_size": 196005888,
+      "memory_limit": 1501560832,
+      "count": 1
+    },
     "beats": {
-      "total": 0,
-      "types": []
-    }
-  },
-  "apm": {
-    "totalEvents": 0,
-    "memRss": 0,
-    "apms": {
-      "total": 0
+      "totalEvents": 0,
+      "bytesSent": 0,
+      "beats": {
+        "total": 0,
+        "types": []
+      }
     },
-    "config": {
-      "container": false
+    "apm": {
+      "totalEvents": 0,
+      "memRss": 0,
+      "apms": {
+        "total": 0
+      },
+      "versions": [],
+      "config": {
+        "container": false
+      }
     },
-    "versions": [ ]
-  },
-  "isCcrEnabled": true,
-  "isPrimary": true,
-  "status": "green"
-}]
+    "enterpriseSearch": {
+      "clusterUuid": "y1qOsQPiRrGtmdEuM3APJw",
+      "stats": {
+        "appSearchEngines": 0,
+        "workplaceSearchOrgSources": 0,
+        "workplaceSearchPrivateSources": 0,
+        "totalInstances": 0,
+        "uptime": 0,
+        "memUsed": 0,
+        "memCommitted": 0,
+        "memTotal": 0,
+        "versions": []
+      }
+    },
+    "isPrimary": true,
+    "status": "green",
+    "isCcrEnabled": true
+  }
+]

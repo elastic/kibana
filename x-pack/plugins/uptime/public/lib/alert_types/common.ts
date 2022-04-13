@@ -5,36 +5,6 @@
  * 2.0.
  */
 
-import { stringify } from 'querystring';
-
-export const format = ({
-  pathname,
-  query,
-}: {
-  pathname: string;
-  query: Record<string, any>;
-}): string => {
-  return `${pathname}?${stringify(query)}`;
+export const getUrlForAlert = (id: string, basePath: string) => {
+  return basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + id;
 };
-
-export const getMonitorRouteFromMonitorId = ({
-  monitorId,
-  dateRangeStart,
-  dateRangeEnd,
-  filters = {},
-}: {
-  monitorId: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  filters?: Record<string, string[]>;
-}) =>
-  format({
-    pathname: `/app/uptime/monitor/${btoa(monitorId)}`,
-    query: {
-      dateRangeEnd,
-      dateRangeStart,
-      ...(Object.keys(filters).length
-        ? { filters: JSON.stringify(Object.keys(filters).map((key) => [key, filters[key]])) }
-        : {}),
-    },
-  });

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { PaletteOutput } from '@kbn/coloring';
 import { LensIconChartArea } from '../assets/chart_area';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
 import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
@@ -17,18 +18,51 @@ import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizonta
 import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
 import { LensIconChartLine } from '../assets/chart_line';
 
-import type { VisualizationType } from '../types';
+import type { VisualizationType, Suggestion } from '../types';
 import type {
   SeriesType,
-  ValueLabelConfig,
   LegendConfig,
   AxisExtentConfig,
-  XYLayerConfig,
   XYCurveType,
   AxesSettingsConfig,
   FittingFunction,
   LabelsOrientationConfig,
-} from '../../common/expressions';
+  EndValue,
+  YConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
+import type { ValueLabelConfig } from '../../common/types';
+
+export interface XYDataLayerConfig {
+  layerId: string;
+  accessors: string[];
+  layerType: 'data';
+  seriesType: SeriesType;
+  xAccessor?: string;
+  hide?: boolean;
+  yConfig?: YConfig[];
+  splitAccessor?: string;
+  palette?: PaletteOutput;
+}
+
+export interface XYReferenceLineLayerConfig {
+  layerId: string;
+  accessors: string[];
+  yConfig?: YConfig[];
+  layerType: 'referenceLine';
+}
+
+export interface XYAnnotationLayerConfig {
+  layerId: string;
+  layerType: 'annotations';
+  annotations: EventAnnotationConfig[];
+  hide?: boolean;
+}
+
+export type XYLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYAnnotationLayerConfig;
 
 // Persisted parts of the state
 export interface XYState {
@@ -36,6 +70,8 @@ export interface XYState {
   legend: LegendConfig;
   valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
+  emphasizeFitting?: boolean;
+  endValue?: EndValue;
   yLeftExtent?: AxisExtentConfig;
   yRightExtent?: AxisExtentConfig;
   layers: XYLayerConfig[];
@@ -53,6 +89,7 @@ export interface XYState {
 }
 
 export type State = XYState;
+
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',
 });
@@ -69,6 +106,7 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar vertical',
     }),
     groupLabel: groupLabelForBar,
+    sortPriority: 4,
   },
   {
     id: 'bar_horizontal',
@@ -153,5 +191,15 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Line',
     }),
     groupLabel: groupLabelForLineAndArea,
+    sortPriority: 2,
   },
 ];
+
+interface XYStateWithLayers {
+  [prop: string]: unknown;
+  layers: XYLayerConfig[];
+}
+export interface XYSuggestion extends Suggestion {
+  datasourceState: XYStateWithLayers;
+  visualizationState: XYStateWithLayers;
+}

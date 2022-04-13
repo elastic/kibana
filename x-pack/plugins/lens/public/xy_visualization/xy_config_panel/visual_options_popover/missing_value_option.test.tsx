@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test/jest';
-import { EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
+import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { EuiSuperSelect } from '@elastic/eui';
 import { MissingValuesOptions } from './missing_values_option';
 
 describe('Missing values option', () => {
@@ -15,63 +15,23 @@ describe('Missing values option', () => {
     const component = shallow(
       <MissingValuesOptions
         onFittingFnChange={jest.fn()}
-        onValueLabelChange={jest.fn()}
         fittingFunction={'Carry'}
-        valueLabels={'hide'}
+        onEmphasizeFittingChange={jest.fn()}
+        onEndValueChange={jest.fn()}
       />
     );
 
-    expect(component.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('Carry');
-  });
-
-  it('should show currently selected value labels display setting', () => {
-    const component = mount(
-      <MissingValuesOptions
-        onFittingFnChange={jest.fn()}
-        onValueLabelChange={jest.fn()}
-        fittingFunction={'Carry'}
-        valueLabels={'inside'}
-      />
-    );
-
-    expect(component.find(EuiButtonGroup).prop('idSelected')).toEqual('value_labels_inside');
-  });
-
-  it('should show display field when enabled', () => {
-    const component = mount(
-      <MissingValuesOptions
-        onFittingFnChange={jest.fn()}
-        onValueLabelChange={jest.fn()}
-        fittingFunction={'Carry'}
-        valueLabels={'inside'}
-      />
-    );
-
-    expect(component.exists('[data-test-subj="lnsValueLabelsDisplay"]')).toEqual(true);
-  });
-
-  it('should hide in display value label option when disabled', () => {
-    const component = mount(
-      <MissingValuesOptions
-        onFittingFnChange={jest.fn()}
-        onValueLabelChange={jest.fn()}
-        fittingFunction={'Carry'}
-        valueLabels={'inside'}
-        isValueLabelsEnabled={false}
-      />
-    );
-
-    expect(component.exists('[data-test-subj="lnsValueLabelsDisplay"]')).toEqual(false);
+    expect(component.find(EuiSuperSelect).first().prop('valueOfSelected')).toEqual('Carry');
   });
 
   it('should show the fitting option when enabled', () => {
     const component = mount(
       <MissingValuesOptions
         onFittingFnChange={jest.fn()}
-        onValueLabelChange={jest.fn()}
         fittingFunction={'Carry'}
-        valueLabels={'inside'}
         isFittingEnabled={true}
+        onEmphasizeFittingChange={jest.fn()}
+        onEndValueChange={jest.fn()}
       />
     );
 
@@ -82,10 +42,10 @@ describe('Missing values option', () => {
     const component = mount(
       <MissingValuesOptions
         onFittingFnChange={jest.fn()}
-        onValueLabelChange={jest.fn()}
         fittingFunction={'Carry'}
-        valueLabels={'inside'}
         isFittingEnabled={false}
+        onEmphasizeFittingChange={jest.fn()}
+        onEndValueChange={jest.fn()}
       />
     );
 

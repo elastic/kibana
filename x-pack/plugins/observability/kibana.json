@@ -11,6 +11,7 @@
     "observability"
   ],
   "optionalPlugins": [
+    "discover",
     "embeddable",
     "home",
     "lens",
@@ -22,13 +23,27 @@
     "alerting",
     "cases",
     "data",
+    "dataViews",
     "features",
     "inspector",
     "ruleRegistry",
     "timelines",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "inspector",
+    "unifiedSearch"
   ],
   "ui": true,
   "server": true,
-  "requiredBundles": ["data", "kibanaReact", "kibanaUtils"]
+  "requiredBundles": [
+    "unifiedSearch",
+    "data",
+    "dataViews",
+    "embeddable",
+    "kibanaReact",
+    "kibanaUtils",
+    "lens"
+  ],
+  "extraPublicDirs": [
+    "common"
+  ]
 }

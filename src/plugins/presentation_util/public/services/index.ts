@@ -12,15 +12,17 @@ import { PresentationCapabilitiesService } from './capabilities';
 import { PresentationDashboardsService } from './dashboards';
 import { PresentationLabsService } from './labs';
 import { registry as stubRegistry } from './stub';
-import { PresentationOverlaysService } from './overlays';
+import { PresentationDataViewsService } from './data_views';
+import { registerExpressionsLanguage } from '..';
 
-export { PresentationCapabilitiesService } from './capabilities';
-export { PresentationDashboardsService } from './dashboards';
-export { PresentationLabsService } from './labs';
+export type { PresentationCapabilitiesService } from './capabilities';
+export type { PresentationDashboardsService } from './dashboards';
+export type { PresentationLabsService } from './labs';
+
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
+  dataViews: PresentationDataViewsService;
   capabilities: PresentationCapabilitiesService;
-  overlays: PresentationOverlaysService;
   labs: PresentationLabsService;
 }
 
@@ -31,5 +33,6 @@ export const getStubPluginServices = (): PresentationUtilPluginStart => {
   return {
     ContextProvider: pluginServices.getContextProvider(),
     labsService: pluginServices.getServices().labs,
+    registerExpressionsLanguage,
   };
 };

@@ -19,7 +19,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { ComponentProps } from '../../route_init';
-import { GlobalStateContext } from '../../global_state_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
@@ -30,6 +30,9 @@ import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { PageTemplate } from '../page_template';
 import { AlertsCallout } from '../../../alerts/callout';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 
 const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();
@@ -112,6 +115,7 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   }) as any;
   const [data, setData] = useState({} as any);
   const [instanceName, setInstanceName] = useState('');
+  const [alerts, setAlerts] = useState<AlertsByName>({});
 
   const title = `Kibana - ${instanceName}`;
   const pageTitle = i18n.translate('xpack.monitoring.kibana.instance.pageTitle', {
@@ -133,30 +137,36 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/kibana/${instance}`;
-    const response = await services.http?.fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        ccs,
+    if (services.http?.fetch && clusterUuid) {
+      const response = await services.http?.fetch<{ kibanaSummary: { name: string } }>(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          ccs,
+          timeRange: {
+            min: bounds.min.toISOString(),
+            max: bounds.max.toISOString(),
+          },
+        }),
+      });
+      setData(response);
+      setInstanceName(response.kibanaSummary.name);
+      const alertsResponse = await fetchAlerts({
+        fetch: services.http.fetch,
+        alertTypeIds: [RULE_KIBANA_VERSION_MISMATCH],
+        clusterUuid,
         timeRange: {
-          min: bounds.min.toISOString(),
-          max: bounds.max.toISOString(),
+          min: bounds.min.valueOf(),
+          max: bounds.max.valueOf(),
         },
-      }),
-    });
-
-    setData(response);
-    setInstanceName(response.kibanaSummary.name);
+      });
+      setAlerts(alertsResponse);
+    }
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
   return (
-    <PageTemplate
-      title={title}
-      pageTitle={pageTitle}
-      getPageData={getPageData}
-      data-test-subj="kibanaInstancePage"
-    >
-      <div data-test-subj="monitoringKibanaInstanceApp">
-        <KibanaInstance data={data} alerts={{}} />
+    <PageTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
+      <div data-test-subj="kibanaInstancePage">
+        <KibanaInstance data={data} alerts={alerts} />
       </div>
     </PageTemplate>
   );

@@ -1,0 +1,50 @@
+{
+  "groups": [
+    {
+      "key": "oss/cigroup",
+      "name": "OSS CI Group",
+      "ciGroups": 12
+    },
+    {
+      "key": "oss/firefox",
+      "name": "OSS Firefox"
+    },
+    {
+      "key": "oss/accessibility",
+      "name": "OSS Accessibility"
+    },
+    {
+      "key": "xpack/cypress/security_solution",
+      "name": "Security Solution - Cypress"
+    },
+    {
+      "key": "xpack/cypress/osquery_cypress",
+      "name": "Osquery - Cypress"
+    },
+    {
+      "key": "xpack/cypress/fleet_cypress",
+      "name": "Fleet - Cypress"
+    },
+    {
+      "key": "xpack/cypress/apm_cypress",
+      "name": "APM - Cypress"
+    },
+    {
+      "key": "xpack/cigroup",
+      "name": "Default CI Group",
+      "ciGroups": 27
+    },
+    {
+      "key": "xpack/cigroup/Docker",
+      "name": "Default CI Group Docker"
+    },
+    {
+      "key": "xpack/firefox",
+      "name": "Default Firefox"
+    },
+    {
+      "key": "xpack/accessibility",
+      "name": "Default Accessibility"
+    }
+  ]
+}

@@ -9,6 +9,17 @@ import { HttpSetup } from 'kibana/public';
 
 const DATA_API_ROOT = '/api/triggers_actions_ui/data';
 
+const formatPattern = (pattern: string) => {
+  let formattedPattern = pattern;
+  if (!formattedPattern.startsWith('*')) {
+    formattedPattern = `*${formattedPattern}`;
+  }
+  if (!formattedPattern.endsWith('*')) {
+    formattedPattern = `${formattedPattern}*`;
+  }
+  return formattedPattern;
+};
+
 export async function getMatchingIndices({
   pattern,
   http,
@@ -16,16 +27,17 @@ export async function getMatchingIndices({
   pattern: string;
   http: HttpSetup;
 }): Promise<Record<string, any>> {
-  if (!pattern.startsWith('*')) {
-    pattern = `*${pattern}`;
+  try {
+    const formattedPattern = formatPattern(pattern);
+
+    const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
+      `${DATA_API_ROOT}/_indices`,
+      { body: JSON.stringify({ pattern: formattedPattern }) }
+    );
+    return indices;
+  } catch (e) {
+    return [];
   }
-  if (!pattern.endsWith('*')) {
-    pattern = `${pattern}*`;
-  }
-  const { indices } = await http.post(`${DATA_API_ROOT}/_indices`, {
-    body: JSON.stringify({ pattern }),
-  });
-  return indices;
 }
 
 export async function getESIndexFields({
@@ -43,9 +55,10 @@ export async function getESIndexFields({
     aggregatable: boolean;
   }>
 > {
-  const { fields } = await http.post(`${DATA_API_ROOT}/_fields`, {
-    body: JSON.stringify({ indexPatterns: indexes }),
-  });
+  const { fields } = await http.post<{ fields: ReturnType<typeof getESIndexFields> }>(
+    `${DATA_API_ROOT}/_fields`,
+    { body: JSON.stringify({ indexPatterns: indexes }) }
+  );
   return fields;
 }
 
@@ -59,11 +72,48 @@ export const getSavedObjectsClient = () => {
   return savedObjectsClient;
 };
 
-export const loadIndexPatterns = async () => {
-  const { savedObjects } = await getSavedObjectsClient().find({
-    type: 'index-pattern',
-    fields: ['title'],
-    perPage: 10000,
-  });
-  return savedObjects;
+export const loadIndexPatterns = async (pattern: string) => {
+  let allSavedObjects = [];
+  const formattedPattern = formatPattern(pattern);
+  const perPage = 1000;
+
+  try {
+    const { savedObjects, total } = await getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title'],
+      page: 1,
+      search: formattedPattern,
+      perPage,
+    });
+
+    allSavedObjects = savedObjects;
+
+    if (total > perPage) {
+      let currentPage = 2;
+      const numberOfPages = Math.ceil(total / perPage);
+      const promises = [];
+
+      while (currentPage <= numberOfPages) {
+        promises.push(
+          getSavedObjectsClient().find({
+            type: 'index-pattern',
+            page: currentPage,
+            fields: ['title'],
+            search: formattedPattern,
+            perPage,
+          })
+        );
+        currentPage++;
+      }
+
+      const paginatedResults = await Promise.all(promises);
+
+      allSavedObjects = paginatedResults.reduce((oldResult, result) => {
+        return oldResult.concat(result.savedObjects);
+      }, allSavedObjects);
+    }
+    return allSavedObjects.map((indexPattern: any) => indexPattern.attributes.title);
+  } catch (e) {
+    return [];
+  }
 };

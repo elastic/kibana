@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
@@ -18,6 +19,7 @@ import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { EntityType } from '../../../../../timelines/common';
+import { UserDetailsPanel } from './user_details';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -25,8 +27,10 @@ interface DetailsPanelProps {
   entityType?: EntityType;
   handleOnPanelClosed?: () => void;
   isFlyoutView?: boolean;
+  runtimeMappings: MappingRuntimeFields;
   tabType?: TimelineTabs;
   timelineId: string;
+  isReadOnly?: boolean;
 }
 
 /**
@@ -41,8 +45,10 @@ export const DetailsPanel = React.memo(
     entityType,
     handleOnPanelClosed,
     isFlyoutView,
+    runtimeMappings,
     tabType,
     timelineId,
+    isReadOnly,
   }: DetailsPanelProps) => {
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -71,6 +77,7 @@ export const DetailsPanel = React.memo(
     let panelSize: EuiFlyoutProps['size'] = 's';
     const contextID = `${timelineId}-${activeTab}`;
     const isDraggable = timelineId === TimelineId.active && activeTab === TimelineTabs.query;
+
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
       panelSize = 'm';
       visiblePanel = (
@@ -82,8 +89,10 @@ export const DetailsPanel = React.memo(
           handleOnEventClosed={closePanel}
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
+          runtimeMappings={runtimeMappings}
           tabType={activeTab}
           timelineId={timelineId}
+          isReadOnly={isReadOnly}
         />
       );
     }
@@ -94,6 +103,18 @@ export const DetailsPanel = React.memo(
           contextID={contextID}
           expandedHost={currentTabDetail?.params}
           handleOnHostClosed={closePanel}
+          isDraggable={isDraggable}
+          isFlyoutView={isFlyoutView}
+        />
+      );
+    }
+
+    if (currentTabDetail?.panelView === 'userDetail' && currentTabDetail?.params?.userName) {
+      visiblePanel = (
+        <UserDetailsPanel
+          contextID={contextID}
+          userName={currentTabDetail.params.userName}
+          handleOnClose={closePanel}
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
         />

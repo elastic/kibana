@@ -50,7 +50,7 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.kibana.autocompleteTerminateAfter).not.toBeDefined();
+    expect(migrated.kibana?.autocompleteTerminateAfter).not.toBeDefined();
     expect(migrated.data.autocomplete.valueSuggestions.terminateAfter).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
@@ -66,7 +66,7 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.kibana.autocompleteTimeout).not.toBeDefined();
+    expect(migrated.kibana?.autocompleteTimeout).not.toBeDefined();
     expect(migrated.data.autocomplete.valueSuggestions.timeout).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [

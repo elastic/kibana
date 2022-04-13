@@ -6,24 +6,19 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
-import { EuiText, EuiSpacer, EuiLink, EuiCodeBlock, EuiSelect } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 
+import { useKibanaVersion } from '../../../hooks';
 import type { EnrollmentAPIKey } from '../../../types';
-import { PLATFORM_OPTIONS, usePlatform, useStartServices } from '../../../hooks';
-import type { PLATFORM_TYPE } from '../../../hooks';
+
+import { InstallationMessage } from '../../agent_enrollment_flyout/installation_message';
+
+import { PlatformSelector } from './platform_selector';
 
 interface Props {
   fleetServerHosts: string[];
   apiKey: EnrollmentAPIKey;
+  isK8s: string | undefined;
 }
-
-// Otherwise the copy button is over the text
-const CommandCode = styled.pre({
-  overflow: 'scroll',
-});
 
 function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
   return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey.api_key}`;
@@ -32,89 +27,45 @@ function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHost
 export const ManualInstructions: React.FunctionComponent<Props> = ({
   apiKey,
   fleetServerHosts,
+  isK8s,
 }) => {
-  const { platform, setPlatform } = usePlatform();
-  const { docLinks } = useStartServices();
-
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
+  const kibanaVersion = useKibanaVersion();
 
-  const linuxMacCommand = `sudo ./elastic-agent install -f ${enrollArgs}`;
+  const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-linux-x86_64
+sudo ./elastic-agent install ${enrollArgs}`;
 
-  const windowsCommand = `.\\elastic-agent.exe install -f ${enrollArgs}`;
+  const macCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz
+cd elastic-agent-${kibanaVersion}-darwin-x86_64
+sudo ./elastic-agent install ${enrollArgs}`;
+
+  const windowsCommand = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+cd elastic-agent-${kibanaVersion}-windows-x86_64
+.\\elastic-agent.exe install ${enrollArgs}`;
+
+  const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
+sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb
+sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
+
+  const linuxRpmCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-x86_64.rpm
+sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm
+sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
   return (
     <>
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.enrollmentInstructions.descriptionText"
-          defaultMessage="From the agent directory, run the appropriate command to install, enroll, and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
-        />
-      </EuiText>
-      <EuiSpacer size="l" />
-      <EuiSelect
-        prepend={
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.enrollmentInstructions.platformSelectLabel"
-              defaultMessage="Platform"
-            />
-          </EuiText>
-        }
-        options={PLATFORM_OPTIONS}
-        value={platform}
-        onChange={(e) => setPlatform(e.target.value as PLATFORM_TYPE)}
-        aria-label={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
-          defaultMessage: 'Platform',
-        })}
+      <InstallationMessage />
+      <PlatformSelector
+        linuxCommand={linuxCommand}
+        macCommand={macCommand}
+        windowsCommand={windowsCommand}
+        linuxDebCommand={linuxDebCommand}
+        linuxRpmCommand={linuxRpmCommand}
+        isK8s={isK8s === 'IS_KUBERNETES'}
       />
-      <EuiSpacer size="s" />
-      {platform === 'linux-mac' && (
-        <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-          <CommandCode>{linuxMacCommand}</CommandCode>
-        </EuiCodeBlock>
-      )}
-      {platform === 'windows' && (
-        <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-          <CommandCode>{windowsCommand}</CommandCode>
-        </EuiCodeBlock>
-      )}
-
-      {platform === 'rpm-deb' && (
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
-            defaultMessage="See the {link} for RPM / DEB deploy instructions."
-            values={{
-              link: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.elasticAgent}>
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.moreInstructionsLink"
-                    defaultMessage="Elastic Agent docs"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-      )}
-
-      <EuiSpacer size="l" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.enrollmentInstructions.troubleshootingText"
-          defaultMessage="If you are having trouble connecting, see our {link}."
-          values={{
-            link: (
-              <EuiLink target="_blank" external href={docLinks.links.fleet.troubleshooting}>
-                <FormattedMessage
-                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                  defaultMessage="troubleshooting guide"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
     </>
   );
 };

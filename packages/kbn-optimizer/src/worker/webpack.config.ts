@@ -7,6 +7,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
@@ -16,9 +17,9 @@ import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
-import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
-import { Bundle, BundleRefs, WorkerConfig } from '../common';
+import { Bundle, BundleRefs, WorkerConfig, parseDllManifest } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
@@ -27,6 +28,15 @@ import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
+
+const nodeModulesButNotKbnPackages = (path: string) => {
+  if (!path.includes('node_modules')) {
+    return false;
+  }
+
+  return !path.includes(`node_modules${Path.sep}@kbn${Path.sep}`);
+};
 
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
@@ -71,8 +81,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     plugins: [
       new CleanWebpackPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
-      new PopulateBundleCachePlugin(worker, bundle),
+      new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
       new BundleMetricsPlugin(bundle),
+      new webpack.DllReferencePlugin({
+        context: worker.repoRoot,
+        manifest: DLL_MANIFEST,
+      }),
       ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
@@ -134,7 +148,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.scss$/,
-          exclude: /node_modules/,
+          exclude: nodeModulesButNotKbnPackages,
           oneOf: [
             ...worker.themeTags.map((theme) => ({
               resourceQuery: `?${theme}`,
@@ -224,6 +238,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
+        vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,
     },
@@ -254,16 +269,15 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         filename: '[path].br',
         test: /\.(js|css)$/,
         cache: false,
+        compressionOptions: {
+          level: 11,
+        },
       }),
       new CompressionPlugin({
         algorithm: 'gzip',
         filename: '[path].gz',
         test: /\.(js|css)$/,
         cache: false,
-      }),
-      new webpack.DllReferencePlugin({
-        context: worker.repoRoot,
-        manifest: require(UiSharedDepsNpm.dllManifestPath),
       }),
     ],
 
@@ -275,9 +289,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           extractComments: false,
           parallel: false,
           terserOptions: {
-            compress: true,
+            compress: { passes: 2 },
             keep_classnames: true,
-            mangle: !['kibanaLegacy', 'monitoring'].includes(bundle.id),
+            mangle: true,
           },
         }),
       ],

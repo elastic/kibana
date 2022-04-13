@@ -8,7 +8,13 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
-import { createFilter } from '../common/helpers';
+import { firstValueFrom } from 'rxjs';
+import {
+  createFilter,
+  generateTablePaginationOptions,
+  getInspectResponse,
+  InspectResponse,
+} from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   ActionEdges,
@@ -20,7 +26,6 @@ import {
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
 
-import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionsArgs {
@@ -55,8 +60,8 @@ export const useAllActions = ({
   return useQuery(
     ['actions', { activePage, direction, limit, sortField }],
     async () => {
-      const responseData = await data.search
-        .search<ActionsRequestOptions, ActionsStrategyResponse>(
+      const responseData = await firstValueFrom(
+        data.search.search<ActionsRequestOptions, ActionsStrategyResponse>(
           {
             factoryQueryType: OsqueryQueries.actions,
             filterQuery: createFilter(filterQuery),
@@ -70,7 +75,7 @@ export const useAllActions = ({
             strategy: 'osquerySearchStrategy',
           }
         )
-        .toPromise();
+      );
 
       return {
         ...responseData,

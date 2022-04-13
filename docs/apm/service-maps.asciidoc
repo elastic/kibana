@@ -41,7 +41,7 @@ We currently surface two types of service maps:
 === How do service maps work?
 
 Service maps rely on distributed traces to draw connections between services.
-As {apm-overview-ref-v}/distributed-tracing.html[distributed tracing] is enabled out-of-the-box for supported technologies, so are service maps.
+As {apm-guide-ref}/apm-distributed-tracing.html[distributed tracing] is enabled out-of-the-box for supported technologies, so are service maps.
 However, if a service isn't instrumented,
 or a `traceparent` header isn't being propagated to it,
 distributed tracing will not work, and the connection will not be drawn on the map.
@@ -84,7 +84,7 @@ image:apm/images/red-service.png[APM red service]:: Max anomaly score **≥75**.
 [role="screenshot"]
 image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]
 
-If an anomaly has been detected, click *view anomalies* to view the anomaly detection metric viewier in the Machine learning app.
+If an anomaly has been detected, click *view anomalies* to view the anomaly detection metric viewer in the Machine learning app.
 This time series analysis will display additional details on the severity and time of the detected anomalies.
 
 To learn how to create a machine learning job, see <<machine-learning-integration,machine learning integration>>.

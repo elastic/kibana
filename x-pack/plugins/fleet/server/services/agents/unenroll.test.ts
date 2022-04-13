@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import type { SavedObject } from 'kibana/server';
 
@@ -43,7 +43,9 @@ describe('unenrollAgent (singular)', () => {
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
     expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
-    expect(calledWith[0]?.body).toHaveProperty('doc.unenrollment_started_at');
+    expect((calledWith[0] as estypes.UpdateRequest)?.body).toHaveProperty(
+      'doc.unenrollment_started_at'
+    );
   });
 
   it('cannot unenroll from hosted agent policy by default', async () => {
@@ -71,7 +73,9 @@ describe('unenrollAgent (singular)', () => {
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
     expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
-    expect(calledWith[0]?.body).toHaveProperty('doc.unenrollment_started_at');
+    expect((calledWith[0] as estypes.UpdateRequest)?.body).toHaveProperty(
+      'doc.unenrollment_started_at'
+    );
   });
 
   it('can unenroll from hosted agent policy with force=true and revoke=true', async () => {
@@ -81,7 +85,7 @@ describe('unenrollAgent (singular)', () => {
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
     expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
-    expect(calledWith[0]?.body).toHaveProperty('doc.unenrolled_at');
+    expect((calledWith[0] as estypes.UpdateRequest)?.body).toHaveProperty('doc.unenrolled_at');
   });
 });
 
@@ -93,10 +97,12 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];
-    const ids = calledWith?.body
+    const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = (calledWith as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.doc)
+      .map((i: any) => i.doc);
     expect(ids).toEqual(idsToUnenroll);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
@@ -111,10 +117,12 @@ describe('unenrollAgents (plural)', () => {
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
     const calledWith = esClient.bulk.mock.calls[1][0];
-    const ids = calledWith?.body
+    const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = (calledWith as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.doc)
+      .map((i: any) => i.doc);
     expect(ids).toEqual(onlyRegular);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
@@ -149,10 +157,12 @@ describe('unenrollAgents (plural)', () => {
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
     const calledWith = esClient.bulk.mock.calls[0][0];
-    const ids = calledWith?.body
+    const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = (calledWith as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.doc)
+      .map((i: any) => i.doc);
     expect(ids).toEqual(onlyRegular);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
@@ -166,10 +176,12 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];
-    const ids = calledWith?.body
+    const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = (calledWith as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.doc)
+      .map((i: any) => i.doc);
     expect(ids).toEqual(idsToUnenroll);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrollment_started_at');
@@ -204,10 +216,12 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
-    const ids = calledWith?.body
+    const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
-    const docs = calledWith?.body?.filter((i: any) => i.doc).map((i: any) => i.doc);
+    const docs = (calledWith as estypes.BulkRequest)?.body
+      ?.filter((i: any) => i.doc)
+      .map((i: any) => i.doc);
     expect(ids).toEqual(idsToUnenroll);
     for (const doc of docs!) {
       expect(doc).toHaveProperty('unenrolled_at');
@@ -249,7 +263,7 @@ function createClientMock() {
 
   const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // @ts-expect-error
-  esClientMock.get.mockImplementation(async ({ id }) => {
+  esClientMock.get.mockResponseImplementation(({ id }) => {
     switch (id) {
       case agentInHostedDoc._id:
         return { body: agentInHostedDoc };
@@ -261,13 +275,12 @@ function createClientMock() {
         throw new Error('not found');
     }
   });
-  esClientMock.bulk.mockResolvedValue({
+  esClientMock.bulk.mockResponse(
     // @ts-expect-error not full interface
-    body: { items: [] },
-  });
+    { items: [] }
+  );
 
-  // @ts-expect-error
-  esClientMock.mget.mockImplementation(async (params) => {
+  esClientMock.mget.mockResponseImplementation((params) => {
     // @ts-expect-error
     const docs = params?.body.docs.map(({ _id }) => {
       switch (_id) {

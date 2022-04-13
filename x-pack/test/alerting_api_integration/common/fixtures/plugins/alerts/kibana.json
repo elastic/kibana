@@ -1,12 +1,11 @@
 {
   "id": "alertsFixtures",
   "owner": {
-    "name": "Alerting Services",
-    "githubTeam": "kibana-alerting-services"
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
   },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack"],
   "requiredPlugins": ["taskManager", "features", "actions", "alerting", "encryptedSavedObjects"],
   "optionalPlugins": ["security", "spaces"],
   "server": true,

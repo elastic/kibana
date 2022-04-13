@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export {
-  ToggleAlertFlyoutButton,
-  ToggleAlertFlyoutButtonProps,
-} from './toggle_alert_flyout_button';
+export type { ToggleAlertFlyoutButtonProps } from './toggle_alert_flyout_button';
+export { ToggleAlertFlyoutButton } from './toggle_alert_flyout_button';
 export { UptimeAlertsFlyoutWrapper } from './uptime_alerts_flyout_wrapper';

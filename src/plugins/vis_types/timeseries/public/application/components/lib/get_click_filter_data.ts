@@ -11,6 +11,7 @@ import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import { BUCKET_TYPES } from '../../../../common/enums';
 import { TimeseriesVisParams } from '../../../types';
 import type { TSVBTables } from './types';
+import { SERIES_SEPARATOR } from '../../../../common/constants';
 
 export const getClickFilterData = (
   points: Array<[GeometryValue, XYChartSeriesIdentifier]>,
@@ -23,7 +24,7 @@ export const getClickFilterData = (
     const { specId } = point[1];
     // specId for a split series has the format
     // 61ca57f1-469d-11e7-af02-69e470af7417:Men's Accessories, <layer_id>:<split_label>
-    const [layerId, splitLabel] = specId.split(':');
+    const [layerId, splitLabel] = specId.split(SERIES_SEPARATOR);
     const table = tables[layerId];
 
     const layer = model.series.filter(({ id }) => id === layerId);
@@ -36,7 +37,12 @@ export const getClickFilterData = (
     const index = table.rows.findIndex((row) => {
       const condition =
         geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
-      return splitLabel ? condition && row[X_ACCESSOR_INDEX + 2].toString() === label : condition;
+      if (splitLabel) {
+        const value =
+          row[X_ACCESSOR_INDEX + 2].keys?.join() ?? row[X_ACCESSOR_INDEX + 2].toString();
+        return condition && value === label;
+      }
+      return condition;
     });
     if (index < 0) return;
 

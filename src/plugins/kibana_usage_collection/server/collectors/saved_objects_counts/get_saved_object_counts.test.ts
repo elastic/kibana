@@ -11,10 +11,8 @@ import { getSavedObjectsCounts } from './get_saved_object_counts';
 
 function mockGetSavedObjectsCounts<TBody>(params: TBody) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.search.mockResolvedValue(
-    // @ts-expect-error we only care about the response body
-    { body: { ...params } }
-  );
+  // @ts-expect-error arbitrary type
+  esClient.search.mockResponse(params);
   return esClient;
 }
 
@@ -26,8 +24,8 @@ describe('getSavedObjectsCounts', () => {
     expect(results).toStrictEqual([]);
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
-      ignoreUnavailable: true,
-      filterPath: 'aggregations.types.buckets',
+      ignore_unavailable: true,
+      filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,
         query: { match_all: {} },
@@ -41,8 +39,8 @@ describe('getSavedObjectsCounts', () => {
     await getSavedObjectsCounts(esClient, '.kibana');
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
-      ignoreUnavailable: true,
-      filterPath: 'aggregations.types.buckets',
+      ignore_unavailable: true,
+      filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,
         query: { match_all: {} },
@@ -56,8 +54,8 @@ describe('getSavedObjectsCounts', () => {
     await getSavedObjectsCounts(esClient, '.kibana', ['type_one', 'type_two']);
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana',
-      ignoreUnavailable: true,
-      filterPath: 'aggregations.types.buckets',
+      ignore_unavailable: true,
+      filter_path: 'aggregations.types.buckets',
       body: {
         size: 0,
         query: { terms: { type: ['type_one', 'type_two'] } },

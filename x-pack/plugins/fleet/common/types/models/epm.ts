@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
@@ -43,9 +43,13 @@ export interface DefaultPackagesInstallationError {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install' | 'unknown';
-export type InstallSource = 'registry' | 'upload';
+export type InstallSource = 'registry' | 'upload' | 'bundled';
 
-export type EpmPackageInstallStatus = 'installed' | 'installing' | 'install_failed';
+export type EpmPackageInstallStatus =
+  | 'installed'
+  | 'installing'
+  | 'install_failed'
+  | 'installed_bundled';
 
 export type DetailViewPanelName = 'overview' | 'policies' | 'assets' | 'settings' | 'custom';
 export type ServiceName = 'kibana' | 'elasticsearch';
@@ -68,7 +72,10 @@ export enum KibanaAssetType {
   map = 'map',
   lens = 'lens',
   securityRule = 'security_rule',
+  cloudSecurityPostureRuleTemplate = 'csp_rule_template',
   mlModule = 'ml_module',
+  tag = 'tag',
+  osqueryPackAsset = 'osquery_pack_asset',
 }
 
 /*
@@ -83,6 +90,9 @@ export enum KibanaSavedObjectType {
   lens = 'lens',
   mlModule = 'ml-module',
   securityRule = 'security-rule',
+  cloudSecurityPostureRuleTemplate = 'csp-rule-template',
+  tag = 'tag',
+  osqueryPackAsset = 'osquery-pack-asset',
 }
 
 export enum ElasticsearchAssetType {
@@ -92,6 +102,7 @@ export enum ElasticsearchAssetType {
   ilmPolicy = 'ilm_policy',
   transform = 'transform',
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
+  mlModel = 'ml_model',
 }
 
 export type DataType = typeof dataTypes;
@@ -100,7 +111,13 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
-  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal'>;
+  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
+
+export interface BundledPackage {
+  name: string;
+  version: string;
+  buffer: Buffer;
+}
 
 export type RegistryPackage = PackageSpecManifest &
   Partial<RegistryOverridesToOptional> &
@@ -123,6 +140,11 @@ interface RegistryAdditionalProperties {
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
   data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
+  elasticsearch?: {
+    privileges?: {
+      cluster?: string[];
+    };
+  };
 }
 interface RegistryOverridePropertyValue {
   icons?: RegistryImage[];
@@ -225,6 +247,7 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'data_streams'
   | 'policy_templates'
+  | 'categories'
 >;
 
 export type ScreenshotItem = RegistryImage | PackageSpecScreenshot;
@@ -286,6 +309,7 @@ export enum RegistryDataStreamKeys {
 }
 
 export interface RegistryDataStream {
+  [key: string]: any;
   [RegistryDataStreamKeys.type]: string;
   [RegistryDataStreamKeys.ilm_policy]?: string;
   [RegistryDataStreamKeys.hidden]?: boolean;
@@ -304,6 +328,7 @@ export interface RegistryElasticsearch {
   privileges?: RegistryDataStreamPrivileges;
   'index_template.settings'?: estypes.IndicesIndexSettings;
   'index_template.mappings'?: estypes.MappingTypeMapping;
+  'ingest_pipeline.name'?: string;
 }
 
 export interface RegistryDataStreamPrivileges {
@@ -374,6 +399,7 @@ export interface IntegrationCardItem {
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   integration: string;
   id: string;
+  categories: string[];
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
@@ -392,18 +418,28 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
-  keep_policies_up_to_date: boolean;
+  installed_kibana_space_id?: string;
+  keep_policies_up_to_date?: boolean;
 }
 
 export interface PackageUsageStats {
   agent_policy_count: number;
 }
 
-export type Installable<T> = Installed<T> | Installing<T> | NotInstalled<T> | InstallFailed<T>;
+export type Installable<T> =
+  | InstalledRegistry<T>
+  | Installing<T>
+  | NotInstalled<T>
+  | InstallFailed<T>
+  | InstalledBundled<T>;
 
-export type Installed<T = {}> = T & {
+export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
+};
+
+export type InstalledBundled<T = {}> = T & {
+  status: InstallationStatus['InstalledBundled'];
 };
 
 export type Installing<T = {}> = T & {
@@ -451,6 +487,25 @@ export interface IndexTemplate {
   _meta: object;
 }
 
+export interface ESAssetMetadata {
+  package?: {
+    name: string;
+  };
+  managed_by: string;
+  managed: boolean;
+}
+export interface TemplateMapEntry {
+  _meta: ESAssetMetadata;
+  template:
+    | {
+        mappings: NonNullable<RegistryElasticsearch['index_template.mappings']>;
+      }
+    | {
+        settings: NonNullable<RegistryElasticsearch['index_template.settings']> | object;
+      };
+}
+
+export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;

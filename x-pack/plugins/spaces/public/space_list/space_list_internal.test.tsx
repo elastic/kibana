@@ -9,7 +9,7 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { coreMock } from 'src/core/public/mocks';
 
 import type { Space } from '../../common';
@@ -79,6 +79,9 @@ describe('SpaceListInternal', () => {
   }
   function getButton(wrapper: ReactWrapper) {
     return wrapper.find('EuiButtonEmpty');
+  }
+  async function getListClickTarget(wrapper: ReactWrapper) {
+    return (await wrapper.find('[data-test-subj="space-avatar-alpha"]')).last();
   }
 
   describe('using default properties', () => {
@@ -235,15 +238,18 @@ describe('SpaceListInternal', () => {
       const { spaces, namespaces } = getSpaceData(8);
 
       it('with displayLimit=0, shows badges without button', async () => {
-        const props = { namespaces: [...namespaces, '?'], displayLimit: 0 };
+        const props = { namespaces: [...namespaces, '?'], displayLimit: 0, listOnClick: jest.fn() };
         const wrapper = await createSpaceList({ spaces, props });
 
         expect(getListText(wrapper)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(getButton(wrapper)).toHaveLength(0);
+
+        (await getListClickTarget(wrapper)).simulate('click');
+        expect(props.listOnClick).toHaveBeenCalledTimes(1);
       });
 
       it('with displayLimit=1, shows badges with button', async () => {
-        const props = { namespaces: [...namespaces, '?'], displayLimit: 1 };
+        const props = { namespaces: [...namespaces, '?'], displayLimit: 1, listOnClick: jest.fn() };
         const wrapper = await createSpaceList({ spaces, props });
 
         expect(getListText(wrapper)).toEqual(['A']);
@@ -257,6 +263,9 @@ describe('SpaceListInternal', () => {
         const badgeText = getListText(wrapper);
         expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(button.text()).toEqual('show less');
+
+        (await getListClickTarget(wrapper)).simulate('click');
+        expect(props.listOnClick).toHaveBeenCalledTimes(1);
       });
 
       it('with displayLimit=7, shows badges with button', async () => {

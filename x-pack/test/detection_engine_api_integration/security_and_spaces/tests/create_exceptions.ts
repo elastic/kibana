@@ -60,6 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
   const es = getService('es');
 
   describe('create_rules_with_exceptions', () => {
@@ -73,13 +74,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
-        await deleteAllExceptions(es);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+        await deleteAllExceptions(supertest, log);
       });
 
       describe('elastic admin', () => {
@@ -104,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
 
-          const rule = await createRule(supertest, ruleWithException);
+          const rule = await createRule(supertest, log, ruleWithException);
           const expected: Partial<RulesSchema> = {
             ...getSimpleRuleOutput(),
             exceptions_list: [
@@ -142,8 +143,8 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
 
-          const rule = await createRule(supertest, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, rule.id);
+          const rule = await createRule(supertest, log, ruleWithException);
+          await waitForRuleSuccessOrStatus(supertest, log, rule.id);
           const bodyToCompare = removeServerGeneratedProperties(rule);
 
           const expected: Partial<RulesSchema> = {
@@ -162,12 +163,16 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should allow removing an exception list from an immutable rule through patch', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+          );
           expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one exceptions_list
 
           // remove the exceptions list as a user is allowed to remove it from an immutable rule
@@ -179,23 +184,29 @@ export default ({ getService }: FtrProviderContext) => {
 
           const immutableRuleSecondTime = await getRule(
             supertest,
+            log,
             '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
           );
           expect(immutableRuleSecondTime.exceptions_list.length).to.eql(0);
         });
 
         it('should allow adding a second exception list to an immutable rule through patch', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
+            log,
             getCreateExceptionListMinimalSchemaMock()
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+          );
           expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -218,6 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const immutableRuleSecondTime = await getRule(
             supertest,
+            log,
             '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
           );
 
@@ -225,12 +237,16 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should override any updates to pre-packaged rules if the user removes the exception list through the API but the new version of a rule has an exception list again', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+          );
           expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
 
           await supertest
@@ -239,10 +255,11 @@ export default ({ getService }: FtrProviderContext) => {
             .send({ rule_id: '9a1a2dae-0b5f-4c3d-8305-a268d404c306', exceptions_list: [] })
             .expect(200);
 
-          await downgradeImmutableRule(es, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
-          await installPrePackagedRules(supertest);
+          await downgradeImmutableRule(es, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          await installPrePackagedRules(supertest, log);
           const immutableRuleSecondTime = await getRule(
             supertest,
+            log,
             '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
           );
 
@@ -252,17 +269,22 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should merge back an exceptions_list if it was removed from the immutable rule through PATCH', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
+            log,
             getCreateExceptionListMinimalSchemaMock()
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
-          const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+          );
           expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
 
           // remove the exception list and only have a single list that is not an endpoint_list
@@ -282,10 +304,11 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await downgradeImmutableRule(es, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
-          await installPrePackagedRules(supertest);
+          await downgradeImmutableRule(es, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          await installPrePackagedRules(supertest, log);
           const immutableRuleSecondTime = await getRule(
             supertest,
+            log,
             '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
           );
 
@@ -301,19 +324,24 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should NOT add an extra exceptions_list that already exists on a rule during an upgrade', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
-          const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+          );
           expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
 
-          await downgradeImmutableRule(es, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
-          await installPrePackagedRules(supertest);
+          await downgradeImmutableRule(es, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          await installPrePackagedRules(supertest, log);
 
           const immutableRuleSecondTime = await getRule(
             supertest,
+            log,
             '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
           );
 
@@ -325,17 +353,22 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should NOT allow updates to pre-packaged rules to overwrite existing exception based rules when the user adds an additional exception list', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
+            log,
             getCreateExceptionListMinimalSchemaMock()
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to ensure does not stomp on our existing rule
-          const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+          );
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
           await supertest
@@ -355,10 +388,11 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await downgradeImmutableRule(es, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
-          await installPrePackagedRules(supertest);
+          await downgradeImmutableRule(es, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          await installPrePackagedRules(supertest, log);
           const immutableRuleSecondTime = await getRule(
             supertest,
+            log,
             '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
           );
 
@@ -375,18 +409,23 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not remove any exceptions added to a pre-packaged/immutable rule during an update if that rule has no existing exception lists', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           // Create a new exception list
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
+            log,
             getCreateExceptionListMinimalSchemaMock()
           );
 
           // Rule id of "eb079c62-4481-4d6e-9643-3ca499df7aaa" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/external_alerts.json
           // since this rule does not have existing exceptions_list that we are going to use for tests
-          const immutableRule = await getRule(supertest, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            'eb079c62-4481-4d6e-9643-3ca499df7aaa'
+          );
           expect(immutableRule.exceptions_list.length).eql(0); // make sure we have no exceptions_list
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -406,10 +445,11 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          await downgradeImmutableRule(es, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
-          await installPrePackagedRules(supertest);
+          await downgradeImmutableRule(es, log, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
+          await installPrePackagedRules(supertest, log);
           const immutableRuleSecondTime = await getRule(
             supertest,
+            log,
             'eb079c62-4481-4d6e-9643-3ca499df7aaa'
           );
 
@@ -424,17 +464,22 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not change the immutable tags when adding a second exception list to an immutable rule through patch', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
+            log,
             getCreateExceptionListMinimalSchemaMock()
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+          );
           expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -457,6 +502,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const body = await findImmutableRuleById(
             supertest,
+            log,
             '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
           );
           expect(body.data.length).to.eql(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
@@ -468,17 +514,22 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
-          await installPrePackagedRules(supertest);
+          await installPrePackagedRules(supertest, log);
 
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
+            log,
             getCreateExceptionListMinimalSchemaMock()
           );
 
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
           // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
           // This rule has an existing exceptions_list that we are going to use
-          const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+          const immutableRule = await getRule(
+            supertest,
+            log,
+            '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
+          );
           expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
 
           // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -499,7 +550,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          const status = await getPrePackagedRulesStatus(supertest);
+          const status = await getPrePackagedRulesStatus(supertest, log);
           expect(status.rules_not_installed).to.eql(0);
         });
       });
@@ -544,18 +595,19 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         beforeEach(async () => {
-          await createSignalsIndex(supertest);
+          await createSignalsIndex(supertest, log);
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(supertest);
-          await deleteAllExceptions(es);
+          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log);
+          await deleteAllExceptions(supertest, log);
         });
 
         it('should be able to execute against an exception list that does not include valid entries and get back 10 signals', async () => {
           const { id, list_id, namespace_type, type } = await createExceptionList(
             supertest,
+            log,
             getCreateExceptionListMinimalSchemaMock()
           );
 
@@ -570,7 +622,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           };
-          await createExceptionListItem(supertest, exceptionListItem);
+          await createExceptionListItem(supertest, log, exceptionListItem);
 
           const ruleWithException: CreateRulesSchema = {
             name: 'Simple Rule Query',
@@ -592,10 +644,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           };
-          const { id: createdId } = await createRule(supertest, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, createdId);
-          await waitForSignalsToBePresent(supertest, 10, [createdId]);
-          const signalsOpen = await getSignalsByIds(supertest, [createdId]);
+          const { id: createdId } = await createRule(supertest, log, ruleWithException);
+          await waitForRuleSuccessOrStatus(supertest, log, createdId);
+          await waitForSignalsToBePresent(supertest, log, 10, [createdId]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [createdId]);
           expect(signalsOpen.hits.hits.length).equal(10);
         });
 
@@ -612,7 +664,7 @@ export default ({ getService }: FtrProviderContext) => {
             from: '1900-01-01T00:00:00.000Z',
             query: 'host.name: "suricata-sensor-amsterdam"',
           };
-          const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+          const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'host.name', // This matches the query above which will exclude everything
@@ -622,7 +674,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
           expect(signalsOpen.hits.hits.length).equal(0);
         });
 
@@ -631,7 +683,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
           };
-          const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+          const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'host.id',
@@ -641,7 +693,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
           expect(signalsOpen.hits.hits.length).equal(0);
         });
 
@@ -653,7 +705,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 700,
             },
           };
-          const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+          const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'host.id',
@@ -663,7 +715,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
           expect(signalsOpen.hits.hits.length).equal(0);
         });
 
@@ -696,7 +748,7 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+          const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
                 field: 'source.ip',
@@ -706,21 +758,21 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           ]);
-          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
           expect(signalsOpen.hits.hits.length).equal(0);
         });
         describe('rules with value list exceptions', () => {
           beforeEach(async () => {
-            await createListsIndex(supertest);
+            await createListsIndex(supertest, log);
           });
 
           afterEach(async () => {
-            await deleteListsIndex(supertest);
+            await deleteListsIndex(supertest, log);
           });
 
           it('generates no signals when a value list exception is added for a query rule', async () => {
             const valueListId = 'value-list-id';
-            await importFile(supertest, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
+            await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
             const rule: QueryCreateSchema = {
               name: 'Simple Rule Query',
               description: 'Simple Rule Query',
@@ -733,7 +785,7 @@ export default ({ getService }: FtrProviderContext) => {
               from: '1900-01-01T00:00:00.000Z',
               query: 'host.name: "suricata-sensor-amsterdam"',
             };
-            const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
               [
                 {
                   field: 'host.name',
@@ -746,13 +798,13 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
             ]);
-            const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
             expect(signalsOpen.hits.hits.length).equal(0);
           });
 
           it('generates no signals when a value list exception is added for a threat match rule', async () => {
             const valueListId = 'value-list-id';
-            await importFile(supertest, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
             const rule: ThreatMatchCreateSchema = {
               description: 'Detecting root and admin users',
               name: 'Query with a rule id',
@@ -781,7 +833,7 @@ export default ({ getService }: FtrProviderContext) => {
               threat_filters: [],
             };
 
-            const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
               [
                 {
                   field: 'host.name',
@@ -794,7 +846,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
             ]);
-            const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+            const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
             expect(signalsOpen.hits.hits.length).equal(0);
           });
         });

@@ -6,54 +6,47 @@
  */
 
 import { render as testLibRender } from '@testing-library/react';
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters } from 'kibana/public';
+import { coreMock } from 'src/core/public/mocks';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
-import { of } from 'rxjs';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   KibanaContextProvider,
   KibanaPageTemplate,
 } from '../../../../../src/plugins/kibana_react/public';
 import translations from '../../../translations/translations/ja-JP.json';
 import { PluginContext } from '../context/plugin_context';
-import { ObservabilityPublicPluginsStart } from '../plugin';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 
-export const core = {
-  http: {
-    basePath: {
-      prepend: jest.fn(),
-    },
-  },
-  uiSettings: {
-    get: (key: string) => true,
-    get$: (key: string) => of(true),
-  },
-} as unknown as CoreStart;
+export const core = coreMock.createStart();
+export const data = dataPluginMock.createStartContract();
 
-const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
-
-const plugins = {
-  data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
-} as unknown as ObservabilityPublicPluginsStart;
+const config = {
+  unsafe: {
+    alertingExperience: { enabled: true },
+    cases: { enabled: true },
+    overviewNext: { enabled: false },
+    rules: { enabled: true },
+  },
+};
 
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
-      <KibanaContextProvider services={{ ...core }}>
+      <KibanaContextProvider services={{ ...core, data }}>
         <PluginContext.Provider
           value={{
             appMountParameters,
             config,
-            core,
-            plugins,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
+            kibanaFeatures: [],
           }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>

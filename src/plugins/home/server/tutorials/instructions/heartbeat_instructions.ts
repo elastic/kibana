@@ -13,247 +13,298 @@ import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 import { cloudPasswordAndResetLink } from './cloud_instructions';
 
-export const createHeartbeatInstructions = (context?: TutorialContext) => ({
-  INSTALL: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.install.osxTitle', {
-        defaultMessage: 'Download and install Heartbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
-        values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf heartbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd heartbeat-{config.kibana.version}-darwin-x86_64/',
-      ],
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTitle', {
-        defaultMessage: 'Download and install Heartbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPre', {
-        defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
-        values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-amd64.deb',
-        'sudo dpkg -i heartbeat-{config.kibana.version}-amd64.deb',
-      ],
-      textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
-        defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.elastic.co/downloads/beats/heartbeat' },
-      }),
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.install.rpmTitle', {
-        defaultMessage: 'Download and install Heartbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.rpmTextPre', {
-        defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
-        values: { link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html' },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-x86_64.rpm',
-        'sudo rpm -vi heartbeat-{config.kibana.version}-x86_64.rpm',
-      ],
-      textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPost', {
-        defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
-        values: { link: 'https://www.elastic.co/downloads/beats/heartbeat' },
-      }),
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.install.windowsTitle', {
-        defaultMessage: 'Download and install Heartbeat',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.heartbeatInstructions.install.windowsTextPre',
-        {
-          defaultMessage:
-            'First time using Heartbeat? See the [Quick Start]({heartbeatLink}).\n\
+export const createHeartbeatInstructions = (context: TutorialContext) => {
+  const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/heartbeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
+
+  return {
+    INSTALL: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.install.osxTitle', {
+          defaultMessage: 'Download and install Heartbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.osxTextPre', {
+          defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
+          values: {
+            link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
+          'tar xzvf heartbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
+          'cd heartbeat-{config.kibana.version}-darwin-x86_64/',
+        ],
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTitle', {
+          defaultMessage: 'Download and install Heartbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.debTextPre', {
+          defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
+          values: {
+            link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-amd64.deb',
+          'sudo dpkg -i heartbeat-{config.kibana.version}-amd64.deb',
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.install.debTextPost',
+          {
+            defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
+            values: { link: 'https://www.elastic.co/downloads/beats/heartbeat' },
+          }
+        ),
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.install.rpmTitle', {
+          defaultMessage: 'Download and install Heartbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.install.rpmTextPre', {
+          defaultMessage: 'First time using Heartbeat? See the [Quick Start]({link}).',
+          values: {
+            link: '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
+          },
+        }),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-{config.kibana.version}-x86_64.rpm',
+          'sudo rpm -vi heartbeat-{config.kibana.version}-x86_64.rpm',
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.install.debTextPost',
+          {
+            defaultMessage: 'Looking for the 32-bit packages? See the [Download page]({link}).',
+            values: { link: 'https://www.elastic.co/downloads/beats/heartbeat' },
+          }
+        ),
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.install.windowsTitle', {
+          defaultMessage: 'Download and install Heartbeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.install.windowsTextPre',
+          {
+            defaultMessage:
+              'First time using Heartbeat? See the [Quick Start]({heartbeatLink}).\n\
  1. Download the Heartbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Heartbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, run the following commands to install Heartbeat as a Windows service.',
+            values: {
+              directoryName: '`heartbeat-{config.kibana.version}-windows`',
+              folderPath: '`C:\\Program Files`',
+              heartbeatLink:
+                '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
+              elasticLink: 'https://www.elastic.co/downloads/beats/heartbeat',
+            },
+          }
+        ),
+        commands: ['cd "C:\\Program Files\\Heartbeat"', '.\\install-service-heartbeat.ps1'],
+      },
+    },
+    START: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.start.osxTitle', {
+          defaultMessage: 'Start Heartbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.osxTextPre', {
+          defaultMessage: 'The `setup` command loads the Kibana index pattern.',
+        }),
+        commands: ['./heartbeat setup', './heartbeat -e'],
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.start.debTitle', {
+          defaultMessage: 'Start Heartbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.debTextPre', {
+          defaultMessage: 'The `setup` command loads the Kibana index pattern.',
+        }),
+        commands: ['sudo heartbeat setup', 'sudo service heartbeat-elastic start'],
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.start.rpmTitle', {
+          defaultMessage: 'Start Heartbeat',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.rpmTextPre', {
+          defaultMessage: 'The `setup` command loads the Kibana index pattern.',
+        }),
+        commands: ['sudo heartbeat setup', 'sudo service heartbeat-elastic start'],
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.start.windowsTitle', {
+          defaultMessage: 'Start Heartbeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.start.windowsTextPre',
+          {
+            defaultMessage: 'The `setup` command loads the Kibana index pattern.',
+          }
+        ),
+        commands: ['.\\heartbeat.exe setup', 'Start-Service heartbeat'],
+      },
+    },
+    CONFIG: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.config.osxTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.config.osxTextPre', {
+          defaultMessage: 'Modify {path} to set the connection information:',
           values: {
-            directoryName: '`heartbeat-{config.kibana.version}-windows`',
-            folderPath: '`C:\\Program Files`',
-            heartbeatLink:
-              '{config.docs.beats.heartbeat}/heartbeat-installation-configuration.html',
-            elasticLink: 'https://www.elastic.co/downloads/beats/heartbeat',
+            path: '`heartbeat.yml`',
           },
-        }
-      ),
-      commands: ['cd "C:\\Program Files\\Heartbeat"', '.\\install-service-heartbeat.ps1'],
-    },
-  },
-  START: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.start.osxTitle', {
-        defaultMessage: 'Start Heartbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.osxTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
-      }),
-      commands: ['./heartbeat setup', './heartbeat -e'],
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.start.debTitle', {
-        defaultMessage: 'Start Heartbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.debTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
-      }),
-      commands: ['sudo heartbeat setup', 'sudo service heartbeat-elastic start'],
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.start.rpmTitle', {
-        defaultMessage: 'Start Heartbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.rpmTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
-      }),
-      commands: ['sudo heartbeat setup', 'sudo service heartbeat-elastic start'],
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.start.windowsTitle', {
-        defaultMessage: 'Start Heartbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.start.windowsTextPre', {
-        defaultMessage: 'The `setup` command loads the Kibana index pattern.',
-      }),
-      commands: ['.\\heartbeat.exe setup', 'Start-Service heartbeat'],
-    },
-  },
-  CONFIG: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.config.osxTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.config.osxTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`heartbeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.osxTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    DEB: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.config.debTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.config.debTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`/etc/heartbeat/heartbeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.debTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    RPM: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.config.rpmTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.config.rpmTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`/etc/heartbeat/heartbeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate('home.tutorials.common.heartbeatInstructions.config.rpmTextPost', {
-        defaultMessage:
-          'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-        values: {
-          passwordTemplate: '`<password>`',
-          esUrlTemplate: '`<es_url>`',
-          kibanaUrlTemplate: '`<kibana_url>`',
-        },
-      }),
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.heartbeatInstructions.config.windowsTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.config.windowsTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`C:\\Program Files\\Heartbeat\\heartbeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate(
-        'home.tutorials.common.heartbeatInstructions.config.windowsTextPost',
-        {
-          defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.config.osxTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+            Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+            default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      DEB: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.config.debTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.config.debTextPre', {
+          defaultMessage: 'Modify {path} to set the connection information:',
           values: {
-            passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
+            path: '`/etc/heartbeat/heartbeat.yml`',
           },
-        }
-      ),
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.config.debTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+            Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+            default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      RPM: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.config.rpmTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate('home.tutorials.common.heartbeatInstructions.config.rpmTextPre', {
+          defaultMessage: 'Modify {path} to set the connection information:',
+          values: {
+            path: '`/etc/heartbeat/heartbeat.yml`',
+          },
+        }),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.config.rpmTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+            Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+            default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      WINDOWS: {
+        title: i18n.translate('home.tutorials.common.heartbeatInstructions.config.windowsTitle', {
+          defaultMessage: 'Edit the configuration',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.config.windowsTextPre',
+          {
+            defaultMessage: 'Modify {path} to set the connection information:',
+            values: {
+              path: '`C:\\Program Files\\Heartbeat\\heartbeat.yml`',
+            },
+          }
+        ),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.heartbeatInstructions.config.windowsTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
     },
-  },
-});
+  };
+};
 
 export const createHeartbeatCloudInstructions = () => ({
   CONFIG: {
@@ -486,7 +537,7 @@ export function heartbeatStatusCheck() {
   };
 }
 
-export function onPremInstructions(platforms: Platform[], context?: TutorialContext) {
+export function onPremInstructions(platforms: Platform[], context: TutorialContext) {
   const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions(context);
 
   return {
@@ -542,10 +593,10 @@ export function onPremInstructions(platforms: Platform[], context?: TutorialCont
   };
 }
 
-export function onPremCloudInstructions() {
+export function onPremCloudInstructions(context: TutorialContext) {
   const TRYCLOUD_OPTION1 = createTrycloudOption1();
   const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions();
+  const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions(context);
 
   return {
     instructionSets: [
@@ -608,8 +659,8 @@ export function onPremCloudInstructions() {
   };
 }
 
-export function cloudInstructions() {
-  const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions();
+export function cloudInstructions(context: TutorialContext) {
+  const HEARTBEAT_INSTRUCTIONS = createHeartbeatInstructions(context);
   const HEARTBEAT_CLOUD_INSTRUCTIONS = createHeartbeatCloudInstructions();
 
   return {

@@ -1,0 +1,294 @@
+{
+  "id": "@kbn/securitysolution-hook-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/securitysolution-hook-utils",
+        "id": "def-common.useAsync",
+        "type": "Function",
+        "tags": [],
+        "label": "useAsync",
+        "description": [
+          "\n\nThis hook wraps a promise-returning thunk (task) in order to conditionally\ninitiate the work, and automatically provide state corresponding to the\ntask's status.\n\nIn order to function properly and not rerender unnecessarily, ensure that\nyour task is a stable function reference.\n"
+        ],
+        "signature": [
+          "<Args extends unknown[], Result>(fn: (...args: Args) => Promise<Result>) => ",
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.Task",
+            "text": "Task"
+          },
+          "<Args, Result>"
+        ],
+        "path": "packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.useAsync.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [
+              "a function returning a promise."
+            ],
+            "signature": [
+              "(...args: Args) => Promise<Result>"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An {@link Task } containing the task's current state along with a\nstart callback"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-hook-utils",
+        "id": "def-common.useIsMounted",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsMounted",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "() => GetIsMounted"
+        ],
+        "path": "packages/kbn-securitysolution-hook-utils/src/use_is_mounted/index.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "A {@link GetIsMounted } getter function returning whether the component is currently mounted"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-hook-utils",
+        "id": "def-common.useObservable",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservable",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "<Args extends unknown[], Result>(fn: (...args: Args) => ",
+          "Observable",
+          "<Result>) => ",
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.Task",
+            "text": "Task"
+          },
+          "<Args, Result>"
+        ],
+        "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.useObservable.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [
+              "function returning an observable"
+            ],
+            "signature": [
+              "(...args: Args) => ",
+              "Observable",
+              "<Result>"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An {@link Async } containing the underlying task's state along with a start callback"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-hook-utils",
+        "id": "def-common.withOptionalSignal",
+        "type": "Function",
+        "tags": [],
+        "label": "withOptionalSignal",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "<Args extends SignalArgs, Result>(fn: (args: Args) => Result) => (args: ",
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.OptionalSignalArgs",
+            "text": "OptionalSignalArgs"
+          },
+          "<Args>) => Result"
+        ],
+        "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.withOptionalSignal.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [
+              "an async function receiving an AbortSignal argument"
+            ],
+            "signature": [
+              "(args: Args) => Result"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An async function where the AbortSignal argument is optional"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/securitysolution-hook-utils",
+        "id": "def-common.Task",
+        "type": "Interface",
+        "tags": [],
+        "label": "Task",
+        "description": [
+          "\nRepresents the state of an asynchronous task, along with an initiator\nfunction to kick off the work."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-hook-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionHookUtilsPluginApi",
+            "section": "def-common.Task",
+            "text": "Task"
+          },
+          "<Args, Result>"
+        ],
+        "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.Task.loading",
+            "type": "boolean",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.Task.error",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.Task.result",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "Result | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-hook-utils",
+            "id": "def-common.Task.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(...args: Args) => void"
+            ],
+            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/securitysolution-hook-utils",
+                "id": "def-common.Task.start.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Args"
+                ],
+                "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/securitysolution-hook-utils",
+        "id": "def-common.OptionalSignalArgs",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionalSignalArgs",
+        "description": [],
+        "signature": [
+          "Omit<Args, \"signal\"> & Partial<SignalArgs>"
+        ],
+        "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

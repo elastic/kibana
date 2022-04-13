@@ -6,21 +6,26 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { HttpSetup } from 'src/core/public';
 
-import { registerTestBed, TestBed, TestBedConfig, findTestSubject, nextTick } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
+  nextTick,
+} from '@kbn/test-jest-helpers';
 import { BASE_PATH } from '../../../../../../../common';
 import { WithAppDependencies } from './setup_environment';
 import { ComponentTemplateList } from '../../../component_template_list/component_template_list';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`${BASE_PATH}component_templates`],
     componentRoutePath: `${BASE_PATH}component_templates`,
   },
   doMountAsync: true,
 };
-
-const initTestBed = registerTestBed(WithAppDependencies(ComponentTemplateList), testBedConfig);
 
 export type ComponentTemplateListTestBed = TestBed<ComponentTemplateTestSubjects> & {
   actions: ReturnType<typeof createActions>;
@@ -68,7 +73,11 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setup = async (): Promise<ComponentTemplateListTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateListTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(ComponentTemplateList, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

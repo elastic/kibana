@@ -11,7 +11,7 @@ import { ValidationFunc, fieldValidators } from '../shared_imports';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const queryFieldValidation: ValidationFunc<any, string, string> = fieldValidators.emptyField(
-  i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.emptyQueryError', {
+  i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyQueryError', {
     defaultMessage: 'Query is a required field',
   })
 );

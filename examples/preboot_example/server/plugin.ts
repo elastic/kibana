@@ -114,7 +114,7 @@ export class PrebootExamplePlugin implements PrebootPlugin {
 
           try {
             return response.ok({
-              body: (await scopedClient.asCurrentUser.security.authenticate()).body,
+              body: await scopedClient.asCurrentUser.security.authenticate(),
             });
           } catch (err) {
             return response.customError({ statusCode: 500, body: getDetailedErrorMessage(err) });

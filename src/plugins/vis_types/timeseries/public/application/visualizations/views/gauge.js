@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { EuiResizeObserver } from '@elastic/eui';
 import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
 import { getLastValue } from '../../../../common/last_value_utils';
@@ -29,19 +30,12 @@ export class Gauge extends Component {
     };
 
     this.handleResize = this.handleResize.bind(this);
-  }
-
-  UNSAFE_componentWillMount() {
-    const check = () => {
-      this.timeout = setTimeout(() => {
-        const newState = calculateCoordinates(this.inner, this.resize, this.state);
-        if (newState && this.state && !_.isEqual(newState, this.state)) {
-          this.handleResize();
-        }
-        check();
-      }, 500);
-    };
-    check();
+    this.checkResizeThrottled = _.throttle(() => {
+      const newState = calculateCoordinates(this.inner, this.resize, this.state);
+      if (newState && this.state && !_.isEqual(newState, this.state)) {
+        this.handleResize();
+      }
+    }, 200);
   }
 
   componentWillUnmount() {
@@ -75,6 +69,7 @@ export class Gauge extends Component {
             top: this.state.top || 0,
             left: this.state.left || 0,
             transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
+            zIndex: 1,
           },
           valueColor: {
             color: this.props.valueColor,
@@ -154,16 +149,20 @@ export class Gauge extends Component {
     });
 
     return (
-      <div className={classes}>
-        <div
-          ref={(el) => (this.resize = el)}
-          className={`tvbVisGauge__resize`}
-          data-test-subj="tvbVisGaugeContainer"
-        >
-          {metrics}
-          <GaugeVis {...gaugeProps} />
-        </div>
-      </div>
+      <EuiResizeObserver onResize={this.checkResizeThrottled}>
+        {(resizeRef) => (
+          <div className={classes} ref={resizeRef}>
+            <div
+              ref={(el) => (this.resize = el)}
+              className={`tvbVisGauge__resize`}
+              data-test-subj="tvbVisGaugeContainer"
+            >
+              {metrics}
+              <GaugeVis {...gaugeProps} />
+            </div>
+          </div>
+        )}
+      </EuiResizeObserver>
     );
   }
 }

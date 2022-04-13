@@ -25,6 +25,7 @@ describe('Fleet - packageToPackagePolicy', () => {
     path: '',
     assets: {
       kibana: {
+        csp_rule_template: [],
         dashboard: [],
         visualization: [],
         search: [],
@@ -33,6 +34,8 @@ describe('Fleet - packageToPackagePolicy', () => {
         lens: [],
         ml_module: [],
         security_rule: [],
+        tag: [],
+        osquery_pack_asset: [],
       },
       elasticsearch: {
         ingest_pipeline: [],
@@ -41,6 +44,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         transform: [],
         ilm_policy: [],
         data_stream_ilm_policy: [],
+        ml_model: [],
       },
     },
     status: 'not_installed',

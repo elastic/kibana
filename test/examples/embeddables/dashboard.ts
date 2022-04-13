@@ -93,21 +93,25 @@ export const testDashboardInput = {
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
-  const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
   const elasticChart = getService('elasticChart');
-  const PageObjects = getPageObjects(['common', 'visChart']);
+  const PageObjects = getPageObjects(['common', 'visChart', 'dashboard']);
+  const monacoEditor = getService('monacoEditor');
 
   describe('dashboard container', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
-      await esArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
       await testSubjects.click('dashboardEmbeddableByValue');
+      await PageObjects.dashboard.waitForRenderComplete();
+
       await updateInput(JSON.stringify(testDashboardInput, null, 4));
     });
 
@@ -128,17 +132,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   });
 
   async function updateInput(input: string) {
-    const editorWrapper = await (
-      await testSubjects.find('dashboardEmbeddableByValueInputEditor')
-    ).findByClassName('ace_editor');
-    const editorId = await editorWrapper.getAttribute('id');
-    await browser.execute(
-      (_editorId: string, _input: string) => {
-        return (window as any).ace.edit(_editorId).setValue(_input);
-      },
-      editorId,
-      input
-    );
+    await monacoEditor.setCodeEditorValue(input);
     await testSubjects.click('dashboardEmbeddableByValueInputSubmit');
   }
 }

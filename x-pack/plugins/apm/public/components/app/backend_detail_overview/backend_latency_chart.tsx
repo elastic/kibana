@@ -7,31 +7,37 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
-import { useComparison } from '../../../hooks/use_comparison';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import { useTheme } from '../../../hooks/use_theme';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../shared/charts/transaction_charts/helper';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../shared/charts/helper/get_timeseries_color';
+import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 
 export function BackendLatencyChart({ height }: { height: number }) {
-  const { backendName } = useApmBackendContext();
-
-  const theme = useTheme();
-
   const {
-    query: { rangeFrom, rangeTo, kuery, environment },
-  } = useApmParams('/backends/{backendName}/overview');
+    query: {
+      backendName,
+      rangeFrom,
+      rangeTo,
+      kuery,
+      environment,
+      offset,
+      comparisonEnabled,
+    },
+  } = useApmParams('/backends/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset, comparisonChartTheme } = useComparison();
+  const comparisonChartTheme = getComparisonChartTheme();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -39,23 +45,24 @@ export function BackendLatencyChart({ height }: { height: number }) {
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /api/apm/backends/{backendName}/charts/latency',
+      return callApmApi('GET /internal/apm/backends/charts/latency', {
         params: {
-          path: {
-            backendName,
-          },
           query: {
+            backendName,
             start,
             end,
-            offset,
+            offset: comparisonEnabled ? offset : undefined,
             kuery,
             environment,
           },
         },
       });
     },
-    [backendName, start, end, offset, kuery, environment]
+    [backendName, start, end, offset, kuery, environment, comparisonEnabled]
+  );
+
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.LATENCY_AVG
   );
 
   const timeseries = useMemo(() => {
@@ -65,7 +72,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
       specs.push({
         data: data.currentTimeseries,
         type: 'linemark',
-        color: theme.eui.euiColorVis1,
+        color: currentPeriodColor,
         title: i18n.translate('xpack.apm.backendLatencyChart.chartTitle', {
           defaultMessage: 'Latency',
         }),
@@ -76,7 +83,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
       specs.push({
         data: data.comparisonTimeseries,
         type: 'area',
-        color: theme.eui.euiColorMediumShade,
+        color: previousPeriodColor,
         title: i18n.translate(
           'xpack.apm.backendLatencyChart.previousPeriodLabel',
           { defaultMessage: 'Previous period' }
@@ -85,7 +92,7 @@ export function BackendLatencyChart({ height }: { height: number }) {
     }
 
     return specs;
-  }, [data, theme.eui.euiColorVis1, theme.eui.euiColorMediumShade]);
+  }, [data, currentPeriodColor, previousPeriodColor]);
 
   const maxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(maxY);

@@ -16,10 +16,10 @@ export interface SavedObjectsImportSuccess
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [createNewCopy](./kibana-plugin-core-server.savedobjectsimportsuccess.createnewcopy.md) | <code>boolean</code> |  |
-|  [destinationId](./kibana-plugin-core-server.savedobjectsimportsuccess.destinationid.md) | <code>string</code> | If <code>destinationId</code> is specified, the new object has a new ID that is different from the import ID. |
-|  [id](./kibana-plugin-core-server.savedobjectsimportsuccess.id.md) | <code>string</code> |  |
-|  [meta](./kibana-plugin-core-server.savedobjectsimportsuccess.meta.md) | <code>{</code><br/><code>        title?: string;</code><br/><code>        icon?: string;</code><br/><code>    }</code> |  |
-|  [overwrite](./kibana-plugin-core-server.savedobjectsimportsuccess.overwrite.md) | <code>boolean</code> | If <code>overwrite</code> is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution). |
-|  [type](./kibana-plugin-core-server.savedobjectsimportsuccess.type.md) | <code>string</code> |  |
+|  [createNewCopy?](./kibana-plugin-core-server.savedobjectsimportsuccess.createnewcopy.md) | boolean | <i>(Optional)</i> |
+|  [destinationId?](./kibana-plugin-core-server.savedobjectsimportsuccess.destinationid.md) | string | <i>(Optional)</i> If <code>destinationId</code> is specified, the new object has a new ID that is different from the import ID. |
+|  [id](./kibana-plugin-core-server.savedobjectsimportsuccess.id.md) | string |  |
+|  [meta](./kibana-plugin-core-server.savedobjectsimportsuccess.meta.md) | { title?: string; icon?: string; } |  |
+|  [overwrite?](./kibana-plugin-core-server.savedobjectsimportsuccess.overwrite.md) | boolean | <i>(Optional)</i> If <code>overwrite</code> is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution). |
+|  [type](./kibana-plugin-core-server.savedobjectsimportsuccess.type.md) | string |  |
 

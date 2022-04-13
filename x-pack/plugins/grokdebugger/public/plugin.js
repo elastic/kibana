@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import { PLUGIN } from '../common/constants';
 import { registerFeature } from './register_feature';
@@ -22,11 +22,11 @@ export class GrokDebuggerUIPlugin {
       }),
       id: PLUGIN.ID,
       enableRouting: false,
-      async mount({ element }) {
+      async mount({ element, theme$ }) {
         const [coreStart] = await coreSetup.getStartServices();
-        const license = await plugins.licensing.license$.pipe(first()).toPromise();
+        const license = await firstValueFrom(plugins.licensing.license$);
         const { renderApp } = await import('./render_app');
-        return renderApp(license, element, coreStart);
+        return renderApp(license, element, coreStart, theme$);
       },
     });
 

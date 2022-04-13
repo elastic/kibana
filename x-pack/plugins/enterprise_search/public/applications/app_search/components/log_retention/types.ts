@@ -8,11 +8,15 @@
 export enum LogRetentionOptions {
   Analytics = 'analytics',
   API = 'api',
+  Audit = 'audit',
+  Crawler = 'crawler',
 }
 
 export interface LogRetention {
   [LogRetentionOptions.Analytics]: LogRetentionSettings;
   [LogRetentionOptions.API]: LogRetentionSettings;
+  [LogRetentionOptions.Audit]: LogRetentionSettings;
+  [LogRetentionOptions.Crawler]: LogRetentionSettings;
 }
 
 export interface LogRetentionPolicy {
@@ -29,6 +33,8 @@ export interface LogRetentionSettings {
 export interface LogRetentionServer {
   [LogRetentionOptions.Analytics]: LogRetentionServerSettings;
   [LogRetentionOptions.API]: LogRetentionServerSettings;
+  [LogRetentionOptions.Audit]: LogRetentionServerSettings;
+  [LogRetentionOptions.Crawler]: LogRetentionServerSettings;
 }
 
 export interface LogRetentionServerPolicy {

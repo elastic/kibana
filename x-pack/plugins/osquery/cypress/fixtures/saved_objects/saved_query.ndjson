@@ -1,0 +1,26 @@
+{
+  "attributes": {
+    "created_at": "2021-12-21T08:54:07.802Z",
+    "created_by": "elastic",
+    "description": "Test saved query description",
+    "ecs_mapping": [
+      {
+        "key": "labels",
+        "value": {
+          "field": "hours"
+        }
+      }
+    ],
+    "id": "Saved-Query-Id",
+    "interval": "3600",
+    "query": "select * from uptime;",
+    "updated_at": "2021-12-21T08:54:38.648Z",
+    "updated_by": "elastic"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "8eae68b0-623b-11ec-8b00-d5db3ac3cda1",
+  "references": [],
+  "type": "osquery-saved-query",
+  "updated_at": "2021-12-21T08:54:38.653Z",
+  "version": "Wzg5MywxXQ=="
+}

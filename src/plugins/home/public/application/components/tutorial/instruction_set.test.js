@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
@@ -33,12 +33,6 @@ const instructionVariants = [
     instructions: instructions,
   },
 ];
-
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
 
 test('render', () => {
   const component = shallowWithIntl(

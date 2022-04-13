@@ -6,11 +6,12 @@
  */
 
 import _ from 'lodash';
-import { DEFAULT_ICON, LAYER_TYPE, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../constants';
+import { DEFAULT_ICON, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../constants';
 
 function isVectorLayer(layerDescriptor) {
   const layerType = _.get(layerDescriptor, 'type');
-  return layerType === LAYER_TYPE.VECTOR;
+  // can not use LAYER_TYPE because LAYER_TYPE.VECTOR does not exist >8.1
+  return layerType === 'VECTOR';
 }
 
 export function migrateSymbolStyleDescriptor({ attributes }) {
@@ -18,7 +19,13 @@ export function migrateSymbolStyleDescriptor({ attributes }) {
     return attributes;
   }
 
-  const layerList = JSON.parse(attributes.layerListJSON);
+  let layerList = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layerDescriptor) => {
     if (!isVectorLayer(layerDescriptor) || !_.has(layerDescriptor, 'style.properties')) {
       return;

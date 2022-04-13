@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { toElasticsearchQuery as astToElasticsearchQuery } from './ast';
 
 /**
@@ -23,4 +23,6 @@ export const toElasticsearchQuery = (...params: Parameters<typeof astToElasticse
 export { KQLSyntaxError } from './kuery_syntax_error';
 export { nodeTypes, nodeBuilder } from './node_types';
 export { fromKueryExpression } from './ast';
-export { DslQuery, KueryNode, KueryQueryOptions } from './types';
+export { escapeKuery } from './utils';
+export type { FunctionTypeBuildNode, NodeTypes } from './node_types';
+export type { DslQuery, KueryNode, KueryQueryOptions, KueryParseOptions } from './types';

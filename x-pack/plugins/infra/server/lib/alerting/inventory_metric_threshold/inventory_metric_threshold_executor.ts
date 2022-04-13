@@ -5,98 +5,118 @@
  * 2.0.
  */
 
-import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON, ALERT_RULE_PARAMS } from '@kbn/rule-data-utils';
-import moment from 'moment';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertStates, InventoryMetricConditions } from './types';
+import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { first, get } from 'lodash';
 import {
-  ActionGroupIdsOf,
   ActionGroup,
-  AlertInstanceContext,
-  AlertInstanceState,
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { AlertInstance, AlertTypeState } from '../../../../../alerting/server';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraBackendLibs } from '../../infra_types';
-import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { Alert, RuleTypeState } from '../../../../../alerting/server';
+import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
+import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { InfraBackendLibs } from '../../infra_types';
+import { LogQueryFields } from '../../metrics/types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
+  buildInvalidQueryAlertReason,
   buildNoDataAlertReason,
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
+import { createScopedLogger, getViewInAppUrlInventory } from '../common/utils';
 import { evaluateCondition } from './evaluate_condition';
-
-interface InventoryMetricThresholdParams {
-  criteria: InventoryMetricConditions[];
-  filterQuery: string | undefined;
-  nodeType: InventoryItemType;
-  sourceId?: string;
-  alertOnNoData?: boolean;
-}
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
 
-export type InventoryMetricThresholdAlertTypeParams = Record<string, any>;
-export type InventoryMetricThresholdAlertTypeState = AlertTypeState; // no specific state used
-export type InventoryMetricThresholdAlertInstanceState = AlertInstanceState; // no specific state used
-export type InventoryMetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instance context used
+export type InventoryMetricThresholdRuleTypeState = RuleTypeState; // no specific state used
+export type InventoryMetricThresholdAlertState = AlertState; // no specific state used
+export type InventoryMetricThresholdAlertContext = AlertContext; // no specific instance context used
 
-type InventoryMetricThresholdAlertInstance = AlertInstance<
-  InventoryMetricThresholdAlertInstanceState,
-  InventoryMetricThresholdAlertInstanceContext,
+type InventoryMetricThresholdAlert = Alert<
+  InventoryMetricThresholdAlertState,
+  InventoryMetricThresholdAlertContext,
   InventoryMetricThresholdAllowedActionGroups
 >;
-type InventoryMetricThresholdAlertInstanceFactory = (
+type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
   threshold?: number | undefined,
   value?: number | undefined
-) => InventoryMetricThresholdAlertInstance;
+) => InventoryMetricThresholdAlert;
 
 export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
-    InventoryMetricThresholdAlertTypeParams,
-    InventoryMetricThresholdAlertTypeState,
-    InventoryMetricThresholdAlertInstanceState,
-    InventoryMetricThresholdAlertInstanceContext,
+    InventoryMetricThresholdParams & Record<string, unknown>,
+    InventoryMetricThresholdRuleTypeState,
+    InventoryMetricThresholdAlertState,
+    InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params }) => {
-    const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } =
-      params as InventoryMetricThresholdParams;
+  >(async ({ services, params, alertId, executionId, startedAt }) => {
+    const startTime = Date.now();
+    const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
-    const { alertWithLifecycle, savedObjectsClient } = services;
-    const alertInstanceFactory: InventoryMetricThresholdAlertInstanceFactory = (id, reason) =>
+    const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
+    const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate } = services;
+    const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
-          [ALERT_RULE_PARAMS]: JSON.stringify(params),
+          [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
         },
       });
 
-    const source = await libs.sources.getSourceConfiguration(
-      savedObjectsClient,
-      sourceId || 'default'
-    );
+    if (!params.filterQuery && params.filterQueryText) {
+      try {
+        const { fromKueryExpression } = await import('@kbn/es-query');
+        fromKueryExpression(params.filterQueryText);
+      } catch (e) {
+        logger.error(e.message);
+        const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
+        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
+        const alert = alertFactory('*', reason);
+        const indexedStartedDate = getAlertStartedDate('*') ?? startedAt.toISOString();
+        const viewInAppUrl = getViewInAppUrlInventory(
+          criteria,
+          nodeType,
+          indexedStartedDate,
+          libs.basePath
+        );
+        alert.scheduleActions(actionGroupId, {
+          group: '*',
+          alertState: stateToAlertMessage[AlertStates.ERROR],
+          reason,
+          timestamp: startedAt.toISOString(),
+          viewInAppUrl,
+          value: null,
+          metric: mapToConditionsLookup(criteria, (c) => c.metric),
+        });
+        return {};
+      }
+    }
+    const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
-    const logQueryFields = await libs
-      .getLogQueryFields(
-        sourceId || 'default',
-        services.savedObjectsClient,
-        services.scopedClusterClient.asCurrentUser
-      )
-      .catch(() => undefined);
+    const [, , { logViews }] = await libs.getStartServices();
+    const logQueryFields: LogQueryFields | undefined = await logViews
+      .getClient(savedObjectsClient, services.scopedClusterClient.asCurrentUser)
+      .getResolvedLogView(sourceId)
+      .then(
+        ({ indices }) => ({ indexPattern: indices }),
+        () => undefined
+      );
 
-    const compositeSize = libs.configuration.inventory.compositeSize;
+    const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
     const results = await Promise.all(
       criteria.map((condition) =>
         evaluateCondition({
@@ -107,22 +127,21 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           esClient: services.scopedClusterClient.asCurrentUser,
           compositeSize,
           filterQuery,
+          executionTimestamp: startedAt,
+          logger,
         })
       )
     );
+    let scheduledActionsCount = 0;
     const inventoryItems = Object.keys(first(results)!);
-    for (const item of inventoryItems) {
+    for (const group of inventoryItems) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = results.every((result) => {
-        // Grab the result of the most recent bucket
-        return last(result[item].shouldFire);
-      });
-      const shouldAlertWarn = results.every((result) => last(result[item].shouldWarn));
-
+      const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
+      const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = results.some((result) => last(result[item].isNoData));
-      const isError = results.some((result) => result[item].isError);
+      const isNoData = results.some((result) => result[group]?.isNoData);
+      const isError = results.some((result) => result[group]?.isError);
 
       const nextState = isError
         ? AlertStates.ERROR
@@ -138,7 +157,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         reason = results
           .map((result) =>
             buildReasonWithVerboseMetricName(
-              result[item],
+              group,
+              result[group],
               buildFiredAlertReason,
               nextState === AlertStates.WARNING
             )
@@ -151,19 +171,23 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
          */
         // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
         // reason = results
-        //   .map((result) => buildReasonWithVerboseMetricName(result[item], buildRecoveredAlertReason))
+        //   .map((result) => buildReasonWithVerboseMetricName(group, result[group], buildRecoveredAlertReason))
         //   .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
           reason = results
-            .filter((result) => result[item].isNoData)
-            .map((result) => buildReasonWithVerboseMetricName(result[item], buildNoDataAlertReason))
+            .filter((result) => result[group].isNoData)
+            .map((result) =>
+              buildReasonWithVerboseMetricName(group, result[group], buildNoDataAlertReason)
+            )
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = results
-            .filter((result) => result[item].isError)
-            .map((result) => buildReasonWithVerboseMetricName(result[item], buildErrorAlertReason))
+            .filter((result) => result[group].isError)
+            .map((result) =>
+              buildReasonWithVerboseMetricName(group, result[group], buildErrorAlertReason)
+            )
             .join('\n');
         }
       }
@@ -175,20 +199,29 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
 
-        const alertInstance = alertInstanceFactory(`${item}`, reason);
-        alertInstance.scheduleActions(
+        const alert = alertFactory(group, reason);
+        const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
+        const viewInAppUrl = getViewInAppUrlInventory(
+          criteria,
+          nodeType,
+          indexedStartedDate,
+          libs.basePath
+        );
+        scheduledActionsCount++;
+        alert.scheduleActions(
           /**
            * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
            * the RecoveredActionGroup isn't allowed
            */
           actionGroupId as unknown as InventoryMetricThresholdAllowedActionGroups,
           {
-            group: item,
+            group,
             alertState: stateToAlertMessage[nextState],
             reason,
-            timestamp: moment().toISOString(),
+            timestamp: startedAt.toISOString(),
+            viewInAppUrl,
             value: mapToConditionsLookup(results, (result) =>
-              formatMetric(result[item].metric, result[item].currentValue)
+              formatMetric(result[group].metric, result[group].currentValue)
             ),
             threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
             metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -196,23 +229,49 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
       }
     }
+    const stopTime = Date.now();
+    logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
   });
 
+const formatThreshold = (metric: SnapshotMetricType, value: number) => {
+  const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
+  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
+
+  const threshold = Array.isArray(value)
+    ? value.map((v: number) => {
+        if (metricFormatter.formatter === 'percent') {
+          v = Number(v) / 100;
+        }
+        if (metricFormatter.formatter === 'bits') {
+          v = Number(v) / 8;
+        }
+        return formatter(v);
+      })
+    : value;
+  return threshold;
+};
+
 const buildReasonWithVerboseMetricName = (
+  group: string,
   resultItem: any,
   buildReason: (r: any) => string,
   useWarningThreshold?: boolean
 ) => {
   if (!resultItem) return '';
+
+  const thresholdToFormat = useWarningThreshold
+    ? resultItem.warningThreshold!
+    : resultItem.threshold;
   const resultWithVerboseMetricName = {
     ...resultItem,
+    group,
     metric:
       toMetricOpt(resultItem.metric)?.text ||
       (resultItem.metric === 'custom'
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),
     currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
-    threshold: useWarningThreshold ? resultItem.warningThreshold! : resultItem.threshold,
+    threshold: formatThreshold(resultItem.metric, thresholdToFormat),
     comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);

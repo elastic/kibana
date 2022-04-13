@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export {
-  FlyoutEditDrilldownAction,
-  FlyoutEditDrilldownParams,
-  OPEN_FLYOUT_EDIT_DRILLDOWN,
-} from './flyout_edit_drilldown';
+export type { FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
+export { FlyoutEditDrilldownAction, OPEN_FLYOUT_EDIT_DRILLDOWN } from './flyout_edit_drilldown';

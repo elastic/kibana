@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_INDEX_KEY,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-} from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 export interface GetInputIndex {
   experimentalFeatures: ExperimentalFeatures;
   index: string[] | null | undefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
 }
 
@@ -33,15 +30,15 @@ export const getInputIndex = async ({
   if (index != null) {
     return index;
   } else {
-    const configuration = await services.savedObjectsClient.get<{
-      'securitySolution:defaultIndex': string[];
-    }>('config', version);
+    const configuration = await withSecuritySpan('getDefaultIndex', () =>
+      services.savedObjectsClient.get<{
+        'securitySolution:defaultIndex': string[];
+      }>('config', version)
+    );
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {
-      return experimentalFeatures.uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN;
+      return DEFAULT_INDEX_PATTERN;
     }
   }
 };

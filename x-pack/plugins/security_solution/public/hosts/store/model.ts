@@ -6,7 +6,11 @@
  */
 
 import { Direction } from '../../../common/search_strategy';
-import { HostsFields } from '../../../common/search_strategy/security_solution';
+import {
+  HostsFields,
+  RiskScoreSortField,
+  RiskSeverity,
+} from '../../../common/search_strategy/security_solution';
 
 export enum HostsType {
   page = 'page',
@@ -20,6 +24,8 @@ export enum HostsTableType {
   uncommonProcesses = 'uncommonProcesses',
   anomalies = 'anomalies',
   alerts = 'externalAlerts',
+  risk = 'hostRisk',
+  sessions = 'sessions',
 }
 
 export interface BasicQueryPaginated {
@@ -32,6 +38,11 @@ export interface HostsQuery extends BasicQueryPaginated {
   sortField: HostsFields;
 }
 
+export interface HostRiskScoreQuery extends BasicQueryPaginated {
+  sort: RiskScoreSortField;
+  severitySelection: RiskSeverity[];
+}
+
 export interface Queries {
   [HostsTableType.authentications]: BasicQueryPaginated;
   [HostsTableType.hosts]: HostsQuery;
@@ -39,6 +50,8 @@ export interface Queries {
   [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
+  [HostsTableType.risk]: HostRiskScoreQuery;
+  [HostsTableType.sessions]: BasicQueryPaginated;
 }
 
 export interface GenericHostsModel {

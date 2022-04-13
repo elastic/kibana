@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -30,6 +30,7 @@ import {
   extractQueryParams,
   attemptToURIDecode,
   APP_WRAPPER_CLASS,
+  useExecutionContext,
 } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { useLoadDataStreams } from '../../../services/api';
@@ -56,9 +57,14 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
-    core: { getUrlForApp },
+    core: { getUrlForApp, executionContext },
     plugins: { isFleetEnabled },
   } = useAppContext();
+
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'indexManagementDataStreamsTab',
+  });
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
   const {

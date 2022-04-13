@@ -5,39 +5,11 @@
  * 2.0.
  */
 
-import { EMSClient } from '@elastic/ems-client';
-import { getEMSClient, getGlyphUrl } from './util';
+import { getGlyphUrl, makePublicExecutionContext } from './util';
 
-jest.mock('@elastic/ems-client');
-
-const EMS_FONTS_URL_MOCK = 'ems/fonts';
 const MOCK_EMS_SETTINGS = {
   isEMSEnabled: () => true,
-  getEMSFileApiUrl: () => 'https://file-api',
-  getEMSTileApiUrl: () => 'https://tile-api',
-  getEMSLandingPageUrl: () => 'http://test.com',
-  getEMSFontLibraryUrl: () => EMS_FONTS_URL_MOCK,
-  isProxyElasticMapsServiceInMaps: () => false,
 };
-
-describe('default use without proxy', () => {
-  beforeEach(() => {
-    require('./kibana_services').getEmsTileLayerId = () => '123';
-    require('./kibana_services').getEMSSettings = () => {
-      return MOCK_EMS_SETTINGS;
-    };
-    require('./licensed_features').getLicenseId = () => {
-      return 'foobarlicenseid';
-    };
-  });
-
-  test('should construct EMSClient with absolute file and tile API urls', async () => {
-    getEMSClient();
-    const mockEmsClientCall = EMSClient.mock.calls[0];
-    expect(mockEmsClientCall[0].fileApiUrl.startsWith('https://file-api')).toBe(true);
-    expect(mockEmsClientCall[0].tileApiUrl.startsWith('https://tile-api')).toBe(true);
-  });
-});
 
 describe('getGlyphUrl', () => {
   describe('EMS enabled', () => {
@@ -49,33 +21,22 @@ describe('getGlyphUrl', () => {
       });
     });
 
-    describe('EMS proxy enabled', () => {
-      beforeAll(() => {
-        require('./kibana_services').getEMSSettings = () => {
-          return {
-            ...MOCK_EMS_SETTINGS,
-            isProxyElasticMapsServiceInMaps: () => true,
-          };
-        };
-      });
-
-      test('should return proxied EMS fonts URL', async () => {
-        expect(getGlyphUrl()).toBe('http://localhost/api/maps/ems/tiles/fonts/{fontstack}/{range}');
-      });
-    });
-
     describe('EMS proxy disabled', () => {
       beforeAll(() => {
         require('./kibana_services').getEMSSettings = () => {
           return {
-            ...MOCK_EMS_SETTINGS,
-            isProxyElasticMapsServiceInMaps: () => false,
+            getEMSFontLibraryUrl() {
+              return 'foobar';
+            },
+            isEMSEnabled() {
+              return true;
+            },
           };
         };
       });
 
       test('should return EMS fonts URL', async () => {
-        expect(getGlyphUrl()).toBe(EMS_FONTS_URL_MOCK);
+        expect(getGlyphUrl()).toBe('foobar');
       });
     });
   });
@@ -98,6 +59,58 @@ describe('getGlyphUrl', () => {
 
     test('should return kibana fonts URL', async () => {
       expect(getGlyphUrl()).toBe('abc/api/maps/fonts/{fontstack}/{range}');
+    });
+  });
+});
+
+describe('makePublicExecutionContext', () => {
+  let injectedContext = {};
+  beforeAll(() => {
+    require('./kibana_services').getExecutionContext = () => ({
+      get: () => injectedContext,
+    });
+  });
+
+  test('creates basic context when no top level context is provided', () => {
+    const context = makePublicExecutionContext('test');
+    expect(context).toStrictEqual({
+      description: 'test',
+      name: 'maps',
+      type: 'application',
+      url: '/',
+    });
+  });
+
+  test('merges with top level context if its from the same app', () => {
+    injectedContext = {
+      name: 'maps',
+      id: '1234',
+    };
+    const context = makePublicExecutionContext('test');
+    expect(context).toStrictEqual({
+      description: 'test',
+      name: 'maps',
+      type: 'application',
+      url: '/',
+      id: '1234',
+    });
+  });
+
+  test('nests inside top level context if its from a different app', () => {
+    injectedContext = {
+      name: 'other-app',
+      id: '1234',
+    };
+    const context = makePublicExecutionContext('test');
+    expect(context).toStrictEqual({
+      name: 'other-app',
+      id: '1234',
+      child: {
+        description: 'test',
+        type: 'application',
+        name: 'maps',
+        url: '/',
+      },
     });
   });
 });

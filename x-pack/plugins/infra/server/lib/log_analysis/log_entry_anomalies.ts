@@ -5,36 +5,40 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { InfraPluginRequestHandlerContext, InfraRequestHandlerContext } from '../../types';
-import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { fetchMlJob, getLogEntryDatasets } from './common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  AnomaliesSort,
   getJobId,
-  logEntryCategoriesJobTypes,
-  logEntryRateJobTypes,
+  isCategoryAnomaly,
   jobCustomSettingsRT,
   LogEntryAnomalyDatasets,
-  AnomaliesSort,
+  logEntryCategoriesJobTypes,
+  logEntryRateJobTypes,
   Pagination,
-  isCategoryAnomaly,
 } from '../../../common/log_analysis';
-import type { ResolvedLogSourceConfiguration } from '../../../common/log_sources';
-import type { MlSystem, MlAnomalyDetectors } from '../../types';
-import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
+import { ResolvedLogView } from '../../../common/log_views';
+import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
+import { decodeOrThrow } from '../../../common/runtime_types';
+import type {
+  InfraPluginRequestHandlerContext,
+  InfraRequestHandlerContext,
+  MlAnomalyDetectors,
+  MlSystem,
+} from '../../types';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
+import { fetchMlJob, getLogEntryDatasets } from './common';
 import {
   InsufficientAnomalyMlJobsConfigured,
   InsufficientLogAnalysisMlJobConfigurationError,
-  UnknownCategoryError,
   isMlPrivilegesError,
+  UnknownCategoryError,
 } from './errors';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { fetchLogEntryCategories } from './log_entry_categories_analysis';
+import { createLogEntryAnomaliesQuery, logEntryAnomaliesResponseRT } from './queries';
 import {
   createLogEntryExamplesQuery,
   logEntryExamplesResponseRT,
 } from './queries/log_entry_examples';
-import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
-import { fetchLogEntryCategories } from './log_entry_categories_analysis';
 
 interface MappedAnomalyHit {
   id: string;
@@ -327,7 +331,7 @@ export async function getLogEntryExamples(
   endTime: number,
   dataset: string,
   exampleCount: number,
-  resolvedSourceConfiguration: ResolvedLogSourceConfiguration,
+  resolvedLogView: ResolvedLogView,
   callWithRequest: KibanaFramework['callWithRequest'],
   categoryId?: string
 ) {
@@ -347,7 +351,7 @@ export async function getLogEntryExamples(
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
-  const { tiebreakerField, runtimeMappings } = resolvedSourceConfiguration;
+  const { tiebreakerField, runtimeMappings } = resolvedLogView;
 
   if (indices == null || timestampField == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(

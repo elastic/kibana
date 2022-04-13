@@ -8,6 +8,7 @@
 import { SerializableRecord, Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from 'src/core/types';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 
 export type LensEmbeddablePersistableState = EmbeddableStateWithType & {
@@ -18,7 +19,20 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
   const typedState = state as LensEmbeddablePersistableState;
 
   if ('attributes' in typedState && typedState.attributes !== undefined) {
-    typedState.attributes.references = references as unknown as Serializable[];
+    // match references based on name, so only references associated with this lens panel are injected.
+    const matchedReferences: SavedObjectReference[] = [];
+
+    if (Array.isArray(typedState.attributes.references)) {
+      typedState.attributes.references.forEach((serializableRef) => {
+        const internalReference = serializableRef as unknown as SavedObjectReference;
+        const matchedReference = references.find(
+          (reference) => reference.name === internalReference.name
+        );
+        if (matchedReference) matchedReferences.push(matchedReference);
+      });
+    }
+
+    typedState.attributes.references = matchedReferences as unknown as Serializable[];
   }
 
   return typedState;

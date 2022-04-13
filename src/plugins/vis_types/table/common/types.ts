@@ -24,5 +24,6 @@ export interface TableVisParams {
   showTotal: boolean;
   totalFunc: AggTypes;
   percentageCol: string;
+  autoFitRowToContent?: boolean;
   row?: boolean;
 }

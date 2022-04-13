@@ -1,0 +1,47 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies when an attempt was made to restore an RDS Snapshot. Snapshots are sometimes shared by threat actors in order to exfiltrate bulk data. If the permissions were modified, verify if the snapshot was shared with an unauthorized or unexpected AWS account.",
+  "false_positives": [
+    "Restoring snapshots may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Snapshot restoration by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS RDS Snapshot Restored",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.action:RestoreDBInstanceFromDBSnapshot and\nevent.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_RestoreDBInstanceFromDBSnapshot.html",
+    "https://github.com/RhinoSecurityLabs/pacu/blob/master/pacu/modules/rds__explore_snapshots/main.py"
+  ],
+  "risk_score": 47,
+  "rule_id": "bf1073bf-ce26-4607-b405-ba1ed8e9e204",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Asset Visibility"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 3
+}

@@ -9,8 +9,9 @@ import * as yaml from 'js-yaml';
 import Url, { UrlObject } from 'url';
 
 import { ROLES } from '../../common/test';
+import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
-import { hostDetailsUrl } from '../urls/navigation';
+import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -57,7 +58,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  */
 export const getUrlWithRoute = (role: ROLES, route: string) => {
   const url = Cypress.config().baseUrl;
-  const kibana = new URL(url!);
+  const kibana = new URL(String(url));
   const theUrl = `${Url.format({
     auth: `${role}:changeme`,
     username: role,
@@ -83,7 +84,7 @@ interface User {
  */
 export const constructUrlWithUser = (user: User, route: string) => {
   const url = Cypress.config().baseUrl;
-  const kibana = new URL(url!);
+  const kibana = new URL(String(url));
   const hostname = kibana.hostname;
   const username = user.username;
   const password = user.password;
@@ -285,44 +286,80 @@ export const getEnvAuth = (): User => {
 };
 
 /**
+ * Saves in localStorage rules feature tour config with deactivated option
+ * It prevents tour to appear during tests and cover UI elements
+ * @param window - browser's window object
+ */
+const disableFeatureTourForRuleManagementPage = (window: Window) => {
+  const tourConfig = {
+    isTourActive: false,
+  };
+  window.localStorage.setItem(
+    RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY,
+    JSON.stringify(tourConfig)
+  );
+};
+
+/**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
-export const loginAndWaitForPage = (url: string, role?: ROLES) => {
-  login(role);
+
+export const waitForPage = (url: string) => {
   cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
   );
-  cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
-export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  login(role);
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void) => {
+  cy.visit(
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
+    {
+      onBeforeLoad(win) {
+        if (onBeforeLoadCallback) {
+          onBeforeLoadCallback(win);
+        }
+        disableFeatureTourForRuleManagementPage(win);
+      },
+    }
+  );
 };
 
-export const loginWithUserAndWaitForPageWithoutDateRange = (url: string, user: User) => {
-  loginWithUser(user);
-  cy.visit(constructUrlWithUser(user, url));
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+export const visitWithoutDateRange = (url: string, role?: ROLES) => {
+  cy.visit(role ? getUrlWithRoute(role, url) : url, {
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+  });
 };
 
-export const loginAndWaitForTimeline = (timelineId: string, role?: ROLES) => {
+export const visitWithUser = (url: string, user: User) => {
+  cy.visit(constructUrlWithUser(user, url), {
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+  });
+};
+
+export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
-
-  login(role);
-  cy.visit(role ? getUrlWithRoute(role, route) : route);
+  cy.visit(role ? getUrlWithRoute(role, route) : route, {
+    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+  });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };
 
-export const loginAndWaitForHostDetailsPage = () => {
-  loginAndWaitForPage(hostDetailsUrl('suricata-iowa'));
-  cy.get('[data-test-subj="loading-spinner"]', { timeout: 12000 }).should('not.exist');
+export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
+  visit(hostDetailsUrl(hostName));
+  cy.get('[data-test-subj="loading-spinner"]').should('exist');
+  cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
+};
+
+export const visitUserDetailsPage = (userName = 'test') => {
+  visit(userDetailsUrl(userName));
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url);
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const logout = () => {
+  cy.visit(LOGOUT_URL);
 };

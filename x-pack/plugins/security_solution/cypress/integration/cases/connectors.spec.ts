@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getServiceNowConnector } from '../../objects/case';
+import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../objects/case';
 
 import { SERVICE_NOW_MAPPING, TOASTER } from '../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../tasks/all_cases';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteCases } from '../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
   selectLastConnectorCreated,
 } from '../../tasks/configure_cases';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL } from '../../urls/navigation';
 
@@ -43,8 +43,20 @@ describe('Cases connectors', () => {
     id: '123',
     owner: 'securitySolution',
   };
-  beforeEach(() => {
+
+  const snConnector = getServiceNowConnector();
+
+  before(() => {
     cleanKibana();
+    login();
+  });
+  beforeEach(() => {
+    deleteCases();
+    cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
+      statusCode: 200,
+      body: getServiceNowITSMHealthResponse(),
+    });
+
     cy.intercept('POST', '/api/actions/connector').as('createConnector');
     cy.intercept('POST', '/api/cases/configure', (req) => {
       const connector = req.body.connector;
@@ -52,6 +64,7 @@ describe('Cases connectors', () => {
         res.send(200, { ...configureResult, connector });
       });
     }).as('saveConnector');
+
     cy.intercept('GET', '/api/cases/configure', (req) => {
       req.reply((res) => {
         const resBody =
@@ -74,17 +87,17 @@ describe('Cases connectors', () => {
   });
 
   it('Configures a new connector', () => {
-    loginAndWaitForPageWithoutDateRange(CASES_URL);
+    visitWithoutDateRange(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
-    addServiceNowConnector(getServiceNowConnector());
+    addServiceNowConnector(snConnector);
 
     cy.wait('@createConnector').then(({ response }) => {
-      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('not.exist');
 
-      selectLastConnectorCreated(response!.body.id);
+      selectLastConnectorCreated(response?.body.id);
 
       cy.wait('@saveConnector', { timeout: 10000 }).its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');

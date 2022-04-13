@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types"
+  },
+  "include": [
+    "index.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../typings/**/*",
+  ],
+  "exclude": [],
+  "references": [
+    { "path": "../../src/core/tsconfig.json" },
+    { "path": "../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../src/plugins/data/tsconfig.json" },
+    { "path": "../../src/plugins/data_views/tsconfig.json" },
+    { "path": "../../src/plugins/data_view_field_editor/tsconfig.json" },
+    { "path": "../developer_examples/tsconfig.json" },
+  ]
+}

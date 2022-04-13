@@ -34,7 +34,7 @@ import {
   updateDataProviderKqlQuery,
   updateDataProviderType,
   updateEventType,
-  updateIndexNames,
+  updateDataView,
   updateIsFavorite,
   updateIsLive,
   updateKqlMode,
@@ -44,6 +44,7 @@ import {
   updateTimeline,
   updateTimelineGraphEventId,
   updateTitleAndDescription,
+  updateTimelineSessionViewConfig,
   toggleModalSaveTimeline,
   updateEqlOptions,
   setTimelineUpdatedAt,
@@ -77,6 +78,7 @@ import {
   updateGraphEventId,
   updateFilters,
   updateTimelineEventType,
+  updateSessionViewConfig,
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
@@ -94,9 +96,14 @@ export const initialTimelineState: TimelineState = {
 
 /** The reducer for all timeline actions  */
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
-  .case(addTimeline, (state, { id, timeline }) => ({
+  .case(addTimeline, (state, { id, timeline, resolveTimelineConfig }) => ({
     ...state,
-    timelineById: addTimelineToStore({ id, timeline, timelineById: state.timelineById }),
+    timelineById: addTimelineToStore({
+      id,
+      timeline,
+      resolveTimelineConfig,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(createTimeline, (state, { id, timelineType = TimelineType.default, ...timelineProps }) => {
     return {
@@ -140,6 +147,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(updateTimelineGraphEventId, (state, { id, graphEventId }) => ({
     ...state,
     timelineById: updateGraphEventId({ id, graphEventId, timelineById: state.timelineById }),
+  }))
+  .case(updateTimelineSessionViewConfig, (state, { id, sessionViewConfig }) => ({
+    ...state,
+    timelineById: updateSessionViewConfig({
+      id,
+      sessionViewConfig,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(pinEvent, (state, { id, eventId }) => ({
     ...state,
@@ -321,12 +336,13 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     insertTimeline,
   }))
-  .case(updateIndexNames, (state, { id, indexNames }) => ({
+  .case(updateDataView, (state, { id, dataViewId, indexNames }) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
       [id]: {
         ...state.timelineById[id],
+        dataViewId,
         indexNames,
       },
     },

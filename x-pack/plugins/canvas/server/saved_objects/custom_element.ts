@@ -7,11 +7,13 @@
 
 import { SavedObjectsType } from 'src/core/server';
 import { CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
+import { customElementMigrationsFactory, CanvasSavedObjectTypeMigrationsDeps } from './migrations';
 
-export const customElementType: SavedObjectsType = {
+export const customElementType = (deps: CanvasSavedObjectTypeMigrationsDeps): SavedObjectsType => ({
   name: CUSTOM_ELEMENT_TYPE,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     dynamic: false,
     properties: {
@@ -30,7 +32,7 @@ export const customElementType: SavedObjectsType = {
       '@created': { type: 'date' },
     },
   },
-  migrations: {},
+  migrations: customElementMigrationsFactory(deps),
   management: {
     icon: 'canvasApp',
     defaultSearchField: 'name',
@@ -39,4 +41,4 @@ export const customElementType: SavedObjectsType = {
       return obj.attributes.displayName;
     },
   },
-};
+});

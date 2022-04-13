@@ -77,6 +77,7 @@ describe('normalizeQuery', () => {
 
     expect(modifiedDoc.aggs.timeseries.meta).toEqual({
       timeField: 'order_date',
+      normalized: true,
       intervalString: '10s',
       bucketSize: 10,
       seriesId: [seriesId],

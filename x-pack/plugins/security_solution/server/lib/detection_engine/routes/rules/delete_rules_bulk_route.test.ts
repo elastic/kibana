@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
@@ -17,6 +17,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
+import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 
 describe.each([
   ['Legacy', false],
@@ -28,12 +29,13 @@ describe.each([
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    const logger = loggingSystemMock.createLogger();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
     clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
 
-    deleteRulesBulkRoute(server.router, isRuleRegistryEnabled);
+    deleteRulesBulkRoute(server.router, isRuleRegistryEnabled, logger);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -42,7 +44,7 @@ describe.each([
       expect(response.status).toEqual(200);
     });
 
-    test('resturns 200 when deleting a single rule and related rule status', async () => {
+    test('returns 200 when deleting a single rule and related rule status', async () => {
       const response = await server.inject(getDeleteBulkRequest(), context);
       expect(response.status).toEqual(200);
     });
@@ -82,20 +84,13 @@ describe.each([
         ])
       );
     });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
-      const response = await server.inject(getDeleteBulkRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
   });
 
   describe('request validation', () => {
     test('rejects requests without IDs', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+        path: DETECTION_ENGINE_RULES_BULK_DELETE,
         body: [{}],
       });
       const response = await server.inject(request, context);
@@ -111,7 +106,7 @@ describe.each([
     test('rejects requests with both id and rule_id', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+        path: DETECTION_ENGINE_RULES_BULK_DELETE,
         body: [{ id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f', rule_id: 'rule_1' }],
       });
       const response = await server.inject(request, context);

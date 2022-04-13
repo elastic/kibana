@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   UserConfiguredActionConnector,
@@ -49,6 +49,8 @@ describe('action_connector_form', () => {
         dispatch={() => {}}
         errors={{ name: [] }}
         actionTypeRegistry={actionTypeRegistry}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     const connectorNameField = wrapper?.find('[data-test-subj="nameInput"]');

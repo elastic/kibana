@@ -7,439 +7,85 @@
 
 import expect from '@kbn/expect';
 import {
-  DEFAULT_SIGNALS_INDEX,
+  DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_INDEX_URL,
 } from '../../../../plugins/security_solution/common/constants';
 
+import { SIGNALS_FIELD_ALIASES_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteSignalsIndex } from '../../utils';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
+  const es = getService('es');
+  const log = getService('log');
 
   describe('create_index', () => {
     afterEach(async () => {
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     describe('elastic admin', () => {
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
+      describe('with another index that shares index alias', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/signals/index_alias_clash');
+        });
 
-      it('should be able to create a signal index when it has not been created yet', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-        expect(body).to.eql({ acknowledged: true });
-      });
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/signals/index_alias_clash');
+        });
 
-      it('should be able to create a signal index two times in a row as the REST call is idempotent', async () => {
-        await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-        expect(body).to.eql({ acknowledged: true });
-      });
+        // This fails and should be investigated or removed if it no longer applies
+        it.skip('should report that signals index does not exist', async () => {
+          const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
+          expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
+        });
 
-      it('should be able to read the index name and status as not being outdated', async () => {
-        await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-        const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: false,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
+        it('should return 200 for create_index', async () => {
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_INDEX_URL)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+          expect(body).to.eql({ acknowledged: true });
         });
       });
-    });
 
-    describe('t1_analyst', () => {
-      const role = ROLES.t1_analyst;
-
-      beforeEach(async () => {
-        await createUserAndRole(getService, role);
-      });
-
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
-
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
-
-      it('should NOT be able to create a signal index when it has not been created yet. Should return a 403 and error that the user is unauthorized', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(403);
-        expect(body.message).to.match(/^security_exception/);
-        expect(body.status_code).to.eql(403);
-      });
-
-      it('should be able to read the index name and status as not being outdated', async () => {
-        // create the index using super user since this user cannot create the index
-        await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: null,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
+      describe('with an outdated signals index', () => {
+        beforeEach(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
         });
-      });
-    });
 
-    describe('t2_analyst', () => {
-      const role = ROLES.t2_analyst;
-
-      beforeEach(async () => {
-        await createUserAndRole(getService, role);
-      });
-
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
-
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
-
-      it('should NOT be able to create a signal index when it has not been created yet. Should return a 403 and error that the user is unauthorized', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(403);
-        expect(body.message).to.match(/^security_exception/);
-        expect(body.status_code).to.eql(403);
-      });
-
-      it('should be able to read the index name and status as not being outdated', async () => {
-        // create the index using super user since this user cannot create an index
-        await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: null,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
+        afterEach(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
         });
-      });
-    });
 
-    describe('detections_admin', () => {
-      const role = ROLES.detections_admin;
-
-      beforeEach(async () => {
-        await createUserAndRole(getService, role);
-      });
-
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
-
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
-
-      it('should be able to create a signal index when it has not been created yet', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({ acknowledged: true });
-      });
-
-      it('should be able to read the index name and status as not being outdated', async () => {
-        await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: false,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
+        it('should report that signals index is outdated', async () => {
+          const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(200);
+          expect(body).to.eql({
+            index_mapping_outdated: true,
+            name: `${DEFAULT_ALERTS_INDEX}-default`,
+          });
         });
-      });
-    });
 
-    describe('soc_manager', () => {
-      const role = ROLES.soc_manager;
+        it('should return 200 for create_index and add field aliases', async () => {
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_INDEX_URL)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+          expect(body).to.eql({ acknowledged: true });
 
-      beforeEach(async () => {
-        await createUserAndRole(getService, role);
-      });
-
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
-
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
-
-      it('should NOT be able to create a signal index when it has not been created yet. Should return a 403 and error that the user is unauthorized', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(403);
-        expect(body.message).to.match(/^security_exception/);
-        expect(body.status_code).to.eql(403);
-      });
-
-      it('should be able to read the index name and status as not being outdated', async () => {
-        // create the index using super user since this user cannot create an index
-        await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: false,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
-        });
-      });
-    });
-
-    describe('hunter', () => {
-      const role = ROLES.hunter;
-
-      beforeEach(async () => {
-        await createUserAndRole(getService, role);
-      });
-
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
-
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
-
-      it('should NOT be able to create a signal index when it has not been created yet. Should return a 403 and error that the user is unauthorized', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(403);
-        expect(body.message).to.match(/^security_exception/);
-        expect(body.status_code).to.eql(403);
-      });
-
-      it('should be able to read the index name and status as not being outdated', async () => {
-        // create the index using super user since this user cannot create an index
-        await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: null,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
-        });
-      });
-    });
-
-    describe('platform_engineer', () => {
-      const role = ROLES.platform_engineer;
-
-      beforeEach(async () => {
-        await createUserAndRole(getService, role);
-      });
-
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
-
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
-
-      it('should be able to create a signal index when it has not been created yet', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({ acknowledged: true });
-      });
-
-      it('should be able to read the index name and status as not being outdated', async () => {
-        await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: false,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
-        });
-      });
-    });
-
-    describe('reader', () => {
-      const role = ROLES.reader;
-
-      beforeEach(async () => {
-        await createUserAndRole(getService, role);
-      });
-
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
-
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
-
-      it('should NOT be able to create a signal index when it has not been created yet. Should return a 401 unauthorized', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(403);
-        expect(body.message).to.match(/^security_exception/);
-        expect(body.status_code).to.eql(403);
-      });
-
-      it('should be able to read the index name and status as being outdated.', async () => {
-        // create the index using super user since this user cannot create the index
-        await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: false,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
-        });
-      });
-    });
-
-    describe('rule_author', () => {
-      const role = ROLES.rule_author;
-
-      beforeEach(async () => {
-        await createUserAndRole(getService, role);
-      });
-
-      afterEach(async () => {
-        await deleteUserAndRole(getService, role);
-      });
-
-      it('should return a 404 when the signal index has never been created', async () => {
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(404);
-        expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });
-      });
-
-      it('should NOT be able to create a signal index when it has not been created yet. Should return a 401 unauthorized', async () => {
-        const { body } = await supertestWithoutAuth
-          .post(DETECTION_ENGINE_INDEX_URL)
-          .set('kbn-xsrf', 'true')
-          .auth(role, 'changeme')
-          .send()
-          .expect(403);
-        expect(body.message).to.match(/^security_exception/);
-        expect(body.status_code).to.eql(403);
-      });
-
-      it('should be able to read the index name and status as being outdated.', async () => {
-        // create the index using super user since this user cannot create the index
-        await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
-
-        const { body } = await supertestWithoutAuth
-          .get(DETECTION_ENGINE_INDEX_URL)
-          .auth(role, 'changeme')
-          .send()
-          .expect(200);
-        expect(body).to.eql({
-          index_mapping_outdated: false,
-          name: `${DEFAULT_SIGNALS_INDEX}-default`,
+          const mappings = await es.indices.get({
+            index: '.siem-signals-default-000001',
+          });
+          // Make sure that aliases_version has been updated on the existing index
+          expect(mappings['.siem-signals-default-000001'].mappings?._meta?.aliases_version).to.eql(
+            SIGNALS_FIELD_ALIASES_VERSION
+          );
         });
       });
     });

@@ -10,7 +10,7 @@ URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensi
 Use *Vega* or *Vega-Lite* when you want to create visualizations with:
 
 * Aggregations that use `nested` or `parent/child` mapping
-* Aggregations without an index pattern
+* Aggregations without {a-data-source}
 * Queries that use custom time filters
 * Complex calculations
 * Extracted data from _source instead of aggregations
@@ -53,7 +53,7 @@ Before starting, add the eCommerce sample data that you'll use in your spec, the
 
 Open *Vega-Lite* and change the time range.
 
-. On the dashboard, click *All types*, then select *Custom visualization*.
+. On the dashboard, click *Select type*, then select *Custom visualization*.
 +
 A pre-populated line chart displays the total number of documents. 
 
@@ -73,7 +73,7 @@ index: kibana_sample_data_ecommerce
 
 A flat line appears with zero results.
 
-To add the data fields from the *kibana_sample_data_ecommerce* index, replace the following, then click *Update*:
+To add the data fields from the *kibana_sample_data_ecommerce* {data-source}, replace the following, then click *Update*:
 
 * `%timefield%: @timestamp` with `%timefield%: order_date`
 

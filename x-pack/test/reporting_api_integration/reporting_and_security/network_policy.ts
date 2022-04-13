@@ -10,23 +10,22 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
   const retry = getService('retry');
   const supertest = getService('supertest');
-  const archive = 'x-pack/test/functional/es_archives/reporting/canvas_disallowed_url';
 
   /*
    * The Reporting API Functional Test config implements a network policy that
    * is designed to disallow the following Canvas worksheet
    */
-  describe('Network Policy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/111381
+  describe.skip('Network Policy', () => {
     before(async () => {
-      await esArchiver.load(archive); // includes a canvas worksheet with an offending image URL
+      await reportingAPI.initLogs(); // includes a canvas worksheet with an offending image URL
     });
 
     after(async () => {
-      await esArchiver.unload(archive);
+      await reportingAPI.teardownLogs();
     });
 
     it('should fail job when page voilates the network policy', async () => {
@@ -37,7 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
       // Retry the download URL until a "failed" response status is returned
       await retry.tryForTime(120000, async () => {
         const { body } = await supertest.get(downloadPath).expect(500);
-        expect(body.message).to.match(/Reporting generation failed: Error:/);
+        expect(body.message).to.match(
+          /Reporting generation failed: ReportingError\(code: browser_unexpectedly_closed_error\) "/
+        );
       });
     });
   });

@@ -67,8 +67,16 @@ Every public API should have a release tag specified at the top of it’s docume
 
 Every team should be collecting telemetry metrics on it’s public API usage. This will be important for knowing when it’s safe to make breaking changes. The Core team will be looking into ways to make this easier and an automatic part of registration (see [#112291](https://github.com/elastic/kibana/issues/112291)).
 
+### APM
+
+Kibana server and client are instrumented with APM node and APM RUM clients respectively, tracking several types of transactions by default, such as `page-load`, `request`, etc.
+You may introduce custom transactions. Please refer to the [APM documentation](https://www.elastic.co/guide/en/apm/get-started/current/index.html) and follow these guidelines when doing so:
+
+- Use dashed syntax for transaction types and names: `my-transaction-type` and `my-transaction-name`
+- [Refrain from adding too many custom labels](https://www.elastic.co/guide/en/apm/get-started/current/metadata.html)
+
 ### Documentation
 
-Every public API should be documented inside the [docs/api](https://github.com/elastic/kibana/tree/master/docs/api) folder in asciidoc (this content will eventually be migrated to mdx to support the new docs system). If a public REST API is undocumented, you should either document it, or make it internal.
+Every public API should be documented inside the [docs/api](https://github.com/elastic/kibana/tree/main/docs/api) folder in asciidoc (this content will eventually be migrated to mdx to support the new docs system). If a public REST API is undocumented, you should either document it, or make it internal.
 
 Every public API should have a release tag specified using the appropriate documentation release tag above. If you do this, the docs system will provide a pop up explaining the conditions. If an API is not marked, it should be considered experimental.

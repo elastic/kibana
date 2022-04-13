@@ -16,14 +16,14 @@ incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<str
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> | The type of saved object whose fields should be incremented |
-|  id | <code>string</code> | The id of the document whose fields should be incremented |
-|  counterFields | <code>Array&lt;string &#124; SavedObjectsIncrementCounterField&gt;</code> | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
-|  options | <code>SavedObjectsIncrementCounterOptions&lt;T&gt;</code> | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
+|  type | string | The type of saved object whose fields should be incremented |
+|  id | string | The id of the document whose fields should be incremented |
+|  counterFields | Array&lt;string \| SavedObjectsIncrementCounterField&gt; | An array of field names to increment or an array of [SavedObjectsIncrementCounterField](./kibana-plugin-core-server.savedobjectsincrementcounterfield.md) |
+|  options | SavedObjectsIncrementCounterOptions&lt;T&gt; | [SavedObjectsIncrementCounterOptions](./kibana-plugin-core-server.savedobjectsincrementcounteroptions.md) |
 
 <b>Returns:</b>
 
-`Promise<SavedObject<T>>`
+Promise&lt;SavedObject&lt;T&gt;&gt;
 
 The saved object after the specified fields were incremented
 
@@ -31,7 +31,7 @@ The saved object after the specified fields were incremented
 
 When supplying a field name like `stats.api.counter` the field name will be used as-is to create a document like: `{attributes: {'stats.api.counter': 1}}` It will not create a nested structure like: `{attributes: {stats: {api: {counter: 1}}}}`
 
-When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/master/src/plugins/usage\_collection/README.mdx\#tracking-interactions-with-incrementcounter)
+When using incrementCounter for collecting usage data, you need to ensure that usage collection happens on a best-effort basis and doesn't negatively affect your plugin or users. See https://github.com/elastic/kibana/blob/main/src/plugins/usage\_collection/README.mdx\#tracking-interactions-with-incrementcounter)
 
 ## Example
 
@@ -65,6 +65,5 @@ repository.incrementCounter<{ appId: string }>(
   [ 'stats.apiCalls'],
   { upsertAttributes: { appId: 'myId' } }
 )
-
 ```
 

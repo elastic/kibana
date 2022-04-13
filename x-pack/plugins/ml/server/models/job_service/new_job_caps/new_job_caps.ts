@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import type { IScopedClusterClient } from 'kibana/server';
+import type { DataViewsService } from '../../../../../../../src/plugins/data_views/common';
+import type { Aggregation, Field, NewJobCapsResponse } from '../../../../common/types/fields';
 import { _DOC_COUNT } from '../../../../common/constants/field_types';
-import { Aggregation, Field, NewJobCapsResponse } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
 export function newJobCapsProvider(client: IScopedClusterClient) {
   async function newJobCaps(
     indexPattern: string,
     isRollup: boolean = false,
-    savedObjectsClient: SavedObjectsClientContract
+    dataViewsService: DataViewsService
   ): Promise<NewJobCapsResponse> {
-    const fieldService = fieldServiceProvider(indexPattern, isRollup, client, savedObjectsClient);
+    const fieldService = fieldServiceProvider(indexPattern, isRollup, client, dataViewsService);
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
 

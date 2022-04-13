@@ -16,13 +16,14 @@ import {
   setArchiveFilelist,
   deleteArchiveFilelist,
   deletePackageInfo,
+  clearPackageFileCache,
 } from './cache';
 import type { SharedKey } from './cache';
 import { getBufferExtractor } from './extract';
 
 export * from './cache';
 export { getBufferExtractor, untarBuffer, unzipBuffer } from './extract';
-export { parseAndVerifyArchiveBuffer as parseAndVerifyArchiveEntries } from './validation';
+export { generatePackageInfoFromArchiveBuffer } from './parse';
 
 export interface ArchiveEntry {
   path: string;
@@ -42,6 +43,9 @@ export async function unpackBufferToCache({
   archiveBuffer: Buffer;
   installSource: InstallSource;
 }): Promise<string[]> {
+  // Make sure any buffers from previous installations from registry or upload are deleted first
+  clearPackageFileCache({ name, version });
+
   const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
   entries.forEach((entry) => {

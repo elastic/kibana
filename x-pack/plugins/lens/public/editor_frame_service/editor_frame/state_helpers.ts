@@ -6,17 +6,17 @@
  */
 
 import { SavedObjectReference } from 'kibana/public';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import {
   Datasource,
+  DatasourceLayers,
   DatasourceMap,
-  DatasourcePublicAPI,
   FramePublicAPI,
   InitializationOptions,
   Visualization,
-  VisualizationDimensionGroupConfig,
   VisualizationMap,
+  VisualizeEditorContext,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
@@ -27,6 +27,7 @@ import {
   getMissingCurrentDatasource,
   getMissingIndexPatterns,
   getMissingVisualizationTypeError,
+  getUnknownVisualizationTypeError,
 } from '../error_helper';
 import { DatasourceStates } from '../../state_management';
 
@@ -34,7 +35,7 @@ export async function initializeDatasources(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext,
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   options?: InitializationOptions
 ) {
   const states: DatasourceStates = {};
@@ -61,7 +62,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
   datasourceMap: DatasourceMap
 ) {
-  const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
+  const datasourceLayers: DatasourceLayers = {};
   Object.keys(datasourceMap)
     .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)
     .forEach((id) => {
@@ -95,6 +96,12 @@ export async function persistedStateToExpression(
     return {
       ast: null,
       errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
+    };
+  }
+  if (!visualizations[visualizationType]) {
+    return {
+      ast: null,
+      errors: [getUnknownVisualizationTypeError(visualizationType)],
     };
   }
   const visualization = visualizations[visualizationType!];
@@ -189,24 +196,8 @@ export const validateDatasourceAndVisualization = (
   currentVisualizationState: unknown | undefined,
   frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
 ): ErrorMessage[] | undefined => {
-  const layersGroups = currentVisualizationState
-    ? currentVisualization
-        ?.getLayerIds(currentVisualizationState)
-        .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
-          const groups = currentVisualization?.getConfiguration({
-            frame: frameAPI,
-            layerId,
-            state: currentVisualizationState,
-          }).groups;
-          if (groups) {
-            memo[layerId] = groups;
-          }
-          return memo;
-        }, {})
-    : undefined;
-
   const datasourceValidationErrors = currentDatasourceState
-    ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)
+    ? currentDataSource?.getErrorMessages(currentDatasourceState)
     : undefined;
 
   const visualizationValidationErrors = currentVisualizationState

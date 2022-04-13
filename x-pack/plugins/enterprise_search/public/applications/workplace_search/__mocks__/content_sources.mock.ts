@@ -7,6 +7,8 @@
 
 import { groups } from './groups.mock';
 
+import { IndexingRule } from '../types';
+import { SourceConfigData } from '../views/content_sources/components/add_source/add_source_logic';
 import { staticSourceData } from '../views/content_sources/source_data';
 import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
 
@@ -45,15 +47,31 @@ export const contentSources = [
   },
 ];
 
+const defaultIndexingRules: IndexingRule[] = [
+  {
+    filterType: 'object_type',
+    include: 'value',
+  },
+  {
+    filterType: 'path_template',
+    exclude: 'value',
+  },
+  {
+    filterType: 'file_extension',
+    include: 'value',
+  },
+];
+
 const defaultIndexing = {
   enabled: true,
   defaultAction: 'include',
-  rules: [],
+  rules: defaultIndexingRules,
   schedule: {
     full: 'P1D',
     incremental: 'PT2H',
     delete: 'PT10M',
     permissions: 'PT3H',
+    blockedWindows: [],
     estimates: {
       full: {
         nextStart: '2021-09-30T15:37:38+00:00',
@@ -122,6 +140,11 @@ export const fullContentSources = [
     urlFieldIsLinkable: true,
     createdAt: '2021-01-20',
     serviceName: 'myService',
+    secret: {
+      app_id: '99999',
+      fingerprint: '65xM7s0RE6tEWNhnuXpK5EvZ5OAMIcbDHIISm/0T23Y=',
+      base_url: 'http://github.com',
+    },
   },
   {
     ...contentSources[1],
@@ -317,24 +340,34 @@ export const mergedConfiguredSources = mergeServerAndStaticData(
   contentSources
 );
 
-export const sourceConfigData = {
+export const sourceConfigData: SourceConfigData = {
   serviceType: 'confluence_cloud',
   name: 'Confluence',
   configured: true,
   needsPermissions: true,
   accountContextOnly: false,
-  supportedByLicense: true,
   privateSourcesEnabled: false,
   categories: ['wiki', 'atlassian', 'intranet'],
   configuredFields: {
-    isOauth1: false,
     clientId: 'CyztADsSECRETCSAUCEh1a',
     clientSecret: 'GSjJxqSECRETCSAUCEksHk',
     baseUrl: 'https://mine.atlassian.net',
     privateKey: '-----BEGIN PRIVATE KEY-----\nkeykeykeykey==\n-----END PRIVATE KEY-----\n',
     publicKey: '-----BEGIN PUBLIC KEY-----\nkeykeykeykey\n-----END PUBLIC KEY-----\n',
     consumerKey: 'elastic_enterprise_search_123',
+    externalConnectorApiKey: 'asdf1234',
+    externalConnectorUrl: 'https://www.elastic.co',
   },
+};
+
+export const externalConfiguredConnector = {
+  serviceType: 'external',
+  name: 'External Connector',
+  configured: true,
+  needsPermissions: false,
+  accountContextOnly: true,
+  supportedByLicense: false,
+  privateSourcesEnabled: false,
 };
 
 export const oauthApplication = {
@@ -369,7 +402,7 @@ export const exampleResult = {
       myLink: 'http://foo',
       otherTitle: 'foo',
       content_source_id: '60e85e7ea2564c265a88a4f0',
-      external_id: 'doc-60e85eb7a2564c937a88a4f3',
+      id: 'doc-60e85eb7a2564c937a88a4f3',
       last_updated: '2021-07-09T14:35:35+00:00',
       updated_at: '2021-07-09T14:35:35+00:00',
       source: 'custom',

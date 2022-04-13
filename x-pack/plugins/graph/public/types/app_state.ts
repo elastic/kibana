@@ -8,7 +8,7 @@
 import { SimpleSavedObject } from 'src/core/public';
 import { FontawesomeIcon } from '../helpers/style_choices';
 import { OutlinkEncoder } from '../helpers/outlink_encoders';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export interface UrlTemplate {
   url: string;
@@ -41,5 +41,5 @@ export interface AdvancedSettings {
 export type IndexPatternSavedObject = SimpleSavedObject<{ title: string }>;
 
 export interface IndexPatternProvider {
-  get(id: string): Promise<IndexPattern>;
+  get(id: string): Promise<DataView>;
 }

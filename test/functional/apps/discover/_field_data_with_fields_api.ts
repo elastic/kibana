@@ -64,9 +64,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('doc view should show Time and Document columns', async function () {
+      it('doc view should show @timestamp and Document columns', async function () {
         const Docheader = await PageObjects.discover.getDocHeader();
-        expect(Docheader).to.contain('Time');
+        expect(Docheader).to.contain('@timestamp');
         expect(Docheader).to.contain('Document');
       });
 
@@ -91,12 +91,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hash.replace('columns:!()', 'columns:!(relatedContent)'),
           { useActualUrl: true }
         );
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async function tryingForTime() {
           expect(await PageObjects.discover.getDocHeader()).to.contain('relatedContent');
-        });
 
-        const field = await PageObjects.discover.getDocTableIndex(1);
-        expect(field).to.contain('relatedContent.url');
+          const field = await PageObjects.discover.getDocTableIndex(1);
+          expect(field).to.contain('relatedContent.url');
+        });
 
         const marks = await PageObjects.discover.getMarks();
         expect(marks.length).to.be.above(0);

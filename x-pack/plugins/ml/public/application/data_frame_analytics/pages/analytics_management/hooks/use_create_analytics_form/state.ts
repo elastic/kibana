@@ -79,6 +79,7 @@ export interface State {
     jobType: AnalyticsJobType;
     jobConfigQuery: any;
     jobConfigQueryString: string | undefined;
+    jobConfigQueryLanguage: string | undefined;
     lambda: number | undefined;
     lossFunction: string | undefined;
     lossFunctionParameter: number | undefined;
@@ -162,6 +163,7 @@ export const getInitialState = (): State => ({
     jobType: undefined,
     jobConfigQuery: defaultSearchQuery,
     jobConfigQueryString: undefined,
+    jobConfigQueryLanguage: undefined,
     lambda: undefined,
     lossFunction: undefined,
     lossFunctionParameter: undefined,
@@ -220,7 +222,7 @@ export const getJobConfigFromFormState = (
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
     description: formState.description,
     source: {
-      // If a Kibana index patterns includes commas, we need to split
+      // If a Kibana data view name includes commas, we need to split
       // the into an array of indices to be in the correct format for
       // the data frame analytics API.
       index: formState.sourceIndex.includes(',')

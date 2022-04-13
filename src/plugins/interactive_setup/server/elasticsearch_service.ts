@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
 import type { Observable } from 'rxjs';
-import { from, of, timer } from 'rxjs';
+import { firstValueFrom, from, of, timer } from 'rxjs';
 import {
   catchError,
   distinctUntilChanged,
@@ -22,19 +22,22 @@ import {
 import tls from 'tls';
 
 import type {
+  ElasticsearchClient,
   ElasticsearchServicePreboot,
   ICustomClusterClient,
   Logger,
   ScopeableRequest,
 } from 'src/core/server';
 
+import { pollEsNodesVersion } from '../../../../src/core/server';
 import { ElasticsearchConnectionStatus } from '../common';
 import type { Certificate, PingResult } from '../common';
+import { CompatibilityError } from './compatibility_error';
 import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
 
 export interface EnrollParameters {
   apiKey: string;
-  hosts: string[];
+  hosts: readonly string[];
   caFingerprint: string;
 }
 
@@ -49,7 +52,7 @@ export interface ElasticsearchServiceSetupDeps {
   /**
    * Core Elasticsearch service preboot contract;
    */
-  elasticsearch: ElasticsearchServicePreboot;
+  elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>;
 
   /**
    * Interval for the Elasticsearch connection check (whether it's configured or not).
@@ -101,6 +104,11 @@ export interface EnrollResult {
   serviceAccountToken: { name: string; value: string };
 }
 
+export interface EnrollKibanaResponse {
+  token: { name: string; value: string };
+  http_ca: string;
+}
+
 export interface AuthenticateResult {
   host: string;
   username?: string;
@@ -113,7 +121,8 @@ export class ElasticsearchService {
    * Elasticsearch client used to check Elasticsearch connection status.
    */
   private connectionStatusClient?: ICustomClusterClient;
-  constructor(private readonly logger: Logger) {}
+
+  constructor(private readonly logger: Logger, private kibanaVersion: string) {}
 
   public setup({
     elasticsearch,
@@ -169,7 +178,7 @@ export class ElasticsearchService {
    * the Elasticsearch node we're enrolling with. Should be in a form of a hex colon-delimited string in upper case.
    */
   private async enroll(
-    elasticsearch: ElasticsearchServicePreboot,
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
     { apiKey, hosts, caFingerprint }: EnrollParameters
   ) {
     const scopeableRequest: ScopeableRequest = { headers: { authorization: `ApiKey ${apiKey}` } };
@@ -186,14 +195,17 @@ export class ElasticsearchService {
         ssl: { verificationMode: 'none' },
       });
 
-      let enrollmentResponse;
+      let enrollmentResponse: TransportResult<EnrollKibanaResponse>;
       try {
-        enrollmentResponse = (await enrollClient
+        enrollmentResponse = await enrollClient
           .asScoped(scopeableRequest)
-          .asCurrentUser.transport.request({
-            method: 'GET',
-            path: '/_security/enroll/kibana',
-          })) as ApiResponse<{ token: { name: string; value: string }; http_ca: string }>;
+          .asCurrentUser.transport.request<EnrollKibanaResponse>(
+            {
+              method: 'GET',
+              path: '/_security/enroll/kibana',
+            },
+            { meta: true }
+          );
       } catch (err) {
         // We expect that all hosts belong to exactly same node and any non-connection error for one host would mean
         // that enrollment will fail for any other host and we should bail out.
@@ -245,9 +257,17 @@ export class ElasticsearchService {
             enrollmentResponse.body.token.name
           }" token to host "${host}": ${getDetailedErrorMessage(err)}.`
         );
-        throw err;
-      } finally {
         await authenticateClient.close();
+        throw err;
+      }
+
+      const versionCompatibility = await this.checkCompatibility(authenticateClient.asInternalUser);
+      await authenticateClient.close();
+      if (!versionCompatibility.isCompatible) {
+        this.logger.error(
+          `Failed compatibility check of host "${host}": ${versionCompatibility.message}`
+        );
+        throw new CompatibilityError(versionCompatibility);
       }
 
       return enrollResult;
@@ -257,7 +277,7 @@ export class ElasticsearchService {
   }
 
   private async authenticate(
-    elasticsearch: ElasticsearchServicePreboot,
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
     { host, username, password, caCert }: AuthenticateParameters
   ) {
     const client = elasticsearch.createClient('authenticate', {
@@ -275,13 +295,24 @@ export class ElasticsearchService {
       this.logger.error(
         `Failed to authenticate with host "${host}": ${getDetailedErrorMessage(error)}`
       );
-      throw error;
-    } finally {
       await client.close();
+      throw error;
+    }
+
+    const versionCompatibility = await this.checkCompatibility(client.asInternalUser);
+    await client.close();
+    if (!versionCompatibility.isCompatible) {
+      this.logger.error(
+        `Failed compatibility check of host "${host}": ${versionCompatibility.message}`
+      );
+      throw new CompatibilityError(versionCompatibility);
     }
   }
 
-  private async ping(elasticsearch: ElasticsearchServicePreboot, host: string) {
+  private async ping(
+    elasticsearch: Pick<ElasticsearchServicePreboot, 'createClient'>,
+    host: string
+  ) {
     const client = elasticsearch.createClient('ping', {
       hosts: [host],
       username: '',
@@ -300,6 +331,7 @@ export class ElasticsearchService {
         error instanceof errors.ProductNotSupportedError
       ) {
         this.logger.error(`Unable to connect to host "${host}": ${getDetailedErrorMessage(error)}`);
+        await client.close();
         throw error;
       }
 
@@ -328,10 +360,13 @@ export class ElasticsearchService {
     this.logger.debug(`Verifying that host "${host}" responds with Elastic product header`);
 
     try {
-      const response = await client.asInternalUser.transport.request({
-        method: 'OPTIONS',
-        path: '/',
-      });
+      const response = await client.asInternalUser.transport.request(
+        {
+          method: 'OPTIONS',
+          path: '/',
+        },
+        { meta: true }
+      );
       if (response.headers?.['x-elastic-product'] !== 'Elasticsearch') {
         throw new Error('Host did not respond with valid Elastic product header.');
       }
@@ -349,6 +384,18 @@ export class ElasticsearchService {
       authRequired,
       certificateChain,
     };
+  }
+
+  private async checkCompatibility(internalClient: ElasticsearchClient) {
+    return firstValueFrom(
+      pollEsNodesVersion({
+        internalClient,
+        log: this.logger,
+        kibanaVersion: this.kibanaVersion,
+        ignoreVersionMismatch: false,
+        esVersionCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
+      })
+    );
   }
 
   private static fetchPeerCertificate(host: string, port: string | number) {
@@ -392,5 +439,16 @@ export class ElasticsearchService {
       .replace(/-/g, '+')
       .replace(/([^\n]{1,65})/g, '$1\n')
       .replace(/\n$/g, '')}\n-----END CERTIFICATE-----\n`;
+  }
+
+  public static formatFingerprint(caFingerprint: string) {
+    // Convert a plain hex string returned in the enrollment token to a format that ES client
+    // expects, i.e. to a colon delimited hex string in upper case: deadbeef -> DE:AD:BE:EF.
+    return (
+      caFingerprint
+        .toUpperCase()
+        .match(/.{1,2}/g)
+        ?.join(':') ?? ''
+    );
   }
 }

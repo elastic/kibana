@@ -141,16 +141,30 @@ and Kibana instance that the tests will be run against.
 
     ML accessibility tests are located in `x-pack/test/accessibility/apps`.
 
+## Generating docs screenshots
+
+The screenshot generation uses the functional test runner described in the
+`Functional tests` section above.
+
+Run the following commands from the `x-pack` directory and use separate terminals
+for test server and test runner. The test server command starts an Elasticsearch
+and Kibana instance that the tests will be run against.
+
+    node scripts/functional_tests_server.js --config test/screenshot_creation/config.ts
+    node scripts/functional_test_runner.js --config test/screenshot_creation/config.ts --include-tag mlqa
+
+The generated screenshots are stored in `x-pack/test/functional/screenshots/session/ml_docs`.
+ML screenshot generation tests are located in `x-pack/test/screenshot_creation/apps/ml_docs`.
 ## Shared functions
 
 You can find the ML shared functions in the following files in GitHub:
 
 ```
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/public/shared.ts
+https://github.com/elastic/kibana/blob/main/x-pack/plugins/ml/public/shared.ts
 ```
 
 ```
-https://github.com/elastic/kibana/blob/master/x-pack/plugins/ml/server/shared.ts
+https://github.com/elastic/kibana/blob/main/x-pack/plugins/ml/server/shared.ts
 ```
 
 These functions are shared from the root of the ML plugin, you can import them with an import statement. For example:

@@ -11,10 +11,11 @@ import type { CoreStart } from 'src/core/public';
 
 import type { CopyToSpaceFlyoutProps } from '../copy_saved_objects_to_space';
 import type {
+  EmbeddableLegacyUrlConflictProps,
   LegacyUrlConflictProps,
-  SavedObjectConflictMessageProps,
-  ShareToSpaceFlyoutProps,
-} from '../share_saved_objects_to_space';
+  RedirectLegacyUrlParams,
+} from '../legacy_urls';
+import type { ShareToSpaceFlyoutProps } from '../share_saved_objects_to_space';
 import type { SpaceAvatarProps } from '../space_avatar';
 import type { SpaceListProps } from '../space_list';
 import type { SpacesContextProps, SpacesReactContextValue } from '../spaces_context';
@@ -47,12 +48,8 @@ export interface SpacesApiUi {
    * New URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`
    *
    * The protocol, hostname, port, base path, and app path are automatically included.
-   *
-   * @param path The path to use for the new URL, optionally including `search` and/or `hash` URL components.
-   * @param objectNoun The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new
-   * location_. Default value is 'object'.
    */
-  redirectLegacyUrl: (path: string, objectNoun?: string) => Promise<void>;
+  redirectLegacyUrl: (params: RedirectLegacyUrlParams) => Promise<void>;
   /**
    * Helper function to easily access the Spaces React Context provider.
    */
@@ -89,6 +86,12 @@ export interface SpacesApiUiComponent {
    */
   getSpaceList: LazyComponentFn<SpaceListProps>;
   /**
+   * Displays a callout that needs to be used if an embeddable component call to `SavedObjectsClient.resolve()` results in an `"conflict"`
+   * outcome, which indicates that the user has loaded an embeddable which is associated directly with one object (A), *and* with a legacy
+   * URL that points to a different object (B).
+   */
+  getEmbeddableLegacyUrlConflict: LazyComponentFn<EmbeddableLegacyUrlConflictProps>;
+  /**
    * Displays a callout that needs to be used if a call to `SavedObjectsClient.resolve()` results in an `"conflict"` outcome, which
    * indicates that the user has loaded the page which is associated directly with one object (A), *and* with a legacy URL that points to a
    * different object (B).
@@ -110,8 +113,4 @@ export interface SpacesApiUiComponent {
    * Displays an avatar for the given space.
    */
   getSpaceAvatar: LazyComponentFn<SpaceAvatarProps>;
-  /**
-   * Displays a saved object conflict message that directs user to disable legacy URL alias
-   */
-  getSavedObjectConflictMessage: LazyComponentFn<SavedObjectConflictMessageProps>;
 }

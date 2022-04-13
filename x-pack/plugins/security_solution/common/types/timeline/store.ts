@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import {
   ColumnHeaderOptions,
   ColumnId,
@@ -12,8 +13,6 @@ import {
   TimelineExpandedDetail,
   TimelineTypeLiteral,
 } from '.';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Filter } from '../../../../../../src/plugins/data/public';
 
 import { Direction } from '../../search_strategy';
 import { DataProvider } from './data_provider';
@@ -38,19 +37,20 @@ export interface SortColumnTimeline {
 }
 
 export interface TimelinePersistInput {
-  id: string;
+  columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
   dateRange?: {
     start: string;
     end: string;
   };
+  defaultColumns?: ColumnHeaderOptions[];
   excludedRowRendererIds?: RowRendererId[];
   expandedDetail?: TimelineExpandedDetail;
   filters?: Filter[];
-  columns: ColumnHeaderOptions[];
-  defaultColumns?: ColumnHeaderOptions[];
-  itemsPerPage?: number;
+  id: string;
   indexNames: string[];
+  itemsPerPage?: number;
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
   };

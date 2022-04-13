@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ReactNode } from 'react';
-import { AppMount } from 'src/core/public';
+import { Observable } from 'rxjs';
+import { RouteComponentProps } from 'react-router-dom';
+
+import { AppUnmount, CoreTheme } from 'src/core/public';
 
 /**
  * Descriptor for a dev tool. A dev tool works similar to an application
@@ -16,6 +18,12 @@ import { AppMount } from 'src/core/public';
 export type CreateDevToolArgs = Omit<DevToolApp, 'enable' | 'disable' | 'isDisabled'> & {
   disabled?: boolean;
 };
+
+interface DevToolMountParams {
+  element: HTMLDivElement;
+  location: RouteComponentProps['location'];
+  theme$: Observable<CoreTheme>;
+}
 
 export class DevToolApp {
   /**
@@ -29,8 +37,13 @@ export class DevToolApp {
    * This will be used as a label in the tab above the actual tool.
    * May also be a ReactNode.
    */
-  public readonly title: ReactNode;
-  public readonly mount: AppMount;
+  public readonly title: string;
+  public readonly mount: (params: DevToolMountParams) => AppUnmount | Promise<AppUnmount>;
+
+  /**
+   * Mark the navigation tab as beta.
+   */
+  public readonly isBeta?: boolean;
 
   /**
    * Flag indicating to disable the tab of this dev tool. Navigating to a
@@ -57,12 +70,13 @@ export class DevToolApp {
 
   constructor(
     id: string,
-    title: ReactNode,
-    mount: AppMount,
+    title: string,
+    mount: (params: DevToolMountParams) => AppUnmount | Promise<AppUnmount>,
     enableRouting: boolean,
     order: number,
     toolTipContent = '',
-    disabled = false
+    disabled = false,
+    isBeta?: boolean
   ) {
     this.id = id;
     this.title = title;
@@ -71,6 +85,7 @@ export class DevToolApp {
     this.order = order;
     this.tooltipContent = toolTipContent;
     this.disabled = disabled;
+    this.isBeta = isBeta;
   }
 
   public enable() {
@@ -94,5 +109,6 @@ export const createDevToolApp = ({
   order,
   tooltipContent,
   disabled,
+  isBeta,
 }: CreateDevToolArgs) =>
-  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled);
+  new DevToolApp(id, title, mount, enableRouting, order, tooltipContent, disabled, isBeta);

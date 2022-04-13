@@ -6,7 +6,7 @@
  */
 
 import { EuiCheckbox, EuiCode, EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
 import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';

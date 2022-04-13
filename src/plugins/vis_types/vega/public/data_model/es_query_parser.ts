@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Assign } from 'utility-types';
 import { TimeCache } from './time_cache';
 import { SearchAPI } from './search_api';
@@ -235,7 +235,8 @@ export class EsQueryParser {
         interval?: { '%autointerval%': true | number } | string;
       }
     >,
-    isQuery: boolean
+    isQuery: boolean,
+    key?: string
   ) {
     if (obj && typeof obj === 'object') {
       if (Array.isArray(obj)) {
@@ -281,9 +282,8 @@ export class EsQueryParser {
           if (!subObj || typeof obj !== 'object') continue;
 
           // replace "interval" with ES acceptable fixed_interval / calendar_interval
-          if (prop === 'interval') {
+          if (prop === 'interval' && key === 'date_histogram') {
             let intervalString: string;
-
             if (typeof subObj === 'string') {
               intervalString = subObj;
             } else if (subObj[AUTOINTERVAL]) {
@@ -322,7 +322,7 @@ export class EsQueryParser {
               this._createRangeFilter(subObj);
               continue;
             case undefined:
-              this._injectContextVars(subObj, isQuery);
+              this._injectContextVars(subObj, isQuery, prop);
               continue;
             default:
               throw new Error(

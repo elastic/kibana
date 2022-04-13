@@ -6,41 +6,28 @@
  */
 
 import { useMemo } from 'react';
-import { LogSourceConfigurationProperties } from '../../../containers/logs/log_source';
+import { LogViewAttributes } from '../../../../common/log_views';
 import { useCompositeFormElement } from './form_elements';
-import { useFieldsFormElement, useLogIndicesFormElement } from './indices_configuration_form_state';
+import { useLogIndicesFormElement } from './indices_configuration_form_state';
 import { useLogColumnsFormElement } from './log_columns_configuration_form_state';
 import { useNameFormElement } from './name_configuration_form_state';
 
-export const useLogSourceConfigurationFormState = (
-  configuration?: LogSourceConfigurationProperties
-) => {
-  const nameFormElement = useNameFormElement(configuration?.name ?? '');
+export const useLogSourceConfigurationFormState = (logViewAttributes?: LogViewAttributes) => {
+  const nameFormElement = useNameFormElement(logViewAttributes?.name ?? '');
 
   const logIndicesFormElement = useLogIndicesFormElement(
     useMemo(
       () =>
-        configuration?.logIndices ?? {
+        logViewAttributes?.logIndices ?? {
           type: 'index_name',
           indexName: '',
         },
-      [configuration]
+      [logViewAttributes]
     )
   );
 
-  const { fieldsFormElement, tiebreakerFieldFormElement, timestampFieldFormElement } =
-    useFieldsFormElement(
-      useMemo(
-        () => ({
-          tiebreakerField: configuration?.fields?.tiebreaker ?? '_doc',
-          timestampField: configuration?.fields?.timestamp ?? '@timestamp',
-        }),
-        [configuration]
-      )
-    );
-
   const logColumnsFormElement = useLogColumnsFormElement(
-    useMemo(() => configuration?.logColumns ?? [], [configuration])
+    useMemo(() => logViewAttributes?.logColumns ?? [], [logViewAttributes])
   );
 
   const sourceConfigurationFormElement = useCompositeFormElement(
@@ -49,12 +36,11 @@ export const useLogSourceConfigurationFormState = (
         childFormElements: {
           name: nameFormElement,
           logIndices: logIndicesFormElement,
-          fields: fieldsFormElement,
           logColumns: logColumnsFormElement,
         },
         validate: async () => [],
       }),
-      [nameFormElement, logIndicesFormElement, fieldsFormElement, logColumnsFormElement]
+      [nameFormElement, logIndicesFormElement, logColumnsFormElement]
     )
   );
 
@@ -64,7 +50,5 @@ export const useLogSourceConfigurationFormState = (
     logColumnsFormElement,
     nameFormElement,
     sourceConfigurationFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
   };
 };

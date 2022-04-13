@@ -9,10 +9,7 @@ import { registerDataHandler, getDataHandler } from './data_handler';
 import moment from 'moment';
 import { ApmIndicesConfig } from '../common/typings';
 
-const sampleAPMIndices = {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  'apm_oss.transactionIndices': 'apm-*',
-} as ApmIndicesConfig;
+const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 
 const params = {
   absoluteTime: {
@@ -23,7 +20,8 @@ const params = {
     start: 'now-15m',
     end: 'now',
   },
-  bucketSize: '10s',
+  intervalString: '10s',
+  bucketSize: 10,
 };
 
 describe('registerDataHandler', () => {
@@ -137,7 +135,12 @@ describe('registerDataHandler', () => {
           },
         };
       },
-      hasData: async () => true,
+      hasData: async () => {
+        return {
+          hasData: true,
+          indices: 'test-index',
+        };
+      },
     });
 
     it('registered data handler', () => {
@@ -178,9 +181,9 @@ describe('registerDataHandler', () => {
     });
 
     it('returns true when hasData is called', async () => {
-      const dataHandler = getDataHandler('apm');
+      const dataHandler = getDataHandler('infra_logs');
       const hasData = await dataHandler?.hasData();
-      expect(hasData).toBeTruthy();
+      expect(hasData?.hasData).toBeTruthy();
     });
   });
   describe('Uptime', () => {
@@ -343,7 +346,7 @@ describe('registerDataHandler', () => {
     registerDataHandler({
       appName: 'infra_metrics',
       fetchData: makeRequest,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'metrics-*' }),
     });
 
     it('registered data handler', () => {

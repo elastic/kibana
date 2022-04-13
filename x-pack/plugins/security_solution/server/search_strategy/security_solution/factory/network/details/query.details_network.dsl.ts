@@ -103,9 +103,9 @@ export const buildNetworkDetailsQuery = ({
   ip,
 }: NetworkDetailsRequestOptions) => {
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),

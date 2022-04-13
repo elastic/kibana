@@ -10,14 +10,22 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 
-export { EncryptedSavedObjectTypeRegistration, EncryptionError } from './crypto';
-export { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
-export { EncryptedSavedObjectsClient } from './saved_objects';
-export type { IsMigrationNeededPredicate } from './create_migration';
+export type { EncryptedSavedObjectTypeRegistration, AttributeToEncrypt } from './crypto';
+export { EncryptionError, EncryptionErrorOperation } from './crypto';
+export type { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
+export type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+  ClientInstanciator,
+} from './saved_objects';
+export type {
+  IsMigrationNeededPredicate,
+  CreateEncryptedSavedObjectsMigrationFn,
+  CreateEncryptedSavedObjectsMigrationFnOpts,
+} from './create_migration';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new EncryptedSavedObjectsPlugin(initializerContext);

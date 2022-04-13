@@ -13,5 +13,5 @@ getBadge$(): Observable<ChromeBadge | undefined>;
 ```
 <b>Returns:</b>
 
-`Observable<ChromeBadge | undefined>`
+Observable&lt;ChromeBadge \| undefined&gt;
 

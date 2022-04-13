@@ -16,11 +16,11 @@ change(newTitle: string | string[]): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  newTitle | <code>string &#124; string[]</code> |  |
+|  newTitle | string \| string\[\] | The new title to set, either a string or string array |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Example
 
@@ -29,6 +29,5 @@ How to change the title of the document
 ```ts
 chrome.docTitle.change('My application title')
 chrome.docTitle.change(['My application', 'My section'])
-
 ```
 

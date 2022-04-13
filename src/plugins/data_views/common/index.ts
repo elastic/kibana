@@ -8,10 +8,9 @@
 
 export {
   RUNTIME_FIELD_TYPES,
-  FLEET_ASSETS_TO_IGNORE,
+  DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
 } from './constants';
 export type { IFieldType, IIndexPatternFieldList } from './fields';
 export {
@@ -28,6 +27,8 @@ export type {
   FieldFormatMap,
   RuntimeType,
   RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeFieldSubField,
   IIndexPattern,
   DataViewAttributes,
   IndexPatternAttributes,
@@ -41,7 +42,6 @@ export type {
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
-  IIndexPatternsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
@@ -49,20 +49,24 @@ export type {
   FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
-  IndexPatternFieldMap,
   DataViewSpec,
-  IndexPatternSpec,
   SourceFilter,
+  HasDataService,
 } from './types';
-export { DataViewType, IndexPatternType } from './types';
-export {
-  IndexPatternsService,
-  IndexPatternsContract,
-  DataViewsService,
-  DataViewsContract,
+export { DataViewType } from './types';
+export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export { IndexPatternsService, DataViewsService } from './data_views';
+export type {
+  DataViewListItem,
+  DataViewsServicePublicMethods,
+  TimeBasedDataView,
 } from './data_views';
-export { IndexPattern, IndexPatternListItem, DataView, DataViewListItem } from './data_views';
-export { DuplicateDataViewError, DataViewSavedObjectConflictError } from './errors';
+export { IndexPattern, DataView } from './data_views';
+export {
+  DuplicateDataViewError,
+  DataViewSavedObjectConflictError,
+  DataViewInsufficientAccessError,
+} from './errors';
 export type {
   IndexPatternExpressionType,
   IndexPatternLoadStartDependencies,

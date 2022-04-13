@@ -8,12 +8,13 @@
 import { appRoutesService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../types';
 
-import { sendRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 
-export const sendGetPermissionsCheck = () => {
+export const sendGetPermissionsCheck = (fleetServerSetup?: boolean) => {
   return sendRequest<CheckPermissionsResponse>({
     path: appRoutesService.getCheckPermissionsPath(),
     method: 'get',
+    query: { fleetServerSetup },
   });
 };
 
@@ -21,5 +22,12 @@ export const sendGenerateServiceToken = () => {
   return sendRequest<GenerateServiceTokenResponse>({
     path: appRoutesService.getRegenerateServiceTokenPath(),
     method: 'post',
+  });
+};
+
+export const usePermissionCheck = () => {
+  return useRequest<CheckPermissionsResponse>({
+    path: appRoutesService.getCheckPermissionsPath(),
+    method: 'get',
   });
 };

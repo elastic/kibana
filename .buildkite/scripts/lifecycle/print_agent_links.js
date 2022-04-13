@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const { BuildkiteClient } = require('kibana-buildkite-library');
 
 (async () => {
@@ -22,7 +30,6 @@ const { BuildkiteClient } = require('kibana-buildkite-library');
       `?time=${startTime.getTime()}`,
     ].join('');
 
-    console.log('--- Agent Debug Links');
     console.log('Agent Metrics:');
     console.log('\u001b]1339;' + `url='${METRICS_URL}'\u0007`);
     console.log('Agent Logs:');

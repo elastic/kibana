@@ -5,41 +5,35 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { JsonObject } from '@kbn/utility-types';
-
-import type { InfraPluginRequestHandlerContext } from '../../../types';
-
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
 } from '../../../../common/http_api';
+import { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entry';
 import {
-  LogSourceColumnConfiguration,
-  ResolvedLogSourceConfiguration,
-  resolveLogSourceConfiguration,
-} from '../../../../common/log_sources';
-import { LogColumn, LogEntryCursor, LogEntry } from '../../../../common/log_entry';
-import {
-  InfraSourceConfiguration,
-  InfraSources,
-  SourceConfigurationFieldColumnRuntimeType,
-} from '../../sources';
+  LogViewColumnConfiguration,
+  logViewFieldColumnConfigurationRT,
+  ResolvedLogView,
+} from '../../../../common/log_views';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
 import {
   CompiledLogMessageFormattingRule,
+  compileFormattingRules,
   Fields,
   Highlights,
-  compileFormattingRules,
 } from '../../../services/log_entries/message/message';
-import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
-import { decodeOrThrow } from '../../../../common/runtime_types';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { InfraBackendLibs } from '../../infra_types';
 import {
-  logEntryDatasetsResponseRT,
-  LogEntryDatasetBucket,
   CompositeDatasetKey,
   createLogEntryDatasetsQuery,
+  LogEntryDatasetBucket,
+  logEntryDatasetsResponseRT,
 } from './queries/log_entry_datasets';
+
 export interface LogEntriesParams {
   startTimestamp: number;
   endTimestamp: number;
@@ -66,17 +60,14 @@ const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 export class InfraLogEntriesDomain {
   constructor(
     private readonly adapter: LogEntriesAdapter,
-    private readonly libs: {
-      framework: KibanaFramework;
-      sources: InfraSources;
-    }
+    private readonly libs: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>
   ) {}
 
   public async getLogEntriesAround(
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     params: LogEntriesAroundParams,
-    columnOverrides?: LogSourceColumnConfiguration[]
+    columnOverrides?: LogViewColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { startTimestamp, endTimestamp, center, query, size, highlightTerm } = params;
 
@@ -136,27 +127,26 @@ export class InfraLogEntriesDomain {
     requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     params: LogEntriesParams,
-    columnOverrides?: LogSourceColumnConfiguration[]
+    columnOverrides?: LogViewColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
-    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
-      configuration,
-      await this.libs.framework.getIndexPatternsServiceWithRequestContext(requestContext)
-    );
-    const columnDefinitions = columnOverrides ?? configuration.logColumns;
+    const [, , { logViews }] = await this.libs.getStartServices();
+    const resolvedLogView = await logViews
+      .getClient(
+        requestContext.core.savedObjects.client,
+        requestContext.core.elasticsearch.client.asCurrentUser
+      )
+      .getResolvedLogView(sourceId);
+    const columnDefinitions = columnOverrides ?? resolvedLogView.columns;
 
     const messageFormattingRules = compileFormattingRules(
-      getBuiltinRules(configuration.fields.message)
+      getBuiltinRules(resolvedLogView.messageField)
     );
 
-    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
+    const requiredFields = getRequiredFields(resolvedLogView, messageFormattingRules);
 
     const { documents, hasMoreBefore, hasMoreAfter } = await this.adapter.getLogEntries(
       requestContext,
-      resolvedLogSourceConfiguration,
+      resolvedLogView,
       requiredFields,
       params
     );
@@ -201,17 +191,16 @@ export class InfraLogEntriesDomain {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryBucket[]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
-    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
-      configuration,
-      await this.libs.framework.getIndexPatternsServiceWithRequestContext(requestContext)
-    );
+    const [, , { logViews }] = await this.libs.getStartServices();
+    const resolvedLogView = await logViews
+      .getClient(
+        requestContext.core.savedObjects.client,
+        requestContext.core.elasticsearch.client.asCurrentUser
+      )
+      .getResolvedLogView(sourceId);
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
       requestContext,
-      resolvedLogSourceConfiguration,
+      resolvedLogView,
       start,
       end,
       bucketSize,
@@ -229,18 +218,17 @@ export class InfraLogEntriesDomain {
     highlightQueries: string[],
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryHighlightsBucket[][]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext.core.savedObjects.client,
-      sourceId
-    );
-    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
-      configuration,
-      await this.libs.framework.getIndexPatternsServiceWithRequestContext(requestContext)
-    );
+    const [, , { logViews }] = await this.libs.getStartServices();
+    const resolvedLogView = await logViews
+      .getClient(
+        requestContext.core.savedObjects.client,
+        requestContext.core.elasticsearch.client.asCurrentUser
+      )
+      .getResolvedLogView(sourceId);
     const messageFormattingRules = compileFormattingRules(
-      getBuiltinRules(configuration.fields.message)
+      getBuiltinRules(resolvedLogView.messageField)
     );
-    const requiredFields = getRequiredFields(configuration, messageFormattingRules);
+    const requiredFields = getRequiredFields(resolvedLogView, messageFormattingRules);
 
     const summaries = await Promise.all(
       highlightQueries.map(async (highlightQueryPhrase) => {
@@ -254,7 +242,7 @@ export class InfraLogEntriesDomain {
           : highlightQuery;
         const summaryBuckets = await this.adapter.getContainedLogSummaryBuckets(
           requestContext,
-          resolvedLogSourceConfiguration,
+          resolvedLogView,
           startTimestamp,
           endTimestamp,
           bucketSize,
@@ -315,14 +303,14 @@ export class InfraLogEntriesDomain {
 export interface LogEntriesAdapter {
   getLogEntries(
     requestContext: InfraPluginRequestHandlerContext,
-    resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration,
+    resolvedLogView: ResolvedLogView,
     fields: string[],
     params: LogEntriesParams
   ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
 
   getContainedLogSummaryBuckets(
     requestContext: InfraPluginRequestHandlerContext,
-    resolvedLogSourceConfiguration: ResolvedLogSourceConfiguration,
+    resolvedLogView: ResolvedLogView,
     startTimestamp: number,
     endTimestamp: number,
     bucketSize: number,
@@ -360,12 +348,12 @@ const convertLogSummaryBucketToSummaryHighlightBucket = (
 });
 
 const getRequiredFields = (
-  configuration: InfraSourceConfiguration,
+  configuration: ResolvedLogView,
   messageFormattingRules: CompiledLogMessageFormattingRule
 ): string[] => {
-  const fieldsFromCustomColumns = configuration.logColumns.reduce<string[]>(
+  const fieldsFromCustomColumns = configuration.columns.reduce<string[]>(
     (accumulatedFields, logColumn) => {
-      if (SourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
+      if (logViewFieldColumnConfigurationRT.is(logColumn)) {
         return [...accumulatedFields, logColumn.fieldColumn.field];
       }
       return accumulatedFields;

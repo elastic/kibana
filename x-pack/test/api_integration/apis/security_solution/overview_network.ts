@@ -7,16 +7,24 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { NetworkQueries } from '../../../../plugins/security_solution/common/search_strategy';
+import {
+  NetworkOverviewStrategyResponse,
+  NetworkQueries,
+} from '../../../../plugins/security_solution/common/search_strategy';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Overview Network', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -34,12 +42,9 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get OverviewNetwork data', async () => {
-        const {
-          body: { overviewNetwork },
-        } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const { overviewNetwork } = await bsearch.send<NetworkOverviewStrategyResponse>({
+          supertest,
+          options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.overview,
             timerange: {
@@ -49,16 +54,21 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(overviewNetwork).to.eql(expectedResult);
       });
     });
 
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/overview'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/overview')
+      );
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/overview')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -75,12 +85,9 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get OverviewNetwork data', async () => {
-        const {
-          body: { overviewNetwork },
-        } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const { overviewNetwork } = await bsearch.send<NetworkOverviewStrategyResponse>({
+          supertest,
+          options: {
             defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.overview,
             timerange: {
@@ -90,17 +97,20 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
-
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(overviewNetwork).to.eql(expectedResult);
       });
     });
 
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -117,12 +127,9 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get OverviewNetwork data', async () => {
-        const {
-          body: { overviewNetwork },
-        } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const { overviewNetwork } = await bsearch.send<NetworkOverviewStrategyResponse>({
+          supertest,
+          options: {
             defaultIndex: ['auditbeat-*'],
             factoryQueryType: NetworkQueries.overview,
             timerange: {
@@ -132,9 +139,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(overviewNetwork).to.eql(expectedResult);
       });
     });

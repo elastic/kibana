@@ -9,12 +9,16 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { url } from './saved_objects';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
-import { ServerUrlService, ServerShortUrlClientFactory } from './url_service';
-import { registerUrlServiceRoutes } from './url_service/http/register_url_service_routes';
+import {
+  ServerUrlService,
+  ServerShortUrlClientFactory,
+  registerUrlServiceRoutes,
+  registerUrlServiceSavedObjectType,
+} from './url_service';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
+import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 
 /** @public */
 export interface SharePluginSetup {
@@ -44,18 +48,18 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       getUrl: async () => {
         throw new Error('Locator .getUrl() currently is not supported on the server.');
       },
-      shortUrls: new ServerShortUrlClientFactory({
-        currentVersion: this.version,
-      }),
+      shortUrls: ({ locators }) =>
+        new ServerShortUrlClientFactory({
+          currentVersion: this.version,
+          locators,
+        }),
     });
-
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());
+    this.url.locators.create(new ShortUrlRedirectLocatorDefinition());
 
-    const router = core.http.createRouter();
+    registerUrlServiceSavedObjectType(core.savedObjects, this.url);
+    registerUrlServiceRoutes(core, core.http.createRouter(), this.url);
 
-    registerUrlServiceRoutes(core, router, this.url);
-
-    core.savedObjects.registerType(url);
     core.uiSettings.register({
       [CSV_SEPARATOR_SETTING]: {
         name: i18n.translate('share.advancedSettings.csv.separatorTitle', {

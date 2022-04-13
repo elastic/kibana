@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from 'src/core/server/mocks';
 import { cryptoFactory } from '../../lib';
-import { createMockLevelLogger } from '../../test_helpers';
 import { decryptJobHeaders } from './';
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 const encryptHeaders = async (encryptionKey: string, headers: Record<string, string>) => {
   const crypto = cryptoFactory(encryptionKey);
@@ -25,7 +25,7 @@ describe('headers', () => {
         logger
       );
     await expect(getDecryptedHeaders()).rejects.toMatchInlineSnapshot(
-      `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. Error: Invalid IV length]`
+      `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. TypeError: Invalid initialization vector]`
     );
   });
 

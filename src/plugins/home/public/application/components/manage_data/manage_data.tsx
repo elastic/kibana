@@ -15,7 +15,7 @@ import {
   EuiTitle,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from 'kibana/public';
 import { FeatureCatalogueEntry } from '../../../services';
@@ -61,7 +61,8 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
             {isDevToolsEnabled || isManagementEnabled ? (
               <EuiFlexItem className="homDataManage__actions" grow={false}>
                 <EuiFlexGroup alignItems="center" responsive={false} wrap>
-                  {isDevToolsEnabled ? (
+                  {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
+                  {isDevToolsEnabled && consoleHref !== undefined ? (
                     <EuiFlexItem grow={false}>
                       <RedirectAppLinks application={application}>
                         <EuiButtonEmpty

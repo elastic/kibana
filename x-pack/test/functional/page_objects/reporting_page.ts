@@ -6,11 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { format as formatUrl } from 'url';
+import fs from 'fs';
+import path from 'path';
 import type SuperTest from 'supertest';
-
-import { FtrService } from '../ftr_provider_context';
+import { format as formatUrl } from 'url';
+import { promisify } from 'util';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../../plugins/reporting/common/constants';
+import { FtrService } from '../ftr_provider_context';
+
+const writeFileAsync = promisify(fs.writeFile);
+const mkdirAsync = promisify(fs.mkdir);
 
 export class ReportingPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
@@ -19,6 +24,7 @@ export class ReportingPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly find = this.ctx.getService('find');
   private readonly share = this.ctx.getPageObject('share');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
 
@@ -33,15 +39,21 @@ export class ReportingPageObject extends FtrService {
   async getReportURL(timeout: number) {
     this.log.debug('getReportURL');
 
-    const url = await this.testSubjects.getAttribute(
-      'downloadCompletedReportButton',
-      'href',
-      timeout
-    );
+    try {
+      const url = await this.testSubjects.getAttribute(
+        'downloadCompletedReportButton',
+        'href',
+        timeout
+      );
+      this.log.debug(`getReportURL got url: ${url}`);
 
-    this.log.debug(`getReportURL got url: ${url}`);
-
-    return url;
+      return url;
+    } catch (err) {
+      const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
+      const errorText = await errorTextEl.getAttribute('data-test-errorText');
+      const newError = new Error(`Test report failed: ${errorText}: ${err}`);
+      throw newError;
+    }
   }
 
   async removeForceSharedItemsContainerSize() {
@@ -187,5 +199,21 @@ export class ReportingPageObject extends FtrService {
         };
       })
     );
+  }
+
+  async writeSessionReport(name: string, reportExt: string, rawPdf: Buffer, folder: string) {
+    const sessionDirectory = path.resolve(folder, 'session');
+    await mkdirAsync(sessionDirectory, { recursive: true });
+    const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
+    await writeFileAsync(sessionReportPath, rawPdf);
+    this.log.debug(`sessionReportPath (${sessionReportPath})`);
+    return sessionReportPath;
+  }
+
+  getBaselineReportPath(fileName: string, reportExt: string, folder: string) {
+    const baselineFolder = path.resolve(folder, 'baseline');
+    const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
+    this.log.debug(`getBaselineReportPath (${fullPath})`);
+    return fullPath;
   }
 }

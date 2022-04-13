@@ -7,14 +7,14 @@
 
 import React, { memo } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { TrackApplicationView } from '../../../../../../src/plugins/usage_collection/public';
@@ -27,35 +27,8 @@ import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
-
-const NoPermissions = memo(() => {
-  return (
-    <>
-      <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        titleSize="l"
-        data-test-subj="noIngestPermissions"
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
-            defaultMessage="You do not have the required Kibana permissions to use Elastic Security Administration"
-          />
-        }
-        body={
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-              defaultMessage="It looks like Fleet is disabled. Fleet must be enabled to use this feature. If you do not have permissions to enable Fleet, contact your Kibana administrator."
-            />
-          </EuiText>
-        }
-      />
-      <SpyRoute pageName={SecurityPageName.administration} />
-    </>
-  );
-});
-NoPermissions.displayName = 'NoPermissions';
+import { BlocklistContainer } from './blocklist';
+import { NoPermissions } from '../components/no_permissons';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -97,7 +70,12 @@ export const ManagementContainer = memo(() => {
   }
 
   if (!canAccessEndpointManagement) {
-    return <Route path="*" component={NoPermissions} />;
+    return (
+      <>
+        <Route path="*" component={NoPermissions} />
+        <SpyRoute pageName={SecurityPageName.administration} />
+      </>
+    );
   }
 
   return (
@@ -110,6 +88,7 @@ export const ManagementContainer = memo(() => {
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
       />
+      <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
       <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>

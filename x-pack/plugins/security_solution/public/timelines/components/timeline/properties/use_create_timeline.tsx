@@ -31,11 +31,10 @@ interface Props {
 
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
-  );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+  const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
+  const { id: dataViewId, patternList: selectedPatterns } =
+    useDeepEqualSelector(defaultDataViewSelector);
+
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
@@ -44,18 +43,20 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
         setTimelineFullScreen(false);
       }
       dispatch(
-        sourcererActions.setSelectedIndexPatterns({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
-          selectedPatterns: existingIndexNames,
+          selectedDataViewId: dataViewId,
+          selectedPatterns,
         })
       );
       dispatch(
         timelineActions.createTimeline({
-          id,
           columns: defaultHeaders,
+          dataViewId,
+          id,
+          indexNames: selectedPatterns,
           show,
           timelineType,
-          indexNames: existingIndexNames,
         })
       );
       dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
@@ -78,9 +79,10 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       }
     },
     [
-      existingIndexNames,
       dispatch,
       globalTimeRange,
+      dataViewId,
+      selectedPatterns,
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,

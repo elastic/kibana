@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { PolicyEdit } from '../../../public/application/sections/policy_edit';
 import { WithAppDependencies } from './setup_environment';
 import { POLICY_NAME } from './constant';
 import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/edit_policy/${POLICY_NAME}`],
     componentRoutePath: '/edit_policy/:name',
@@ -19,9 +20,11 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed<PolicyFormTestSubjects>(
-  WithAppDependencies(PolicyEdit),
-  testBedConfig
-);
+export const setup = async (httpSetup: HttpSetup) => {
+  const initTestBed = registerTestBed<PolicyFormTestSubjects>(
+    WithAppDependencies(PolicyEdit, httpSetup),
+    testBedConfig
+  );
 
-export const setup = formSetup.bind(null, initTestBed);
+  return formSetup(initTestBed);
+};

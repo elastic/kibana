@@ -5,10 +5,17 @@
  * 2.0.
  */
 import rison, { RisonValue } from 'rison-node';
+import {
+  buildQueryFilter,
+  PhraseFilter,
+  ExistsFilter,
+  buildPhraseFilter as esBuildPhraseFilter,
+  buildPhrasesFilter as esBuildPhrasesFilter,
+  buildExistsFilter as esBuildExistsFilter,
+} from '@kbn/es-query';
 import type { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { esFilters, ExistsFilter } from '../../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { URL_KEYS } from './constants/url_constants';
 import { PersistableFilter } from '../../../../../../lens/common';
 
@@ -42,69 +49,120 @@ export function convertToShortUrl(series: SeriesUrl) {
   };
 }
 
+export function createExploratoryViewRoutePath({
+  reportType,
+  allSeries,
+}: {
+  reportType: ReportViewType;
+  allSeries: AllSeries;
+}) {
+  const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
+
+  return `/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
+    allShortSeries as unknown as RisonValue
+  )}`;
+}
+
 export function createExploratoryViewUrl(
   { reportType, allSeries }: { reportType: ReportViewType; allSeries: AllSeries },
-  baseHref = ''
+  baseHref = '',
+  appId = 'observability'
 ) {
   const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
   return (
     baseHref +
-    `/app/observability/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
+    `/app/${appId}/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
       allShortSeries as unknown as RisonValue
     )}`
   );
 }
 
-export function buildPhraseFilter(field: string, value: string, indexPattern: IndexPattern) {
-  const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
+export function buildPhraseFilter(field: string, value: string, dataView: DataView) {
+  const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
-    return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
+    return [esBuildPhraseFilter(fieldMeta, value, dataView)];
   }
   return [];
 }
 
-export function buildPhrasesFilter(field: string, value: string[], indexPattern: IndexPattern) {
-  const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
+export function getQueryFilter(field: string, value: string[], dataView: DataView) {
+  const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta && dataView.id) {
+    return value.map((val) =>
+      buildQueryFilter(
+        {
+          query_string: {
+            fields: [field],
+            query: `*${val}*`,
+          },
+        },
+        dataView.id!,
+        ''
+      )
+    );
+  }
+
+  return [];
+}
+
+export function buildPhrasesFilter(field: string, value: string[], dataView: DataView) {
+  const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
-    return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
+    if (value.length === 1) {
+      return [esBuildPhraseFilter(fieldMeta, value[0], dataView)];
+    }
+    return [esBuildPhrasesFilter(fieldMeta, value, dataView)];
   }
   return [];
 }
 
-export function buildExistsFilter(field: string, indexPattern: IndexPattern) {
-  const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
+export function buildExistsFilter(field: string, dataView: DataView) {
+  const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
-    return [esFilters.buildExistsFilter(fieldMeta, indexPattern)];
+    return [esBuildExistsFilter(fieldMeta, dataView)];
   }
   return [];
 }
 
-type FiltersType = PersistableFilter[] | ExistsFilter[];
+type FiltersType = Array<PersistableFilter | ExistsFilter | PhraseFilter>;
 
 export function urlFilterToPersistedFilter({
   urlFilters,
   initFilters,
-  indexPattern,
+  dataView,
 }: {
   urlFilters: UrlFilter[];
-  initFilters: FiltersType;
-  indexPattern: IndexPattern;
+  initFilters?: FiltersType;
+  dataView: DataView;
 }) {
   const parsedFilters: FiltersType = initFilters ? [...initFilters] : [];
 
-  urlFilters.forEach(({ field, values = [], notValues = [] }) => {
-    if (values?.length > 0) {
-      const filter = buildPhrasesFilter(field, values, indexPattern);
-      parsedFilters.push(...filter);
-    }
+  urlFilters.forEach(
+    ({ field, values = [], notValues = [], wildcards = [], notWildcards = ([] = []) }) => {
+      if (values.length > 0) {
+        const filter = buildPhrasesFilter(field, values, dataView);
+        parsedFilters.push(...filter);
+      }
 
-    if (notValues?.length > 0) {
-      const filter = buildPhrasesFilter(field, notValues, indexPattern)[0];
-      filter.meta.negate = true;
-      parsedFilters.push(filter);
+      if (notValues.length > 0) {
+        const filter = buildPhrasesFilter(field, notValues, dataView)[0];
+        filter.meta.negate = true;
+        parsedFilters.push(filter);
+      }
+
+      if (wildcards.length > 0) {
+        const filter = getQueryFilter(field, wildcards, dataView);
+        parsedFilters.push(...filter);
+      }
+
+      if (notWildcards.length > 0) {
+        const filter = getQueryFilter(field, notWildcards, dataView)[0];
+        filter.meta.negate = true;
+        parsedFilters.push(filter);
+      }
     }
-  });
+  );
 
   return parsedFilters;
 }

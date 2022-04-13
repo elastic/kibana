@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Remotely Started Services via RPC",
-  "query": "sequence with maxspan=1s\n   [network where process.name : \"services.exe\" and\n      network.direction == \"incoming\" and network.transport == \"tcp\" and \n      source.port >= 49152 and destination.port >= 49152 and source.address not in (\"127.0.0.1\", \"::1\")\n   ] by host.id, process.entity_id\n\n   [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"services.exe\" and \n       not (process.name : \"svchost.exe\" and process.args : \"tiledatamodelsvc\") and \n       not (process.name : \"msiexec.exe\" and process.args : \"/V\")\n   \n    /* uncomment if psexec is noisy in your environment */\n    /* and not process.name : \"PSEXESVC.exe\" */\n   ] by host.id, process.parent.entity_id\n",
+  "query": "sequence with maxspan=1s\n   [network where process.name : \"services.exe\" and\n      network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and \n      source.port >= 49152 and destination.port >= 49152 and source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n   ] by host.id, process.entity_id\n\n   [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"services.exe\" and \n       not (process.name : \"svchost.exe\" and process.args : \"tiledatamodelsvc\") and \n       not (process.name : \"msiexec.exe\" and process.args : \"/V\")\n   \n    /* uncomment if psexec is noisy in your environment */\n    /* and not process.name : \"PSEXESVC.exe\" */\n   ] by host.id, process.parent.entity_id\n",
   "risk_score": 47,
   "rule_id": "aa9a274d-6b53-424d-ac5e-cb8ca4251650",
   "severity": "medium",
@@ -41,5 +41,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 4
 }

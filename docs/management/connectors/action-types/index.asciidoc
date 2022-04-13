@@ -74,7 +74,7 @@ Example of the index document for Index Threshold rule:
     "rule_name": "{{ruleName}}",
     "alert_id": "{{alertId}}",
     "context_message": "{{context.message}}"
-} 
+}
 --------------------------------------------------
 
 Example of creating a test index using the API.
@@ -105,10 +105,10 @@ experimental[] {kib} offers a preconfigured index connector to facilitate indexi
 
 [WARNING]
 ==================================================
-This functionality is experimental and may be changed or removed completely in a future release.
+This functionality is in technical preview and may be changed or removed completely in a future release.
 ==================================================
 
-To use this connector, set the <<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> configuration to `true`. 
+To use this connector, set the <<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> configuration to `true`.
 
 ```js
   xpack.actions.preconfiguredAlertHistoryEsIndex: true
@@ -123,7 +123,7 @@ Documents are indexed using a preconfigured schema that captures the <<defining-
 
 [IMPORTANT]
 ==============================================
-To write documents to the preconfigured index, you must have `all` or `write` privileges to the `kibana-alert-history-*` indices. Refer to <<xpack-kibana-role-management>> for more information.
+To write documents to the preconfigured index, you must have `all` or `write` privileges to the `kibana-alert-history-*` indices. Refer to <<kibana-role-management>> for more information.
 ==============================================
 
 [NOTE]

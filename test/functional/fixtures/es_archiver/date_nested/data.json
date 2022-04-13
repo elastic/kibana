@@ -1,27 +1,10 @@
 {
   "type": "doc",
   "value": {
-    "id": "index-pattern:date-nested",
-    "index": ".kibana",
-    "source": {
-      "index-pattern": {
-       "fields":"[]",
-        "timeFieldName": "@timestamp",
-        "title": "date-nested"
-      },
-      "type": "index-pattern"
-    }
-  }
-}
-
-
-{
-  "type": "doc",
-  "value": {
     "id": "date-nested-1",
     "index": "date-nested",
     "source": {
-      "message" : "test",
+      "message": "test",
       "nested": {
         "timestamp": "2021-06-30T12:00:00.123Z"
       }

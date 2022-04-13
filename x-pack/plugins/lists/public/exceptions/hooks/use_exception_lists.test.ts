@@ -48,8 +48,6 @@ describe('useExceptionLists', () => {
           },
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
-          showEventFilters: false,
-          showTrustedApps: false,
         })
       );
       await waitForNextUpdate();
@@ -85,8 +83,6 @@ describe('useExceptionLists', () => {
           },
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
-          showEventFilters: false,
-          showTrustedApps: false,
         })
       );
       // NOTE: First `waitForNextUpdate` is initialization
@@ -110,7 +106,7 @@ describe('useExceptionLists', () => {
     });
   });
 
-  test('fetches trusted apps lists if "showTrustedApps" is true', async () => {
+  test('does not fetch specific list id if it is added to the hideLists array', async () => {
     const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
 
     await act(async () => {
@@ -118,6 +114,7 @@ describe('useExceptionLists', () => {
         useExceptionLists({
           errorMessage: 'Uh oh',
           filterOptions: {},
+          hideLists: ['listId-1'],
           http: mockKibanaHttpService,
           initialPagination: {
             page: 1,
@@ -126,8 +123,6 @@ describe('useExceptionLists', () => {
           },
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
-          showEventFilters: false,
-          showTrustedApps: true,
         })
       );
       // NOTE: First `waitForNextUpdate` is initialization
@@ -137,115 +132,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
-        http: mockKibanaHttpService,
-        namespaceTypes: 'single,agnostic',
-        pagination: { page: 1, perPage: 20 },
-        signal: new AbortController().signal,
-      });
-    });
-  });
-
-  test('does not fetch trusted apps lists if "showTrustedApps" is false', async () => {
-    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
-
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
-        useExceptionLists({
-          errorMessage: 'Uh oh',
-          filterOptions: {},
-          http: mockKibanaHttpService,
-          initialPagination: {
-            page: 1,
-            perPage: 20,
-            total: 0,
-          },
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          showEventFilters: false,
-          showTrustedApps: false,
-        })
-      );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
-        filters:
-          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
-        http: mockKibanaHttpService,
-        namespaceTypes: 'single,agnostic',
-        pagination: { page: 1, perPage: 20 },
-        signal: new AbortController().signal,
-      });
-    });
-  });
-
-  test('fetches event filters lists if "showEventFilters" is true', async () => {
-    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
-
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
-        useExceptionLists({
-          errorMessage: 'Uh oh',
-          filterOptions: {},
-          http: mockKibanaHttpService,
-          initialPagination: {
-            page: 1,
-            perPage: 20,
-            total: 0,
-          },
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          showEventFilters: true,
-          showTrustedApps: false,
-        })
-      );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
-        filters:
-          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (exception-list.attributes.list_id: endpoint_event_filters* OR exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
-        http: mockKibanaHttpService,
-        namespaceTypes: 'single,agnostic',
-        pagination: { page: 1, perPage: 20 },
-        signal: new AbortController().signal,
-      });
-    });
-  });
-
-  test('does not fetch event filters lists if "showEventFilters" is false', async () => {
-    const spyOnfetchExceptionLists = jest.spyOn(api, 'fetchExceptionLists');
-
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<UseExceptionListsProps, ReturnExceptionLists>(() =>
-        useExceptionLists({
-          errorMessage: 'Uh oh',
-          filterOptions: {},
-          http: mockKibanaHttpService,
-          initialPagination: {
-            page: 1,
-            perPage: 20,
-            total: 0,
-          },
-          namespaceTypes: ['single', 'agnostic'],
-          notifications: mockKibanaNotificationsService,
-          showEventFilters: false,
-          showTrustedApps: false,
-        })
-      );
-      // NOTE: First `waitForNextUpdate` is initialization
-      // Second call applies the params
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
-        filters:
-          '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+          '(not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -265,6 +152,7 @@ describe('useExceptionLists', () => {
             created_by: 'Moi',
             name: 'Sample Endpoint',
           },
+          hideLists: ['listId-1'],
           http: mockKibanaHttpService,
           initialPagination: {
             page: 1,
@@ -273,8 +161,6 @@ describe('useExceptionLists', () => {
           },
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
-          showEventFilters: false,
-          showTrustedApps: false,
         })
       );
       // NOTE: First `waitForNextUpdate` is initialization
@@ -284,7 +170,7 @@ describe('useExceptionLists', () => {
 
       expect(spyOnfetchExceptionLists).toHaveBeenCalledWith({
         filters:
-          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)',
+          '(exception-list.attributes.created_by:Moi OR exception-list-agnostic.attributes.created_by:Moi) AND (exception-list.attributes.name.text:Sample Endpoint OR exception-list-agnostic.attributes.name.text:Sample Endpoint) AND (not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)',
         http: mockKibanaHttpService,
         namespaceTypes: 'single,agnostic',
         pagination: { page: 1, perPage: 20 },
@@ -300,16 +186,7 @@ describe('useExceptionLists', () => {
         UseExceptionListsProps,
         ReturnExceptionLists
       >(
-        ({
-          errorMessage,
-          filterOptions,
-          http,
-          initialPagination,
-          namespaceTypes,
-          notifications,
-          showEventFilters,
-          showTrustedApps,
-        }) =>
+        ({ errorMessage, filterOptions, http, initialPagination, namespaceTypes, notifications }) =>
           useExceptionLists({
             errorMessage,
             filterOptions,
@@ -317,8 +194,6 @@ describe('useExceptionLists', () => {
             initialPagination,
             namespaceTypes,
             notifications,
-            showEventFilters,
-            showTrustedApps,
           }),
         {
           initialProps: {
@@ -332,8 +207,6 @@ describe('useExceptionLists', () => {
             },
             namespaceTypes: ['single'],
             notifications: mockKibanaNotificationsService,
-            showEventFilters: false,
-            showTrustedApps: false,
           },
         }
       );
@@ -353,8 +226,6 @@ describe('useExceptionLists', () => {
         },
         namespaceTypes: ['single', 'agnostic'],
         notifications: mockKibanaNotificationsService,
-        showEventFilters: false,
-        showTrustedApps: false,
       });
       // NOTE: Only need one call here because hook already initilaized
       await waitForNextUpdate();
@@ -381,8 +252,6 @@ describe('useExceptionLists', () => {
           },
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
-          showEventFilters: false,
-          showTrustedApps: false,
         })
       );
       // NOTE: First `waitForNextUpdate` is initialization
@@ -420,8 +289,6 @@ describe('useExceptionLists', () => {
           },
           namespaceTypes: ['single', 'agnostic'],
           notifications: mockKibanaNotificationsService,
-          showEventFilters: false,
-          showTrustedApps: false,
         })
       );
       // NOTE: First `waitForNextUpdate` is initialization

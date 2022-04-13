@@ -5,25 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, ReactPortal, useState, memo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { Ast } from '@kbn/interpreter/common';
-import { RenderToDom } from '../components/render_to_dom';
+import usePrevious from 'react-use/lib/usePrevious';
+import deepEqual from 'react-fast-compare';
+import { Ast } from '@kbn/interpreter';
+import { createPortal } from 'react-dom';
 import { BaseForm, BaseFormProps } from './base_form';
 import { ExpressionFormHandlers } from '../../common/lib';
 import { ExpressionFunction } from '../../types';
+import { UpdatePropsRef } from '../../types/arguments';
 
-const defaultTemplate = () => (
-  <div>
-    <p>This datasource has no interface. Use the expression editor to make changes.</p>
-  </div>
-);
+const defaultTemplate = (domNode: HTMLElement) =>
+  createPortal(
+    <div>
+      <p>This datasource has no interface. Use the expression editor to make changes.</p>
+    </div>,
+    domNode
+  );
 
 type TemplateFn = (
   domNode: HTMLElement,
   config: DatasourceRenderProps,
-  handlers: ExpressionFormHandlers
-) => void;
+  handlers: ExpressionFormHandlers,
+  onMount?: (ref: UpdatePropsRef<DatasourceRenderProps> | null) => void
+) => ReactPortal | undefined;
 
 export type DatasourceProps = {
   template?: TemplateFn;
@@ -47,40 +53,72 @@ interface DatasourceWrapperProps {
   datasourceProps: DatasourceRenderProps;
 }
 
-const DatasourceWrapper: React.FunctionComponent<DatasourceWrapperProps> = (props) => {
-  const domNodeRef = useRef<HTMLElement>();
+const DatasourceWrapperComponent: React.FunctionComponent<DatasourceWrapperProps> = (props) => {
+  const domNodeRef = useRef<HTMLDivElement>(null);
+  const datasourceRef = useRef<UpdatePropsRef<DatasourceRenderProps>>();
+  const [argument, setArgument] = useState<ReactPortal>();
+
   const { spec, datasourceProps, handlers } = props;
+  const prevSpec = usePrevious(spec);
 
-  const callRenderFn = useCallback(() => {
-    const { template } = spec;
+  const onMount = useCallback((ref) => {
+    datasourceRef.current = ref ?? undefined;
+  }, []);
 
-    if (!domNodeRef.current) {
-      return;
-    }
-
-    template(domNodeRef.current, datasourceProps, handlers);
-  }, [datasourceProps, handlers, spec]);
+  const callRenderFn = useCallback(
+    (domNode) => {
+      const { template } = spec;
+      if (!template) {
+        return null;
+      }
+      return template(domNode, datasourceProps, handlers, onMount);
+    },
+    [datasourceProps, handlers, onMount, spec]
+  );
 
   useEffect(() => {
-    callRenderFn();
-  }, [callRenderFn, props]);
+    if (!argument && domNodeRef.current) {
+      const arg = callRenderFn(domNodeRef.current);
+      if (arg) {
+        setArgument(arg);
+      }
+    }
+  }, [argument, callRenderFn]);
 
-  useEffectOnce(() => () => {
-    handlers.destroy();
+  useEffect(() => {
+    if (argument && prevSpec?.name !== spec?.name) {
+      setArgument(undefined);
+      datasourceRef.current = undefined;
+    }
+  }, [argument, prevSpec?.name, spec?.name]);
+
+  useEffect(() => {
+    if (datasourceRef.current) {
+      datasourceRef.current.updateProps(datasourceProps);
+    }
+  }, [datasourceProps]);
+
+  useEffectOnce(() => {
+    datasourceRef.current = undefined;
+    return () => {
+      datasourceRef.current = undefined;
+      handlers.destroy();
+    };
   });
 
   return (
-    <RenderToDom
-      render={(domNode) => {
-        domNodeRef.current = domNode;
-        callRenderFn();
-      }}
-    />
+    <div className="render_to_dom" ref={domNodeRef}>
+      {argument}
+    </div>
   );
 };
 
+export const DatasourceWrapper = memo(DatasourceWrapperComponent, (prevProps, nextProps) =>
+  deepEqual(prevProps, nextProps)
+);
+
 export class Datasource extends BaseForm {
-  template: TemplateFn | React.FC;
+  template?: TemplateFn;
   image?: string;
   requiresContext?: boolean;
 

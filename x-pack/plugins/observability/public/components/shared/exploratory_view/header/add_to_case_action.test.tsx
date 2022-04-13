@@ -6,11 +6,18 @@
  */
 
 import React from 'react';
-import { render } from '../rtl_helpers';
+import { render, forNearestButton } from '../rtl_helpers';
 import { fireEvent } from '@testing-library/dom';
 import { AddToCaseAction } from './add_to_case_action';
+import * as useCaseHook from '../hooks/use_add_to_case';
+import * as datePicker from '../components/date_range_picker';
+import moment from 'moment';
 
 describe('AddToCaseAction', function () {
+  beforeEach(() => {
+    jest.spyOn(datePicker, 'parseRelativeDate').mockRestore();
+  });
+
   it('should render properly', async function () {
     const { findByText } = render(
       <AddToCaseAction
@@ -19,6 +26,58 @@ describe('AddToCaseAction', function () {
       />
     );
     expect(await findByText('Add to case')).toBeInTheDocument();
+  });
+
+  it('should parse relative data to the useAddToCase hook', async function () {
+    const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
+    jest.spyOn(datePicker, 'parseRelativeDate').mockReturnValue(moment('2021-11-10T10:52:06.091Z'));
+
+    const { findByText } = render(
+      <AddToCaseAction
+        lensAttributes={{ title: 'Performance distribution' } as any}
+        timeRange={{ to: 'now', from: 'now-5m' }}
+      />
+    );
+    expect(await findByText('Add to case')).toBeInTheDocument();
+
+    expect(useAddToCaseHook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lensAttributes: {
+          title: 'Performance distribution',
+        },
+        timeRange: {
+          from: '2021-11-10T10:52:06.091Z',
+          to: '2021-11-10T10:52:06.091Z',
+        },
+      })
+    );
+  });
+
+  it('should use an empty time-range when timeRanges are empty', async function () {
+    const useAddToCaseHook = jest.spyOn(useCaseHook, 'useAddToCase');
+
+    const { getByText } = render(
+      <AddToCaseAction
+        lensAttributes={null}
+        timeRange={{ to: '', from: '' }}
+        appId="securitySolutionUI"
+        owner="security"
+      />
+    );
+
+    expect(await forNearestButton(getByText)('Add to case')).toBeDisabled();
+
+    expect(useAddToCaseHook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lensAttributes: null,
+        timeRange: {
+          from: '',
+          to: '',
+        },
+        appId: 'securitySolutionUI',
+        owner: 'security',
+      })
+    );
   });
 
   it('should be able to click add to case button', async function () {
@@ -43,10 +102,9 @@ describe('AddToCaseAction', function () {
     );
     fireEvent.click(await findByText('Add to case'));
 
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
-    expect(core?.cases?.getAllCasesSelectorModal).toHaveBeenCalledWith(
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledTimes(1);
+    expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledWith(
       expect.objectContaining({
-        createCaseNavigation: expect.objectContaining({ href: '/app/observability/cases/create' }),
         owner: ['observability'],
         userCanCrud: true,
       })

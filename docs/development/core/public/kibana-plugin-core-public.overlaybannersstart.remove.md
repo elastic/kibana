@@ -16,11 +16,11 @@ remove(id: string): boolean;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>string</code> |  |
+|  id | string | the unique identifier for the banner returned by [OverlayBannersStart.add()](./kibana-plugin-core-public.overlaybannersstart.add.md) |
 
 <b>Returns:</b>
 
-`boolean`
+boolean
 
 if the banner was found or not
 

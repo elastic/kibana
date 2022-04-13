@@ -43,9 +43,9 @@ export const API_BASE_PATH = '/api/transform/';
 // In the UI additional privileges are required:
 // - kibana_admin (builtin)
 // - dest index: monitor (applied to df-*)
-// - cluster: monitor
+// - cluster: monitor, read_pipeline
 //
-// Note that users with kibana_admin can see all Kibana index patterns and saved searches
+// Note that users with kibana_admin can see all Kibana data views and saved searches
 // in the source selection modal when creating a transform, but the wizard will trigger
 // error callouts when there are no sufficient privileges to read the actual source indices.
 
@@ -55,6 +55,7 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/delete',
   'cluster:admin/transform/preview',
   'cluster:admin/transform/put',
+  'cluster:admin/transform/reset',
   'cluster:admin/transform/start',
   'cluster:admin/transform/start_task',
   'cluster:admin/transform/stop',
@@ -69,7 +70,7 @@ export const APP_GET_TRANSFORM_CLUSTER_PRIVILEGES = [
   'cluster.cluster:monitor/transform/stats/get',
 ];
 
-// Equivalent of capabilities.canGetTransform
+// Equivalent of capabilities.canCreateTransform
 export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
   'cluster.cluster:monitor/transform/get',
   'cluster.cluster:monitor/transform/stats/get',
@@ -131,4 +132,21 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
       }
     ),
   },
+  errorMessages: {
+    name: i18n.translate('xpack.transform.alertTypes.transformHealth.errorMessagesCheckName', {
+      defaultMessage: 'Errors in transform messages',
+    }),
+    description: i18n.translate(
+      'xpack.transform.alertTypes.transformHealth.errorMessagesCheckDescription',
+      {
+        defaultMessage: 'Get alerts if a transform contains errors in the transform messages.',
+      }
+    ),
+  },
 };
+
+// Transform API default values https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html
+export const DEFAULT_CONTINUOUS_MODE_DELAY = '60s';
+export const DEFAULT_TRANSFORM_FREQUENCY = '1m';
+export const DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND = null;
+export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE = 500;

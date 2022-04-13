@@ -8,7 +8,7 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import {
   EuiButtonGroup,
   EuiButtonIcon,
@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import {
   Axis,
-  BarSeries,
+  HistogramBarSeries,
   Chart,
   niceTimeFormatter,
   Position,
@@ -36,16 +36,16 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { FieldButton } from '@kbn/react-field';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { EuiHighlight } from '@elastic/eui';
+import { Filter, buildEsQuery } from '@kbn/es-query';
 import {
   Query,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
-  Filter,
-  esQuery,
+  getEsQueryConfig,
 } from '../../../../../src/plugins/data/public';
-import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
@@ -165,20 +165,15 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
+      .post<FieldStatsResponse<string | number>>(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
-          dslQuery: esQuery.buildEsQuery(
-            indexPattern,
-            query,
-            filters,
-            esQuery.getEsQueryConfig(core.uiSettings)
-          ),
+          dslQuery: buildEsQuery(indexPattern, query, filters, getEsQueryConfig(core.uiSettings)),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
           fieldName: field.name,
         }),
       })
-      .then((results: FieldStatsResponse<string | number>) => {
+      .then((results) => {
         setState((s) => ({
           ...s,
           isLoading: false,
@@ -348,7 +343,7 @@ function FieldPanelHeader({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-              defaultMessage: 'Edit index pattern field',
+              defaultMessage: 'Edit data view field',
             })}
           >
             <EuiButtonIcon
@@ -356,7 +351,7 @@ function FieldPanelHeader({
               iconType="pencil"
               data-test-subj="lnsFieldListPanelEdit"
               aria-label={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-                defaultMessage: 'Edit index pattern field',
+                defaultMessage: 'Edit data view field',
               })}
             />
           </EuiToolTip>
@@ -366,7 +361,7 @@ function FieldPanelHeader({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.removeFieldLabel', {
-              defaultMessage: 'Remove index pattern field',
+              defaultMessage: 'Remove data view field',
             })}
           >
             <EuiButtonIcon
@@ -375,7 +370,7 @@ function FieldPanelHeader({
               data-test-subj="lnsFieldListPanelRemove"
               color="danger"
               aria-label={i18n.translate('xpack.lens.indexPattern.removeFieldLabel', {
-                defaultMessage: 'Remove index pattern field',
+                defaultMessage: 'Remove data view field',
               })}
             />
           </EuiToolTip>
@@ -477,6 +472,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         </EuiText>
       </>
     );
+  } else if (field.type === 'murmur3') {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsMurmur3Limited', {
+            defaultMessage: `Summary information is not available for murmur3 fields.`,
+          })}
+        </EuiText>
+      </>
+    );
   } else if (field.type === 'geo_point' || field.type === 'geo_shape') {
     return (
       <>
@@ -496,15 +503,21 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     (!props.histogram || props.histogram.buckets.length === 0) &&
     (!props.topValues || props.topValues.buckets.length === 0)
   ) {
+    const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
     return (
       <>
         <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
 
         <EuiText size="s">
-          {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-            defaultMessage:
-              'This field is empty because it doesn’t exist in the 500 sampled documents. Adding this field to the configuration may result in a blank chart.',
-          })}
+          {isUsingSampling
+            ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data in the first 500 documents that match your filters. To create a visualization, drag and drop a different field.',
+              })
+            : i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+              })}
         </EuiText>
       </>
     );
@@ -636,7 +649,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             showOverlappingTicks={true}
           />
 
-          <BarSeries
+          <HistogramBarSeries
             data={histogram.buckets}
             id={specId}
             xAccessor={'key'}
@@ -664,7 +677,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             tickFormat={(d) => formatter.convert(d)}
           />
 
-          <BarSeries
+          <HistogramBarSeries
             data={histogram.buckets}
             id={specId}
             xAccessor={'key'}

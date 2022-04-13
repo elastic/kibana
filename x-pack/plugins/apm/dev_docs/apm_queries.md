@@ -1,3 +1,19 @@
+### Table of Contents
+ - [Transactions](#transactions)
+ - [System metrics](#system-metrics)
+ - [Transaction breakdown metrics](#transaction-breakdown-metrics)
+ - [Span breakdown metrics](#span-breakdown-metrics)
+ - [Service destination metrics](#service-destination-metrics)
+ - [Common filters](#common-filters)
+
+---
+
+### Data model
+Elastic APM agents capture different types of information from within their instrumented applications. These are known as events, and can be spans, transactions, errors, or metrics. You can find more information [here](https://www.elastic.co/guide/en/apm/get-started/current/apm-data-model.html).
+
+### Running examples
+You can run the example queries on the [edge cluster](https://edge-oblt.elastic.dev/) or any another cluster that contains APM data.
+
 # Transactions
 
 Transactions are stored in two different formats:
@@ -34,6 +50,8 @@ A pre-aggregated document where `_doc_count` is the number of transaction events
 }
 ```
 
+You can find all the APM transaction fields [here](https://www.elastic.co/guide/en/apm/server/current/exported-fields-apm-transaction.html).
+
 The decision to use aggregated transactions or not is determined in [`getSearchAggregatedTransactions`](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L53-L79) and then used to specify [the transaction index](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/suggestions/get_suggestions.ts#L30-L32) and [the latency field](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/plugins/apm/server/lib/alerts/chart_preview/get_transaction_duration.ts#L62-L65)
 
 ### Latency
@@ -45,6 +63,7 @@ Noteworthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 #### Transaction-based latency
 
 ```json
+GET apm-*-transaction-*,traces-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -61,6 +80,7 @@ Noteworthy fields: `transaction.duration.us`, `transaction.duration.histogram`
 #### Metric-based latency
 
 ```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -85,14 +105,64 @@ Throughput is the number of transactions per minute. This can be calculated usin
 
 Noteworthy fields: None (based on `doc_count`)
 
-```js
+#### Transaction-based throughput
+
+```json
+GET apm-*-transaction-*,traces-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
-    // same filters as for latency
+    "bool": {
+      "filter": [{ "terms": { "processor.event": ["transaction"] } }]
+    }
   },
   "aggs": {
-    "throughput": { "rate": { "unit": "minute" } }
+    "timeseries": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "fixed_interval": "60s"
+      },
+      "aggs": {
+        "throughput": {
+          "rate": {
+            "unit": "minute"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+
+#### Metric-based throughput
+
+```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "processor.event": ["metric"] } },
+        { "term": { "metricset.name": "transaction" } }
+      ]
+    }
+  },
+  "aggs": {
+    "timeseries": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "fixed_interval": "60s"
+      },
+      "aggs": {
+        "throughput": {
+          "rate": {
+            "unit": "minute"
+          }
+        }
+      }
+    }
   }
 }
 ```
@@ -102,11 +172,41 @@ Noteworthy fields: None (based on `doc_count`)
 Failed transaction rate is the number of transactions with `event.outcome=failure` per minute.
 Noteworthy fields: `event.outcome`
 
-```js
+#### Transaction-based failed transaction rate
+
+ ```json
+GET apm-*-transaction-*,traces-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
-    // same filters as for latency
+    "bool": {
+      "filter": [{ "terms": { "processor.event": ["transaction"] } }]
+    }
+  },
+  "aggs": {
+    "outcomes": {
+      "terms": {
+        "field": "event.outcome",
+        "include": ["failure", "success"]
+      }
+    }
+  }
+}
+```
+
+#### Metric-based failed transaction rate
+
+```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "processor.event": ["metric"] } },
+        { "term": { "metricset.name": "transaction" } }
+      ]
+    }
   },
   "aggs": {
     "outcomes": {
@@ -121,7 +221,7 @@ Noteworthy fields: `event.outcome`
 
 # System metrics
 
-System metrics are captured periodically (every 60 seconds by default).
+System metrics are captured periodically (every 60 seconds by default). You can find all the System Metrics fields [here](https://www.elastic.co/guide/en/apm/server/current/exported-fields-system.html).
 
 ### CPU
 
@@ -146,6 +246,7 @@ Noteworthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.p
 #### Query
 
 ```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -185,18 +286,17 @@ Noteworthy fields: `system.memory.actual.free`, `system.memory.total`,
 
 #### Query
 
-```js
+```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
     "bool": {
       "filter": [
         { "terms": { "processor.event": ["metric"] }},
-        { "terms": { "metricset.name": ["app"] }}
-
-        // ensure the memory fields exists
+        { "terms": { "metricset.name": ["app"] }},
         { "exists": { "field": "system.memory.actual.free" }},
-        { "exists": { "field": "system.memory.total" }},
+        { "exists": { "field": "system.memory.total" }}
       ]
     }
   },
@@ -213,31 +313,9 @@ Noteworthy fields: `system.memory.actual.free`, `system.memory.total`,
 }
 ```
 
-Above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/fe9b5332e157fd456f81aecfd4ffa78d9e511a66/x-pack/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers
+The above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/fe9b5332e157fd456f81aecfd4ffa78d9e511a66/x-pack/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers. Please note that an [Exists Query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html) is used in the filter context in the query to ensure that the memory fields exist.
 
-
-
-# Transaction breakdown metrics (`transaction_breakdown`)
-
-A pre-aggregations of transaction documents where `transaction.breakdown.count` is the number of original transactions.
-
-Noteworthy fields: `transaction.name`, `transaction.type`
-
-#### Sample document
-
-```json
-{
-  "@timestamp": "2021-09-27T21:59:59.828Z",
-  "processor.event": "metric",
-  "metricset.name": "transaction_breakdown",
-  "transaction.breakdown.count": 12,
-  "transaction.name": "GET /api/products",
-  "transaction.type": "request"
-}
-}
-```
-
-# Span breakdown metrics (`span_breakdown`)
+# Span breakdown metrics
 
 A pre-aggregations of span documents where `span.self_time.count` is the number of original spans. Measures the "self-time" for a span type, and optional subtype, within a transaction group. 
 
@@ -268,6 +346,7 @@ Noteworthy fields: `transaction.name`, `transaction.type`, `span.type`, `span.su
 #### Query
 
 ```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -330,6 +409,7 @@ A pre-aggregated document with 73 span requests from opbeans-ruby to elasticsear
 The latency between a service and an (external) endpoint
 
 ```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -360,6 +440,7 @@ Captures the number of requests made from a service to an (external) endpoint
 #### Query
 
 ```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "size": 0,
   "query": {
@@ -372,17 +453,25 @@ Captures the number of requests made from a service to an (external) endpoint
     }
   },
   "aggs": {
-    "throughput": {
-      "rate": {
-        "field": "span.destination.service.response_time.count",
-        "unit": "minute"
+    "timeseries": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "fixed_interval": "60s"
+      },
+      "aggs": {
+        "throughput": {
+          "rate": {
+            "field": "span.destination.service.response_time.count",
+            "unit": "minute"
+          }
+        }
       }
     }
   }
 }
 ```
 
-## Common filters
+# Common filters
 
 Most Elasticsearch queries will need to have one or more filters. There are a couple of reasons for adding filters:
 
@@ -390,27 +479,17 @@ Most Elasticsearch queries will need to have one or more filters. There are a co
 - stability: Running an aggregation on unrelated documents could cause the entire query to fail
 - performance: limiting the number of documents will make the query faster
 
-```js
+```json
+GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 {
   "query": {
     "bool": {
       "filter": [
-        // service name
         { "term": { "service.name": "opbeans-go" }},
-
-        // service environment
-        { "term": { "service.environment": "testing" }}
-
-        // transaction type
-        { "term": { "transaction.type": "request" }}
-
-        // event type (possible values : transaction, span, metric, error)
+        { "term": { "service.environment": "testing" }},
+        { "term": { "transaction.type": "request" }},
         { "terms": { "processor.event": ["metric"] }},
-
-        // metric set is a subtype of `processor.event: metric`
         { "terms": { "metricset.name": ["transaction"] }},
-
-        // time range
         {
           "range": {
             "@timestamp": {
@@ -422,5 +501,10 @@ Most Elasticsearch queries will need to have one or more filters. There are a co
         }
       ]
     }
-  },
+  }
+}
 ```
+
+Possible values for `processor.event` are: `transaction`, `span`, `metric`, `error`.
+
+`metricset` is a subtype of `processor.event: metric`. Possible values are: `transaction`, `span_breakdown`, `transaction_breakdown`, `app`, `service_destination`, `agent_config`

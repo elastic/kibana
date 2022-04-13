@@ -21,10 +21,10 @@
     { "path": "../../../src/plugins/data/tsconfig.json"},
     { "path": "../../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json"},
-    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json"},
     { "path": "../../../src/plugins/home/tsconfig.json"},
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" }
+    { "path": "../spaces/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

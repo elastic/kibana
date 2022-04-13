@@ -8,29 +8,34 @@
 import React from 'react';
 
 import {
+  EuiButtonEmpty,
+  EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
+  EuiSplitPanel,
   EuiText,
   EuiTitle,
   EuiToken,
   EuiToolTip,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { getSourcesPath } from '../../../../routes';
+import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
+import { hasMultipleConnectorOptions } from '../../../../utils';
 
 import {
   CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,
   CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP,
-  CONFIGURED_SOURCES_CONNECT_BUTTON,
   CONFIGURED_SOURCES_EMPTY_STATE,
   CONFIGURED_SOURCES_TITLE,
   CONFIGURED_SOURCES_EMPTY_BODY,
+  ADD_SOURCE_ORG_SOURCES_TITLE,
 } from './constants';
 
 interface ConfiguredSourcesProps {
@@ -65,53 +70,93 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   );
 
   const visibleSources = (
-    <EuiFlexGrid columns={2} gutterSize="s" responsive={false} className="source-grid-configured">
-      {sources.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
-        <React.Fragment key={i}>
-          <EuiFlexItem>
-            <EuiPanel paddingSize="s">
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="none"
-                responsive={false}
-                className="eui-fullHeight"
+    <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
+      {sources.map((sourceData, i) => {
+        const { connected, accountContextOnly, name, serviceType, isBeta } = sourceData;
+        return (
+          <React.Fragment key={i}>
+            <EuiFlexItem
+              grow
+              className="organizational-content-source-item"
+              data-test-subj="ConfiguredSourcesListItem"
+            >
+              <EuiCard
+                title=""
+                betaBadgeProps={
+                  isBeta
+                    ? {
+                        label: i18n.translate(
+                          'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSourcesList.betaBadge',
+                          {
+                            defaultMessage: 'Beta',
+                          }
+                        ),
+                      }
+                    : undefined
+                }
+                paddingSize="none"
+                hasBorder
               >
-                <EuiFlexItem>
-                  <EuiFlexGroup
-                    justifyContent="flexStart"
-                    alignItems="center"
-                    gutterSize="s"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <SourceIcon serviceType={serviceType} name={name} size="l" />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <h4>
-                          {name}
-                          {!connected &&
-                            !accountContextOnly &&
-                            isOrganization &&
-                            unConnectedTooltip}
-                          {accountContextOnly && isOrganization && accountOnlyTooltip}
-                        </h4>
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {(!isOrganization || (isOrganization && !accountContextOnly)) && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmptyTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-                      {CONFIGURED_SOURCES_CONNECT_BUTTON}
-                    </EuiButtonEmptyTo>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        </React.Fragment>
-      ))}
+                <EuiSplitPanel.Outer color="plain" hasShadow={false}>
+                  <EuiSplitPanel.Inner>
+                    <EuiFlexGroup
+                      justifyContent="center"
+                      alignItems="center"
+                      direction="column"
+                      gutterSize="s"
+                      responsive={false}
+                    >
+                      <EuiFlexItem>
+                        <SourceIcon serviceType={serviceType} name={name} size="xxl" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s">
+                          <h4>
+                            {name}
+                            {!connected &&
+                              !accountContextOnly &&
+                              isOrganization &&
+                              unConnectedTooltip}
+                            {accountContextOnly && isOrganization && accountOnlyTooltip}
+                          </h4>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiSplitPanel.Inner>
+                  <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+                    {((!isOrganization || (isOrganization && !accountContextOnly)) && (
+                      <EuiButtonEmptyTo
+                        className="eui-fullWidth"
+                        to={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/${
+                          hasMultipleConnectorOptions(sourceData) && isOrganization ? '' : 'connect'
+                        }`}
+                      >
+                        {!connected
+                          ? i18n.translate(
+                              'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
+                              {
+                                defaultMessage: 'Connect',
+                              }
+                            )
+                          : i18n.translate(
+                              'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectAnotherButton',
+                              {
+                                defaultMessage: 'Connect another',
+                              }
+                            )}
+                      </EuiButtonEmptyTo>
+                    )) || (
+                      <EuiButtonEmpty className="eui-fullWidth" isDisabled>
+                        {ADD_SOURCE_ORG_SOURCES_TITLE}
+                      </EuiButtonEmpty>
+                    )}
+                  </EuiSplitPanel.Inner>
+                </EuiSplitPanel.Outer>
+              </EuiCard>
+            </EuiFlexItem>
+          </React.Fragment>
+        );
+      })}
     </EuiFlexGrid>
   );
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { SemVer } from 'semver';
+import SemVer from 'semver/classes/semver';
 
 import { CoreStart, CoreSetup } from '../../../../../src/core/public';
 
@@ -17,6 +17,7 @@ import {
   createKibanaReactContext,
   GlobalFlyout,
   useKibana as useKibanaReactPlugin,
+  KibanaThemeProvider,
 } from '../shared_imports';
 
 import { AppContextProvider, AppDependencies } from './app_context';
@@ -34,9 +35,9 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications, application } = core;
+  const { i18n, docLinks, notifications, application, executionContext } = core;
   const { Context: I18nContext } = i18n;
-  const { services, history, setBreadcrumbs, uiSettings, kibanaVersion } = dependencies;
+  const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
 
   // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
@@ -55,23 +56,26 @@ export const renderApp = (
     toasts: notifications.toasts,
     setBreadcrumbs,
     getUrlForApp: application.getUrlForApp,
+    executionContext,
   };
 
   render(
     <I18nContext>
-      <KibanaReactContextProvider>
-        <Provider store={indexManagementStore(services)}>
-          <AppContextProvider value={dependencies}>
-            <MappingsEditorProvider>
-              <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-                <GlobalFlyoutProvider>
-                  <App history={history} />
-                </GlobalFlyoutProvider>
-              </ComponentTemplatesProvider>
-            </MappingsEditorProvider>
-          </AppContextProvider>
-        </Provider>
-      </KibanaReactContextProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaReactContextProvider>
+          <Provider store={indexManagementStore(services)}>
+            <AppContextProvider value={dependencies}>
+              <MappingsEditorProvider>
+                <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+                  <GlobalFlyoutProvider>
+                    <App history={history} />
+                  </GlobalFlyoutProvider>
+                </ComponentTemplatesProvider>
+              </MappingsEditorProvider>
+            </AppContextProvider>
+          </Provider>
+        </KibanaReactContextProvider>
+      </KibanaThemeProvider>
     </I18nContext>,
     elem
   );
@@ -93,4 +97,5 @@ const useKibana = () => {
   return useKibanaReactPlugin<KibanaReactContextServices>();
 };
 
-export { AppDependencies, useKibana };
+export type { AppDependencies };
+export { useKibana };

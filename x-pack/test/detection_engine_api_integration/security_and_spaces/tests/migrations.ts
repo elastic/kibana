@@ -30,10 +30,15 @@ export default ({ getService }: FtrProviderContext): void => {
             actions: [{ id: string; actionRef: string }];
           };
           references: [{}];
-        }>({
-          index: '.kibana',
-          id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
-        });
+        }>(
+          {
+            index: '.kibana',
+            id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
+          },
+          {
+            meta: true,
+          }
+        );
         expect(response.statusCode).to.eql(200);
 
         // references exist and are expected values
@@ -63,6 +68,32 @@ export default ({ getService }: FtrProviderContext): void => {
         // actions.id no longer exist
         expect(response.body._source?.['siem-detection-engine-rule-actions'].actions[0].id).to.eql(
           undefined
+        );
+      });
+
+      it('migrates legacy siem-detection-engine-rule-actions and retains "ruleThrottle" and "alertThrottle" as the same attributes as before', async () => {
+        const response = await es.get<{
+          'siem-detection-engine-rule-actions': {
+            ruleThrottle: string;
+            alertThrottle: string;
+          };
+        }>(
+          {
+            index: '.kibana',
+            id: 'siem-detection-engine-rule-actions:fce024a0-0452-11ec-9b15-d13d79d162f3',
+          },
+          {
+            meta: true,
+          }
+        );
+        expect(response.statusCode).to.eql(200);
+
+        // "alertThrottle" and "ruleThrottle" should still exist
+        expect(response.body._source?.['siem-detection-engine-rule-actions'].alertThrottle).to.eql(
+          '7d'
+        );
+        expect(response.body._source?.['siem-detection-engine-rule-actions'].ruleThrottle).to.eql(
+          '7d'
         );
       });
     });

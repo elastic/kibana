@@ -7,9 +7,8 @@
 
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { createHash } from 'crypto';
-import { Ancestor } from '../../../signals/types';
-import { ALERT_ANCESTORS } from '../../field_maps/field_names';
-import { RACAlert } from '../../types';
+import { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
+import { ALERT_ANCESTORS } from '../../../../../../common/field_maps/field_names';
 
 /**
  * Generates unique doc ids for each building block signal within a sequence. The id of each building block
@@ -17,17 +16,17 @@ import { RACAlert } from '../../types';
  * (e.g. if multiple rules build sequences that share a common event/signal) will get a unique id per sequence.
  * @param buildingBlocks The full list of building blocks in the sequence.
  */
-export const generateBuildingBlockIds = (buildingBlocks: RACAlert[]): string[] => {
+export const generateBuildingBlockIds = (buildingBlocks: BaseFieldsLatest[]): string[] => {
   const baseHashString = buildingBlocks.reduce(
     (baseString, block) =>
       baseString
         .concat(
-          (block[ALERT_ANCESTORS] as Ancestor[]).reduce(
+          block[ALERT_ANCESTORS].reduce(
             (acc, ancestor) => acc.concat(ancestor.id, ancestor.index),
             ''
           )
         )
-        .concat(block[ALERT_RULE_UUID] as string),
+        .concat(block[ALERT_RULE_UUID]),
     ''
   );
   return buildingBlocks.map((block, idx) =>

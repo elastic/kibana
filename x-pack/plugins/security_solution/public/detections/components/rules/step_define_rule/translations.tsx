@@ -14,24 +14,17 @@ export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   }
 );
 
+export const EQL_QUERY_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
+  {
+    defaultMessage: 'An EQL query is required.',
+  }
+);
+
 export const INVALID_CUSTOM_QUERY = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError',
   {
     defaultMessage: 'The KQL is invalid',
-  }
-);
-
-export const CONFIG_INDICES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesFromConfigDescription',
-  {
-    defaultMessage: 'Use Elasticsearch indices from Security Solution advanced settings',
-  }
-);
-
-export const CUSTOM_INDICES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesCustomDescription',
-  {
-    defaultMessage: 'Provide custom list of indices',
   }
 );
 

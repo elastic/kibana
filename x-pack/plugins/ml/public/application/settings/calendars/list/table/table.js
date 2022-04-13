@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiButton, EuiInMemoryTable } from '@elastic/eui';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';

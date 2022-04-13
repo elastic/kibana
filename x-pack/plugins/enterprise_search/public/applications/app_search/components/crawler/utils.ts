@@ -16,8 +16,18 @@ import {
   CrawlerDomainValidationStep,
   CrawlRequestFromServer,
   CrawlRequest,
+  CrawlRequestStats,
+  CrawlRequestStatsFromServer,
+  CrawlRule,
+  CrawlerRules,
   CrawlEventFromServer,
   CrawlEvent,
+  CrawlConfigFromServer,
+  CrawlConfig,
+  CrawlRequestWithDetailsFromServer,
+  CrawlRequestWithDetails,
+  DomainConfig,
+  DomainConfigFromServer,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -60,6 +70,30 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
   return clientPayload;
 }
 
+export function crawlRequestStatsServerToClient(
+  crawlStats: CrawlRequestStatsFromServer
+): CrawlRequestStats {
+  const {
+    status: {
+      avg_response_time_msec: avgResponseTimeMSec,
+      crawl_duration_msec: crawlDurationMSec,
+      pages_visited: pagesVisited,
+      urls_allowed: urlsAllowed,
+      status_codes: statusCodes,
+    },
+  } = crawlStats;
+
+  return {
+    status: {
+      urlsAllowed,
+      pagesVisited,
+      avgResponseTimeMSec,
+      crawlDurationMSec,
+      statusCodes,
+    },
+  };
+}
+
 export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer): CrawlRequest {
   const {
     id,
@@ -78,7 +112,23 @@ export function crawlRequestServerToClient(crawlRequest: CrawlRequestFromServer)
   };
 }
 
-export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
+export function crawlConfigServerToClient(crawlConfig: CrawlConfigFromServer): CrawlConfig {
+  const {
+    domain_allowlist: domainAllowlist,
+    seed_urls: seedUrls,
+    sitemap_urls: sitemapUrls,
+    max_crawl_depth: maxCrawlDepth,
+  } = crawlConfig;
+
+  return {
+    domainAllowlist,
+    seedUrls,
+    sitemapUrls,
+    maxCrawlDepth,
+  };
+}
+
+export function crawlEventServerToClient(event: CrawlEventFromServer): CrawlEvent {
   const {
     id,
     stage,
@@ -86,6 +136,8 @@ export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEv
     created_at: createdAt,
     began_at: beganAt,
     completed_at: completedAt,
+    type,
+    crawl_config: crawlConfig,
   } = event;
 
   return {
@@ -95,6 +147,34 @@ export function crawlerEventServerToClient(event: CrawlEventFromServer): CrawlEv
     createdAt,
     beganAt,
     completedAt,
+    type,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
+  };
+}
+
+export function crawlRequestWithDetailsServerToClient(
+  event: CrawlRequestWithDetailsFromServer
+): CrawlRequestWithDetails {
+  const {
+    began_at: beganAt,
+    completed_at: completedAt,
+    crawl_config: crawlConfig,
+    created_at: createdAt,
+    id,
+    stats: crawlStats,
+    status,
+    type,
+  } = event;
+
+  return {
+    beganAt,
+    completedAt,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
+    createdAt,
+    id,
+    stats: crawlStats && crawlRequestStatsServerToClient(crawlStats),
+    status,
+    type,
   };
 }
 
@@ -103,7 +183,7 @@ export function crawlerDataServerToClient(payload: CrawlerDataFromServer): Crawl
 
   return {
     domains: domains.map((domain) => crawlerDomainServerToClient(domain)),
-    events: events.map((event) => crawlerEventServerToClient(event)),
+    events: events.map((event) => crawlEventServerToClient(event)),
     mostRecentCrawlRequest:
       mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
   };
@@ -159,3 +239,32 @@ export const getDeleteDomainSuccessMessage = (domainUrl: string) => {
     }
   );
 };
+
+export const getCrawlRulePathPatternTooltip = (crawlRule: CrawlRule) => {
+  if (crawlRule.rule === CrawlerRules.regex) {
+    return i18n.translate(
+      'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.regexPathPatternTooltip',
+      {
+        defaultMessage:
+          'The path pattern is a regular expression compatible with the Ruby language regular expression engine.',
+      }
+    );
+  }
+
+  return i18n.translate(
+    'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.pathPatternTooltip',
+    {
+      defaultMessage:
+        'The path pattern is a literal string except for the asterisk (*) character, which is a meta character that will match anything.',
+    }
+  );
+};
+
+export const domainConfigServerToClient = (
+  domainConfigFromServer: DomainConfigFromServer
+): DomainConfig => ({
+  id: domainConfigFromServer.id,
+  name: domainConfigFromServer.name,
+  seedUrls: domainConfigFromServer.seed_urls,
+  sitemapUrls: domainConfigFromServer.sitemap_urls,
+});

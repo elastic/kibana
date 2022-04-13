@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a potential exploitation of InstallerTakeOver (CVE-2021-41379) default PoC execution. Successful exploitation allows an unprivileged user to escalate privileges to SYSTEM.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential Privilege Escalation via InstallerFileTakeOver",
+  "note": "## Triage and analysis.\n\n### Investigating Potential Priivilege Escalation via InstallerFileTakeOver\n\nInstallerFileTakeOver is a weaponized EoP PoC to the CVE-2021-41379 vulnerability. Upon successful exploitation,\nan unprivileged user will escalate privileges to SYSTEM/NT AUTHORITY.\n\nThis rule detects the default execution of the PoC, which overwrites the `elevation_service.exe` DACL and copies itself\nto the location to escalate privileges. An attacker is able to still take over any file that is not in use (locked), which is outside the scope of this rule.\n\n#### Possible investigation steps:\n\n- Check for the digital signature of the executable.\n- Look for additional processes spawned by the process, command lines, and network communications.\n- Look for additional alerts involving the host and the user.\n\n### False Positive Analysis\n\n- Verify whether the digital signature exists in the executable, and if it is valid.\n\n### Related Rules\n\n- Suspicious DLL Loaded for Persistence or Privilege Escalation - bfeaf89b-a2a7-48a3-817f-e41829dc61ee\n\n### Response and Remediation\n\n- Immediate response steps should be taken to validate, investigate, and potentially contain the activity to prevent\nfurther post-compromise behavior.\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "/* This rule is compatible with both Sysmon and Elastic Endpoint */\n\nprocess where event.type == \"start\" and \n    (?process.Ext.token.integrity_level_name : \"System\" or\n    ?winlog.event_data.IntegrityLevel : \"System\") and\n    (\n      (process.name : \"elevation_service.exe\" and \n       not process.pe.original_file_name == \"elevation_service.exe\") or\n\n      (process.parent.name : \"elevation_service.exe\" and \n       process.name : (\"rundll32.exe\", \"cmd.exe\", \"powershell.exe\")) \n    )\n",
+  "references": [
+    "https://github.com/klinix5/InstallerFileTakeOver"
+  ],
+  "risk_score": 73,
+  "rule_id": "58c6d58b-a0d3-412d-b3b8-0981a9400607",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1068",
+          "name": "Exploitation for Privilege Escalation",
+          "reference": "https://attack.mitre.org/techniques/T1068/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

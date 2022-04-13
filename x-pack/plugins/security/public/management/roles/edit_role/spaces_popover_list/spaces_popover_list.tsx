@@ -18,7 +18,7 @@ import {
 import React, { Component, memo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
 import type { Space, SpacesApiUi } from '../../../../../../spaces/public';

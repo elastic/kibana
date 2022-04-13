@@ -5,24 +5,47 @@
  * 2.0.
  */
 
-import { RulesClient } from '../../../../../alerting/server';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+
+import { Logger } from 'src/core/server';
+import { ExceptionListClient } from '../../../../../lists/server';
+import { RulesClient, RuleExecutorServices } from '../../../../../alerting/server';
 import { getNonPackagedRules } from './get_existing_prepackaged_rules';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { transformAlertsToRules } from '../routes/rules/utils';
-import { transformDataToNdjson } from '../../../utils/read_stream/create_stream_from_ndjson';
+import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
+
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_bulk_rule_actions_saved_object';
 
 export const getExportAll = async (
   rulesClient: RulesClient,
+  exceptionsClient: ExceptionListClient | undefined,
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
+  logger: Logger,
   isRuleRegistryEnabled: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
+  exceptionLists: string | null;
 }> => {
   const ruleAlertTypes = await getNonPackagedRules({ rulesClient, isRuleRegistryEnabled });
-  const rules = transformAlertsToRules(ruleAlertTypes);
-  // We do not support importing/exporting actions. When we do, delete this line of code
-  const rulesWithoutActions = rules.map((rule) => ({ ...rule, actions: [] }));
-  const rulesNdjson = transformDataToNdjson(rulesWithoutActions);
-  const exportDetails = getExportDetailsNdjson(rules);
-  return { rulesNdjson, exportDetails };
+  const alertIds = ruleAlertTypes.map((rule) => rule.id);
+
+  // Gather actions
+  const legacyActions = await legacyGetBulkRuleActionsSavedObject({
+    alertIds,
+    savedObjectsClient,
+    logger,
+  });
+  const rules = transformAlertsToRules(ruleAlertTypes, legacyActions);
+
+  // Gather exceptions
+  const exceptions = rules.flatMap((rule) => rule.exceptions_list ?? []);
+  const { exportData: exceptionLists, exportDetails: exceptionDetails } =
+    await getRuleExceptionsForExport(exceptions, exceptionsClient);
+
+  const rulesNdjson = transformDataToNdjson(rules);
+  const exportDetails = getExportDetailsNdjson(rules, [], exceptionDetails);
+  return { rulesNdjson, exportDetails, exceptionLists };
 };

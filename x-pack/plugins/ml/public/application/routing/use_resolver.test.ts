@@ -11,6 +11,7 @@ import { IUiSettingsClient } from 'kibana/public';
 
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { useNotifications } from '../contexts/kibana';
+import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 
 import { useResolver } from './use_resolver';
 
@@ -44,9 +45,9 @@ describe('useResolver', () => {
     jest.useRealTimers();
   });
 
-  it('should accept undefined as indexPatternId and savedSearchId.', async () => {
+  it('should accept undefined as dataViewId and savedSearchId.', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useResolver(undefined, undefined, {} as IUiSettingsClient, {})
+      useResolver(undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
     );
 
     await act(async () => {
@@ -64,9 +65,9 @@ describe('useResolver', () => {
             ],
           },
         },
-        currentIndexPattern: null,
+        currentDataView: null,
         currentSavedSearch: null,
-        indexPatterns: null,
+        dataViewsContract: {},
         kibanaConfig: {},
       },
       results: {},
@@ -75,8 +76,10 @@ describe('useResolver', () => {
     expect(redirectToJobsManagementPage).toHaveBeenCalledTimes(0);
   });
 
-  it('should add an error toast and redirect if indexPatternId is an empty string.', async () => {
-    const { result } = renderHook(() => useResolver('', undefined, {} as IUiSettingsClient, {}));
+  it('should add an error toast and redirect if dataViewId is an empty string.', async () => {
+    const { result } = renderHook(() =>
+      useResolver('', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
+    );
 
     await act(async () => {});
 

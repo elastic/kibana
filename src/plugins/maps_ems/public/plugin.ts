@@ -6,45 +6,53 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-// @ts-ignore
-import { setKibanaVersion, setMapsEmsConfig } from './kibana_services';
-// @ts-ignore
-import { MapsEmsPluginSetup, MapsEmsPluginStart } from './index';
-import type { MapsEmsConfig } from '../config';
-import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
+import { CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import {
+  setKibanaVersion,
+  setLicensingPluginStart,
+  setMapConfig,
+  getIsEnterprisePlus,
+} from './kibana_services';
+import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index';
+import type { MapConfig } from '../config';
+import { createEMSSettings } from '../common/ems_settings';
+import type { LicensingPluginStart } from '../../../../x-pack/plugins/licensing/public';
+import { createEMSClientLazy } from './lazy_load_bundle';
 
-/**
- * These are the interfaces with your public contracts. You should export these
- * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
- * @public
- */
+interface MapsEmsStartPublicDependencies {
+  licensing?: LicensingPluginStart;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MapsEmsStartDependencies {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MapsEmsSetupDependencies {}
+export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart> {
+  readonly _initializerContext: PluginInitializerContext<MapConfig>;
 
-export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginStart> {
-  readonly _initializerContext: PluginInitializerContext<MapsEmsConfig>;
-
-  constructor(initializerContext: PluginInitializerContext<MapsEmsConfig>) {
+  constructor(initializerContext: PluginInitializerContext<MapConfig>) {
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsEmsSetupDependencies) {
-    const config = this._initializerContext.config.get<MapsEmsConfig>();
+  public setup() {
+    return {};
+  }
+
+  public start(code: CoreStart, plugins: MapsEmsStartPublicDependencies) {
+    const mapConfig = this._initializerContext.config.get<MapConfig>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
     setKibanaVersion(kibanaVersion);
-    setMapsEmsConfig(config);
+    setMapConfig(mapConfig);
 
+    if (plugins.licensing) {
+      setLicensingPluginStart(plugins.licensing);
+    }
     return {
-      getServiceSettings,
-      config,
+      config: mapConfig,
+      createEMSSettings: () => {
+        return createEMSSettings(mapConfig, getIsEnterprisePlus);
+      },
+      createEMSClient: async () => {
+        const emsSettings = createEMSSettings(mapConfig, getIsEnterprisePlus);
+        return createEMSClientLazy(emsSettings, kibanaVersion);
+      },
     };
   }
-
-  public start(core: CoreStart, plugins: MapsEmsStartDependencies) {}
 }

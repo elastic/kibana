@@ -7,6 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectReference } from 'kibana/server';
 import { DependencyList } from 'react';
 import type { PersistableState } from 'src/plugins/kibana_utils/common';
@@ -67,13 +68,15 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     state: P,
     references: SavedObjectReference[]
   ): P => {
-    return this.definition.inject ? this.definition.inject(state, references) : state;
+    if (!this.definition.inject) return state;
+    return this.definition.inject(state, references);
   };
 
   public readonly extract: PersistableState<P>['extract'] = (
     state: P
   ): { state: P; references: SavedObjectReference[] } => {
-    return this.definition.extract ? this.definition.extract(state) : { state, references: [] };
+    if (!this.definition.extract) return { state, references: [] };
+    return this.definition.extract(state);
   };
 
   // LocatorPublic<P> ----------------------------------------------------------
@@ -116,11 +119,18 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     });
   }
 
-  /* eslint-disable react-hooks/rules-of-hooks */
+  public navigateSync(locatorParams: P, navigationParams: LocatorNavigationParams = {}): void {
+    this.navigate(locatorParams, navigationParams).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.log(`Failed to navigate [locator = ${this.id}].`, locatorParams, navigationParams);
+      // eslint-disable-next-line no-console
+      console.error(error);
+    });
+  }
+
   public readonly useUrl = (
     params: P,
     getUrlParams?: LocatorGetUrlParams,
     deps: DependencyList = []
   ): string => useLocatorUrl<P>(this, params, getUrlParams, deps);
-  /* eslint-enable react-hooks/rules-of-hooks */
 }

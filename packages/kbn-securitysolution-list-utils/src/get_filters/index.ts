@@ -9,27 +9,23 @@
 import { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { getGeneralFilters } from '../get_general_filters';
 import { getSavedObjectTypes } from '../get_saved_object_types';
-import { getTrustedAppsFilter } from '../get_trusted_apps_filter';
-import { getEventFiltersFilter } from '../get_event_filters_filter';
-
 export interface GetFiltersParams {
   filters: ExceptionListFilter;
   namespaceTypes: NamespaceType[];
-  showTrustedApps: boolean;
-  showEventFilters: boolean;
+  hideLists: readonly string[];
 }
 
-export const getFilters = ({
-  filters,
-  namespaceTypes,
-  showTrustedApps,
-  showEventFilters,
-}: GetFiltersParams): string => {
+export const getFilters = ({ filters, namespaceTypes, hideLists }: GetFiltersParams): string => {
   const namespaces = getSavedObjectTypes({ namespaceType: namespaceTypes });
   const generalFilters = getGeneralFilters(filters, namespaces);
-  const trustedAppsFilter = getTrustedAppsFilter(showTrustedApps, namespaces);
-  const eventFiltersFilter = getEventFiltersFilter(showEventFilters, namespaces);
-  return [generalFilters, trustedAppsFilter, eventFiltersFilter]
+  const hideListsFilters = hideLists.map((listId) => {
+    const filtersByNamespace = namespaces.map((namespace) => {
+      return `not ${namespace}.attributes.list_id: ${listId}*`;
+    });
+    return `(${filtersByNamespace.join(' AND ')})`;
+  });
+
+  return [generalFilters, ...hideListsFilters]
     .filter((filter) => filter.trim() !== '')
     .join(' AND ');
 };

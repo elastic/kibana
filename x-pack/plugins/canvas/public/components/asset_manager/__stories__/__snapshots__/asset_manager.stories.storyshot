@@ -17,7 +17,6 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -27,7 +26,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -38,7 +39,9 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          Manage workpad assets
+          <h1>
+            Manage workpad assets
+          </h1>
         </div>
         <div
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive canvasAssetManager__fileUploadWrapper"
@@ -54,7 +57,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
               >
                 <input
                   accept="image/*"
-                  aria-describedby="generated-id"
+                  aria-describedby="generated-id-filePicker__prompt"
                   className="euiFilePicker__input"
                   multiple={true}
                   onChange={[Function]}
@@ -65,14 +68,16 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                 />
                 <div
                   className="euiFilePicker__prompt"
-                  id="generated-id"
+                  id="generated-id-filePicker__prompt"
                 >
                   <span
                     aria-hidden="true"
                     className="euiFilePicker__icon"
                     data-euiicon-type="importAction"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <div
                     className="euiFilePicker__promptText"
                   >
@@ -109,21 +114,36 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAssetManager__emptyPanel"
           >
             <div
-              className="euiEmptyPrompt"
+              className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
             >
-              <span
-                color="subdued"
-                data-euiicon-type="importAction"
-                size="xxl"
-              />
               <div
-                className="euiSpacer euiSpacer--m"
-              />
-              <h2
-                className="euiTitle euiTitle--xsmall"
+                className="euiEmptyPrompt__main"
               >
-                Import your assets to get started
-              </h2>
+                <div
+                  className="euiEmptyPrompt__icon"
+                >
+                  <span
+                    color="subdued"
+                    data-euiicon-type="importAction"
+                    size="xxl"
+                  >
+                    
+                  </span>
+                </div>
+                <div
+                  className="euiEmptyPrompt__content"
+                >
+                  <div
+                    className="euiEmptyPrompt__contentInner"
+                  >
+                    <h2
+                      className="euiTitle euiTitle--xsmall"
+                    >
+                      Import your assets to get started
+                    </h2>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -140,7 +160,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             <progress
               aria-hidden={false}
               aria-labelledby="CanvasAssetManagerLabel"
-              className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
+              className="euiProgress euiProgress--native euiProgress--s euiProgress--success"
               max={25000}
               style={null}
               value={0}
@@ -201,7 +221,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -211,7 +230,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -222,7 +243,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          Manage workpad assets
+          <h1>
+            Manage workpad assets
+          </h1>
         </div>
         <div
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive canvasAssetManager__fileUploadWrapper"
@@ -238,7 +261,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               >
                 <input
                   accept="image/*"
-                  aria-describedby="generated-id"
+                  aria-describedby="generated-id-filePicker__prompt"
                   className="euiFilePicker__input"
                   multiple={true}
                   onChange={[Function]}
@@ -249,14 +272,16 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                 />
                 <div
                   className="euiFilePicker__prompt"
-                  id="generated-id"
+                  id="generated-id-filePicker__prompt"
                 >
                   <span
                     aria-hidden="true"
                     className="euiFilePicker__icon"
                     data-euiicon-type="importAction"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                   <div
                     className="euiFilePicker__promptText"
                   >
@@ -354,7 +379,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -366,7 +390,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="vector"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -388,7 +414,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -397,7 +422,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="sortDown"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -420,7 +447,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -429,7 +455,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="copyClipboard"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -445,7 +473,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -457,7 +484,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="trash"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -526,7 +555,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -538,7 +566,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="vector"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -560,7 +590,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -569,7 +598,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="sortDown"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -592,7 +623,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                          disabled={false}
                           type="button"
                         >
                           <span
@@ -601,7 +631,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                             color="inherit"
                             data-euiicon-type="copyClipboard"
                             size="m"
-                          />
+                          >
+                            
+                          </span>
                         </button>
                       </div>
                     </span>
@@ -617,7 +649,6 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -629,7 +660,9 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                           color="inherit"
                           data-euiicon-type="trash"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </span>
                   </div>
@@ -651,7 +684,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
             <progress
               aria-hidden={false}
               aria-labelledby="CanvasAssetManagerLabel"
-              className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
+              className="euiProgress euiProgress--native euiProgress--s euiProgress--success"
               max={25000}
               style={null}
               value={2}

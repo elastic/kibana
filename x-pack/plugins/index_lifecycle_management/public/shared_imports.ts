@@ -8,22 +8,25 @@
 import { AppServicesContext } from './types';
 import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
 
+export type {
+  FormHook,
+  FieldHook,
+  FormData,
+  UseFieldProps,
+  FieldConfig,
+  OnFormUpdateArg,
+  ValidationFunc,
+  FormSchema,
+  ValidationConfig,
+  ValidationError,
+} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+
 export {
   useForm,
   useFormData,
   Form,
-  FormHook,
-  FieldHook,
-  FormData,
-  Props as UseFieldProps,
-  FieldConfig,
-  OnFormUpdateArg,
-  ValidationFunc,
   getFieldValidityAndErrorMessage,
   useFormContext,
-  FormSchema,
-  ValidationConfig,
-  ValidationError,
   UseMultiFields,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
@@ -41,8 +44,17 @@ export {
 
 export { attemptToURIDecode } from '../../../../src/plugins/es_ui_shared/public';
 
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+export {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  RedirectAppLinks,
+  useExecutionContext,
+} from '../../../../src/plugins/kibana_react/public';
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 
 export const useKibana = () => _useKibana<AppServicesContext>();
+
+export type { CloudSetup } from '../../cloud/public';
+
+export type { ILicense } from '../../licensing/public';

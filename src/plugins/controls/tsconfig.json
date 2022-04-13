@@ -1,0 +1,28 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "extraPublicDirs": ["common"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "storybook/**/*",
+    "../../../typings/**/*",
+    "./jest_setup.ts"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../saved_objects/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../embeddable/tsconfig.json" },
+    { "path": "../presentation_util/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../data/tsconfig.json" }
+  ]
+}

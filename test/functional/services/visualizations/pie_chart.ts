@@ -7,9 +7,10 @@
  */
 
 import expect from '@kbn/expect';
+import { isNil } from 'lodash';
 import { FtrService } from '../../ftr_provider_context';
 
-const pieChartSelector = 'visTypePieChart';
+const partitionVisChartSelector = 'partitionVisChart';
 
 export class PieChartService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -26,16 +27,16 @@ export class PieChartService extends FtrService {
 
   async clickOnPieSlice(name?: string) {
     this.log.debug(`PieChart.clickOnPieSlice(${name})`);
-    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
       const slices =
-        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
-        [];
+        (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
       let sliceLabel = name || slices[0].name;
       if (name === 'Other') {
         sliceLabel = '__other__';
       }
       const pieSlice = slices.find((slice) => slice.name === sliceLabel);
-      const pie = await this.testSubjects.find(pieChartSelector);
+      const pie = await this.testSubjects.find(partitionVisChartSelector);
       if (pieSlice) {
         const pieSize = await pie.getSize();
         const pieHeight = pieSize.height;
@@ -87,10 +88,10 @@ export class PieChartService extends FtrService {
 
   async getPieSliceStyle(name: string) {
     this.log.debug(`VisualizePage.getPieSliceStyle(${name})`);
-    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
       const slices =
-        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
-        [];
+        (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
       const selectedSlice = slices.filter((slice) => {
         return slice.name.toString() === name.replace(',', '');
       });
@@ -100,21 +101,34 @@ export class PieChartService extends FtrService {
     return await pieSlice.getAttribute('style');
   }
 
-  async getAllPieSliceStyles(name: string) {
-    this.log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
-    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+  async getAllPieSliceColor(name: string) {
+    this.log.debug(`VisualizePage.getAllPieSliceColor(${name})`);
+    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
       const slices =
-        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
-        [];
+        (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
       const selectedSlice = slices.filter((slice) => {
         return slice.name.toString() === name.replace(',', '');
       });
       return selectedSlice.map((slice) => slice.color);
     }
     const pieSlices = await this.getAllPieSlices(name);
-    return await Promise.all(
+    const slicesStyles = await Promise.all(
       pieSlices.map(async (pieSlice) => await pieSlice.getAttribute('style'))
     );
+    return slicesStyles
+      .map(
+        (styles) =>
+          styles.split(';').reduce<Record<string, string>>((styleAsObj, style) => {
+            const stylePair = style.split(':');
+            if (stylePair.length !== 2) {
+              return styleAsObj;
+            }
+            styleAsObj[stylePair[0].trim()] = stylePair[1].trim();
+            return styleAsObj;
+          }, {}).fill // in vislib the color is available on the `fill` style prop
+      )
+      .filter((d) => !isNil(d));
   }
 
   async getPieChartData() {
@@ -129,10 +143,10 @@ export class PieChartService extends FtrService {
   }
 
   async getPieChartLabels() {
-    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
       const slices =
-        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
-        [];
+        (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
       return slices.map((slice) => {
         if (slice.name === '__missing__') {
           return 'Missing';
@@ -155,10 +169,10 @@ export class PieChartService extends FtrService {
 
   async getPieSliceCount() {
     this.log.debug('PieChart.getPieSliceCount');
-    if (await this.visChart.isNewLibraryChart(pieChartSelector)) {
+    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
       const slices =
-        (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
-        [];
+        (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
       return slices?.length;
     }
     const slices = await this.find.allByCssSelector('svg > g > g.arcs > path.slice');
@@ -167,8 +181,8 @@ export class PieChartService extends FtrService {
 
   async expectPieSliceCountEsCharts(expectedCount: number) {
     const slices =
-      (await this.visChart.getEsChartDebugState(pieChartSelector))?.partition?.[0]?.partitions ??
-      [];
+      (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+        ?.partitions ?? [];
     expect(slices.length).to.be(expectedCount);
   }
 

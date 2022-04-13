@@ -14,47 +14,55 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { CaseType } from '../../../common';
+import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
-import { useOwnerContext } from '../owner_context/use_owner_context';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
+import { CaseAttachments } from '../../types';
 
 const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
-  connectorId: 'none',
+  connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
+  selectedOwner: null,
 };
 
 interface Props {
   afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
-  caseType?: CaseType;
   children?: JSX.Element | JSX.Element[];
-  hideConnectorServiceNowSir?: boolean;
   onSuccess?: (theCase: Case) => Promise<void>;
+  attachments?: CaseAttachments;
 }
 
 export const FormContext: React.FC<Props> = ({
   afterCaseCreated,
-  caseType = CaseType.individual,
   children,
-  hideConnectorServiceNowSir,
   onSuccess,
+  attachments,
 }) => {
   const { connectors, loading: isLoadingConnectors } = useConnectors();
-  const owner = useOwnerContext();
+  const { owner } = useCasesContext();
+  const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
   const { postComment } = usePostComment();
   const { pushCaseToExternalService } = usePostPushToService();
 
   const submitCase = useCallback(
     async (
-      { connectorId: dataConnectorId, fields, syncAlerts = true, ...dataWithoutConnectorId },
+      {
+        connectorId: dataConnectorId,
+        fields,
+        syncAlerts = isSyncAlertsEnabled,
+        ...dataWithoutConnectorId
+      },
       isValid
     ) => {
       if (isValid) {
+        const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
 
         const connectorToUpdate = caseConnector
@@ -62,18 +70,30 @@ export const FormContext: React.FC<Props> = ({
           : getNoneConnector();
 
         const updatedCase = await postCase({
-          ...dataWithoutConnectorId,
-          type: caseType,
+          ...userFormData,
           connector: connectorToUpdate,
           settings: { syncAlerts },
-          owner: owner[0],
+          owner: selectedOwner ?? owner[0],
         });
+
+        // add attachments to the case
+        if (updatedCase && Array.isArray(attachments)) {
+          // TODO currently the API only supports to add a comment at the time
+          // once the API is updated we should use bulk post comment #124814
+          // this operation is intentionally made in sequence
+          for (const attachment of attachments) {
+            await postComment({
+              caseId: updatedCase.id,
+              data: attachment,
+            });
+          }
+        }
 
         if (afterCaseCreated && updatedCase) {
           await afterCaseCreated(updatedCase, postComment);
         }
 
-        if (updatedCase?.id && dataConnectorId !== 'none') {
+        if (updatedCase?.id && connectorToUpdate.id !== 'none') {
           await pushCaseToExternalService({
             caseId: updatedCase.id,
             connector: connectorToUpdate,
@@ -86,12 +106,13 @@ export const FormContext: React.FC<Props> = ({
       }
     },
     [
+      isSyncAlertsEnabled,
       connectors,
       postCase,
-      caseType,
       owner,
       afterCaseCreated,
       onSuccess,
+      attachments,
       postComment,
       pushCaseToExternalService,
     ]

@@ -5,74 +5,89 @@
  * 2.0.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
-
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 
+type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
+export interface ResponseError {
+  statusCode: number;
+  message: string | Error;
+  attributes?: Record<string, any>;
+}
+
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadPipelinesResponse = (response?: any[], error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'PUT', 'DELETE', 'POST'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
 
-    server.respondWith('GET', API_BASE_PATH, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
+  const mockMethodImplementation = (method: HttpMethod, path: string) =>
+    mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.delete.mockImplementation((path) =>
+    mockMethodImplementation('DELETE', path as unknown as string)
+  );
+  httpSetup.post.mockImplementation((path) =>
+    mockMethodImplementation('POST', path as unknown as string)
+  );
+  httpSetup.put.mockImplementation((path) =>
+    mockMethodImplementation('PUT', path as unknown as string)
+  );
+
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
 
-  const setLoadPipelineResponse = (response?: {}, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
+  const setLoadPipelinesResponse = (response?: object[], error?: ResponseError) =>
+    mockResponse('GET', API_BASE_PATH, response, error);
 
-    server.respondWith('GET', `${API_BASE_PATH}/:name`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  const setLoadPipelineResponse = (
+    pipelineName: string,
+    response?: object,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/${pipelineName}`, response, error);
 
-  const setDeletePipelineResponse = (response?: object) => {
-    server.respondWith('DELETE', `${API_BASE_PATH}/:name`, [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
-  };
+  const setDeletePipelineResponse = (
+    pipelineName: string,
+    response?: object,
+    error?: ResponseError
+  ) => mockResponse('DELETE', `${API_BASE_PATH}/${pipelineName}`, response, error);
 
-  const setCreatePipelineResponse = (response?: object, error?: any) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+  const setCreatePipelineResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('POST', API_BASE_PATH, response, error);
 
-    server.respondWith('POST', API_BASE_PATH, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
-  };
+  const setParseCsvResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/parse_csv`, response, error);
 
   return {
     setLoadPipelinesResponse,
     setLoadPipelineResponse,
     setDeletePipelineResponse,
     setCreatePipelineResponse,
+    setParseCsvResponse,
   };
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
-
-  // Define default response for unhandled requests.
-  // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultMockedResponse']);
-
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
 
   return {
-    server,
+    httpSetup,
     httpRequestsMockHelpers,
   };
 };

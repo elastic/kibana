@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from 'src/plugins/data/public';
 import { SortDirection } from 'src/plugins/data/common/search';
 import {
@@ -27,6 +28,7 @@ export type AbstractSourceDescriptor = {
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS TMS layer id. Used when !isAutoSelect
   isAutoSelect: boolean;
+  lightModeDefault: string;
 };
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
@@ -157,6 +159,7 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
 
 export type InlineFieldDescriptor = {
   name: string;
+  label?: string;
   type: 'string' | 'number';
 };
 

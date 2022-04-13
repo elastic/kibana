@@ -22,7 +22,7 @@ import {
   sendGetPackagePolicy,
   sendGetFleetAgentStatusForPolicy,
   sendPutPackagePolicy,
-} from '../../services/ingest';
+} from '../../../../../services/policies/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
@@ -55,6 +55,14 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
       }
       if (policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.memory_protection.message =
+          DefaultPolicyRuleNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.mac.popup.memory_protection.message === '') {
+        policyItem.inputs[0].config.policy.value.mac.popup.memory_protection.message =
+          DefaultPolicyRuleNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.linux.popup.memory_protection.message === '') {
+        policyItem.inputs[0].config.policy.value.linux.popup.memory_protection.message =
           DefaultPolicyRuleNotificationMessage;
       }
       if (

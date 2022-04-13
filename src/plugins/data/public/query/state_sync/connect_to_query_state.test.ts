@@ -13,7 +13,7 @@ import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import { BaseStateContainer, createStateContainer, Storage } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { connectToQueryState } from './connect_to_query_state';
 import { TimefilterContract } from '../timefilter';
 import { QueryState } from './types';
@@ -74,7 +74,7 @@ describe('connect_to_global_state', () => {
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
-      savedObjectsClient: startMock.savedObjects.client,
+      http: startMock.http,
     });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
@@ -308,7 +308,7 @@ describe('connect_to_app_state', () => {
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
-      savedObjectsClient: startMock.savedObjects.client,
+      http: startMock.http,
     });
     filterManager = queryServiceStart.filterManager;
 
@@ -487,7 +487,7 @@ describe('filters with different state', () => {
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
-      savedObjectsClient: startMock.savedObjects.client,
+      http: startMock.http,
     });
     filterManager = queryServiceStart.filterManager;
 

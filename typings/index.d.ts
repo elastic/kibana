@@ -6,24 +6,6 @@
  * Side Public License, v 1.
  */
 
-declare module '*.html' {
-  const template: string;
-  // eslint-disable-next-line import/no-default-export
-  export default template;
-}
-
-declare module '*.png' {
-  const content: string;
-  // eslint-disable-next-line import/no-default-export
-  export default content;
-}
-
-declare module '*.svg' {
-  const content: string;
-  // eslint-disable-next-line import/no-default-export
-  export default content;
-}
-
 declare module 'axios/lib/adapters/xhr';
 
 // Storybook references this module. It's @ts-ignored in the codebase but when

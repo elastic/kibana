@@ -26,8 +26,11 @@ export interface Series {
 export interface FetchDataParams {
   absoluteTime: { start: number; end: number };
   relativeTime: { start: string; end: string };
-  bucketSize: string;
   serviceName?: string;
+  // Bucket size in seconds (number)
+  bucketSize: number;
+  // Bucket size in seconds (string)
+  intervalString: string;
 }
 
 export interface HasDataParams {
@@ -50,6 +53,16 @@ export interface SyntheticsHasDataResponse extends HasDataResponse {
 export interface APMHasDataResponse {
   hasData: boolean;
   indices: ApmIndicesConfig;
+}
+
+export interface InfraMetricsHasDataResponse {
+  hasData: boolean;
+  indices: string;
+}
+
+export interface InfraLogsHasDataResponse {
+  hasData: boolean;
+  indices: string;
 }
 
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
@@ -146,8 +159,8 @@ export interface ObservabilityFetchDataResponse {
 
 export interface ObservabilityHasDataResponse {
   apm: APMHasDataResponse;
-  infra_metrics: boolean;
-  infra_logs: boolean;
+  infra_metrics: InfraMetricsHasDataResponse;
+  infra_logs: InfraLogsHasDataResponse;
   synthetics: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
 }

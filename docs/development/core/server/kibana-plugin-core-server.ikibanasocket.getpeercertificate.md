@@ -14,9 +14,9 @@ getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  detailed | <code>true</code> |  |
+|  detailed | true |  |
 
 <b>Returns:</b>
 
-`DetailedPeerCertificate | null`
+DetailedPeerCertificate \| null
 

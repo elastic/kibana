@@ -4,11 +4,11 @@ slug: /kibana-dev-docs/api/ruleRegistry
 title: "ruleRegistry"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the ruleRegistry plugin
-date: 2020-11-16
+date: 2022-04-05
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'ruleRegistry']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import ruleRegistryObj from './rule_registry.json';
+import ruleRegistryObj from './rule_registry.devdocs.json';
 
 
 
@@ -16,9 +16,9 @@ Contact [RAC](https://github.com/orgs/elastic/teams/rac) for questions regarding
 
 **Code health stats**
 
-| Public API count  | Any count | Items lacking comments | Missing exports | 
+| Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 132 | 0 | 109 | 7 |
+| 194 | 0 | 167 | 8 |
 
 ## Server
 
@@ -27,6 +27,9 @@ Contact [RAC](https://github.com/orgs/elastic/teams/rac) for questions regarding
 
 ### Start
 <DocDefinitionList data={[ruleRegistryObj.server.start]}/>
+
+### Objects
+<DocDefinitionList data={ruleRegistryObj.server.objects}/>
 
 ### Functions
 <DocDefinitionList data={ruleRegistryObj.server.functions}/>
@@ -47,4 +50,10 @@ Contact [RAC](https://github.com/orgs/elastic/teams/rac) for questions regarding
 
 ### Functions
 <DocDefinitionList data={ruleRegistryObj.common.functions}/>
+
+### Interfaces
+<DocDefinitionList data={ruleRegistryObj.common.interfaces}/>
+
+### Consts, variables and types
+<DocDefinitionList data={ruleRegistryObj.common.misc}/>
 

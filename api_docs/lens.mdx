@@ -4,11 +4,11 @@ slug: /kibana-dev-docs/api/lens
 title: "lens"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the lens plugin
-date: 2020-11-16
+date: 2022-04-05
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'lens']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import lensObj from './lens.json';
+import lensObj from './lens.devdocs.json';
 
 Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. Exposes components to embed visualizations and link into the Lens editor from within other apps in Kibana.
 
@@ -16,11 +16,14 @@ Contact [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) 
 
 **Code health stats**
 
-| Public API count  | Any count | Items lacking comments | Missing exports | 
+| Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 252 | 0 | 234 | 24 |
+| 542 | 0 | 467 | 29 |
 
 ## Client
+
+### Objects
+<DocDefinitionList data={lensObj.client.objects}/>
 
 ### Interfaces
 <DocDefinitionList data={lensObj.client.interfaces}/>
@@ -52,6 +55,9 @@ Contact [Vis Editors](https://github.com/orgs/elastic/teams/kibana-vis-editors) 
 
 ### Interfaces
 <DocDefinitionList data={lensObj.common.interfaces}/>
+
+### Enums
+<DocDefinitionList data={lensObj.common.enums}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={lensObj.common.misc}/>

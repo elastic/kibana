@@ -10,8 +10,9 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
-import { UiPlugins } from '../plugins';
+import type { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
 import {
@@ -26,6 +27,7 @@ import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
 import { KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
+import { filterUiPlugins } from './filter_ui_plugins';
 
 type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
 
@@ -78,7 +80,7 @@ export class RenderingService {
     { http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
-    { includeUserSettings = true, vars }: IRenderOptions = {}
+    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
     const env = {
       mode: this.coreContext.env.mode,
@@ -89,11 +91,11 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
     const settings = {
       defaults: uiSettings.getRegistered() ?? {},
-      user: includeUserSettings ? await uiSettings.getUserProvided() : {},
+      user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
 
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
-    const themeVersion = getSettingValue('theme:version', settings, String);
+    const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
@@ -102,15 +104,17 @@ export class RenderingService {
       buildNum,
     });
 
+    const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
+    const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       uiPublicUrl: `${basePath}/ui`,
-      bootstrapScriptUrl: `${basePath}/bootstrap.js`,
+      bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       darkMode,
-      stylesheetPaths,
       themeVersion,
+      stylesheetPaths,
       injectedMetadata: {
         version: env.packageInfo.version,
         buildNumber: env.packageInfo.buildNum,
@@ -123,15 +127,23 @@ export class RenderingService {
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
+        theme: {
+          darkMode,
+          version: themeVersion,
+        },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,
         vars: vars ?? {},
         uiPlugins: await Promise.all(
-          [...uiPlugins.public].map(async ([id, plugin]) => ({
-            id,
-            plugin,
-            config: await getUiConfig(uiPlugins, id),
-          }))
+          filteredPlugins.map(async ([id, plugin]) => {
+            const { browserConfig, exposedConfigKeys } = await getUiConfig(uiPlugins, id);
+            return {
+              id,
+              plugin,
+              config: browserConfig,
+              ...(includeExposedConfigKeys && { exposedConfigKeys }),
+            };
+          })
         ),
         legacyMetadata: {
           uiSettings: settings,
@@ -147,5 +159,8 @@ export class RenderingService {
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
   const browserConfig = uiPlugins.browserConfigs.get(pluginId);
-  return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
+  return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {
+    browserConfig: {},
+    exposedConfigKeys: {},
+  }) as { browserConfig: Record<string, unknown>; exposedConfigKeys: Record<string, string> };
 };

@@ -15,7 +15,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Potential Command and Control via Internet Explorer",
-  "query": "sequence by host.id, user.id with maxspan = 5s\n  [library where dll.name : \"IEProxy.dll\" and process.name : (\"rundll32.exe\", \"regsvr32.exe\")]\n  [process where event.type == \"start\" and process.parent.name : \"iexplore.exe\" and process.parent.args : \"-Embedding\"]\n  /* IE started via COM in normal conditions makes few connections, mainly to Microsoft and OCSP related domains, add FPs here */\n  [network where network.protocol == \"dns\" and process.name : \"iexplore.exe\" and\n   not dns.question.name :\n   (\n    \"*.microsoft.com\",\n    \"*.digicert.com\",\n    \"*.msocsp.com\",\n    \"*.windowsupdate.com\",\n    \"*.bing.com\",\n    \"*.identrust.com\",\n    \"*.sharepoint.com\",\n    \"*.office365.com\",\n    \"*.office.com\"\n    )\n  ]\n",
+  "query": "sequence by host.id, user.name with maxspan = 5s\n  [library where dll.name : \"IEProxy.dll\" and process.name : (\"rundll32.exe\", \"regsvr32.exe\")]\n  [process where event.type == \"start\" and process.parent.name : \"iexplore.exe\" and process.parent.args : \"-Embedding\"]\n  /* IE started via COM in normal conditions makes few connections, mainly to Microsoft and OCSP related domains, add FPs here */\n  [network where network.protocol == \"dns\" and process.name : \"iexplore.exe\" and\n   not dns.question.name :\n   (\n    \"*.microsoft.com\",\n    \"*.digicert.com\",\n    \"*.msocsp.com\",\n    \"*.windowsupdate.com\",\n    \"*.bing.com\",\n    \"*.identrust.com\",\n    \"*.sharepoint.com\",\n    \"*.office365.com\",\n    \"*.office.com\"\n    )\n  ] /* with runs=5 */\n",
   "risk_score": 47,
   "rule_id": "acd611f3-2b93-47b3-a0a3-7723bcc46f6d",
   "severity": "medium",
@@ -41,8 +41,30 @@
           "reference": "https://attack.mitre.org/techniques/T1071/"
         }
       ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1559",
+          "name": "Inter-Process Communication",
+          "reference": "https://attack.mitre.org/techniques/T1559/",
+          "subtechnique": [
+            {
+              "id": "T1559.001",
+              "name": "Component Object Model",
+              "reference": "https://attack.mitre.org/techniques/T1559/001/"
+            }
+          ]
+        }
+      ]
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 5
 }

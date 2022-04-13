@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import DateMath from '@elastic/datemath';
-import { isEqual } from 'lodash';
+import DateMath from '@kbn/datemath';
 import { useEffect, useState } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataViewBase } from '@kbn/es-query';
+import { isEqual } from 'lodash';
+
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerResponse,
@@ -27,7 +28,7 @@ function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOpt
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
   source: MetricsSourceConfigurationProperties | undefined,
-  derivedIndexPattern: IIndexPattern,
+  derivedIndexPattern: DataViewBase,
   timerange: MetricsExplorerTimeOptions,
   afterKey: string | null | Record<string, string | null>,
   signal: any,
@@ -83,7 +84,6 @@ export function useMetricsExplorerData(
               void 0,
             timerange: {
               ...timerange,
-              field: source.fields.timestamp,
               from: from.valueOf(),
               to: to.valueOf(),
             },

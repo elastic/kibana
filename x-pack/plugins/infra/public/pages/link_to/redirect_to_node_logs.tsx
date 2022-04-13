@@ -10,16 +10,16 @@ import { flowRight } from 'lodash';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
+import { LinkDescriptor } from '../../../../observability/public';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
 import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
-import { useLogSource } from '../../containers/logs/log_source';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { LinkDescriptor } from '../../hooks/use_link_props';
-import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { useLogView } from '../../hooks/use_log_view';
+import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
@@ -34,15 +34,14 @@ export const RedirectToNodeLogs = ({
   location,
 }: RedirectToNodeLogsType) => {
   const { services } = useKibanaContextForPlugin();
-  const { isLoading, loadSource, sourceConfiguration } = useLogSource({
+  const { isLoading, load } = useLogView({
     fetch: services.http.fetch,
-    sourceId,
-    indexPatternsService: services.data.indexPatterns,
+    logViewId: sourceId,
+    logViews: services.logViews.client,
   });
-  const fields = sourceConfiguration?.configuration.fields;
 
   useMount(() => {
-    loadSource();
+    load();
   });
 
   if (isLoading) {
@@ -57,11 +56,9 @@ export const RedirectToNodeLogs = ({
         })}
       />
     );
-  } else if (fields == null) {
-    return null;
   }
 
-  const nodeFilter = `${findInventoryFields(nodeType, fields).id}: ${nodeId}`;
+  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
   const userFilter = getFilterFromLocation(location);
   const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
 

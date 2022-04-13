@@ -11,7 +11,9 @@ import { storiesOf } from '@storybook/react';
 import { tagcloudRenderer } from '../expression_renderers';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { TagcloudRendererConfig } from '../../common/types';
+import { ScaleOptions, Orientation } from '../../common/constants';
 import { palettes } from '../__mocks__/palettes';
+import { theme } from '../__mocks__/theme';
 
 const config: TagcloudRendererConfig = {
   visType: 'tagcloud',
@@ -38,8 +40,8 @@ const config: TagcloudRendererConfig = {
     ],
   },
   visParams: {
-    scale: 'linear',
-    orientation: 'single',
+    scale: ScaleOptions.LINEAR,
+    orientation: Orientation.SINGLE,
     minFontSize: 18,
     maxFontSize: 72,
     showLabel: true,
@@ -66,14 +68,18 @@ const containerSize = {
 storiesOf('renderers/tag_cloud_vis', module)
   .add('Default', () => {
     return (
-      <Render renderer={() => tagcloudRenderer({ palettes })} config={config} {...containerSize} />
+      <Render
+        renderer={() => tagcloudRenderer({ palettes, theme })}
+        config={config}
+        {...containerSize}
+      />
     );
   })
   .add('With log scale', () => {
     return (
       <Render
-        renderer={() => tagcloudRenderer({ palettes })}
-        config={{ ...config, visParams: { ...config.visParams, scale: 'log' } }}
+        renderer={() => tagcloudRenderer({ palettes, theme })}
+        config={{ ...config, visParams: { ...config.visParams, scale: ScaleOptions.LOG } }}
         {...containerSize}
       />
     );
@@ -81,8 +87,8 @@ storiesOf('renderers/tag_cloud_vis', module)
   .add('With square root scale', () => {
     return (
       <Render
-        renderer={() => tagcloudRenderer({ palettes })}
-        config={{ ...config, visParams: { ...config.visParams, scale: 'square root' } }}
+        renderer={() => tagcloudRenderer({ palettes, theme })}
+        config={{ ...config, visParams: { ...config.visParams, scale: ScaleOptions.SQUARE_ROOT } }}
         {...containerSize}
       />
     );
@@ -90,8 +96,11 @@ storiesOf('renderers/tag_cloud_vis', module)
   .add('With right angled orientation', () => {
     return (
       <Render
-        renderer={() => tagcloudRenderer({ palettes })}
-        config={{ ...config, visParams: { ...config.visParams, orientation: 'right angled' } }}
+        renderer={() => tagcloudRenderer({ palettes, theme })}
+        config={{
+          ...config,
+          visParams: { ...config.visParams, orientation: Orientation.RIGHT_ANGLED },
+        }}
         {...containerSize}
       />
     );
@@ -99,8 +108,11 @@ storiesOf('renderers/tag_cloud_vis', module)
   .add('With multiple orientations', () => {
     return (
       <Render
-        renderer={() => tagcloudRenderer({ palettes })}
-        config={{ ...config, visParams: { ...config.visParams, orientation: 'multiple' } }}
+        renderer={() => tagcloudRenderer({ palettes, theme })}
+        config={{
+          ...config,
+          visParams: { ...config.visParams, orientation: Orientation.MULTIPLE },
+        }}
         {...containerSize}
       />
     );
@@ -108,7 +120,7 @@ storiesOf('renderers/tag_cloud_vis', module)
   .add('With hidden label', () => {
     return (
       <Render
-        renderer={() => tagcloudRenderer({ palettes })}
+        renderer={() => tagcloudRenderer({ palettes, theme })}
         config={{ ...config, visParams: { ...config.visParams, showLabel: false } }}
         {...containerSize}
       />
@@ -117,7 +129,7 @@ storiesOf('renderers/tag_cloud_vis', module)
   .add('With empty results', () => {
     return (
       <Render
-        renderer={() => tagcloudRenderer({ palettes })}
+        renderer={() => tagcloudRenderer({ palettes, theme })}
         config={{ ...config, visData: { ...config.visData, rows: [] } }}
         {...containerSize}
       />

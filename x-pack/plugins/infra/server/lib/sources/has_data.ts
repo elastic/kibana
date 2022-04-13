@@ -10,9 +10,9 @@ import { ESSearchClient } from '../metrics/types';
 export const hasData = async (index: string, client: ESSearchClient) => {
   const params = {
     index,
-    allowNoIndices: true,
+    allow_no_indices: true,
     terminate_after: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       size: 0,
     },

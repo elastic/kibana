@@ -6,29 +6,48 @@
  * Side Public License, v 1.
  */
 
-import { TELEMETRY_ENDPOINT } from '../constants';
+import {
+  ENDPOINT_VERSION,
+  ENDPOINT_STAGING,
+  ENDPOINT_PROD,
+  TELEMETRY_CHANNELS,
+} from '../constants';
 
+export type ChannelName = 'snapshot' | 'optInStatus';
+export type TelemetryEnv = 'staging' | 'prod';
 export interface GetTelemetryChannelEndpointConfig {
-  channelName: 'main' | 'optInStatus';
-  env: 'staging' | 'prod';
+  channelName: ChannelName;
+  env: TelemetryEnv;
+}
+
+export function getChannel(channelName: ChannelName): string {
+  switch (channelName) {
+    case 'snapshot':
+      return TELEMETRY_CHANNELS.SNAPSHOT_CHANNEL;
+    case 'optInStatus':
+      return TELEMETRY_CHANNELS.OPT_IN_STATUS_CHANNEL;
+    default:
+      throw new Error(`Unknown telemetry channel ${channelName}.`);
+  }
+}
+
+export function getBaseUrl(env: TelemetryEnv): string {
+  switch (env) {
+    case 'prod':
+      return ENDPOINT_PROD;
+    case 'staging':
+      return ENDPOINT_STAGING;
+    default:
+      throw new Error(`Unknown telemetry endpoint env ${env}.`);
+  }
 }
 
 export function getTelemetryChannelEndpoint({
   channelName,
   env,
 }: GetTelemetryChannelEndpointConfig): string {
-  if (env !== 'staging' && env !== 'prod') {
-    throw new Error(`Unknown telemetry endpoint env ${env}.`);
-  }
+  const baseUrl = getBaseUrl(env);
+  const channelPath = getChannel(channelName);
 
-  const endpointEnv = env === 'staging' ? 'STAGING' : 'PROD';
-
-  switch (channelName) {
-    case 'main':
-      return TELEMETRY_ENDPOINT.MAIN_CHANNEL[endpointEnv];
-    case 'optInStatus':
-      return TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL[endpointEnv];
-    default:
-      throw new Error(`Unknown telemetry channel ${channelName}.`);
-  }
+  return `${baseUrl}${channelPath}/${ENDPOINT_VERSION}/send`;
 }

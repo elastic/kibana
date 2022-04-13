@@ -9,17 +9,20 @@ import type { CoreSetup } from 'kibana/public';
 import { createStartServicesGetter, Storage } from '../../../../../src/plugins/kibana_utils/public';
 import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
+import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import type { EditorFrameSetup } from '../types';
 import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import type {
   FieldFormatsStart,
   FieldFormatsSetup,
 } from '../../../../../src/plugins/field_formats/public';
+
+export type { PersistedIndexPatternLayer, IndexPattern, FormulaPublicApi } from './types';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
@@ -32,7 +35,8 @@ export interface IndexPatternDatasourceSetupPlugins {
 export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
+  dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
 }
 
@@ -60,7 +64,7 @@ export class IndexPatternDatasource {
         fieldFormatsSetup.register([suffixFormatter]);
       }
 
-      const [coreStart, { indexPatternFieldEditor, uiActions, data, fieldFormats }] =
+      const [coreStart, { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews }] =
         await core.getStartServices();
 
       return getIndexPatternDatasource({
@@ -68,8 +72,9 @@ export class IndexPatternDatasource {
         fieldFormats,
         storage: new Storage(localStorage),
         data,
+        dataViews,
         charts,
-        indexPatternFieldEditor,
+        dataViewFieldEditor,
         uiActions,
       });
     });

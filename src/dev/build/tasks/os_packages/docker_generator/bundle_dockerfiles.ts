@@ -8,8 +8,10 @@
 
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
+import { copyFile } from 'fs/promises';
 
 import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import Mustache from 'mustache';
 
 import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
@@ -21,6 +23,7 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   const dockerFilesDirName = `kibana${scope.imageFlavor}-${scope.version}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
+  const dockerContextUseLocalArtifact = config.getDockerContextUseLocalArtifact();
 
   // Create dockerfiles dir inside docker build dir
   await mkdirp(dockerFilesBuildDir);
@@ -30,7 +33,8 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
     resolve(dockerFilesBuildDir, dockerfileTemplate.name),
     dockerfileTemplate.generator({
       ...scope,
-      usePublicArtifact: true,
+      usePublicArtifact:
+        dockerContextUseLocalArtifact !== null ? !dockerContextUseLocalArtifact : true,
     })
   );
 
@@ -39,9 +43,10 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   await copyAll(resolve(scope.dockerBuildDir, 'bin'), resolve(dockerFilesBuildDir, 'bin'));
   await copyAll(resolve(scope.dockerBuildDir, 'config'), resolve(dockerFilesBuildDir, 'config'));
   if (scope.ironbank) {
-    await copyAll(resolve(scope.dockerBuildDir), resolve(dockerFilesBuildDir), {
-      select: ['LICENSE'],
-    });
+    await copyFile(
+      resolve(REPO_ROOT, 'licenses/ELASTIC-LICENSE-2.0.txt'),
+      resolve(dockerFilesBuildDir, 'LICENSE')
+    );
     const templates = ['hardening_manifest.yaml', 'README.md'];
     for (const template of templates) {
       const file = readFileSync(resolve(__dirname, 'templates/ironbank', template));

@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Security Software Discovery using WMIC",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n   (process.name:\"wmic.exe\" or process.pe.original_file_name:\"wmic.exe\") and\n    process.args:\"/namespace:\\\\\\\\root\\\\SecurityCenter2\" and process.args:\"Get\"\n",
   "risk_score": 47,
   "rule_id": "6ea55c81-e2ba-42f2-a134-bccf857ba922",
@@ -35,12 +36,19 @@
         {
           "id": "T1518",
           "name": "Software Discovery",
-          "reference": "https://attack.mitre.org/techniques/T1518/"
+          "reference": "https://attack.mitre.org/techniques/T1518/",
+          "subtechnique": [
+            {
+              "id": "T1518.001",
+              "name": "Security Software Discovery",
+              "reference": "https://attack.mitre.org/techniques/T1518/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 5
 }

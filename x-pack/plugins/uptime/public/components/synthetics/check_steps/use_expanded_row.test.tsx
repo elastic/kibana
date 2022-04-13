@@ -51,6 +51,10 @@ describe('useExpandedROw', () => {
         step: {
           name: 'load page',
           index: 1,
+          status: 'succeeded',
+          duration: {
+            us: 9999,
+          },
         },
       },
     },
@@ -73,6 +77,10 @@ describe('useExpandedROw', () => {
         step: {
           name: 'go to login',
           index: 2,
+          status: 'succeeded',
+          duration: {
+            us: 9999,
+          },
         },
       },
     },
@@ -199,6 +207,22 @@ describe('useExpandedROw', () => {
     expect(Object.keys(result.current.expandedRows)).toEqual(['0']);
   });
 
+  it('returns expected browser consoles', async () => {
+    const { result } = renderHook(() =>
+      useExpandedRow({
+        steps: defaultSteps,
+        allSteps: [...defaultSteps, browserConsoleStep],
+        loading: false,
+      })
+    );
+
+    result.current.toggleExpand({ journeyStep: defaultSteps[0] });
+
+    expect(result.current.expandedRows[0].props.browserConsoles).toEqual([
+      browserConsoleStep.synthetics.payload.text,
+    ]);
+  });
+
   describe('getExpandedStepCallback', () => {
     it('matches step index to key', () => {
       const callback = getExpandedStepCallback(2);
@@ -207,3 +231,47 @@ describe('useExpandedROw', () => {
     });
   });
 });
+
+const browserConsoleStep = {
+  _id: 'IvT1oXwB5ds00bB_FVXP',
+  observer: {
+    hostname: '16Elastic',
+    geo: {
+      name: 'au-heartbeat',
+    },
+  },
+  agent: {
+    name: '16Elastic',
+    id: '77def92c-1a78-4353-b9e5-45d31920b1b7',
+    type: 'heartbeat',
+    ephemeral_id: '3a9ca86c-08d0-4f3f-b857-aeef540b3cac',
+    version: '8.0.0',
+  },
+  '@timestamp': '2021-10-21T08:25:25.221Z',
+  package: { name: '@elastic/synthetics', version: '1.0.0-beta.14' },
+  ecs: { version: '1.12.0' },
+  os: { platform: 'darwin' },
+  synthetics: {
+    package_version: '1.0.0-beta.14',
+    journey: { name: 'inline', id: 'inline' },
+    payload: {
+      text: "Refused to execute inline script because it violates the following Content Security Policy directive: \"script-src 'unsafe-eval' 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='), or a nonce ('nonce-...') is required to enable inline execution.\n",
+      type: 'error',
+    },
+    index: 755,
+    step: { duration: { us: 0 }, name: 'goto kibana', index: 1, status: '' },
+    type: 'journey/browserconsole',
+    isFullScreenshot: false,
+    isScreenshotRef: true,
+  },
+  monitor: {
+    name: 'cnn-monitor - inline',
+    timespan: { lt: '2021-10-21T08:27:04.662Z', gte: '2021-10-21T08:26:04.662Z' },
+    check_group: '70acec60-3248-11ec-9921-acde48001122',
+    id: 'cnn-monitor-inline',
+    type: 'browser',
+    status: 'up',
+  },
+  event: { dataset: 'browser' },
+  timestamp: '2021-10-21T08:25:25.221Z',
+};

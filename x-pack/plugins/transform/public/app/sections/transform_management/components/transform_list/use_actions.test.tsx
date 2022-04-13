@@ -27,11 +27,13 @@ describe('Transform: Transform List Actions', () => {
     // in the runtime result here anyway.
     expect(actions.map((a: any) => a['data-test-subj'])).toStrictEqual([
       'transformActionDiscover',
+      'transformActionCreateAlertRule',
       'transformActionStart',
       'transformActionStop',
       'transformActionEdit',
       'transformActionClone',
       'transformActionDelete',
+      'transformActionReset',
     ]);
   });
 });

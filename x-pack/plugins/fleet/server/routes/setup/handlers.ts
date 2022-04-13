@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
-
 import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
-import { setupFleet } from '../../services/setup';
+import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';
+import type { FleetRequestHandler } from '../../types';
 
-export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
+export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   try {
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isFleetServerSetup = await hasFleetServers(appContextService.getInternalUserESClient());
+    const isFleetServerSetup = await hasFleetServers(
+      context.core.elasticsearch.client.asInternalUser
+    );
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
+    const missingOptionalFeatures: GetFleetStatusResponse['missing_optional_features'] = [];
+
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
     }
@@ -29,9 +32,14 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
       missingRequirements.push('fleet_server');
     }
 
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      missingOptionalFeatures.push('encrypted_saved_object_encryption_key_required');
+    }
+
     const body: GetFleetStatusResponse = {
       isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
+      missing_optional_features: missingOptionalFeatures,
     };
 
     return response.ok({
@@ -42,23 +50,15 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   }
 };
 
-export const fleetSetupHandler: RequestHandler = async (context, request, response) => {
+export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const soClient = context.core.savedObjects.client;
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const soClient = context.fleet.epm.internalSoClient;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,
-      nonFatalErrors: setupStatus.nonFatalErrors.map((e) => {
-        // JSONify the error object so it can be displayed properly in the UI
-        const error = e.error ?? e;
-        return {
-          name: error.name,
-          message: error.message,
-        };
-      }),
+      nonFatalErrors: formatNonFatalErrors(setupStatus.nonFatalErrors),
     };
-
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

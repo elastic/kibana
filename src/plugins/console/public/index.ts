@@ -7,13 +7,14 @@
  */
 
 import './index.scss';
+import { PluginInitializerContext } from 'src/core/public';
 
 import { ConsoleUIPlugin } from './plugin';
 
-export type { ConsoleUILocatorParams } from './plugin';
+export type { ConsoleUILocatorParams, ConsolePluginSetup } from './types';
 
 export { ConsoleUIPlugin as Plugin };
 
-export function plugin() {
-  return new ConsoleUIPlugin();
+export function plugin(ctx: PluginInitializerContext) {
+  return new ConsoleUIPlugin(ctx);
 }

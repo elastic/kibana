@@ -5,41 +5,38 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
+import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 
-jest.mock('../settings/apm_indices/get_apm_indices', () => ({
-  getApmIndices: async () => ({
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.sourcemapIndices': 'apm-*',
-    'apm_oss.errorIndices': 'apm-*',
-    'apm_oss.onboardingIndices': 'apm-*',
-    'apm_oss.spanIndices': 'apm-*',
-    'apm_oss.transactionIndices': 'apm-*',
-    'apm_oss.metricsIndices': 'apm-*',
-    /* eslint-enable @typescript-eslint/naming-convention */
-    apmAgentConfigurationIndex: 'apm-*',
-  }),
+jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
+  getApmIndices: async () =>
+    ({
+      sourcemap: 'apm-*',
+      error: 'apm-*',
+      onboarding: 'apm-*',
+      span: 'apm-*',
+      transaction: 'apm-*',
+      metric: 'apm-*',
+      apmAgentConfigurationIndex: 'apm-*',
+    } as Awaited<ReturnType<typeof getApmIndices>>),
 }));
 
-jest.mock('../index_pattern/get_dynamic_index_pattern', () => ({
-  getDynamicIndexPattern: async () => {
+jest.mock('../../routes/data_view/get_dynamic_data_view', () => ({
+  getDynamicDataView: async () => {
     return;
   },
 }));
 
 function getMockResources() {
-  const esClientMock = {
-    asCurrentUser: {
-      search: jest.fn().mockResolvedValue({ body: {} }),
-    },
-    asInternalUser: {
-      search: jest.fn().mockResolvedValue({ body: {} }),
-    },
-  };
+  const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  // @ts-expect-error incomplete definition
+  esClientMock.asCurrentUser.search.mockResponse({});
+  // @ts-expect-error incomplete definition
+  esClientMock.asInternalUser.search.mockResponse({});
 
   const mockResources = {
     config: new Proxy(
@@ -111,28 +108,30 @@ describe('setupRequest', () => {
       const { apmEventClient } = await setupRequest(mockResources);
       await apmEventClient.search('foo', {
         apm: { events: [ProcessorEvent.transaction] },
-        body: { foo: 'bar' },
+        body: { size: 10 },
       });
 
       expect(
         mockResources.context.core.elasticsearch.client.asCurrentUser.search
-      ).toHaveBeenCalledWith({
-        index: ['apm-*'],
-        body: {
-          foo: 'bar',
-          query: {
-            bool: {
-              filter: [
-                { terms: { 'processor.event': ['transaction'] } },
-                { range: { 'observer.version_major': { gte: 7 } } },
-              ],
+      ).toHaveBeenCalledWith(
+        {
+          index: ['apm-*'],
+          body: {
+            size: 10,
+            query: {
+              bool: {
+                filter: [{ terms: { 'processor.event': ['transaction'] } }],
+              },
             },
           },
+          ignore_unavailable: true,
+          preference: 'any',
         },
-        ignore_unavailable: true,
-        ignore_throttled: true,
-        preference: 'any',
-      });
+        {
+          signal: expect.any(Object),
+          meta: true,
+        }
+      );
     });
 
     it('calls callWithInternalUser', async () => {
@@ -144,103 +143,24 @@ describe('setupRequest', () => {
       } as any);
       expect(
         mockResources.context.core.elasticsearch.client.asInternalUser.search
-      ).toHaveBeenCalledWith({
-        index: ['apm-*'],
-        body: {
-          foo: 'bar',
-        },
-      });
-    });
-  });
-
-  describe('with a bool filter', () => {
-    it('adds a range filter for `observer.version_major` to the existing filter', async () => {
-      const mockResources = getMockResources();
-      const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search('foo', {
-        apm: {
-          events: [ProcessorEvent.transaction],
-        },
-        body: {
-          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
-        },
-      });
-      const params =
-        mockResources.context.core.elasticsearch.client.asCurrentUser.search
-          .mock.calls[0][0];
-      expect(params.body).toEqual({
-        query: {
-          bool: {
-            filter: [
-              { term: { field: 'someTerm' } },
-              { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
-              { range: { 'observer.version_major': { gte: 7 } } },
-            ],
+      ).toHaveBeenCalledWith(
+        {
+          index: ['apm-*'],
+          body: {
+            foo: 'bar',
           },
         },
-      });
-    });
-
-    it('does not add a range filter for `observer.version_major` if includeLegacyData=true', async () => {
-      const mockResources = getMockResources();
-      const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search('foo', {
-        apm: {
-          events: [ProcessorEvent.error],
-          includeLegacyData: true,
-        },
-        body: {
-          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
-        },
-      });
-      const params =
-        mockResources.context.core.elasticsearch.client.asCurrentUser.search
-          .mock.calls[0][0];
-      expect(params.body).toEqual({
-        query: {
-          bool: {
-            filter: [
-              { term: { field: 'someTerm' } },
-              {
-                terms: {
-                  [PROCESSOR_EVENT]: ['error'],
-                },
-              },
-            ],
-          },
-        },
-      });
-    });
-  });
-});
-
-describe('without a bool filter', () => {
-  it('adds a range filter for `observer.version_major`', async () => {
-    const mockResources = getMockResources();
-    const { apmEventClient } = await setupRequest(mockResources);
-    await apmEventClient.search('foo', {
-      apm: {
-        events: [ProcessorEvent.error],
-      },
-    });
-    const params =
-      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
-        .calls[0][0];
-    expect(params.body).toEqual({
-      query: {
-        bool: {
-          filter: [
-            { terms: { [PROCESSOR_EVENT]: ['error'] } },
-            { range: { 'observer.version_major': { gte: 7 } } },
-          ],
-        },
-      },
+        {
+          signal: expect.any(Object),
+          meta: true,
+        }
+      );
     });
   });
 });
 
 describe('with includeFrozen=false', () => {
-  it('sets `ignore_throttled=true`', async () => {
+  it('should NOT send "ignore_throttled:true" in the request', async () => {
     const mockResources = getMockResources();
 
     // mock includeFrozen to return false
@@ -252,12 +172,14 @@ describe('with includeFrozen=false', () => {
       apm: {
         events: [],
       },
+      body: { size: 10 },
     });
 
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
         .calls[0][0];
-    expect(params.ignore_throttled).toBe(true);
+    // @ts-expect-error missing body definition
+    expect(params.ignore_throttled).toBe(undefined);
   });
 });
 
@@ -272,11 +194,13 @@ describe('with includeFrozen=true', () => {
 
     await apmEventClient.search('foo', {
       apm: { events: [] },
+      body: { size: 10 },
     });
 
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
         .calls[0][0];
+    // @ts-expect-error missing body definition
     expect(params.ignore_throttled).toBe(false);
   });
 });

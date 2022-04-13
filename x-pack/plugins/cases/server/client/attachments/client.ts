@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertResponse, CommentResponse } from '../../../common';
+import { AlertResponse, CommentResponse } from '../../../common/api';
 import { CasesClient } from '../client';
 
 import { CasesClientInternal } from '../client_internal';
@@ -76,7 +76,7 @@ export const createAttachmentsSubClient = (
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: (params: AddArgs) => addComment(params, clientArgs, casesClientInternal),
+    add: (params: AddArgs) => addComment(params, clientArgs),
     deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
     delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),

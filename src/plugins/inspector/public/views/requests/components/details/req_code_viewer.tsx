@@ -32,6 +32,10 @@ const openInConsoleLabel = i18n.translate('inspector.requests.openInConsoleLabel
   defaultMessage: 'Open in Console',
 });
 
+const openInSearchProfilerLabel = i18n.translate('inspector.requests.openInSearchProfilerLabel', {
+  defaultMessage: 'Open in Search Profiler',
+});
+
 /**
  * @internal
  */
@@ -39,15 +43,31 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
   const { services } = useKibana<InspectorPluginStartDeps>();
 
   const navigateToUrl = services.application?.navigateToUrl;
-  const canShowDevTools = services.application?.capabilities?.dev_tools.show;
+
   const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
-  const devToolsHref = services.share.url.locators
+  const consoleHref = services.share.url.locators
     .get('CONSOLE_APP_LOCATOR')
     ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
+  // Check if both the Dev Tools UI and the Console UI are enabled.
+  const canShowDevTools =
+    services.application?.capabilities?.dev_tools.show && consoleHref !== undefined;
   const shouldShowDevToolsLink = !!(indexPattern && canShowDevTools);
   const handleDevToolsLinkClick = useCallback(
-    () => devToolsHref && navigateToUrl && navigateToUrl(devToolsHref),
-    [devToolsHref, navigateToUrl]
+    () => consoleHref && navigateToUrl && navigateToUrl(consoleHref),
+    [consoleHref, navigateToUrl]
+  );
+
+  const searchProfilerDataUri = compressToEncodedURIComponent(json);
+  const searchProfilerHref = services.share.url.locators
+    .get('SEARCH_PROFILER_LOCATOR')
+    ?.useUrl({ index: indexPattern, loadFrom: `data:text/plain,${searchProfilerDataUri}` });
+  // Check if both the Dev Tools UI and the SearchProfiler UI are enabled.
+  const canShowsearchProfiler =
+    services.application?.capabilities?.dev_tools.show && searchProfilerHref !== undefined;
+  const shouldShowsearchProfilerLink = !!(indexPattern && canShowsearchProfiler);
+  const handleSearchProfilerLinkClick = useCallback(
+    () => searchProfilerHref && navigateToUrl && navigateToUrl(searchProfilerHref),
+    [searchProfilerHref, navigateToUrl]
   );
 
   return (
@@ -60,33 +80,57 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
-        <div className="eui-textRight">
-          <EuiCopy textToCopy={json}>
-            {(copy) => (
-              <EuiButtonEmpty
-                size="xs"
-                flush="right"
-                iconType="copyClipboard"
-                onClick={copy}
-                data-test-subj="inspectorRequestCopyClipboardButton"
-              >
-                {copyToClipboardLabel}
-              </EuiButtonEmpty>
-            )}
-          </EuiCopy>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" wrap>
+          <EuiFlexItem grow={false}>
+            <div>
+              <EuiCopy textToCopy={json}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="right"
+                    iconType="copyClipboard"
+                    onClick={copy}
+                    data-test-subj="inspectorRequestCopyClipboardButton"
+                  >
+                    {copyToClipboardLabel}
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            </div>
+          </EuiFlexItem>
           {shouldShowDevToolsLink && (
-            <EuiButtonEmpty
-              size="xs"
-              flush="right"
-              iconType="wrench"
-              href={devToolsHref}
-              onClick={handleDevToolsLinkClick}
-              data-test-subj="inspectorRequestOpenInConsoleButton"
-            >
-              {openInConsoleLabel}
-            </EuiButtonEmpty>
+            <EuiFlexItem grow={false}>
+              <div>
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  iconType="wrench"
+                  href={consoleHref}
+                  onClick={handleDevToolsLinkClick}
+                  data-test-subj="inspectorRequestOpenInConsoleButton"
+                >
+                  {openInConsoleLabel}
+                </EuiButtonEmpty>
+              </div>
+            </EuiFlexItem>
           )}
-        </div>
+          {shouldShowsearchProfilerLink && (
+            <EuiFlexItem grow={false}>
+              <div>
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  iconType="visBarHorizontal"
+                  href={searchProfilerHref}
+                  onClick={handleSearchProfilerLinkClick}
+                  data-test-subj="inspectorRequestOpenInSearchProfilerButton"
+                >
+                  {openInSearchProfilerLabel}
+                </EuiButtonEmpty>
+              </div>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <CodeEditor

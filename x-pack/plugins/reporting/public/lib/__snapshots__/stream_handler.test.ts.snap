@@ -11,6 +11,14 @@ Object {
       "status": "completed",
       "title": "specimen",
     },
+    Object {
+      "csvContainsFormulas": true,
+      "id": "job-source-mock4",
+      "jobtype": undefined,
+      "maxSizeReached": false,
+      "status": "completed",
+      "title": "specimen",
+    },
   ],
   "failed": Array [
     Object {
@@ -33,9 +41,13 @@ Array [
       "reactNode": <React.Fragment>
         <p>
           <FormattedMessage
-            defaultMessage="The report contains characters which spreadsheet applications can interpret as formulas."
+            defaultMessage="The report '{reportObjectTitle}' contains characters which spreadsheet applications can interpret as formulas."
             id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
-            values={Object {}}
+            values={
+              Object {
+                "reportObjectTitle": "Yas",
+              }
+            }
           />
         </p>
         <p>
@@ -59,12 +71,11 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
+        defaultMessage="{reportType} may contain formulas"
         id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
         values={
           Object {
-            "reportObjectTitle": "Yas",
-            "reportObjectType": "yas",
+            "reportType": "yas",
           }
         }
       />,
@@ -82,6 +93,7 @@ Array [
       "reactNode": <React.Fragment>
         <EuiCallOut
           color="danger"
+          data-test-errorText="this is the failed report error"
           iconType="alert"
           size="m"
           title="The reporting job failed"
@@ -91,7 +103,7 @@ Array [
         <EuiSpacer />
         <p>
           <FormattedMessage
-            defaultMessage="More information is available at {path}."
+            defaultMessage="Go to {path} for details."
             id="xpack.reporting.publicNotifier.error.checkManagement"
             values={
               Object {
@@ -99,7 +111,7 @@ Array [
                   href="/#management"
                 >
                   <FormattedMessage
-                    defaultMessage="Management > Kibana > Reporting"
+                    defaultMessage="Stack Management > Kibana > Reporting"
                     id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
                     values={Object {}}
                   />
@@ -112,12 +124,12 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
+        defaultMessage="Cannot create {reportType} report for '{reportObjectTitle}'."
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
         values={
           Object {
             "reportObjectTitle": "Yas 7",
-            "reportObjectType": "yas",
+            "reportType": "yas",
           }
         }
       />,
@@ -160,12 +172,12 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
+        defaultMessage="Created partial {reportType} for '{reportObjectTitle}'"
         id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
         values={
           Object {
             "reportObjectTitle": "Yas",
-            "reportObjectType": "yas",
+            "reportType": "yas",
           }
         }
       />,
@@ -201,12 +213,12 @@ Array [
     },
     "title": MountPoint {
       "reactNode": <FormattedMessage
-        defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
+        defaultMessage="{reportType} created for '{reportObjectTitle}'"
         id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
         values={
           Object {
             "reportObjectTitle": "Yas",
-            "reportObjectType": "yas",
+            "reportType": "yas",
           }
         }
       />,

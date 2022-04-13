@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Whitespace Padding in Process Command Line",
-  "note": "## Triage and analysis\n\n- Analyze the command line of the process in question for evidence of malicious code execution.\n- Review the ancestry and child processes spawned by the process in question for indicators of further malicious code execution.",
+  "note": "## Triage and analysis\n\n- Analyze the command line of the process in question for evidence of malicious code execution.\n- Review the ancestor and child processes spawned by the process in question for indicators of further malicious code execution.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.command_line regex \".*[ ]{20,}.*\" or \n  \n  /* this will match on 3 or more separate occurrences of 5+ contiguous whitespace characters */\n  process.command_line regex \".*(.*[ ]{5,}[^ ]*){3,}.*\"\n",
   "references": [
     "https://twitter.com/JohnLaTwC/status/1419251082736201737"
@@ -40,5 +40,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 7
 }

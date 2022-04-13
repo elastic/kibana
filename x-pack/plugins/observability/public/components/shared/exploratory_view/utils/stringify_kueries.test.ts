@@ -36,7 +36,7 @@ describe('stringifyKueries', () => {
       },
     ];
     expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(
-      `"user_agent.name: (\\"Chrome\\")"`
+      `"user_agent.name: \\"Chrome\\""`
     );
   });
 
@@ -64,7 +64,7 @@ describe('stringifyKueries', () => {
       },
     ];
     expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(
-      `"user_agent.name: (\\"Google Chrome\\")"`
+      `"user_agent.name: \\"Google Chrome\\""`
     );
   });
 
@@ -77,7 +77,7 @@ describe('stringifyKueries', () => {
       },
     ];
     expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(
-      `"user_agent.name: (\\"Google Chrome\\") and not (user_agent.name: (\\"Apple Safari\\"))"`
+      `"user_agent.name: \\"Google Chrome\\" and not (user_agent.name: \\"Apple Safari\\")"`
     );
   });
 
@@ -90,7 +90,7 @@ describe('stringifyKueries', () => {
       },
     ];
     expect(urlFiltersToKueryString(filters)).toMatchInlineSnapshot(
-      `"user_agent.name: (\\"Chrome\\" or \\"Firefox\\" or \\"Safari\\" or \\"Opera\\") and not (user_agent.name: (\\"Safari\\"))"`
+      `"user_agent.name: (\\"Chrome\\" or \\"Firefox\\" or \\"Safari\\" or \\"Opera\\") and not (user_agent.name: \\"Safari\\")"`
     );
   });
 

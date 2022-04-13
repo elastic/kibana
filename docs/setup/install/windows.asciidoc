@@ -40,6 +40,9 @@ CD c:\kibana-{version}-windows-x86_64
 
 endif::[]
 
+[[windows-enroll]]
+include::start-es-and-enroll.asciidoc[]
+
 [[windows-running]]
 include::windows-running.asciidoc[]
 

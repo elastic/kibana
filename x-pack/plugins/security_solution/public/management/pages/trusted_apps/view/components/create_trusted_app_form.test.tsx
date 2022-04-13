@@ -9,11 +9,8 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { fireEvent, getByTestId } from '@testing-library/dom';
 
-import {
-  ConditionEntryField,
-  NewTrustedApp,
-  OperatingSystem,
-} from '../../../../../../common/endpoint/types';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import { NewTrustedApp } from '../../../../../../common/endpoint/types';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -21,12 +18,25 @@ import {
 
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import { defaultNewTrustedApp } from '../../store/builders';
-import { forceHTMLElementOffsetWidth } from './effected_policy_select/test_utils';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { licenseService } from '../../../../../common/hooks/use_license';
+import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+
+jest.mock('../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('When using the Trusted App Form', () => {
   const dataTestSubjForForm = 'createForm';
@@ -112,6 +122,7 @@ describe('When using the Trusted App Form', () => {
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
 
     mockedContext = createAppRootMockRenderer();
 
@@ -120,6 +131,9 @@ describe('When using the Trusted App Form', () => {
     formProps = {
       'data-test-subj': dataTestSubjForForm,
       trustedApp: latestUpdatedTrustedApp,
+      isEditMode: false,
+      isDirty: false,
+      wasByPolicy: false,
       onChange: jest.fn((updates) => {
         latestUpdatedTrustedApp = updates.item;
       }),
@@ -137,7 +151,11 @@ describe('When using the Trusted App Form', () => {
   describe('and the form is rendered', () => {
     beforeEach(() => render());
 
-    it('should show Name as required', () => {
+    it('should show Name as required after blur', () => {
+      expect(getNameField().required).toBe(false);
+      reactTestingLibrary.act(() => {
+        fireEvent.blur(getNameField());
+      });
       expect(getNameField().required).toBe(true);
     });
 
@@ -208,7 +226,11 @@ describe('When using the Trusted App Form', () => {
       ]);
     });
 
-    it('should show the value field as required', () => {
+    it('should show the value field as required after blur', () => {
+      expect(getConditionValue(getCondition()).required).toEqual(false);
+      reactTestingLibrary.act(() => {
+        fireEvent.blur(getConditionValue(getCondition()));
+      });
       expect(getConditionValue(getCondition()).required).toEqual(true);
     });
 
@@ -277,7 +299,7 @@ describe('When using the Trusted App Form', () => {
 
       expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
       expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('false');
-      expect(renderResult.getByTestId('policy-123').getAttribute('aria-selected')).toEqual('true');
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-checked')).toEqual('true');
     });
     it('should show loader when setting `policies.isLoading` to true and scope is per-policy', () => {
       formProps.policies.isLoading = true;
@@ -286,10 +308,7 @@ describe('When using the Trusted App Form', () => {
         policies: ['123'],
       };
       render();
-      expect(
-        renderResult.getByTestId(`${dataTestSubjForForm}-effectedPolicies-policiesSelectable`)
-          .textContent
-      ).toEqual('Loading options');
+      expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
     });
   });
 
@@ -300,6 +319,58 @@ describe('When using the Trusted App Form', () => {
       expect(
         renderResult.queryByText('Apply trusted application globally')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('the Policy Selection area when the license downgrades to gold or below', () => {
+    beforeEach(() => {
+      // select per policy for trusted app
+      const policy = generator.generatePolicyPackagePolicy();
+      policy.name = 'test policy A';
+      policy.id = '123';
+
+      formProps.policies.options = [policy];
+
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'policy',
+        policies: ['123'],
+      };
+
+      formProps.isEditMode = true;
+
+      // downgrade license
+      (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    });
+
+    it('maintains policy configuration but does not allow the user to edit add/remove individual policies in edit mode', () => {
+      render();
+      const perPolicyButton = renderResult.getByTestId(
+        `${dataTestSubjForForm}-effectedPolicies-perPolicy`
+      ) as HTMLButtonElement;
+
+      expect(perPolicyButton.classList.contains('euiButtonGroupButton-isSelected')).toEqual(true);
+      expect(renderResult.getByTestId('policy-123').getAttribute('aria-disabled')).toEqual('true');
+      expect(renderResult.getByTestId('policy-123-checkbox')).toBeChecked();
+    });
+    it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
+      render();
+      const globalButtonInput = renderResult.getByTestId('globalPolicy') as HTMLButtonElement;
+
+      reactTestingLibrary.act(() => {
+        fireEvent.click(globalButtonInput);
+      });
+
+      expect(formProps.onChange.mock.calls[0][0].item.effectScope.type).toBe('global');
+    });
+    it('hides the policy assignment section if the TA is set to global', () => {
+      (formProps.trustedApp as NewTrustedApp).effectScope = {
+        type: 'global',
+      };
+      expect(renderResult.queryByTestId(`${dataTestSubjForForm}-effectedPolicies`)).toBeNull();
+    });
+    it('hides the policy assignment section if the user is adding a new TA', () => {
+      formProps.isEditMode = false;
+      expect(renderResult.queryByTestId(`${dataTestSubjForForm}-effectedPolicies`)).toBeNull();
     });
   });
 
@@ -356,6 +427,18 @@ describe('When using the Trusted App Form', () => {
       rerenderWithLatestTrustedApp();
 
       expect(renderResult.getByText('[2] Field entry must have a value'));
+    });
+
+    it('should validate duplicated conditions', () => {
+      const andButton = getConditionBuilderAndButton();
+      reactTestingLibrary.act(() => {
+        fireEvent.click(andButton, { button: 1 });
+      });
+
+      setTextFieldValue(getConditionValue(getCondition()), '');
+      rerenderWithLatestTrustedApp();
+
+      expect(renderResult.getByText('Hash cannot be added more than once'));
     });
 
     it('should validate multiple errors in form', () => {

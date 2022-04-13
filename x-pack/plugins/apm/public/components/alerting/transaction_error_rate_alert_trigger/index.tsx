@@ -13,7 +13,7 @@ import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asPercent } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { createCallApmApi } from '../../../services/rest/createCallApmApi';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../chart_preview';
 import {
   EnvironmentField,
@@ -24,7 +24,7 @@ import {
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
-interface AlertParams {
+interface RuleParams {
   windowSize?: number;
   windowUnit?: string;
   threshold?: number;
@@ -34,22 +34,22 @@ interface AlertParams {
 }
 
 interface Props {
-  alertParams: AlertParams;
+  ruleParams: RuleParams;
   metadata?: AlertMetadata;
-  setAlertParams: (key: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
+  setRuleProperty: (key: string, value: any) => void;
 }
 
 export function TransactionErrorRateAlertTrigger(props: Props) {
   const { services } = useKibana();
-  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
+  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
   useEffect(() => {
     createCallApmApi(services as CoreStart);
   }, [services]);
 
   const params = defaults(
-    { ...omit(metadata, ['start', 'end']), ...alertParams },
+    { ...omit(metadata, ['start', 'end']), ...ruleParams },
     {
       threshold: 30,
       windowSize: 5,
@@ -67,19 +67,21 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
         windowUnit: params.windowUnit as TimeUnit,
       });
       if (interval && start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_rate',
-          params: {
-            query: {
-              environment: params.environment,
-              serviceName: params.serviceName,
-              transactionType: params.transactionType,
-              interval,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
+          {
+            params: {
+              query: {
+                environment: params.environment,
+                serviceName: params.serviceName,
+                transactionType: params.transactionType,
+                interval,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [
@@ -94,27 +96,27 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
-      onChange={(value) => setAlertParams('serviceName', value)}
+      onChange={(value) => setRuleParams('serviceName', value)}
     />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      onChange={(value) => setAlertParams('transactionType', value)}
+      onChange={(value) => setRuleParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setAlertParams('environment', value)}
+      onChange={(value) => setRuleParams('environment', value)}
     />,
     <IsAboveField
       value={params.threshold}
       unit="%"
-      onChange={(value) => setAlertParams('threshold', value || 0)}
+      onChange={(value) => setRuleParams('threshold', value || 0)}
     />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
+        setRuleParams('windowSize', timeWindowSize || '')
       }
       onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
+        setRuleParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
@@ -130,6 +132,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       data={data?.errorRateChartPreview}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
+      uiSettings={services.uiSettings}
     />
   );
 
@@ -137,8 +140,8 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
     <ServiceAlertTrigger
       fields={fields}
       defaults={params}
-      setAlertParams={setAlertParams}
-      setAlertProperty={setAlertProperty}
+      setRuleParams={setRuleParams}
+      setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}
     />
   );

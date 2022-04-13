@@ -1,0 +1,184 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
+load("@npm//@babel/cli:index.bzl", "babel")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+
+PKG_BASE_NAME = "kbn-test-jest-helpers"
+PKG_REQUIRE_NAME = "@kbn/test-jest-helpers"
+
+SOURCE_FILES = glob(
+  [
+    "src/**/*"
+  ],
+  exclude = [
+    "**/*.test.*",
+    "**/*.snap",
+    "**/__fixture__/**",
+    "**/__fixtures__/**",
+    "**/__snapshots__/**",
+  ]
+)
+
+SRCS = SOURCE_FILES
+
+filegroup(
+  name = "srcs",
+  srcs = SRCS,
+)
+
+NPM_MODULE_EXTRA_FILES = [
+  "jest.config.js",
+  "package.json",
+]
+
+RUNTIME_DEPS = [
+    "//packages/kbn-dev-utils",
+    "//packages/kbn-i18n-react",
+    "//packages/kbn-axe-config",
+    "//packages/kbn-std",
+    "//packages/kbn-utils",
+    "@npm//@elastic/elasticsearch",
+    "@npm//axios",
+    "@npm//@babel/traverse",
+    "@npm//chance",
+    "@npm//dedent",
+    "@npm//del",
+    "@npm//enzyme",
+    "@npm//execa",
+    "@npm//exit-hook",
+    "@npm//form-data",
+    "@npm//getopts",
+    "@npm//globby",
+    "@npm//he",
+    "@npm//history",
+    "@npm//jest",
+    "@npm//jest-axe",
+    "@npm//jest-cli",
+    "@npm//jest-snapshot",
+    "@npm//jest-styled-components",
+    "@npm//@jest/reporters",
+    "@npm//joi",
+    "@npm//mustache",
+    "@npm//normalize-path",
+    "@npm//parse-link-header",
+    "@npm//prettier",
+    "@npm//react",
+    "@npm//react-dom",
+    "@npm//react-redux",
+    "@npm//react-router-dom",
+    "@npm//redux",
+    "@npm//rxjs",
+    "@npm//semver",
+    "@npm//strip-ansi",
+    "@npm//xmlbuilder",
+    "@npm//xml2js",
+]
+
+TYPES_DEPS = [
+  "//packages/kbn-dev-utils:npm_module_types",
+  "//packages/kbn-i18n-react:npm_module_types",
+  "//packages/kbn-std:npm_module_types",
+  "//packages/kbn-axe-config:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
+  "@npm//@elastic/elasticsearch",
+  "@npm//axios",
+  "@npm//axe-core",
+  "@npm//elastic-apm-node",
+  "@npm//del",
+  "@npm//exit-hook",
+  "@npm//form-data",
+  "@npm//getopts",
+  "@npm//jest",
+  "@npm//jest-cli",
+  "@npm//jest-snapshot",
+  "@npm//redux",
+  "@npm//rxjs",
+  "@npm//xmlbuilder",
+  "@npm//@types/chance",
+  "@npm//@types/dedent",
+  "@npm//@types/enzyme",
+  "@npm//@types/he",
+  "@npm//@types/history",
+  "@npm//@types/jest",
+  "@npm//@types/jest-axe",
+  "@npm//@types/joi",
+  "@npm//@types/lodash",
+  "@npm//@types/mustache",
+  "@npm//@types/normalize-path",
+  "@npm//@types/node",
+  "@npm//@types/parse-link-header",
+  "@npm//@types/prettier",
+  "@npm//@types/react",
+  "@npm//@types/react-dom",
+  "@npm//@types/react-redux",
+  "@npm//@types/react-router-dom",
+  "@npm//@types/semver",
+  "@npm//@types/xml2js",
+]
+
+jsts_transpiler(
+  name = "target_node",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+)
+
+ts_config(
+  name = "tsconfig",
+  src = "tsconfig.json",
+  deps = [
+    "//:tsconfig.base.json",
+    "//:tsconfig.bazel.json",
+  ],
+)
+
+ts_project(
+  name = "tsc_types",
+  args = ['--pretty'],
+  srcs = SRCS,
+  deps = TYPES_DEPS,
+  declaration = True,
+  emit_declaration_only = True,
+  out_dir = "target_types",
+  root_dir = "src",
+  tsconfig = ":tsconfig",
+)
+
+js_library(
+  name = PKG_BASE_NAME,
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm(
+  name = "npm_module",
+  deps = [
+    ":%s" % PKG_BASE_NAME,
+  ]
+)
+
+filegroup(
+  name = "build",
+  srcs = [
+    ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
+  ],
+  visibility = ["//visibility:public"],
+)

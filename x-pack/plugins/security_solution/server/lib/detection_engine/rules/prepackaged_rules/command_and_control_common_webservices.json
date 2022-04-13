@@ -2,17 +2,16 @@
   "author": [
     "Elastic"
   ],
-  "description": "Adversaries may implement command and control communications that use common web services in order to hide their activity. This attack technique is typically targeted to an organization and uses web services common to the victim network which allows the adversary to blend into legitimate traffic. activity. These popular services are typically targeted since they have most likely been used before a compromise and allow adversaries to blend in the network.",
+  "description": "Adversaries may implement command and control (C2) communications that use common web services to hide their activity. This attack technique is typically targeted at an organization and uses web services common to the victim network, which allows the adversary to blend into legitimate traffic activity. These popular services are typically targeted since they have most likely been used before compromise, which helps malicious traffic blend in.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Connection to Commonly Abused Web Services",
-  "query": "network where network.protocol == \"dns\" and\n    process.name != null and user.id not in (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\") and\n    /* Add new WebSvc domains here */\n    dns.question.name :\n    (\n        \"raw.githubusercontent.*\",\n        \"*.pastebin.*\",\n        \"*drive.google.*\",\n        \"*docs.live.*\",\n        \"*api.dropboxapi.*\",\n        \"*dropboxusercontent.*\",\n        \"*onedrive.*\",\n        \"*4shared.*\",\n        \"*.file.io\",\n        \"*filebin.net\",\n        \"*slack-files.com\",\n        \"*ghostbin.*\",\n        \"*ngrok.*\",\n        \"*portmap.*\",\n        \"*serveo.net\",\n        \"*localtunnel.me\",\n        \"*pagekite.me\",\n        \"*localxpose.io\",\n        \"*notabug.org\",\n        \"rawcdn.githack.*\",\n        \"paste.nrecom.net\",\n        \"zerobin.net\",\n        \"controlc.com\",\n        \"requestbin.net\"\n    ) and\n    /* Insert noisy false positives here */\n    not process.executable :\n    (\n      \"?:\\\\Program Files\\\\*.exe\",\n      \"?:\\\\Program Files (x86)\\\\*.exe\",\n      \"?:\\\\Windows\\\\System32\\\\WWAHost.exe\",\n      \"?:\\\\Windows\\\\System32\\\\smartscreen.exe\",\n      \"?:\\\\Windows\\\\System32\\\\MicrosoftEdgeCP.exe\",\n      \"?:\\\\ProgramData\\\\Microsoft\\\\Windows Defender\\\\Platform\\\\*\\\\MsMpEng.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Programs\\\\Fiddler\\\\Fiddler.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Programs\\\\Microsoft VS Code\\\\Code.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\OneDrive\\\\OneDrive.exe\",\n      \"?:\\\\Windows\\\\system32\\\\mobsync.exe\",\n      \"?:\\\\Windows\\\\SysWOW64\\\\mobsync.exe\"\n    )\n",
+  "note": "## Triage and analysis\n\n### Investigating Connection to Commonly Abused Web Services\n\nAdversaries may use an existing, legitimate external Web service as a means for relaying data to/from a compromised\nsystem. Popular websites and social media acting as a mechanism for C2 may give a significant amount of cover due to the\nlikelihood that hosts within a network are already communicating with them prior to a compromise.\n\nThis rule looks for processes outside known legitimate program locations communicating with a list of services that can\nbe abused for exfiltration or command and control.\n\n#### Possible investigation steps\n\n- Investigate the script execution chain (parent process tree).\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Verify whether the digital signature exists in the executable.\n- Identify the kind of the operation (upload, download, tunneling, etc.).\n- Use a sandboxed malware analysis system to perform analysis on the executable.\n- Use the PowerShell Get-FileHash cmdlet to get the SHA-256 hash value of the file.\n  - Search for the existence of this file in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n\n### False positive analysis\n\n- This rule has a high chance to produce false positives because it detects communication with legitimate services. Noisy\nfalse positives can be added as exceptions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n- Implement any temporary network rules, procedures, and segmentation required to contain the malware.\n",
+  "query": "network where network.protocol == \"dns\" and\n    process.name != null and user.id not in (\"S-1-5-18\", \"S-1-5-19\", \"S-1-5-20\") and\n    /* Add new WebSvc domains here */\n    dns.question.name :\n    (\n        \"raw.githubusercontent.*\",\n        \"*.pastebin.*\",\n        \"*drive.google.*\",\n        \"*docs.live.*\",\n        \"*api.dropboxapi.*\",\n        \"*dropboxusercontent.*\",\n        \"*onedrive.*\",\n        \"*4shared.*\",\n        \"*.file.io\",\n        \"*filebin.net\",\n        \"*slack-files.com\",\n        \"*ghostbin.*\",\n        \"*ngrok.*\",\n        \"*portmap.*\",\n        \"*serveo.net\",\n        \"*localtunnel.me\",\n        \"*pagekite.me\",\n        \"*localxpose.io\",\n        \"*notabug.org\",\n        \"rawcdn.githack.*\",\n        \"paste.nrecom.net\",\n        \"zerobin.net\",\n        \"controlc.com\",\n        \"requestbin.net\",\n        \"cdn.discordapp.com\",\n        \"discordapp.com\",\n        \"discord.com\"\n    ) and\n    /* Insert noisy false positives here */\n    not process.executable :\n    (\n      \"?:\\\\Program Files\\\\*.exe\",\n      \"?:\\\\Program Files (x86)\\\\*.exe\",\n      \"?:\\\\Windows\\\\System32\\\\WWAHost.exe\",\n      \"?:\\\\Windows\\\\System32\\\\smartscreen.exe\",\n      \"?:\\\\Windows\\\\System32\\\\MicrosoftEdgeCP.exe\",\n      \"?:\\\\ProgramData\\\\Microsoft\\\\Windows Defender\\\\Platform\\\\*\\\\MsMpEng.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Programs\\\\Fiddler\\\\Fiddler.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Programs\\\\Microsoft VS Code\\\\Code.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\OneDrive\\\\OneDrive.exe\",\n      \"?:\\\\Windows\\\\system32\\\\mobsync.exe\",\n      \"?:\\\\Windows\\\\SysWOW64\\\\mobsync.exe\",\n      \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Discord\\\\-*\\\\Discord.exe\"\n    )\n",
   "risk_score": 21,
   "rule_id": "66883649-f908-4a5b-a1e0-54090a1d3a32",
   "severity": "low",
@@ -38,9 +37,36 @@
           "reference": "https://attack.mitre.org/techniques/T1102/"
         }
       ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
+      },
+      "technique": [
+        {
+          "id": "T1567",
+          "name": "Exfiltration Over Web Service",
+          "reference": "https://attack.mitre.org/techniques/T1567/",
+          "subtechnique": [
+            {
+              "id": "T1567.001",
+              "name": "Exfiltration to Code Repository",
+              "reference": "https://attack.mitre.org/techniques/T1567/001/"
+            },
+            {
+              "id": "T1567.002",
+              "name": "Exfiltration to Cloud Storage",
+              "reference": "https://attack.mitre.org/techniques/T1567/002/"
+            }
+          ]
+        }
+      ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 8
 }

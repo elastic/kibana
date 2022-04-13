@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Detects when an EFS File System or Mount is deleted. An adversary could break any file system using the mount target that is being deleted, which might disrupt instances or applications using those mounts. The mount must be deleted prior to deleting the File System, or the adversary will be unable to delete the File System.",
+  "false_positives": [
+    "File System or Mount being deleted may be performed by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. File System Mount deletion by unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS EFS File System or Mount Deleted",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:elasticfilesystem.amazonaws.com and \nevent.action:(DeleteMountTarget or DeleteFileSystem) and event.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/efs/latest/ug/API_DeleteFileSystem.html",
+    "https://docs.aws.amazon.com/efs/latest/ug/API_DeleteMountTarget.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "536997f7-ae73-447d-a12d-bff1e8f5f0a0",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Data Protection"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1485",
+          "name": "Data Destruction",
+          "reference": "https://attack.mitre.org/techniques/T1485/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 3
+}

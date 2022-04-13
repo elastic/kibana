@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
-import { mockBrowserFields, TestProviders } from '../../../../mock';
+import { omit } from 'lodash/fp';
+import { render } from '@testing-library/react';
+import { EuiInMemoryTable } from '@elastic/eui';
+import { mockBrowserFields } from '../../../../mock';
 import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../body/constants';
 
-import { Category } from './category';
 import { getFieldColumns, getFieldItems } from './field_items';
-import { FIELDS_PANE_WIDTH } from './helpers';
-import { useMountAppended } from '../../../utils/use_mount_appended';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../common/types';
 
-const selectedCategoryId = 'base';
-const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
 const timestampFieldId = '@timestamp';
 const columnHeaders: ColumnHeaderOptions[] = [
   {
@@ -28,7 +24,7 @@ const columnHeaders: ColumnHeaderOptions[] = [
     description:
       'Date/time when the event originated.\nFor log events this is the date/time when the event was generated, and not when it was read.\nRequired field for all events.',
     example: '2016-05-23T08:05:34.853Z',
-    id: '@timestamp',
+    id: timestampFieldId,
     type: 'date',
     aggregatable: true,
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
@@ -36,295 +32,202 @@ const columnHeaders: ColumnHeaderOptions[] = [
 ];
 
 describe('field_items', () => {
-  const timelineId = 'test';
-  const mount = useMountAppended();
-
   describe('getFieldItems', () => {
-    Object.keys(selectedCategoryFields!).forEach((fieldId) => {
-      test(`it renders the name of the ${fieldId} field`, () => {
-        const wrapper = mount(
-          <TestProviders>
-            <Category
-              categoryId={selectedCategoryId}
-              data-test-subj="category"
-              filteredBrowserFields={mockBrowserFields}
-              fieldItems={getFieldItems({
-                category: mockBrowserFields[selectedCategoryId],
-                columnHeaders: [],
-                highlight: '',
-                timelineId,
-                toggleColumn: jest.fn(),
-              })}
-              width={FIELDS_PANE_WIDTH}
-              onCategorySelected={jest.fn()}
-              onUpdateColumns={jest.fn()}
-              timelineId={timelineId}
-            />
-          </TestProviders>
-        );
+    const timestampField = mockBrowserFields.base.fields![timestampFieldId];
 
-        expect(wrapper.find(`[data-test-subj="field-name-${fieldId}"]`).first().text()).toEqual(
-          fieldId
-        );
+    it('should return browser field item format', () => {
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: ['base'],
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        columnHeaders: [],
+      });
+
+      expect(fieldItems[0]).toEqual({
+        name: timestampFieldId,
+        description: timestampField.description,
+        category: 'base',
+        selected: false,
+        type: timestampField.type,
+        example: timestampField.example,
+        isRuntime: false,
       });
     });
 
-    Object.keys(selectedCategoryFields!).forEach((fieldId) => {
-      test(`it renders a checkbox for the ${fieldId} field`, () => {
-        const wrapper = mount(
-          <TestProviders>
-            <Category
-              categoryId={selectedCategoryId}
-              data-test-subj="category"
-              filteredBrowserFields={mockBrowserFields}
-              fieldItems={getFieldItems({
-                category: mockBrowserFields[selectedCategoryId],
-                columnHeaders: [],
-                highlight: '',
-                timelineId,
-                toggleColumn: jest.fn(),
-              })}
-              width={FIELDS_PANE_WIDTH}
-              onCategorySelected={jest.fn()}
-              onUpdateColumns={jest.fn()}
-              timelineId={timelineId}
-            />
-          </TestProviders>
-        );
+    it('should return selected item', () => {
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: ['base'],
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        columnHeaders,
+      });
 
-        expect(wrapper.find(`[data-test-subj="field-${fieldId}-checkbox"]`).first().exists()).toBe(
-          true
-        );
+      expect(fieldItems[0]).toMatchObject({
+        selected: true,
       });
     });
 
-    test('it renders a checkbox in the checked state when the field is selected to be displayed as a column in the timeline', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Category
-            categoryId={selectedCategoryId}
-            data-test-subj="category"
-            filteredBrowserFields={mockBrowserFields}
-            fieldItems={getFieldItems({
-              category: mockBrowserFields[selectedCategoryId],
-              columnHeaders,
-              highlight: '',
-              timelineId,
-              toggleColumn: jest.fn(),
-            })}
-            width={FIELDS_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            timelineId={timelineId}
-          />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find(`[data-test-subj="field-${timestampFieldId}-checkbox"]`).first().props()
-          .checked
-      ).toBe(true);
-    });
-
-    test('it does NOT render a checkbox in the checked state when the field is NOT selected to be displayed as a column in the timeline', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Category
-            categoryId={selectedCategoryId}
-            data-test-subj="category"
-            filteredBrowserFields={mockBrowserFields}
-            fieldItems={getFieldItems({
-              category: mockBrowserFields[selectedCategoryId],
-              columnHeaders: columnHeaders.filter((header) => header.id !== timestampFieldId),
-              highlight: '',
-              timelineId,
-              toggleColumn: jest.fn(),
-            })}
-            width={FIELDS_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            timelineId={timelineId}
-          />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find(`[data-test-subj="field-${timestampFieldId}-checkbox"]`).first().props()
-          .checked
-      ).toBe(false);
-    });
-
-    test('it invokes `toggleColumn` when the user interacts with the checkbox', () => {
-      const toggleColumn = jest.fn();
-
-      const wrapper = mount(
-        <TestProviders>
-          <Category
-            categoryId={selectedCategoryId}
-            data-test-subj="category"
-            filteredBrowserFields={mockBrowserFields}
-            fieldItems={getFieldItems({
-              category: mockBrowserFields[selectedCategoryId],
-              columnHeaders: [],
-              highlight: '',
-              timelineId,
-              toggleColumn,
-            })}
-            width={FIELDS_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            timelineId={timelineId}
-          />
-        </TestProviders>
-      );
-
-      wrapper
-        .find('input[type="checkbox"]')
-        .first()
-        .simulate('change', {
-          target: { checked: true },
-        });
-      wrapper.update();
-
-      expect(toggleColumn).toBeCalledWith({
-        columnHeaderType: 'not-filtered',
-        id: '@timestamp',
-        initialWidth: 180,
-      });
-    });
-
-    test('it returns the expected signal column settings', async () => {
-      const mockSelectedCategoryId = 'signal';
-      const mockBrowserFieldsWithSignal = {
-        ...mockBrowserFields,
-        signal: {
-          fields: {
-            'signal.rule.name': {
-              aggregatable: true,
-              category: 'signal',
-              description: 'rule name',
-              example: '',
-              format: '',
-              indexes: ['auditbeat', 'filebeat', 'packetbeat'],
-              name: 'signal.rule.name',
-              searchable: true,
-              type: 'string',
+    it('should return isRuntime field', () => {
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: ['base'],
+        browserFields: {
+          base: {
+            fields: {
+              [timestampFieldId]: {
+                ...timestampField,
+                runtimeField: { type: 'keyword', script: { source: 'scripts are fun' } },
+              },
             },
           },
         },
-      };
-      const toggleColumn = jest.fn();
-      const wrapper = mount(
-        <TestProviders>
-          <Category
-            categoryId={mockSelectedCategoryId}
-            data-test-subj="category"
-            filteredBrowserFields={mockBrowserFieldsWithSignal}
-            fieldItems={getFieldItems({
-              category: mockBrowserFieldsWithSignal[mockSelectedCategoryId],
-              columnHeaders,
-              highlight: '',
-              timelineId,
-              toggleColumn,
-            })}
-            width={FIELDS_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            timelineId={timelineId}
-          />
-        </TestProviders>
-      );
-      wrapper
-        .find(`[data-test-subj="field-signal.rule.name-checkbox"]`)
-        .last()
-        .simulate('change', {
-          target: { checked: true },
-        });
+        columnHeaders,
+      });
 
-      await waitFor(() => {
-        expect(toggleColumn).toBeCalledWith({
-          columnHeaderType: 'not-filtered',
-          id: 'signal.rule.name',
-          initialWidth: 180,
-        });
+      expect(fieldItems[0]).toMatchObject({
+        isRuntime: true,
       });
     });
 
-    test('it renders the expected icon for a field', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Category
-            categoryId={selectedCategoryId}
-            data-test-subj="category"
-            filteredBrowserFields={mockBrowserFields}
-            fieldItems={getFieldItems({
-              category: mockBrowserFields[selectedCategoryId],
-              columnHeaders,
-              highlight: '',
-              timelineId,
-              toggleColumn: jest.fn(),
-            })}
-            width={FIELDS_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            timelineId={timelineId}
-          />
-        </TestProviders>
+    it('should return all field items of all categories if no category selected', () => {
+      const fieldCount = Object.values(mockBrowserFields).reduce(
+        (total, { fields }) => total + Object.keys(fields ?? {}).length,
+        0
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="field-${timestampFieldId}-icon"]`).first().props().type
-      ).toEqual('clock');
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: [],
+        browserFields: mockBrowserFields,
+        columnHeaders: [],
+      });
+
+      expect(fieldItems.length).toBe(fieldCount);
     });
 
-    test('it renders the expected field description', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Category
-            categoryId={selectedCategoryId}
-            data-test-subj="category"
-            filteredBrowserFields={mockBrowserFields}
-            fieldItems={getFieldItems({
-              category: mockBrowserFields[selectedCategoryId],
-              columnHeaders,
-              highlight: '',
-              timelineId,
-              toggleColumn: jest.fn(),
-            })}
-            width={FIELDS_PANE_WIDTH}
-            onCategorySelected={jest.fn()}
-            onUpdateColumns={jest.fn()}
-            timelineId={timelineId}
-          />
-        </TestProviders>
+    it('should return filtered field items of selected categories', () => {
+      const selectedCategoryIds = ['base', 'event'];
+      const fieldCount = selectedCategoryIds.reduce(
+        (total, selectedCategoryId) =>
+          total + Object.keys(mockBrowserFields[selectedCategoryId].fields ?? {}).length,
+        0
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="field-${timestampFieldId}-description"]`).first().text()
-      ).toEqual(
-        'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
-      );
+      const fieldItems = getFieldItems({
+        selectedCategoryIds,
+        browserFields: mockBrowserFields,
+        columnHeaders: [],
+      });
+
+      expect(fieldItems.length).toBe(fieldCount);
     });
   });
 
   describe('getFieldColumns', () => {
-    test('it returns the expected column definitions', () => {
-      expect(getFieldColumns().map((column) => omit('render', column))).toEqual([
+    const onToggleColumn = jest.fn();
+    const getFieldColumnsParams = { onToggleColumn, onHide: () => {} };
+
+    beforeEach(() => {
+      onToggleColumn.mockClear();
+    });
+
+    it('should return default field columns', () => {
+      expect(
+        getFieldColumns(getFieldColumnsParams).map((column) => omit('render', column))
+      ).toEqual([
         {
-          field: 'checkbox',
+          field: 'selected',
           name: '',
           sortable: false,
           width: '25px',
         },
-        { field: 'field', name: 'Field', sortable: false, width: '225px' },
+        {
+          field: 'name',
+          name: 'Name',
+          sortable: true,
+          width: '225px',
+        },
         {
           field: 'description',
           name: 'Description',
-          sortable: false,
-          truncateText: true,
+          sortable: true,
           width: '400px',
         },
+        {
+          field: 'category',
+          name: 'Category',
+          sortable: true,
+          width: '130px',
+        },
       ]);
+    });
+
+    it('should return custom field columns', () => {
+      const customColumns = [
+        {
+          field: 'name',
+          name: 'customColumn1',
+          sortable: false,
+          width: '225px',
+        },
+        {
+          field: 'description',
+          name: 'customColumn2',
+          sortable: true,
+          width: '400px',
+        },
+      ];
+
+      expect(
+        getFieldColumns({
+          ...getFieldColumnsParams,
+          getFieldTableColumns: () => customColumns,
+        }).map((column) => omit('render', column))
+      ).toEqual([
+        {
+          field: 'selected',
+          name: '',
+          sortable: false,
+          width: '25px',
+        },
+        ...customColumns,
+      ]);
+    });
+
+    it('should render default columns', () => {
+      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: ['base'],
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        columnHeaders: [],
+      });
+
+      const columns = getFieldColumns(getFieldColumnsParams);
+      const { getByTestId, getAllByText } = render(
+        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+      );
+
+      expect(getAllByText('Name').at(0)).toBeInTheDocument();
+      expect(getAllByText('Description').at(0)).toBeInTheDocument();
+      expect(getAllByText('Category').at(0)).toBeInTheDocument();
+
+      expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
+      expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
+    });
+
+    it('should call call toggle callback on checkbox click', () => {
+      const timestampField = mockBrowserFields.base.fields![timestampFieldId];
+      const fieldItems = getFieldItems({
+        selectedCategoryIds: ['base'],
+        browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+        columnHeaders: [],
+      });
+
+      const columns = getFieldColumns(getFieldColumnsParams);
+      const { getByTestId } = render(
+        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+      );
+
+      getByTestId(`field-${timestampFieldId}-checkbox`).click();
+      expect(onToggleColumn).toHaveBeenCalledWith(timestampFieldId);
     });
   });
 });

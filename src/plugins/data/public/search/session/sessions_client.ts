@@ -12,6 +12,7 @@ import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from 'kibana/server';
 import type { SearchSessionSavedObjectAttributes } from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;
@@ -37,26 +38,26 @@ export class SessionsClient {
   public create({
     name,
     appId,
-    urlGeneratorId,
+    locatorId,
     initialState,
     restoreState,
     sessionId,
   }: {
     name: string;
     appId: string;
+    locatorId: string;
     initialState: Record<string, unknown>;
     restoreState: Record<string, unknown>;
-    urlGeneratorId: string;
     sessionId: string;
   }): Promise<SearchSessionSavedObject> {
     return this.http.post(`/internal/session`, {
       body: JSON.stringify({
         name,
+        appId,
+        locatorId,
         initialState,
         restoreState,
         sessionId,
-        appId,
-        urlGeneratorId,
       }),
     });
   }

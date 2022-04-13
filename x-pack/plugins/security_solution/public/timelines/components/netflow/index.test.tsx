@@ -11,7 +11,6 @@ import { shallow } from 'enzyme';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
-import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import {
@@ -25,7 +24,7 @@ import { JA3_HASH_FIELD_NAME } from '../ja3_fingerprint';
 import {
   DESTINATION_PORT_FIELD_NAME,
   SOURCE_PORT_FIELD_NAME,
-} from '../../../network/components/port';
+} from '../../../network/components/port/helpers';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,
@@ -61,6 +60,7 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../../../network/components/source_destination/field_names';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
+import { getMockNetflowData } from '../../../common/mock/netflow';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -204,7 +204,7 @@ describe('Netflow', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="destination-ip-and-port"]').first().text()
       )
-    ).toEqual('10.1.2.3:80');
+    ).toContain('10.1.2.3:80');
   });
 
   test('it renders destination.packets', () => {
@@ -340,7 +340,7 @@ describe('Netflow', () => {
 
     expect(
       removeExternalLinkText(wrapper.find('[data-test-subj="source-ip-and-port"]').first().text())
-    ).toEqual('192.168.1.2:9987');
+    ).toContain('192.168.1.2:9987');
   });
 
   test('it renders source.packets', () => {
@@ -374,7 +374,7 @@ describe('Netflow', () => {
           .first()
           .text()
       )
-    ).toEqual('tls.client_certificate.fingerprint.sha1-value');
+    ).toContain('tls.client_certificate.fingerprint.sha1-value');
   });
 
   test('it hyperlinks tls.fingerprints.ja3.hash site to compare the fingerprint against a known set of signatures', () => {
@@ -390,7 +390,7 @@ describe('Netflow', () => {
 
     expect(
       removeExternalLinkText(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text())
-    ).toEqual('tls.fingerprints.ja3.hash-value');
+    ).toContain('tls.fingerprints.ja3.hash-value');
   });
 
   test('it hyperlinks tls.server_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
@@ -418,7 +418,7 @@ describe('Netflow', () => {
           .first()
           .text()
       )
-    ).toEqual('tls.server_certificate.fingerprint.sha1-value');
+    ).toContain('tls.server_certificate.fingerprint.sha1-value');
   });
 
   test('it renders network.transport', () => {

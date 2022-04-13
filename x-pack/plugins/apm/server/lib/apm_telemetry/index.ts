@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Observable, firstValueFrom } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   CoreSetup,
@@ -24,7 +23,7 @@ import {
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
   CollectTelemetryParams,
@@ -66,7 +65,7 @@ export async function createApmTelemetry({
   const savedObjectsClient = await getInternalSavedObjectsClient(core);
 
   const collectAndStore = async () => {
-    const config = await config$.pipe(take(1)).toPromise();
+    const config = await firstValueFrom(config$);
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client;
 
@@ -76,14 +75,21 @@ export async function createApmTelemetry({
     });
 
     const search: CollectTelemetryParams['search'] = (params) =>
-      unwrapEsResponse(esClient.asInternalUser.search(params)) as any;
+      unwrapEsResponse(
+        esClient.asInternalUser.search(params, { meta: true })
+      ) as any;
 
     const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
-      unwrapEsResponse(esClient.asInternalUser.indices.stats(params));
+      unwrapEsResponse(
+        esClient.asInternalUser.indices.stats(params, { meta: true })
+      );
 
     const transportRequest: CollectTelemetryParams['transportRequest'] = (
       params
-    ) => unwrapEsResponse(esClient.asInternalUser.transport.request(params));
+    ) =>
+      unwrapEsResponse(
+        esClient.asInternalUser.transport.request(params, { meta: true })
+      );
 
     const dataTelemetry = await collectDataTelemetry({
       search,

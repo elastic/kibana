@@ -14,10 +14,10 @@ interface Props {
   placeholder?: string;
   label: string;
   errors: string[];
-  setAlertParams: (property: string, value: string) => void;
+  setRuleParams: (property: string, value: string) => void;
 }
 export const AlertParamTextField: React.FC<Props> = (props: Props) => {
-  const { name, label, setAlertParams, errors, placeholder } = props;
+  const { name, label, setRuleParams, errors, placeholder } = props;
   const [value, setValue] = useState(props.value);
   return (
     <EuiFormRow label={label} error={errors} isInvalid={errors?.length > 0}>
@@ -28,7 +28,7 @@ export const AlertParamTextField: React.FC<Props> = (props: Props) => {
         onChange={(e) => {
           const newValue = e.target.value;
           setValue(newValue);
-          setAlertParams(name, newValue);
+          setRuleParams(name, newValue);
         }}
       />
     </EuiFormRow>

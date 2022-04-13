@@ -87,33 +87,35 @@ function renderTestCases(
     });
 
     it('renders "core" page driven by settings', async () => {
-      uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(data.legacyMetadata.uiSettings.user).toEqual(userSettings); // user settings are injected
     });
 
     it('renders "core" with excluded user settings', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings, {
-        includeUserSettings: false,
+        isAnonymousPage: true,
       });
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(data.legacyMetadata.uiSettings.user).toEqual({}); // user settings are not injected
     });
 
     it('calls `getStylesheetPaths` with the correct parameters', async () => {
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {
           return true;
-        }
-        if (settingName === 'theme:version') {
-          return 'v8';
         }
         return settingName;
       });

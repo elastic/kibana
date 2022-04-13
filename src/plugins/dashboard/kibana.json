@@ -8,17 +8,26 @@
   "version": "kibana",
   "requiredPlugins": [
     "data",
+    "dataViews",
     "embeddable",
+    "controls",
     "inspector",
     "navigation",
     "savedObjects",
     "share",
+    "screenshotMode",
     "uiActions",
     "urlForwarding",
     "presentationUtil",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "spaces", "savedObjectsTaggingOss", "usageCollection"],
+  "optionalPlugins": [
+    "home",
+    "spaces",
+    "savedObjectsTaggingOss",
+    "screenshotMode",
+    "usageCollection"
+  ],
   "server": true,
   "ui": true,
   "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]

@@ -6,15 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDefinition } from '../index';
-import { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../types';
+import type { BaseIndexPatternColumn, OperationDefinition } from '../index';
+import type { ReferenceBasedIndexPatternColumn } from '../column_types';
+import type { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
-import { regenerateLayerFromAst } from './parse';
+import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
+import { getFilter, isColumnFormatted } from '../helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -35,6 +36,12 @@ export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternCol
   };
 }
 
+export function isFormulaIndexPatternColumn(
+  column: BaseIndexPatternColumn
+): column is FormulaIndexPatternColumn {
+  return 'params' in column && 'formula' in (column as FormulaIndexPatternColumn).params;
+}
+
 export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'managedReference'> =
   {
     type: 'formula',
@@ -42,6 +49,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
     input: 'managedReference',
     hidden: true,
+    filterable: {
+      helpMessage: i18n.translate('xpack.lens.indexPattern.formulaFilterableHelpText', {
+        defaultMessage: 'The provided filter will be applied to the entire formula.',
+      }),
+    },
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
@@ -57,7 +69,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         return error?.message ? [error.message] : [];
       }
 
-      const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
+      const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap, column);
 
       if (errors.length) {
         return errors.map(({ message }) => message);
@@ -74,6 +86,25 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           return [];
         })
         .filter((marker) => marker);
+      const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId].isBucketed);
+      const hasOtherMetrics = layer.columnOrder.some((colId) => {
+        const col = layer.columns[colId];
+        return (
+          !col.isBucketed &&
+          !col.isStaticValue &&
+          col.operationType !== 'math' &&
+          col.operationType !== 'formula'
+        );
+      });
+
+      if (hasBuckets && !hasOtherMetrics) {
+        innerErrors.push({
+          message: i18n.translate('xpack.lens.indexPattern.noRealMetricError', {
+            defaultMessage:
+              'A layer with only static values will not show results, use at least one dynamic metric',
+          }),
+        });
+      }
 
       return innerErrors.length ? innerErrors.map(({ message }) => message) : undefined;
     },
@@ -120,8 +151,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       // carry over the format settings from previous operation for seamless transfer
       // NOTE: this works only for non-default formatters set in Lens
       let prevFormat = {};
-      if (previousColumn?.params && 'format' in previousColumn.params) {
-        prevFormat = { format: previousColumn.params.format };
+      if (previousColumn && isColumnFormatted(previousColumn)) {
+        prevFormat = { format: previousColumn.params?.format };
       }
       return {
         label: previousFormula || defaultLabel,
@@ -133,6 +164,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           ? { formula: previousFormula, isFormulaBroken: false, ...prevFormat }
           : { ...prevFormat },
         references: [],
+        // carry over the filter if coming from another formula,
+        // otherwise the filter has been already migrated into the formula text
+        filter:
+          previousColumn?.operationType === 'formula' ? getFilter(previousColumn, {}) : undefined,
+        timeScale: previousColumn?.timeScale,
       };
     },
     isTransferable: () => {
@@ -140,23 +176,12 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     },
     createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
       const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
-      const tempLayer = {
-        ...layer,
-        columns: {
-          ...layer.columns,
-          [targetId]: { ...currentColumn },
-        },
-      };
-      const { newLayer } = regenerateLayerFromAst(
-        currentColumn.params.formula ?? '',
-        tempLayer,
-        targetId,
-        currentColumn,
-        indexPattern,
-        operationDefinitionMap
-      );
-      return newLayer;
-    },
 
+      return insertOrReplaceFormulaColumn(targetId, currentColumn, layer, {
+        indexPattern,
+        operations: operationDefinitionMap,
+      }).layer;
+    },
+    timeScalingMode: 'optional',
     paramEditor: WrappedFormulaEditor,
   };

@@ -12,15 +12,32 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  metricsEntitiesEnabled: false,
-  ruleRegistryEnabled: false,
+  ruleRegistryEnabled: true,
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
-  trustedAppsByPolicyEnabled: false,
   excludePoliciesInFilterEnabled: false,
-  uebaEnabled: false,
+  usersEnabled: true,
+  detectionResponseEnabled: false,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
+  riskyUsersEnabled: false,
+  pendingActionResponsesWithAck: true,
+  policyListEnabled: true,
+
+  /**
+   * This is used for enabling the end to end tests for the security_solution telemetry.
+   * We disable the telemetry since we don't have specific roles or permissions around it and
+   * we don't want people to be able to violate security by getting access to whole documents
+   * around telemetry they should not.
+   * @see telemetry_detection_rules_preview_route.ts
+   * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
+   */
+  previewTelemetryUrlEnabled: false,
+
+  /**
+   * Enables the Endpoint response actions console in various areas of the app
+   */
+  responseActionsConsoleEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

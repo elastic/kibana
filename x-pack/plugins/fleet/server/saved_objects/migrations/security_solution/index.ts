@@ -10,3 +10,5 @@ export { migratePackagePolicyToV7120 } from './to_v7_12_0';
 export { migrateEndpointPackagePolicyToV7130 } from './to_v7_13_0';
 export { migrateEndpointPackagePolicyToV7140 } from './to_v7_14_0';
 export { migratePackagePolicyToV7150 } from './to_v7_15_0';
+export { migratePackagePolicyToV7160 } from './to_v7_16_0';
+export { migratePackagePolicyToV820 } from './to_v8_2_0';

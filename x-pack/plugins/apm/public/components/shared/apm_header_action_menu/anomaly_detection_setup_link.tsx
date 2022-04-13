@@ -5,31 +5,21 @@
  * 2.0.
  */
 
-import {
-  EuiHeaderLink,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { IconType } from '@elastic/eui';
+import { EuiHeaderLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
 } from '../../../../common/environment_filter_values';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { getAPMHref } from '../Links/apm/APMLink';
-
-export type AnomalyDetectionApiResponse =
-  APIReturnType<'GET /api/apm/settings/anomaly-detection/jobs'>;
-
-const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
+import { getLegacyApmHref } from '../links/apm/apm_link';
 
 export function AnomalyDetectionSetupLink() {
   const { query } = useApmParams('/*');
@@ -38,71 +28,86 @@ export function AnomalyDetectionSetupLink() {
     ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
 
   const { core } = useApmPluginContext();
-  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
-  const license = useLicenseContext();
-  const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
+
   const { basePath } = core.http;
   const theme = useTheme();
 
-  return (
+  const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
+
+  let tooltipText: string = '';
+  let color: 'warning' | 'text' | 'success' | 'danger' = 'text';
+  let icon: IconType | undefined;
+
+  if (anomalyDetectionSetupState === AnomalyDetectionSetupState.Failure) {
+    color = 'warning';
+    tooltipText = i18n.translate(
+      'xpack.apm.anomalyDetectionSetup.jobFetchFailureText',
+      {
+        defaultMessage: 'Could not determine state of anomaly detection setup.',
+      }
+    );
+    icon = 'alert';
+  } else if (
+    anomalyDetectionSetupState === AnomalyDetectionSetupState.NoJobs ||
+    anomalyDetectionSetupState ===
+      AnomalyDetectionSetupState.NoJobsForEnvironment
+  ) {
+    color = 'warning';
+    tooltipText = getNoJobsMessage(anomalyDetectionSetupState, environment);
+    icon = 'alert';
+  } else if (
+    anomalyDetectionSetupState === AnomalyDetectionSetupState.UpgradeableJobs
+  ) {
+    color = 'success';
+    tooltipText = i18n.translate(
+      'xpack.apm.anomalyDetectionSetup.upgradeableJobsText',
+      {
+        defaultMessage:
+          'Updates available for existing anomaly detection jobs.',
+      }
+    );
+    icon = 'wrench';
+  }
+
+  let pre: React.ReactElement | null = null;
+
+  if (anomalyDetectionSetupState === AnomalyDetectionSetupState.Loading) {
+    pre = <EuiLoadingSpinner size="s" />;
+  } else if (icon) {
+    pre = <EuiIcon type={icon} color={color} size="s" />;
+  }
+
+  const element = (
     <EuiHeaderLink
-      color="text"
-      href={getAPMHref({ basePath, path: '/settings/anomaly-detection' })}
+      color={color}
+      href={getLegacyApmHref({ basePath, path: '/settings/anomaly-detection' })}
       style={{ whiteSpace: 'nowrap' }}
     >
-      {canGetJobs && hasValidLicense ? (
-        <MissingJobsAlert environment={environment} />
-      ) : (
-        <EuiIcon size="s" type="inspect" color="text" />
-      )}
+      {pre}
       <span style={{ marginInlineStart: theme.eui.euiSizeS }}>
         {ANOMALY_DETECTION_LINK_LABEL}
       </span>
     </EuiHeaderLink>
   );
-}
 
-export function MissingJobsAlert({ environment }: { environment?: string }) {
-  const {
-    anomalyDetectionJobsData = DEFAULT_DATA,
-    anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobsContext();
-
-  const defaultIcon = <EuiIcon size="s" type="inspect" color="text" />;
-
-  if (anomalyDetectionJobsStatus === FETCH_STATUS.LOADING) {
-    return <EuiLoadingSpinner />;
-  }
-
-  if (anomalyDetectionJobsStatus !== FETCH_STATUS.SUCCESS) {
-    return defaultIcon;
-  }
-
-  const isEnvironmentSelected =
-    environment && environment !== ENVIRONMENT_ALL.value;
-
-  // there are jobs for at least one environment
-  if (!isEnvironmentSelected && anomalyDetectionJobsData.jobs.length > 0) {
-    return defaultIcon;
-  }
-
-  // there are jobs for the selected environment
-  if (
-    isEnvironmentSelected &&
-    anomalyDetectionJobsData.jobs.some((job) => environment === job.environment)
-  ) {
-    return defaultIcon;
-  }
-
-  return (
-    <EuiToolTip position="bottom" content={getTooltipText(environment)}>
-      <EuiIcon size="s" type="alert" color="danger" />
+  const wrappedElement = tooltipText ? (
+    <EuiToolTip position="bottom" content={tooltipText}>
+      {element}
     </EuiToolTip>
+  ) : (
+    element
   );
+
+  return wrappedElement;
 }
 
-function getTooltipText(environment?: string) {
-  if (!environment || environment === ENVIRONMENT_ALL.value) {
+function getNoJobsMessage(
+  state:
+    | AnomalyDetectionSetupState.NoJobs
+    | AnomalyDetectionSetupState.NoJobsForEnvironment,
+  environment: string
+) {
+  if (state === AnomalyDetectionSetupState.NoJobs) {
     return i18n.translate('xpack.apm.anomalyDetectionSetup.notEnabledText', {
       defaultMessage: `Anomaly detection is not yet enabled. Click to continue setup.`,
     });

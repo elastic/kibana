@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { Router } from 'react-router-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';

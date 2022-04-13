@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useWorkpad } from './use_workpad';
 
@@ -61,14 +60,20 @@ describe('useWorkpad', () => {
       workpad: workpadResponse,
     });
 
-    renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
-    await waitFor(() => expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId));
+    try {
+      await waitFor(() => expect(mockDispatch).toHaveBeenCalledTimes(3));
 
-    expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId);
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setAssets', payload: assets });
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setWorkpad', payload: workpad });
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setZoomScale', payload: 1 });
+      expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId);
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'setAssets', payload: assets });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'setWorkpad', payload: workpad });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'setZoomScale', payload: 1 });
+    } catch (e) {
+      throw e;
+    } finally {
+      unmount();
+    }
   });
 
   test('sets alias id of workpad on a conflict', async () => {
@@ -81,17 +86,23 @@ describe('useWorkpad', () => {
       aliasId,
     });
 
-    renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
-    await waitFor(() => expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId));
+    try {
+      await waitFor(() => expect(mockDispatch).toHaveBeenCalledTimes(3));
 
-    expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId);
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setAssets', payload: assets });
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'setWorkpad',
-      payload: { ...workpad, aliasId },
-    });
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setZoomScale', payload: 1 });
+      expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId);
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'setAssets', payload: assets });
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'setWorkpad',
+        payload: { ...workpad, aliasId },
+      });
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'setZoomScale', payload: 1 });
+    } catch (e) {
+      throw e;
+    } finally {
+      unmount();
+    }
   });
 
   test('redirects on alias match', async () => {
@@ -102,12 +113,21 @@ describe('useWorkpad', () => {
       outcome: 'aliasMatch',
       workpad: workpadResponse,
       aliasId,
+      aliasPurpose: 'savedObjectConversion',
     });
 
-    renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
-
-    await waitFor(() => expect(mockResolveWorkpad).toHaveBeenCalledWith(workpadId));
-
-    expect(mockRedirectLegacyUrl).toBeCalledWith(`#${aliasId}`, 'Workpad');
+    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    try {
+      await waitFor(() => expect(mockRedirectLegacyUrl).toHaveBeenCalled());
+      expect(mockRedirectLegacyUrl).toBeCalledWith({
+        path: `#${aliasId}`,
+        aliasPurpose: 'savedObjectConversion',
+        objectNoun: 'Workpad',
+      });
+    } catch (e) {
+      throw e;
+    } finally {
+      unmount();
+    }
   });
 });

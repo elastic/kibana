@@ -93,17 +93,6 @@ The long term plan is to rely on using `FormattedMessage` and `i18n.translate()`
 Currently, we support the following ReactJS `i18n` tools, but they will be removed in future releases:
 - Usage of `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
 
-#### In AngularJS
-
-The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
-
-- Call JS function `i18n.translate()` from the `@kbn/i18n` package.
-- Use `i18nId` directive in template.
-
-Currently, we support the following AngluarJS `i18n` tools, but they will be removed in future releases:
-- Usage of `i18n` service in controllers, directives, services by injecting it.
-- Usage of `i18n` filter in template for attribute translation. Note: Use one-time binding ("{{:: ... }}") in filters wherever it's possible to prevent unnecessary expression re-evaluation.
-
 #### In JavaScript
 
 - Use `i18n.translate()` in NodeJS or any other framework agnostic code, where `i18n` is the I18n engine from `@kbn/i18n` package.
@@ -223,7 +212,6 @@ For example:
 - for button:
 
   ```js
-
   <EuiButton data-test-subj="addScriptedFieldLink" href={addScriptedFieldUrl}>
        <FormattedMessage id="kbn.management.editIndexPattern.scripted.addFieldButtonLabel" defaultMessage="Add scripted field"/>
   </EuiButton>
@@ -232,11 +220,11 @@ For example:
 - for dropDown:
 
   ```js
-  <select ng-model="indexedFieldTypeFilter" ng-options="o for o in indexedFieldTypes">
-      <option value=""
-          i18n-id="kbn.management.editIndexPattern.fields.allTypesDropDown"
-          i18n-default-message="All field types"></option>
-  </select>
+    <option value={
+      i18n.translate('kbn.management.editIndexPattern.fields.allTypesDropDown', {
+        defaultMessage: 'All field types',
+      })
+    }
   ```
 
 - for placeholder:
@@ -310,12 +298,6 @@ For example:
 - Variables
 
   ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
-    i18n-default-message="Time Filter field name: {timeFieldName}"
-    i18n-values="{ timeFieldName: indexPattern.timeFieldName }"></span>
-  ```
-
-  ```html
   <FormattedMessage
     id="kbn.management.createIndexPatternHeader"
     defaultMessage="Create {indexPatternName}"
@@ -326,25 +308,6 @@ For example:
   ```
 
 - Labels and variables in tag
-
-  ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
-    i18n-default-message="This page lists every field in the {indexPatternTitle} index"
-    i18n-values="{ indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
-  ```
-
-  -----------------------------------------------------------
-  **BUT** we can not use tags that should be compiled:
-
-  ```html
-  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
-    i18n-default-message="This page lists every field in the {indexPatternTitle} index"
-    i18n-values="{ indexPatternTitle: '<div my-directive>' + indexPattern.title + '</div>' }"></span>
-  ```
-
-  To void injections vulnerability, `i18nId` directive doesn't compile its values.
-
-  -----------------------------------------------------------
 
   ```html
   <FormattedMessage
@@ -388,10 +351,12 @@ The numeric input is mapped to a plural category, some subset of "zero", "one", 
 
 Here is an example of message translation depending on a plural category:
 
-```html
-<span i18n-id="kbn.management.editIndexPattern.mappingConflictLabel"
-      i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
-      i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
+```jsx
+  <FormattedMessage
+    id="kbn.management.editIndexPattern.mappingConflictLabel"
+    defaultMessage="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
+    values={{ conflictFieldsLength: conflictFields.length }}
+  />
 ```
 
 When `conflictFieldsLength` equals 1, the result string will be `"A field is defined as several types (string, integer, etc) across the indices that match this pattern."`. In cases when `conflictFieldsLength` has value of 2 or more, the result string - `"2 fields are defined as several types (string, integer, etc) across the indices that match this pattern."`.
@@ -541,7 +506,7 @@ Testing React component that uses the `injectI18n` higher-order component is mor
 
 With shallow rendering only top level component is rendered, that is a wrapper itself, not the original component. Since we want to test the rendering of the original component, we need to access it via the wrapper's `WrappedComponent` property. Its value will be the component we passed into `injectI18n()`.
 
-When testing such component, use the `shallowWithIntl` helper function defined in `@kbn/test/jest` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the `intl` mock defined in `test_utils/mocks/intl`.
+When testing such component, use the `shallowWithIntl` helper function defined in `@kbn/test-jest-helpers` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the `intl` mock defined in `test_utils/mocks/intl`.
 
 Use the `mountWithIntl` helper function to mount render the component.
 

@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldName renders a geo field 1`] = `
+Array [
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
+  >
+    <span
+      class="euiToken euiToken--euiColorVis5 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+    >
+      <span
+        data-euiicon-type="tokenGeo"
+        title="Geo point field"
+      >
+        Geo point field
+      </span>
+    </span>
+  </div>,
+  <div
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
+    >
+      <span
+        class="euiToolTipAnchor eui-textBreakAll"
+      >
+        <span>
+          test.test.test
+        </span>
+      </span>
+    </div>
+  </div>,
+]
+`;
+
+exports[`FieldName renders a number field by providing a field record 1`] = `
+Array [
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
+  >
+    <span
+      class="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+    >
+      <span
+        data-euiicon-type="tokenNumber"
+        title="Number field"
+      >
+        Number field
+      </span>
+    </span>
+  </div>,
+  <div
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
+    >
+      <span
+        class="euiToolTipAnchor eui-textBreakAll"
+      >
+        <span>
+          test.test.test
+        </span>
+      </span>
+    </div>
+  </div>,
+]
+`;
+
+exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
+Array [
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
+  >
+    <span
+      class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
+    >
+      <span
+        data-euiicon-type="tokenString"
+        title="String field"
+      >
+        String field
+      </span>
+    </span>
+  </div>,
+  <div
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
+    >
+      <span
+        class="euiToolTipAnchor eui-textBreakAll"
+      >
+        <span>
+          test
+        </span>
+      </span>
+    </div>
+  </div>,
+]
+`;
+
+exports[`FieldName renders unknown field 1`] = `
+Array [
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
+  >
+    <span
+      class="euiToken euiToken--gray euiToken--circle euiToken--light euiToken--small kbnFieldIcon"
+    >
+      <span
+        data-euiicon-type="questionInCircle"
+        title="Unknown field"
+      >
+        Unknown field
+      </span>
+    </span>
+  </div>,
+  <div
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
+    >
+      <span
+        class="euiToolTipAnchor eui-textBreakAll"
+      >
+        <span>
+          test.test.test
+        </span>
+      </span>
+    </div>
+  </div>,
+]
+`;

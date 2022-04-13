@@ -8,6 +8,7 @@
 import { omit, union } from 'lodash/fp';
 
 import { isEmpty } from 'lodash';
+import { EuiDataGridColumn } from '@elastic/eui';
 import type { ToggleDetailPanel } from './actions';
 import { TGridPersistInput, TimelineById, TimelineId } from './types';
 import type { TGridModel, TGridModelSettings } from './model';
@@ -232,6 +233,63 @@ export const applyDeltaToTimelineColumnWidth = ({
   };
 };
 
+type Columns = Array<
+  Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> & ColumnHeaderOptions
+>;
+
+export const updateTGridColumnOrder = ({
+  columnIds,
+  id,
+  timelineById,
+}: {
+  columnIds: string[];
+  id: string;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columns = columnIds.reduce<Columns>((acc, cid) => {
+    const columnIndex = timeline.columns.findIndex((c) => c.id === cid);
+
+    return columnIndex !== -1 ? [...acc, timeline.columns[columnIndex]] : acc;
+  }, []);
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+export const updateTGridColumnWidth = ({
+  columnId,
+  id,
+  timelineById,
+  width,
+}: {
+  columnId: string;
+  id: string;
+  timelineById: TimelineById;
+  width: number;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columns = timeline.columns.map((x) => ({
+    ...x,
+    initialWidth: x.id === columnId ? width : x.initialWidth,
+  }));
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
 interface UpdateTimelineColumnsParams {
   id: string;
   columns: ColumnHeaderOptions[];
@@ -417,7 +475,7 @@ export const setSelectedTimelineEvents = ({
 export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
   const { tabType, timelineId, ...expandedDetails } = action;
 
-  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
+  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
   const expandedTabType = tabType ?? TimelineTabs.query;
   const newExpandDetails = {
     params: expandedDetails.params ? { ...expandedDetails.params } : {},

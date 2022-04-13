@@ -84,7 +84,11 @@ const ActionsExplorer = ({ share }: Props) => {
           if (!locator) return;
           let params: HelloLocatorV1Params | HelloLocatorV2Params = savedLink.params;
           if (savedLink.version === '0.0.1') {
-            const migration = locator.migrations['0.0.2'];
+            const migrations =
+              typeof locator.migrations === 'function'
+                ? locator.migrations()
+                : locator.migrations || {};
+            const migration = migrations['0.0.2'];
             if (migration) {
               params = migration(params) as HelloLocatorV2Params;
             }

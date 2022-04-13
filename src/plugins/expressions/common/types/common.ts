@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 
 /**
  * This can convert a type into a known Expression string representation of
@@ -37,7 +37,7 @@ export type KnownTypeToString<T> =
  * `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
  */
 export type TypeString<T> = KnownTypeToString<
-  T extends ObservableLike<unknown> ? UnwrapObservable<T> : UnwrapPromiseOrReturn<T>
+  T extends ObservableLike<unknown> ? UnwrapObservable<T> : Awaited<T>
 >;
 
 /**
@@ -46,14 +46,3 @@ export type TypeString<T> = KnownTypeToString<
  * `date` is typed as a number or string, and represents a date
  */
 export type UnmappedTypeStrings = 'date' | 'filter';
-
-/**
- * JSON representation of a field formatter configuration.
- * Is used to carry information about how to format data in
- * a data table as part of the column definition.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface SerializedFieldFormat<TParams = Record<string, any>> {
-  id?: string;
-  params?: TParams;
-}

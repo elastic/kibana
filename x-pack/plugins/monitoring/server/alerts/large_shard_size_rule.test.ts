@@ -40,7 +40,6 @@ jest.mock('../static_globals', () => ({
       config: {
         ui: {
           ccs: { enabled: true },
-          metricbeat: { index: 'metricbeat-*' },
           container: { elasticsearch: { enabled: false } },
         },
       },
@@ -85,14 +84,10 @@ describe('LargeShardSizeRule', () => {
     const shardSize = 0;
     const clusterUuid = 'abc123';
     const clusterName = 'testCluster';
-    const nodeId = 'myNodeId';
-    const nodeName = 'myNodeName';
     const stat = {
       shardIndex,
       shardSize,
       clusterUuid,
-      nodeId,
-      nodeName,
     };
 
     const replaceState = jest.fn();
@@ -101,13 +96,15 @@ describe('LargeShardSizeRule', () => {
     const executorOptions = {
       services: {
         scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        alertInstanceFactory: jest.fn().mockImplementation(() => {
-          return {
-            replaceState,
-            scheduleActions,
-            getState,
-          };
-        }),
+        alertFactory: {
+          create: jest.fn().mockImplementation(() => {
+            return {
+              replaceState,
+              scheduleActions,
+              getState,
+            };
+          }),
+        },
       },
       state: {},
     };

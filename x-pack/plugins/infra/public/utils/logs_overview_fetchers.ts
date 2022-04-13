@@ -5,14 +5,11 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { encode } from 'rison-node';
-import type { estypes } from '@elastic/elasticsearch';
 import { FetchData, FetchDataParams, LogsFetchDataResponse } from '../../../observability/public';
-import { DEFAULT_SOURCE_ID } from '../../common/constants';
-import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
-import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
-import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
-import { resolveLogSourceConfiguration } from '../../common/log_sources';
+import { DEFAULT_SOURCE_ID, TIMESTAMP_FIELD } from '../../common/constants';
+import { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
 
 interface StatsAggregation {
   buckets: Array<{
@@ -30,40 +27,36 @@ interface StatsAggregation {
 
 interface LogParams {
   index: string;
-  timestampField: string;
 }
 
 type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
 
-export function getLogsHasDataFetcher(getStartServices: InfraClientCoreSetup['getStartServices']) {
+export function getLogsHasDataFetcher(getStartServices: InfraClientStartServicesAccessor) {
   return async () => {
-    const [core] = await getStartServices();
-    const sourceStatus = await callFetchLogSourceStatusAPI(DEFAULT_SOURCE_ID, core.http.fetch);
-    return sourceStatus.data.logIndexStatus === 'available';
+    const [, , { logViews }] = await getStartServices();
+    const resolvedLogView = await logViews.client.getResolvedLogView(DEFAULT_SOURCE_ID);
+    const logViewStatus = await logViews.client.getResolvedLogViewStatus(resolvedLogView);
+
+    const hasData = logViewStatus.index === 'available';
+    const indices = resolvedLogView.indices;
+
+    return {
+      hasData,
+      indices,
+    };
   };
 }
 
 export function getLogsOverviewDataFetcher(
-  getStartServices: InfraClientCoreSetup['getStartServices']
+  getStartServices: InfraClientStartServicesAccessor
 ): FetchData<LogsFetchDataResponse> {
   return async (params) => {
-    const [core, startPlugins] = await getStartServices();
-    const { data } = startPlugins;
-
-    const sourceConfiguration = await callFetchLogSourceConfigurationAPI(
-      DEFAULT_SOURCE_ID,
-      core.http.fetch
-    );
-
-    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
-      sourceConfiguration.data.configuration,
-      startPlugins.data.indexPatterns
-    );
+    const [, { data }, { logViews }] = await getStartServices();
+    const resolvedLogView = await logViews.client.getResolvedLogView(DEFAULT_SOURCE_ID);
 
     const { stats, series } = await fetchLogsOverview(
       {
-        index: resolvedLogSourceConfiguration.indices,
-        timestampField: resolvedLogSourceConfiguration.timestampField,
+        index: resolvedLogView.indices,
       },
       params,
       data
@@ -117,7 +110,7 @@ async function fetchLogsOverview(
 function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
   return {
     range: {
-      [logParams.timestampField]: {
+      [TIMESTAMP_FIELD]: {
         gt: new Date(params.absoluteTime.start).toISOString(),
         lte: new Date(params.absoluteTime.end).toISOString(),
         format: 'strict_date_optional_time',
@@ -137,8 +130,8 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
       aggs: {
         series: {
           date_histogram: {
-            field: logParams.timestampField,
-            fixed_interval: params.bucketSize,
+            field: TIMESTAMP_FIELD,
+            fixed_interval: params.intervalString,
           },
         },
       },

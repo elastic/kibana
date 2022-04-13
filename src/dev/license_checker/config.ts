@@ -25,6 +25,7 @@ export const LICENSE_ALLOWED = [
   '(MIT OR WTFPL)',
   '(Unlicense OR Apache-2.0)',
   'AFLv2.1',
+  '(AFL-2.1 OR BSD-3-Clause)',
   'Apache 2.0',
   'Apache License, v2.0',
   'Apache License, Version 2.0',
@@ -64,6 +65,7 @@ export const LICENSE_ALLOWED = [
   'WTFPL OR ISC',
   'WTFPL',
   'Nuclide software',
+  'Python-2.0',
 ];
 
 // The following list only applies to licenses that
@@ -74,7 +76,7 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0'];
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
-  '@elastic/ems-client@7.15.0': ['Elastic License 2.0'],
-  '@elastic/eui@38.0.1': ['SSPL-1.0 OR Elastic License 2.0'],
+  '@elastic/ems-client@8.2.0': ['Elastic License 2.0'],
+  '@elastic/eui@54.0.0': ['SSPL-1.0 OR Elastic License 2.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
 };

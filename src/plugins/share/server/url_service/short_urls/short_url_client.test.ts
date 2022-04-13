@@ -7,9 +7,12 @@
  */
 
 import { ServerShortUrlClientFactory } from './short_url_client_factory';
-import { UrlService } from '../../../common/url_service';
+import { UrlService, LocatorDefinition } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
 import { MemoryShortUrlStorage } from './storage/memory_short_url_storage';
+import { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from 'kibana/server';
+import { UrlServiceError } from '../error';
 
 const setup = () => {
   const currentVersion = '1.2.3';
@@ -20,9 +23,11 @@ const setup = () => {
     navigate: () => {
       throw new Error('Not implemented.');
     },
-    shortUrls: new ServerShortUrlClientFactory({
-      currentVersion,
-    }),
+    shortUrls: ({ locators }) =>
+      new ServerShortUrlClientFactory({
+        currentVersion,
+        locators,
+      }),
   });
   const definition = new LegacyShortUrlLocatorDefinition();
   const locator = service.locators.create(definition);
@@ -121,7 +126,7 @@ describe('ServerShortUrlClient', () => {
             url: '/app/test#foo/bar/baz',
           },
         })
-      ).rejects.toThrowError(new Error(`Slug "lala" already exists.`));
+      ).rejects.toThrowError(new UrlServiceError(`Slug "lala" already exists.`, 'SLUG_EXISTS'));
     });
 
     test('can automatically generate human-readable slug', async () => {
@@ -175,6 +180,113 @@ describe('ServerShortUrlClient', () => {
       await expect(() => client.get(shortUrl1.data.id)).rejects.toThrowError(
         new Error(`No short url with id "${shortUrl1.data.id}"`)
       );
+    });
+  });
+
+  describe('Persistable State', () => {
+    interface FooLocatorParams extends SerializableRecord {
+      dashboardId: string;
+      indexPatternId: string;
+    }
+
+    class FooLocatorDefinition implements LocatorDefinition<FooLocatorParams> {
+      public readonly id = 'FOO_LOCATOR';
+
+      public readonly getLocation = async () => ({
+        app: 'foo_app',
+        path: '/foo/path',
+        state: {},
+      });
+
+      public readonly extract = (
+        state: FooLocatorParams
+      ): { state: FooLocatorParams; references: SavedObjectReference[] } => ({
+        state,
+        references: [
+          {
+            id: state.dashboardId,
+            type: 'dashboard',
+            name: 'dashboardId',
+          },
+          {
+            id: state.indexPatternId,
+            type: 'index_pattern',
+            name: 'indexPatternId',
+          },
+        ],
+      });
+
+      public readonly inject = (
+        state: FooLocatorParams,
+        references: SavedObjectReference[]
+      ): FooLocatorParams => {
+        const dashboard = references.find(
+          (ref) => ref.type === 'dashboard' && ref.name === 'dashboardId'
+        );
+        const indexPattern = references.find(
+          (ref) => ref.type === 'index_pattern' && ref.name === 'indexPatternId'
+        );
+
+        return {
+          ...state,
+          dashboardId: dashboard ? dashboard.id : '',
+          indexPatternId: indexPattern ? indexPattern.id : '',
+        };
+      };
+    }
+
+    test('extracts and persists references', async () => {
+      const { service, client, storage } = setup();
+      const locator = service.locators.create(new FooLocatorDefinition());
+      const shortUrl = await client.create({
+        locator,
+        params: {
+          dashboardId: '123',
+          indexPatternId: '456',
+        },
+      });
+      const record = await storage.getById(shortUrl.data.id);
+
+      expect(record.references).toEqual([
+        {
+          id: '123',
+          type: 'dashboard',
+          name: 'locator:params:dashboardId',
+        },
+        {
+          id: '456',
+          type: 'index_pattern',
+          name: 'locator:params:indexPatternId',
+        },
+      ]);
+    });
+
+    test('injects references', async () => {
+      const { service, client, storage } = setup();
+      const locator = service.locators.create(new FooLocatorDefinition());
+      const shortUrl1 = await client.create({
+        locator,
+        params: {
+          dashboardId: '3',
+          indexPatternId: '5',
+        },
+      });
+      const record1 = await storage.getById(shortUrl1.data.id);
+
+      record1.data.locator.state = {};
+
+      await storage.update(record1.data.id, record1.data);
+
+      const record2 = await storage.getById(shortUrl1.data.id);
+
+      expect(record2.data.locator.state).toEqual({});
+
+      const shortUrl2 = await client.get(shortUrl1.data.id);
+
+      expect(shortUrl2.data.locator.state).toEqual({
+        dashboardId: '3',
+        indexPatternId: '5',
+      });
     });
   });
 });

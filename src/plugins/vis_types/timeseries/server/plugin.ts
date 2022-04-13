@@ -15,14 +15,16 @@ import {
   KibanaRequest,
   IUiSettingsClient,
 } from 'src/core/server';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
-import { first, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
+import { HomeServerPluginSetup } from '../../../home/server';
 import { PluginStart } from '../../../data/server';
-import { IndexPatternsService } from '../../../data/common';
+import type { DataViewsService } from '../../../data_views/common';
+import type { PluginStart as DataViewsPublicPluginStart } from '../../../data_views/server';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { getUiSettings } from './ui_settings';
@@ -47,10 +49,12 @@ export interface LegacySetup {
 
 interface VisTypeTimeseriesPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+  home?: HomeServerPluginSetup;
 }
 
 interface VisTypeTimeseriesPluginStartDependencies {
   data: PluginStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface VisTypeTimeseriesSetup {
@@ -71,7 +75,7 @@ export interface Framework {
   searchStrategyRegistry: SearchStrategyRegistry;
   getIndexPatternsService: (
     requestContext: VisTypeTimeseriesRequestHandlerContext
-  ) => Promise<IndexPatternsService>;
+  ) => Promise<DataViewsService>;
   getFieldFormatsService: (uiSettings: IUiSettingsClient) => Promise<FieldFormatsRegistry>;
   getEsShardTimeout: () => Promise<number>;
 }
@@ -100,16 +104,13 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       logger,
       searchStrategyRegistry,
       getEsShardTimeout: () =>
-        globalConfig$
-          .pipe(
-            first(),
-            map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
-          )
-          .toPromise(),
+        firstValueFrom(
+          globalConfig$.pipe(map((config) => config.elasticsearch.shardTimeout.asMilliseconds()))
+        ),
       getIndexPatternsService: async (requestContext) => {
-        const [, { data }] = await core.getStartServices();
+        const [, { dataViews }] = await core.getStartServices();
 
-        return await data.indexPatterns.indexPatternsServiceFactory(
+        return await dataViews.dataViewsServiceFactory(
           requestContext.core.savedObjects.client,
           requestContext.core.elasticsearch.client.asCurrentUser
         );
@@ -128,7 +129,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     fieldsRoutes(router, framework);
 
     if (plugins.usageCollection) {
-      registerTimeseriesUsageCollector(plugins.usageCollection);
+      registerTimeseriesUsageCollector(plugins.usageCollection, plugins.home);
     }
 
     return {

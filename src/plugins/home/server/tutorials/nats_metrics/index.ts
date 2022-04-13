@@ -23,16 +23,16 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'natsMetrics',
     name: i18n.translate('home.tutorials.natsMetrics.nameTitle', {
-      defaultMessage: 'NATS metrics',
+      defaultMessage: 'NATS Metrics',
     }),
     moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.natsMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the Nats server.',
+      defaultMessage: 'Collect metrics from NATS servers with Metricbeat.',
     }),
     longDescription: i18n.translate('home.tutorials.natsMetrics.longDescription', {
       defaultMessage:
-        'The `nats` Metricbeat module fetches monitoring metrics from Nats. \
+        'The `nats` Metricbeat module fetches metrics from Nats. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',
@@ -56,8 +56,8 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/nats_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['message_queue'],
   };
 }

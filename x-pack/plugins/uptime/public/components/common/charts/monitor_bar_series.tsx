@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { HistogramPoint } from '../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
@@ -114,7 +114,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
         />
       }
     >
-      <EuiText color="secondary">--</EuiText>
+      <EuiText color="success">--</EuiText>
     </EuiToolTip>
   );
 };

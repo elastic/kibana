@@ -7,9 +7,9 @@
  */
 
 import Path from 'path';
-import { Observable } from 'rxjs';
-import { concatMap, filter, first, map, tap, toArray } from 'rxjs/operators';
-import { getFlattenedObject, pick } from '@kbn/std';
+import { firstValueFrom, Observable } from 'rxjs';
+import { filter, map, tap, toArray } from 'rxjs/operators';
+import { getFlattenedObject } from '@kbn/std';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -26,6 +26,7 @@ import {
 } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
 import { InternalEnvironmentServicePreboot } from '../environment';
@@ -89,10 +90,10 @@ export interface PluginsServiceDiscoverDeps {
 /** @internal */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
-  private readonly prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+  private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
   private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
-  private readonly standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+  private readonly standardPluginsSystem: PluginsSystem<PluginType.standard>;
   private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
@@ -105,10 +106,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
+    this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
+    this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   }
 
   public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     const { error$, plugin$ } = discover(config, this.coreContext, {
       uuid: environment.instanceUuid,
@@ -148,7 +151,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async preboot(deps: PluginsServicePrebootSetupDeps) {
     this.log.debug('Prebooting plugins service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (config.initialize) {
       await this.prebootPluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps, this.prebootUiPluginInternalInfo);
@@ -162,7 +165,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async setup(deps: PluginsServiceSetupDeps) {
     this.log.debug('Setting up plugins service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
@@ -183,7 +186,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Plugins service starts plugins');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (!config.initialize) {
       this.log.info(
         'Skipping `start` for `standard` plugins since plugin initialization is disabled.'
@@ -226,16 +229,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           const configDescriptor = this.pluginConfigDescriptors.get(pluginId)!;
           return [
             pluginId,
-            this.configService.atPath(plugin.configPath).pipe(
-              map((config: any) =>
-                pick(
-                  config || {},
-                  Object.entries(configDescriptor.exposeToBrowser!)
-                    .filter(([_, exposed]) => exposed)
-                    .map(([key, _]) => key)
-                )
-              )
-            ),
+            this.configService
+              .atPath(plugin.configPath)
+              .pipe(map((config: any) => createBrowserConfig(config, configDescriptor))),
           ];
         })
     );
@@ -250,13 +246,13 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       PluginDiscoveryErrorType.InvalidManifest,
     ];
 
-    const errors = await error$
-      .pipe(
+    const errors = await firstValueFrom(
+      error$.pipe(
         filter((error) => errorTypesToReport.includes(error.type)),
         tap((pluginError) => this.log.error(pluginError)),
         toArray()
       )
-      .toPromise();
+    );
     if (errors.length > 0) {
       throw new Error(
         `Failed to initialize plugins:${errors.map((err) => `\n\t${err.message}`).join('')}`
@@ -269,50 +265,56 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       PluginName,
       { plugin: PluginWrapper; isEnabled: boolean }
     >();
-    await plugin$
-      .pipe(
-        concatMap(async (plugin) => {
-          const configDescriptor = plugin.getConfigDescriptor();
-          if (configDescriptor) {
-            this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
-            if (configDescriptor.deprecations) {
-              this.coreContext.configService.addDeprecationProvider(
-                plugin.configPath,
-                configDescriptor.deprecations
-              );
-            }
-            if (configDescriptor.exposeToUsage) {
-              this.pluginConfigUsageDescriptors.set(
-                Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
-                getFlattenedObject(configDescriptor.exposeToUsage)
-              );
-            }
-            this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
-          }
-          const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
+    const plugins = await firstValueFrom(plugin$.pipe(toArray()));
 
-          if (pluginEnableStatuses.has(plugin.name)) {
-            throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
-          }
+    // Register config descriptors and deprecations
+    for (const plugin of plugins) {
+      const configDescriptor = plugin.getConfigDescriptor();
+      if (configDescriptor) {
+        this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+        if (configDescriptor.deprecations) {
+          this.coreContext.configService.addDeprecationProvider(
+            plugin.configPath,
+            configDescriptor.deprecations
+          );
+        }
+        if (configDescriptor.exposeToUsage) {
+          this.pluginConfigUsageDescriptors.set(
+            Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
+            getFlattenedObject(configDescriptor.exposeToUsage)
+          );
+        }
+        this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
+      }
+    }
 
-          if (plugin.includesUiPlugin) {
-            const uiPluginInternalInfo =
-              plugin.manifest.type === PluginType.preboot
-                ? this.prebootUiPluginInternalInfo
-                : this.standardUiPluginInternalInfo;
-            uiPluginInternalInfo.set(plugin.name, {
-              requiredBundles: plugin.requiredBundles,
-              version: plugin.manifest.version,
-              publicTargetDir: Path.resolve(plugin.path, 'target/public'),
-              publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
-            });
-          }
+    // Validate config and handle enabled statuses.
+    // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.
+    // Hence, we need all the deprecations to be registered before accessing any config parameter.
+    for (const plugin of plugins) {
+      const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
-          pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
-        })
-      )
-      .toPromise();
+      if (pluginEnableStatuses.has(plugin.name)) {
+        throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
+      }
 
+      if (plugin.includesUiPlugin) {
+        const uiPluginInternalInfo =
+          plugin.manifest.type === PluginType.preboot
+            ? this.prebootUiPluginInternalInfo
+            : this.standardUiPluginInternalInfo;
+        uiPluginInternalInfo.set(plugin.name, {
+          requiredBundles: plugin.requiredBundles,
+          version: plugin.manifest.version,
+          publicTargetDir: Path.resolve(plugin.path, 'target/public'),
+          publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
+        });
+      }
+
+      pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
+    }
+
+    // Add the plugins to the Plugin System if enabled and its dependencies are met
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 

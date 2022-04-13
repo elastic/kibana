@@ -16,39 +16,46 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> =
-  ({
-    columnId,
-    data,
-    eventId,
-    isDraggable,
-    header,
-    isDetails,
-    isExpandable,
-    isExpanded,
-    linkValues,
-    rowIndex,
-    setCellProps,
-    timelineId,
-    ecsData,
-    rowRenderers,
-    browserFields,
-  }) => (
-    <DefaultCellRenderer
-      columnId={columnId}
-      data={data}
-      eventId={eventId}
-      isDraggable={isDraggable}
-      header={header}
-      isDetails={isDetails}
-      isExpandable={isExpandable}
-      isExpanded={isExpanded}
-      linkValues={linkValues}
-      rowIndex={rowIndex}
-      setCellProps={setCellProps}
-      timelineId={timelineId}
-      ecsData={ecsData}
-      rowRenderers={rowRenderers}
-      browserFields={browserFields}
-    />
-  );
+export const RenderCellValue: React.FC<
+  EuiDataGridCellValueElementProps & CellValueElementProps
+> = ({
+  browserFields,
+  columnId,
+  data,
+  ecsData,
+  eventId,
+  globalFilters,
+  header,
+  isDetails,
+  isDraggable,
+  isExpandable,
+  isExpanded,
+  linkValues,
+  rowIndex,
+  colIndex,
+  rowRenderers,
+  setCellProps,
+  timelineId,
+  truncate,
+}) => (
+  <DefaultCellRenderer
+    browserFields={browserFields}
+    columnId={columnId}
+    data={data}
+    ecsData={ecsData}
+    eventId={eventId}
+    globalFilters={globalFilters}
+    header={header}
+    isDetails={isDetails}
+    isDraggable={isDraggable}
+    isExpandable={isExpandable}
+    isExpanded={isExpanded}
+    linkValues={linkValues}
+    rowIndex={rowIndex}
+    colIndex={colIndex}
+    rowRenderers={rowRenderers}
+    setCellProps={setCellProps}
+    timelineId={timelineId}
+    truncate={truncate}
+  />
+);

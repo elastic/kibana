@@ -4,11 +4,11 @@ slug: /kibana-dev-docs/api/lists
 title: "lists"
 image: https://source.unsplash.com/400x175/?github
 summary: API docs for the lists plugin
-date: 2020-11-16
+date: 2022-04-05
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'lists']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
-import listsObj from './lists.json';
+import listsObj from './lists.devdocs.json';
 
 
 
@@ -16,9 +16,9 @@ Contact [Security detections response](https://github.com/orgs/elastic/teams/sec
 
 **Code health stats**
 
-| Public API count  | Any count | Items lacking comments | Missing exports | 
+| Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 150 | 0 | 143 | 38 |
+| 198 | 0 | 162 | 49 |
 
 ## Client
 
@@ -28,11 +28,14 @@ Contact [Security detections response](https://github.com/orgs/elastic/teams/sec
 ### Start
 <DocDefinitionList data={[listsObj.client.start]}/>
 
-### Objects
-<DocDefinitionList data={listsObj.client.objects}/>
+### Functions
+<DocDefinitionList data={listsObj.client.functions}/>
 
 ### Classes
 <DocDefinitionList data={listsObj.client.classes}/>
+
+### Interfaces
+<DocDefinitionList data={listsObj.client.interfaces}/>
 
 ## Server
 
@@ -44,4 +47,7 @@ Contact [Security detections response](https://github.com/orgs/elastic/teams/sec
 
 ### Interfaces
 <DocDefinitionList data={listsObj.server.interfaces}/>
+
+### Consts, variables and types
+<DocDefinitionList data={listsObj.server.misc}/>
 

@@ -39,8 +39,7 @@ const DEFAULT_PAGINATION = {
  * @param filterOptions filter by certain fields
  * @param namespaceTypes spaces to be searched
  * @param notifications kibana service for displaying toasters
- * @param showTrustedApps boolean - include/exclude trusted app lists
- * @param showEventFilters boolean - include/exclude event filters lists
+ * @param hideLists a list of listIds we don't want to query
  * @param initialPagination
  *
  */
@@ -51,8 +50,7 @@ export const useExceptionLists = ({
   filterOptions = {},
   namespaceTypes,
   notifications,
-  showTrustedApps = false,
-  showEventFilters = false,
+  hideLists = [],
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
@@ -62,8 +60,12 @@ export const useExceptionLists = ({
   const namespaceTypesAsString = useMemo(() => namespaceTypes.join(','), [namespaceTypes]);
   const filters = useMemo(
     (): string =>
-      getFilters({ filters: filterOptions, namespaceTypes, showTrustedApps, showEventFilters }),
-    [namespaceTypes, filterOptions, showTrustedApps, showEventFilters]
+      getFilters({
+        filters: filterOptions,
+        namespaceTypes,
+        hideLists,
+      }),
+    [namespaceTypes, filterOptions, hideLists]
   );
 
   const fetchData = useCallback(async (): Promise<void> => {

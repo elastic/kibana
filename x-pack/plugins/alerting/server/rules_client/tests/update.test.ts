@@ -20,8 +20,7 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { resolvable } from '../../test_utils';
 import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { auditLoggerMock } from '../../../../security/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
 jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
@@ -36,7 +35,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+const auditLogger = auditLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -55,6 +54,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
 beforeEach(() => {
@@ -74,7 +74,7 @@ describe('update()', () => {
       enabled: true,
       tags: ['foo'],
       alertTypeId: 'myType',
-      schedule: { interval: '10s' },
+      schedule: { interval: '1m' },
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
       params: {},
@@ -182,7 +182,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -247,11 +247,13 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
           bar: true,
+          risk_score: 40,
+          severity: 'low',
         },
         throttle: null,
         notifyWhen: 'onActiveAlert',
@@ -316,7 +318,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -362,6 +364,10 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "consumer": "myApp",
         "enabled": true,
+        "mapped_params": Object {
+          "risk_score": 40,
+          "severity": "20-low",
+        },
         "meta": Object {
           "versionApiKeyLastmodified": "v7.10.0",
         },
@@ -369,9 +375,11 @@ describe('update()', () => {
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
+          "risk_score": 40,
+          "severity": "low",
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -468,7 +476,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -519,7 +527,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -592,7 +600,7 @@ describe('update()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
@@ -643,7 +651,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -698,7 +706,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
@@ -734,7 +742,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: ruleParams,
@@ -768,7 +776,7 @@ describe('update()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
         throttle: null,
@@ -814,7 +822,7 @@ describe('update()', () => {
           "parameterThatIsSavedObjectId": "9",
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -832,7 +840,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -882,7 +890,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -922,7 +930,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -957,7 +965,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -997,7 +1005,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: false,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1038,7 +1046,7 @@ describe('update()', () => {
     const result = await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1079,7 +1087,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "updatedAt": 2019-02-12T21:01:22.479Z,
@@ -1114,7 +1122,7 @@ describe('update()', () => {
           "bar": true,
         },
         "schedule": Object {
-          "interval": "10s",
+          "interval": "1m",
         },
         "scheduledTaskId": "task-123",
         "tags": Array [
@@ -1150,7 +1158,7 @@ describe('update()', () => {
         await rulesClient.update({
           id: '1',
           data: {
-            schedule: { interval: '10s' },
+            schedule: { interval: '1m' },
             name: 'abc',
             tags: ['foo'],
             params: {
@@ -1209,7 +1217,7 @@ describe('update()', () => {
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1240,7 +1248,7 @@ describe('update()', () => {
       attributes: {
         enabled: false,
         name: ' my alert name ',
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1284,7 +1292,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1312,7 +1320,7 @@ describe('update()', () => {
     await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1376,7 +1384,7 @@ describe('update()', () => {
       type: 'alert',
       attributes: {
         enabled: true,
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         params: {
           bar: true,
         },
@@ -1431,7 +1439,7 @@ describe('update()', () => {
     await rulesClient.update({
       id: '1',
       data: {
-        schedule: { interval: '10s' },
+        schedule: { interval: '1m' },
         name: 'abc',
         tags: ['foo'],
         params: {
@@ -1480,7 +1488,7 @@ describe('update()', () => {
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1585,12 +1593,12 @@ describe('update()', () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
-      mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '10s' });
+      mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '1m' });
 
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1617,12 +1625,12 @@ describe('update()', () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '10s' });
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1649,7 +1657,7 @@ describe('update()', () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
 
       const resolveAfterAlertUpdatedCompletes = resolvable<{ id: string }>();
 
@@ -1659,7 +1667,7 @@ describe('update()', () => {
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1687,7 +1695,7 @@ describe('update()', () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
-      mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
+      mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
 
       taskManager.runNow.mockReset();
       taskManager.runNow.mockRejectedValue(new Error('Failed to run alert'));
@@ -1695,7 +1703,7 @@ describe('update()', () => {
       await rulesClient.update({
         id: alertId,
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1763,7 +1771,7 @@ describe('update()', () => {
       rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1801,6 +1809,198 @@ describe('update()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
+  test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_2',
+            actionTypeId: 'test2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'api_key_pending_invalidation',
+      attributes: {
+        apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
+      },
+      references: [],
+    });
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      `Rule schedule interval (1s) for "myType" rule type with ID "1" is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+    );
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+  });
+
+  test('throws error when updating with an interval less than the minimum configured one when enforce = true', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    await expect(
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1s' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '2',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error updating rule: the interval is less than the allowed minimum interval of 1m"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
   describe('authorization', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1810,7 +2010,7 @@ describe('update()', () => {
           alertTypeId: 'myType',
           consumer: 'myApp',
           enabled: true,
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           params: {
             bar: true,
           },
@@ -1827,7 +2027,7 @@ describe('update()', () => {
       await rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1856,7 +2056,7 @@ describe('update()', () => {
         rulesClient.update({
           id: '1',
           data: {
-            schedule: { interval: '10s' },
+            schedule: { interval: '1m' },
             name: 'abc',
             tags: ['foo'],
             params: {
@@ -1887,7 +2087,7 @@ describe('update()', () => {
         type: 'alert',
         attributes: {
           enabled: true,
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           params: {
             bar: true,
           },
@@ -1904,7 +2104,7 @@ describe('update()', () => {
       await rulesClient.update({
         id: '1',
         data: {
-          schedule: { interval: '10s' },
+          schedule: { interval: '1m' },
           name: 'abc',
           tags: ['foo'],
           params: {
@@ -1934,7 +2134,7 @@ describe('update()', () => {
         rulesClient.update({
           id: '1',
           data: {
-            schedule: { interval: '10s' },
+            schedule: { interval: '1m' },
             name: 'abc',
             tags: ['foo'],
             params: {

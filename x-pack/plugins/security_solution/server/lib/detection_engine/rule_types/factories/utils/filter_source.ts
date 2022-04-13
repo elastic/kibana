@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { buildEventTypeSignal } from '../../../signals/build_event_type_signal';
+import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { SignalSourceHit } from '../../../signals/types';
-import { RACAlert } from '../../types';
 
-export const filterSource = (doc: SignalSourceHit): Partial<RACAlert> => {
-  const event = buildEventTypeSignal(doc);
-
+export const filterSource = (doc: SignalSourceHit) => {
   const docSource = doc._source ?? {};
-  const { threshold_result: thresholdResult, ...filteredSource } = docSource || {
+  const {
+    event,
+    kibana,
+    signal,
+    threshold_result: siemSignalsThresholdResult,
+    [ALERT_THRESHOLD_RESULT]: alertThresholdResult,
+    ...filteredSource
+  } = docSource || {
+    event: null,
+    kibana: null,
+    signal: null,
     threshold_result: null,
+    [ALERT_THRESHOLD_RESULT]: null,
   };
 
-  return {
-    ...filteredSource,
-    event,
-  };
+  return filteredSource;
 };

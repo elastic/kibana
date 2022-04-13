@@ -9,7 +9,7 @@ import { TooltipInfo } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
 import {
   asTransactionRate,
@@ -18,7 +18,7 @@ import {
 import { useTheme } from '../../../../hooks/use_theme';
 
 type ServiceInstanceMainStatistics =
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 type MainStatsServiceInstanceItem =
   ServiceInstanceMainStatistics['currentPeriod'][0];
 

@@ -6,12 +6,13 @@
  */
 
 import React, { ReactNode } from 'react';
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   ISessionService,
   RefreshInterval,
@@ -22,7 +23,7 @@ import {
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createSearchUsageCollectorMock } from '../../../../../../../src/plugins/data/public/search/collectors/mocks';
 
 const coreStart = coreMock.createStart();
@@ -35,10 +36,11 @@ let usageCollector: jest.Mocked<SearchUsageCollector>;
 
 const refreshInterval$ = new BehaviorSubject<RefreshInterval>({ value: 0, pause: true });
 const timeFilter = dataStart.query.timefilter.timefilter as jest.Mocked<TimefilterContract>;
-timeFilter.getRefreshIntervalUpdate$.mockImplementation(() => refreshInterval$);
+timeFilter.getRefreshIntervalUpdate$.mockImplementation(() => refreshInterval$.pipe(map(() => {})));
 timeFilter.getRefreshInterval.mockImplementation(() => refreshInterval$.getValue());
 
 const disableSaveAfterSessionCompletesTimeout = 5 * 60 * 1000;
+const tourDisabled = false;
 
 function Container({ children }: { children?: ReactNode }) {
   return <IntlProvider locale="en">{children}</IntlProvider>;
@@ -64,6 +66,7 @@ test("shouldn't show indicator in case no active search session", async () => {
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
     basePath,
+    tourDisabled,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -92,6 +95,7 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
     basePath,
+    tourDisabled,
   });
   const { getByTestId, container } = render(
     <Container>
@@ -122,6 +126,7 @@ test('should show indicator in case there is an active search session', async ()
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
     basePath,
+    tourDisabled,
   });
   const { getByTestId } = render(
     <Container>
@@ -147,6 +152,7 @@ test('should be disabled in case uiConfig says so ', async () => {
     disableSaveAfterSessionCompletesTimeout,
     usageCollector,
     basePath,
+    tourDisabled,
   });
 
   render(
@@ -170,6 +176,7 @@ test('should be disabled in case not enough permissions', async () => {
     storage,
     disableSaveAfterSessionCompletesTimeout,
     basePath,
+    tourDisabled,
   });
 
   render(
@@ -203,6 +210,7 @@ describe('Completed inactivity', () => {
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,
       basePath,
+      tourDisabled,
     });
 
     render(
@@ -264,6 +272,7 @@ describe('tour steps', () => {
         disableSaveAfterSessionCompletesTimeout,
         usageCollector,
         basePath,
+        tourDisabled,
       });
       const rendered = render(
         <Container>
@@ -305,6 +314,7 @@ describe('tour steps', () => {
         disableSaveAfterSessionCompletesTimeout,
         usageCollector,
         basePath,
+        tourDisabled,
       });
       const rendered = render(
         <Container>
@@ -329,6 +339,51 @@ describe('tour steps', () => {
       expect(usageCollector.trackSessionIndicatorTourLoading).toHaveBeenCalledTimes(0);
       expect(usageCollector.trackSessionIndicatorTourRestored).toHaveBeenCalledTimes(0);
     });
+
+    test("doesn't show tour step on slow loading when tour is disabled", async () => {
+      const state$ = new BehaviorSubject(SearchSessionState.Loading);
+      const SearchSessionIndicator = createConnectedSearchSessionIndicator({
+        sessionService: { ...sessionService, state$ },
+        application,
+        storage,
+        disableSaveAfterSessionCompletesTimeout,
+        usageCollector,
+        basePath,
+        tourDisabled: true,
+      });
+      const rendered = render(
+        <Container>
+          <SearchSessionIndicator />
+        </Container>
+      );
+
+      await waitFor(() => rendered.getByTestId('searchSessionIndicator'));
+
+      expect(() => screen.getByTestId('searchSessionIndicatorPopoverContainer')).toThrow();
+
+      act(() => {
+        jest.advanceTimersByTime(10001);
+      });
+
+      expect(
+        screen.queryByTestId('searchSessionIndicatorPopoverContainer')
+      ).not.toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+        state$.next(SearchSessionState.Completed);
+      });
+
+      expect(
+        screen.queryByTestId('searchSessionIndicatorPopoverContainer')
+      ).not.toBeInTheDocument();
+
+      expect(storage.get(TOUR_RESTORE_STEP_KEY)).toBeFalsy();
+      expect(storage.get(TOUR_TAKING_TOO_LONG_STEP_KEY)).toBeFalsy();
+
+      expect(usageCollector.trackSessionIndicatorTourLoading).toHaveBeenCalledTimes(0);
+      expect(usageCollector.trackSessionIndicatorTourRestored).toHaveBeenCalledTimes(0);
+    });
   });
 
   test('shows tour step for restored', async () => {
@@ -340,6 +395,7 @@ describe('tour steps', () => {
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,
       basePath,
+      tourDisabled,
     });
     const rendered = render(
       <Container>
@@ -367,6 +423,7 @@ describe('tour steps', () => {
       disableSaveAfterSessionCompletesTimeout,
       usageCollector,
       basePath,
+      tourDisabled,
     });
     const rendered = render(
       <Container>

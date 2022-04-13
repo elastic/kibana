@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ScaleContinuousType } from '@elastic/charts';
+import { Fit, ScaleContinuousType } from '@elastic/charts';
 
 import { Datatable } from '../../../../expressions/public';
 import { BUCKET_TYPES } from '../../../../data/public';
@@ -28,8 +28,14 @@ import { getLegend } from './get_legend';
 import { getAxis } from './get_axis';
 import { getAspects } from './get_aspects';
 import { ChartType } from '../index';
+import { getSafeId } from '../utils/accessors';
 
-export function getConfig(table: Datatable, params: VisParams): VisConfig {
+export function getConfig(
+  table: Datatable,
+  params: VisParams,
+  useLegacyTimeAxis = false,
+  darkMode = false
+): VisConfig {
   const {
     thresholdLine,
     orderBucketsBySum,
@@ -42,28 +48,51 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     fillOpacity,
   } = params;
   const aspects = getAspects(table.columns, params.dimensions);
+  const tooltip = getTooltip(aspects, params);
+
+  const yAxes: Array<AxisConfig<ScaleContinuousType>> = [];
+
+  // avoid duplicates based on aggId
+  const aspectVisited = new Set();
+  params.dimensions.y.forEach((y) => {
+    const accessor = y.accessor;
+    const aspect = aspects.y.find(({ column }) => column === accessor);
+    const aggId = getSafeId(aspect?.aggId);
+    const serie = params.seriesParams.find(({ data: { id } }) => id === aggId);
+    const valueAxis = params.valueAxes.find(({ id }) => id === serie?.valueAxis);
+    if (aspect && valueAxis && !aspectVisited.has(aggId)) {
+      yAxes.push(getAxis<YScaleType>(valueAxis, params.grid, aspect, params.seriesParams));
+      aspectVisited.add(aggId);
+    }
+  });
+
+  const rotation = getRotation(params.categoryAxes[0]);
+
+  const isDateHistogram = params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM;
+  const isHistogram = params.dimensions.x?.aggType === BUCKET_TYPES.HISTOGRAM;
+  const enableHistogramMode =
+    (isDateHistogram || isHistogram) &&
+    shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
+
+  const useMultiLayerTimeAxis =
+    enableHistogramMode && isDateHistogram && !useLegacyTimeAxis && rotation === 0;
+
   const xAxis = getAxis<XScaleType>(
     params.categoryAxes[0],
     params.grid,
     aspects.x,
     params.seriesParams,
-    params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM
+    isDateHistogram,
+    useMultiLayerTimeAxis,
+    darkMode
   );
-  const tooltip = getTooltip(aspects, params);
-  const yAxes = params.valueAxes.map((a) =>
-    // uses first y aspect in array for formatting axis
-    getAxis<YScaleType>(a, params.grid, aspects.y[0], params.seriesParams)
-  );
-  const enableHistogramMode =
-    (params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM ||
-      params.dimensions.x?.aggType === BUCKET_TYPES.HISTOGRAM) &&
-    shouldEnableHistogramMode(params.seriesParams, aspects.y, yAxes);
+
   const isTimeChart = (aspects.x.params as DateHistogramParams).date ?? false;
 
   return {
     // NOTE: downscale ratio to match current vislib implementation
     markSizeRatio: radiusRatio * 0.6,
-    fittingFunction,
+    fittingFunction: fittingFunction ?? Fit.Linear,
     fillOpacity,
     detailedTooltip,
     orderBucketsBySum,
@@ -77,7 +106,7 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     xAxis,
     yAxes,
     legend: getLegend(params),
-    rotation: getRotation(params.categoryAxes[0]),
+    rotation,
     thresholdLine: getThresholdLine(thresholdLine, yAxes, params.seriesParams),
   };
 }
@@ -112,8 +141,6 @@ const shouldEnableHistogramMode = (
   }
 
   return bars.every(({ valueAxis: groupId, mode }) => {
-    const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
-
-    return mode === 'stacked' || yAxisScale?.mode === 'percentage';
+    return mode === 'stacked';
   });
 };

@@ -17,10 +17,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [
       require.resolve('./apps/login_page'),
-      require.resolve('./apps/home'),
       require.resolve('./apps/kibana_overview'),
+      require.resolve('./apps/home'),
       require.resolve('./apps/grok_debugger'),
       require.resolve('./apps/search_profiler'),
+      require.resolve('./apps/painless_lab'),
       require.resolve('./apps/uptime'),
       require.resolve('./apps/spaces'),
       require.resolve('./apps/advanced_settings'),
@@ -34,11 +35,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/lens'),
       require.resolve('./apps/upgrade_assistant'),
       require.resolve('./apps/canvas'),
+      require.resolve('./apps/maps'),
       require.resolve('./apps/security_solution'),
       require.resolve('./apps/ml_embeddables_in_dashboard'),
       require.resolve('./apps/remote_clusters'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
+      require.resolve('./apps/license_management'),
+      require.resolve('./apps/tags'),
+      require.resolve('./apps/search_sessions'),
     ],
 
     pageObjects,

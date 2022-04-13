@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { AlertServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
 import sampleAggsJsonResponse from './es_sample_response.json';
 import sampleShapesJsonResponse from './es_sample_response_shapes.json';
 import sampleAggsJsonResponseWithNesting from './es_sample_response_with_nesting.json';
@@ -17,15 +17,12 @@ import {
   getGeoContainmentExecutor,
 } from '../geo_containment';
 import { OTHER_CATEGORY } from '../es_query_builder';
-import {
-  GeoContainmentInstanceContext,
-  GeoContainmentInstanceState,
-  GeoContainmentParams,
-} from '../alert_type';
+import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
+import type { GeoContainmentParams } from '../alert_type';
 
-const alertInstanceFactory =
-  (contextKeys: unknown[], testAlertActionArr: unknown[]) => (instanceId: string) => {
-    const alertInstance = alertsMock.createAlertInstanceFactory<
+const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
+  create: (instanceId: string) => {
+    const alertInstance = alertsMock.createAlertFactory.create<
       GeoContainmentInstanceState,
       GeoContainmentInstanceContext
     >();
@@ -42,7 +39,9 @@ const alertInstanceFactory =
       }
     );
     return alertInstance;
-  };
+  },
+  done: () => ({ getRecoveredAlerts: () => [] }),
+});
 
 describe('geo_containment', () => {
   describe('transformResults', () => {
@@ -256,7 +255,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMap,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -281,7 +280,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -320,7 +319,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         prevLocationMapWithNonIdenticalEntityEntry,
         currLocationMap,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -343,7 +342,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -376,7 +375,7 @@ describe('geo_containment', () => {
       getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithThreeMore,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -413,7 +412,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -445,7 +444,7 @@ describe('geo_containment', () => {
       const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
         emptyPrevLocationMap,
         currLocationMapWithOther,
-        alertInstanceFactory(contextKeys, testAlertActionArr),
+        alertFactory(contextKeys, testAlertActionArr),
         emptyShapesIdsNamesMap,
         currentDateTime
       );
@@ -514,23 +513,25 @@ describe('geo_containment', () => {
     const boundaryCall = jest.fn();
     const esAggCall = jest.fn();
     const contextKeys = Object.keys(expectedAlertResults[0].context);
-    const alertServicesWithSearchMock: AlertServicesMock = {
-      ...alertsMock.createAlertServices(),
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    // @ts-ignore incomplete return type
+    esClient.search.mockResponseImplementation(({ index }) => {
+      if (index === geoContainmentParams.boundaryIndexTitle) {
+        boundaryCall();
+        return sampleShapesJsonResponse;
+      } else {
+        esAggCall();
+        return sampleAggsJsonResponse;
+      }
+    });
+
+    const alertServicesWithSearchMock: RuleExecutorServicesMock = {
+      ...alertsMock.createRuleExecutorServices(),
       // @ts-ignore
-      alertInstanceFactory: alertInstanceFactory(contextKeys, testAlertActionArr),
+      alertFactory: alertFactory(contextKeys, testAlertActionArr),
+      // @ts-ignore
       scopedClusterClient: {
-        asCurrentUser: {
-          // @ts-ignore
-          search: jest.fn(({ index }: { index: string }) => {
-            if (index === geoContainmentParams.boundaryIndexTitle) {
-              boundaryCall();
-              return sampleShapesJsonResponse;
-            } else {
-              esAggCall();
-              return sampleAggsJsonResponse;
-            }
-          }),
-        },
+        asCurrentUser: esClient,
       },
     };
 
@@ -541,6 +542,7 @@ describe('geo_containment', () => {
 
     it('should query for shapes if state does not contain shapes', async () => {
       const executor = await getGeoContainmentExecutor(mockLogger);
+      // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
         startedAt,
@@ -560,6 +562,7 @@ describe('geo_containment', () => {
 
     it('should not query for shapes if state contains shapes', async () => {
       const executor = await getGeoContainmentExecutor(mockLogger);
+      // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
         startedAt,
@@ -578,6 +581,7 @@ describe('geo_containment', () => {
 
     it('should carry through shapes filters in state to next call unmodified', async () => {
       const executor = await getGeoContainmentExecutor(mockLogger);
+      // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
         startedAt,
@@ -613,6 +617,7 @@ describe('geo_containment', () => {
         ],
       };
       const executor = await getGeoContainmentExecutor(mockLogger);
+      // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
         startedAt,

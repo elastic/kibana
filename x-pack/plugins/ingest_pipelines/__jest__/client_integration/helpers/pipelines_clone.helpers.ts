@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig, TestBed } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { PipelinesClone } from '../../../public/application/sections/pipelines_clone';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
@@ -28,7 +29,7 @@ export const PIPELINE_TO_CLONE = {
   ],
 };
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [getClonePath({ clonedPipelineName: PIPELINE_TO_CLONE.name })],
     componentRoutePath: ROUTES.clone,
@@ -36,9 +37,11 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(PipelinesClone), testBedConfig);
-
-export const setup = async (): Promise<PipelinesCloneTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<PipelinesCloneTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(PipelinesClone, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

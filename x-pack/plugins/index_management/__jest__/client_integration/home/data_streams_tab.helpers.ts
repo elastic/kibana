@@ -9,7 +9,13 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
 import { EuiDescriptionListDescription } from '@elastic/eui';
-import { registerTestBed, TestBed, TestBedConfig, findTestSubject } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
+} from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
@@ -41,8 +47,11 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   findDetailPanelIndexTemplateLink: () => ReactWrapper;
 }
 
-export const setup = async (overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
-  const testBedConfig: TestBedConfig = {
+export const setup = async (
+  httpSetup: HttpSetup,
+  overridingDependencies: any = {}
+): Promise<DataStreamsTabTestBed> => {
+  const testBedConfig: AsyncTestBedConfig = {
     store: () => indexManagementStore(services as any),
     memoryRouter: {
       initialEntries: [`/indices`],
@@ -52,7 +61,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
   };
 
   const initTestBed = registerTestBed(
-    WithAppDependencies(IndexManagementHome, overridingDependencies),
+    WithAppDependencies(IndexManagementHome, httpSetup, overridingDependencies),
     testBedConfig
   );
   const testBed = await initTestBed();

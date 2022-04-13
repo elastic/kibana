@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../common';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import type { ConfigType } from '../../../../../config';
 import { MergeStrategyFunction } from '../types';
 import { mergeAllFieldsWithSource } from './merge_all_fields_with_source';

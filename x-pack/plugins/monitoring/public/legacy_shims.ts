@@ -5,15 +5,28 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup, IUiSettingsClient, AppMountParameters } from 'kibana/public';
+import {
+  CoreStart,
+  HttpSetup,
+  IUiSettingsClient,
+  AppMountParameters,
+  NotificationsStart,
+  ApplicationStart,
+  DocLinksStart,
+  ChromeStart,
+  I18nStart,
+} from 'kibana/public';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
-import { MonitoringStartPluginDependencies } from './types';
+import {
+  MonitoringStartPluginDependencies,
+  LegacyMonitoringStartPluginDependencies,
+} from './types';
 import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionTypeModel, AlertTypeModel } from '../../triggers_actions_ui/public/types';
+import { ActionTypeModel, RuleTypeModel } from '../../triggers_actions_ui/public/types';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 interface BreadcrumbItem {
@@ -37,26 +50,21 @@ export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
 }
 
-const angularNoop = () => {
-  throw new Error('Angular has been removed.');
-};
-
 export interface IShims {
-  toastNotifications: CoreStart['notifications']['toasts'];
-  capabilities: CoreStart['application']['capabilities'];
-  getAngularInjector: typeof angularNoop | (() => angular.auto.IInjectorService);
+  toastNotifications: NotificationsStart['toasts'];
+  capabilities: ApplicationStart['capabilities'];
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
     set: (breadcrumbs: BreadcrumbItem[]) => void;
     update: (breadcrumbs?: BreadcrumbItem[]) => void;
   };
-  I18nContext: CoreStart['i18n']['Context'];
-  docLinks: CoreStart['docLinks'];
-  docTitle: CoreStart['chrome']['docTitle'];
+  I18nContext: I18nStart['Context'];
+  docLinks: DocLinksStart;
+  docTitle: ChromeStart['docTitle'];
   timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  ruleTypeRegistry: TypeRegistry<AlertTypeModel>;
+  ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   kfetch: (
@@ -73,23 +81,17 @@ export interface IShims {
 export class Legacy {
   private static _shims: IShims;
 
-  public static init(
-    {
-      core,
-      data,
-      isCloud,
-      triggersActionsUi,
-      usageCollection,
-      appMountParameters,
-    }: MonitoringStartPluginDependencies,
-    ngInjector?: angular.auto.IInjectorService
-  ) {
+  public static init({
+    core,
+    data,
+    isCloud,
+    triggersActionsUi,
+    usageCollection,
+    appMountParameters,
+  }: LegacyMonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
-      getAngularInjector: ngInjector
-        ? (): angular.auto.IInjectorService => ngInjector
-        : angularNoop,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
         core.injectedMetadata.getInjectedVar(name, defaultValue),
@@ -97,9 +99,11 @@ export class Legacy {
         set: (breadcrumbs: BreadcrumbItem[]) => this._shims.breadcrumbs.update(breadcrumbs),
         update: (breadcrumbs?: BreadcrumbItem[]) => {
           if (!breadcrumbs) {
-            const currentBreadcrumbs: Observable<any> & {
-              value?: BreadcrumbItem[];
-            } = core.chrome.getBreadcrumbs$()?.source;
+            const currentBreadcrumbs:
+              | (Observable<any> & {
+                  value?: BreadcrumbItem[];
+                })
+              | undefined = core.chrome.getBreadcrumbs$()?.source;
             breadcrumbs = currentBreadcrumbs?.value;
           }
           const globalStateStr = location.hash.split('?')[1];

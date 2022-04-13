@@ -6,95 +6,37 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 
 import { Field, getUseField } from '../../common/shared_imports';
 import * as i18n from './translations';
-import { CreateCaseForm } from './form';
-import { FormContext } from './form_context';
-import { SubmitCaseButton } from './submit_button';
-import { Case } from '../../containers/types';
-import { CaseType } from '../../../common';
-import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
-import { fieldName as descriptionFieldName } from './description';
-import { InsertTimeline } from '../insert_timeline';
-import { UsePostComment } from '../../containers/use_post_comment';
-import { Owner } from '../../types';
-import { OwnerProvider } from '../owner_context';
+import { CreateCaseForm, CreateCaseFormProps } from './form';
+import { HeaderPage } from '../header_page';
+import { useCasesBreadcrumbs } from '../use_breadcrumbs';
+import { CasesDeepLinkId } from '../../common/navigation';
 
 export const CommonUseField = getUseField({ component: Field });
 
-const Container = styled.div`
-  ${({ theme }) => `
-    margin-top: ${theme.eui.euiSize};
-  `}
-`;
+export const CreateCase = React.memo<CreateCaseFormProps>(
+  ({ afterCaseCreated, onCancel, onSuccess, timelineIntegration, withSteps }) => {
+    useCasesBreadcrumbs(CasesDeepLinkId.casesCreate);
 
-export interface CreateCaseProps extends Owner {
-  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
-  caseType?: CaseType;
-  disableAlerts?: boolean;
-  hideConnectorServiceNowSir?: boolean;
-  onCancel: () => void;
-  onSuccess: (theCase: Case) => Promise<void>;
-  timelineIntegration?: CasesTimelineIntegration;
-  withSteps?: boolean;
-}
-
-const CreateCaseComponent = ({
-  afterCaseCreated,
-  caseType,
-  hideConnectorServiceNowSir,
-  disableAlerts,
-  onCancel,
-  onSuccess,
-  timelineIntegration,
-  withSteps,
-}: Omit<CreateCaseProps, 'owner'>) => (
-  <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-    <FormContext
-      afterCaseCreated={afterCaseCreated}
-      caseType={caseType}
-      hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-      onSuccess={onSuccess}
-    >
-      <CreateCaseForm
-        hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-        disableAlerts={disableAlerts}
-        withSteps={withSteps}
-      />
-      <Container>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="flexEnd"
-          gutterSize="xs"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="create-case-cancel"
-              iconType="cross"
-              onClick={onCancel}
-              size="s"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SubmitCaseButton />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Container>
-      <InsertTimeline fieldName={descriptionFieldName} />
-    </FormContext>
-  </CasesTimelineIntegrationProvider>
+    return (
+      <>
+        <HeaderPage
+          showBackButton={true}
+          data-test-subj="case-create-title"
+          title={i18n.CREATE_CASE_TITLE}
+        />
+        <CreateCaseForm
+          afterCaseCreated={afterCaseCreated}
+          onCancel={onCancel}
+          onSuccess={onSuccess}
+          timelineIntegration={timelineIntegration}
+          withSteps={withSteps}
+        />
+      </>
+    );
+  }
 );
 
-export const CreateCase: React.FC<CreateCaseProps> = React.memo((props) => (
-  <OwnerProvider owner={props.owner}>
-    <CreateCaseComponent {...props} />
-  </OwnerProvider>
-));
-// eslint-disable-next-line import/no-default-export
-export { CreateCase as default };
+CreateCase.displayName = 'CreateCase';

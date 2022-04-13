@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the use of Distributed Component Object Model (DCOM) to execute commands from a remote host, which are launched via the HTA Application COM Object. This behavior may indicate an attacker abusing a DCOM application to move laterally while attempting to evading detection.",
+  "description": "Identifies the use of Distributed Component Object Model (DCOM) to execute commands from a remote host, which are launched via the HTA Application COM Object. This behavior may indicate an attacker abusing a DCOM application to move laterally while attempting to evade detection.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Incoming DCOM Lateral Movement via MSHTA",
-  "query": "sequence with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n     process.name : \"mshta.exe\" and process.args : \"-Embedding\"\n  ] by host.id, process.entity_id\n  [network where event.type == \"start\" and process.name : \"mshta.exe\" and \n     network.direction == \"incoming\" and network.transport == \"tcp\" and\n     source.port > 49151 and destination.port > 49151 and not source.address in (\"127.0.0.1\", \"::1\")\n  ] by host.id, process.entity_id\n",
+  "query": "sequence with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n     process.name : \"mshta.exe\" and process.args : \"-Embedding\"\n  ] by host.id, process.entity_id\n  [network where event.type == \"start\" and process.name : \"mshta.exe\" and \n     network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n     source.port > 49151 and destination.port > 49151 and source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n  ] by host.id, process.entity_id\n",
   "references": [
     "https://codewhitesec.blogspot.com/2018/07/lethalhta.html"
   ],
@@ -38,11 +38,40 @@
         {
           "id": "T1021",
           "name": "Remote Services",
-          "reference": "https://attack.mitre.org/techniques/T1021/"
+          "reference": "https://attack.mitre.org/techniques/T1021/",
+          "subtechnique": [
+            {
+              "id": "T1021.003",
+              "name": "Distributed Component Object Model",
+              "reference": "https://attack.mitre.org/techniques/T1021/003/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.005",
+              "name": "Mshta",
+              "reference": "https://attack.mitre.org/techniques/T1218/005/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 6
 }

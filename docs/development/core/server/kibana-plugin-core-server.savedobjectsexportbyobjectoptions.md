@@ -11,10 +11,11 @@ Options for the [export by objects API](./kibana-plugin-core-server.savedobjects
 ```typescript
 export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBaseOptions 
 ```
+<b>Extends:</b> SavedObjectExportBaseOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [objects](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.objects.md) | <code>Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;</code> | optional array of objects to export. |
+|  [objects](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.objects.md) | Array&lt;{ id: string; type: string; }&gt; | optional array of objects to export. |
 

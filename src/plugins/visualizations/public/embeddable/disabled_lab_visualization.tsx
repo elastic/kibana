@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { getDocLinks } from '../services';

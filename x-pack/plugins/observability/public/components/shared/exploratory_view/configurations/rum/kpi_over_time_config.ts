@@ -13,6 +13,7 @@ import {
   OPERATION_COLUMN,
   RECORDS_FIELD,
   REPORT_METRIC_FIELD,
+  PERCENTILE,
   ReportTypes,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
@@ -47,7 +48,7 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getKPITrendsLensConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],
@@ -63,10 +64,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
     ],
     hasOperationType: false,
     filterFields: [
-      {
-        field: TRANSACTION_URL,
-        isNegated: false,
-      },
+      TRANSACTION_URL,
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,
@@ -81,11 +79,12 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
       USER_AGENT_OS,
       CLIENT_GEO_COUNTRY_NAME,
       USER_AGENT_DEVICE,
+      PERCENTILE,
       LABEL_FIELDS_BREAKDOWN,
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: { ...FieldLabels, [SERVICE_NAME]: WEB_APPLICATION_LABEL },
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],

@@ -5,18 +5,47 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import uuid from 'uuid/v5';
+import { omit } from 'lodash';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
-import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
-import { decodeCloudId, normalizeHostsForAgents } from '../../common';
+import {
+  DEFAULT_OUTPUT,
+  DEFAULT_OUTPUT_ID,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../constants';
+import { decodeCloudId, normalizeHostsForAgents, SO_SEARCH_LIMIT, outputType } from '../../common';
+import {
+  OutputUnauthorizedError,
+  OutputInvalidError,
+  FleetEncryptedSavedObjectEncryptionKeyRequired,
+} from '../errors';
 
+import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
+
+type Nullable<T> = { [P in keyof T]: T[P] | null };
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
+
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+} as unknown as KibanaRequest;
 
 // differentiate
 function isUUID(val: string) {
@@ -36,36 +65,90 @@ export function outputIdToUuid(id: string) {
 }
 
 function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
-  const { output_id: outputId, ...atributes } = so.attributes;
+  const { output_id: outputId, ssl, ...atributes } = so.attributes;
+
   return {
     id: outputId ?? so.id,
     ...atributes,
+    ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
   };
 }
 
+async function validateLogstashOutputNotUsedInAPMPolicy(
+  soClient: SavedObjectsClientContract,
+  outputId?: string,
+  isDefault?: boolean
+) {
+  // Validate no policy with APM use that policy
+  let kuery: string;
+  if (outputId) {
+    if (isDefault) {
+      kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+    } else {
+      kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+    }
+  } else {
+    if (isDefault) {
+      kuery = `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+    } else {
+      return;
+    }
+  }
+
+  const agentPolicySO = await agentPolicyService.list(soClient, {
+    kuery,
+    perPage: SO_SEARCH_LIMIT,
+    withPackagePolicies: true,
+  });
+  for (const agentPolicy of agentPolicySO.items) {
+    if (agentPolicyService.hasAPMIntegration(agentPolicy)) {
+      throw new OutputInvalidError('Logstash output cannot be used with APM integration.');
+    }
+  }
+}
+
 class OutputService {
-  private async _getDefaultOutputsSO(soClient: SavedObjectsClientContract) {
-    return await soClient.find<OutputSOAttributes>({
+  private get encryptedSoClient() {
+    return appContextService.getInternalUserSOClient(fakeRequest);
+  }
+
+  private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
+    return await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
   }
 
-  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
-    const outputs = await this._getDefaultOutputsSO(soClient);
+  private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
+    return await this.encryptedSoClient.find<OutputSOAttributes>({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      searchFields: ['is_default_monitoring'],
+      search: 'true',
+    });
+  }
 
-    if (!outputs.saved_objects.length) {
+  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
+    const outputs = await this.list(soClient);
+
+    const defaultOutput = outputs.items.find((o) => o.is_default);
+    const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
+
+    if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: this.getDefaultESHosts(),
         ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
+        is_default_monitoring: !defaultMonitoringOutput,
       } as NewOutput;
 
-      return await this.create(soClient, newDefaultOutput);
+      return await this.create(soClient, newDefaultOutput, {
+        id: DEFAULT_OUTPUT_ID,
+        overwrite: true,
+      });
     }
 
-    return outputSavedObjectToOutput(outputs.saved_objects[0]);
+    return defaultOutput;
   }
 
   public getDefaultESHosts(): string[] {
@@ -82,8 +165,18 @@ class OutputService {
     return cloudHosts || flagHosts || DEFAULT_ES_HOSTS;
   }
 
-  public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
-    const outputs = await this._getDefaultOutputsSO(soClient);
+  public async getDefaultDataOutputId(soClient: SavedObjectsClientContract) {
+    const outputs = await this._getDefaultDataOutputsSO(soClient);
+
+    if (!outputs.saved_objects.length) {
+      return null;
+    }
+
+    return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
+  }
+
+  public async getDefaultMonitoringOutputId(soClient: SavedObjectsClientContract) {
+    const outputs = await this._getDefaultMonitoringOutputsSO(soClient);
 
     if (!outputs.saved_objects.length) {
       return null;
@@ -95,19 +188,44 @@ class OutputService {
   public async create(
     soClient: SavedObjectsClientContract,
     output: NewOutput,
-    options?: { id?: string; overwrite?: boolean }
+    options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
-    const data: OutputSOAttributes = { ...output };
+    const data: OutputSOAttributes = { ...omit(output, 'ssl') };
 
-    // ensure only default output exists
-    if (data.is_default) {
-      const defaultOuput = await this.getDefaultOutputId(soClient);
-      if (defaultOuput) {
-        throw new Error(`A default output already exists (${defaultOuput})`);
+    if (output.type === outputType.Logstash) {
+      await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
+      if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+        throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+          'Logstash output needs encrypted saved object api key to be set'
+        );
       }
     }
 
-    if (data.hosts) {
+    // ensure only default output exists
+    if (data.is_default) {
+      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
+      if (defaultDataOuputId) {
+        await this.update(
+          soClient,
+          defaultDataOuputId,
+          { is_default: false },
+          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+        );
+      }
+    }
+    if (data.is_default_monitoring) {
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      if (defaultMonitoringOutputId) {
+        await this.update(
+          soClient,
+          defaultMonitoringOutputId,
+          { is_default_monitoring: false },
+          { fromPreconfiguration: options?.fromPreconfiguration ?? false }
+        );
+      }
+    }
+
+    if (data.type === outputType.Elasticsearch && data.hosts) {
       data.hosts = data.hosts.map(normalizeHostsForAgents);
     }
 
@@ -115,15 +233,16 @@ class OutputService {
       data.output_id = options?.id;
     }
 
-    const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
-      ...options,
+    if (output.ssl) {
+      data.ssl = JSON.stringify(output.ssl);
+    }
+
+    const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
+      overwrite: options?.overwrite || options?.fromPreconfiguration,
       id: options?.id ? outputIdToUuid(options.id) : undefined,
     });
 
-    return {
-      id: options?.id ?? newSo.id,
-      ...newSo.attributes,
-    };
+    return outputSavedObjectToOutput(newSo);
   }
 
   public async bulkGet(
@@ -131,7 +250,7 @@ class OutputService {
     ids: string[],
     { ignoreNotFound = false } = { ignoreNotFound: true }
   ) {
-    const res = await soClient.bulkGet<OutputSOAttributes>(
+    const res = await this.encryptedSoClient.bulkGet<OutputSOAttributes>(
       ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
     );
 
@@ -149,8 +268,28 @@ class OutputService {
       .filter((output): output is Output => typeof output !== 'undefined');
   }
 
+  public async list(soClient: SavedObjectsClientContract) {
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      sortField: 'is_default',
+      sortOrder: 'desc',
+    });
+
+    return {
+      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
+      total: outputs.total,
+      page: outputs.page,
+      perPage: outputs.per_page,
+    };
+  }
+
   public async get(soClient: SavedObjectsClientContract, id: string): Promise<Output> {
-    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    const outputSO = await this.encryptedSoClient.get<OutputSOAttributes>(
+      SAVED_OBJECT_TYPE,
+      outputIdToUuid(id)
+    );
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -159,17 +298,107 @@ class OutputService {
     return outputSavedObjectToOutput(outputSO);
   }
 
-  public async delete(soClient: SavedObjectsClientContract, id: string) {
-    return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+  public async delete(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
+      fromPreconfiguration: false,
+    }
+  ) {
+    const originalOutput = await this.get(soClient, id);
+
+    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(
+        `Preconfigured output ${id} cannot be deleted outside of kibana config file.`
+      );
+    }
+
+    if (originalOutput.is_default && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(`Default output ${id} cannot be deleted.`);
+    }
+
+    if (originalOutput.is_default_monitoring && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
+    }
+
+    await agentPolicyService.removeOutputFromAll(
+      soClient,
+      appContextService.getInternalUserESClient(),
+      id
+    );
+
+    return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
-  public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
-    const updateData = { ...data };
+  public async update(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    data: Partial<Output>,
+    { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
+      fromPreconfiguration: false,
+    }
+  ) {
+    const originalOutput = await this.get(soClient, id);
 
-    if (updateData.hosts) {
+    if (originalOutput.is_preconfigured && !fromPreconfiguration) {
+      throw new OutputUnauthorizedError(
+        `Preconfigured output ${id} cannot be updated outside of kibana config file.`
+      );
+    }
+
+    const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
+    const mergedType = data.type ?? originalOutput.type;
+    const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+
+    if (mergedType === outputType.Logstash) {
+      await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
+    }
+
+    // If the output type changed
+    if (data.type && data.type !== originalOutput.type) {
+      if (data.type === outputType.Logstash) {
+        // remove ES specific field
+        updateData.ca_trusted_fingerprint = null;
+        updateData.ca_sha256 = null;
+      } else {
+        // remove logstash specific field
+        updateData.ssl = null;
+      }
+    }
+
+    if (data.ssl) {
+      updateData.ssl = JSON.stringify(data.ssl);
+    }
+
+    // ensure only default output exists
+    if (data.is_default) {
+      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
+      if (defaultDataOuputId && defaultDataOuputId !== id) {
+        await this.update(
+          soClient,
+          defaultDataOuputId,
+          { is_default: false },
+          { fromPreconfiguration }
+        );
+      }
+    }
+    if (data.is_default_monitoring) {
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+
+      if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
+        await this.update(
+          soClient,
+          defaultMonitoringOutputId,
+          { is_default_monitoring: false },
+          { fromPreconfiguration }
+        );
+      }
+    }
+
+    if (mergedType === outputType.Elasticsearch && updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
-    const outputSO = await soClient.update<OutputSOAttributes>(
+    const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData
@@ -178,21 +407,6 @@ class OutputService {
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
     }
-  }
-
-  public async list(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find<OutputSOAttributes>({
-      type: SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: 1000,
-    });
-
-    return {
-      items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
-      total: outputs.total,
-      page: 1,
-      perPage: 1000,
-    };
   }
 }
 

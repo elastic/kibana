@@ -9,11 +9,8 @@
 import { Filter } from '@kbn/es-query';
 import expect from '@kbn/expect';
 
-import {
-  IndexPattern,
-  FilterManager as QueryFilterManager,
-  IndexPatternsContract,
-} from '../../../../data/public';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '../../../../data/public';
+import { DataView } from '../../../../data_views/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
 
 describe('PhraseFilterManager', function () {
@@ -27,7 +24,7 @@ describe('PhraseFilterManager', function () {
         convert: (value: any) => value,
       },
     };
-    const indexPatternMock: IndexPattern = {
+    const indexPatternMock: DataView = {
       id: indexPatternId,
       fields: {
         getByName: (name: string) => {
@@ -35,10 +32,10 @@ describe('PhraseFilterManager', function () {
           return fields[name];
         },
       },
-    } as IndexPattern;
+    } as DataView;
     const indexPatternsServiceMock = {
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
-    } as unknown as jest.Mocked<IndexPatternsContract>;
+    } as unknown as jest.Mocked<DataViewsContract>;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: PhraseFilterManager;
     beforeEach(async () => {
@@ -89,7 +86,7 @@ describe('PhraseFilterManager', function () {
         id: string,
         fieldName: string,
         indexPatternId: string,
-        indexPatternsService: IndexPatternsContract,
+        indexPatternsService: DataViewsContract,
         queryFilter: QueryFilterManager
       ) {
         super(id, fieldName, indexPatternId, indexPatternsService, queryFilter);
@@ -105,7 +102,7 @@ describe('PhraseFilterManager', function () {
       }
     }
 
-    const indexPatternsServiceMock = {} as IndexPatternsContract;
+    const indexPatternsServiceMock = {} as DataViewsContract;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: MockFindFiltersPhraseFilterManager;
     beforeEach(() => {

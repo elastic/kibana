@@ -70,12 +70,18 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { defer, EMPTY, from, Observable } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPattern, IndexPatternField } from '../..';
+import {
+  AggConfigSerialized,
+  IIndexPattern,
+  IndexPattern,
+  IndexPatternField,
+  SerializedSearchSourceFields,
+} from '../..';
 import {
   AggConfigs,
   EsQuerySortValue,
@@ -89,7 +95,8 @@ import type {
   SearchSourceFields,
   SearchSourceOptions,
 } from './types';
-import { FetchHandlers, getSearchParamsFromRequest, RequestFailure, SearchRequest } from './fetch';
+import { getSearchParamsFromRequest, RequestFailure } from './fetch';
+import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
@@ -124,7 +131,8 @@ export interface SearchSourceDependencies extends FetchHandlers {
 /** @public **/
 export class SearchSource {
   private id: string = uniqueId('data_source');
-  private searchStrategyId?: string;
+  private shouldOverwriteDataViewType: boolean = false;
+  private overwriteDataViewType?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
     (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
@@ -149,11 +157,22 @@ export class SearchSource {
    *****/
 
   /**
-   * internal, dont use
-   * @param searchStrategyId
+   * Used to make the search source overwrite the actual data view type for the
+   * specific requests done. This should only be needed very rarely, since it means
+   * e.g. we'd be treating a rollup index pattern as a regular one. Be very sure
+   * you understand the consequences of using this method before using it.
+   *
+   * @param overwriteType If `false` is passed in it will disable the overwrite, otherwise
+   *    the passed in value will be used as the data view type for this search source.
    */
-  setPreferredSearchStrategyId(searchStrategyId: string) {
-    this.searchStrategyId = searchStrategyId;
+  setOverwriteDataViewType(overwriteType: string | undefined | false) {
+    if (overwriteType === false) {
+      this.shouldOverwriteDataViewType = false;
+      this.overwriteDataViewType = undefined;
+    } else {
+      this.shouldOverwriteDataViewType = true;
+      this.overwriteDataViewType = overwriteType;
+    }
   }
 
   /**
@@ -306,11 +325,9 @@ export class SearchSource {
    * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
-    return this.fetch$(options)
-      .toPromise()
-      .then((r) => {
-        return r.rawResponse as estypes.SearchResponse<any>;
-      });
+    return lastValueFrom(this.fetch$(options)).then((r) => {
+      return r.rawResponse as estypes.SearchResponse<any>;
+    });
   }
 
   /**
@@ -609,11 +626,7 @@ export class SearchSource {
   }
 
   private getIndexType(index?: IIndexPattern) {
-    if (this.searchStrategyId) {
-      return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
-    } else {
-      return index?.type;
-    }
+    return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
   private readonly getFieldName = (fld: string | Record<string, any>): string =>
@@ -838,18 +851,43 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false) {
-    const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
-    let serializedSearchSourceFields: SearchSourceFields = {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
+    const {
+      filter: originalFilters,
+      aggs: searchSourceAggs,
+      parent,
+      size: omit,
+      sort,
+      index,
+      ...searchSourceFields
+    } = this.getFields();
+
+    let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
-      index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
+    if (index) {
+      serializedSearchSourceFields.index = index.id;
+    }
+    if (sort) {
+      serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;
+    }
     if (originalFilters) {
       const filters = this.getFilters(originalFilters);
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
         filter: filters,
       };
+    }
+    if (searchSourceAggs) {
+      let aggs = searchSourceAggs;
+      if (typeof aggs === 'function') {
+        aggs = (searchSourceAggs as Function)();
+      }
+      if (aggs instanceof AggConfigs) {
+        serializedSearchSourceFields.aggs = aggs.getAll().map((agg) => agg.serialize());
+      } else {
+        serializedSearchSourceFields.aggs = aggs as AggConfigSerialized[];
+      }
     }
     if (recurse && this.getParent()) {
       serializedSearchSourceFields.parent = this.getParent()!.getSerializedFields(recurse);

@@ -6,10 +6,10 @@
  */
 
 export const defaultRequestParameters = {
-  allowNoIndices: true,
-  ignoreUnavailable: true,
-  trackScores: false,
-  trackTotalHits: false,
+  allow_no_indices: true,
+  ignore_unavailable: true,
+  track_scores: false,
+  track_total_hits: false,
 };
 
 export const createJobIdFilters = (jobId: string) => [
@@ -44,6 +44,7 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
       timestamp: {
         gte: startTime,
         lte: endTime,
+        format: 'epoch_millis',
       },
     },
   },

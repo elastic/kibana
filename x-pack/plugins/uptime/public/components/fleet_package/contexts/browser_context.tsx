@@ -6,33 +6,53 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { IBrowserSimpleFields, ConfigKeys, DataStream } from '../types';
+import { BrowserSimpleFields, ConfigKey, DataStream, ScheduleUnit } from '../types';
 import { defaultValues as commonDefaultValues } from '../common/default_values';
 
-interface IBrowserSimpleFieldsContext {
-  setFields: React.Dispatch<React.SetStateAction<IBrowserSimpleFields>>;
-  fields: IBrowserSimpleFields;
-  defaultValues: IBrowserSimpleFields;
+interface BrowserSimpleFieldsContext {
+  setFields: React.Dispatch<React.SetStateAction<BrowserSimpleFields>>;
+  fields: BrowserSimpleFields;
+  defaultValues: BrowserSimpleFields;
 }
 
-interface IBrowserSimpleFieldsContextProvider {
+interface BrowserSimpleFieldsContextProvider {
   children: React.ReactNode;
-  defaultValues?: IBrowserSimpleFields;
+  defaultValues?: BrowserSimpleFields;
 }
 
-export const initialValues: IBrowserSimpleFields = {
+export const initialValues: BrowserSimpleFields = {
   ...commonDefaultValues,
-  [ConfigKeys.MONITOR_TYPE]: DataStream.BROWSER,
-  [ConfigKeys.SOURCE_ZIP_URL]: '',
-  [ConfigKeys.SOURCE_ZIP_USERNAME]: '',
-  [ConfigKeys.SOURCE_ZIP_PASSWORD]: '',
-  [ConfigKeys.SOURCE_ZIP_FOLDER]: '',
-  [ConfigKeys.SOURCE_INLINE]: '',
-  [ConfigKeys.PARAMS]: '',
+  [ConfigKey.SCHEDULE]: {
+    unit: ScheduleUnit.MINUTES,
+    number: '10',
+  },
+  [ConfigKey.METADATA]: {
+    script_source: {
+      is_generated_script: false,
+      file_name: '',
+    },
+    is_zip_url_tls_enabled: false,
+  },
+  [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+  [ConfigKey.SOURCE_ZIP_URL]: '',
+  [ConfigKey.SOURCE_ZIP_USERNAME]: '',
+  [ConfigKey.SOURCE_ZIP_PASSWORD]: '',
+  [ConfigKey.SOURCE_ZIP_FOLDER]: '',
+  [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
+  [ConfigKey.SOURCE_INLINE]: '',
+  [ConfigKey.PARAMS]: '',
+  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
+  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
+  [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
+  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
+  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
+  [ConfigKey.ZIP_URL_TLS_VERSION]: undefined,
+  [ConfigKey.URLS]: undefined,
+  [ConfigKey.PORT]: undefined,
 };
 
-const defaultContext: IBrowserSimpleFieldsContext = {
-  setFields: (_fields: React.SetStateAction<IBrowserSimpleFields>) => {
+const defaultContext: BrowserSimpleFieldsContext = {
+  setFields: (_fields: React.SetStateAction<BrowserSimpleFields>) => {
     throw new Error(
       'setFields was not initialized for Browser Simple Fields, set it when you invoke the context'
     );
@@ -46,8 +66,8 @@ export const BrowserSimpleFieldsContext = createContext(defaultContext);
 export const BrowserSimpleFieldsContextProvider = ({
   children,
   defaultValues = initialValues,
-}: IBrowserSimpleFieldsContextProvider) => {
-  const [fields, setFields] = useState<IBrowserSimpleFields>(defaultValues);
+}: BrowserSimpleFieldsContextProvider) => {
+  const [fields, setFields] = useState<BrowserSimpleFields>(defaultValues);
 
   const value = useMemo(() => {
     return { fields, setFields, defaultValues };

@@ -25,7 +25,7 @@ import {
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
 import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
-import { SavedObjectsClientContract } from '../../../../src/core/target/types/public/saved_objects';
+import { SavedObjectsClientContract } from '../../../../src/core/public';
 
 interface StartServices {
   openModal: OverlayStart['openModal'];
@@ -71,7 +71,7 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
         const newInput = await attributeService.wrapAttributes(
           attributes,
           useRefType,
-          attributeService.getExplicitInputFromEmbeddable(embeddable)
+          embeddable.getExplicitInput()
         );
         if (!useRefType && (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId) {
           // Set the saved object ID to null so that update input will remove the existing savedObjectId...

@@ -7,16 +7,18 @@
 
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPNG, TaskPayloadPNG } from '../types';
+import { JobParamsPNGDeprecated, TaskPayloadPNG } from '../types';
 
-export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<JobParamsPNG, TaskPayloadPNG>> =
-  function createJobFactoryFn() {
-    return async function createJob(jobParams) {
-      validateUrls([jobParams.relativeUrl]);
+export const createJobFnFactory: CreateJobFnFactory<
+  CreateJobFn<JobParamsPNGDeprecated, TaskPayloadPNG>
+> = function createJobFactoryFn() {
+  return async function createJob(jobParams) {
+    validateUrls([jobParams.relativeUrl]);
 
-      return {
-        ...jobParams,
-        forceNow: new Date().toISOString(),
-      };
+    return {
+      ...jobParams,
+      isDeprecated: true,
+      forceNow: new Date().toISOString(),
     };
   };
+};

@@ -6,9 +6,10 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
+import { lastValueFrom } from 'rxjs';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
 import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -154,8 +155,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
       partition_field: partitionField,
       over_field: overField,
       by_field: byField,
-    } = await mlResultsService
-      .fetchPartitionFieldsValues(
+    } = await lastValueFrom(
+      mlResultsService.fetchPartitionFieldsValues(
         selectedJob.job_id,
         searchTerm,
         [
@@ -168,7 +169,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         bounds.max.valueOf(),
         fieldsConfig
       )
-      .toPromise();
+    );
 
     const entityValuesUpdate: Record<string, any> = {};
     entityControls.forEach((entity) => {

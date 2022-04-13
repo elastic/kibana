@@ -8,13 +8,14 @@
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { Query } from 'src/plugins/data/public';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getTimefilter, getToastNotifications } from '../../util/dependency_cache';
 import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
+import type { RuntimeMappings } from '../../../../common/types/fields';
+import { addExcludeFrozenToQuery } from '../../../../common/util/query_utils';
 
 export interface TimeRange {
   from: number;
@@ -22,8 +23,9 @@ export interface TimeRange {
 }
 
 export async function setFullTimeRange(
-  indexPattern: IndexPattern,
-  query: Query
+  indexPattern: DataView,
+  query: QueryDslQueryContainer,
+  excludeFrozenData: boolean
 ): Promise<GetTimeFieldRangeResponse> {
   try {
     const timefilter = getTimefilter();
@@ -31,7 +33,8 @@ export async function setFullTimeRange(
     const resp = await ml.getTimeFieldRange({
       index: indexPattern.title,
       timeFieldName: indexPattern.timeFieldName,
-      query,
+      // By default we want to use full non-frozen time range
+      query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
       ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
     });
     timefilter.setTime({

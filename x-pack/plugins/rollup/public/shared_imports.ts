@@ -11,3 +11,9 @@ export {
   SectionLoading,
   EuiCodeEditor,
 } from '../../../../src/plugins/es_ui_shared/public';
+
+export {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  useExecutionContext,
+} from '../../../../src/plugins/kibana_react/public';

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 
-import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../common';
+import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
@@ -17,6 +17,8 @@ import { Choice, Fields } from './types';
 import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
+import { connectorValidator } from './validator';
+import { DeprecatedCallout } from '../deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -40,8 +42,8 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   } = fields ?? {};
 
   const { http, notifications } = useKibana().services;
-
   const [choices, setChoices] = useState<Fields>(defaultFields);
+  const showConnectorWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   const onChangeCb = useCallback(
     (
@@ -166,117 +168,137 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
     }
   }, [category, destIp, malwareHash, malwareUrl, onChange, priority, sourceIp, subcategory]);
 
-  return isEdit ? (
-    <div data-test-subj={'connector-fields-sn-sir'}>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.ALERT_FIELDS_LABEL}>
-            <>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiCheckbox
-                    id="destIpCheckbox"
-                    data-test-subj="destIpCheckbox"
-                    label={i18n.DEST_IP}
-                    checked={destIp ?? false}
-                    compressed
-                    onChange={(e) => onChangeCb('destIp', e.target.checked)}
+  return (
+    <>
+      {showConnectorWarning && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <DeprecatedCallout />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {isEdit ? (
+        <div data-test-subj="connector-fields-sn-sir">
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.ALERT_FIELDS_LABEL}>
+                <>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiCheckbox
+                        id="destIpCheckbox"
+                        data-test-subj="destIpCheckbox"
+                        label={i18n.DEST_IP}
+                        checked={destIp ?? false}
+                        compressed
+                        onChange={(e) => onChangeCb('destIp', e.target.checked)}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiCheckbox
+                        id="sourceIpCheckbox"
+                        data-test-subj="sourceIpCheckbox"
+                        label={i18n.SOURCE_IP}
+                        checked={sourceIp ?? false}
+                        compressed
+                        onChange={(e) => onChangeCb('sourceIp', e.target.checked)}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiCheckbox
+                        id="malwareUrlCheckbox"
+                        data-test-subj="malwareUrlCheckbox"
+                        label={i18n.MALWARE_URL}
+                        checked={malwareUrl ?? false}
+                        compressed
+                        onChange={(e) => onChangeCb('malwareUrl', e.target.checked)}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiCheckbox
+                        id="malwareHashCheckbox"
+                        data-test-subj="malwareHashCheckbox"
+                        label={i18n.MALWARE_HASH}
+                        checked={malwareHash ?? false}
+                        compressed
+                        onChange={(e) => onChangeCb('malwareHash', e.target.checked)}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.PRIORITY}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="prioritySelect"
+                  hasNoInitialSelection
+                  isLoading={isLoadingChoices}
+                  disabled={isLoadingChoices}
+                  options={priorityOptions}
+                  value={priority ?? undefined}
+                  onChange={(e) => onChangeCb('priority', e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.CATEGORY}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="categorySelect"
+                  options={categoryOptions}
+                  value={category ?? undefined}
+                  isLoading={isLoadingChoices}
+                  disabled={isLoadingChoices}
+                  hasNoInitialSelection
+                  onChange={(e) =>
+                    onChange({ ...fields, category: e.target.value, subcategory: null })
+                  }
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {subcategoryOptions?.length > 0 ? (
+                <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
+                  <EuiSelect
+                    fullWidth
+                    data-test-subj="subcategorySelect"
+                    options={subcategoryOptions}
+                    // Needs an empty string instead of undefined to select the blank option when changing categories
+                    value={subcategory ?? ''}
+                    isLoading={isLoadingChoices}
+                    disabled={isLoadingChoices}
+                    hasNoInitialSelection
+                    onChange={(e) => onChangeCb('subcategory', e.target.value)}
                   />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiCheckbox
-                    id="sourceIpCheckbox"
-                    data-test-subj="sourceIpCheckbox"
-                    label={i18n.SOURCE_IP}
-                    checked={sourceIp ?? false}
-                    compressed
-                    onChange={(e) => onChangeCb('sourceIp', e.target.checked)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiCheckbox
-                    id="malwareUrlCheckbox"
-                    data-test-subj="malwareUrlCheckbox"
-                    label={i18n.MALWARE_URL}
-                    checked={malwareUrl ?? false}
-                    compressed
-                    onChange={(e) => onChangeCb('malwareUrl', e.target.checked)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiCheckbox
-                    id="malwareHashCheckbox"
-                    data-test-subj="malwareHashCheckbox"
-                    label={i18n.MALWARE_HASH}
-                    checked={malwareHash ?? false}
-                    compressed
-                    onChange={(e) => onChangeCb('malwareHash', e.target.checked)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.PRIORITY}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="prioritySelect"
-              hasNoInitialSelection
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              options={priorityOptions}
-              value={priority ?? undefined}
-              onChange={(e) => onChangeCb('priority', e.target.value)}
+                </EuiFormRow>
+              ) : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      ) : (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <ConnectorCard
+              connectorType={ConnectorTypes.serviceNowSIR}
+              title={connector.name}
+              listItems={listItems}
+              isLoading={false}
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.CATEGORY}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="categorySelect"
-              options={categoryOptions}
-              value={category ?? undefined}
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              hasNoInitialSelection
-              onChange={(e) => onChange({ ...fields, category: e.target.value, subcategory: null })}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.SUBCATEGORY}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="subcategorySelect"
-              options={subcategoryOptions}
-              // Needs an empty string instead of undefined to select the blank option when changing categories
-              value={subcategory ?? ''}
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              hasNoInitialSelection
-              onChange={(e) => onChangeCb('subcategory', e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
-  ) : (
-    <ConnectorCard
-      connectorType={ConnectorTypes.serviceNowITSM}
-      title={connector.name}
-      listItems={listItems}
-      isLoading={false}
-    />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </>
   );
 };
+ServiceNowSIRFieldsComponent.displayName = 'ServiceNowSIRFieldsComponent';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowSIRFieldsComponent as default };

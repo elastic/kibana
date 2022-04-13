@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandlerContext,
@@ -13,14 +13,17 @@ import {
   RequestHandler,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { SpacesPluginSetup } from '../../../spaces/server';
+import type { SpacesPluginSetup } from '../../../spaces/server';
 import type { SecurityPluginSetup } from '../../../security/server';
 
-import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
-import { MlLicense } from '../../common/license';
+import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
+import type { MlLicense } from '../../common/license';
 
 import { MlClient, getMlClient } from '../lib/ml_client';
 import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
+import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
+import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
+import { getDataViewsServiceFactory } from './data_views_utils';
 
 type MLRequestHandlerContext = RequestHandlerContext & {
   alerting?: AlertingApiRequestHandlerContext;
@@ -31,12 +34,14 @@ type Handler<P = unknown, Q = unknown, B = unknown> = (handlerParams: {
   request: KibanaRequest<P, Q, B>;
   response: KibanaResponseFactory;
   context: MLRequestHandlerContext;
-  jobSavedObjectService: JobSavedObjectService;
+  mlSavedObjectService: MLSavedObjectService;
   mlClient: MlClient;
+  getDataViewsService(): Promise<DataViewsService>;
 }) => ReturnType<RequestHandler<P, Q, B>>;
 
 type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract | null;
 type GetInternalSavedObjectClient = () => SavedObjectsClientContract | null;
+type GetDataViews = () => DataViewsPluginStart | null;
 
 export class RouteGuard {
   private _mlLicense: MlLicense;
@@ -45,6 +50,7 @@ export class RouteGuard {
   private _spacesPlugin: SpacesPluginSetup | undefined;
   private _authorization: SecurityPluginSetup['authz'] | undefined;
   private _isMlReady: () => Promise<void>;
+  private _getDataViews: GetDataViews;
 
   constructor(
     mlLicense: MlLicense,
@@ -52,7 +58,8 @@ export class RouteGuard {
     getInternalSavedObject: GetInternalSavedObjectClient,
     spacesPlugin: SpacesPluginSetup | undefined,
     authorization: SecurityPluginSetup['authz'] | undefined,
-    isMlReady: () => Promise<void>
+    isMlReady: () => Promise<void>,
+    getDataViews: GetDataViews
   ) {
     this._mlLicense = mlLicense;
     this._getMlSavedObjectClient = getSavedObject;
@@ -60,6 +67,7 @@ export class RouteGuard {
     this._spacesPlugin = spacesPlugin;
     this._authorization = authorization;
     this._isMlReady = isMlReady;
+    this._getDataViews = getDataViews;
   }
 
   public fullLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
@@ -79,6 +87,7 @@ export class RouteGuard {
         return response.forbidden();
       }
 
+      const client = context.core.elasticsearch.client;
       const mlSavedObjectClient = this._getMlSavedObjectClient(request);
       const internalSavedObjectsClient = this._getInternalSavedObjectClient();
       if (mlSavedObjectClient === null || internalSavedObjectsClient === null) {
@@ -87,22 +96,28 @@ export class RouteGuard {
         });
       }
 
-      const jobSavedObjectService = jobSavedObjectServiceFactory(
+      const mlSavedObjectService = mlSavedObjectServiceFactory(
         mlSavedObjectClient,
         internalSavedObjectsClient,
         this._spacesPlugin !== undefined,
         this._authorization,
+        client,
         this._isMlReady
       );
-      const client = context.core.elasticsearch.client;
 
       return handler({
         client,
         request,
         response,
         context,
-        jobSavedObjectService,
-        mlClient: getMlClient(client, jobSavedObjectService),
+        mlSavedObjectService,
+        mlClient: getMlClient(client, mlSavedObjectService),
+        getDataViewsService: getDataViewsServiceFactory(
+          this._getDataViews,
+          context.core.savedObjects.client,
+          client,
+          request
+        ),
       });
     };
   }

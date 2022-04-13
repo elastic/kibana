@@ -18,9 +18,13 @@ export * from './deprecated';
  * Filters:
  */
 
-export { getEsQueryConfig } from '../common';
-export { FilterLabel, FilterItem } from './ui';
-export { getDisplayValueFromFilter, generateFilters, extractTimeRange } from './query';
+export { getEsQueryConfig, FilterStateStore } from '../common';
+export {
+  getDisplayValueFromFilter,
+  generateFilters,
+  extractTimeRange,
+  getIndexPatternFromFilter,
+} from './query';
 
 /**
  * Exporters (CSV)
@@ -52,7 +56,6 @@ import {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   validateDataView,
-  flattenHitWrapper,
 } from './data_views';
 
 export type { IndexPatternsService } from './data_views';
@@ -69,32 +72,26 @@ export const indexPatterns = {
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
   validate: validateDataView,
-  flattenHitWrapper,
 };
 
-export {
-  IndexPatternsContract,
-  DataViewsContract,
-  IndexPattern,
-  IndexPatternField,
-  TypeMeta,
-} from './data_views';
+export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
+export { IndexPattern, IndexPatternField } from './data_views';
 
-export {
+export type {
   IIndexPattern,
   IFieldType,
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
   IndexPatternAttributes,
-  UI_SETTINGS,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
-  fieldList,
   GetFieldsOptions,
   AggregationRestrictions,
-  IndexPatternType,
-  IndexPatternListItem,
+  DataViewListItem,
+} from '../common';
+export {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  UI_SETTINGS,
+  fieldList,
   DuplicateDataViewError,
 } from '../common';
 
@@ -144,6 +141,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  checkColumnForPrecisionError,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
@@ -191,6 +189,7 @@ export type {
   ISearchSource,
   SearchRequest,
   SearchSourceFields,
+  SerializedSearchSourceFields,
   // errors
   IEsError,
   Reason,
@@ -206,12 +205,13 @@ export {
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
   isEsError,
+  SearchSource,
   SearchSessionState,
   SortDirection,
+  handleResponse,
 } from './search';
 
 export type {
-  SearchSource,
   // TODO: remove these when data_enhanced is merged into data
   ISessionService,
   SearchSessionInfoProvider,
@@ -219,7 +219,8 @@ export type {
   SearchUsageCollector,
 } from './search';
 
-export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export type { ISearchOptions } from '../common';
+export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -250,20 +251,12 @@ export const search = {
   getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
+  checkColumnForPrecisionError,
 };
 
 /*
  * UI components
  */
-
-export type {
-  SearchBarProps,
-  StatefulSearchBarProps,
-  IndexPatternSelectProps,
-  QueryStringInputProps,
-} from './ui';
-
-export { QueryStringInput, SearchBar } from './ui';
 
 /**
  * Types to be shared externally
@@ -278,6 +271,8 @@ export {
   getDefaultQuery,
   FilterManager,
   TimeHistory,
+  getQueryLog,
+  mapAndFlattenFilters,
 } from './query';
 
 export type {
@@ -290,20 +285,19 @@ export type {
   QueryStateChange,
   QueryStart,
   AutoRefreshDoneFn,
+  PersistedLog,
+  QueryStringContract,
+  QuerySetup,
 } from './query';
 
 export type { AggsStart } from './search/aggs';
 
-export {
-  getTime,
-  // kbn field types
-  castEsToKbnFieldTypeName,
-  getKbnTypeNames,
-} from '../common';
+export { getTime } from '../common';
 
-export { isTimeRange, isQuery } from '../common';
+export type { SavedObject } from '../common';
 
-export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
+export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
+
 export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
@@ -320,7 +314,6 @@ export type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 

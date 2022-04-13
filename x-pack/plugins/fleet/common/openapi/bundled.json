@@ -59,6 +59,73 @@
         ]
       }
     },
+    "/setup/preconfiguration": {
+      "put": {
+        "summary": "Preconfiguration",
+        "operationId": "get-settings",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "agentPolicies": {
+                      "type": "object",
+                      "items": {}
+                    },
+                    "packages": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "body": {
+                    "type": "object",
+                    "properties": {
+                      "agentPolicies": {
+                        "$ref": "#/components/schemas/preconfigured_agent_policies"
+                      },
+                      "packages": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        },
+                        "required": ["name", "version"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/settings": {
       "get": {
         "summary": "Settings",
@@ -95,6 +162,71 @@
         "operationId": "update-settings"
       }
     },
+    "/service-tokens": {
+      "post": {
+        "summary": "Generate service tokens",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "generate-service-token",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "deprecated": true
+      }
+    },
+    "/service_tokens": {
+      "post": {
+        "summary": "Generate service tokens",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "generate-service-token",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
     "/epm/categories": {
       "get": {
         "summary": "Package categories",
@@ -105,26 +237,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "count": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "title",
-                      "count"
-                    ]
-                  }
+                  "$ref": "#/components/schemas/get_categories_response"
                 }
               }
             }
@@ -132,6 +245,34 @@
         },
         "operationId": "get-package-categories"
       }
+    },
+    "/epm/packages/limited": {
+      "get": {
+        "summary": "Packages - Get limited list",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "list-limited-packages"
+      },
+      "parameters": []
     },
     "/epm/packages": {
       "get": {
@@ -143,16 +284,33 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/search_result"
-                  }
+                  "$ref": "#/components/schemas/get_packages_response"
                 }
               }
             }
           }
         },
         "operationId": "list-all-packages"
+      },
+      "parameters": []
+    },
+    "/epm/packages/_bulk": {
+      "post": {
+        "summary": "Packages - Bulk install",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bulk_install_packages_response"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-install-packages"
       },
       "parameters": []
     },
@@ -179,21 +337,13 @@
                       "properties": {
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "installed",
-                            "installing",
-                            "install_failed",
-                            "not_installed"
-                          ]
+                          "enum": ["installed", "installing", "install_failed", "not_installed"]
                         },
                         "savedObject": {
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "status",
-                        "savedObject"
-                      ]
+                      "required": ["status", "savedObject"]
                     }
                   ]
                 }
@@ -206,18 +356,19 @@
           {
             "basicAuth": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgkey",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "deprecated": true
       },
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "pkgkey",
-          "in": "path",
-          "required": true
-        }
-      ],
       "post": {
         "summary": "Packages - Install",
         "tags": [],
@@ -248,16 +399,11 @@
                             ]
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     }
                   },
-                  "required": [
-                    "response"
-                  ]
+                  "required": ["response"]
                 }
               }
             }
@@ -283,7 +429,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       },
       "delete": {
         "summary": "Packages - Delete",
@@ -315,16 +462,285 @@
                             ]
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     }
                   },
-                  "required": [
-                    "response"
+                  "required": ["response"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "delete-package",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/epm/packages/{pkgName}/{pkgVersion}": {
+      "get": {
+        "summary": "Packages - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/package_info"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": ["installed", "installing", "install_failed", "not_installed"]
+                        },
+                        "savedObject": {
+                          "type": "string"
+                        }
+                      },
+                      "required": ["status", "savedObject"]
+                    }
                   ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-package",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgVersion",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Packages - Install",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/kibana_saved_object_type"
+                              },
+                              {
+                                "$ref": "#/components/schemas/elasticsearch_asset_type"
+                              }
+                            ]
+                          }
+                        },
+                        "required": ["id", "type"]
+                      }
+                    },
+                    "_meta": {
+                      "type": "object",
+                      "properties": {
+                        "install_source": {
+                          "type": "string",
+                          "enum": ["registry", "upload", "bundled"]
+                        }
+                      }
+                    }
+                  },
+                  "required": ["items"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "install-package",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "force": {
+                    "type": "boolean"
+                  },
+                  "ignore_constraints": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Packages - Update",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/kibana_saved_object_type"
+                              },
+                              {
+                                "$ref": "#/components/schemas/elasticsearch_asset_type"
+                              }
+                            ]
+                          }
+                        },
+                        "required": ["id", "type"]
+                      }
+                    }
+                  },
+                  "required": ["items"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "update-package",
+        "description": "",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgName",
+            "in": "path",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "pkgVersion",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "keepPoliciesUpToDate": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Packages - Delete",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "oneOf": [
+                              {
+                                "$ref": "#/components/schemas/kibana_saved_object_type"
+                              },
+                              {
+                                "$ref": "#/components/schemas/elasticsearch_asset_type"
+                              }
+                            ]
+                          }
+                        },
+                        "required": ["id", "type"]
+                      }
+                    }
+                  },
+                  "required": ["items"]
                 }
               }
             }
@@ -351,6 +767,102 @@
           }
         }
       }
+    },
+    "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
+      "get": {
+        "summary": "Packages - Get file from registry",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "headers": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "packages-get-file"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgVersion",
+          "in": "path",
+          "required": true
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "filePath",
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
+    "/epm/packages/{pkgName}/stats": {
+      "get": {
+        "summary": "Get stats for a package",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "$ref": "#/components/schemas/package_usage_stats"
+                    }
+                  },
+                  "required": ["response"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-package-stats",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "pkgName",
+          "in": "path",
+          "required": true
+        }
+      ]
     },
     "/agents/setup": {
       "get": {
@@ -403,10 +915,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "admin_username",
-                  "admin_password"
-                ]
+                "required": ["admin_username", "admin_password"]
               }
             }
           }
@@ -480,6 +989,125 @@
             "in": "query",
             "required": false
           }
+        ],
+        "deprecated": true
+      }
+    },
+    "/agent_status": {
+      "get": {
+        "summary": "Agents - Summary stats",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "integer"
+                    },
+                    "events": {
+                      "type": "integer"
+                    },
+                    "inactive": {
+                      "type": "integer"
+                    },
+                    "offline": {
+                      "type": "integer"
+                    },
+                    "online": {
+                      "type": "integer"
+                    },
+                    "other": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "updating": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "events",
+                    "inactive",
+                    "offline",
+                    "online",
+                    "other",
+                    "total",
+                    "updating"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agent-status",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "policyId",
+            "in": "query",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "kuery",
+            "in": "query",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/agent_status/data": {
+      "get": {
+        "summary": "Agents - Get incoming data",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agent-data",
+        "parameters": [
+          {
+            "schema": {
+              "type": "array"
+            },
+            "name": "agentsId",
+            "in": "query",
+            "required": true
+          }
         ]
       }
     },
@@ -493,30 +1121,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "list": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/agent"
-                      }
-                    },
-                    "total": {
-                      "type": "number"
-                    },
-                    "page": {
-                      "type": "number"
-                    },
-                    "perPage": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "list",
-                    "total",
-                    "page",
-                    "perPage"
-                  ]
+                  "$ref": "#/components/schemas/get_agents_response"
                 }
               }
             }
@@ -551,9 +1156,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "success"
-                    ]
+                    "required": ["success"]
                   }
                 }
               }
@@ -614,9 +1217,7 @@
                       "$ref": "#/components/schemas/agent"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -639,9 +1240,7 @@
                       "$ref": "#/components/schemas/agent"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -667,14 +1266,10 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "deleted"
-                      ]
+                      "enum": ["deleted"]
                     }
                   },
-                  "required": [
-                    "action"
-                  ]
+                  "required": ["action"]
                 }
               }
             }
@@ -686,6 +1281,69 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
+      }
+    },
+    "/agents/{agentId}/actions": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "Agent - Actions",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "headers": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "new-agent-action",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "$ref": "#/components/schemas/agent_action"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/agents/{agentId}/reassign": {
@@ -731,9 +1389,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "policy_id"
-                ]
+                "required": ["policy_id"]
               }
             }
           }
@@ -780,9 +1436,7 @@
                     },
                     "statusCode": {
                       "type": "number",
-                      "enum": [
-                        400
-                      ]
+                      "enum": [400]
                     }
                   }
                 }
@@ -890,9 +1544,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "success"
-                    ]
+                    "required": ["success"]
                   }
                 }
               }
@@ -928,10 +1580,7 @@
                     ]
                   }
                 },
-                "required": [
-                  "policy_id",
-                  "agents"
-                ]
+                "required": ["policy_id", "agents"]
               }
             }
           }
@@ -959,9 +1608,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "success"
-                    ]
+                    "required": ["success"]
                   }
                 }
               }
@@ -1000,9 +1647,7 @@
                     ]
                   }
                 },
-                "required": [
-                  "agents"
-                ]
+                "required": ["agents"]
               }
             }
           }
@@ -1037,12 +1682,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "items",
-                    "total",
-                    "page",
-                    "perPage"
-                  ]
+                  "required": ["items", "total", "page", "perPage"]
                 }
               }
             }
@@ -1126,9 +1766,7 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1153,9 +1791,7 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1209,9 +1845,7 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1230,9 +1864,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "name"
-                ]
+                "required": ["name"]
               }
             }
           },
@@ -1259,10 +1891,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "id",
-                    "success"
-                  ]
+                  "required": ["id", "success"]
                 }
               }
             }
@@ -1278,9 +1907,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "agentPolicyId"
-                ]
+                "required": ["agentPolicyId"]
               }
             }
           }
@@ -1290,6 +1917,34 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
+      },
+      "parameters": []
+    },
+    "/data_streams": {
+      "get": {
+        "summary": "Data streams - List",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data_streams": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/data_stream"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "data-streams-list"
       },
       "parameters": []
     },
@@ -1309,6 +1964,13 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/enrollment_api_key"
+                      },
+                      "deprecated": true
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/enrollment_api_key"
                       }
                     },
                     "page": {
@@ -1321,19 +1983,15 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "list",
-                    "page",
-                    "perPage",
-                    "total"
-                  ]
+                  "required": ["items", "page", "perPage", "total"]
                 }
               }
             }
           }
         },
         "operationId": "get-enrollment-api-keys",
-        "parameters": []
+        "parameters": [],
+        "deprecated": true
       },
       "post": {
         "summary": "Enrollment API Key - Create",
@@ -1351,9 +2009,7 @@
                     },
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "created"
-                      ]
+                      "enum": ["created"]
                     }
                   }
                 }
@@ -1366,7 +2022,8 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "deprecated": true
       }
     },
     "/enrollment-api-keys/{keyId}": {
@@ -1395,9 +2052,149 @@
                       "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-enrollment-api-key",
+        "deprecated": true
+      },
+      "delete": {
+        "summary": "Enrollment API Key - Delete",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "action": {
+                      "type": "string",
+                      "enum": ["deleted"]
+                    }
+                  },
+                  "required": ["action"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "delete-enrollment-api-key",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "deprecated": true
+      }
+    },
+    "/enrollment_api_keys": {
+      "get": {
+        "summary": "Enrollment API Keys - List",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "list": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/enrollment_api_key"
+                      },
+                      "deprecated": true
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/enrollment_api_key"
+                      }
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
+                    },
+                    "total": {
+                      "type": "number"
+                    }
+                  },
+                  "required": ["items", "page", "perPage", "total"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-enrollment-api-keys",
+        "parameters": []
+      },
+      "post": {
+        "summary": "Enrollment API Key - Create",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/enrollment_api_key"
+                    },
+                    "action": {
+                      "type": "string",
+                      "enum": ["created"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "create-enrollment-api-keys",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/enrollment_api_keys/{keyId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "keyId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Enrollment API Key - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/enrollment_api_key"
+                    }
+                  },
+                  "required": ["item"]
                 }
               }
             }
@@ -1418,14 +2215,10 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "deleted"
-                      ]
+                      "enum": ["deleted"]
                     }
                   },
-                  "required": [
-                    "action"
-                  ]
+                  "required": ["action"]
                 }
               }
             }
@@ -1467,9 +2260,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "items"
-                  ]
+                  "required": ["items"]
                 }
               }
             }
@@ -1495,9 +2286,7 @@
                       "$ref": "#/components/schemas/package_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1559,9 +2348,7 @@
                     "type": "boolean"
                   }
                 },
-                "required": [
-                  "packagePolicyIds"
-                ]
+                "required": ["packagePolicyIds"]
               }
             }
           }
@@ -1586,10 +2373,7 @@
                         "type": "boolean"
                       }
                     },
-                    "required": [
-                      "id",
-                      "success"
-                    ]
+                    "required": ["id", "success"]
                   }
                 }
               }
@@ -1601,6 +2385,111 @@
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
+      }
+    },
+    "/package_policies/upgrade": {
+      "post": {
+        "summary": "Package policy - Upgrade",
+        "operationId": "upgrade-package-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packagePolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["packagePolicyIds"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "success": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["id", "success"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/package_policies/upgrade/dryrun": {
+      "post": {
+        "summary": "Package policy - Upgrade Dry run",
+        "operationId": "upgrade-package-policy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "packagePolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "packageVersion": {
+                    "type": "string"
+                  }
+                },
+                "required": ["packagePolicyIds"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "hasErrors": {
+                        "type": "boolean"
+                      },
+                      "diff": {
+                        "$ref": "#/components/schemas/upgrade_diff"
+                      },
+                      "agent_diff": {
+                        "$ref": "#/components/schemas/upgrade_agent_diff"
+                      }
+                    },
+                    "required": ["hasErrors"]
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/package_policies/{packagePolicyId}": {
@@ -1619,9 +2508,7 @@
                       "$ref": "#/components/schemas/package_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1666,10 +2553,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "item",
-                    "sucess"
-                  ]
+                  "required": ["item", "sucess"]
                 }
               }
             }
@@ -1716,6 +2600,69 @@
           }
         },
         "operationId": "get-outputs"
+      },
+      "post": {
+        "summary": "Outputs",
+        "description": "Create a new output",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/output"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["elasticsearch"]
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_default_monitoring": {
+                    "type": "boolean"
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "ca_sha256": {
+                    "type": "string"
+                  },
+                  "config_yaml": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "type"]
+              }
+            }
+          }
+        },
+        "operationId": "post-outputs"
       }
     },
     "/outputs/{outputId}": {
@@ -1734,9 +2681,7 @@
                       "$ref": "#/components/schemas/output"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1754,6 +2699,33 @@
           "required": true
         }
       ],
+      "delete": {
+        "summary": "Output - Delete",
+        "operationId": "delete-output",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["id"]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
       "put": {
         "summary": "Output - Update",
         "operationId": "update-output",
@@ -1763,19 +2735,36 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "hosts": {
+                  "name": {
                     "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["elasticsearch"]
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_default_monitoring": {
+                    "type": "boolean"
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
                   },
                   "ca_sha256": {
                     "type": "string"
                   },
-                  "config": {
-                    "type": "object"
+                  "ca_trusted_fingerprint": {
+                    "type": "string"
                   },
                   "config_yaml": {
                     "type": "string"
                   }
-                }
+                },
+                "required": ["name", "type"]
               }
             }
           }
@@ -1792,9 +2781,7 @@
                       "$ref": "#/components/schemas/output"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1807,9 +2794,9 @@
         ]
       }
     },
-    "/epm/packages/{pkgName}/stats": {
-      "get": {
-        "summary": "Get stats for a package",
+    "/logstash_api_keys": {
+      "post": {
+        "summary": "Generate Logstash API key",
         "tags": [],
         "responses": {
           "200": {
@@ -1819,35 +2806,22 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "response": {
-                      "$ref": "#/components/schemas/package_usage_stats"
+                    "api_key": {
+                      "type": "string"
                     }
-                  },
-                  "required": [
-                    "response"
-                  ]
+                  }
                 }
               }
             }
           }
         },
-        "operationId": "get-package-stats",
-        "security": [
+        "operationId": "generate-logstash-api-key",
+        "parameters": [
           {
-            "basicAuth": []
+            "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
-      },
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "pkgName",
-          "in": "path",
-          "required": true
-        }
-      ]
+      }
     }
   },
   "components": {
@@ -1926,17 +2900,137 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "name",
-                "message"
-              ]
+              "required": ["name", "message"]
             }
           }
         },
-        "required": [
-          "isInitialized",
-          "nonFatalErrors"
-        ]
+        "required": ["isInitialized", "nonFatalErrors"]
+      },
+      "preconfigured_agent_policies": {
+        "title": "Preconfigured agent policies",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "is_managed": {
+            "type": "string"
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["logs", "metrics"]
+            }
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "id": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "is_default": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "is_default_fleet_server": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "has_fleet_server": {
+            "type": "boolean"
+          },
+          "data_output_id": {
+            "type": "string"
+          },
+          "monitoring_output_id": {
+            "type": "string"
+          },
+          "package_policies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "package": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "description": {
+                  "type": "string"
+                },
+                "namespace": {
+                  "type": "string"
+                },
+                "inputs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "keep_enabled": {
+                        "type": "boolean"
+                      },
+                      "vars": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "string"
+                          },
+                          "frozen": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "required": ["type"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": ["name", "namespace", "package_policies"]
       },
       "settings": {
         "title": "Settings",
@@ -1958,10 +3052,7 @@
             }
           }
         },
-        "required": [
-          "fleet_server_hosts",
-          "id"
-        ]
+        "required": ["fleet_server_hosts", "id"]
       },
       "fleet_settings_response": {
         "title": "Fleet settings response",
@@ -1971,9 +3062,51 @@
             "$ref": "#/components/schemas/settings"
           }
         },
-        "required": [
-          "item"
-        ]
+        "required": ["item"]
+      },
+      "get_categories_response": {
+        "title": "Get categories response",
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "deprecated": true,
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": ["id", "title", "count"]
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": ["id", "title", "count"]
+            }
+          }
+        },
+        "required": ["items"]
       },
       "search_result": {
         "title": "Search result",
@@ -2021,6 +3154,62 @@
           "version",
           "status"
         ]
+      },
+      "get_packages_response": {
+        "title": "Get Packages response",
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/search_result"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/search_result"
+            }
+          }
+        },
+        "required": ["items"]
+      },
+      "bulk_install_packages_response": {
+        "title": "Bulk install packages response",
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "deprecated": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": ["items"]
       },
       "package_info": {
         "title": "Package information",
@@ -2100,10 +3289,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "src",
-                "path"
-              ]
+              "required": ["src", "path"]
             }
           },
           "icons": {
@@ -2153,10 +3339,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "name",
-                      "default"
-                    ]
+                    "required": ["name", "default"]
                   }
                 },
                 "type": {
@@ -2166,14 +3349,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "title",
-                "name",
-                "release",
-                "ingeset_pipeline",
-                "type",
-                "package"
-              ]
+              "required": ["title", "name", "release", "ingeset_pipeline", "type", "package"]
             }
           },
           "download": {
@@ -2211,7 +3387,8 @@
           "map",
           "lens",
           "ml-module",
-          "security-rule"
+          "security-rule",
+          "csp_rule_template"
         ]
       },
       "elasticsearch_asset_type": {
@@ -2226,6 +3403,16 @@
           "data_stream_ilm_policy"
         ]
       },
+      "package_usage_stats": {
+        "title": "Package usage stats",
+        "type": "object",
+        "properties": {
+          "agent_policy_count": {
+            "type": "integer"
+          }
+        },
+        "required": ["agent_policy_count"]
+      },
       "fleet_status_response": {
         "title": "Fleet status response",
         "type": "object",
@@ -2237,29 +3424,23 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "tls_required",
-                "api_keys",
-                "fleet_admin_user",
-                "fleet_server",
-                "encrypted_saved_object_encryption_key_required"
-              ]
+              "enum": ["tls_required", "api_keys", "fleet_admin_user", "fleet_server"]
+            }
+          },
+          "missing_optional_features": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["encrypted_saved_object_encryption_key_required"]
             }
           }
         },
-        "required": [
-          "isReady",
-          "missing_requirements"
-        ]
+        "required": ["isReady", "missing_requirements", "missing_optional_features"]
       },
       "agent_type": {
         "type": "string",
         "title": "Agent type",
-        "enum": [
-          "PERMANENT",
-          "EPHEMERAL",
-          "TEMPORARY"
-        ]
+        "enum": ["PERMANENT", "EPHEMERAL", "TEMPORARY"]
       },
       "agent_metadata": {
         "title": "Agent metadata",
@@ -2268,13 +3449,7 @@
       "agent_status": {
         "type": "string",
         "title": "Agent status",
-        "enum": [
-          "offline",
-          "error",
-          "online",
-          "inactive",
-          "warning"
-        ]
+        "enum": ["offline", "error", "online", "inactive", "warning"]
       },
       "agent": {
         "title": "Agent",
@@ -2294,10 +3469,6 @@
           },
           "unenrollment_started_at": {
             "type": "string"
-          },
-          "shared_id": {
-            "type": "string",
-            "deprecated": true
           },
           "access_api_key_id": {
             "type": "string"
@@ -2333,13 +3504,36 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "active",
-          "enrolled_at",
-          "id",
-          "status"
-        ]
+        "required": ["type", "active", "enrolled_at", "id", "status"]
+      },
+      "get_agents_response": {
+        "title": "Get Agent response",
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/agent"
+            },
+            "deprecated": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/agent"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "perPage": {
+            "type": "number"
+          }
+        },
+        "required": ["items", "total", "page", "perPage"]
       },
       "bulk_upgrade_agents": {
         "title": "Bulk upgrade agents",
@@ -2365,10 +3559,7 @@
             ]
           }
         },
-        "required": [
-          "agents",
-          "version"
-        ]
+        "required": ["agents", "version"]
       },
       "upgrade_agent": {
         "title": "Upgrade agent",
@@ -2380,9 +3571,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "version"
-            ]
+            "required": ["version"]
           },
           {
             "type": "object",
@@ -2394,9 +3583,42 @@
                 "type": "string"
               }
             },
-            "required": [
-              "version"
-            ]
+            "required": ["version"]
+          }
+        ]
+      },
+      "agent_action": {
+        "title": "Agent action",
+        "oneOf": [
+          {
+            "properties": {
+              "data": {
+                "type": "string"
+              },
+              "ack_data": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["POLICY_CHANGE", "UNENROLL", "UPGRADE", "POLICY_REASSIGN"]
+              }
+            }
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "log_level": {
+                    "type": "string",
+                    "enum": ["debug", "info", "warning", "error"]
+                  }
+                }
+              }
+            }
           }
         ]
       },
@@ -2404,6 +3626,9 @@
         "title": "New agent policy",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -2417,13 +3642,19 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "metrics",
-                "logs"
-              ]
+              "enum": ["metrics", "logs"]
             }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
           }
-        }
+        },
+        "required": ["name", "namespace"]
       },
       "new_package_policy": {
         "title": "New package policy",
@@ -2446,11 +3677,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "name",
-              "version",
-              "title"
-            ]
+            "required": ["name", "version"]
           },
           "namespace": {
             "type": "string"
@@ -2486,11 +3713,7 @@
                   "type": "object"
                 }
               },
-              "required": [
-                "type",
-                "enabled",
-                "streams"
-              ]
+              "required": ["type", "enabled"]
             }
           },
           "policy_id": {
@@ -2503,12 +3726,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "output_id",
-          "inputs",
-          "policy_id",
-          "name"
-        ]
+        "required": ["inputs", "name"]
       },
       "package_policy": {
         "title": "Package policy",
@@ -2527,10 +3745,7 @@
                 "items": {}
               }
             },
-            "required": [
-              "id",
-              "revision"
-            ]
+            "required": ["id", "revision"]
           },
           {
             "$ref": "#/components/schemas/new_package_policy"
@@ -2550,10 +3765,7 @@
               },
               "status": {
                 "type": "string",
-                "enum": [
-                  "active",
-                  "inactive"
-                ]
+                "enum": ["active", "inactive"]
               },
               "packagePolicies": {
                 "oneOf": [
@@ -2578,6 +3790,12 @@
               "updated_by": {
                 "type": "string"
               },
+              "data_output_id": {
+                "type": "string"
+              },
+              "monitoring_output_id": {
+                "type": "string"
+              },
               "revision": {
                 "type": "number"
               },
@@ -2585,12 +3803,56 @@
                 "type": "number"
               }
             },
-            "required": [
-              "id",
-              "status"
-            ]
+            "required": ["id", "status"]
           }
         ]
+      },
+      "data_stream": {
+        "title": "Data stream",
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "string"
+          },
+          "dataset": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string"
+          },
+          "package_version": {
+            "type": "string"
+          },
+          "last_activity_ms": {
+            "type": "number"
+          },
+          "size_in_bytes": {
+            "type": "number"
+          },
+          "size_in_bytes_formatted": {
+            "type": "string"
+          },
+          "dashboard": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       },
       "enrollment_api_key": {
         "title": "Enrollment API key",
@@ -2618,29 +3880,223 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "api_key_id",
-          "api_key",
-          "active",
-          "created_at"
-        ]
+        "required": ["id", "api_key_id", "api_key", "active", "created_at"]
       },
-      "update_package_policy": {
-        "title": "Update package policy",
+      "upgrade_diff": {
+        "title": "Package policy Upgrade dryrun",
+        "type": "array",
+        "items": {
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/package_policy"
+            },
+            {
+              "type": "object",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/new_package_policy"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "missingVars": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "full_agent_policy_input_stream": {
+        "title": "Full agent policy input stream",
         "allOf": [
           {
             "type": "object",
+            "additionalProperties": true,
             "properties": {
-              "version": {
+              "id": {
                 "type": "string"
+              },
+              "data_stream": {
+                "type": "object",
+                "properties": {
+                  "dataset": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "required": ["dataset", "type"]
               }
-            }
-          },
-          {
-            "$ref": "#/components/schemas/new_package_policy"
+            },
+            "required": ["id", "data_stream"]
           }
         ]
+      },
+      "full_agent_policy_input": {
+        "title": "Full agent policy input",
+        "allOf": [
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "type": {
+                "type": "string"
+              },
+              "data_stream": {
+                "type": "object",
+                "properties": {
+                  "namespace": {
+                    "type": "string"
+                  }
+                },
+                "required": ["namespace"]
+              },
+              "use_output": {
+                "type": "string"
+              },
+              "meta": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "package": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["name", "version"]
+                  }
+                }
+              },
+              "streams": {
+                "$ref": "#/components/schemas/full_agent_policy_input_stream"
+              }
+            },
+            "required": ["id", "name", "revision", "type", "data_stream", "use_output"]
+          }
+        ]
+      },
+      "upgrade_agent_diff": {
+        "title": "Package policy Upgrade dryrun",
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/full_agent_policy_input"
+          }
+        }
+      },
+      "update_package_policy": {
+        "title": "Update package policy",
+        "type": "object",
+        "description": "",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "package": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "title", "version"]
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "output_id": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "processors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "streams": {
+                  "type": "array",
+                  "items": {}
+                },
+                "config": {
+                  "type": "object"
+                },
+                "vars": {
+                  "type": "object"
+                }
+              },
+              "required": ["type", "enabled", "streams"]
+            }
+          },
+          "policy_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean"
+          }
+        },
+        "required": ["name", "namespace", "policy_id", "enabled"]
       },
       "output": {
         "title": "Output",
@@ -2652,14 +4108,15 @@
           "is_default": {
             "type": "boolean"
           },
+          "is_default_monitoring": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
           "type": {
             "type": "string",
-            "enum": [
-              "elasticsearch"
-            ]
+            "enum": ["elasticsearch"]
           },
           "hosts": {
             "type": "array",
@@ -2670,7 +4127,7 @@
           "ca_sha256": {
             "type": "string"
           },
-          "api_key": {
+          "ca_trusted_fingerprint": {
             "type": "string"
           },
           "config": {
@@ -2678,26 +4135,26 @@
           },
           "config_yaml": {
             "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate": {
+                "type": "string"
+              },
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "key": {
+                "type": "string"
+              }
+            }
           }
         },
-        "required": [
-          "id",
-          "is_default",
-          "name",
-          "type"
-        ]
-      },
-      "package_usage_stats": {
-        "title": "Package usage stats",
-        "type": "object",
-        "properties": {
-          "agent_policy_count": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "agent_policy_count"
-        ]
+        "required": ["id", "is_default", "name", "type"]
       }
     }
   },

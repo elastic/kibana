@@ -1,0 +1,37 @@
+---
+id: kibTransformPluginApi
+slug: /kibana-dev-docs/api/transform
+title: "transform"
+image: https://source.unsplash.com/400x175/?github
+summary: API docs for the transform plugin
+date: 2022-04-05
+tags: ['contributor', 'dev', 'apidocs', 'kibana', 'transform']
+warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
+---
+import transformObj from './transform.devdocs.json';
+
+This plugin provides access to the transforms features provided by Elastic. Transforms enable you to convert existing Elasticsearch indices into summarized indices, which provide opportunities for new insights and analytics.
+
+Contact [Machine Learning UI](https://github.com/orgs/elastic/teams/ml-ui) for questions regarding this plugin.
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports |
+|-------------------|-----------|------------------------|-----------------|
+| 4 | 0 | 4 | 1 |
+
+## Client
+
+### Functions
+<DocDefinitionList data={transformObj.client.functions}/>
+
+## Server
+
+### Functions
+<DocDefinitionList data={transformObj.server.functions}/>
+
+## Common
+
+### Objects
+<DocDefinitionList data={transformObj.common.objects}/>
+

@@ -16,36 +16,29 @@ import {
   LineSeries,
   niceTimeFormatter,
   Position,
-  RectAnnotation,
   ScaleType,
   Settings,
+  XYBrushEvent,
   YDomainRange,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Suspense, useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  LazyAlertsFlyout,
-  useChartTheme,
-} from '../../../../../observability/public';
+import { useChartTheme } from '../../../../../observability/public';
+import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import {
-  Coordinate,
-  RectCoordinate,
-  TimeSeries,
-} from '../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
-import { getAlertAnnotations } from './helper/get_alert_annotations';
+import { getChartAnomalyTimeseries } from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
+import { getTimeZone } from './helper/timezone';
 
 interface Props {
   id: string;
@@ -63,11 +56,8 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalyTimeseries?: ReturnType<
-    typeof getLatencyChartSelector
-  >['anomalyTimeseries'];
+  anomalyTimeseries?: ServiceAnomalyTimeseries;
   customTheme?: Record<string, unknown>;
-  alerts?: APMServiceAlert[];
 }
 export function TimeseriesChart({
   id,
@@ -81,28 +71,35 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
-  alerts,
 }: Props) {
   const history = useHistory();
-  const { observabilityRuleTypeRegistry } = useApmPluginContext();
-  const { getFormatter } = observabilityRuleTypeRegistry;
+  const { core } = useApmPluginContext();
   const { annotations } = useAnnotationsContext();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
-  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
-    undefined
-  );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
+
+  const timeZone = getTimeZone(core.uiSettings);
 
   const min = Math.min(...xValues);
   const max = Math.max(...xValues);
 
+  const anomalyChartTimeseries = getChartAnomalyTimeseries({
+    anomalyTimeseries,
+    theme,
+  });
+
   const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
-  const annotationColor = theme.eui.euiColorSecondary;
-  const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
+  const annotationColor = theme.eui.euiColorSuccess;
+  const allSeries = [
+    ...timeseries,
+    // TODO: re-enable anomaly boundaries when we have a fix for https://github.com/elastic/kibana/issues/100660
+    // ...(anomalyChartTimeseries?.boundaries ?? []),
+    ...(anomalyChartTimeseries?.scores ?? []),
+  ];
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
   return (
@@ -114,21 +111,24 @@ export function TimeseriesChart({
     >
       <Chart ref={chartRef} id={id}>
         <Settings
-          tooltip={{ stickTo: 'top' }}
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={{
-            ...chartTheme,
-            areaSeriesStyle: {
-              line: { visible: false },
+          tooltip={{ stickTo: 'top', showNullValues: true }}
+          onBrushEnd={(event) =>
+            onBrushEnd({ x: (event as XYBrushEvent).x, history })
+          }
+          theme={[
+            customTheme,
+            {
+              areaSeriesStyle: {
+                line: { visible: false },
+              },
             },
-            ...customTheme,
-          }}
+            ...chartTheme,
+          ]}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true },
           }}
           showLegend
-          showLegendExtra
           legendPosition={Position.Bottom}
           xDomain={xDomain}
           onLegendItemClick={(legend) => {
@@ -177,12 +177,17 @@ export function TimeseriesChart({
 
           return (
             <Series
+              timeZone={timeZone}
               key={serie.title}
-              id={serie.title}
+              id={serie.id || serie.title}
+              groupId={serie.groupId}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
-              yAccessors={['y']}
+              yAccessors={serie.yAccessors ?? ['y']}
+              y0Accessors={serie.y0Accessors}
+              stackAccessors={serie.stackAccessors ?? undefined}
+              markSizeAccessor={serie.markSizeAccessor}
               data={isEmpty ? [] : serie.data}
               color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
@@ -191,44 +196,11 @@ export function TimeseriesChart({
               filterSeriesInTooltip={
                 serie.hideTooltipValue ? () => false : undefined
               }
-              stackAccessors={serie.stackAccessors ?? undefined}
               areaSeriesStyle={serie.areaSeriesStyle}
               lineSeriesStyle={serie.lineSeriesStyle}
             />
           );
         })}
-
-        {anomalyTimeseries?.scores && (
-          <RectAnnotation
-            key={anomalyTimeseries.scores.title}
-            id="score_anomalies"
-            dataValues={(anomalyTimeseries.scores.data as RectCoordinate[]).map(
-              ({ x0, x: x1 }) => ({
-                coordinates: { x0, x1 },
-              })
-            )}
-            style={{ fill: anomalyTimeseries.scores.color }}
-          />
-        )}
-        {getAlertAnnotations({
-          alerts,
-          chartStartTime: xValues[0],
-          getFormatter,
-          selectedAlertId,
-          setSelectedAlertId,
-          theme,
-        })}
-        <Suspense fallback={null}>
-          <LazyAlertsFlyout
-            alerts={alerts}
-            isInApp={true}
-            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={() => {
-              setSelectedAlertId(undefined);
-            }}
-            selectedAlertId={selectedAlertId}
-          />
-        </Suspense>
       </Chart>
     </ChartContainer>
   );

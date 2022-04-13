@@ -16,12 +16,13 @@ import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
 import {
   useInitSourcerer,
-  useSourcererScope,
   getScopeFromPath,
+  useSourcererDataView,
 } from '../../common/containers/sourcerer';
 import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
+import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -38,8 +39,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
 
   useInitSourcerer(getScopeFromPath(pathname));
 
-  const { browserFields, indexPattern } = useSourcererScope(getScopeFromPath(pathname));
-
+  const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
@@ -49,14 +49,16 @@ const HomePageComponent: React.FC<HomePageProps> = ({
 
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
-      <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
-      <DragDropContextWrapper browserFields={browserFields}>
-        <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-        <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
-          {children}
-        </SecuritySolutionTemplateWrapper>
-      </DragDropContextWrapper>
-      <HelpMenu />
+      <ConsoleManager>
+        <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
+        <DragDropContextWrapper browserFields={browserFields}>
+          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+          <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
+            {children}
+          </SecuritySolutionTemplateWrapper>
+        </DragDropContextWrapper>
+        <HelpMenu />
+      </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );
 };

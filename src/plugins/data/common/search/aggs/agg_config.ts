@@ -12,12 +12,10 @@ import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { Assign, Ensure } from '@kbn/utility-types';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
-import {
-  ExpressionAstExpression,
-  ExpressionAstArgument,
-  SerializedFieldFormat,
-} from 'src/plugins/expressions/common';
+import { ExpressionAstExpression, ExpressionAstArgument } from 'src/plugins/expressions/common';
+import type { SerializedFieldFormat } from 'src/plugins/field_formats/common';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
@@ -403,6 +401,10 @@ export class AggConfig {
 
   getValue(bucket: any) {
     return this.type.getValue(this, bucket);
+  }
+
+  getResponseId() {
+    return this.type.getResponseId(this);
   }
 
   getKey(bucket: any, key?: string) {

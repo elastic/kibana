@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
@@ -14,6 +14,7 @@ import { ILicense } from '../../licensing/common/types';
 
 import { PLUGIN } from '../common';
 import { AppPublicPluginDependencies } from './types';
+import { SearchProfilerLocatorDefinition } from './locator';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
@@ -23,7 +24,7 @@ const checkLicenseStatus = (license: ILicense) => {
 export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {
   public setup(
     { http, getStartServices }: CoreSetup,
-    { devTools, home, licensing }: AppPublicPluginDependencies
+    { devTools, home, licensing, share }: AppPublicPluginDependencies
   ) {
     home.featureCatalogue.register({
       id: PLUGIN.id,
@@ -51,7 +52,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         const { notifications, i18n: i18nDep } = coreStart;
         const { renderApp } = await import('./application');
 
-        const license = await licensing.license$.pipe(first()).toPromise();
+        const license = await firstValueFrom(licensing.license$);
         const initialLicenseStatus = checkLicenseStatus(license);
 
         return renderApp({
@@ -60,6 +61,8 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
           el: params.element,
           I18nContext: i18nDep.Context,
           notifications: notifications.toasts,
+          theme$: params.theme$,
+          location: params.location,
         });
       },
     });
@@ -71,6 +74,8 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         devTool.enable();
       }
     });
+
+    share.url.locators.create(new SearchProfilerLocatorDefinition());
   }
 
   public start() {}

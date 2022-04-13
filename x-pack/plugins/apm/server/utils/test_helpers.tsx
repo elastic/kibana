@@ -6,12 +6,12 @@
  */
 
 import { APMConfig } from '../';
-import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
-import { UxUIFilters } from '../../typings/ui_filters';
+import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
+import { UxUIFilters } from '../../common/ux_ui_filter';
 
 interface Options {
   mockResponse?: (
@@ -26,18 +26,7 @@ interface MockSetup {
   internalClient: any;
   config: APMConfig;
   uiFilters: UxUIFilters;
-  indices: {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.sourcemapIndices': string;
-    'apm_oss.errorIndices': string;
-    'apm_oss.onboardingIndices': string;
-    'apm_oss.spanIndices': string;
-    'apm_oss.transactionIndices': string;
-    'apm_oss.metricsIndices': string;
-    /* eslint-enable @typescript-eslint/naming-convention */
-    apmAgentConfigurationIndex: string;
-    apmCustomLinkIndex: string;
-  };
+  indices: ApmIndicesConfig;
 }
 
 export async function inspectSearchParams(
@@ -61,6 +50,16 @@ export async function inspectSearchParams(
   let response;
   let error;
 
+  const mockApmIndices: {
+    [Property in keyof APMConfig['indices']]: string;
+  } = {
+    sourcemap: 'myIndex',
+    error: 'myIndex',
+    onboarding: 'myIndex',
+    span: 'myIndex',
+    transaction: 'myIndex',
+    metric: 'myIndex',
+  };
   const mockSetup = {
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
@@ -76,8 +75,15 @@ export async function inspectSearchParams(
           switch (key) {
             default:
               return 'myIndex';
-
-            case 'xpack.apm.metricsInterval':
+            case 'indices':
+              return mockApmIndices;
+            case 'ui':
+              return {
+                enabled: true,
+                transactionGroupBucketSize: 1000,
+                maxTraceItems: 1000,
+              };
+            case 'metricsInterval':
               return 30;
           }
         },
@@ -85,18 +91,10 @@ export async function inspectSearchParams(
     ) as APMConfig,
     uiFilters: options?.uiFilters ?? {},
     indices: {
-      /* eslint-disable @typescript-eslint/naming-convention */
-      'apm_oss.sourcemapIndices': 'myIndex',
-      'apm_oss.errorIndices': 'myIndex',
-      'apm_oss.onboardingIndices': 'myIndex',
-      'apm_oss.spanIndices': 'myIndex',
-      'apm_oss.transactionIndices': 'myIndex',
-      'apm_oss.metricsIndices': 'myIndex',
-      /* eslint-enable @typescript-eslint/naming-convention */
+      ...mockApmIndices,
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any,
   };
   try {
     response = await fn(mockSetup);
@@ -114,7 +112,7 @@ export async function inspectSearchParams(
   };
 }
 
-export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+export type SearchParamsMock = Awaited<ReturnType<typeof inspectSearchParams>>;
 
 export function mockNow(date: string | number | Date) {
   const fakeNow = new Date(date).getTime();

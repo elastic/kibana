@@ -18,17 +18,15 @@ const fixturesPath = path.resolve(__dirname, '__fixtures__', 'extract_default_tr
 const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_1'),
   path.join(fixturesPath, 'test_plugin_2'),
-  path.join(fixturesPath, 'test_plugin_3'),
-  path.join(fixturesPath, 'test_plugin_3_additional_path'),
+  path.join(fixturesPath, 'test_plugin_2_additional_path'),
 ];
 
 const config = {
   paths: {
     plugin_1: ['src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1'],
-    plugin_2: ['src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2'],
-    plugin_3: [
-      'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
-      'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3_additional_path',
+    plugin_2: [
+      'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
+      'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2_additional_path',
     ],
   },
   exclude: [],
@@ -44,7 +42,7 @@ describe('dev/i18n/extract_default_translations', () => {
   });
 
   test('throws on id collision', async () => {
-    const [, , pluginPath] = pluginsPaths;
+    const [, pluginPath] = pluginsPaths;
     const reporter = new ErrorReporter();
 
     await expect(
@@ -57,20 +55,20 @@ describe('dev/i18n/extract_default_translations', () => {
     const id = 'plugin_2.message-id';
     const filePath = path.resolve(
       __dirname,
-      '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
+      '__fixtures__/extract_default_translations/test_plugin_2/test_file.jsx'
     );
     expect(() => validateMessageNamespace(id, filePath, config.paths)).not.toThrow();
   });
 
   test('validates message namespace with multiple paths', () => {
-    const id = 'plugin_3.message-id';
+    const id = 'plugin_2.message-id';
     const filePath1 = path.resolve(
       __dirname,
-      '__fixtures__/extract_default_translations/test_plugin_3/test_file.html'
+      '__fixtures__/extract_default_translations/test_plugin_2/test_file.jsx'
     );
     const filePath2 = path.resolve(
       __dirname,
-      '__fixtures__/extract_default_translations/test_plugin_3_additional_path/test_file.html'
+      '__fixtures__/extract_default_translations/test_plugin_2_additional_path/test_file.jsx'
     );
     expect(() => validateMessageNamespace(id, filePath1, config.paths)).not.toThrow();
     expect(() => validateMessageNamespace(id, filePath2, config.paths)).not.toThrow();
@@ -81,7 +79,7 @@ describe('dev/i18n/extract_default_translations', () => {
     const id = 'wrong_plugin_namespace.message-id';
     const filePath = path.resolve(
       __dirname,
-      '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
+      '__fixtures__/extract_default_translations/test_plugin_2/test_file.jsx'
     );
 
     expect(() => validateMessageNamespace(id, filePath, config.paths, { report })).not.toThrow();

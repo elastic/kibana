@@ -17,8 +17,9 @@ import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../
 import { Legacy } from '../../../legacy_shims';
 import { Enabler } from './enabler';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
-import { initSetupModeState } from '../../setup_mode/setup_mode';
-import { GlobalStateContext } from '../../global_state_context';
+import { initSetupModeState } from '../../../lib/setup_mode';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { useRequestErrorHandler } from '../../hooks/use_request_error_handler';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 
@@ -77,7 +78,8 @@ export const NoDataPage = () => {
   ]);
 
   const globalState = useContext(GlobalStateContext);
-  initSetupModeState(globalState, services.http);
+  const handleRequestError = useRequestErrorHandler();
+  initSetupModeState(globalState, services.http, handleRequestError);
 
   // From x-pack/plugins/monitoring/public/views/no_data/model_updater.js
   const updateModel = useCallback(
@@ -218,12 +220,10 @@ async function executeCheck(checker: SettingsChecker, http: { fetch: any }): Pro
 
     return { found, reason };
   } catch (err: any) {
-    const { data } = err;
-
     return {
       error: true,
       found: false,
-      errorReason: data,
+      errorReason: err.body,
     };
   }
 }

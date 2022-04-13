@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'header', 'timePicker']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
@@ -18,11 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/data');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/config');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/data');
       await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/config');
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
     it('should allow creation of lens xy chart', async () => {
@@ -84,12 +86,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'sum',
         field: 'bytes',
       });
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('mtrVis');
 
       await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
 
       await PageObjects.lens.switchFirstLayerIndexPattern('lens_rolled_up_data');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('mtrVis');
 
       await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
     });

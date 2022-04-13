@@ -7,33 +7,19 @@
 
 import expect from '@kbn/expect';
 import { indexTimestamp } from '../../../plugins/reporting/server/lib/store/index_timestamp';
+import {
+  AvailableTotal,
+  JobTypes,
+  LayoutCounts,
+  ReportingUsageType,
+} from '../../../plugins/reporting/server/usage/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-interface PDFAppCounts {
-  app: {
-    [appName: string]: number;
-  };
-  layout: {
-    [layoutType: string]: number;
-  };
-}
-
-export interface ReportingUsageStats {
-  available: boolean;
-  enabled: boolean;
-  total: number;
-  last_7_days: {
-    total: number;
-    printable_pdf: PDFAppCounts;
-    [jobType: string]: any;
-  };
-  printable_pdf: PDFAppCounts;
-  status: any;
-  [jobType: string]: any;
-}
-
+// NOTE: the usage stats come from an HTTP API, which converts key names to snake_case
 export interface UsageStats {
-  reporting: ReportingUsageStats;
+  reporting: ReportingUsageType & {
+    last_7_days: ReportingUsageType['last7Days'];
+  };
 }
 
 export function createUsageServices({ getService }: FtrProviderContext) {
@@ -42,7 +28,7 @@ export function createUsageServices({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
-    async waitForJobToFinish(downloadReportPath: string) {
+    async waitForJobToFinish(downloadReportPath: string, ignoreFailure?: boolean) {
       log.debug(`Waiting for job to finish: ${downloadReportPath}`);
       const JOB_IS_PENDING_CODE = 503;
 
@@ -65,8 +51,9 @@ export function createUsageServices({ getService }: FtrProviderContext) {
           }
         }, 1500);
       });
-
-      expect(statusCode).to.be(200);
+      if (!ignoreFailure) {
+        expect(statusCode).to.be(200);
+      }
     },
 
     /**
@@ -114,27 +101,31 @@ export function createUsageServices({ getService }: FtrProviderContext) {
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
-      expect(stats.reporting.last_7_days.printable_pdf.app[app]).to.be(count);
+      expect(
+        stats.reporting.last_7_days.printable_pdf.app![app as keyof AvailableTotal['app']]
+      ).to.be(count);
     },
 
     expectAllTimePdfAppStats(stats: UsageStats, app: string, count: number) {
-      expect(stats.reporting.printable_pdf.app[app]).to.be(count);
+      expect(stats.reporting.printable_pdf.app![app as keyof AvailableTotal['app']]).to.be(count);
     },
 
     expectRecentPdfLayoutStats(stats: UsageStats, layout: string, count: number) {
-      expect(stats.reporting.last_7_days.printable_pdf.layout[layout]).to.be(count);
+      expect(stats.reporting.last_7_days.printable_pdf.layout![layout as keyof LayoutCounts]).to.be(
+        count
+      );
     },
 
     expectAllTimePdfLayoutStats(stats: UsageStats, layout: string, count: number) {
-      expect(stats.reporting.printable_pdf.layout[layout]).to.be(count);
+      expect(stats.reporting.printable_pdf.layout![layout as keyof LayoutCounts]).to.be(count);
     },
 
     expectRecentJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting.last_7_days[jobType].total).to.be(count);
+      expect(stats.reporting.last_7_days[jobType as keyof JobTypes].total).to.be(count);
     },
 
     expectAllTimeJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting[jobType].total).to.be(count);
+      expect(stats.reporting[jobType as keyof JobTypes].total).to.be(count);
     },
 
     getCompletedReportCount(stats: UsageStats) {

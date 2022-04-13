@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
 import { cloneDeep } from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IScopedClusterClient } from 'kibana/server';
+import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
+import type { DataViewsService } from '../../../../../../../src/plugins/data_views/common';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
@@ -38,35 +38,34 @@ export function fieldServiceProvider(
   indexPattern: string,
   isRollup: boolean,
   client: IScopedClusterClient,
-  savedObjectsClient: SavedObjectsClientContract
+  dataViewsService: DataViewsService
 ) {
-  return new FieldsService(indexPattern, isRollup, client, savedObjectsClient);
+  return new FieldsService(indexPattern, isRollup, client, dataViewsService);
 }
 
 class FieldsService {
   private _indexPattern: string;
   private _isRollup: boolean;
   private _mlClusterClient: IScopedClusterClient;
-  private _savedObjectsClient: SavedObjectsClientContract;
+  private _dataViewsService: DataViewsService;
 
   constructor(
     indexPattern: string,
     isRollup: boolean,
     client: IScopedClusterClient,
-    savedObjectsClient: SavedObjectsClientContract
+    dataViewsService: DataViewsService
   ) {
     this._indexPattern = indexPattern;
     this._isRollup = isRollup;
     this._mlClusterClient = client;
-    this._savedObjectsClient = savedObjectsClient;
+    this._dataViewsService = dataViewsService;
   }
 
   private async loadFieldCaps(): Promise<any> {
-    const { body } = await this._mlClusterClient.asCurrentUser.fieldCaps({
+    return await this._mlClusterClient.asCurrentUser.fieldCaps({
       index: this._indexPattern,
       fields: '*',
     });
-    return body;
   }
 
   // create field object from the results from _field_caps
@@ -111,9 +110,9 @@ class FieldsService {
       const rollupService = await rollupServiceProvider(
         this._indexPattern,
         this._mlClusterClient,
-        this._savedObjectsClient
+        this._dataViewsService
       );
-      const rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null =
+      const rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[] | null =
         await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
@@ -137,7 +136,7 @@ class FieldsService {
 }
 
 function combineAllRollupFields(
-  rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
+  rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[]
 ): RollupFields {
   const rollupFields: RollupFields = {};
   rollupConfigs.forEach((conf) => {

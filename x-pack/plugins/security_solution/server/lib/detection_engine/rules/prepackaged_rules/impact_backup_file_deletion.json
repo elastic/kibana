@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of backup files, saved using third-party software, by a process outside of the backup suite. Adversaries may delete Backup files to ensure that recovery from a ransomware attack is less likely.",
+  "false_positives": [
+    "Certain utilities that delete files for disk cleanup or Administrators manually removing backup files."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Third-party Backup Files Deleted via Unexpected Process",
+  "note": "## Triage and analysis\n\n### Investigating Third-party Backup Files Deleted via Unexpected Process\n\nBackups are a significant obstacle for any ransomware operation. They allow the victim to resume business by performing\ndata recovery, making them a valuable target.\n\nAttackers can delete backups from the host and gain access to backup servers to remove centralized backups for the\nenvironment, ensuring that victims have no alternatives to paying the ransom.\n\nThis rule identifies file deletions performed by a process that does not belong to the backup suite and aims to delete\nVeritas or Veeam backups.\n\n#### Possible investigation steps\n\n- Identify the process (location, name, etc.) and the user that performed this operation.\n- Check whether the account is authorized to perform this operation.\n- Confirm whether the account owner is aware of the operation.\n- Investigate other alerts associated with the user during the past 48 hours.\n\n### False positive analysis\n\n- This rule can be triggered by the manual removal of backup files and by removal using other third-party tools that are\nnot from the backup suite. Exceptions can be added for specific accounts and executables, preferably tied together.\n\n### Related rules\n\n- Deleting Backup Catalogs with Wbadmin - 581add16-df76-42bb-af8e-c979bfb39a59\n- Volume Shadow Copy Deleted or Resized via VssAdmin - b5ea4bfe-a1b2-421f-9d47-22a75a6f2921\n- Volume Shadow Copy Deletion via PowerShell - d99a037b-c8e2-47a5-97b9-170d076827c4\n- Volume Shadow Copy Deletion via WMIC - dc9c1f74-dac3-48e3-b47f-eb79db358f57\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Reset the password of the involved accounts.\n- Perform data recovery locally or restore the backups from replicated copies (Cloud, other servers, etc.).\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "file where event.type == \"deletion\" and\n  (\n  /* Veeam Related Backup Files */\n  (file.extension : (\"VBK\", \"VIB\", \"VBM\") and\n  not process.executable : (\"?:\\\\Windows\\\\Veeam\\\\Backup\\\\*\",\n                            \"?:\\\\Program Files\\\\Veeam\\\\Backup and Replication\\\\*\",\n                            \"?:\\\\Program Files (x86)\\\\Veeam\\\\Backup and Replication\\\\*\")) or\n\n  /* Veritas Backup Exec Related Backup File */\n  (file.extension : \"BKF\" and\n  not process.executable : (\"?:\\\\Program Files\\\\Veritas\\\\Backup Exec\\\\*\",\n                            \"?:\\\\Program Files (x86)\\\\Veritas\\\\Backup Exec\\\\*\"))\n  )\n",
+  "references": [
+    "https://www.advintel.io/post/backup-removal-solutions-from-conti-ransomware-with-love"
+  ],
+  "risk_score": 47,
+  "rule_id": "11ea6bec-ebde-4d71-a8e9-784948f8e3e9",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Impact"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1490",
+          "name": "Inhibit System Recovery",
+          "reference": "https://attack.mitre.org/techniques/T1490/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

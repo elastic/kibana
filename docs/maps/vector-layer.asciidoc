@@ -11,7 +11,7 @@ To add a vector layer to your map, click *Add layer*, then select one of the fol
 
 *Choropleth*:: Shaded areas to compare statistics across boundaries.
 
-*Clusters and grids*:: Geospatial data grouped in grids with metrics for each gridded cell.
+*Clusters*:: Geospatial data grouped in grids with metrics for each gridded cell.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
 
 *Create index*:: Draw shapes on the map and index in Elasticsearch.
@@ -27,11 +27,15 @@ Results exceeding `index.max_result_window` are not displayed.
 
 * *Show clusters when results exceed 10,000* When results exceed `index.max_result_window`, the layer uses {ref}/search-aggregations-bucket-geotilegrid-aggregation.html[GeoTile grid aggregation] to group your documents into clusters and displays metrics for each cluster. When results are less then `index.max_result_window`, the layer displays features from individual documents.
 
-* *Use vector tiles.* Vector tiles partition your map into 6 to 8 tiles.
+* *Use vector tiles.* Vector tiles partition your map into tiles.
 Each tile request is limited to the `index.max_result_window` index setting.
-Tiles exceeding `index.max_result_window` have a visual indicator when there are too many features to display.
+When a tile exceeds `index.max_result_window`, results exceeding `index.max_result_window` are not contained in the tile and a dashed rectangle outlining the bounding box containing all geo values within the tile is displayed.
 
 *EMS Boundaries*:: Administrative boundaries from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
+
+*ML Anomalies*:: Points and lines associated with anomalies. The {anomaly-job}
+must use a `lat_long` function. Go to
+{ml-docs}/geographic-anomalies.html[Detecting anomalous locations in geographic data] for an example.
 
 *Point to point*:: Aggregated data paths between the source and destination.
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.

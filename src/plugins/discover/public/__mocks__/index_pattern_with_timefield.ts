@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common';
-import { IndexPattern } from '../../../data/common';
-import { indexPatterns } from '../../../data/public';
+import { IIndexPatternFieldList, DataView } from '../../../data_views/public';
 
 const fields = [
   {
@@ -64,20 +62,16 @@ const indexPattern = {
   id: 'index-pattern-with-timefield-id',
   title: 'index-pattern-with-timefield',
   metaFields: ['_index', '_score'],
-  flattenHit: undefined,
-  formatHit: jest.fn((hit) => hit._source),
   fields,
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
   getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
-  getFormatterForField: () => ({ convert: () => 'formatted' }),
-} as unknown as IndexPattern;
+  getFormatterForField: () => ({ convert: (value: unknown) => value }),
+  isTimeNanosBased: () => false,
+  popularizeField: () => {},
+} as unknown as DataView;
 
-indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
-indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
-  return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
-};
 
 export const indexPatternWithTimefieldMock = indexPattern;

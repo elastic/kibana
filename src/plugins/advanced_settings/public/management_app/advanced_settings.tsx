@@ -19,6 +19,7 @@ import {
   DocLinksStart,
   ToastsStart,
   ScopedHistory,
+  ThemeServiceStart,
 } from '../../../../core/public';
 import { url } from '../../../kibana_utils/public';
 
@@ -32,6 +33,7 @@ import { getAriaName, toEditableConfig, fieldSorter, DEFAULT_CATEGORY } from './
 
 import { FieldSetting, SettingsChanges } from './types';
 import { parseErrorMsg } from './components/search/search';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 export const QUERY = 'query';
 
@@ -39,8 +41,9 @@ interface AdvancedSettingsProps {
   history: ScopedHistory;
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+  theme: ThemeServiceStart['theme$'];
   componentRegistry: ComponentRegistry['start'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
@@ -195,6 +198,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
         });
       })
       .filter((c) => !c.readOnly)
+      .filter((c) => !c.isCustom) // hide any settings that aren't explicitly registered by enabled plugins.
       .sort(fieldSorter);
   }
 
@@ -257,20 +261,23 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
         <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 
-        <Form
-          settings={this.groupedSettings}
-          visibleSettings={filteredSettings}
-          categories={this.categories}
-          categoryCounts={this.categoryCounts}
-          clearQuery={this.clearQuery}
-          save={this.saveConfig}
-          showNoResultsMessage={!footerQueryMatched}
-          enableSaving={this.props.enableSaving}
-          dockLinks={this.props.dockLinks}
-          toasts={this.props.toasts}
-          trackUiMetric={this.props.trackUiMetric}
-          queryText={query.text}
-        />
+        <KibanaContextProvider services={{ uiSettings: this.props.uiSettings }}>
+          <Form
+            settings={this.groupedSettings}
+            visibleSettings={filteredSettings}
+            categories={this.categories}
+            categoryCounts={this.categoryCounts}
+            clearQuery={this.clearQuery}
+            save={this.saveConfig}
+            showNoResultsMessage={!footerQueryMatched}
+            enableSaving={this.props.enableSaving}
+            docLinks={this.props.docLinks}
+            toasts={this.props.toasts}
+            trackUiMetric={this.props.trackUiMetric}
+            queryText={query.text}
+            theme={this.props.theme}
+          />
+        </KibanaContextProvider>
         <PageFooter
           toasts={this.props.toasts}
           query={query}

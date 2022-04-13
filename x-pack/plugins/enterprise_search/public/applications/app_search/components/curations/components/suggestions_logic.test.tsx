@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-} from '../../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../../shared/constants';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../../test_helpers';
 
 import { SuggestionsAPIResponse, SuggestionsLogic } from './suggestions_logic';
 
@@ -45,13 +43,13 @@ const MOCK_RESPONSE: SuggestionsAPIResponse = {
       updated_at: '2021-07-08T14:35:50Z',
       promoted: ['1', '2'],
       status: 'applied',
+      operation: 'create',
     },
   ],
 };
 
 describe('SuggestionsLogic', () => {
   const { mount } = new LogicMounter(SuggestionsLogic);
-  const { flashAPIErrors } = mockFlashMessageHelpers;
   const { http } = mockHttpValues;
 
   beforeEach(() => {
@@ -121,7 +119,7 @@ describe('SuggestionsLogic', () => {
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify({
               page: {
@@ -139,14 +137,9 @@ describe('SuggestionsLogic', () => {
         expect(SuggestionsLogic.actions.onSuggestionsLoaded).toHaveBeenCalledWith(MOCK_RESPONSE);
       });
 
-      it('handles errors', async () => {
-        http.post.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         mount();
-
         SuggestionsLogic.actions.loadSuggestions();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

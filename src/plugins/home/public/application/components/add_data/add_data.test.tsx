@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { AddData } from './add_data';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ApplicationStart } from 'kibana/public';
 
 jest.mock('../app_navigation_handler', () => {
@@ -27,7 +27,9 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const applicationStartMock = {} as unknown as ApplicationStart;
+const applicationStartMock = {
+  capabilities: { navLinks: { integrations: true } },
+} as unknown as ApplicationStart;
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 

@@ -9,26 +9,25 @@ import './space_selector.scss';
 
 import {
   EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageHeader,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart } from 'src/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaSolutionAvatar } from '@kbn/shared-ux-components';
+import type { AppMountParameters, CoreStart } from 'src/core/public';
 
+import {
+  KibanaPageTemplate,
+  KibanaThemeProvider,
+} from '../../../../../src/plugins/kibana_react/public';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
@@ -105,84 +104,90 @@ export class SpaceSelector extends Component<Props, State> {
     }
 
     return (
-      <EuiPage className="spcSpaceSelector" data-test-subj="kibanaSpaceSelector">
-        <EuiPageBody>
-          <EuiPageHeader className="spcSpaceSelector__heading">
-            <EuiSpacer size="xxl" />
-            <span className="spcSpaceSelector__logo">
-              <EuiIcon size="xxl" type={`logoElastic`} />
-            </span>
+      <KibanaPageTemplate
+        template="empty"
+        className="spcSpaceSelector"
+        data-test-subj="kibanaSpaceSelector"
+        pageContentBodyProps={{ className: 'spcSpaceSelector__pageContent' }}
+      >
+        <EuiText textAlign="center" size="s">
+          <EuiSpacer size="xxl" />
+          <KibanaSolutionAvatar name="Elastic" size="xl" />
+          <EuiSpacer size="xxl" />
+          <h1
+            // plain `eui` class undos forced focus style on non-EUI components
+            className="eui spcSpaceSelector__pageHeader"
+            tabIndex={0}
+            ref={this.setHeaderRef}
+          >
+            <FormattedMessage
+              id="xpack.spaces.spaceSelector.selectSpacesTitle"
+              defaultMessage="Select your space"
+            />
+          </h1>
+          <EuiTextColor color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
+                defaultMessage="You can change your space at anytime."
+              />
+            </p>
+          </EuiTextColor>
+        </EuiText>
+        <EuiSpacer size="xxl" />
 
-            <EuiTitle size="l">
-              <h1 tabIndex={0} ref={this.setHeaderRef}>
-                <FormattedMessage
-                  id="xpack.spaces.spaceSelector.selectSpacesTitle"
-                  defaultMessage="Select your space"
-                />
-              </h1>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
-                  defaultMessage="You can change your space at anytime"
-                />
-              </p>
-            </EuiText>
-          </EuiPageHeader>
-          <EuiPageContent className="spcSpaceSelector__pageContent">
-            <EuiFlexGroup
-              // @ts-ignore
-              direction="column"
-              alignItems="center"
-              responsive={false}
-            >
-              {this.getSearchField()}
-            </EuiFlexGroup>
+        {this.getSearchField()}
 
-            <EuiSpacer size="xl" />
+        <EuiSpacer size="xl" />
 
-            {this.state.loading && <EuiLoadingSpinner size="xl" />}
+        {this.state.loading && <EuiLoadingSpinner size="xl" />}
 
-            {!this.state.loading && (
-              <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
-            )}
+        {!this.state.loading && (
+          <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
+        )}
 
-            {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
-              <Fragment>
-                <EuiSpacer />
-                <EuiText color="subdued" textAlign="center">
+        {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiPanel className="spcSpaceSelector__errorPanel" color="subdued">
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate(
+                    'xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription',
+                    {
+                      defaultMessage: 'No spaces match {searchTerm}',
+                      values: { searchTerm: `"${this.state.searchTerm}"` },
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
+            </EuiPanel>
+          </Fragment>
+        )}
+
+        {!this.state.loading && this.state.error && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiPanel color="danger" className="spcSpaceSelector__errorPanel">
+              <EuiText size="s" color="danger">
+                <h2>
                   <FormattedMessage
-                    id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
-                    defaultMessage="No spaces match search criteria"
+                    id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
+                    defaultMessage="Error loading spaces ({message})"
+                    values={{ message: this.state.error.message }}
                   />
-                </EuiText>
-              </Fragment>
-            )}
-
-            {!this.state.loading && this.state.error && (
-              <Fragment>
-                <EuiSpacer />
-                <EuiPanel className="spcSpaceSelector__errorPanel">
-                  <EuiText color="danger" style={{ textAlign: 'center' }}>
-                    <FormattedMessage
-                      id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
-                      defaultMessage="Error loading spaces ({message})"
-                      values={{ message: this.state.error.message }}
-                    />
-                  </EuiText>
-                  <EuiText style={{ textAlign: 'center' }}>
-                    <FormattedMessage
-                      id="xpack.spaces.spaceSelector.contactSysAdminDescription"
-                      defaultMessage="Contact your system administrator."
-                    />
-                  </EuiText>
-                </EuiPanel>
-              </Fragment>
-            )}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+                </h2>
+                <p>
+                  <FormattedMessage
+                    id="xpack.spaces.spaceSelector.contactSysAdminDescription"
+                    defaultMessage="Contact your system administrator."
+                  />
+                </p>
+              </EuiText>
+            </EuiPanel>
+          </Fragment>
+        )}
+      </KibanaPageTemplate>
     );
   }
 
@@ -190,19 +195,20 @@ export class SpaceSelector extends Component<Props, State> {
     if (!this.state.spaces || this.state.spaces.length < SPACE_SEARCH_COUNT_THRESHOLD) {
       return null;
     }
+
+    const inputLabel = i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
+      defaultMessage: 'Find a space',
+    });
+
     return (
-      <EuiFlexItem className="spcSpaceSelector__searchHolder">
-        {
-          <EuiFieldSearch
-            className="spcSpaceSelector__searchField"
-            placeholder={i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {
-              defaultMessage: 'Find a space',
-            })}
-            incremental={true}
-            onSearch={this.onSearch}
-          />
-        }
-      </EuiFlexItem>
+      <div className="spcSpaceSelector__searchHolder">
+        <EuiFieldSearch
+          placeholder={inputLabel}
+          aria-label={inputLabel}
+          incremental={true}
+          onSearch={this.onSearch}
+        />
+      </div>
     );
   };
 
@@ -213,12 +219,18 @@ export class SpaceSelector extends Component<Props, State> {
   };
 }
 
-export const renderSpaceSelectorApp = (i18nStart: CoreStart['i18n'], el: Element, props: Props) => {
+export const renderSpaceSelectorApp = (
+  i18nStart: CoreStart['i18n'],
+  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
+  props: Props
+) => {
   ReactDOM.render(
     <i18nStart.Context>
-      <SpaceSelector {...props} />
+      <KibanaThemeProvider theme$={theme$}>
+        <SpaceSelector {...props} />
+      </KibanaThemeProvider>
     </i18nStart.Context>,
-    el
+    element
   );
-  return () => ReactDOM.unmountComponentAtNode(el);
+  return () => ReactDOM.unmountComponentAtNode(element);
 };

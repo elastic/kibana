@@ -9,7 +9,7 @@ import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiPanel,
   EuiLink,
   EuiText,
   EuiTitle,
@@ -56,48 +56,49 @@ function NewsItem({ item }: { item: INewsItem }) {
   const theme = useContext(ThemeContext);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxxs">
-          <h4>{item.title.en}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
-              <EuiFlexItem>
-                <EuiText grow={false} size="xs" color="subdued">
-                  {limitString(item.description.en, 128)}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <EuiLink href={item.link_url.en} target="_blank" external>
-                    {i18n.translate('xpack.observability.news.readFullStory', {
-                      defaultMessage: 'Read full story',
-                    })}
-                  </EuiLink>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {item.image_url?.en && (
-            <EuiFlexItem grow={false}>
-              <img
-                data-test-subj="news_image"
-                style={{ border: theme.eui.euiBorderThin }}
-                width={48}
-                height={48}
-                alt={item.title.en}
-                src={item.image_url.en}
-                className="obsNewsFeed__itemImg"
-              />
+    <EuiPanel hasBorder={true}>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h4>{item.title.en}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
+                <EuiFlexItem>
+                  <EuiText grow={false} size="s" color="subdued">
+                    {limitString(item.description.en, 128)}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <EuiLink href={item.link_url.en} target="_blank" external>
+                      {i18n.translate('xpack.observability.news.readFullStory', {
+                        defaultMessage: 'Read full story',
+                      })}
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiHorizontalRule margin="s" />
-    </EuiFlexGroup>
+            {item.image_url?.en && (
+              <EuiFlexItem grow={false}>
+                <img
+                  data-test-subj="newsImage"
+                  style={{ border: theme.eui.euiBorderThin }}
+                  width={48}
+                  height={48}
+                  alt={item.title.en}
+                  src={item.image_url.en}
+                  className="obsNewsFeed__itemImg"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }

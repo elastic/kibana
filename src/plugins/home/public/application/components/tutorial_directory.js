@@ -9,8 +9,8 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
@@ -18,12 +18,10 @@ import { getServices } from '../kibana_services';
 import { KibanaPageTemplate } from '../../../../kibana_react/public';
 import { getTutorials } from '../load_tutorials';
 
-const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
-const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
-  defaultMessage: 'Add data',
+const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
+  defaultMessage: 'Integrations',
 });
 
 class TutorialDirectoryUi extends React.Component {
@@ -33,34 +31,6 @@ class TutorialDirectoryUi extends React.Component {
     const extraTabs = getServices().addDataService.getAddDataTabs();
 
     this.tabs = [
-      {
-        id: ALL_TAB_ID,
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.allTitle',
-          defaultMessage: 'All',
-        }),
-      },
-      {
-        id: 'logging',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.loggingTitle',
-          defaultMessage: 'Logs',
-        }),
-      },
-      {
-        id: 'metrics',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.metricsTitle',
-          defaultMessage: 'Metrics',
-        }),
-      },
-      {
-        id: 'security',
-        name: this.props.intl.formatMessage({
-          id: 'home.tutorial.tabs.securitySolutionTitle',
-          defaultMessage: 'Security',
-        }),
-      },
       {
         id: SAMPLE_DATA_TAB_ID,
         name: this.props.intl.formatMessage({
@@ -76,7 +46,7 @@ class TutorialDirectoryUi extends React.Component {
       })),
     ];
 
-    let openTab = ALL_TAB_ID;
+    let openTab = SAMPLE_DATA_TAB_ID;
     if (
       props.openTab &&
       this.tabs.some((tab) => {
@@ -88,7 +58,6 @@ class TutorialDirectoryUi extends React.Component {
     this.state = {
       selectedTabId: openTab,
       tutorialCards: [],
-      notices: getServices().tutorialService.getDirectoryNotices(),
     };
   }
 
@@ -101,10 +70,9 @@ class TutorialDirectoryUi extends React.Component {
 
     getServices().chrome.setBreadcrumbs([
       {
-        text: homeTitle,
-        href: '#/',
+        text: integrationsTitle,
+        href: this.props.addBasePath(`/app/integrations/browse`),
       },
-      { text: addDataTitle },
     ]);
 
     const tutorialConfigs = await getTutorials();
@@ -184,6 +152,15 @@ class TutorialDirectoryUi extends React.Component {
   renderTabContent = () => {
     const tab = this.tabs.find(({ id }) => id === this.state.selectedTabId);
     if (tab?.content) {
+      getServices().chrome.setBreadcrumbs([
+        {
+          text: integrationsTitle,
+          href: this.props.addBasePath(`/app/integrations/browse`),
+        },
+        {
+          text: tab.name,
+        },
+      ]);
       return tab.content;
     }
 
@@ -192,7 +169,7 @@ class TutorialDirectoryUi extends React.Component {
         {this.state.tutorialCards
           .filter((tutorial) => {
             return (
-              this.state.selectedTabId === ALL_TAB_ID ||
+              this.state.selectedTabId === SAMPLE_DATA_TAB_ID ||
               this.state.selectedTabId === tutorial.category
             );
           })
@@ -216,19 +193,6 @@ class TutorialDirectoryUi extends React.Component {
     );
   };
 
-  renderNotices = () => {
-    const notices = getServices().tutorialService.getDirectoryNotices();
-    return notices.length ? (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {notices.map((DirectoryNotice, index) => (
-          <EuiFlexItem key={index}>
-            <DirectoryNotice />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    ) : null;
-  };
-
   renderHeaderLinks = () => {
     const headerLinks = getServices().tutorialService.getDirectoryHeaderLinks();
     return headerLinks.length ? (
@@ -245,7 +209,6 @@ class TutorialDirectoryUi extends React.Component {
   render() {
     const headerLinks = this.renderHeaderLinks();
     const tabs = this.getTabs();
-    const notices = this.renderNotices();
 
     return (
       <KibanaPageTemplate
@@ -253,18 +216,31 @@ class TutorialDirectoryUi extends React.Component {
         template="empty"
         pageHeader={{
           pageTitle: (
-            <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
+            <FormattedMessage
+              id="home.tutorial.addDataToKibanaTitle"
+              defaultMessage="More ways to add data"
+            />
+          ),
+          description: (
+            <FormattedMessage
+              id="home.tutorial.addDataToKibanaDescription"
+              defaultMessage="In addition to adding {integrationsLink}, you can try our sample data or upload your own data."
+              values={{
+                integrationsLink: (
+                  <EuiLink href={this.props.addBasePath(`/app/integrations/browse`)}>
+                    <FormattedMessage
+                      id="home.tutorial.addDataToKibanaDescription.integrations"
+                      defaultMessage="integrations"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           ),
           tabs,
           rightSideItems: headerLinks ? [headerLinks] : [],
         }}
       >
-        {notices && (
-          <>
-            {notices}
-            <EuiSpacer size="s" />
-          </>
-        )}
         {this.renderTabContent()}
       </KibanaPageTemplate>
     );

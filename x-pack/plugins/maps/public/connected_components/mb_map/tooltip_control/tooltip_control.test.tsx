@@ -14,6 +14,7 @@ jest.mock('./tooltip_popover', () => ({
 import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { Feature } from 'geojson';
 import type { Map as MbMap, MapMouseEvent, MapboxGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
@@ -35,6 +36,12 @@ const mockLayer = {
   },
   canShowTooltip: () => {
     return true;
+  },
+  getMbTooltipLayerIds: () => {
+    return ['foo', 'bar'];
+  },
+  getFeatureId: (feature: Feature) => {
+    return feature.properties?.__kbn__feature_id__;
   },
   getFeatureById: () => {
     return {
@@ -147,7 +154,7 @@ describe('TooltipControl', () => {
     test('should un-register all map callbacks on unmount', () => {
       const component = mount(<TooltipControl {...defaultProps} />);
 
-      expect(Object.keys(mockMbMapHandlers).length).toBe(3);
+      expect(Object.keys(mockMbMapHandlers).length).toBe(4);
 
       component.unmount();
       expect(Object.keys(mockMbMapHandlers).length).toBe(0);

@@ -14,12 +14,22 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsFindResult,
 } from '../../../../../core/server';
+import type { HomeServerPluginSetup } from '../../../../home/server';
 import type { SavedVisState } from '../../../../visualizations/common';
 import type { Panel } from '../../common/types';
 
 export interface TimeseriesUsage {
   timeseries_use_last_value_mode_total: number;
+  timeseries_use_es_indices_total: number;
   timeseries_table_use_aggregate_function: number;
+  timeseries_types: {
+    table: number;
+    gauge: number;
+    markdown: number;
+    top_n: number;
+    timeseries: number;
+    metric: number;
+  };
 }
 
 const doTelemetryFoVisualizations = async (
@@ -59,22 +69,70 @@ const doTelemetryForByValueVisualizations = async (
   }
 };
 
+const getDefaultTSVBVisualizations = (home?: HomeServerPluginSetup) => {
+  const titles: string[] = [];
+  const sampleDataSets = home?.sampleData.getSampleDatasets() ?? [];
+
+  sampleDataSets.forEach((sampleDataSet) =>
+    sampleDataSet.savedObjects.forEach((savedObject) => {
+      try {
+        if (savedObject.type === 'visualization') {
+          const visState = JSON.parse(savedObject.attributes?.visState);
+
+          if (visState.type === 'metrics') {
+            titles.push(visState.title);
+          }
+        }
+      } catch (e) {
+        // Let it go, visState is invalid and we'll don't need to handle it
+      }
+    })
+  );
+
+  return titles;
+};
+
 export const getStats = async (
-  soClient: SavedObjectsClientContract | ISavedObjectsRepository
+  soClient: SavedObjectsClientContract | ISavedObjectsRepository,
+  home?: HomeServerPluginSetup
 ): Promise<TimeseriesUsage | undefined> => {
   const timeseriesUsage = {
     timeseries_use_last_value_mode_total: 0,
+    timeseries_use_es_indices_total: 0,
     timeseries_table_use_aggregate_function: 0,
+    timeseries_types: {
+      gauge: 0,
+      markdown: 0,
+      metric: 0,
+      table: 0,
+      timeseries: 0,
+      top_n: 0,
+    },
   };
+
+  // we want to exclude the TSVB Sample Data visualizations from the stats
+  // in order to have more accurate results
+  const excludedFromStatsVisualizations = getDefaultTSVBVisualizations(home);
 
   function telemetryUseLastValueMode(visState: SavedVisState<Panel>) {
     if (
       visState.type === 'metrics' &&
       visState.params.type !== 'timeseries' &&
       (!visState.params.time_range_mode ||
-        visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE)
+        visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE) &&
+      !excludedFromStatsVisualizations.includes(visState.title)
     ) {
       timeseriesUsage.timeseries_use_last_value_mode_total++;
+    }
+  }
+
+  function telemetryUseESIndices(visState: SavedVisState<Panel>) {
+    if (
+      visState.type === 'metrics' &&
+      !visState.params.use_kibana_indexes &&
+      !excludedFromStatsVisualizations.includes(visState.title)
+    ) {
+      timeseriesUsage.timeseries_use_es_indices_total++;
     }
   }
 
@@ -83,7 +141,8 @@ export const getStats = async (
       visState.type === 'metrics' &&
       visState.params.type === 'table' &&
       visState.params.series &&
-      visState.params.series.length > 0
+      visState.params.series.length > 0 &&
+      !excludedFromStatsVisualizations.includes(visState.title)
     ) {
       const usesAggregateFunction = visState.params.series.some(
         (s) => s.aggregate_by && s.aggregate_function
@@ -94,17 +153,30 @@ export const getStats = async (
     }
   }
 
+  function telemetryPanelTypes(visState: SavedVisState<Panel>) {
+    if (visState.type === 'metrics' && !excludedFromStatsVisualizations.includes(visState.title)) {
+      timeseriesUsage.timeseries_types[visState.params.type]++;
+    }
+  }
   await Promise.all([
     // last value usage telemetry
     doTelemetryFoVisualizations(soClient, telemetryUseLastValueMode),
     doTelemetryForByValueVisualizations(soClient, telemetryUseLastValueMode),
+    // elasticsearch indices usage telemetry
+    doTelemetryFoVisualizations(soClient, telemetryUseESIndices),
+    doTelemetryForByValueVisualizations(soClient, telemetryUseESIndices),
     //  table aggregate function telemetry
     doTelemetryFoVisualizations(soClient, telemetryTableAggFunction),
     doTelemetryForByValueVisualizations(soClient, telemetryTableAggFunction),
+    //  panel types usage telemetry
+    doTelemetryFoVisualizations(soClient, telemetryPanelTypes),
+    doTelemetryForByValueVisualizations(soClient, telemetryPanelTypes),
   ]);
 
   return timeseriesUsage.timeseries_use_last_value_mode_total ||
-    timeseriesUsage.timeseries_table_use_aggregate_function
+    timeseriesUsage.timeseries_use_es_indices_total ||
+    timeseriesUsage.timeseries_table_use_aggregate_function ||
+    Object.values(timeseriesUsage.timeseries_types).some((visualizationCount) => visualizationCount)
     ? timeseriesUsage
     : undefined;
 };

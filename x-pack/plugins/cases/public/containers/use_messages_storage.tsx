@@ -16,7 +16,6 @@ export interface UseMessagesStorage {
   hasMessage: (plugin: string, id: string) => boolean;
 }
 
-// TODO: Removed const { storage } = useKibana().services; in favor of using the util directly
 export const useMessagesStorage = (): UseMessagesStorage => {
   const storage = useMemo(() => new Storage(localStorage), []);
 

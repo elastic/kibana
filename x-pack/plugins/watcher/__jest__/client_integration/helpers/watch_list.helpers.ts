@@ -7,31 +7,35 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, findTestSubject, TestBed, TestBedConfig, nextTick } from '@kbn/test/jest';
+import {
+  registerTestBed,
+  findTestSubject,
+  TestBed,
+  AsyncTestBedConfig,
+} from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { WatchList } from '../../../public/application/sections/watch_list/components/watch_list';
 import { ROUTES, REFRESH_INTERVALS } from '../../../common/constants';
-import { withAppContext } from './app_context.mock';
+import { WithAppDependencies } from './setup_environment';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`${ROUTES.API_ROOT}/watches`],
   },
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(withAppContext(WatchList), testBedConfig);
-
 export interface WatchListTestBed extends TestBed<WatchListTestSubjects> {
   actions: {
     selectWatchAt: (index: number) => void;
-    clickWatchAt: (index: number) => void;
     clickWatchActionAt: (index: number, action: 'delete' | 'edit') => void;
     searchWatches: (term: string) => void;
     advanceTimeToTableRefresh: () => Promise<void>;
   };
 }
 
-export const setup = async (): Promise<WatchListTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<WatchListTestBed> => {
+  const initTestBed = registerTestBed(WithAppDependencies(WatchList, httpSetup), testBedConfig);
   const testBed = await initTestBed();
 
   /**
@@ -43,18 +47,6 @@ export const setup = async (): Promise<WatchListTestBed> => {
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
     checkBox.simulate('change', { target: { checked: true } });
-  };
-
-  const clickWatchAt = async (index: number) => {
-    const { rows } = testBed.table.getMetaData('watchesTable');
-    const watchesLink = findTestSubject(rows[index].reactWrapper, 'watchesLink');
-
-    await act(async () => {
-      const { href } = watchesLink.props();
-      testBed.router.navigateTo(href!);
-      await nextTick();
-      testBed.component.update();
-    });
   };
 
   const clickWatchActionAt = async (index: number, action: 'delete' | 'edit') => {
@@ -95,7 +87,6 @@ export const setup = async (): Promise<WatchListTestBed> => {
     ...testBed,
     actions: {
       selectWatchAt,
-      clickWatchAt,
       clickWatchActionAt,
       searchWatches,
       advanceTimeToTableRefresh,

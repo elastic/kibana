@@ -9,10 +9,11 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { lastValueFrom } from '@kbn/std';
+import { lastValueFrom } from 'rxjs';
 import { run, createFlagError, Flags } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
+import { logOptimizerProgress } from './log_optimizer_progress';
 import { OptimizerConfig } from './optimizer';
 import { runOptimizer } from './run_optimizer';
 import { validateLimitsForAllBundles, updateBundleLimits } from './limits';
@@ -97,6 +98,11 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         throw createFlagError('expected --report-stats to have no value');
       }
 
+      const logProgress = flags.progress ?? false;
+      if (typeof logProgress !== 'boolean') {
+        throw createFlagError('expected --progress to have no value');
+      }
+
       const filter = typeof flags.filter === 'string' ? [flags.filter] : flags.filter;
       if (!Array.isArray(filter) || !filter.every((f) => typeof f === 'string')) {
         throw createFlagError('expected --filter to be one or more strings');
@@ -144,7 +150,11 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
       const update$ = runOptimizer(config);
 
       await lastValueFrom(
-        update$.pipe(logOptimizerState(log, config), reportOptimizerTimings(log, config))
+        update$.pipe(
+          logProgress ? logOptimizerProgress(log) : (x) => x,
+          logOptimizerState(log, config),
+          reportOptimizerTimings(log, config)
+        )
       );
 
       if (updateLimits) {
@@ -169,6 +179,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           'inspect-workers',
           'validate-limits',
           'update-limits',
+          'progress',
         ],
         string: ['workers', 'scan-dir', 'filter', 'limits'],
         default: {
@@ -176,12 +187,14 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           examples: true,
           cache: true,
           'inspect-workers': true,
+          progress: true,
           filter: [],
           focus: [],
         },
         help: `
           --watch            run the optimizer in watch mode
           --workers          max number of workers to use
+          --no-progress      disable logging of progress information
           --oss              only build oss plugins
           --profile          profile the webpack builds and write stats.json files to build outputs
           --no-core          disable generating the core bundle
@@ -194,7 +207,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           --no-inspect-workers  when inspecting the parent process, don't inspect the workers
           --limits           path to a limits.yml file to read, defaults to $KBN_OPTIMIZER_LIMITS_PATH or source file
           --validate-limits  validate the limits.yml config to ensure that there are limits defined for every bundle
-          --update-limits    run a build and rewrite the limits file to include the current bundle sizes +5kb
+          --update-limits    run a build and rewrite the limits file to include the current bundle sizes +15kb
         `,
       },
     }

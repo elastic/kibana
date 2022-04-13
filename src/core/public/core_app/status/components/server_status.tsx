@@ -7,13 +7,14 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { FormattedStatus } from '../lib';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { StatusState } from '../lib';
+import { StatusBadge } from './status_badge';
 
 interface ServerStateProps {
   name: string;
-  serverState: FormattedStatus['state'];
+  serverState: StatusState;
 }
 
 export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, serverState }) => (
@@ -26,13 +27,7 @@ export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, server
             defaultMessage="Kibana status is {kibanaStatus}"
             values={{
               kibanaStatus: (
-                <EuiBadge
-                  data-test-subj="serverStatusTitleBadge"
-                  color={serverState.uiColor}
-                  aria-label={serverState.title}
-                >
-                  {serverState.title}
-                </EuiBadge>
+                <StatusBadge status={serverState} data-test-subj="serverStatusTitleBadge" />
               ),
             }}
           />

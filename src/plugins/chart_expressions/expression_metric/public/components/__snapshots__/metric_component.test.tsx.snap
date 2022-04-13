@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MetricVisComponent should render correct structure for multi-value metrics 1`] = `
+Array [
+  <MetricVisValue
+    colorFullBackground={false}
+    key="0"
+    labelConfig={
+      Object {
+        "position": "bottom",
+        "show": true,
+        "style": Object {
+          "css": "",
+          "spec": Object {},
+          "type": "style",
+        },
+      }
+    }
+    metric={
+      Object {
+        "bgColor": undefined,
+        "color": undefined,
+        "label": "1st percentile of bytes",
+        "lightText": false,
+        "rowIndex": 0,
+        "value": 182,
+      }
+    }
+    style={
+      Object {
+        "bgColor": false,
+        "css": "",
+        "labelColor": false,
+        "spec": Object {},
+        "type": "style",
+      }
+    }
+  />,
+  <MetricVisValue
+    colorFullBackground={false}
+    key="1"
+    labelConfig={
+      Object {
+        "position": "bottom",
+        "show": true,
+        "style": Object {
+          "css": "",
+          "spec": Object {},
+          "type": "style",
+        },
+      }
+    }
+    metric={
+      Object {
+        "bgColor": undefined,
+        "color": undefined,
+        "label": "99th percentile of bytes",
+        "lightText": false,
+        "rowIndex": 0,
+        "value": 445842.4634666484,
+      }
+    }
+    style={
+      Object {
+        "bgColor": false,
+        "css": "",
+        "labelColor": false,
+        "spec": Object {},
+        "type": "style",
+      }
+    }
+  />,
+]
+`;
+
+exports[`MetricVisComponent should render correct structure for single metric 1`] = `
+<MetricVisValue
+  colorFullBackground={false}
+  key="0"
+  labelConfig={
+    Object {
+      "position": "bottom",
+      "show": true,
+      "style": Object {
+        "css": "",
+        "spec": Object {},
+        "type": "style",
+      },
+    }
+  }
+  metric={
+    Object {
+      "bgColor": undefined,
+      "color": undefined,
+      "label": "Count",
+      "lightText": false,
+      "rowIndex": 0,
+      "value": 4301021,
+    }
+  }
+  style={
+    Object {
+      "bgColor": false,
+      "css": "",
+      "labelColor": false,
+      "spec": Object {},
+      "type": "style",
+    }
+  }
+/>
+`;

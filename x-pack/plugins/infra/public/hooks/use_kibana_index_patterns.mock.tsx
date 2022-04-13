@@ -6,27 +6,20 @@
  */
 
 import React, { useMemo } from 'react';
-import { from, of } from 'rxjs';
+import { firstValueFrom, from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { CoreStart } from '../../../../../src/core/public';
 import { FieldSpec } from '../../../../../src/plugins/data/common';
-import {
-  IIndexPattern,
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternsContract,
-} from '../../../../../src/plugins/data/public';
+import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/public';
+import { DataViewField } from '../../../../../src/plugins/data_views/common';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { Pick2 } from '../../common/utility_types';
 
 type MockIndexPattern = Pick<
-  IndexPattern,
+  DataView,
   'id' | 'title' | 'type' | 'getTimeField' | 'isTimeBased' | 'getFieldByName' | 'getComputedFields'
 >;
-export type MockIndexPatternSpec = Pick<
-  IIndexPattern,
-  'id' | 'title' | 'type' | 'timeFieldName'
-> & {
+export type MockIndexPatternSpec = Pick<DataView, 'id' | 'title' | 'type' | 'timeFieldName'> & {
   fields: FieldSpec[];
 };
 
@@ -59,21 +52,21 @@ export const createIndexPatternsMock = (
   asyncDelay: number,
   indexPatterns: MockIndexPattern[]
 ): {
-  getIdsWithTitle: IndexPatternsContract['getIdsWithTitle'];
-  get: (...args: Parameters<IndexPatternsContract['get']>) => Promise<MockIndexPattern>;
+  getIdsWithTitle: DataViewsContract['getIdsWithTitle'];
+  get: (...args: Parameters<DataViewsContract['get']>) => Promise<MockIndexPattern>;
 } => {
   return {
     async getIdsWithTitle(_refresh?: boolean) {
       const indexPatterns$ = of(
         indexPatterns.map(({ id = 'unknown_id', title }) => ({ id, title }))
       );
-      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
+      return await firstValueFrom(indexPatterns$.pipe(delay(asyncDelay)));
     },
     async get(indexPatternId: string) {
       const indexPatterns$ = from(
         indexPatterns.filter((indexPattern) => indexPattern.id === indexPatternId)
       );
-      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
+      return await firstValueFrom(indexPatterns$.pipe(delay(asyncDelay)));
     },
   };
 };
@@ -85,7 +78,7 @@ export const createIndexPatternMock = ({
   fields,
   timeFieldName,
 }: MockIndexPatternSpec): MockIndexPattern => {
-  const indexPatternFields = fields.map((fieldSpec) => new IndexPatternField(fieldSpec));
+  const indexPatternFields = fields.map((fieldSpec) => new DataViewField(fieldSpec));
 
   return {
     id,

@@ -11,15 +11,16 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../lib/lib';
 import { DynamicSettings, DynamicSettingsType } from '../../common/runtime_types';
 import { UMRestApiRouteFactory } from '.';
-import { savedObjectsAdapter } from '../lib/saved_objects';
+import { savedObjectsAdapter } from '../lib/saved_objects/saved_objects';
 import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
+import { API_URLS } from '../../common/constants';
 
-export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/dynamic_settings',
+  path: API_URLS.DYNAMIC_SETTINGS,
   validate: false,
   handler: async ({ savedObjectsClient }): Promise<any> => {
     return savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
@@ -45,15 +46,22 @@ export const validateCertsValues = (
   }
 };
 
-export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (_libs: UMServerLibs) => ({
   method: 'POST',
-  path: '/api/uptime/dynamic_settings',
+  path: API_URLS.DYNAMIC_SETTINGS,
   validate: {
     body: schema.object({
       heartbeatIndices: schema.string(),
       certAgeThreshold: schema.number(),
       certExpirationThreshold: schema.number(),
       defaultConnectors: schema.arrayOf(schema.string()),
+      defaultEmail: schema.maybe(
+        schema.object({
+          to: schema.arrayOf(schema.string()),
+          cc: schema.maybe(schema.arrayOf(schema.string())),
+          bcc: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
     }),
   },
   writeAccess: true,

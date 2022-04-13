@@ -15,7 +15,7 @@ import {
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { Logger } from '../../../../../../../../src/core/server';
 import { BuildRuleMessage } from '../rule_messages';
@@ -26,7 +26,7 @@ interface FindThresholdSignalsParams {
   from: string;
   to: string;
   inputIndexPattern: string[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   filter: unknown;
   threshold: ThresholdNormalized;
@@ -53,6 +53,11 @@ export const findThresholdSignals = async ({
   const leafAggs = {
     max_timestamp: {
       max: {
+        field: timestampOverride != null ? timestampOverride : TIMESTAMP,
+      },
+    },
+    min_timestamp: {
+      min: {
         field: timestampOverride != null ? timestampOverride : TIMESTAMP,
       },
     },

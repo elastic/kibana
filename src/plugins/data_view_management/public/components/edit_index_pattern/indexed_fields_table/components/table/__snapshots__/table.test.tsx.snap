@@ -1,0 +1,343 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table render conflict summary modal  1`] = `
+<React.Fragment>
+  <EuiModalHeader>
+    <EuiModalHeaderTitle>
+      <h1>
+        <FormattedMessage
+          defaultMessage="This field has a type conflict"
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
+          values={Object {}}
+        />
+      </h1>
+    </EuiModalHeaderTitle>
+  </EuiModalHeader>
+  <EuiModalBody>
+    <EuiText>
+      <p>
+        <FormattedMessage
+          defaultMessage="The type of the {fieldName} field changes across indices and might not be available for search, visualizations, and other analysis."
+          id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
+          values={
+            Object {
+              "fieldName": <EuiCode>
+                message
+              </EuiCode>,
+            }
+          }
+        />
+      </p>
+      <EuiBasicTable
+        columns={
+          Array [
+            Object {
+              "field": "type",
+              "name": "Type",
+            },
+            Object {
+              "field": "indices",
+              "name": "Indices",
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "indices": "index_a",
+              "type": "keyword",
+            },
+            Object {
+              "indices": "index_b",
+              "type": "long",
+            },
+          ]
+        }
+        noItemsMessage={
+          <EuiI18n
+            default="No items found"
+            token="euiBasicTable.noItemsMessage"
+          />
+        }
+        responsive={true}
+        rowHeader="firstName"
+        tableCaption="Demo of EuiBasicTable"
+        tableLayout="auto"
+      />
+    </EuiText>
+  </EuiModalBody>
+  <EuiModalFooter>
+    <EuiButton
+      fill={true}
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Close"
+        id="indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiModalFooter>
+</React.Fragment>
+`;
+
+exports[`Table render name 1`] = `
+<span>
+  customer
+</span>
+`;
+
+exports[`Table render name 2`] = `
+<span>
+  customer
+  <span>
+     
+    <EuiIconTip
+      content={
+        <span>
+          This field exists on the data view only.
+        </span>
+      }
+      title="Runtime field"
+      type="indexRuntime"
+    />
+  </span>
+</span>
+`;
+
+exports[`Table should render conflicting type 1`] = `
+<span>
+  text, long
+  <span>
+    <EuiBadge
+      color="warning"
+      iconOnClick={[Function]}
+      iconOnClickAriaLabel="Conflict Detail"
+      iconType="alert"
+      onClick={[Function]}
+      onClickAriaLabel="Conflict Detail"
+    >
+      Conflict
+    </EuiBadge>
+  </span>
+</span>
+`;
+
+exports[`Table should render mixed, non-conflicting type 1`] = `
+<span>
+  keyword, constant_keyword
+</span>
+`;
+
+exports[`Table should render normal field name 1`] = `
+<span>
+  Elastic
+</span>
+`;
+
+exports[`Table should render normal type 1`] = `
+<span>
+  string
+</span>
+`;
+
+exports[`Table should render normally 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "data-test-subj": "indexedFieldName",
+        "dataType": "string",
+        "field": "displayName",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+        "width": "38%",
+      },
+      Object {
+        "data-test-subj": "indexedFieldType",
+        "dataType": "string",
+        "field": "type",
+        "name": "Type",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "field": "format",
+        "name": "Format",
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "These fields can be used in the filter bar",
+        "field": "searchable",
+        "name": "Searchable",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "These fields can be used in visualization aggregations",
+        "field": "aggregatable",
+        "name": "Aggregatable",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "Fields that are excluded from _source when it is fetched",
+        "field": "excluded",
+        "name": "Excluded",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "actions": Array [
+          Object {
+            "available": [Function],
+            "data-test-subj": "editFieldFormat",
+            "description": "Edit",
+            "icon": "pencil",
+            "name": "Edit",
+            "onClick": [Function],
+            "type": "icon",
+          },
+        ],
+        "name": "",
+        "width": "40px",
+      },
+      Object {
+        "actions": Array [
+          Object {
+            "available": [Function],
+            "data-test-subj": "deleteField",
+            "description": "Delete",
+            "icon": "trash",
+            "name": "Delete",
+            "onClick": [Function],
+            "type": "icon",
+          },
+        ],
+        "name": "",
+        "width": "40px",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "displayName": "Elastic",
+        "excluded": false,
+        "hasRuntime": false,
+        "info": Array [],
+        "isMapped": true,
+        "isUserEditable": true,
+        "kbnType": "string",
+        "name": "Elastic",
+        "searchable": true,
+        "type": "name",
+      },
+      Object {
+        "displayName": "timestamp",
+        "excluded": false,
+        "hasRuntime": false,
+        "info": Array [],
+        "isMapped": true,
+        "isUserEditable": true,
+        "kbnType": "date",
+        "name": "timestamp",
+        "type": "date",
+      },
+      Object {
+        "conflictDescriptions": Object {
+          "keyword": Array [
+            "index_a",
+          ],
+          "long": Array [
+            "index_b",
+          ],
+        },
+        "displayName": "conflictingField",
+        "excluded": false,
+        "hasRuntime": false,
+        "info": Array [],
+        "isMapped": true,
+        "isUserEditable": true,
+        "kbnType": "conflict",
+        "name": "conflictingField",
+        "type": "text, long",
+      },
+      Object {
+        "displayName": "customer",
+        "excluded": false,
+        "hasRuntime": true,
+        "info": Array [],
+        "isMapped": false,
+        "isUserEditable": true,
+        "kbnType": "text",
+        "name": "customer",
+        "type": "keyword",
+      },
+      Object {
+        "displayName": "noedit",
+        "excluded": false,
+        "hasRuntime": true,
+        "info": Array [],
+        "isMapped": false,
+        "isUserEditable": false,
+        "kbnType": "text",
+        "name": "noedit",
+        "type": "keyword",
+      },
+    ]
+  }
+  pagination={
+    Object {
+      "initialPageSize": 10,
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
+      ],
+    }
+  }
+  responsive={true}
+  sorting={
+    Object {
+      "sort": Object {
+        "direction": "asc",
+        "field": "displayName",
+      },
+    }
+  }
+  tableLayout="fixed"
+/>
+`;
+
+exports[`Table should render the boolean template (false) 1`] = `<span />`;
+
+exports[`Table should render the boolean template (true) 1`] = `
+<span
+  color="success"
+  data-euiicon-type="dot"
+>
+  Is searchable
+</span>
+`;
+
+exports[`Table should render timestamp field name 1`] = `
+<span>
+  timestamp
+  <span>
+     
+    <EuiIconTip
+      aria-label="Primary time field"
+      color="primary"
+      content="This field represents the time that events occurred."
+      type="clock"
+    />
+  </span>
+</span>
+`;

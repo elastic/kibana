@@ -29,28 +29,25 @@ export default function ({ getService }: FtrProviderContext) {
   describe('bsearch', () => {
     describe('post', () => {
       it('should return 200 a single response', async () => {
-        const resp = await supertest
-          .post(`/internal/bsearch`)
-          .set({ 'X-Chunk-Encoding': '' })
-          .send({
-            batch: [
-              {
-                request: {
-                  params: {
-                    index: '.kibana',
-                    body: {
-                      query: {
-                        match_all: {},
-                      },
+        const resp = await supertest.post(`/internal/bsearch`).send({
+          batch: [
+            {
+              request: {
+                params: {
+                  index: '.kibana',
+                  body: {
+                    query: {
+                      match_all: {},
                     },
                   },
                 },
-                options: {
-                  strategy: 'es',
-                },
               },
-            ],
-          });
+              options: {
+                strategy: 'es',
+              },
+            },
+          ],
+        });
 
         const jsonBody = parseBfetchResponse(resp);
 
@@ -62,28 +59,25 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 200 a single response from compressed', async () => {
-        const resp = await supertest
-          .post(`/internal/bsearch`)
-          .set({ 'X-Chunk-Encoding': 'deflate' })
-          .send({
-            batch: [
-              {
-                request: {
-                  params: {
-                    index: '.kibana',
-                    body: {
-                      query: {
-                        match_all: {},
-                      },
+        const resp = await supertest.post(`/internal/bsearch?compress=true`).send({
+          batch: [
+            {
+              request: {
+                params: {
+                  index: '.kibana',
+                  body: {
+                    query: {
+                      match_all: {},
                     },
                   },
                 },
-                options: {
-                  strategy: 'es',
-                },
               },
-            ],
-          });
+              options: {
+                strategy: 'es',
+              },
+            },
+          ],
+        });
 
         const jsonBody = parseBfetchResponse(resp, true);
 

@@ -1,0 +1,2 @@
+source_field,copy_action,format_action,timestamp_format,destination_field,Notes
+srcip,,,,source.address,Copying srcip to source.address

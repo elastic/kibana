@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { takeUntil, first } from 'rxjs/operators';
+import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
 import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
-import {
-  AggregationsFiltersAggregate,
-  AggregationsFiltersBucketItem,
+import type {
+  AggregationsMultiBucketAggregateBase,
+  AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
@@ -33,7 +33,6 @@ import type {
 } from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
-import { KibanaConfigType } from '../kibana_config';
 import { coreUsageStatsType } from './core_usage_stats';
 import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
 import { CORE_USAGE_STATS_TYPE } from './constants';
@@ -56,6 +55,8 @@ export interface StartDeps {
   exposedConfigsToUsage: ExposedConfigsToUsage;
 }
 
+const kibanaIndex = '.kibana';
+
 /**
  * Because users can configure their Saved Object to any arbitrary index name,
  * we need to map customized index names back to a "standard" index name.
@@ -74,18 +75,12 @@ const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
 };
 
-/**
- * This is incredibly hacky... The config service doesn't allow you to determine
- * whether or not a config value has been changed from the default value, and the
- * default value is defined in legacy code.
- *
- * This will be going away in 8.0, so please look away for a few months
- *
- * @param index The `kibana.index` setting from the `kibana.yml`
- */
-const isCustomIndex = (index: string) => {
-  return index !== '.kibana';
-};
+interface UsageDataAggs extends AggregationsMultiBucketAggregateBase {
+  buckets: {
+    disabled: AggregationsSingleBucketAggregateBase;
+    active: AggregationsSingleBucketAggregateBase;
+  };
+}
 
 export class CoreUsageDataService
   implements CoreService<InternalCoreUsageDataSetup, CoreUsageDataStart>
@@ -98,7 +93,6 @@ export class CoreUsageDataService
   private soConfig?: SavedObjectsConfigType;
   private stop$: Subject<void>;
   private opsMetrics?: OpsMetrics;
-  private kibanaConfig?: KibanaConfigType;
   private coreUsageStatsClient?: CoreUsageStatsClient;
   private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
   private incrementUsageCounter: CoreIncrementUsageCounter = () => {}; // Initially set to noop
@@ -106,7 +100,7 @@ export class CoreUsageDataService
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
     this.configService = core.configService;
-    this.stop$ = new Subject();
+    this.stop$ = new Subject<void>();
   }
 
   private async getSavedObjectUsageData(
@@ -133,24 +127,25 @@ export class CoreUsageDataService
           .getTypeRegistry()
           .getAllTypes()
           .reduce((acc, type) => {
-            const index = type.indexPattern ?? this.kibanaConfig!.index;
-            return index != null ? acc.add(index) : acc;
+            const index = type.indexPattern ?? kibanaIndex;
+            return acc.add(index);
           }, new Set<string>())
           .values()
-      ).map((index) => {
+      ).map(async (index) => {
         // The _cat/indices API returns the _index_ and doesn't return a way
         // to map back from the index to the alias. So we have to make an API
-        // call for every alias
-        return elasticsearch.client.asInternalUser.cat
-          .indices<any[]>({
+        // call for every alias. The document count is the lucene document count.
+        const catIndicesResults = await elasticsearch.client.asInternalUser.cat
+          .indices({
             index,
             format: 'JSON',
             bytes: 'b',
           })
-          .then(({ body }) => {
+          .then((body) => {
             const stats = body[0];
+
             return {
-              alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
+              alias: kibanaOrTaskManagerIndex(index, kibanaIndex),
               docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
               docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
               storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
@@ -159,6 +154,27 @@ export class CoreUsageDataService
                 : 0,
             };
           });
+        // We use the GET <index>/_count API to get the number of saved objects
+        // to monitor if the cluster will hit the scalling limit of saved object migrations
+        const savedObjectsCounts = await elasticsearch.client.asInternalUser
+          .count({
+            index,
+          })
+          .then((body) => {
+            return {
+              savedObjectsDocsCount: body.count ? body.count : 0,
+            };
+          });
+        this.logger.debug(
+          `Lucene documents count ${catIndicesResults.docsCount} from index ${catIndicesResults.alias}`
+        );
+        this.logger.debug(
+          `Saved objects documents count ${savedObjectsCounts.savedObjectsDocsCount} from index ${catIndicesResults.alias}`
+        );
+        return {
+          ...catIndicesResults,
+          ...savedObjectsCounts,
+        };
       })
     );
   }
@@ -166,8 +182,11 @@ export class CoreUsageDataService
   private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
     // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
     // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
-    const { body: resp } = await elasticsearch.client.asInternalUser.search({
-      index: this.kibanaConfig!.index,
+    const resp = await elasticsearch.client.asInternalUser.search<
+      unknown,
+      { aliases: UsageDataAggs }
+    >({
+      index: kibanaIndex,
       body: {
         track_total_hits: true,
         query: { match: { type: LEGACY_URL_ALIAS_TYPE } },
@@ -192,10 +211,10 @@ export class CoreUsageDataService
 
     const { hits, aggregations } = resp;
     const totalCount = (hits.total as SearchTotalHits).value;
-    const aggregate = aggregations!.aliases as AggregationsFiltersAggregate;
-    const buckets = aggregate.buckets as Record<string, AggregationsFiltersBucketItem>;
-    const disabledCount = buckets.disabled.doc_count as number;
-    const activeCount = buckets.active.doc_count as number;
+    const aggregate = aggregations!.aliases;
+    const buckets = aggregate.buckets;
+    const disabledCount = buckets.disabled.doc_count;
+    const activeCount = buckets.active.doc_count;
     const inactiveCount = totalCount - disabledCount - activeCount;
 
     return { totalCount, disabledCount, activeCount, inactiveCount };
@@ -313,7 +332,7 @@ export class CoreUsageDataService
         },
 
         savedObjects: {
-          customIndex: isCustomIndex(this.kibanaConfig!.index),
+          customIndex: false,
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
           maxImportExportSize: this.soConfig.maxImportExportSize,
         },
@@ -364,7 +383,7 @@ export class CoreUsageDataService
   private async getNonDefaultKibanaConfigs(
     exposedConfigsToUsage: ExposedConfigsToUsage
   ): Promise<ConfigUsageData> {
-    const config = await this.configService.getConfig$().pipe(first()).toPromise();
+    const config = await firstValueFrom(this.configService.getConfig$());
     const nonDefaultConfigs = config.toRaw();
     const usedPaths = await this.configService.getUsedPaths();
     const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];
@@ -472,13 +491,6 @@ export class CoreUsageDataService
         this.soConfig = config;
       });
 
-    this.configService
-      .atPath<KibanaConfigType>('kibana')
-      .pipe(takeUntil(this.stop$))
-      .subscribe((config) => {
-        this.kibanaConfig = config;
-      });
-
     changedDeprecatedConfigPath$
       .pipe(takeUntil(this.stop$))
       .subscribe((deprecatedConfigPaths) => (this.deprecatedConfigPaths = deprecatedConfigPaths));
@@ -540,7 +552,6 @@ function getEsPrincipalUsage({ username, serviceAccountToken }: ElasticsearchCon
   let value: CoreConfigUsageData['elasticsearch']['principal'] = 'unknown';
   if (isConfigured.string(username)) {
     switch (username) {
-      case 'elastic': // deprecated
       case 'kibana': // deprecated
       case 'kibana_system':
         value = `${username}_user` as const;

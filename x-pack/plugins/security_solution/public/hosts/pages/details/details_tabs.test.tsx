@@ -10,8 +10,7 @@ import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../../common/mock/match_media';
-import { mockIndexPattern } from '../../../common/mock/index_pattern';
-import { TestProviders } from '../../../common/mock/test_providers';
+import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
 import { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
@@ -19,13 +18,28 @@ import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 import { HostsTableType } from '../../store/model';
+import { mockCasesContract } from '../../../../../cases/public/mocks';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        cases: mockCasesContract(),
+        timelines: { getTGrid: jest.fn().mockReturnValue(() => <></>) },
+      },
+    }),
+  };
+});
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
 jest.mock('../../../common/containers/source', () => ({
-  useWithSource: jest.fn().mockReturnValue({ indicesExist: true, indexPattern: mockIndexPattern }),
+  useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));
 
 jest.mock('../../../common/containers/use_global_time', () => ({
@@ -49,6 +63,9 @@ jest.mock('../../../common/components/query_bar', () => ({
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
+jest.mock('../../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
 
 describe('body', () => {
   const scenariosMap = {

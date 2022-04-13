@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -70,11 +70,11 @@ function title(statuses: Statuses) {
           defaultMessage="Error uploading data"
         />
       );
-    case statuses.indexPatternCreatedStatus:
+    case statuses.dataViewCreatedStatus:
       return (
         <FormattedMessage
-          id="xpack.dataVisualizer.file.importErrors.creatingIndexPatternErrorMessage"
-          defaultMessage="Error creating index pattern"
+          id="xpack.dataVisualizer.file.importErrors.creatingDataViewErrorMessage"
+          defaultMessage="Error creating data view"
         />
       );
     case statuses.permissionCheckStatus:

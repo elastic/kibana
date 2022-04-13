@@ -6,10 +6,13 @@
  */
 
 import { cloneDeep } from 'lodash';
+import uuid from 'uuid';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { TrustedApp } from '../../../../common/endpoint/types';
 
-export const getCommonItemDataOverrides = () => {
+const getCommonItemDataOverrides = () => {
   return {
     name: 'some internal app',
     description: 'this app is trusted by the company',
@@ -17,18 +20,26 @@ export const getCommonItemDataOverrides = () => {
   };
 };
 
-export const getTrustedAppProvider = () =>
+export const getTrustedAppProviderMock = (): TrustedApp =>
   new TrustedAppGenerator('seed').generate(getCommonItemDataOverrides());
 
-export const getExceptionProvider = () => {
+export const getExceptionProviderMock = (): ExceptionListItemSchema => {
+  // Grab the properties from the generated Trusted App that should be the same across both types
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { name, description, created_at, updated_at, updated_by, created_by, id } =
+    getTrustedAppProviderMock();
+
   // cloneDeep needed because exception mock generator uses state across instances
   return cloneDeep(
     getExceptionListItemSchemaMock({
-      ...getCommonItemDataOverrides(),
+      name,
+      description,
+      created_at,
+      updated_at,
+      updated_by,
+      created_by,
+      id,
       os_types: ['windows'],
-      updated_at: new Date().toISOString(),
-      created_by: 'Justa',
-      updated_by: 'Mara',
       entries: [
         {
           field: 'process.hash.*',
@@ -40,10 +51,18 @@ export const getExceptionProvider = () => {
           field: 'process.executable.caseless',
           operator: 'included',
           type: 'match',
-          value: '/one/two/three',
+          value: 'c:\\fol\\bin.exe',
         },
       ],
       tags: ['policy:all'],
+      comments: [
+        {
+          id: uuid.v4(),
+          comment: 'test',
+          created_at: new Date().toISOString(),
+          created_by: 'Justa',
+        },
+      ],
     })
   );
 };

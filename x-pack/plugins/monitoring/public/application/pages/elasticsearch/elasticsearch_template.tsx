@@ -12,7 +12,7 @@ import { TabMenuItem, PageTemplateProps } from '../page_template';
 import { ML_SUPPORTED_LICENSES } from '../../../../common/constants';
 
 interface ElasticsearchTemplateProps extends PageTemplateProps {
-  cluster: any;
+  cluster?: any;
 }
 
 export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
@@ -43,7 +43,7 @@ export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
     },
   ];
 
-  if (mlIsSupported(cluster.license)) {
+  if (cluster && mlIsSupported(cluster.license)) {
     tabs.push({
       id: 'ml',
       label: i18n.translate('xpack.monitoring.esNavigation.jobsLinkText', {
@@ -53,7 +53,7 @@ export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
     });
   }
 
-  if (cluster.isCcrEnabled) {
+  if (cluster?.isCcrEnabled) {
     tabs.push({
       id: 'ccr',
       label: i18n.translate('xpack.monitoring.esNavigation.ccrLinkText', {

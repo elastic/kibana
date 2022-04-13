@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
+import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
 import { AlertTypeWithExecutor } from '../../../../rule_registry/server';
-import { AlertInstanceContext, AlertTypeState } from '../../../../alerting/common';
+import { AlertInstanceContext, RuleTypeState } from '../../../../alerting/common';
 import { LifecycleAlertService } from '../../../../rule_registry/server';
 
 /**
@@ -21,16 +21,13 @@ export type DefaultUptimeAlertInstance<TActionGroupIds extends string> = AlertTy
   Record<string, any>,
   AlertInstanceContext,
   {
-    alertWithLifecycle: LifecycleAlertService<
-      AlertTypeState,
-      AlertInstanceContext,
-      TActionGroupIds
-    >;
+    alertWithLifecycle: LifecycleAlertService<RuleTypeState, AlertInstanceContext, TActionGroupIds>;
+    getAlertStartedDate: (alertId: string) => string | null;
   }
 >;
 
 export type UptimeAlertTypeFactory<TActionGroupIds extends string> = (
-  server: UptimeCoreSetup,
+  server: UptimeServerSetup,
   libs: UMServerLibs,
-  plugins: UptimeCorePlugins
+  plugins: UptimeCorePluginsSetup
 ) => DefaultUptimeAlertInstance<TActionGroupIds>;

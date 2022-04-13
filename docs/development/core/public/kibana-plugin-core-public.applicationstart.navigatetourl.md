@@ -10,23 +10,24 @@ The method resolves pathnames the same way browsers do when resolving a `<a href
 
 If all these criteria are true for the given URL: - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location - The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space) - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
 
-Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path. Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
+Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path. Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-navigateToUrl(url: string): Promise<void>;
+navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  url | <code>string</code> | an absolute URL, an absolute path or a relative path, to navigate to. |
+|  url | string | an absolute URL, an absolute path or a relative path, to navigate to. |
+|  options | NavigateToUrlOptions | navigation options |
 
 <b>Returns:</b>
 
-`Promise<void>`
+Promise&lt;void&gt;
 
 ## Example
 
@@ -45,6 +46,5 @@ application.navigateToUrl('/app/discover/some-path') // does not include the cur
 application.navigateToUrl('/base-path/s/my-space/app/unknown-app/some-path') // unknown application
 application.navigateToUrl('../discover') // resolve to `/base-path/s/my-space/discover` which is not a path of a known app.
 application.navigateToUrl('../../other-space/discover') // resolve to `/base-path/s/other-space/discover` which is not within the current basePath.
-
 ```
 

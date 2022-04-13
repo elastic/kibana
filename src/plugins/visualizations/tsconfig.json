@@ -9,11 +9,13 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "../../../typings/**/*"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },
@@ -22,6 +24,14 @@
     { "path": "../saved_objects_tagging_oss/tsconfig.json" },
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
+    { "path": "../url_forwarding/tsconfig.json" },
+    { "path": "../navigation/tsconfig.json" },
+    { "path": "../home/tsconfig.json" },
+    { "path": "../share/tsconfig.json" },
+    { "path": "../presentation_util/tsconfig.json" },
+    { "path": "../screenshot_mode/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" }
   ]
 }

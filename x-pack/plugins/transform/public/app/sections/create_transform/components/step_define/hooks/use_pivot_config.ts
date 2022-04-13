@@ -100,13 +100,13 @@ function getRootAggregation(item: PivotAggsConfig) {
 
 export const usePivotConfig = (
   defaults: StepDefineExposedState,
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern']
+  dataView: StepDefineFormProps['searchItems']['dataView']
 ) => {
   const toastNotifications = useToastNotifications();
 
   const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData, fields } = useMemo(
-    () => getPivotDropdownOptions(indexPattern, defaults.runtimeMappings),
-    [defaults.runtimeMappings, indexPattern]
+    () => getPivotDropdownOptions(dataView, defaults.runtimeMappings),
+    [defaults.runtimeMappings, dataView]
   );
 
   // The list of selected aggregations

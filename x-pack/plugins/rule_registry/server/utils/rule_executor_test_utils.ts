@@ -7,19 +7,22 @@
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  httpServerMock,
+  uiSettingsServiceMock,
 } from '../../../../../src/core/server/mocks';
 import {
-  AlertExecutorOptions,
+  RuleExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../../alerting/server';
 import { alertsMock } from '../../../alerting/server/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 
 export const createDefaultAlertExecutorOptions = <
-  Params extends AlertTypeParams = never,
-  State extends AlertTypeState = never,
+  Params extends RuleTypeParams = never,
+  State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = {},
   InstanceContext extends AlertInstanceContext = {},
   ActionGroupIds extends string = ''
@@ -31,6 +34,7 @@ export const createDefaultAlertExecutorOptions = <
   createdAt = new Date(),
   startedAt = new Date(),
   updatedAt = new Date(),
+  shouldWriteAlerts = true,
 }: {
   alertId?: string;
   ruleName?: string;
@@ -39,7 +43,8 @@ export const createDefaultAlertExecutorOptions = <
   createdAt?: Date;
   startedAt?: Date;
   updatedAt?: Date;
-}): AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
+  shouldWriteAlerts?: boolean;
+}): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   alertId,
   createdBy: 'CREATED_BY',
   startedAt,
@@ -65,13 +70,22 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
-    alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
-      .alertInstanceFactory,
+    alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
+      .alertFactory,
     savedObjectsClient: savedObjectsClientMock.create(),
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    shouldWriteAlerts: () => shouldWriteAlerts,
+    shouldStopExecution: () => false,
+    searchSourceClient: Promise.resolve(
+      dataPluginMock
+        .createStartContract()
+        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
+    ),
   },
   state,
   updatedBy: null,
   previousStartedAt: null,
   namespace: undefined,
+  executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
 });

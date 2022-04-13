@@ -1,0 +1,858 @@
+{
+  "id": "@kbn/doc-links",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/doc-links",
+        "id": "def-server.getDocLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "getDocLinks",
+        "description": [],
+        "signature": [
+          "({ kibanaBranch }: ",
+          "GetDocLinkOptions",
+          ") => ",
+          {
+            "pluginId": "@kbn/doc-links",
+            "scope": "server",
+            "docId": "kibKbnDocLinksPluginApi",
+            "section": "def-server.DocLinks",
+            "text": "DocLinks"
+          }
+        ],
+        "path": "packages/kbn-doc-links/src/get_doc_links.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.getDocLinks.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ kibanaBranch }",
+            "description": [],
+            "signature": [
+              "GetDocLinkOptions"
+            ],
+            "path": "packages/kbn-doc-links/src/get_doc_links.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/doc-links",
+        "id": "def-server.getDocLinksMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "getDocLinksMeta",
+        "description": [],
+        "signature": [
+          "({ kibanaBranch }: ",
+          "GetDocLinksMetaOptions",
+          ") => ",
+          {
+            "pluginId": "@kbn/doc-links",
+            "scope": "server",
+            "docId": "kibKbnDocLinksPluginApi",
+            "section": "def-server.DocLinksMeta",
+            "text": "DocLinksMeta"
+          }
+        ],
+        "path": "packages/kbn-doc-links/src/get_doc_meta.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.getDocLinksMeta.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ kibanaBranch }",
+            "description": [],
+            "signature": [
+              "GetDocLinksMetaOptions"
+            ],
+            "path": "packages/kbn-doc-links/src/get_doc_meta.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/doc-links",
+        "id": "def-server.DocLinks",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocLinks",
+        "description": [],
+        "path": "packages/kbn-doc-links/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.settings",
+            "type": "string",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.elasticStackGetStarted",
+            "type": "string",
+            "tags": [],
+            "label": "elasticStackGetStarted",
+            "description": [],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.upgrade",
+            "type": "Object",
+            "tags": [],
+            "label": "upgrade",
+            "description": [],
+            "signature": [
+              "{ readonly upgradingStackOnPrem: string; readonly upgradingStackOnCloud: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.apm",
+            "type": "Object",
+            "tags": [],
+            "label": "apm",
+            "description": [],
+            "signature": [
+              "{ readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; readonly overview: string; readonly tailSamplingPolicies: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.canvas",
+            "type": "Object",
+            "tags": [],
+            "label": "canvas",
+            "description": [],
+            "signature": [
+              "{ readonly guide: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              "{ readonly indexManagement: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.console",
+            "type": "Object",
+            "tags": [],
+            "label": "console",
+            "description": [],
+            "signature": [
+              "{ readonly guide: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              "{ readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.discover",
+            "type": "Object",
+            "tags": [],
+            "label": "discover",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.filebeat",
+            "type": "Object",
+            "tags": [],
+            "label": "filebeat",
+            "description": [],
+            "signature": [
+              "{ readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; readonly suricataModule: string; readonly zeekModule: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.auditbeat",
+            "type": "Object",
+            "tags": [],
+            "label": "auditbeat",
+            "description": [],
+            "signature": [
+              "{ readonly base: string; readonly auditdModule: string; readonly systemModule: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.metricbeat",
+            "type": "Object",
+            "tags": [],
+            "label": "metricbeat",
+            "description": [],
+            "signature": [
+              "{ readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.appSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "appSearch",
+            "description": [],
+            "signature": [
+              "{ readonly apiRef: string; readonly apiClients: string; readonly apiKeys: string; readonly authentication: string; readonly crawlRules: string; readonly curations: string; readonly duplicateDocuments: string; readonly entryPoints: string; readonly guide: string; readonly indexingDocuments: string; readonly indexingDocumentsSchema: string; readonly logSettings: string; readonly metaEngines: string; readonly precisionTuning: string; readonly relevanceTuning: string; readonly resultSettings: string; readonly searchUI: string; readonly security: string; readonly synonyms: string; readonly webCrawler: string; readonly webCrawlerEventLogs: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.enterpriseSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "enterpriseSearch",
+            "description": [],
+            "signature": [
+              "{ readonly configuration: string; readonly licenseManagement: string; readonly mailService: string; readonly troubleshootSetup: string; readonly usersAccess: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.workplaceSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "workplaceSearch",
+            "description": [],
+            "signature": [
+              "{ readonly apiKeys: string; readonly box: string; readonly confluenceCloud: string; readonly confluenceServer: string; readonly customSources: string; readonly customSourcePermissions: string; readonly documentPermissions: string; readonly dropbox: string; readonly externalSharePointOnline: string; readonly externalIdentities: string; readonly gitHub: string; readonly gettingStarted: string; readonly gmail: string; readonly googleDrive: string; readonly indexingSchedule: string; readonly jiraCloud: string; readonly jiraServer: string; readonly oneDrive: string; readonly permissions: string; readonly salesforce: string; readonly security: string; readonly serviceNow: string; readonly sharePoint: string; readonly sharePointServer: string; readonly slack: string; readonly synch: string; readonly zendesk: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.heartbeat",
+            "type": "Object",
+            "tags": [],
+            "label": "heartbeat",
+            "description": [],
+            "signature": [
+              "{ readonly base: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.libbeat",
+            "type": "Object",
+            "tags": [],
+            "label": "libbeat",
+            "description": [],
+            "signature": [
+              "{ readonly getStarted: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.logstash",
+            "type": "Object",
+            "tags": [],
+            "label": "logstash",
+            "description": [],
+            "signature": [
+              "{ readonly base: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.functionbeat",
+            "type": "Object",
+            "tags": [],
+            "label": "functionbeat",
+            "description": [],
+            "signature": [
+              "{ readonly base: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.winlogbeat",
+            "type": "Object",
+            "tags": [],
+            "label": "winlogbeat",
+            "description": [],
+            "signature": [
+              "{ readonly base: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.aggs",
+            "type": "Object",
+            "tags": [],
+            "label": "aggs",
+            "description": [],
+            "signature": [
+              "{ readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly terms_doc_count_error: string; readonly rare_terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.runtimeFields",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeFields",
+            "description": [],
+            "signature": [
+              "{ readonly overview: string; readonly mapping: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.scriptedFields",
+            "type": "Object",
+            "tags": [],
+            "label": "scriptedFields",
+            "description": [],
+            "signature": [
+              "{ readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.search",
+            "type": "Object",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "{ readonly sessions: string; readonly sessionLimits: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.indexPatterns",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              "{ readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.addData",
+            "type": "string",
+            "tags": [],
+            "label": "addData",
+            "description": [],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.kibana",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              "{ readonly guide: string; readonly autocompleteSuggestions: string; readonly xpackSecurity: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.upgradeAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "upgradeAssistant",
+            "description": [],
+            "signature": [
+              "{ readonly overview: string; readonly batchReindex: string; readonly remoteReindex: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.rollupJobs",
+            "type": "string",
+            "tags": [],
+            "label": "rollupJobs",
+            "description": [],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.siem",
+            "type": "Object",
+            "tags": [],
+            "label": "siem",
+            "description": [],
+            "signature": [
+              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.securitySolution",
+            "type": "Object",
+            "tags": [],
+            "label": "securitySolution",
+            "description": [],
+            "signature": [
+              "{ readonly trustedApps: string; readonly eventFilters: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.date",
+            "type": "Object",
+            "tags": [],
+            "label": "date",
+            "description": [],
+            "signature": [
+              "{ readonly dateMath: string; readonly dateMathIndexNames: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.management",
+            "type": "Object",
+            "tags": [],
+            "label": "management",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.ml",
+            "type": "Object",
+            "tags": [],
+            "label": "ml",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.transforms",
+            "type": "Object",
+            "tags": [],
+            "label": "transforms",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.visualize",
+            "type": "Object",
+            "tags": [],
+            "label": "visualize",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.apis",
+            "type": "Object",
+            "tags": [],
+            "label": "apis",
+            "description": [],
+            "signature": [
+              "{ readonly bulkIndexAlias: string; readonly byteSizeUnits: string; readonly createAutoFollowPattern: string; readonly createFollower: string; readonly createIndex: string; readonly createSnapshotLifecyclePolicy: string; readonly createRoleMapping: string; readonly createRoleMappingTemplates: string; readonly createRollupJobsRequest: string; readonly createApiKey: string; readonly createPipeline: string; readonly createTransformRequest: string; readonly cronExpressions: string; readonly executeWatchActionModes: string; readonly indexExists: string; readonly multiSearch: string; readonly openIndex: string; readonly putComponentTemplate: string; readonly painlessExecute: string; readonly painlessExecuteAPIContexts: string; readonly putComponentTemplateMetadata: string; readonly putSnapshotLifecyclePolicy: string; readonly putIndexTemplateV1: string; readonly putWatch: string; readonly searchPreference: string; readonly simulatePipeline: string; readonly timeUnits: string; readonly unfreezeIndex: string; readonly updateTransform: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.observability",
+            "type": "Object",
+            "tags": [],
+            "label": "observability",
+            "description": [],
+            "signature": [
+              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.alerting",
+            "type": "Object",
+            "tags": [],
+            "label": "alerting",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.maps",
+            "type": "Object",
+            "tags": [],
+            "label": "maps",
+            "description": [],
+            "signature": [
+              "{ readonly guide: string; readonly importGeospatialPrivileges: string; readonly gdalTutorial: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.monitoring",
+            "type": "Object",
+            "tags": [],
+            "label": "monitoring",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly runAsPrivilege: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              "{ readonly kibanaLegacyUrlAliases: string; readonly kibanaDisableLegacyUrlAliasesApi: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.watcher",
+            "type": "Object",
+            "tags": [],
+            "label": "watcher",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.ccs",
+            "type": "Object",
+            "tags": [],
+            "label": "ccs",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [],
+            "signature": [
+              "{ azureRepo: string; gcsRepo: string; hdfsRepo: string; s3Repo: string; snapshotRestoreRepos: string; mapperSize: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.snapshotRestore",
+            "type": "Object",
+            "tags": [],
+            "label": "snapshotRestore",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.ingest",
+            "type": "Object",
+            "tags": [],
+            "label": "ingest",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.fleet",
+            "type": "Object",
+            "tags": [],
+            "label": "fleet",
+            "description": [],
+            "signature": [
+              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly settings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly upgradeElasticAgent: string; readonly upgradeElasticAgent712lower: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.ecs",
+            "type": "Object",
+            "tags": [],
+            "label": "ecs",
+            "description": [],
+            "signature": [
+              "{ readonly guide: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.clients",
+            "type": "Object",
+            "tags": [],
+            "label": "clients",
+            "description": [],
+            "signature": [
+              "{ readonly guide: string; readonly goIndex: string; readonly goOverview: string; readonly javaBasicAuthentication: string; readonly javaIndex: string; readonly javaInstallation: string; readonly javaIntroduction: string; readonly javaRestLow: string; readonly jsClientConnecting: string; readonly jsIntro: string; readonly netGuide: string; readonly netIntroduction: string; readonly netNest: string; readonly netSingleNode: string; readonly perlGuide: string; readonly phpGuide: string; readonly phpConnecting: string; readonly phpInstallation: string; readonly phpOverview: string; readonly pythonAuthentication: string; readonly pythonGuide: string; readonly pythonOverview: string; readonly rubyAuthentication: string; readonly rubyOverview: string; readonly rustGuide: string; readonly rustOverview: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.endpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "endpoints",
+            "description": [],
+            "signature": [
+              "{ readonly troubleshooting: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinks.legal",
+            "type": "Object",
+            "tags": [],
+            "label": "legal",
+            "description": [],
+            "signature": [
+              "{ readonly privacyStatement: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/doc-links",
+        "id": "def-server.DocLinksMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocLinksMeta",
+        "description": [],
+        "path": "packages/kbn-doc-links/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinksMeta.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-server.DocLinksMeta.elasticWebsiteUrl",
+            "type": "string",
+            "tags": [],
+            "label": "elasticWebsiteUrl",
+            "description": [],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

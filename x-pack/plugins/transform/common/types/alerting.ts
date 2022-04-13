@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertTypeParams } from '../../../alerting/common';
+import type { Rule, RuleTypeParams } from '../../../alerting/common';
 
 export type TransformHealthRuleParams = {
   includeTransforms?: string[];
@@ -14,9 +14,14 @@ export type TransformHealthRuleParams = {
     notStarted?: {
       enabled: boolean;
     } | null;
+    errorMessages?: {
+      enabled: boolean;
+    } | null;
   } | null;
-} & AlertTypeParams;
+} & RuleTypeParams;
 
 export type TransformHealthRuleTestsConfig = TransformHealthRuleParams['testsConfig'];
 
 export type TransformHealthTests = keyof Exclude<TransformHealthRuleTestsConfig, null | undefined>;
+
+export type TransformHealthAlertRule = Omit<Rule<TransformHealthRuleParams>, 'apiKey'>;

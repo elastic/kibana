@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a privilege escalation attempt via rogue named pipe impersonation. An adversary may abuse this technique by masquerading as a known named pipe and manipulating a privileged process to connect to it.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Privilege Escalation via Rogue Named Pipe Impersonation",
+  "note": "## Config\n\nNamed Pipe Creation Events need to be enabled within the Sysmon configuration by including the following settings:\n`condition equal \"contains\" and keyword equal \"pipe\"`\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n\n",
+  "query": "file where event.action : \"Pipe Created*\" and\n /* normal sysmon named pipe creation events truncate the pipe keyword */\n  file.name : \"\\\\*\\\\Pipe\\\\*\"\n",
+  "references": [
+    "https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/",
+    "https://github.com/zcgonvh/EfsPotato",
+    "https://twitter.com/SBousseaden/status/1429530155291193354"
+  ],
+  "risk_score": 73,
+  "rule_id": "76ddb638-abf7-42d5-be22-4a70b0bf7241",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1134",
+          "name": "Access Token Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1134/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

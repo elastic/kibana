@@ -84,11 +84,9 @@ describe('getCerts', () => {
   it('parses query result and returns expected values', async () => {
     const { esClient, uptimeEsClient } = getUptimeESMockClient();
 
-    esClient.search.mockResolvedValueOnce({
-      body: {
-        hits: {
-          hits: mockHits,
-        },
+    esClient.search.mockResponseOnce({
+      hits: {
+        hits: mockHits,
       },
     } as any);
 
@@ -101,6 +99,7 @@ describe('getCerts', () => {
       size: 30,
       sortBy: 'not_after',
       direction: 'desc',
+      notValidAfter: 'now+100d',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -184,6 +183,20 @@ describe('getCerts', () => {
                         },
                       },
                     },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "range": Object {
+                              "tls.certificate_not_valid_after": Object {
+                                "lte": "now+100d",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
                   ],
                   "minimum_should_match": 1,
                   "should": Array [
@@ -212,7 +225,10 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat-8*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+          },
+          Object {
+            "meta": true,
           },
         ],
       ]

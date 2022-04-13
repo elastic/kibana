@@ -10,18 +10,14 @@ import { flatMap, sortBy } from 'lodash';
 type TablesJSON = Array<{
   name: string;
 }>;
-export const normalizeTables = (tablesJSON: TablesJSON) => {
-  return sortBy(tablesJSON, (table) => {
-    return table.name;
-  });
-};
+export const normalizeTables = (tablesJSON: TablesJSON) => sortBy(tablesJSON, 'name');
 
 let osqueryTables: TablesJSON | null = null;
 export const getOsqueryTables = () => {
   if (!osqueryTables) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    osqueryTables = normalizeTables(require('../common/schemas/osquery/v4.9.0.json'));
+    osqueryTables = normalizeTables(require('../common/schemas/osquery/v5.2.2.json'));
   }
   return osqueryTables;
 };
-export const getOsqueryTableNames = () => flatMap(getOsqueryTables(), (table) => table.name);
+export const getOsqueryTableNames = () => flatMap(getOsqueryTables(), 'name');

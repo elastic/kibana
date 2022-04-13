@@ -5,46 +5,67 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { BulkResponse } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
-import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import {
+  RuleExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleType,
+  RuleTypeParams,
+  RuleTypeState,
 } from '../../../alerting/server';
+import { WithoutReservedActionGroups } from '../../../alerting/common';
 import { IRuleDataClient } from '../rule_data_client';
-import { AlertTypeWithExecutor } from '../types';
+import { BulkResponseErrorAggregation } from './utils';
+import { AlertWithCommonFieldsLatest } from '../../common/schemas';
 
-export type PersistenceAlertService<
-  TState extends AlertInstanceState = never,
-  TContext extends AlertInstanceContext = never,
-  TActionGroupIds extends string = never
-> = (
+export type PersistenceAlertService = <T>(
   alerts: Array<{
-    id: string;
-    fields: Record<string, unknown>;
+    _id: string;
+    _source: T;
   }>,
   refresh: boolean | 'wait_for'
-) => Promise<ApiResponse<BulkResponse, unknown>>;
+) => Promise<PersistenceAlertServiceResult<T>>;
 
-export type PersistenceAlertQueryService = (
-  query: ESSearchRequest
-) => Promise<Array<Record<string, unknown>>>;
-export interface PersistenceServices<TAlertInstanceContext extends AlertInstanceContext = {}> {
-  alertWithPersistence: PersistenceAlertService<TAlertInstanceContext>;
+export interface PersistenceAlertServiceResult<T> {
+  createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
+  errors: BulkResponseErrorAggregation;
 }
 
-export type CreatePersistenceRuleTypeFactory = (options: {
+export interface PersistenceServices {
+  alertWithPersistence: PersistenceAlertService;
+}
+
+export type PersistenceAlertType<
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
+  TInstanceContext extends AlertInstanceContext = {},
+  TActionGroupIds extends string = never
+> = Omit<
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  'executor'
+> & {
+  executor: (
+    options: RuleExecutorOptions<
+      TParams,
+      TState,
+      AlertInstanceState,
+      TInstanceContext,
+      WithoutReservedActionGroups<TActionGroupIds, never>
+    > & {
+      services: PersistenceServices;
+    }
+  ) => Promise<TState | void>;
+};
+
+export type CreatePersistenceRuleTypeWrapper = (options: {
   ruleDataClient: IRuleDataClient;
   logger: Logger;
 }) => <
-  TState extends AlertTypeState,
-  TParams extends AlertTypeParams,
-  TServices extends PersistenceServices<TAlertInstanceContext>,
-  TAlertInstanceContext extends AlertInstanceContext = {}
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
+  TInstanceContext extends AlertInstanceContext = {},
+  TActionGroupIds extends string = never
 >(
-  type: AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>
-) => AlertTypeWithExecutor<TState, TParams, TAlertInstanceContext, TServices>;
+  type: PersistenceAlertType<TParams, TState, TInstanceContext, TActionGroupIds>
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;

@@ -4,47 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { debounce } from 'lodash';
-import { Unit } from '@elastic/datemath';
-import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiSpacer,
-  EuiText,
-  EuiFormRow,
+  EuiAccordion,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiToolTip,
-  EuiIcon,
   EuiFieldSearch,
-  EuiAccordion,
+  EuiFormRow,
+  EuiIcon,
+  EuiLink,
   EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { debounce } from 'lodash';
 import {
+  ForLastExpression,
   IErrorObject,
-  AlertTypeParams,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParams,
+  RuleTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-
-import { ExpressionRow } from './expression_row';
-import { MetricExpression, AlertParams, AlertContextMeta } from '../types';
+import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-
+import { ExpressionRow } from './expression_row';
+import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
-  AlertTypeParamsExpressionProps<AlertTypeParams & AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+  RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
 const defaultExpression = {
@@ -57,8 +55,8 @@ const defaultExpression = {
 export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
-  const { setAlertParams, alertParams, errors, metadata } = props;
-  const { http, notifications } = useKibanaContextForPlugin().services;
+  const { setRuleParams, ruleParams, errors, metadata } = props;
+  const { http, notifications, docLinks } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
@@ -66,7 +64,7 @@ export const Expressions: React.FC<Props> = (props) => {
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
+  const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
@@ -85,43 +83,47 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
-      const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
+      const exp = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       exp[id] = e;
-      setAlertParams('criteria', exp);
+      setRuleParams('criteria', exp);
     },
-    [setAlertParams, alertParams.criteria]
+    [setRuleParams, ruleParams.criteria]
   );
 
   const addExpression = useCallback(() => {
-    const exp = alertParams.criteria?.slice() || [];
+    const exp = ruleParams.criteria?.slice() || [];
     exp.push({
       ...defaultExpression,
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
-    setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
+    setRuleParams('criteria', exp);
+  }, [setRuleParams, ruleParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
-      const exp = alertParams.criteria?.slice() || [];
+      const exp = ruleParams.criteria?.slice() || [];
       if (exp.length > 1) {
         exp.splice(id, 1);
-        setAlertParams('criteria', exp);
+        setRuleParams('criteria', exp);
       }
     },
-    [setAlertParams, alertParams.criteria]
+    [setRuleParams, ruleParams.criteria]
   );
 
   const onFilterChange = useCallback(
     (filter: any) => {
-      setAlertParams('filterQueryText', filter);
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      setRuleParams('filterQueryText', filter);
+      try {
+        setRuleParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern, false) || ''
+        );
+      } catch (e) {
+        setRuleParams('filterQuery', QUERY_INVALID);
+      }
     },
-    [setAlertParams, derivedIndexPattern]
+    [setRuleParams, derivedIndexPattern]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -131,9 +133,9 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
-      setAlertParams('groupBy', group && group.length ? group : '');
+      setRuleParams('groupBy', group && group.length ? group : '');
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const emptyError = useMemo(() => {
@@ -147,33 +149,33 @@ export const Expressions: React.FC<Props> = (props) => {
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
       const criteria =
-        alertParams.criteria?.map((c) => ({
+        ruleParams.criteria?.map((c) => ({
           ...c,
           timeSize: ts,
         })) || [];
       setTimeSize(ts || undefined);
-      setAlertParams('criteria', criteria);
+      setRuleParams('criteria', criteria);
     },
-    [alertParams.criteria, setAlertParams]
+    [ruleParams.criteria, setRuleParams]
   );
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
       const criteria =
-        alertParams.criteria?.map((c) => ({
+        ruleParams.criteria?.map((c) => ({
           ...c,
           timeUnit: tu,
         })) || [];
-      setTimeUnit(tu as Unit);
-      setAlertParams('criteria', criteria as AlertParams['criteria']);
+      setTimeUnit(tu as TimeUnitChar);
+      setRuleParams('criteria', criteria as AlertParams['criteria']);
     },
-    [alertParams.criteria, setAlertParams]
+    [ruleParams.criteria, setRuleParams]
   );
 
   const preFillAlertCriteria = useCallback(() => {
     const md = metadata;
     if (md?.currentOptions?.metrics?.length) {
-      setAlertParams(
+      setRuleParams(
         'criteria',
         md.currentOptions.metrics.map((metric) => ({
           metric: metric.field,
@@ -185,15 +187,15 @@ export const Expressions: React.FC<Props> = (props) => {
         })) as AlertParams['criteria']
       );
     } else {
-      setAlertParams('criteria', [defaultExpression]);
+      setRuleParams('criteria', [defaultExpression]);
     }
-  }, [metadata, setAlertParams, timeSize, timeUnit]);
+  }, [metadata, setRuleParams, timeSize, timeUnit]);
 
   const preFillAlertFilter = useCallback(() => {
     const md = metadata;
     if (md && md.currentOptions?.filterQuery) {
-      setAlertParams('filterQueryText', md.currentOptions.filterQuery);
-      setAlertParams(
+      setRuleParams('filterQueryText', md.currentOptions.filterQuery);
+      setRuleParams(
         'filterQuery',
         convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
       );
@@ -202,46 +204,46 @@ export const Expressions: React.FC<Props> = (props) => {
       const filter = Array.isArray(groupBy)
         ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
         : `${groupBy}: "${md.series.id}"`;
-      setAlertParams('filterQueryText', filter);
-      setAlertParams(
+      setRuleParams('filterQueryText', filter);
+      setRuleParams(
         'filterQuery',
         convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
       );
     }
-  }, [metadata, derivedIndexPattern, setAlertParams]);
+  }, [metadata, derivedIndexPattern, setRuleParams]);
 
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
     if (md && md.currentOptions?.groupBy && !md.series) {
-      setAlertParams('groupBy', md.currentOptions.groupBy);
+      setRuleParams('groupBy', md.currentOptions.groupBy);
     }
-  }, [metadata, setAlertParams]);
+  }, [metadata, setRuleParams]);
 
   useEffect(() => {
-    if (alertParams.criteria && alertParams.criteria.length) {
-      setTimeSize(alertParams.criteria[0].timeSize);
-      setTimeUnit(alertParams.criteria[0].timeUnit);
+    if (ruleParams.criteria && ruleParams.criteria.length) {
+      setTimeSize(ruleParams.criteria[0].timeSize);
+      setTimeUnit(ruleParams.criteria[0].timeUnit);
     } else {
       preFillAlertCriteria();
     }
 
-    if (!alertParams.filterQuery) {
+    if (!ruleParams.filterQuery) {
       preFillAlertFilter();
     }
 
-    if (!alertParams.groupBy) {
+    if (!ruleParams.groupBy) {
       preFillAlertGroupBy();
     }
 
-    if (!alertParams.sourceId) {
-      setAlertParams('sourceId', source?.id || 'default');
+    if (!ruleParams.sourceId) {
+      setRuleParams('sourceId', source?.id || 'default');
     }
 
-    if (typeof alertParams.alertOnNoData === 'undefined') {
-      setAlertParams('alertOnNoData', true);
+    if (typeof ruleParams.alertOnNoData === 'undefined') {
+      setRuleParams('alertOnNoData', true);
     }
-    if (typeof alertParams.alertOnGroupDisappear === 'undefined') {
-      setAlertParams('alertOnGroupDisappear', true);
+    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
+      setRuleParams('alertOnGroupDisappear', true);
     }
   }, [metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -251,36 +253,43 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const areAllAggsRate = useMemo(
-    () => alertParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
-    [alertParams.criteria]
+    () => ruleParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
+    [ruleParams.criteria]
   );
 
   const hasGroupBy = useMemo(
-    () => alertParams.groupBy && alertParams.groupBy.length > 0,
-    [alertParams.groupBy]
+    () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
+    [ruleParams.groupBy]
   );
 
+  const disableNoData = useMemo(
+    () => ruleParams.criteria?.every((c) => c.aggType === Aggregators.COUNT),
+    [ruleParams.criteria]
+  );
+
+  // Test to see if any of the group fields in groupBy are already filtered down to a single
+  // group by the filterQuery. If this is the case, then a groupBy is unnecessary, as it would only
+  // ever produce one group instance
   const groupByFilterTestPatterns = useMemo(() => {
-    if (!alertParams.groupBy) return null;
-    const groups = !Array.isArray(alertParams.groupBy)
-      ? [alertParams.groupBy]
-      : alertParams.groupBy;
+    if (!ruleParams.groupBy) return null;
+    const groups = !Array.isArray(ruleParams.groupBy) ? [ruleParams.groupBy] : ruleParams.groupBy;
     return groups.map((group: string) => ({
       groupName: group,
       pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
     }));
-  }, [alertParams.groupBy]);
+  }, [ruleParams.groupBy]);
 
   const redundantFilterGroupBy = useMemo(() => {
-    if (!alertParams.filterQuery || !groupByFilterTestPatterns) return [];
+    const { filterQuery } = ruleParams;
+    if (typeof filterQuery !== 'string' || !groupByFilterTestPatterns) return [];
     return groupByFilterTestPatterns
       .map(({ groupName, pattern }) => {
-        if (pattern.test(alertParams.filterQuery!)) {
+        if (pattern.test(filterQuery)) {
           return groupName;
         }
       })
       .filter((g) => typeof g === 'string') as string[];
-  }, [alertParams.filterQuery, groupByFilterTestPatterns]);
+  }, [ruleParams, groupByFilterTestPatterns]);
 
   return (
     <>
@@ -294,17 +303,17 @@ export const Expressions: React.FC<Props> = (props) => {
         </h4>
       </EuiText>
       <EuiSpacer size={'xs'} />
-      {alertParams.criteria &&
-        alertParams.criteria.map((e, idx) => {
+      {ruleParams.criteria &&
+        ruleParams.criteria.map((e, idx) => {
           return (
             <ExpressionRow
-              canDelete={(alertParams.criteria && alertParams.criteria.length > 1) || false}
+              canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
               fields={derivedIndexPattern.fields}
               remove={removeExpression}
               addExpression={addExpression}
               key={idx} // idx's don't usually make good key's but here the index has semantic meaning
               expressionId={idx}
-              setAlertParams={updateParams}
+              setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
             >
@@ -312,8 +321,8 @@ export const Expressions: React.FC<Props> = (props) => {
                 expression={e}
                 derivedIndexPattern={derivedIndexPattern}
                 source={source}
-                filterQuery={alertParams.filterQueryText}
-                groupBy={alertParams.groupBy}
+                filterQuery={ruleParams.filterQueryText}
+                groupBy={ruleParams.groupBy}
               />
             </ExpressionRow>
           );
@@ -354,6 +363,7 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         <EuiPanel color="subdued">
           <EuiCheckbox
+            disabled={disableNoData}
             id="metrics-alert-no-data-toggle"
             label={
               <>
@@ -361,17 +371,20 @@ export const Expressions: React.FC<Props> = (props) => {
                   defaultMessage: "Alert me if there's no data",
                 })}{' '}
                 <EuiToolTip
-                  content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
-                    defaultMessage:
-                      'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                  })}
+                  content={
+                    (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
+                    i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
+                      defaultMessage:
+                        'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+                    })
+                  }
                 >
                   <EuiIcon type="questionInCircle" color="subdued" />
                 </EuiToolTip>
               </>
             }
-            checked={alertParams.alertOnNoData}
-            onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
+            checked={ruleParams.alertOnNoData}
+            onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
           />
           <EuiCheckbox
             id="metrics-alert-partial-buckets-toggle"
@@ -394,9 +407,9 @@ export const Expressions: React.FC<Props> = (props) => {
                 </EuiToolTip>
               </>
             }
-            checked={areAllAggsRate || alertParams.shouldDropPartialBuckets}
+            checked={areAllAggsRate || ruleParams.shouldDropPartialBuckets}
             disabled={areAllAggsRate}
-            onChange={(e) => setAlertParams('shouldDropPartialBuckets', e.target.checked)}
+            onChange={(e) => setRuleParams('shouldDropPartialBuckets', e.target.checked)}
           />
         </EuiPanel>
       </EuiAccordion>
@@ -417,12 +430,12 @@ export const Expressions: React.FC<Props> = (props) => {
             derivedIndexPattern={derivedIndexPattern}
             onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
-            value={alertParams.filterQueryText}
+            value={ruleParams.filterQueryText}
           />
         )) || (
           <EuiFieldSearch
             onChange={handleFieldSearchChange}
-            value={alertParams.filterQueryText}
+            value={ruleParams.filterQueryText}
             fullWidth
           />
         )}
@@ -445,7 +458,7 @@ export const Expressions: React.FC<Props> = (props) => {
           fields={derivedIndexPattern.fields}
           options={{
             ...options,
-            groupBy: alertParams.groupBy || undefined,
+            groupBy: ruleParams.groupBy || undefined,
           }}
           errorOptions={redundantFilterGroupBy}
         />
@@ -456,10 +469,20 @@ export const Expressions: React.FC<Props> = (props) => {
           <EuiText size="xs" color="danger">
             <FormattedMessage
               id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
-              defaultMessage="This rule will only alert per one {matchedGroups} because the filter query contains an exact match for {groupCount, plural, one {this field} other {these fields}}."
+              defaultMessage="This rule may alert on {matchedGroups} less than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
               values={{
                 matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
                 groupCount: redundantFilterGroupBy.length,
+                filteringAndGroupingLink: (
+                  <EuiLink
+                    href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
+                  >
+                    {i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError.docsLink',
+                      { defaultMessage: 'the docs' }
+                    )}
+                  </EuiLink>
+                ),
               }}
             />
           </EuiText>
@@ -474,23 +497,33 @@ export const Expressions: React.FC<Props> = (props) => {
               defaultMessage: 'Alert me if a group stops reporting data',
             })}{' '}
             <EuiToolTip
-              content={i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
-                defaultMessage:
-                  'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-              })}
+              content={
+                (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
+                i18n.translate('xpack.infra.metrics.alertFlyout.groupDisappearHelpText', {
+                  defaultMessage:
+                    'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                })
+              }
             >
               <EuiIcon type="questionInCircle" color="subdued" />
             </EuiToolTip>
           </>
         }
-        disabled={!hasGroupBy}
-        checked={Boolean(hasGroupBy && alertParams.alertOnGroupDisappear)}
-        onChange={(e) => setAlertParams('alertOnGroupDisappear', e.target.checked)}
+        disabled={disableNoData || !hasGroupBy}
+        checked={Boolean(hasGroupBy && ruleParams.alertOnGroupDisappear)}
+        onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
       />
       <EuiSpacer size={'m'} />
     </>
   );
 };
+
+const docCountNoDataDisabledHelpText = i18n.translate(
+  'xpack.infra.metrics.alertFlyout.docCountNoDataDisabledHelpText',
+  {
+    defaultMessage: '[This setting is not applicable to the Document Count aggregator.]',
+  }
+);
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export

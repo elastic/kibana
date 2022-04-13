@@ -8,10 +8,10 @@
 import { isEmpty } from 'lodash/fp';
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
@@ -26,6 +26,7 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { LinkButton } from '../../../common/components/links';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 export interface OverviewNetworkProps {
   startDate: GlobalTimeArgs['from'];
@@ -48,18 +49,32 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
+  const { toggleStatus, setToggleStatus } = useQueryToggle(OverviewNetworkQueryId);
+  const [querySkip, setQuerySkip] = useState(filterQuery === undefined || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(filterQuery === undefined || !toggleStatus);
+  }, [filterQuery, toggleStatus]);
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
+  );
+
   const [loading, { overviewNetwork, id, inspect, refetch }] = useNetworkOverview({
     endDate,
     filterQuery,
     indexNames,
     startDate,
-    skip: filterQuery === undefined,
+    skip: querySkip,
   });
 
   const goToNetwork = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.network,
         path: getNetworkUrl(urlSearch),
       });
@@ -121,26 +136,30 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
 
   return (
     <EuiFlexItem>
-      <InspectButtonContainer>
+      <InspectButtonContainer show={toggleStatus}>
         <EuiPanel hasBorder data-test-subj="overview-network-query">
           <>
             <HeaderSection
               id={OverviewNetworkQueryId}
+              height={!toggleStatus ? 30 : undefined}
               subtitle={subtitle}
               title={title}
+              toggleStatus={toggleStatus}
+              toggleQuery={toggleQuery}
               isInspectDisabled={filterQuery === undefined}
             >
               {networkPageButton}
             </HeaderSection>
-
-            <OverviewNetworkStatsManage
-              loading={loading}
-              data={overviewNetwork}
-              id={id}
-              inspect={inspect}
-              setQuery={setQuery}
-              refetch={refetch}
-            />
+            {toggleStatus && (
+              <OverviewNetworkStatsManage
+                loading={loading}
+                data={overviewNetwork}
+                id={id}
+                inspect={inspect}
+                setQuery={setQuery}
+                refetch={refetch}
+              />
+            )}
           </>
         </EuiPanel>
       </InspectButtonContainer>

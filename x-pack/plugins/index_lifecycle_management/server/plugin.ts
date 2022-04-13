@@ -26,16 +26,13 @@ const indexLifecycleDataEnricher = async (
     return [];
   }
 
-  const {
-    body: { indices: ilmIndicesData },
-  } = await client.asCurrentUser.ilm.explainLifecycle({
+  const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
     index: '*',
   });
-
+  // @ts-expect-error IndexLifecyclePolicy is not compatible with IlmExplainLifecycleResponse
   return indicesList.map((index: IndexWithoutIlm) => {
     return {
       ...index,
-      // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/531
       ilm: { ...(ilmIndicesData[index.name] || {}) },
     };
   });
@@ -101,5 +98,6 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
   }
 
   start() {}
+
   stop() {}
 }

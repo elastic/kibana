@@ -27,17 +27,67 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9900 !important;
     min-width: 24px;
   }
+  .euiPopover__panel.euiPopover__panel-isOpen.sourcererPopoverPanel {
+    // needs to appear under modal
+    z-index: 5900 !important;
+  }
   .euiToolTip {
     z-index: 9950 !important;
+  }
+
+  .euiDataGridRowCell .euiDataGridRowCell__expandActions .euiDataGridRowCell__actionButtonIcon {
+    display: none;
+
+    &:first-child,
+    &:nth-child(2),
+    &:nth-child(3),
+    &:last-child {
+      display: inline-flex;
+    }
+
   }
 
   /*
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
   */
-  .euiDataGridRowCell__popover .euiPopoverFooter .euiFlexGroup {
-    flex-direction: column;
-    align-items: flex-start;
+
+  .euiDataGridRowCell__popover {
+
+    max-width: 815px !important;
+    max-height: none !important;
+    overflow: hidden;
+
+
+    .expandable-top-value-button {
+      &.euiButtonEmpty--primary:enabled:focus,
+      .euiButtonEmpty--primary:focus {
+        background-color: transparent;
+      }
+    }
+
+
+    &.euiPopover__panel.euiPopover__panel-isOpen {
+      padding: 8px 0;
+      min-width: 65px;
+    }
+
+
+    .euiPopoverFooter {
+      border: 0;
+      margin-top: 0 !important;
+      .euiFlexGroup {
+        flex-direction: column;
+      }
+    }
+
+    // Hide EUI's 'Filter in' and 'Filter out' footer buttons - replaced with our own buttons
+    .euiPopoverFooter:nth-child(2) {
+      .euiFlexItem:first-child,
+      .euiFlexItem:nth-child(2) {
+          display: none;
+      }
+    }
   }
 
   /*
@@ -54,9 +104,13 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
   }
 
   /* hide open draggable popovers when a modal is being displayed to prevent them from covering the modal */
-  body.euiBody-hasOverlayMask .withHoverActions__popover.euiPopover__panel-isOpen{
-    visibility: hidden !important;
+  body.euiBody-hasOverlayMask {
+    .euiDataGridRowCell__popover.euiPopover__panel-isOpen,
+    .withHoverActions__popover.euiPopover__panel-isOpen {
+      visibility: hidden !important;
+    }
   }
+
 
   /* ensure elastic charts tooltips appear above open euiPopovers */
   .echTooltip {

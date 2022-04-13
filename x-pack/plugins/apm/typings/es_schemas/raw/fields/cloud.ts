@@ -27,4 +27,7 @@ export interface Cloud {
   image?: {
     id: string;
   };
+  service?: {
+    name: string;
+  };
 }

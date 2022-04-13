@@ -7,47 +7,49 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { act, waitFor } from '@testing-library/react';
 
 import '../../common/mock/match_media';
-import { CaseComponent, CaseComponentProps, CaseView, CaseViewProps } from '.';
+import { CaseView } from '.';
+import { CaseViewProps } from './types';
 import {
   basicCase,
-  basicCaseClosed,
   caseUserActions,
   alertComment,
   getAlertUserAction,
+  basicCaseMetrics,
+  connectorsMock,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { SpacesApi } from '../../../../spaces/public';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { useGetCase } from '../../containers/use_get_case';
+import { UseGetCase, useGetCase } from '../../containers/use_get_case';
+import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { waitFor } from '@testing-library/react';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { CaseType, ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
+import { Case } from '../../../common/ui';
 import { useKibana } from '../../common/lib/kibana';
 
-const mockId = basicCase.id;
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({ detailName: mockId }),
-}));
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
+jest.mock('../../containers/use_get_case_metrics');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_action_tree/user_action_timestamp');
+jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
+jest.mock('../../common/navigation/hooks');
 
+const useGetCaseMock = useGetCase as jest.Mock;
+const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const onCaseDataSuccessMock = jest.fn();
+const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const spacesUiApiMock = {
   redirectLegacyUrl: jest.fn().mockResolvedValue(undefined),
@@ -83,21 +85,7 @@ const alertsHit = [
   },
 ];
 
-export const caseProps: CaseComponentProps = {
-  allCasesNavigation: {
-    href: 'all-cases-href',
-    onClick: jest.fn(),
-  },
-  caseDetailsNavigation: {
-    href: 'case-details-href',
-    onClick: jest.fn(),
-  },
-  caseId: basicCase.id,
-  configureCasesNavigation: {
-    href: 'configure-cases-href',
-    onClick: jest.fn(),
-  },
-  getCaseDetailHrefWithCommentId: jest.fn(),
+export const caseViewProps: CaseViewProps = {
   onComponentInitialized: jest.fn(),
   actionsNavigation: {
     href: jest.fn(),
@@ -115,42 +103,41 @@ export const caseProps: CaseComponentProps = {
       'alert-id-2': alertsHit[1],
     },
   ],
-  userCanCrud: true,
-  caseData: {
-    ...basicCase,
-    comments: [...basicCase.comments, alertComment],
-    connector: {
-      id: 'resilient-2',
-      name: 'Resilient',
-      type: ConnectorTypes.resilient,
-      fields: null,
-    },
+};
+
+export const caseData: Case = {
+  ...basicCase,
+  comments: [...basicCase.comments, alertComment],
+  connector: {
+    id: 'resilient-2',
+    name: 'Resilient',
+    type: ConnectorTypes.resilient,
+    fields: null,
   },
-  fetchCase: jest.fn(),
-  updateCase: jest.fn(),
-  onCaseDataSuccess: onCaseDataSuccessMock,
 };
 
-export const caseClosedProps: CaseComponentProps = {
-  ...caseProps,
-  caseData: basicCaseClosed,
-};
-
-describe('CaseView ', () => {
+describe('CaseView', () => {
   const updateCaseProperty = jest.fn();
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();
+  const fetchCaseMetrics = jest.fn();
   const updateCase = jest.fn();
   const pushCaseToExternalService = jest.fn();
 
-  const data = caseProps.caseData;
   const defaultGetCase = {
     isLoading: false,
     isError: false,
-    data,
+    data: caseData,
     resolveOutcome: 'exactMatch',
     updateCase,
     fetchCase,
+  };
+
+  const defaultGetCaseMetrics = {
+    isLoading: false,
+    isError: false,
+    metrics: basicCaseMetrics,
+    fetchCaseMetrics,
   };
 
   const defaultUpdateCaseState = {
@@ -169,254 +156,32 @@ describe('CaseView ', () => {
     isLoading: false,
     isError: false,
     lastIndexPushToService: -1,
-    participants: [data.createdBy],
+    participants: [caseData.createdBy],
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
-    useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
-    usePostPushToServiceMock.mockImplementation(() => ({
-      isLoading: false,
-      pushCaseToExternalService,
-    }));
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
-      actionTypeTitle: '.servicenow',
-      iconClass: 'logoSecurity',
-    });
+  const mockGetCase = (props: Partial<UseGetCase> = {}) => {
+    useGetCaseMock.mockReturnValue({ ...defaultGetCase, ...props });
+  };
+
+  beforeAll(() => {
+    mockGetCase();
+    useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
+    useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
+    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
+    useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
     useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
   });
 
-  it('should render CaseComponent', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
-        data.title
-      );
-    });
-
-    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
-      'Open'
-    );
-
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-coke"]`)
-        .first()
-        .text()
-    ).toEqual(data.tags[0]);
-
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="tag-pepsi"]`)
-        .first()
-        .text()
-    ).toEqual(data.tags[1]);
-
-    expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
-      data.createdBy.username
-    );
-
-    expect(
-      wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-    ).toEqual(data.createdAt);
-
-    expect(
-      wrapper
-        .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
-        .first()
-        .text()
-    ).toBe(data.description);
-
-    expect(
-      wrapper.find('button[data-test-subj="case-view-status-action-button"]').first().text()
-    ).toBe('Mark in progress');
-  });
-
-  it('should show closed indicators in header when case is closed', async () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      caseData: basicCaseClosed,
-    }));
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseClosedProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-      ).toEqual(basicCaseClosed.closedAt);
-      expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
-        'Closed'
-      );
-    });
-  });
-
-  it('should update status', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-    wrapper.find('[data-test-subj="case-view-status-dropdown"] button').first().simulate('click');
-    wrapper
-      .find('button[data-test-subj="case-view-status-dropdown-closed"]')
-      .first()
-      .simulate('click');
-
-    await waitFor(() => {
-      const updateObject = updateCaseProperty.mock.calls[0][0];
-      expect(updateCaseProperty).toHaveBeenCalledTimes(1);
-      expect(updateObject.updateKey).toEqual('status');
-      expect(updateObject.updateValue).toEqual('closed');
-    });
-  });
-
-  it('should display EditableTitle isLoading', async () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      isLoading: true,
-      updateKey: 'title',
-    }));
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="editable-title-loading"]').first().exists()
-      ).toBeTruthy();
-      expect(
-        wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()
-      ).toBeFalsy();
-    });
-  });
-
-  it('should display description isLoading', async () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      isLoading: true,
-      updateKey: 'description',
-    }));
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(
-        wrapper
-          .find(
-            '[data-test-subj="description-action"] [data-test-subj="user-action-title-loading"]'
-          )
-          .first()
-          .exists()
-      ).toBeTruthy();
-      expect(
-        wrapper
-          .find('[data-test-subj="description-action"] [data-test-subj="property-actions"]')
-          .first()
-          .exists()
-      ).toBeFalsy();
-    });
-  });
-
-  it('should display tags isLoading', async () => {
-    useUpdateCaseMock.mockImplementation(() => ({
-      ...defaultUpdateCaseState,
-      isLoading: true,
-      updateKey: 'tags',
-    }));
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(
-        wrapper
-          .find('[data-test-subj="case-view-tag-list"] [data-test-subj="tag-list-loading"]')
-          .first()
-          .exists()
-      ).toBeTruthy();
-
-      expect(wrapper.find('button[data-test-subj="tag-list-edit"]').first().exists()).toBeFalsy();
-    });
-  });
-
-  it('should update title', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-    const newTitle = 'The new title';
-    wrapper.find(`[data-test-subj="editable-title-edit-icon"]`).first().simulate('click');
-    wrapper
-      .find(`[data-test-subj="editable-title-input-field"]`)
-      .last()
-      .simulate('change', { target: { value: newTitle } });
-
-    wrapper.find(`[data-test-subj="editable-title-submit-btn"]`).first().simulate('click');
-
-    const updateObject = updateCaseProperty.mock.calls[0][0];
-    await waitFor(() => {
-      expect(updateObject.updateKey).toEqual('title');
-      expect(updateObject.updateValue).toEqual(newTitle);
-      expect(updateObject.onSuccess).toBeDefined();
-    });
-
-    updateObject.onSuccess(); // simulate the request has succeed
-    await waitFor(() => {
-      expect(onCaseDataSuccessMock).toHaveBeenCalledWith({
-        ...caseProps.caseData,
-        title: newTitle,
-      });
-    });
-  });
-
-  it('should push updates on button click', async () => {
-    useGetCaseUserActionsMock.mockImplementation(() => ({
-      ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
-    }));
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...{ ...caseProps, updateCase }} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="has-data-to-push-button"]').first().exists()
-      ).toBeTruthy();
-    });
-    wrapper.find('[data-test-subj="push-to-external-service"]').first().simulate('click');
-
-    await waitFor(() => {
-      expect(pushCaseToExternalService).toHaveBeenCalled();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should return null if error', async () => {
-    (useGetCase as jest.Mock).mockImplementation(() => ({
-      ...defaultGetCase,
-      isError: true,
-    }));
+    mockGetCase({ isError: true });
     const wrapper = mount(
       <TestProviders>
-        <CaseView {...caseProps} />
+        <CaseView {...caseViewProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -425,13 +190,10 @@ describe('CaseView ', () => {
   });
 
   it('should return spinner if loading', async () => {
-    (useGetCase as jest.Mock).mockImplementation(() => ({
-      ...defaultGetCase,
-      isLoading: true,
-    }));
+    mockGetCase({ isLoading: true });
     const wrapper = mount(
       <TestProviders>
-        <CaseView {...caseProps} />
+        <CaseView {...caseViewProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -440,13 +202,10 @@ describe('CaseView ', () => {
   });
 
   it('should return case view when data is there', async () => {
-    (useGetCase as jest.Mock).mockImplementation(() => ({
-      ...defaultGetCase,
-      resolveOutcome: 'exactMatch',
-    }));
+    mockGetCase({ resolveOutcome: 'exactMatch' });
     const wrapper = mount(
       <TestProviders>
-        <CaseView {...caseProps} />
+        <CaseView {...caseViewProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -458,36 +217,30 @@ describe('CaseView ', () => {
 
   it('should redirect case view when resolves to alias match', async () => {
     const resolveAliasId = `${defaultGetCase.data.id}_2`;
-    (useGetCase as jest.Mock).mockImplementation(() => ({
-      ...defaultGetCase,
-      resolveOutcome: 'aliasMatch',
-      resolveAliasId,
-    }));
+    const resolveAliasPurpose = 'savedObjectConversion' as const;
+    mockGetCase({ resolveOutcome: 'aliasMatch', resolveAliasId, resolveAliasPurpose });
     const wrapper = mount(
       <TestProviders>
-        <CaseView {...caseProps} />
+        <CaseView {...caseViewProps} />
       </TestProviders>
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
       expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
-      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith(
-        `cases/${resolveAliasId}`,
-        'case'
-      );
+      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith({
+        path: `/cases/${resolveAliasId}`,
+        aliasPurpose: resolveAliasPurpose,
+        objectNoun: 'case',
+      });
     });
   });
 
   it('should redirect case view when resolves to conflict', async () => {
     const resolveAliasId = `${defaultGetCase.data.id}_2`;
-    (useGetCase as jest.Mock).mockImplementation(() => ({
-      ...defaultGetCase,
-      resolveOutcome: 'conflict',
-      resolveAliasId,
-    }));
+    mockGetCase({ resolveOutcome: 'conflict', resolveAliasId });
     const wrapper = mount(
       <TestProviders>
-        <CaseView {...caseProps} />
+        <CaseView {...caseViewProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -498,7 +251,7 @@ describe('CaseView ', () => {
         objectNoun: 'case',
         currentObjectId: defaultGetCase.data.id,
         otherObjectId: resolveAliasId,
-        otherObjectPath: `cases/${resolveAliasId}`,
+        otherObjectPath: `/cases/${resolveAliasId}`,
       });
     });
   });
@@ -507,398 +260,54 @@ describe('CaseView ', () => {
     (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
     const wrapper = mount(
       <TestProviders>
-        <CaseView {...caseProps} />
+        <CaseView {...caseViewProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     await waitFor(() => {
-      expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id, 'resilient-2', undefined);
+      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2');
+      expect(fetchCaseMetrics).toBeCalled();
       expect(fetchCase).toBeCalled();
-    });
-  });
-
-  it('should disable the push button when connector is invalid', async () => {
-    useGetCaseUserActionsMock.mockImplementation(() => ({
-      ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
-    }));
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent
-          {...{
-            ...caseProps,
-            updateCase,
-            caseData: { ...caseProps.caseData, connectorId: 'not-exist' },
-          }}
-        />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(
-        wrapper.find('button[data-test-subj="push-to-external-service"]').first().prop('disabled')
-      ).toBeTruthy();
-    });
-  });
-
-  // TODO: fix when the useEffects in edit_connector are cleaned up
-  it.skip('should revert to the initial connector in case of failure', async () => {
-    updateCaseProperty.mockImplementation(({ onError }) => {
-      onError();
-    });
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent
-          {...caseProps}
-          caseData={{
-            ...caseProps.caseData,
-            connector: {
-              id: 'servicenow-1',
-              name: 'SN 1',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-          }}
-        />
-      </TestProviders>
-    );
-    const connectorName = wrapper
-      .find('[data-test-subj="settings-connector-card"] .euiTitle')
-      .first()
-      .text();
-
-    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
-    await waitFor(() => wrapper.update());
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    await waitFor(() => wrapper.update());
-    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
-    await waitFor(() => wrapper.update());
-    wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
-
-    await waitFor(() => {
-      wrapper.update();
-      const updateObject = updateCaseProperty.mock.calls[0][0];
-      expect(updateObject.updateKey).toEqual('connector');
-      expect(
-        wrapper.find('[data-test-subj="settings-connector-card"] .euiTitle').first().text()
-      ).toBe(connectorName);
-    });
-  });
-
-  it('should update connector', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent
-          {...caseProps}
-          caseData={{
-            ...caseProps.caseData,
-            connector: {
-              id: 'servicenow-1',
-              name: 'SN 1',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-          }}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
-    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
-
-    await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
-    });
-
-    wrapper.find(`button[data-test-subj="edit-connectors-submit"]`).first().simulate('click');
-
-    await waitFor(() => {
-      wrapper.update();
-      expect(updateCaseProperty).toHaveBeenCalledTimes(1);
-      const updateObject = updateCaseProperty.mock.calls[0][0];
-      expect(updateObject.updateKey).toEqual('connector');
-      expect(updateObject.updateValue).toEqual({
-        id: 'resilient-2',
-        name: 'My Connector 2',
-        type: ConnectorTypes.resilient,
-        fields: {
-          incidentTypes: null,
-          severityCode: null,
-        },
-      });
-    });
-  });
-
-  it('it should call onComponentInitialized on mount', async () => {
-    const onComponentInitialized = jest.fn();
-    mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} onComponentInitialized={onComponentInitialized} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(onComponentInitialized).toHaveBeenCalled();
-    });
-  });
-
-  it('should show loading content when loading alerts', async () => {
-    const useFetchAlertData = jest.fn().mockReturnValue([true]);
-    useGetCaseUserActionsMock.mockReturnValue({
-      caseServices: {},
-      caseUserActions: [],
-      hasDataToPush: false,
-      isError: false,
-      isLoading: true,
-      participants: [],
-    });
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} useFetchAlertData={useFetchAlertData} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="case-view-loading-content"]').first().exists()
-      ).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="user-actions"]').first().exists()).toBeFalsy();
-    });
-  });
-
-  it('should call show alert details with expected arguments', async () => {
-    const showAlertDetails = jest.fn();
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} showAlertDetails={showAlertDetails} />
-      </TestProviders>
-    );
-
-    wrapper
-      .find('[data-test-subj="comment-action-show-alert-alert-action-id"] button')
-      .first()
-      .simulate('click');
-    await waitFor(() => {
-      expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
-    });
-  });
-
-  it('should show the rule name', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(
-        wrapper
-          .find(
-            '[data-test-subj="comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
-          )
-          .first()
-          .text()
-      ).toBe('added an alert from Awesome rule');
-    });
-  });
-
-  it('should update settings', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-
-    wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
-    await waitFor(() => {
-      wrapper.update();
-      const updateObject = updateCaseProperty.mock.calls[0][0];
-      expect(updateObject.updateKey).toEqual('settings');
-      expect(updateObject.updateValue).toEqual({ syncAlerts: false });
-    });
-  });
-
-  it('should show the correct connector name on the push button', async () => {
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useGetCaseUserActionsMock.mockImplementation(() => ({
-      ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
-    }));
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(
-        wrapper
-          .find('[data-test-subj="has-data-to-push-button"]')
-          .first()
-          .text()
-          .includes('My Connector 2')
-      ).toBe(true);
     });
   });
 
   describe('when a `refreshRef` prop is provided', () => {
     let refreshRef: CaseViewProps['refreshRef'];
 
-    beforeEach(() => {
+    beforeEach(async () => {
       (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
       refreshRef = React.createRef();
 
-      mount(
-        <TestProviders>
-          <CaseView
-            {...{
-              refreshRef,
-              allCasesNavigation: {
-                href: 'all-cases-href',
-                onClick: jest.fn(),
-              },
-              caseDetailsNavigation: {
-                href: 'case-details-href',
-                onClick: jest.fn(),
-              },
-              caseId: '1234',
-              configureCasesNavigation: {
-                href: 'configure-cases-href',
-                onClick: jest.fn(),
-              },
-              getCaseDetailHrefWithCommentId: jest.fn(),
-              onComponentInitialized: jest.fn(),
-              ruleDetailsNavigation: {
-                href: jest.fn(),
-                onClick: jest.fn(),
-              },
-              showAlertDetails: jest.fn(),
-              useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-              userCanCrud: true,
-            }}
-          />
-        </TestProviders>
-      );
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <CaseView
+              {...{
+                refreshRef,
+                caseId: '1234',
+                onComponentInitialized: jest.fn(),
+                showAlertDetails: jest.fn(),
+                useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+                userCanCrud: true,
+              }}
+            />
+          </TestProviders>
+        );
+      });
     });
 
     it('should set it with expected refresh interface', async () => {
       expect(refreshRef!.current).toEqual({
-        refreshUserActionsAndComments: expect.any(Function),
         refreshCase: expect.any(Function),
       });
     });
 
     it('should refresh actions and comments', async () => {
+      refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        refreshRef!.current!.refreshUserActionsAndComments();
-        expect(fetchCaseUserActions).toBeCalledWith('1234', 'resilient-2', undefined);
+        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2');
+        expect(fetchCaseMetrics).toBeCalledWith(true);
         expect(fetchCase).toBeCalledWith(true);
-      });
-    });
-
-    it('should refresh case', async () => {
-      await waitFor(() => {
-        refreshRef!.current!.refreshCase();
-        expect(fetchCase).toBeCalledWith(); // No args given to `fetchCase()`
-      });
-    });
-  });
-
-  describe('Callouts', () => {
-    it('it shows the danger callout when a connector has been deleted', async () => {
-      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));
-      const wrapper = mount(
-        <TestProviders>
-          <CaseComponent {...caseProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeTruthy();
-      });
-    });
-
-    it('it does NOT shows the danger callout when connectors are loading', async () => {
-      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: true }));
-      const wrapper = mount(
-        <TestProviders>
-          <CaseComponent {...caseProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeFalsy();
-      });
-    });
-  });
-
-  describe('Collections', () => {
-    it('it does not allow the user to update the status', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <CaseComponent
-            {...caseProps}
-            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="case-action-bar-wrapper"]').exists()).toBe(true);
-        expect(wrapper.find('button[data-test-subj="case-view-status"]').exists()).toBe(false);
-        expect(wrapper.find('[data-test-subj="user-actions"]').exists()).toBe(true);
-        expect(
-          wrapper.find('button[data-test-subj="case-view-status-action-button"]').exists()
-        ).toBe(false);
-      });
-    });
-
-    it('it shows the push button when has data to push', async () => {
-      useGetCaseUserActionsMock.mockImplementation(() => ({
-        ...defaultUseGetCaseUserActions,
-        hasDataToPush: true,
-      }));
-
-      const wrapper = mount(
-        <TestProviders>
-          <CaseComponent
-            {...caseProps}
-            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="has-data-to-push-button"]').exists()).toBe(true);
-      });
-    });
-
-    it('it does not show the horizontal rule when does NOT has data to push', async () => {
-      useGetCaseUserActionsMock.mockImplementation(() => ({
-        ...defaultUseGetCaseUserActions,
-        hasDataToPush: false,
-      }));
-
-      const wrapper = mount(
-        <TestProviders>
-          <CaseComponent
-            {...caseProps}
-            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(
-          wrapper.find('[data-test-subj="case-view-bottom-actions-horizontal-rule"]').exists()
-        ).toBe(false);
       });
     });
   });

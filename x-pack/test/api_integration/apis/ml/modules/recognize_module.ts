@@ -38,16 +38,6 @@ export default ({ getService }: FtrProviderContext) => {
       },
     },
     {
-      testTitleSuffix: 'for apm dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm',
-      indexPattern: 'ft_module_apm',
-      user: USER.ML_POWERUSER,
-      expected: {
-        responseCode: 200,
-        moduleIds: ['apm_jsbase', 'apm_nodejs'],
-      },
-    },
-    {
       testTitleSuffix: 'for logs dataset',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_logs',
       indexPattern: 'ft_module_logs',
@@ -202,14 +192,24 @@ export default ({ getService }: FtrProviderContext) => {
         moduleIds: ['nginx_data_stream'],
       },
     },
+    {
+      testTitleSuffix: 'for apm transaction dataset',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      indexPattern: 'ft_module_apm_transaction',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['apm_transaction'],
+      },
+    },
   ];
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/modules/recognize/${indexPattern}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(rspCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }

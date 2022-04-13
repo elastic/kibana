@@ -9,12 +9,14 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
+  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts', 'jest\\.config\\.js'],
 
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: !!process.env.CODE_COVERAGE
@@ -28,6 +30,7 @@ module.exports = {
   moduleNameMapper: {
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
+    'elastic-apm-node': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/apm_agent_mock.js',
     '\\.module.(css|scss)$':
       '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/css_module_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/style_mock.js',
@@ -46,19 +49,34 @@ module.exports = {
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
 
   // Use this configuration option to add custom reporters to Jest
-  reporters: ['default', '@kbn/test/target_node/jest/junit_reporter'],
+  reporters: [
+    'default',
+    [
+      '@kbn/test/target_node/jest/junit_reporter',
+      {
+        rootDirectory: '.',
+      },
+    ],
+    [
+      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+      {
+        testGroupType: 'Jest Unit Tests',
+      },
+    ],
+  ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/babel_polyfill.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/polyfills.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/polyfills.jsdom.js',
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/enzyme.js',
   ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/setup_test.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/react_testing_library.js',
   ],
 
@@ -66,7 +84,7 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
-    '<rootDir>/node_modules/@emotion/jest/serializer',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/emotion.js',
   ],
 
   // The test environment that will be used for testing
@@ -112,4 +130,6 @@ module.exports = {
 
   // A custom resolver to preserve symlinks by default
   resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+
+  watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 };

@@ -21,9 +21,19 @@ import {
   tap,
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, ToastsSetup } from 'kibana/public';
+import {
+  ApplicationStart,
+  CoreStart,
+  DocLinksStart,
+  HttpSetup,
+  IHttpFetchError,
+  IUiSettingsClient,
+  ThemeServiceSetup,
+  ToastsSetup,
+  ExecutionContextSetup,
+} from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '../../../../bfetch/public';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -54,20 +64,23 @@ import { SearchAbortController } from './search_abort_controller';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
-  http: CoreSetup['http'];
-  uiSettings: CoreSetup['uiSettings'];
+  http: HttpSetup;
+  executionContext: ExecutionContextSetup;
+  uiSettings: IUiSettingsClient;
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
+  theme: ThemeServiceSetup;
 }
 
 const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
 
 export class SearchInterceptor {
-  private uiSettingsSub: Subscription;
+  private uiSettingsSubs: Subscription[] = [];
   private searchTimeout: number;
+  private bFetchDisabled: boolean;
   private readonly responseCache: SearchResponseCache = new SearchResponseCache(
     MAX_CACHE_ITEMS,
     MAX_CACHE_SIZE_MB
@@ -82,8 +95,8 @@ export class SearchInterceptor {
   /**
    * @internal
    */
-  private application!: CoreStart['application'];
-  private docLinks!: CoreStart['docLinks'];
+  private application!: ApplicationStart;
+  private docLinks!: DocLinksStart;
   private batchedFetch!: BatchedFunc<
     { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
     IKibanaSearchResponse
@@ -105,17 +118,21 @@ export class SearchInterceptor {
     });
 
     this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
+    this.bFetchDisabled = deps.uiSettings.get(DISABLE_BFETCH);
 
-    this.uiSettingsSub = deps.uiSettings
-      .get$(UI_SETTINGS.SEARCH_TIMEOUT)
-      .subscribe((timeout: number) => {
+    this.uiSettingsSubs.push(
+      deps.uiSettings.get$(UI_SETTINGS.SEARCH_TIMEOUT).subscribe((timeout: number) => {
         this.searchTimeout = timeout;
-      });
+      }),
+      deps.uiSettings.get$(DISABLE_BFETCH).subscribe((bFetchDisabled: boolean) => {
+        this.bFetchDisabled = bFetchDisabled;
+      })
+    );
   }
 
   public stop() {
     this.responseCache.clear();
-    this.uiSettingsSub.unsubscribe();
+    this.uiSettingsSubs.forEach((s) => s.unsubscribe());
   }
 
   /*
@@ -265,13 +282,38 @@ export class SearchInterceptor {
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
-    return this.batchedFetch(
-      {
-        request,
-        options: this.getSerializableOptions(options),
-      },
-      abortSignal
-    );
+
+    if (this.bFetchDisabled) {
+      const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+      return this.deps.http
+        .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
+          signal: abortSignal,
+          context: executionContext,
+          body: JSON.stringify({
+            ...request,
+            ...searchOptions,
+          }),
+        })
+        .catch((e: IHttpFetchError<KibanaServerError>) => {
+          if (e?.body) {
+            throw e.body;
+          } else {
+            throw e;
+          }
+        }) as Promise<IKibanaSearchResponse>;
+    } else {
+      const { executionContext, ...rest } = options || {};
+      return this.batchedFetch(
+        {
+          request,
+          options: this.getSerializableOptions({
+            ...rest,
+            executionContext: this.deps.executionContext.withGlobalContext(executionContext),
+          }),
+        },
+        abortSignal
+      );
+    }
   }
 
   /**
@@ -318,9 +360,12 @@ export class SearchInterceptor {
    */
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
     const searchOptions = {
-      strategy: ENHANCED_ES_SEARCH_STRATEGY,
       ...options,
     };
+    if (!searchOptions.strategy) {
+      searchOptions.strategy = ENHANCED_ES_SEARCH_STRATEGY;
+    }
+
     const { sessionId, abortSignal } = searchOptions;
 
     return this.createRequestHash$(request, searchOptions).pipe(
@@ -377,13 +422,13 @@ export class SearchInterceptor {
   private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
     this.deps.toasts.addDanger({
       title: 'Timed out',
-      text: toMountPoint(e.getErrorMessage(this.application)),
+      text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
     });
   };
 
   private showTimeoutErrorMemoized = memoize(
     this.showTimeoutErrorToast,
-    (_: SearchTimeoutError, sessionId: string) => {
+    (_: SearchTimeoutError, sessionId?: string) => {
       return sessionId;
     }
   );
@@ -392,7 +437,9 @@ export class SearchInterceptor {
     this.deps.toasts.addWarning(
       {
         title: 'Your search session is still running',
-        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks)),
+        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), {
+          theme$: this.deps.theme.theme$,
+        }),
       },
       {
         toastLifeTimeMs: 60000,
@@ -400,12 +447,7 @@ export class SearchInterceptor {
     );
   };
 
-  private showRestoreWarning = memoize(
-    this.showRestoreWarningToast,
-    (_: SearchTimeoutError, sessionId: string) => {
-      return sessionId;
-    }
-  );
+  private showRestoreWarning = memoize(this.showRestoreWarningToast);
 
   /**
    * Show one error notification per session.
@@ -428,14 +470,14 @@ export class SearchInterceptor {
         title: i18n.translate('data.search.esErrorTitle', {
           defaultMessage: 'Cannot retrieve search results',
         }),
-        text: toMountPoint(e.getErrorMessage(this.application)),
+        text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
       });
     } else if (e.constructor.name === 'HttpFetchError') {
       this.deps.toasts.addDanger({
         title: i18n.translate('data.search.httpErrorTitle', {
           defaultMessage: 'Cannot retrieve your data',
         }),
-        text: toMountPoint(getHttpError(e.message)),
+        text: toMountPoint(getHttpError(e.message), { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

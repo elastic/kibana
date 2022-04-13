@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useUiTracker } from '../../../../../../observability/public';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
@@ -52,21 +52,11 @@ export const BottomDrawer: React.FC<{
             aria-expanded={isOpen}
             iconType={isOpen ? 'arrowDown' : 'arrowRight'}
             onClick={onClick}
+            data-test-subj="toggleTimelineButton"
           >
             {isOpen ? hideHistory : showHistory}
           </ShowHideButton>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          style={{
-            position: 'relative',
-            minWidth: 400,
-            height: '16px',
-          }}
-        >
-          {children}
-        </EuiFlexItem>
-        <RightSideSpacer />
       </BottomActionTopBar>
       <EuiFlexGroup style={{ marginTop: 0 }}>
         <Timeline isVisible={isOpen} interval={interval} yAxisFormatter={formatter} />
@@ -94,9 +84,5 @@ const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({
 `;
 
 const ShowHideButton = euiStyled(EuiButtonEmpty).attrs({ size: 's' })`
-  width: 140px;
-`;
-
-const RightSideSpacer = euiStyled(EuiSpacer).attrs({ size: 'xs' })`
   width: 140px;
 `;

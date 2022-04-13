@@ -27,6 +27,7 @@ import {
 import { Version } from '@kbn/securitysolution-io-ts-types';
 
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import type { Filter } from '@kbn/es-query';
 import {
   AnomalyThresholdOrUndefined,
   Description,
@@ -52,12 +53,11 @@ import {
   EventCategoryOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 
-import { Filter } from '../../../../../../src/plugins/data/server';
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams as AlertingRuleTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;
 
-export interface RuleTypeParams extends AlertTypeParams {
+export interface RuleTypeParams extends AlertingRuleTypeParams {
   anomalyThreshold?: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -80,6 +80,7 @@ export interface RuleTypeParams extends AlertTypeParams {
   query?: QueryOrUndefined;
   filters?: unknown[];
   maxSignals: MaxSignals;
+  namespace?: string;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMappingOrUndefined;
   ruleNameOverride: RuleNameOverrideOrUndefined;

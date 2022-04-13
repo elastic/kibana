@@ -2,7 +2,11 @@
 
 exports[`props iconType 1`] = `
 <EuiCard
-  betaBadgeLabel={null}
+  betaBadgeProps={
+    Object {
+      "label": null,
+    }
+  }
   className="homSynopsis__card"
   data-test-subj="homeSynopsisLinktutorial"
   description="this is a great tutorial about..."
@@ -24,7 +28,11 @@ exports[`props iconType 1`] = `
 
 exports[`props iconUrl 1`] = `
 <EuiCard
-  betaBadgeLabel={null}
+  betaBadgeProps={
+    Object {
+      "label": null,
+    }
+  }
   className="homSynopsis__card"
   data-test-subj="homeSynopsisLinktutorial"
   description="this is a great tutorial about..."
@@ -45,7 +53,11 @@ exports[`props iconUrl 1`] = `
 
 exports[`props isBeta 1`] = `
 <EuiCard
-  betaBadgeLabel="Beta"
+  betaBadgeProps={
+    Object {
+      "label": "Beta",
+    }
+  }
   className="homSynopsis__card"
   data-test-subj="homeSynopsisLinktutorial"
   description="this is a great tutorial about..."
@@ -59,7 +71,11 @@ exports[`props isBeta 1`] = `
 
 exports[`render 1`] = `
 <EuiCard
-  betaBadgeLabel={null}
+  betaBadgeProps={
+    Object {
+      "label": null,
+    }
+  }
   className="homSynopsis__card"
   data-test-subj="homeSynopsisLinktutorial"
   description="this is a great tutorial about..."

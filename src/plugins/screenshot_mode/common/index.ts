@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+export { getScreenshotContext, setScreenshotContext } from './context';
 export {
   getScreenshotMode,
   setScreenshotModeEnabled,
   setScreenshotModeDisabled,
   KBN_SCREENSHOT_MODE_ENABLED_KEY,
-} from './get_set_browser_screenshot_mode';
-
+} from './mode';
 export { KBN_SCREENSHOT_MODE_HEADER } from './constants';

@@ -7,9 +7,13 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectReference } from 'kibana/server';
 import type { LocatorDependencies } from './locator';
-import type { LocatorDefinition, LocatorPublic, ILocatorClient } from './types';
+import type { LocatorDefinition, LocatorPublic, ILocatorClient, LocatorData } from './types';
 import { Locator } from './locator';
+import { LocatorMigrationFunction, LocatorsMigrationMap } from '.';
 
 export type LocatorClientDependencies = LocatorDependencies;
 
@@ -44,4 +48,92 @@ export class LocatorClient implements ILocatorClient {
   public get<P extends SerializableRecord>(id: string): undefined | LocatorPublic<P> {
     return this.locators.get(id);
   }
+
+  protected getOrThrow<P extends SerializableRecord>(id: string): LocatorPublic<P> {
+    const locator = this.locators.get(id);
+    if (!locator) throw new Error(`Locator [ID = "${id}"] is not registered.`);
+    return locator;
+  }
+
+  public migrations(): { [locatorId: string]: MigrateFunctionsObject } {
+    const migrations: { [locatorId: string]: MigrateFunctionsObject } = {};
+
+    for (const locator of this.locators.values()) {
+      migrations[locator.id] =
+        typeof locator.migrations === 'function' ? locator.migrations() : locator.migrations;
+    }
+
+    return migrations;
+  }
+
+  // PersistableStateService<LocatorData> ----------------------------------------------------------
+
+  public telemetry(
+    state: LocatorData,
+    collector: Record<string, unknown>
+  ): Record<string, unknown> {
+    for (const locator of this.locators.values()) {
+      collector = locator.telemetry(state.state, collector);
+    }
+
+    return collector;
+  }
+
+  public inject(state: LocatorData, references: SavedObjectReference[]): LocatorData {
+    const locator = this.getOrThrow(state.id);
+    const filteredReferences = references
+      .filter((ref) => ref.name.startsWith('params:'))
+      .map((ref) => ({
+        ...ref,
+        name: ref.name.substr('params:'.length),
+      }));
+    return {
+      ...state,
+      state: locator.inject(state.state, filteredReferences),
+    };
+  }
+
+  public extract(state: LocatorData): { state: LocatorData; references: SavedObjectReference[] } {
+    const locator = this.getOrThrow(state.id);
+    const extracted = locator.extract(state.state);
+    return {
+      state: {
+        ...state,
+        state: extracted.state,
+      },
+      references: extracted.references.map((ref) => ({
+        ...ref,
+        name: 'params:' + ref.name,
+      })),
+    };
+  }
+
+  public readonly getAllMigrations = (): LocatorsMigrationMap => {
+    const locatorParamsMigrations = this.migrations();
+    const locatorMigrations: LocatorsMigrationMap = {};
+    const versions = new Set<string>();
+
+    for (const migrationMap of Object.values(locatorParamsMigrations))
+      for (const version of Object.keys(migrationMap)) versions.add(version);
+
+    for (const version of versions.values()) {
+      const migration: LocatorMigrationFunction = (locator) => {
+        const locatorMigrationsMap = locatorParamsMigrations[locator.id];
+        if (!locatorMigrationsMap) return locator;
+
+        const migrationFunction = locatorMigrationsMap[version];
+        if (!migrationFunction) return locator;
+
+        return {
+          ...locator,
+          version,
+          state: migrationFunction(locator.state),
+        };
+      };
+
+      locatorMigrations[version] = migration;
+    }
+
+    return locatorMigrations;
+  };
 }

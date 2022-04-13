@@ -24,12 +24,12 @@ export function santaLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'santaLogs',
     name: i18n.translate('home.tutorials.santaLogs.nameTitle', {
-      defaultMessage: 'Google Santa logs',
+      defaultMessage: 'Google Santa Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.santaLogs.shortDescription', {
-      defaultMessage: 'Collect Google Santa logs about process executions on MacOS.',
+      defaultMessage: 'Collect and parse logs from Google Santa systems with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.santaLogs.longDescription', {
       defaultMessage:
@@ -58,8 +58,8 @@ export function santaLogsSpecProvider(context: TutorialContext): TutorialSchema 
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/santa_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security', 'os_system'],
   };
 }

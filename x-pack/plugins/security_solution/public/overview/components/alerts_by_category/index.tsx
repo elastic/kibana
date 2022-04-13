@@ -8,18 +8,16 @@
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import { Position } from '@elastic/charts';
+import styled from 'styled-components';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { EuiButton } from '@elastic/eui';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { HostsTableType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
@@ -32,17 +30,19 @@ import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_t
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
-import { LinkButton } from '../../../common/components/links';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 
 const ID = 'alertsByCategoryOverview';
 
 const DEFAULT_STACK_BY = 'event.module';
 
+const StyledLinkButton = styled(EuiButton)`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.l};
+`;
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters: Filter[];
   hideHeaderChildren?: boolean;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   indexNames: string[];
   query: Query;
 }
@@ -68,7 +68,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const goToHostAlerts = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.alerts, urlSearch),
       });
@@ -78,13 +78,13 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
 
   const alertsCountViewAlertsButton = useMemo(
     () => (
-      <LinkButton
+      <StyledLinkButton
         data-test-subj="view-alerts"
         onClick={goToHostAlerts}
         href={formatUrl(getTabsOnHostsUrl(HostsTableType.alerts))}
       >
         {i18n.VIEW_ALERTS}
-      </LinkButton>
+      </StyledLinkButton>
     ),
     [goToHostAlerts, formatUrl]
   );
@@ -105,7 +105,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,

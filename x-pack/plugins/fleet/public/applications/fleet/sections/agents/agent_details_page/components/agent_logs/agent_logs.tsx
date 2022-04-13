@@ -22,7 +22,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { fromKueryExpression } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
@@ -277,9 +277,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
 
     return (
       <WrapperFlexGroup direction="column" gutterSize="m">
-        {agentPolicy && !agentPolicy.monitoring_enabled?.includes('logs') && (
-          <AgentPolicyLogsNotEnabledCallout agentPolicy={agentPolicy} />
-        )}
+        {agentPolicy &&
+          !agentPolicy.monitoring_enabled?.includes('logs') &&
+          !agentPolicy.is_managed && <AgentPolicyLogsNotEnabledCallout agentPolicy={agentPolicy} />}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>

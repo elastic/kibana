@@ -13,9 +13,7 @@ export function useApmRouter() {
   const router = useRouter();
   const { core } = useApmPluginContext();
 
-  const link = (...args: any[]) => {
-    // a little too much effort needed to satisfy TS here
-    // @ts-ignore
+  const link = (...args: [any]) => {
     return core.http.basePath.prepend('/app/apm' + router.link(...args));
   };
 

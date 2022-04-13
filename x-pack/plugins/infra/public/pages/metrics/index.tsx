@@ -11,7 +11,6 @@ import React, { useContext } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
-import { IIndexPattern } from 'src/plugins/data/common';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -40,7 +39,8 @@ import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabi
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { useLinkProps } from '../../hooks/use_link_props';
+import { useLinkProps } from '../../../../observability/public';
+import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -48,7 +48,7 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
+  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
@@ -84,8 +84,8 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     })}
                   />
 
-                  {setHeaderActionMenu && (
-                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+                  {setHeaderActionMenu && theme$ && (
+                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
                       <EuiHeaderLinks gutterSize="xs">
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}
@@ -93,9 +93,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
                         <MetricsAlertDropdown />
                         <EuiHeaderLink
-                          href={kibana.services?.application?.getUrlForApp(
-                            '/home#/tutorial_directory/metrics'
-                          )}
+                          href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
                           color="primary"
                           iconType="indexOpen"
                         >
@@ -141,7 +139,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
 const PageContent = (props: {
   configuration: MetricsSourceConfigurationProperties;
-  createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
+  createDerivedIndexPattern: CreateDerivedIndexPattern;
 }) => {
   const { createDerivedIndexPattern, configuration } = props;
   const { options } = useContext(MetricsExplorerOptionsContainer.Context);
@@ -153,7 +151,7 @@ const PageContent = (props: {
       defaultViewState={DEFAULT_METRICS_EXPLORER_VIEW_STATE}
     >
       <MetricsExplorerPage
-        derivedIndexPattern={createDerivedIndexPattern('metrics')}
+        derivedIndexPattern={createDerivedIndexPattern()}
         source={configuration}
         {...props}
       />

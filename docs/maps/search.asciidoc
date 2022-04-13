@@ -43,7 +43,7 @@ To prevent the global search from applying to a layer, configure the following:
 [[maps-narrow-layer-by-global-time]]
 ==== Narrow layers by global time
 
-Layers that request data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the <<set-time-filter, global time>>.
+Layers that request data from {es} using a <<data-views, data view>> with a configured time field are narrowed by the <<set-time-filter, global time>>.
 These layers contain the clock icon image:maps/images/clock_icon.png[clock icon] next to the layer name in the legend.
 
 Use the time slider to quickly select time slices within the global time range:
@@ -133,7 +133,7 @@ If the map is a dashboard panel with drilldowns, you can apply a phrase filter t
 You can apply a search request to individual layers by setting `Filters` in the layer details panel.
 Click the *Add filter* button to add a filter to a layer.
 
-NOTE: Layer filters are not applied to *term joins*. You can apply a search request to *term joins* by setting the *where* clause in the join definition.
+NOTE: Layer filters are not applied to the right side of *term joins*. You can apply a search request to the right side of *term joins* by setting the *where* clause in the join definition. For example, suppose you have a layer with a term join where the left side is roads and the right side is traffic volume measurements. A layer filter of `roadType is "highway"` is applied to the roads index, but not to the traffic volume measurements index.
 
 [role="screenshot"]
 image::maps/images/layer_search.png[]

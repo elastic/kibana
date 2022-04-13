@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { TeamsActionConnector } from '../types';
 import TeamsActionFields from './teams_connectors';
@@ -30,6 +30,8 @@ describe('TeamsActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
 
@@ -56,6 +58,8 @@ describe('TeamsActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
@@ -79,6 +83,8 @@ describe('TeamsActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
@@ -103,6 +109,8 @@ describe('TeamsActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         readOnly={false}
+        setCallbacks={() => {}}
+        isEdit={false}
       />
     );
     expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);

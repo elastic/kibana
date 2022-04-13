@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 import React from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
@@ -71,7 +70,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    const typeData = data[flowTarget]!;
+    const typeData = data[flowTarget];
     const column: DescriptionList[] = [
       {
         title: i18n.LOCATION,

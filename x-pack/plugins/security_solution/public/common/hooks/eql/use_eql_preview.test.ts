@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 import * as i18n from '../translations';
-import { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
+import type { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
 import { Source } from './types';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { useKibana } from '../../../common/lib/kibana';

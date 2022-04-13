@@ -8,7 +8,7 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SpaceAvatarInternal } from '../../../space_avatar/space_avatar_internal';
 import { AdvancedSettingsTitle } from './advanced_settings_title';

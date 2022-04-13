@@ -80,21 +80,6 @@ describe('config.validate()', () => {
       ).not.toThrow();
     });
 
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          script_src: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -104,6 +89,7 @@ describe('config.validate()', () => {
         `"[script_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({
@@ -124,21 +110,6 @@ describe('config.validate()', () => {
   });
 
   describe(`"worker_src"`, () => {
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          worker_src: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -148,6 +119,7 @@ describe('config.validate()', () => {
         `"[worker_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({
@@ -168,21 +140,6 @@ describe('config.validate()', () => {
   });
 
   describe(`"style_src"`, () => {
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          style_src: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -192,6 +149,7 @@ describe('config.validate()', () => {
         `"[style_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({
@@ -212,21 +170,6 @@ describe('config.validate()', () => {
   });
 
   describe(`"connect_src"`, () => {
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          connect_src: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -236,6 +179,7 @@ describe('config.validate()', () => {
         `"[connect_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({
@@ -256,21 +200,6 @@ describe('config.validate()', () => {
   });
 
   describe(`"default_src"`, () => {
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          default_src: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -280,6 +209,7 @@ describe('config.validate()', () => {
         `"[default_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({
@@ -300,21 +230,6 @@ describe('config.validate()', () => {
   });
 
   describe(`"font_src"`, () => {
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          font_src: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -324,6 +239,7 @@ describe('config.validate()', () => {
         `"[font_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({
@@ -344,21 +260,6 @@ describe('config.validate()', () => {
   });
 
   describe(`"frame_src"`, () => {
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          frame_src: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -368,6 +269,7 @@ describe('config.validate()', () => {
         `"[frame_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({
@@ -388,21 +290,6 @@ describe('config.validate()', () => {
   });
 
   describe(`"img_src"`, () => {
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          img_src: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -412,6 +299,7 @@ describe('config.validate()', () => {
         `"[img_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({
@@ -432,21 +320,6 @@ describe('config.validate()', () => {
   });
 
   describe(`"frame_ancestors"`, () => {
-    it(`throws if 'rules' is also specified`, () => {
-      expect(() =>
-        config.schema.validate({
-          rules: [
-            `script-src 'unsafe-eval' 'self'`,
-            `worker-src 'unsafe-eval' 'self'`,
-            `style-src 'unsafe-eval' 'self'`,
-          ],
-          frame_ancestors: [`'self'`],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"\\"csp.rules\\" cannot be used when specifying per-directive additions such as \\"script_src\\", \\"worker_src\\" or \\"style_src\\""`
-      );
-    });
-
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
         config.schema.validate({
@@ -456,6 +329,7 @@ describe('config.validate()', () => {
         `"[frame_ancestors]: using \\"nonce-*\\" is considered insecure and is not allowed"`
       );
     });
+
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
         config.schema.validate({

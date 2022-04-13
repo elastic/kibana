@@ -7,7 +7,7 @@
  */
 
 import { FtrService } from '../ftr_provider_context';
-import { IndexPatternSpec } from '../../../src/plugins/data/common';
+import { DataViewSpec } from '../../../src/plugins/data/common';
 
 export class IndexPatternsService extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
@@ -16,13 +16,14 @@ export class IndexPatternsService extends FtrService {
    * Create a new index pattern
    */
   async create(
-    indexPattern: { title: string },
-    { override = false }: { override: boolean } = { override: false }
-  ): Promise<IndexPatternSpec> {
+    indexPattern: { title: string; timeFieldName?: string },
+    { override = false }: { override: boolean },
+    spaceId = ''
+  ): Promise<DataViewSpec> {
     const response = await this.kibanaServer.request<{
-      index_pattern: IndexPatternSpec;
+      index_pattern: DataViewSpec;
     }>({
-      path: '/api/index_patterns/index_pattern',
+      path: `${spaceId}/api/index_patterns/index_pattern`,
       method: 'POST',
       body: {
         override,

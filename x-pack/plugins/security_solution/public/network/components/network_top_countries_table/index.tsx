@@ -9,7 +9,7 @@ import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import { IIndexPattern } from 'src/plugins/data/public';
+import type { DataViewBase } from '@kbn/es-query';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import {
@@ -31,10 +31,11 @@ interface NetworkTopCountriesTableProps {
   fakeTotalCount: number;
   flowTargeted: FlowTargetSourceDest;
   id: string;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
@@ -62,6 +63,7 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -170,6 +172,7 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={{ field, direction: sort.direction }}
       totalCount={fakeTotalCount}

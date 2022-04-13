@@ -12,6 +12,7 @@ import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
 import { TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
+import { FieldBrowserOptions } from '../../fields_browser';
 
 export interface ActionProps {
   action?: RowCellRender;
@@ -67,6 +68,7 @@ export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
+  fieldBrowserOptions?: FieldBrowserOptions;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
   onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
@@ -104,8 +106,6 @@ interface AdditionalControlColumnProps {
   // Override these type definitions to support either a generic custom component or the one used in security_solution today.
   headerCellRender: HeaderCellRender;
   rowCellRender: RowCellRender;
-  // If not provided, calculated dynamically
-  width?: number;
 }
 
 export type ControlColumnProps = Omit<

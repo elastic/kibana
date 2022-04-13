@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { TimeRange } from 'src/plugins/data/common/query/timefilter/types';
 import { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
@@ -43,6 +43,8 @@ declare interface JobService {
   getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
   getJob(jobId: string): CombinedJob;
   loadJobsWrapper(): Promise<CombinedJob[]>;
+  customUrlsByJob: Record<string, any[]>;
+  detectorsByJob: Record<string, any>;
 }
 
 export const mlJobService: JobService;

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
@@ -35,6 +35,7 @@ export interface ExpressionWrapperProps {
     data: unknown,
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => void;
+  onRender$: () => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
@@ -106,6 +107,7 @@ export function ExpressionWrapper({
   interactive,
   searchSessionId,
   onData$,
+  onRender$,
   renderMode,
   syncColors,
   hasCompatibleActions,
@@ -132,6 +134,7 @@ export function ExpressionWrapper({
             searchContext={searchContext}
             searchSessionId={searchSessionId}
             onData$={onData$}
+            onRender$={onRender$}
             inspectorAdapters={lensInspector.adapters}
             renderMode={renderMode}
             syncColors={syncColors}

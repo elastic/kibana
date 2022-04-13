@@ -45,9 +45,21 @@ import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
-import { regenerateLayerFromAst } from '../parse';
+import { insertOrReplaceFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
+
+function tableHasData(
+  activeData: ParamEditorProps<FormulaIndexPatternColumn>['activeData'],
+  layerId: string,
+  columnId: string
+) {
+  const table = activeData?.[layerId];
+  if (!table || table.rows.length === 0) {
+    return false;
+  }
+  return table.rows.some((row) => row[columnId] != null);
+}
 
 export const WrappedFormulaEditor = ({
   activeData,
@@ -59,7 +71,13 @@ export const WrappedFormulaEditor = ({
     activeData,
     rest.layerId
   );
-  return <MemoizedFormulaEditor {...rest} dateHistogramInterval={dateHistogramInterval} />;
+  return (
+    <MemoizedFormulaEditor
+      {...rest}
+      dateHistogramInterval={dateHistogramInterval}
+      hasData={tableHasData(activeData, rest.layerId, rest.columnId)}
+    />
+  );
 };
 
 const MemoizedFormulaEditor = React.memo(FormulaEditor);
@@ -76,8 +94,10 @@ export function FormulaEditor({
   isFullscreen,
   setIsCloseable,
   dateHistogramInterval,
+  hasData,
 }: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
+  hasData: boolean;
 }) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [warnings, setWarnings] = useState<
@@ -131,16 +151,24 @@ export function FormulaEditor({
     setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
-      updateLayer((prevLayer) => {
-        return regenerateLayerFromAst(
-          text || '',
-          prevLayer,
-          columnId,
-          currentColumn,
-          indexPattern,
-          operationDefinitionMap
-        ).newLayer;
-      });
+      updateLayer(
+        (prevLayer) =>
+          insertOrReplaceFormulaColumn(
+            columnId,
+            {
+              ...currentColumn,
+              params: {
+                ...currentColumn.params,
+                formula: text || '',
+              },
+            },
+            prevLayer,
+            {
+              indexPattern,
+              operations: operationDefinitionMap,
+            }
+          ).layer
+      );
     }
   });
 
@@ -153,15 +181,23 @@ export function FormulaEditor({
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
         if (currentColumn.params.formula) {
           // Only submit if valid
-          const { newLayer } = regenerateLayerFromAst(
-            text || '',
-            layer,
-            columnId,
-            currentColumn,
-            indexPattern,
-            operationDefinitionMap
+          updateLayer(
+            insertOrReplaceFormulaColumn(
+              columnId,
+              {
+                ...currentColumn,
+                params: {
+                  ...currentColumn.params,
+                  formula: text || '',
+                },
+              },
+              layer,
+              {
+                indexPattern,
+                operations: operationDefinitionMap,
+              }
+            ).layer
           );
-          updateLayer(newLayer);
         }
 
         return;
@@ -173,25 +209,43 @@ export function FormulaEditor({
       if (error) {
         errors = [error];
       } else if (root) {
-        const validationErrors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
+        const validationErrors = runASTValidation(
+          root,
+          layer,
+          indexPattern,
+          visibleOperationsMap,
+          currentColumn
+        );
         if (validationErrors.length) {
           errors = validationErrors;
         }
       }
 
       if (errors.length) {
-        if (currentColumn.params.isFormulaBroken) {
+        // Replace the previous error with the new one
+        const previousFormulaWasBroken = currentColumn.params.isFormulaBroken;
+        // If the user is changing a previous formula and there are currently no result
+        // show the most up-to-date state with the error message.
+        const previousFormulaWasOkButNoData = !currentColumn.params.isFormulaBroken && !hasData;
+        if (previousFormulaWasBroken || previousFormulaWasOkButNoData) {
           // If the formula is already broken, show the latest error message in the workspace
           if (currentColumn.params.formula !== text) {
             updateLayer(
-              regenerateLayerFromAst(
-                text || '',
-                layer,
+              insertOrReplaceFormulaColumn(
                 columnId,
-                currentColumn,
-                indexPattern,
-                visibleOperationsMap
-              ).newLayer
+                {
+                  ...currentColumn,
+                  params: {
+                    ...currentColumn.params,
+                    formula: text || '',
+                  },
+                },
+                layer,
+                {
+                  indexPattern,
+                  operations: operationDefinitionMap,
+                }
+              ).layer
             );
           }
         }
@@ -239,14 +293,25 @@ export function FormulaEditor({
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
 
         // Only submit if valid
-        const { newLayer, locations } = regenerateLayerFromAst(
-          text || '',
-          layer,
+        const {
+          layer: newLayer,
+          meta: { locations },
+        } = insertOrReplaceFormulaColumn(
           columnId,
-          currentColumn,
-          indexPattern,
-          visibleOperationsMap
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: text || '',
+            },
+          },
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
         );
+
         updateLayer(newLayer);
 
         const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);
@@ -301,7 +366,7 @@ export function FormulaEditor({
     // from a previous edit
     { skipFirstRender: false },
     256,
-    [text]
+    [text, currentColumn.filter]
   );
 
   const errorCount = warnings.filter(

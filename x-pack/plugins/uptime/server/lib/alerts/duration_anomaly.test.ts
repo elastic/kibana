@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  ALERT_SEVERITY,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
@@ -17,6 +16,7 @@ import { DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
 import { Ping } from '../../../common/runtime_types/ping';
+import { ALERT_REASON_MSG, VIEW_IN_APP_URL } from './action_variables';
 
 interface MockAnomaly {
   severity: AnomaliesTableRecord['severity'];
@@ -158,6 +158,7 @@ describe('duration anomaly alert', () => {
       );
       const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
       expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(2);
+      const reasonMessages: string[] = [];
       mockAnomaliesResult.anomalies.forEach((anomaly, index) => {
         const slowestResponse = Math.round(anomaly.actualSort / 1000);
         const typicalResponse = Math.round(anomaly.typicalSort / 1000);
@@ -170,7 +171,6 @@ describe('duration anomaly alert', () => {
             'observer.geo.name': anomaly.entityValue,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
-            [ALERT_SEVERITY]: getSeverityType(anomaly.severity),
             [ALERT_REASON]: `Abnormal (${getSeverityType(
               anomaly.severity
             )} level) response time detected on uptime-monitor with url ${
@@ -182,6 +182,7 @@ Response times as high as ${slowestResponse} ms have been detected from location
           },
           id: `${DURATION_ANOMALY.id}${index}`,
         });
+
         expect(alertInstanceMock.replaceState).toBeCalledWith({
           firstCheckedAt: 'date',
           firstTriggeredAt: undefined,
@@ -200,9 +201,37 @@ Response times as high as ${slowestResponse} ms have been detected from location
           slowestAnomalyResponse: `${slowestResponse} ms`,
           bucketSpan: anomaly.source.bucket_span,
         });
+        const reasonMsg = `Abnormal (${getSeverityType(
+          anomaly.severity
+        )} level) response time detected on uptime-monitor with url ${
+          mockPing.url?.full
+        } at date. Anomaly severity score is ${anomaly.severity}.
+        Response times as high as ${slowestResponse} ms have been detected from location ${
+          anomaly.entityValue
+        }. Expected response time is ${typicalResponse} ms.`;
+
+        reasonMessages.push(reasonMsg);
       });
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(2);
-      expect(alertInstanceMock.scheduleActions).toBeCalledWith(DURATION_ANOMALY.id);
+
+      expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "xpack.uptime.alerts.actionGroups.durationAnomaly",
+          Object {
+            "${ALERT_REASON_MSG}": "${reasonMessages[0]}",
+            "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MA==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
+          },
+        ]
+      `);
+      expect(alertInstanceMock.scheduleActions.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          "xpack.uptime.alerts.actionGroups.durationAnomaly",
+          Object {
+            "${ALERT_REASON_MSG}": "${reasonMessages[1]}",
+            "${VIEW_IN_APP_URL}": "http://localhost:5601/hfe/app/uptime/monitor/eHBhY2sudXB0aW1lLmFsZXJ0cy5hY3Rpb25Hcm91cHMuZHVyYXRpb25Bbm9tYWx5MQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z",
+          },
+        ]
+      `);
     });
   });
 });

@@ -6,25 +6,18 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { ML_RULE_TYPE_ID } from '../../../../../common/constants';
+import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+
 import { machineLearningRuleParams, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
 
-export const createMlAlertType = (createOptions: CreateRuleOptions) => {
-  const { lists, logger, mergeStrategy, ignoreFields, ml, ruleDataClient, ruleDataService } =
-    createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    mergeStrategy,
-    ignoreFields,
-    ruleDataClient,
-    ruleDataService,
-  });
-  return createSecurityRuleType<MachineLearningRuleParams, {}, PersistenceServices, {}>({
+export const createMlAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
+  const { logger, ml } = createOptions;
+  return {
     id: ML_RULE_TYPE_ID,
     name: 'Machine Learning Rule',
     validate: {
@@ -53,7 +46,7 @@ export const createMlAlertType = (createOptions: CreateRuleOptions) => {
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
@@ -61,7 +54,7 @@ export const createMlAlertType = (createOptions: CreateRuleOptions) => {
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           tuple,
           wrapHits,
         },
@@ -76,12 +69,12 @@ export const createMlAlertType = (createOptions: CreateRuleOptions) => {
         listClient,
         logger,
         ml,
-        rule,
+        completeRule,
         services,
         tuple,
         wrapHits,
       });
       return { ...result, state };
     },
-  });
+  };
 };

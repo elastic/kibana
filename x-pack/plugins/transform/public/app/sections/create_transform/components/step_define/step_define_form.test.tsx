@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
 
@@ -57,10 +57,10 @@ describe('Transform: <DefinePivotForm />', () => {
     const mlSharedImports = await getMlSharedImports();
 
     const searchItems = {
-      indexPattern: {
-        title: 'the-index-pattern-title',
+      dataView: {
+        title: 'the-data-view-title',
         fields: [] as any[],
-      } as SearchItems['indexPattern'],
+      } as SearchItems['dataView'],
     };
 
     // mock services for QueryStringInput
@@ -83,8 +83,8 @@ describe('Transform: <DefinePivotForm />', () => {
 
     // Act
     // Assert
-    expect(getByText('Index pattern')).toBeInTheDocument();
-    expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
+    expect(getByText('Data view')).toBeInTheDocument();
+    expect(getByText(searchItems.dataView.title)).toBeInTheDocument();
   });
 });
 

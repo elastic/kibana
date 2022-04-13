@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockHttpValues,
-  mockFlashMessageHelpers,
-} from '../../../../../__mocks__/kea_logic';
+import { LogicMounter, mockHttpValues } from '../../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+jest.mock('../../curations_logic', () => ({
+  CurationsLogic: {
+    values: {},
+    actions: {
+      loadCurations: jest.fn(),
+    },
+  },
+}));
+
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { CurationsLogic } from '../..';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
+import { EngineLogic } from '../../../engine';
 
 import { CurationsSettingsLogic } from './curations_settings_logic';
 
@@ -27,7 +36,6 @@ const DEFAULT_VALUES = {
 describe('CurationsSettingsLogic', () => {
   const { mount } = new LogicMounter(CurationsSettingsLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -85,7 +93,7 @@ describe('CurationsSettingsLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/settings'
+          '/internal/app_search/engines/some-engine/adaptive_relevance/settings'
         );
         expect(CurationsSettingsLogic.actions.onCurationsSettingsLoad).toHaveBeenCalledWith({
           enabled: true,
@@ -93,14 +101,8 @@ describe('CurationsSettingsLogic', () => {
         });
       });
 
-      it('presents any API errors to the user', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
-        mount();
-
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         CurationsSettingsLogic.actions.loadCurationsSettings();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -192,7 +194,7 @@ describe('CurationsSettingsLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/settings',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/settings',
           {
             body: JSON.stringify({
               curation: {
@@ -205,16 +207,14 @@ describe('CurationsSettingsLogic', () => {
           enabled: true,
           mode: 'automatic',
         });
+
+        // data should have been reloaded
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalled();
+        expect(CurationsLogic.actions.loadCurations).toHaveBeenCalled();
       });
 
-      it('presents any API errors to the user', async () => {
-        http.put.mockReturnValueOnce(Promise.reject('error'));
-        mount();
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationsSettingsLogic.actions.updateCurationsSetting({});
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });

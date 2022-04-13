@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { CoreSetup } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+
+import { CoreSetup, ExecutionContextStart } from 'kibana/public';
+import { KibanaContextProvider, KibanaThemeProvider, useExecutionContext } from './shared_imports';
 // @ts-ignore
 import { rollupJobsStore } from './crud_app/store';
 // @ts-ignore
@@ -19,12 +20,27 @@ import './index.scss';
 
 import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
 
+const AppWithExecutionContext = ({
+  history,
+  executionContext,
+}: {
+  history: ManagementAppMountParams['history'];
+  executionContext: ExecutionContextStart;
+}) => {
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'rollup',
+  });
+
+  return <App history={history} />;
+};
+
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
 export const renderApp = async (
   core: CoreSetup,
-  { history, element, setBreadcrumbs }: ManagementAppMountParams
+  { history, element, setBreadcrumbs, theme$ }: ManagementAppMountParams
 ) => {
   const [coreStart] = await core.getStartServices();
   const I18nContext = coreStart.i18n.Context;
@@ -36,11 +52,13 @@ export const renderApp = async (
 
   render(
     <I18nContext>
-      <KibanaContextProvider services={services}>
-        <Provider store={rollupJobsStore}>
-          <App history={history} />
-        </Provider>
-      </KibanaContextProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <KibanaContextProvider services={services}>
+          <Provider store={rollupJobsStore}>
+            <AppWithExecutionContext executionContext={core.executionContext} history={history} />
+          </Provider>
+        </KibanaContextProvider>
+      </KibanaThemeProvider>
     </I18nContext>,
     element
   );

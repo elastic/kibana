@@ -7,21 +7,20 @@
 
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import { LensStoreDeps } from '..';
-import { loadInitial as loadInitialAction, navigateAway } from '..';
+import { loadInitial as loadInitialAction } from '..';
 import { loadInitial } from './load_initial';
-import { subscribeToExternalContext } from './subscribe_to_external_context';
+import { readFromStorage } from '../../settings_storage';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
+
+const autoApplyDisabled = () => {
+  return readFromStorage(new Storage(localStorage), AUTO_APPLY_DISABLED_STORAGE_KEY) === 'true';
+};
 
 export const initMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
-  const unsubscribeFromExternalContext = subscribeToExternalContext(
-    storeDeps.lensServices.data,
-    store.getState,
-    store.dispatch
-  );
   return (next: Dispatch) => (action: PayloadAction) => {
     if (loadInitialAction.match(action)) {
-      return loadInitial(store, storeDeps, action.payload);
-    } else if (navigateAway.match(action)) {
-      return unsubscribeFromExternalContext();
+      return loadInitial(store, storeDeps, action.payload, autoApplyDisabled());
     }
     next(action);
   };

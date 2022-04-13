@@ -53,14 +53,12 @@ export const createDeserializer =
       cold: {
         enabled: Boolean(cold),
         dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
-        freezeEnabled: Boolean(cold?.actions?.freeze),
         readonlyEnabled: Boolean(cold?.actions?.readonly),
         minAgeToMilliSeconds: -1,
       },
       frozen: {
         enabled: Boolean(frozen),
         dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
-        freezeEnabled: Boolean(frozen?.actions?.freeze),
         minAgeToMilliSeconds: -1,
       },
       delete: {

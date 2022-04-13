@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Enumeration Command Spawned via WMIPrvSE",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name:\n  (\n    \"arp.exe\",\n    \"dsquery.exe\",\n    \"dsget.exe\",\n    \"gpresult.exe\",\n    \"hostname.exe\",\n    \"ipconfig.exe\",\n    \"nbtstat.exe\",\n    \"net.exe\",\n    \"net1.exe\",\n    \"netsh.exe\",\n    \"netstat.exe\",\n    \"nltest.exe\",\n    \"ping.exe\",\n    \"qprocess.exe\",\n    \"quser.exe\",\n    \"qwinsta.exe\",\n    \"reg.exe\",\n    \"sc.exe\",\n    \"systeminfo.exe\",\n    \"tasklist.exe\",\n    \"tracert.exe\",\n    \"whoami.exe\"\n  ) and\n  process.parent.name:\"wmiprvse.exe\"\n",
   "risk_score": 21,
   "rule_id": "770e0c4d-b998-41e5-a62e-c7901fd7f470",
@@ -38,9 +39,34 @@
           "reference": "https://attack.mitre.org/techniques/T1047/"
         }
       ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1018",
+          "name": "Remote System Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1018/"
+        },
+        {
+          "id": "T1087",
+          "name": "Account Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1087/"
+        },
+        {
+          "id": "T1518",
+          "name": "Software Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1518/"
+        }
+      ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

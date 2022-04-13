@@ -16,22 +16,32 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
         <button
           aria-controls="accordion-variables"
           aria-expanded={false}
+          aria-labelledby="generated-id"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+          onClick={[Function]}
+          tabIndex={-1}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+            size="m"
+          >
+            
+          </span>
+        </button>
+        <button
+          aria-controls="accordion-variables"
+          aria-expanded={false}
           className="euiAccordion__button"
           id="generated-id"
           onClick={[Function]}
           type="button"
         >
           <span
-            className="euiAccordion__iconWrapper"
-          >
-            <span
-              className="euiAccordion__icon"
-              data-euiicon-type="arrowRight"
-              size="m"
-            />
-          </span>
-          <span
-            className="euiIEFlexWrapFix"
+            className="euiAccordion__buttonContent"
           >
             <span
               className="euiToolTipAnchor"
@@ -58,7 +68,6 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
             <button
               aria-label="Add a variable"
               className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -70,7 +79,9 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
                 color="inherit"
                 data-euiicon-type="plusInCircle"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>

@@ -12,6 +12,7 @@ import {
   getAlertMock,
   getUpdateRequest,
   getFindResultWithSingleHit,
+  getRuleExecutionSummarySucceeded,
   nonRuleFindResult,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
@@ -43,13 +44,16 @@ describe.each([
     clients.rulesClient.update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // successful update
-    clients.ruleExecutionLogClient.find.mockResolvedValue([]); // successful transform: ;
+    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
+      getRuleExecutionSummarySucceeded()
+    );
+    clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
     updateRulesRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
+  describe('status codes', () => {
+    test('returns 200', async () => {
       const response = await server.inject(getUpdateRequest(), context);
       expect(response.status).toEqual(200);
     });
@@ -63,22 +67,6 @@ describe.each([
         message: 'rule_id: "rule-1" not found',
         status_code: 404,
       });
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getRulesClient = jest.fn();
-      const response = await server.inject(getUpdateRequest(), context);
-
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
-    it('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      // @ts-expect-error
-      const response = await server.inject(getUpdateRequest(), contextWithoutSecuritySolution);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('returns error when updating non-rule', async () => {

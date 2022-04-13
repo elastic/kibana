@@ -8,7 +8,7 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { RemoteClustersUIPlugin } from './plugin';
 
-export { RemoteClustersPluginSetup } from './plugin';
+export type { RemoteClustersPluginSetup } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new RemoteClustersUIPlugin(initializerContext);

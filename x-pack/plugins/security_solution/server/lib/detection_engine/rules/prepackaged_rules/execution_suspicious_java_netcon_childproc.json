@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an outbound network connection by JAVA to LDAP, RMI or DNS standard ports followed by a suspicious JAVA child processes. This may indicate an attempt to exploit a JAVA/NDI (Java Naming and Directory Interface) injection vulnerability.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential JAVA/JNDI Exploitation Attempt",
+  "query": "sequence by host.id with maxspan=1m\n [network where event.action == \"connection_attempted\" and\n  process.name : \"java\" and\n  /*\n     outbound connection attempt to\n     LDAP, RMI or DNS standard ports\n     by JAVA process\n   */\n  destination.port in (1389, 389, 1099, 53, 5353)] by process.pid\n [process where event.type == \"start\" and\n\n  /* Suspicious JAVA child process */\n  process.parent.name : \"java\" and\n   process.name : (\"sh\",\n                   \"bash\",\n                   \"dash\",\n                   \"ksh\",\n                   \"tcsh\",\n                   \"zsh\",\n                   \"curl\",\n                   \"perl*\",\n                   \"python*\",\n                   \"ruby*\",\n                   \"php*\",\n                   \"wget\")] by process.parent.pid\n",
+  "references": [
+    "https://www.lunasec.io/docs/blog/log4j-zero-day/",
+    "https://github.com/christophetd/log4shell-vulnerable-app",
+    "https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf"
+  ],
+  "risk_score": 73,
+  "rule_id": "c3f5e1d8-910e-43b4-8d44-d748e498ca86",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "macOS",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.007",
+              "name": "JavaScript",
+              "reference": "https://attack.mitre.org/techniques/T1059/007/"
+            }
+          ]
+        },
+        {
+          "id": "T1203",
+          "name": "Exploitation for Client Execution",
+          "reference": "https://attack.mitre.org/techniques/T1203/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 2
+}

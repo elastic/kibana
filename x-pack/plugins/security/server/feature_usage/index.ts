@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  SecurityFeatureUsageService,
-  SecurityFeatureUsageServiceStart,
-} from './feature_usage_service';
+export type { SecurityFeatureUsageServiceStart } from './feature_usage_service';
+export { SecurityFeatureUsageService } from './feature_usage_service';

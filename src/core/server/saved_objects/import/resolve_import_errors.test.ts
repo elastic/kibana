@@ -6,6 +6,21 @@
  * Side Public License, v 1.
  */
 
+import {
+  mockCheckReferenceOrigins,
+  mockValidateRetries,
+  mockCreateObjectsFilter,
+  mockCollectSavedObjects,
+  mockRegenerateIds,
+  mockValidateReferences,
+  mockCheckConflicts,
+  mockCheckOriginConflicts,
+  mockGetImportStateMapForRetries,
+  mockSplitOverwrites,
+  mockCreateSavedObjects,
+  mockExecuteImportHooks,
+} from './resolve_import_errors.test.mock';
+
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -25,58 +40,37 @@ import {
   ResolveSavedObjectsImportErrorsOptions,
 } from './resolve_import_errors';
 
-import {
-  validateRetries,
-  collectSavedObjects,
-  regenerateIds,
-  validateReferences,
-  checkConflicts,
-  getImportIdMapForRetries,
-  splitOverwrites,
-  createSavedObjects,
-  createObjectsFilter,
-  executeImportHooks,
-} from './lib';
-
-jest.mock('./lib/validate_retries');
-jest.mock('./lib/create_objects_filter');
-jest.mock('./lib/collect_saved_objects');
-jest.mock('./lib/regenerate_ids');
-jest.mock('./lib/validate_references');
-jest.mock('./lib/check_conflicts');
-jest.mock('./lib/check_origin_conflicts');
-jest.mock('./lib/split_overwrites');
-jest.mock('./lib/create_saved_objects');
-jest.mock('./lib/execute_import_hooks');
-
-const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
-  fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
-
 describe('#importSavedObjectsFromStream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // mock empty output of each of these mocked modules so the import doesn't throw an error
-    getMockFn(createObjectsFilter).mockReturnValue(() => false);
-    getMockFn(collectSavedObjects).mockResolvedValue({
+    mockCreateObjectsFilter.mockReturnValue(() => false);
+    mockCollectSavedObjects.mockResolvedValue({
       errors: [],
       collectedObjects: [],
-      importIdMap: new Map(),
+      importStateMap: new Map(),
     });
-    getMockFn(regenerateIds).mockReturnValue(new Map());
-    getMockFn(validateReferences).mockResolvedValue([]);
-    getMockFn(checkConflicts).mockResolvedValue({
+    mockCheckReferenceOrigins.mockResolvedValue({ importStateMap: new Map() });
+    mockRegenerateIds.mockReturnValue(new Map());
+    mockValidateReferences.mockResolvedValue([]);
+    mockCheckConflicts.mockResolvedValue({
       errors: [],
       filteredObjects: [],
-      importIdMap: new Map(),
-      pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
+      importStateMap: new Map(),
+      pendingOverwrites: new Set(),
     });
-    getMockFn(getImportIdMapForRetries).mockReturnValue(new Map());
-    getMockFn(splitOverwrites).mockReturnValue({
+    mockCheckOriginConflicts.mockResolvedValue({
+      errors: [],
+      importStateMap: new Map(),
+      pendingOverwrites: new Set(),
+    });
+    mockGetImportStateMapForRetries.mockReturnValue(new Map());
+    mockSplitOverwrites.mockReturnValue({
       objectsToOverwrite: [],
       objectsToNotOverwrite: [],
     });
-    getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
-    getMockFn(executeImportHooks).mockResolvedValue([]);
+    mockCreateSavedObjects.mockResolvedValue({ errors: [], createdObjects: [] });
+    mockExecuteImportHooks.mockResolvedValue([]);
   });
 
   let readStream: Readable;
@@ -144,7 +138,6 @@ describe('#importSavedObjectsFromStream', () => {
     return {
       type: 'foo-type',
       id: uuidv4(),
-      title: 'some-title',
       meta: { title },
       error: { type: 'conflict' },
     };
@@ -153,7 +146,7 @@ describe('#importSavedObjectsFromStream', () => {
   /**
    * These tests use minimal mocks which don't look realistic, but are sufficient to exercise the code paths correctly. For example, for an
    * object to be imported successfully it would need to be obtained from `collectSavedObjects`, passed to `validateReferences`, passed to
-   * `getImportIdMapForRetries`, passed to `createSavedObjects`, and returned from that. However, for each of the tests below, we skip the
+   * `getImportStateMapForRetries`, passed to `createSavedObjects`, and returned from that. However, for each of the tests below, we skip the
    * intermediate steps in the interest of brevity.
    */
   describe('module calls', () => {
@@ -162,7 +155,7 @@ describe('#importSavedObjectsFromStream', () => {
       const options = setupOptions({ retries: [retry] });
 
       await resolveSavedObjectsImportErrors(options);
-      expect(validateRetries).toHaveBeenCalledWith([retry]);
+      expect(mockValidateRetries).toHaveBeenCalledWith([retry]);
     });
 
     test('creates objects filter', async () => {
@@ -170,7 +163,7 @@ describe('#importSavedObjectsFromStream', () => {
       const options = setupOptions({ retries: [retry] });
 
       await resolveSavedObjectsImportErrors(options);
-      expect(createObjectsFilter).toHaveBeenCalledWith([retry]);
+      expect(mockCreateObjectsFilter).toHaveBeenCalledWith([retry]);
     });
 
     test('collects saved objects from stream', async () => {
@@ -182,28 +175,62 @@ describe('#importSavedObjectsFromStream', () => {
 
       await resolveSavedObjectsImportErrors(options);
       expect(typeRegistry.getImportableAndExportableTypes).toHaveBeenCalled();
-      const filter = getMockFn(createObjectsFilter).mock.results[0].value;
-      const collectSavedObjectsOptions = { readStream, objectLimit, filter, supportedTypes };
-      expect(collectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
+      const filter = mockCreateObjectsFilter.mock.results[0].value;
+      const mockCollectSavedObjectsOptions = { readStream, objectLimit, filter, supportedTypes };
+      expect(mockCollectSavedObjects).toHaveBeenCalledWith(mockCollectSavedObjectsOptions);
+    });
+
+    test('checks reference origins', async () => {
+      const retries = [createRetry()];
+      const options = setupOptions({ retries });
+      const collectedObjects = [createObject()];
+      const importStateMap = new Map([
+        [`${collectedObjects[0].type}:${collectedObjects[0].id}`, {}],
+        [`foo:bar`, { isOnlyReference: true }],
+      ]);
+      mockCollectSavedObjects.mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importStateMap,
+      });
+
+      await resolveSavedObjectsImportErrors(options);
+      expect(mockCheckReferenceOrigins).toHaveBeenCalledWith({
+        savedObjectsClient,
+        typeRegistry,
+        namespace,
+        importStateMap,
+      });
     });
 
     test('validates references', async () => {
       const retries = [createRetry()];
       const options = setupOptions({ retries });
       const collectedObjects = [createObject()];
-      getMockFn(collectSavedObjects).mockResolvedValue({
+      mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map([
+          [`${collectedObjects[0].type}:${collectedObjects[0].id}`, {}],
+          [`foo:bar`, { isOnlyReference: true }],
+        ]),
+      });
+      mockCheckReferenceOrigins.mockResolvedValue({
+        importStateMap: new Map([[`foo:bar`, { isOnlyReference: true, id: 'baz' }]]),
       });
 
       await resolveSavedObjectsImportErrors(options);
-      expect(validateReferences).toHaveBeenCalledWith(
-        collectedObjects,
+      expect(mockValidateReferences).toHaveBeenCalledWith({
+        objects: collectedObjects,
         savedObjectsClient,
         namespace,
-        retries
-      );
+        importStateMap: new Map([
+          // This importStateMap is a combination of the other two
+          [`${collectedObjects[0].type}:${collectedObjects[0].id}`, {}],
+          [`foo:bar`, { isOnlyReference: true, id: 'baz' }],
+        ]),
+        retries,
+      });
     });
 
     test('execute import hooks', async () => {
@@ -212,19 +239,19 @@ describe('#importSavedObjectsFromStream', () => {
       };
       const options = setupOptions({ importHooks });
       const collectedObjects = [createObject()];
-      getMockFn(collectSavedObjects).mockResolvedValue({
+      mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(),
+        importStateMap: new Map(),
       });
-      getMockFn(createSavedObjects).mockResolvedValueOnce({
+      mockCreateSavedObjects.mockResolvedValueOnce({
         errors: [],
         createdObjects: collectedObjects,
       });
 
       await resolveSavedObjectsImportErrors(options);
 
-      expect(executeImportHooks).toHaveBeenCalledWith({
+      expect(mockExecuteImportHooks).toHaveBeenCalledWith({
         objects: collectedObjects,
         importHooks,
       });
@@ -239,23 +266,25 @@ describe('#importSavedObjectsFromStream', () => {
         }),
       ];
       const options = setupOptions({ retries });
-      getMockFn(collectSavedObjects).mockResolvedValue({
+      mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects: [object],
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
       });
+      // mockCheckReferenceOrigins returns an empty importStateMap by default
 
       await resolveSavedObjectsImportErrors(options);
       const objectWithReplacedReferences = {
         ...object,
         references: [{ ...object.references[0], id: 'def' }],
       };
-      expect(validateReferences).toHaveBeenCalledWith(
-        [objectWithReplacedReferences],
+      expect(mockValidateReferences).toHaveBeenCalledWith({
+        objects: [objectWithReplacedReferences],
         savedObjectsClient,
         namespace,
-        retries
-      );
+        importStateMap: new Map(), // doesn't matter
+        retries,
+      });
     });
 
     test('checks conflicts', async () => {
@@ -263,10 +292,10 @@ describe('#importSavedObjectsFromStream', () => {
       const retries = [createRetry()];
       const options = setupOptions({ retries, createNewCopies });
       const collectedObjects = [createObject()];
-      getMockFn(collectSavedObjects).mockResolvedValue({
+      mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
       });
 
       await resolveSavedObjectsImportErrors(options);
@@ -277,7 +306,33 @@ describe('#importSavedObjectsFromStream', () => {
         retries,
         createNewCopies,
       };
-      expect(checkConflicts).toHaveBeenCalledWith(checkConflictsParams);
+      expect(mockCheckConflicts).toHaveBeenCalledWith(checkConflictsParams);
+    });
+
+    test('checks origin conflicts', async () => {
+      const retries = [createRetry()];
+      const options = setupOptions({ retries });
+      const filteredObjects = [createObject()];
+      const importStateMap = new Map();
+      const pendingOverwrites = new Set<string>();
+      mockCheckConflicts.mockResolvedValue({
+        errors: [],
+        filteredObjects,
+        importStateMap,
+        pendingOverwrites,
+      });
+
+      await resolveSavedObjectsImportErrors(options);
+      const checkOriginConflictsParams = {
+        objects: filteredObjects,
+        savedObjectsClient,
+        typeRegistry,
+        namespace,
+        importStateMap,
+        pendingOverwrites,
+        retries,
+      };
+      expect(mockCheckOriginConflicts).toHaveBeenCalledWith(checkOriginConflictsParams);
     });
 
     test('gets import ID map for retries', async () => {
@@ -285,76 +340,103 @@ describe('#importSavedObjectsFromStream', () => {
       const createNewCopies = Symbol() as unknown as boolean;
       const options = setupOptions({ retries, createNewCopies });
       const filteredObjects = [createObject()];
-      getMockFn(checkConflicts).mockResolvedValue({
+      mockCheckConflicts.mockResolvedValue({
         errors: [],
         filteredObjects,
-        importIdMap: new Map(),
-        pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
+        importStateMap: new Map(),
+        pendingOverwrites: new Set(),
       });
 
       await resolveSavedObjectsImportErrors(options);
-      const getImportIdMapForRetriesParams = { objects: filteredObjects, retries, createNewCopies };
-      expect(getImportIdMapForRetries).toHaveBeenCalledWith(getImportIdMapForRetriesParams);
+      const getImportStateMapForRetriesParams = {
+        objects: filteredObjects,
+        retries,
+        createNewCopies,
+      };
+      expect(mockGetImportStateMapForRetries).toHaveBeenCalledWith(
+        getImportStateMapForRetriesParams
+      );
     });
 
     test('splits objects to overwrite from those not to overwrite', async () => {
       const retries = [createRetry()];
       const options = setupOptions({ retries });
       const collectedObjects = [createObject()];
-      getMockFn(collectSavedObjects).mockResolvedValue({
+      mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
       });
 
       await resolveSavedObjectsImportErrors(options);
-      expect(splitOverwrites).toHaveBeenCalledWith(collectedObjects, retries);
+      expect(mockSplitOverwrites).toHaveBeenCalledWith(collectedObjects, retries);
     });
 
     describe('with createNewCopies disabled', () => {
       test('does not regenerate object IDs', async () => {
         const options = setupOptions();
         const collectedObjects = [createObject()];
-        getMockFn(collectSavedObjects).mockResolvedValue({
+        mockCollectSavedObjects.mockResolvedValue({
           errors: [],
           collectedObjects,
-          importIdMap: new Map(), // doesn't matter
+          importStateMap: new Map(), // doesn't matter
         });
 
         await resolveSavedObjectsImportErrors(options);
-        expect(regenerateIds).not.toHaveBeenCalled();
+        expect(mockRegenerateIds).not.toHaveBeenCalled();
       });
 
       test('creates saved objects', async () => {
         const options = setupOptions();
-        const errors = [createError(), createError(), createError()];
-        getMockFn(collectSavedObjects).mockResolvedValue({
+        const errors = [createError(), createError(), createError(), createError()];
+        mockCollectSavedObjects.mockResolvedValue({
           errors: [errors[0]],
           collectedObjects: [], // doesn't matter
-          importIdMap: new Map(), // doesn't matter
+          importStateMap: new Map([
+            ['a', {}],
+            ['b', {}],
+            ['c', {}],
+            ['d', { isOnlyReference: true }],
+          ]),
         });
-        getMockFn(validateReferences).mockResolvedValue([errors[1]]);
-        getMockFn(checkConflicts).mockResolvedValue({
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['d', { isOnlyReference: true, destinationId: 'newId-d' }]]),
+        });
+        mockValidateReferences.mockResolvedValue([errors[1]]);
+        mockCheckConflicts.mockResolvedValue({
           errors: [errors[2]],
           filteredObjects: [],
-          importIdMap: new Map([['foo', { id: 'someId' }]]),
-          pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
+          importStateMap: new Map([
+            ['b', { destinationId: 'newId-b2' }],
+            ['c', { destinationId: 'newId-c2' }],
+          ]),
+          pendingOverwrites: new Set(),
         });
-        getMockFn(getImportIdMapForRetries).mockReturnValue(
+        mockCheckOriginConflicts.mockResolvedValue({
+          errors: [errors[3]],
+          importStateMap: new Map([['c', { destinationId: 'newId-c3' }]]),
+          pendingOverwrites: new Set(),
+        });
+        mockGetImportStateMapForRetries.mockReturnValue(
           new Map([
-            ['foo', { id: 'newId' }],
-            ['bar', { id: 'anotherNewId' }],
+            ['a', { destinationId: 'newId-a1' }],
+            ['b', { destinationId: 'newId-b1' }],
+            ['c', { destinationId: 'newId-c1' }],
           ])
         );
-        const importIdMap = new Map([
-          ['foo', { id: 'someId' }],
-          ['bar', { id: 'anotherNewId' }],
+
+        // assert that the importStateMap is correctly composed of the results from the four modules
+        const importStateMap = new Map([
+          ['a', { destinationId: 'newId-a1' }],
+          ['b', { destinationId: 'newId-b2' }],
+          ['c', { destinationId: 'newId-c3' }],
+          ['d', { isOnlyReference: true, destinationId: 'newId-d' }],
         ]);
         const objectsToOverwrite = [createObject()];
         const objectsToNotOverwrite = [createObject()];
-        getMockFn(splitOverwrites).mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });
-        getMockFn(createSavedObjects).mockResolvedValueOnce({
-          errors: [createError()], // this error will NOT be passed to the second `createSavedObjects` call
+        mockSplitOverwrites.mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });
+        mockCreateSavedObjects.mockResolvedValueOnce({
+          errors: [createError()], // this error will NOT be passed to the second `mockCreateSavedObjects` call
           createdObjects: [],
         });
 
@@ -362,15 +444,15 @@ describe('#importSavedObjectsFromStream', () => {
         const partialCreateSavedObjectsParams = {
           accumulatedErrors: errors,
           savedObjectsClient,
-          importIdMap,
+          importStateMap,
           namespace,
         };
-        expect(createSavedObjects).toHaveBeenNthCalledWith(1, {
+        expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(1, {
           ...partialCreateSavedObjectsParams,
           objects: objectsToOverwrite,
           overwrite: true,
         });
-        expect(createSavedObjects).toHaveBeenNthCalledWith(2, {
+        expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(2, {
           ...partialCreateSavedObjectsParams,
           objects: objectsToNotOverwrite,
         });
@@ -381,54 +463,78 @@ describe('#importSavedObjectsFromStream', () => {
       test('regenerates object IDs', async () => {
         const options = setupOptions({ createNewCopies: true });
         const collectedObjects = [createObject()];
-        getMockFn(collectSavedObjects).mockResolvedValue({
+        mockCollectSavedObjects.mockResolvedValue({
           errors: [],
           collectedObjects,
-          importIdMap: new Map(), // doesn't matter
+          importStateMap: new Map(), // doesn't matter
         });
 
         await resolveSavedObjectsImportErrors(options);
-        expect(regenerateIds).toHaveBeenCalledWith(collectedObjects);
+        expect(mockRegenerateIds).toHaveBeenCalledWith(collectedObjects);
+      });
+
+      test('does not check origin conflicts', async () => {
+        const options = setupOptions({ createNewCopies: true });
+        const collectedObjects = [createObject()];
+        mockCollectSavedObjects.mockResolvedValue({
+          errors: [],
+          collectedObjects,
+          importStateMap: new Map(), // doesn't matter
+        });
+
+        await resolveSavedObjectsImportErrors(options);
+        expect(mockCheckOriginConflicts).not.toHaveBeenCalled();
       });
 
       test('creates saved objects', async () => {
         const options = setupOptions({ createNewCopies: true });
         const errors = [createError(), createError(), createError()];
-        getMockFn(collectSavedObjects).mockResolvedValue({
+        mockCollectSavedObjects.mockResolvedValue({
           errors: [errors[0]],
           collectedObjects: [], // doesn't matter
-          importIdMap: new Map(), // doesn't matter
+          importStateMap: new Map([
+            ['a', {}],
+            ['b', {}],
+            ['c', {}],
+            ['d', { isOnlyReference: true }],
+          ]),
         });
-        getMockFn(validateReferences).mockResolvedValue([errors[1]]);
-        getMockFn(regenerateIds).mockReturnValue(
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['d', { isOnlyReference: true, destinationId: 'newId-d' }]]),
+        });
+        mockValidateReferences.mockResolvedValue([errors[1]]);
+        mockRegenerateIds.mockReturnValue(
           new Map([
-            ['foo', { id: 'randomId1' }],
-            ['bar', { id: 'randomId2' }],
-            ['baz', { id: 'randomId3' }],
+            ['a', { destinationId: 'randomId-a' }],
+            ['b', { destinationId: 'randomId-b' }],
+            ['c', { destinationId: 'randomId-c' }],
           ])
         );
-        getMockFn(checkConflicts).mockResolvedValue({
+        mockCheckConflicts.mockResolvedValue({
           errors: [errors[2]],
           filteredObjects: [],
-          importIdMap: new Map([['bar', { id: 'someId' }]]),
-          pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
+          importStateMap: new Map([['c', { destinationId: 'newId-c2' }]]),
+          pendingOverwrites: new Set(),
         });
-        getMockFn(getImportIdMapForRetries).mockReturnValue(
+        mockGetImportStateMapForRetries.mockReturnValue(
           new Map([
-            ['bar', { id: 'newId' }],
-            ['baz', { id: 'anotherNewId' }],
+            ['b', { destinationId: 'newId-b1' }],
+            ['c', { destinationId: 'newId-c1' }],
           ])
         );
-        const importIdMap = new Map([
-          ['foo', { id: 'randomId1' }],
-          ['bar', { id: 'someId' }],
-          ['baz', { id: 'anotherNewId' }],
+
+        // assert that the importStateMap is correctly composed of the results from the five modules
+        const importStateMap = new Map([
+          ['a', { destinationId: 'randomId-a' }],
+          ['b', { destinationId: 'newId-b1' }],
+          ['c', { destinationId: 'newId-c2' }],
+          ['d', { isOnlyReference: true, destinationId: 'newId-d' }],
         ]);
         const objectsToOverwrite = [createObject()];
         const objectsToNotOverwrite = [createObject()];
-        getMockFn(splitOverwrites).mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });
-        getMockFn(createSavedObjects).mockResolvedValueOnce({
-          errors: [createError()], // this error will NOT be passed to the second `createSavedObjects` call
+        mockSplitOverwrites.mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });
+        mockCreateSavedObjects.mockResolvedValueOnce({
+          errors: [createError()], // this error will NOT be passed to the second `mockCreateSavedObjects` call
           createdObjects: [],
         });
 
@@ -436,15 +542,15 @@ describe('#importSavedObjectsFromStream', () => {
         const partialCreateSavedObjectsParams = {
           accumulatedErrors: errors,
           savedObjectsClient,
-          importIdMap,
+          importStateMap,
           namespace,
         };
-        expect(createSavedObjects).toHaveBeenNthCalledWith(1, {
+        expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(1, {
           ...partialCreateSavedObjectsParams,
           objects: objectsToOverwrite,
           overwrite: true,
         });
-        expect(createSavedObjects).toHaveBeenNthCalledWith(2, {
+        expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(2, {
           ...partialCreateSavedObjectsParams,
           objects: objectsToNotOverwrite,
         });
@@ -462,10 +568,10 @@ describe('#importSavedObjectsFromStream', () => {
 
     test('returns success=false if an error occurred', async () => {
       const options = setupOptions();
-      getMockFn(collectSavedObjects).mockResolvedValue({
+      mockCollectSavedObjects.mockResolvedValue({
         errors: [createError()],
         collectedObjects: [],
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
       });
 
       const result = await resolveSavedObjectsImportErrors(options);
@@ -480,17 +586,17 @@ describe('#importSavedObjectsFromStream', () => {
     test('executes import hooks', async () => {
       const options = setupOptions();
       const collectedObjects = [createObject()];
-      getMockFn(collectSavedObjects).mockResolvedValue({
+      mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(),
+        importStateMap: new Map(),
       });
-      getMockFn(createSavedObjects).mockResolvedValueOnce({
+      mockCreateSavedObjects.mockResolvedValueOnce({
         errors: [],
         createdObjects: collectedObjects,
       });
       const warnings: SavedObjectsImportWarning[] = [{ type: 'simple', message: 'foo' }];
-      getMockFn(executeImportHooks).mockResolvedValue(warnings);
+      mockExecuteImportHooks.mockResolvedValue(warnings);
 
       const result = await resolveSavedObjectsImportErrors(options);
 
@@ -507,11 +613,11 @@ describe('#importSavedObjectsFromStream', () => {
       const tmp = createObject();
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
       const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId; this is a new copy
-      getMockFn(createSavedObjects).mockResolvedValueOnce({
+      mockCreateSavedObjects.mockResolvedValueOnce({
         errors: [error1],
         createdObjects: [obj1],
       });
-      getMockFn(createSavedObjects).mockResolvedValueOnce({
+      mockCreateSavedObjects.mockResolvedValueOnce({
         errors: [error2],
         createdObjects: [obj2, obj3],
       });
@@ -569,13 +675,13 @@ describe('#importSavedObjectsFromStream', () => {
         },
       });
 
-      getMockFn(checkConflicts).mockResolvedValue({
+      mockCheckConflicts.mockResolvedValue({
         errors: [],
         filteredObjects: [],
-        importIdMap: new Map(),
+        importStateMap: new Map(),
         pendingOverwrites: new Set(),
       });
-      getMockFn(createSavedObjects)
+      mockCreateSavedObjects
         .mockResolvedValueOnce({ errors: [], createdObjects: [obj1, obj2] })
         .mockResolvedValueOnce({ errors: [], createdObjects: [] });
 
@@ -607,17 +713,17 @@ describe('#importSavedObjectsFromStream', () => {
     test('accumulates multiple errors', async () => {
       const options = setupOptions();
       const errors = [createError(), createError(), createError(), createError()];
-      getMockFn(collectSavedObjects).mockResolvedValue({
+      mockCollectSavedObjects.mockResolvedValue({
         errors: [errors[0]],
         collectedObjects: [],
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
       });
-      getMockFn(validateReferences).mockResolvedValue([errors[1]]);
-      getMockFn(createSavedObjects).mockResolvedValueOnce({
+      mockValidateReferences.mockResolvedValue([errors[1]]);
+      mockCreateSavedObjects.mockResolvedValueOnce({
         errors: [errors[2]],
         createdObjects: [],
       });
-      getMockFn(createSavedObjects).mockResolvedValueOnce({
+      mockCreateSavedObjects.mockResolvedValueOnce({
         errors: [errors[3]],
         createdObjects: [],
       });

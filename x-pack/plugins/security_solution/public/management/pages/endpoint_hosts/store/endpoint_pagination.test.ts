@@ -11,7 +11,7 @@ import { applyMiddleware, Store, createStore } from 'redux';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
-import { HostResultList, AppLocation } from '../../../../../common/endpoint/types';
+import { AppLocation, MetadataListResponse } from '../../../../../common/endpoint/types';
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 
 import { endpointMiddlewareFactory } from './middleware';
@@ -19,15 +19,19 @@ import { endpointMiddlewareFactory } from './middleware';
 import { endpointListReducer } from './reducer';
 
 import { uiQueryParams } from './selectors';
-import { mockEndpointResultList } from './mock_endpoint_result_list';
+import {
+  mockEndpointResultList,
+  setEndpointListApiMockImplementation,
+} from './mock_endpoint_result_list';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import {
   MiddlewareActionSpyHelper,
   createSpyMiddleware,
 } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../policy/store/services/ingest', () => ({
+jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
 }));
@@ -40,8 +44,8 @@ describe('endpoint list pagination: ', () => {
   let queryParams: () => EndpointIndexUIQueryParams;
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let actionSpyMiddleware;
-  const getEndpointListApiResponse = (): HostResultList => {
-    return mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
+  const getEndpointListApiResponse = (): MetadataListResponse => {
+    return mockEndpointResultList({ pageSize: 1, page: 0, total: 10 });
   };
 
   let historyPush: (params: EndpointIndexUIQueryParams) => void;
@@ -63,13 +67,15 @@ describe('endpoint list pagination: ', () => {
     historyPush = (nextQueryParams: EndpointIndexUIQueryParams): void => {
       return history.push(getEndpointListPath({ name: 'endpointList', ...nextQueryParams }));
     };
+
+    setEndpointListApiMockImplementation(fakeHttpServices);
   });
 
   describe('when the user enteres the endpoint list for the first time', () => {
     it('the api is called with page_index and page_size defaulting to 0 and 10 respectively', async () => {
       const apiResponse = getEndpointListApiResponse();
-      fakeHttpServices.post.mockResolvedValue(apiResponse);
-      expect(fakeHttpServices.post).not.toHaveBeenCalled();
+      fakeHttpServices.get.mockResolvedValue(apiResponse);
+      expect(fakeHttpServices.get).not.toHaveBeenCalled();
 
       store.dispatch({
         type: 'userChangedUrl',
@@ -79,11 +85,12 @@ describe('endpoint list pagination: ', () => {
         },
       });
       await waitForAction('serverReturnedEndpointList');
-      expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: '0' }, { page_size: '10' }],
-          filters: { kql: '' },
-        }),
+      expect(fakeHttpServices.get).toHaveBeenCalledWith(HOST_METADATA_LIST_ROUTE, {
+        query: {
+          page: '0',
+          pageSize: '10',
+          kuery: '',
+        },
       });
     });
   });

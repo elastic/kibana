@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const fs = require('fs');
 const { execSync } = require('child_process');
 const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
@@ -8,6 +16,8 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
   const destination = process.argv[2] || __dirname + '/test';
 
   const ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
+  const ES_CLOUD_IMAGE = process.env.ELASTICSEARCH_CLOUD_IMAGE;
+  const ES_CLOUD_IMAGE_CHECKSUM = process.env.ELASTICSEARCH_CLOUD_IMAGE_CHECKSUM;
   const GIT_COMMIT = process.env.ELASTICSEARCH_GIT_COMMIT;
   const GIT_COMMIT_SHORT = process.env.ELASTICSEARCH_GIT_COMMIT_SHORT;
 
@@ -47,9 +57,20 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
           version: parts[1],
           platform: parts[3],
           architecture: parts[4].split('.')[0],
-          license: parts[0] == 'oss' ? 'oss' : 'default',
+          license: parts[0] === 'oss' ? 'oss' : 'default',
         };
       });
+
+    if (ES_CLOUD_IMAGE && ES_CLOUD_IMAGE_CHECKSUM) {
+      manifestEntries.push({
+        checksum: ES_CLOUD_IMAGE_CHECKSUM,
+        url: ES_CLOUD_IMAGE,
+        version: VERSION,
+        platform: 'docker',
+        architecture: 'image',
+        license: 'default',
+      });
+    }
 
     const manifest = {
       id: SNAPSHOT_ID,

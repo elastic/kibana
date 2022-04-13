@@ -7,14 +7,17 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 
 describe('Error handling', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
   });
 
   it('handles 403', async () => {
@@ -27,16 +30,13 @@ describe('Error handling', () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
-    const { component, exists, find } = testBed;
-
+    const { component, find } = testBed;
     component.update();
-
-    expect(exists('permissionsError')).toBe(true);
-    expect(find('permissionsError').text()).toContain(
-      'You are not authorized to view Elasticsearch deprecations.'
+    expect(find('deprecationsPageLoadingError').text()).toContain(
+      'You are not authorized to view Elasticsearch deprecation issues.'
     );
   });
 
@@ -55,15 +55,14 @@ describe('Error handling', () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
-    const { component, exists, find } = testBed;
-
+    const { component, find } = testBed;
     component.update();
-
-    expect(exists('upgradedCallout')).toBe(true);
-    expect(find('upgradedCallout').text()).toContain('All Elasticsearch nodes have been upgraded.');
+    expect(find('deprecationsPageLoadingError').text()).toContain(
+      'All Elasticsearch nodes have been upgraded.'
+    );
   });
 
   it('shows partially upgrade error when nodes are running different versions', async () => {
@@ -79,15 +78,12 @@ describe('Error handling', () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
-    const { component, exists, find } = testBed;
-
+    const { component, find } = testBed;
     component.update();
-
-    expect(exists('partiallyUpgradedWarning')).toBe(true);
-    expect(find('partiallyUpgradedWarning').text()).toContain(
+    expect(find('deprecationsPageLoadingError').text()).toContain(
       'Upgrade Kibana to the same version as your Elasticsearch cluster. One or more nodes in the cluster is running a different version than Kibana.'
     );
   });
@@ -102,14 +98,13 @@ describe('Error handling', () => {
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(undefined, error);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
     });
 
-    const { component, exists, find } = testBed;
-
+    const { component, find } = testBed;
     component.update();
-
-    expect(exists('requestError')).toBe(true);
-    expect(find('requestError').text()).toContain('Could not retrieve Elasticsearch deprecations.');
+    expect(find('deprecationsPageLoadingError').text()).toContain(
+      'Could not retrieve Elasticsearch deprecation issues.'
+    );
   });
 });

@@ -6,54 +6,81 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import { ConfigKeys, Validation } from '../types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFormRow } from '@elastic/eui';
+import { Validation } from '../types';
+import { ConfigKey } from '../types';
 import { useBrowserSimpleFieldsContext } from '../contexts';
-import { ComboBox } from '../combo_box';
-import { OptionalLabel } from '../optional_label';
 import { ScheduleField } from '../schedule_field';
 import { SourceField } from './source_field';
+import { SimpleFieldsWrapper } from '../common/simple_fields_wrapper';
 
 interface Props {
   validate: Validation;
+  onFieldBlur: (field: ConfigKey) => void; // To propagate blurred state up to parents
 }
 
-export const BrowserSimpleFields = memo<Props>(({ validate }) => {
+export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
   const { fields, setFields, defaultValues } = useBrowserSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
-    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
-  };
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
   const onChangeSourceField = useCallback(
-    ({ zipUrl, folder, username, password, inlineScript, params }) => {
+    ({
+      zipUrl,
+      folder,
+      username,
+      password,
+      inlineScript,
+      params,
+      proxyUrl,
+      isGeneratedScript,
+      fileName,
+    }) => {
       setFields((prevFields) => ({
         ...prevFields,
-        [ConfigKeys.SOURCE_ZIP_URL]: zipUrl,
-        [ConfigKeys.SOURCE_ZIP_FOLDER]: folder,
-        [ConfigKeys.SOURCE_ZIP_USERNAME]: username,
-        [ConfigKeys.SOURCE_ZIP_PASSWORD]: password,
-        [ConfigKeys.SOURCE_INLINE]: inlineScript,
-        [ConfigKeys.PARAMS]: params,
+        [ConfigKey.SOURCE_ZIP_URL]: zipUrl,
+        [ConfigKey.SOURCE_ZIP_PROXY_URL]: proxyUrl,
+        [ConfigKey.SOURCE_ZIP_FOLDER]: folder,
+        [ConfigKey.SOURCE_ZIP_USERNAME]: username,
+        [ConfigKey.SOURCE_ZIP_PASSWORD]: password,
+        [ConfigKey.SOURCE_INLINE]: inlineScript,
+        [ConfigKey.PARAMS]: params,
+        [ConfigKey.METADATA]: {
+          ...prevFields[ConfigKey.METADATA],
+          script_source: {
+            is_generated_script: isGeneratedScript,
+            file_name: fileName,
+          },
+        },
       }));
     },
     [setFields]
   );
 
   return (
-    <>
+    <SimpleFieldsWrapper
+      fields={fields}
+      validate={validate}
+      onInputChange={handleInputChange}
+      onFieldBlur={onFieldBlur}
+    >
       <EuiFormRow
         id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
-            defaultMessage="Monitor interval"
+            defaultMessage="Frequency"
           />
         }
-        isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields)}
+        isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-            defaultMessage="Monitor interval is required"
+            defaultMessage="Monitor frequency is required"
           />
         }
       >
@@ -61,11 +88,12 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
           onChange={(schedule) =>
             handleInputChange({
               value: schedule,
-              configKey: ConfigKeys.SCHEDULE,
+              configKey: ConfigKey.SCHEDULE,
             })
           }
-          number={fields[ConfigKeys.SCHEDULE].number}
-          unit={fields[ConfigKeys.SCHEDULE].unit}
+          onBlur={() => onFieldBlur(ConfigKey.SCHEDULE)}
+          number={fields[ConfigKey.SCHEDULE].number}
+          unit={fields[ConfigKey.SCHEDULE].unit}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -78,106 +106,24 @@ export const BrowserSimpleFields = memo<Props>(({ validate }) => {
       >
         <SourceField
           onChange={onChangeSourceField}
+          onFieldBlur={onFieldBlur}
           defaultConfig={useMemo(
             () => ({
-              zipUrl: defaultValues[ConfigKeys.SOURCE_ZIP_URL],
-              folder: defaultValues[ConfigKeys.SOURCE_ZIP_FOLDER],
-              username: defaultValues[ConfigKeys.SOURCE_ZIP_USERNAME],
-              password: defaultValues[ConfigKeys.SOURCE_ZIP_PASSWORD],
-              inlineScript: defaultValues[ConfigKeys.SOURCE_INLINE],
-              params: defaultValues[ConfigKeys.PARAMS],
+              zipUrl: defaultValues[ConfigKey.SOURCE_ZIP_URL],
+              proxyUrl: defaultValues[ConfigKey.SOURCE_ZIP_PROXY_URL],
+              folder: defaultValues[ConfigKey.SOURCE_ZIP_FOLDER],
+              username: defaultValues[ConfigKey.SOURCE_ZIP_USERNAME],
+              password: defaultValues[ConfigKey.SOURCE_ZIP_PASSWORD],
+              inlineScript: defaultValues[ConfigKey.SOURCE_INLINE],
+              params: defaultValues[ConfigKey.PARAMS],
+              isGeneratedScript:
+                defaultValues[ConfigKey.METADATA].script_source?.is_generated_script,
+              fileName: defaultValues[ConfigKey.METADATA].script_source?.file_name,
             }),
             [defaultValues]
           )}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.label"
-            defaultMessage="APM service name"
-          />
-        }
-        labelAppend={<OptionalLabel />}
-        helpText={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.helpText"
-            defaultMessage="APM service name for this monitor. Corresponds to the service.name ECS field. Set this when monitoring an app that is also using APM to enable integrations between Uptime and APM data in Kibana."
-          />
-        }
-      >
-        <EuiFieldText
-          value={fields[ConfigKeys.APM_SERVICE_NAME]}
-          onChange={(event) =>
-            handleInputChange({
-              value: event.target.value,
-              configKey: ConfigKeys.APM_SERVICE_NAME,
-            })
-          }
-          data-test-subj="syntheticsAPMServiceName"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.label"
-            defaultMessage="Timeout in seconds"
-          />
-        }
-        isInvalid={!!validate[ConfigKeys.TIMEOUT]?.(fields)}
-        error={
-          parseInt(fields[ConfigKeys.TIMEOUT], 10) < 0 ? (
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanZeroError"
-              defaultMessage="Timeout must be greater than or equal to 0"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
-              defaultMessage="Timeout must be less than the monitor interval"
-            />
-          )
-        }
-        helpText={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText"
-            defaultMessage="The total time allowed for testing the connection and exchanging data."
-          />
-        }
-      >
-        <EuiFieldNumber
-          min={0}
-          value={fields[ConfigKeys.TIMEOUT]}
-          onChange={(event) =>
-            handleInputChange({
-              value: event.target.value,
-              configKey: ConfigKeys.TIMEOUT,
-            })
-          }
-          step={'any'}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.label"
-            defaultMessage="Tags"
-          />
-        }
-        labelAppend={<OptionalLabel />}
-        helpText={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.helpText"
-            defaultMessage="A list of tags that will be sent with the monitor event. Press enter to add a new tag. Displayed in Uptime and enables searching by tag."
-          />
-        }
-      >
-        <ComboBox
-          selectedOptions={fields[ConfigKeys.TAGS]}
-          onChange={(value) => handleInputChange({ value, configKey: ConfigKeys.TAGS })}
-          data-test-subj="syntheticsTags"
-        />
-      </EuiFormRow>
-    </>
+    </SimpleFieldsWrapper>
   );
 });

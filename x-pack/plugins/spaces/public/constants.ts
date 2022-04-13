@@ -19,3 +19,7 @@ export const getSpacesFeatureDescription = () => {
 
   return spacesFeatureDescription;
 };
+
+export const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.shareToSpace.objectNoun', {
+  defaultMessage: 'object',
+});

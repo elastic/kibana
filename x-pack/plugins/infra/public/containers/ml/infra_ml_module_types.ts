@@ -15,7 +15,7 @@ import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload } from './api/ml_get_module';
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
 
-export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
+export type { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 
 export interface SetUpModuleArgs {
   start?: number | undefined;
@@ -49,12 +49,10 @@ export interface ModuleDescriptor<JobType extends string> {
   ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices?: (
     indices: string[],
-    timestampField: string,
     fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets?: (
     indices: string[],
-    timestampField: string,
     startTime: number,
     endTime: number,
     fetch: HttpHandler
@@ -65,7 +63,6 @@ export interface ModuleSourceConfiguration {
   indices: string[];
   sourceId: string;
   spaceId: string;
-  timestampField: string;
 }
 
 interface ManyCategoriesWarningReason {

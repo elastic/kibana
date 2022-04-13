@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import chroma from 'chroma-js';
 
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import { DEFAULT_PANEL_WIDTH } from '../../../../src/plugins/dashboard/public/application/embeddable/dashboard_constants';
@@ -194,12 +195,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('for query parameter with soft refresh', async function () {
         await changeQuery(false, 'hi:goodbye');
+        await PageObjects.dashboard.expectAppStateRemovedFromURL();
       });
 
       it('for query parameter with hard refresh', async function () {
         await changeQuery(true, 'hi:hello');
         await queryBar.clearQuery();
         await queryBar.clickQuerySubmitButton();
+        await PageObjects.dashboard.expectAppStateRemovedFromURL();
       });
 
       it('for panel size parameters', async function () {
@@ -264,14 +267,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const allPieSlicesColor = await pieChart.getAllPieSliceStyles('80,000');
-            let whitePieSliceCounts = 0;
-            allPieSlicesColor.forEach((style) => {
-              if (style.indexOf('rgb(255, 255, 255)') > -1) {
-                whitePieSliceCounts++;
-              }
-            });
-
+            const allPieSlicesColor = await pieChart.getAllPieSliceColor('80,000');
+            const whitePieSliceCounts = allPieSlicesColor.reduce((count, color) => {
+              // converting the color to a common format, testing the color, not the string format
+              return chroma(color).hex().toUpperCase() === '#FFFFFF' ? count + 1 : count;
+            }, 0);
             expect(whitePieSliceCounts).to.be(1);
           });
         });

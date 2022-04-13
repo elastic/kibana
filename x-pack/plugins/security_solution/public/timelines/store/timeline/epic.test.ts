@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
+import { FilterStateStore, Filter } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { convertTimelineAsInput } from './epic';
@@ -89,6 +89,7 @@ describe('Epic Timeline', () => {
             ],
           },
         ],
+        dataViewId: null,
         deletedEventIds: [],
         description: '',
         documentType: '',
@@ -105,7 +106,7 @@ describe('Epic Timeline', () => {
         historyIds: [],
         filters: [
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -117,7 +118,7 @@ describe('Epic Timeline', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: esFilters.FilterStateStore.APP_STATE },
+            $state: { store: FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -158,6 +159,7 @@ describe('Epic Timeline', () => {
         dateRange: { start: '2019-10-30T21:06:27.644Z', end: '2019-10-31T21:06:27.644Z' },
         savedObjectId: '11169110-fc22-11e9-8ca9-072f15ce2685',
         selectedEventIds: {},
+        sessionViewConfig: null,
         show: true,
         showCheckboxes: false,
         sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
@@ -238,6 +240,7 @@ describe('Epic Timeline', () => {
             },
           },
         ],
+        dataViewId: null,
         dateRange: {
           end: '2019-10-31T21:06:27.644Z',
           start: '2019-10-30T21:06:27.644Z',

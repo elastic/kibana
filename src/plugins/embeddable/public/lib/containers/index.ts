@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { IContainer, PanelState, ContainerInput, ContainerOutput } from './i_container';
+export type {
+  IContainer,
+  PanelState,
+  ContainerInput,
+  ContainerOutput,
+  EmbeddableContainerSettings,
+} from './i_container';
 export { Container } from './container';
 export * from './embeddable_child_panel';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AlertTypeState } from '../../../../../../alerting/server';
+import { RuleTypeState } from '../../../../../../alerting/server';
 import { SecurityAlertTypeReturnValue } from '../types';
 
-export const createResultObject = <TState extends AlertTypeState>(state: TState) => {
+export const createResultObject = <TState extends RuleTypeState>(state: TState) => {
   const result: SecurityAlertTypeReturnValue<TState> = {
     bulkCreateTimes: [],
     createdSignalsCount: 0,
@@ -23,3 +23,5 @@ export const createResultObject = <TState extends AlertTypeState>(state: TState)
   };
   return result;
 };
+
+export * from './get_list_client';

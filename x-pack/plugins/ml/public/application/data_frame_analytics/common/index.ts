@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+export type {
+  UpdateDataFrameAnalyticsConfig,
+  IndexPattern,
+  RegressionEvaluateResponse,
+  Eval,
+  SearchQuery,
+} from './analytics';
 export {
   getAnalysisType,
   getDependentVar,
@@ -13,38 +20,26 @@ export {
   isOutlierAnalysis,
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
-  UpdateDataFrameAnalyticsConfig,
-  IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,
   OUTLIER_ANALYSIS_METHOD,
-  RegressionEvaluateResponse,
   getValuesFromResponse,
   loadEvalData,
   loadDocsCount,
-  Eval,
   getPredictedFieldName,
   INDEX_STATUS,
   SEARCH_SIZE,
   defaultSearchQuery,
-  SearchQuery,
   ANALYSIS_CONFIG_TYPE,
 } from './analytics';
 
-export {
-  getDefaultFieldsFromJobCaps,
-  sortExplorationResultsFields,
-  EsId,
-  EsDoc,
-  EsDocSource,
-  EsFieldName,
-  MAX_COLUMNS,
-} from './fields';
+export type { EsId, EsDoc, EsDocSource, EsFieldName } from './fields';
+export { getDefaultFieldsFromJobCaps, sortExplorationResultsFields, MAX_COLUMNS } from './fields';
 
 export { getIndexData } from './get_index_data';
 export { getIndexFields } from './get_index_fields';
 export { getScatterplotMatrixLegendType } from './get_scatterplot_matrix_legend_type';
 
 export { useResultsViewConfig } from './use_results_view_config';
-export { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
-export { DataFrameAnalyticsId } from '../../../../common/types/data_frame_analytics';
-export { IndexName } from '../../../../common/types/data_frame_analytics';
+export type { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
+export type { DataFrameAnalyticsId } from '../../../../common/types/data_frame_analytics';
+export type { IndexName } from '../../../../common/types/data_frame_analytics';

@@ -9,7 +9,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from 'src/core/public/mocks';
 
 import { ClusterAddressForm } from './cluster_address_form';
 import { Providers } from './plugin';
@@ -21,6 +21,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('ClusterAddressForm', () => {
   jest.setTimeout(20_000);
 
+  const theme$ = themeServiceMock.createTheme$();
+
   it('calls enrollment API when submitting form', async () => {
     const coreStart = coreMock.createStart();
     coreStart.http.post.mockResolvedValue({});
@@ -28,7 +30,7 @@ describe('ClusterAddressForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers services={coreStart}>
+      <Providers services={coreStart} theme$={theme$}>
         <ClusterAddressForm onSuccess={onSuccess} />
       </Providers>
     );
@@ -52,7 +54,7 @@ describe('ClusterAddressForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers services={coreStart}>
+      <Providers services={coreStart} theme$={theme$}>
         <ClusterAddressForm onSuccess={onSuccess} />
       </Providers>
     );

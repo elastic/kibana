@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RECORDS_FIELD } from '../constants';
+
 export const sampleAttributeKpi = {
-  description: 'undefined',
+  description: '',
   references: [
     {
       id: 'apm-*',
@@ -46,7 +48,7 @@ export const sampleAttributeKpi = {
                 label: 'Page views',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
             },
             incompleteColumns: {},
@@ -57,7 +59,7 @@ export const sampleAttributeKpi = {
     filters: [],
     query: {
       language: 'kuery',
-      query: '',
+      query: 'transaction.type: page-load and processor.event: transaction',
     },
     visualization: {
       axisTitlesVisibilitySettings: {
@@ -83,12 +85,14 @@ export const sampleAttributeKpi = {
             {
               color: 'green',
               forAccessor: 'y-axis-column-layer0',
+              axisMode: 'left',
             },
           ],
         },
       ],
       legend: {
         isVisible: true,
+        showSingleSeries: true,
         position: 'right',
       },
       preferredSeriesType: 'line',

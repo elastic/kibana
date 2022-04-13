@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Austin Songer"
+  ],
+  "description": "Identifies that a user has deleted an unusually large volume of files as reported by Microsoft Cloud App Security.",
+  "false_positives": [
+    "Users or System Administrator cleaning out folders."
+  ],
+  "from": "now-30m",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Microsoft 365 Unusual Volume of File Deletion",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n",
+  "query": "event.dataset:o365.audit and event.provider:SecurityComplianceCenter and event.category:web and event.action:\"Unusual volume of file deletion\" and event.outcome:success\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/cloud-app-security/anomaly-detection-policy",
+    "https://docs.microsoft.com/en-us/cloud-app-security/policy-template-reference"
+  ],
+  "risk_score": 47,
+  "rule_id": "b2951150-658f-4a60-832f-a00d1e6c6745",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1485",
+          "name": "Data Destruction",
+          "reference": "https://attack.mitre.org/techniques/T1485/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

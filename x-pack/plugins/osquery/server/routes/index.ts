@@ -12,23 +12,15 @@ import { initSavedQueryRoutes } from './saved_query';
 import { initStatusRoutes } from './status';
 import { initFleetWrapperRoutes } from './fleet_wrapper';
 import { initPackRoutes } from './pack';
-import { initScheduledQueryGroupRoutes } from './scheduled_query_group';
 import { initPrivilegesCheckRoutes } from './privileges_check';
+import { initAssetRoutes } from './asset';
 
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
-  const config = context.config();
-
   initActionRoutes(router, context);
   initStatusRoutes(router, context);
-  initScheduledQueryGroupRoutes(router, context);
+  initPackRoutes(router, context);
   initFleetWrapperRoutes(router, context);
   initPrivilegesCheckRoutes(router, context);
-
-  if (config.packs) {
-    initPackRoutes(router);
-  }
-
-  if (config.savedQueries) {
-    initSavedQueryRoutes(router);
-  }
+  initSavedQueryRoutes(router, context);
+  initAssetRoutes(router, context);
 };

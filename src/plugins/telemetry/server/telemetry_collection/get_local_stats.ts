@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   StatsGetter,
   StatsCollectionContext,
@@ -65,7 +65,7 @@ export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
   config,
   context
 ) => {
-  const { usageCollection, esClient, soClient, kibanaRequest } = config;
+  const { usageCollection, esClient, soClient } = config;
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
@@ -73,7 +73,7 @@ export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
         getClusterInfo(esClient), // cluster info
         getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
         getNodesUsage(esClient), // nodes_usage info
-        getKibana(usageCollection, esClient, soClient, kibanaRequest),
+        getKibana(usageCollection, esClient, soClient),
         getDataTelemetry(esClient),
       ]);
       return handleLocalStats(

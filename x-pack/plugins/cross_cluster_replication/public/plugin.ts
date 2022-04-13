@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { PLUGIN, MANAGEMENT_ID } from '../common/constants';
@@ -41,7 +41,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
       id: MANAGEMENT_ID,
       title: PLUGIN.TITLE,
       order: 6,
-      mount: async ({ element, setBreadcrumbs, history }) => {
+      mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const { mountApp } = await import('./app');
 
         const [coreStart] = await getStartServices();
@@ -50,6 +50,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
           i18n: { Context: I18nContext },
           docLinks,
           application: { getUrlForApp },
+          executionContext,
         } = coreStart;
 
         docTitle.change(PLUGIN.TITLE);
@@ -61,6 +62,8 @@ export class CrossClusterReplicationPlugin implements Plugin {
           docLinks,
           history,
           getUrlForApp,
+          theme$,
+          executionContext,
         });
 
         return () => {
@@ -72,7 +75,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
     // NOTE: We enable the plugin by default instead of disabling it by default because this
     // creates a race condition that causes functional tests to fail on CI (see #66781).
-    Promise.all([licensing.license$.pipe(first()).toPromise(), getStartServices()]).then(
+    Promise.all([firstValueFrom(licensing.license$), getStartServices()]).then(
       ([license, startServices]) => {
         const licenseStatus = license.check(PLUGIN.ID, PLUGIN.minimumLicenseType);
         const isLicenseOk = licenseStatus.state === 'valid';

@@ -9,12 +9,11 @@ import './_classification_exploration.scss';
 
 import React, { FC, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridPopoverContents,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -26,6 +25,7 @@ import { useMlKibana } from '../../../../../contexts/kibana';
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../../../../../components/vega_chart';
 import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
+import { useCurrentEuiTheme } from '../../../../../components/color_range_legend';
 
 import { ErrorCallout } from '../error_callout';
 import { getDependentVar, DataFrameAnalyticsConfig } from '../../../../common';
@@ -33,6 +33,7 @@ import { DataFrameTaskStateType } from '../../../analytics_management/components
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
+
 import { EvaluateStat } from './evaluate_stat';
 import { EvaluationQualityMetricsTable } from './evaluation_quality_metrics_table';
 
@@ -107,11 +108,11 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const {
     services: { docLinks },
   } = useMlKibana();
+  const { euiTheme } = useCurrentEuiTheme();
 
   const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
   const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);
   const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
-  const [popoverContents, setPopoverContents] = useState<EuiDataGridPopoverContents>({});
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
@@ -148,26 +149,6 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
       setVisibleColumns(() => derivedColumns.map(({ id }: { id: string }) => id));
       setColumns(derivedColumns);
       setColumnsData(columnData);
-      setPopoverContents({
-        numeric: ({
-          cellContentsElement,
-          children,
-        }: {
-          cellContentsElement: any;
-          children: any;
-        }) => {
-          const rowIndex = children?.props?.rowIndex;
-          const colId = children?.props?.columnId;
-          const gridItem = columnData[rowIndex];
-
-          if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
-            const count = gridItem.predicted_classes_count[colId];
-            return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
-          }
-
-          return cellContentsElement.textContent;
-        },
-      });
     }
   }, [confusionMatrixData]);
 
@@ -186,11 +167,9 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     rowIndex,
     columnId,
     setCellProps,
-  }: {
-    rowIndex: number;
-    columnId: string;
-    setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
-  }) => {
+    schema,
+    isDetails,
+  }: EuiDataGridCellValueElementProps) => {
     const cellValue =
       columnId === ACTUAL_CLASS_ID
         ? columnsData[rowIndex][columnId]
@@ -204,6 +183,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
       accuracyNumber = Math.round(accuracyNumber * 100) / 100;
       accuracy = `${Math.round(accuracyNumber * 100)}%`;
     }
+
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       if (columnId !== ACTUAL_CLASS_ID) {
@@ -214,7 +194,19 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
         });
       }
     }, [rowIndex, columnId, setCellProps]);
-    return <span>{columnId === ACTUAL_CLASS_ID ? cellValue : accuracy}</span>;
+
+    let cellContent = columnId === ACTUAL_CLASS_ID ? cellValue : accuracy;
+
+    // Custom popover content for numeric schemas
+    if (isDetails && schema === 'numeric') {
+      const gridItem = columnsData[rowIndex];
+      if (gridItem !== undefined && columnId !== ACTUAL_CLASS_ID) {
+        const count = gridItem.predicted_classes_count[columnId];
+        cellContent = `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContent}`;
+      }
+    }
+
+    return <span>{cellContent}</span>;
   };
 
   const docLink = docLinks.links.ml.classificationEvaluation;
@@ -344,11 +336,10 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                               inMemory={{ level: 'sorting' }}
                               toolbarVisibility={{
                                 showColumnSelector: true,
-                                showStyleSelector: false,
+                                showDisplaySelector: false,
                                 showFullScreenSelector: false,
                                 showSortSelector: false,
                               }}
-                              popoverContents={popoverContents}
                               gridStyle={{
                                 border: 'all',
                                 fontSize: 's',
@@ -469,7 +460,8 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                   vegaSpec={getRocCurveChartVegaLiteSpec(
                     classificationClasses,
                     rocCurveData,
-                    getDependentVar(jobConfig.analysis)
+                    getDependentVar(jobConfig.analysis),
+                    euiTheme
                   )}
                 />
               </div>

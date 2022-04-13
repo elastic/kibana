@@ -22,7 +22,6 @@ import * as rt from 'io-ts';
 import moment from 'moment';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain } from 'fp-ts/lib/Either';
-import { logIndexReferenceRT } from '../log_sources';
 
 export const TimestampFromString = new rt.Type<number, string>(
   'TimestampFromString',
@@ -49,15 +48,8 @@ export const TimestampFromString = new rt.Type<number, string>(
 export const sourceConfigurationConfigFilePropertiesRT = rt.type({
   sources: rt.type({
     default: rt.partial({
-      logAlias: rt.string, // Cannot be deprecated until 8.0.0. Will be converted to an indexName reference.
-      metricAlias: rt.string,
       fields: rt.partial({
-        timestamp: rt.string,
         message: rt.array(rt.string),
-        tiebreaker: rt.string,
-        host: rt.string,
-        container: rt.string,
-        pod: rt.string,
       }),
     }),
   }),
@@ -111,15 +103,31 @@ export const SourceConfigurationColumnRuntimeType = rt.union([
 export type InfraSourceConfigurationColumn = rt.TypeOf<typeof SourceConfigurationColumnRuntimeType>;
 
 /**
+ * Log indices
+ */
+
+// Kibana index pattern
+export const logIndexPatternReferenceRT = rt.type({
+  type: rt.literal('index_pattern'),
+  indexPatternId: rt.string,
+});
+export type LogIndexPatternReference = rt.TypeOf<typeof logIndexPatternReferenceRT>;
+
+// Legacy support
+export const logIndexNameReferenceRT = rt.type({
+  type: rt.literal('index_name'),
+  indexName: rt.string,
+});
+export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
+
+export const logIndexReferenceRT = rt.union([logIndexPatternReferenceRT, logIndexNameReferenceRT]);
+export type LogIndexReference = rt.TypeOf<typeof logIndexReferenceRT>;
+
+/**
  * Fields
  */
 
 const SourceConfigurationFieldsRT = rt.type({
-  container: rt.string,
-  host: rt.string,
-  pod: rt.string,
-  tiebreaker: rt.string,
-  timestamp: rt.string,
   message: rt.array(rt.string),
 });
 

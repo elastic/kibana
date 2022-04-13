@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", ".storybook/**/*"],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../charts/tsconfig.json" },
@@ -22,8 +22,11 @@
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../kibana_legacy/tsconfig.json" },
-    { "path": "../index_pattern_field_editor/tsconfig.json"},
-    { "path": "../field_formats/tsconfig.json" }
+    { "path": "../data_view_field_editor/tsconfig.json"},
+    { "path": "../field_formats/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" },
+    { "path": "../data_view_editor/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/triggers_actions_ui/tsconfig.json" }
   ]
 }

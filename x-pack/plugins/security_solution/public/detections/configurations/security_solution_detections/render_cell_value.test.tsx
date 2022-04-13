@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
@@ -46,6 +46,7 @@ describe('RenderCellValue', () => {
       isExpanded: false,
       linkValues,
       rowIndex,
+      colIndex: 0,
       setCellProps: jest.fn(),
       timelineId,
     };

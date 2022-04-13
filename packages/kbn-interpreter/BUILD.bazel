@@ -1,7 +1,7 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@npm//peggy:index.bzl", "peggy")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-interpreter"
 PKG_REQUIRE_NAME = "@kbn/interpreter"
@@ -22,7 +22,6 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "common/package.json",
   "package.json",
 ]
 
@@ -31,6 +30,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/lodash",
   "@npm//@types/node",
@@ -52,7 +52,7 @@ peggy(
     "--allowed-start-rules",
     "expression,argument",
     "-o",
-    "$(@D)/index.js",
+    "$(@D)/built_grammar.js",
     "./%s/grammar/grammar.peggy" % package_name()
   ],
 )
@@ -73,10 +73,8 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )
@@ -84,7 +82,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -100,6 +98,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

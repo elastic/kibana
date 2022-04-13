@@ -12,7 +12,14 @@ import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
 
+function getRequestAbortedSignal(aborted$) {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+  return controller.signal;
+}
+
 export default new Datasource('es', {
+  hideFitArg: true,
   args: [
     {
       name: 'q',
@@ -106,13 +113,17 @@ export default new Datasource('es', {
 
     const body = buildRequest(config, tlConfig, scriptFields, runtimeFields, esShardTimeout);
 
+    // User may abort the request without waiting for the results
+    // we need to handle this scenario by aborting underlying server requests
+    const abortSignal = getRequestAbortedSignal(tlConfig.request.events.aborted$);
+
     const resp = await tlConfig.context.search
       .search(
         body,
         {
           ...tlConfig.request?.body.searchSession,
         },
-        tlConfig.context
+        { ...tlConfig.context, abortSignal }
       )
       .toPromise();
 

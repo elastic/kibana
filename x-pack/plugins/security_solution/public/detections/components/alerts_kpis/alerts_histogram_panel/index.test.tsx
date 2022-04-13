@@ -9,12 +9,16 @@ import React from 'react';
 import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 
-import { esQuery, Filter } from '../../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
+import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
 
 import { AlertsHistogramPanel } from './index';
 import * as helpers from './helpers';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+
+jest.mock('../../../../common/containers/query_toggle');
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -22,6 +26,7 @@ jest.mock('react-router-dom', () => {
     ...originalModule,
     createHref: jest.fn(),
     useHistory: jest.fn(),
+    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
   };
 });
 
@@ -37,8 +42,20 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => {
           navigateToApp: mockNavigateToApp,
           getUrlForApp: jest.fn(),
         },
+        data: {
+          search: {
+            search: jest.fn(),
+          },
+        },
         uiSettings: {
           get: jest.fn(),
+        },
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+          },
         },
       },
     }),
@@ -77,6 +94,12 @@ describe('AlertsHistogramPanel', () => {
     setQuery: jest.fn(),
     updateDateRange: jest.fn(),
   };
+
+  const mockSetToggle = jest.fn();
+  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  beforeEach(() => {
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -122,7 +145,7 @@ describe('AlertsHistogramPanel', () => {
           preventDefault: jest.fn(),
         });
 
-      expect(mockNavigateToApp).toBeCalledWith('securitySolution', {
+      expect(mockNavigateToApp).toBeCalledWith('securitySolutionUI', {
         deepLinkId: SecurityPageName.alerts,
         path: '',
       });
@@ -133,10 +156,11 @@ describe('AlertsHistogramPanel', () => {
   describe('Query', () => {
     it('it render with a illegal KQL', async () => {
       await act(async () => {
-        const spyOnBuildEsQuery = jest.spyOn(esQuery, 'buildEsQuery');
-        spyOnBuildEsQuery.mockImplementation(() => {
-          throw new Error('Something went wrong');
-        });
+        jest.mock('@kbn/es-query', () => ({
+          buildEsQuery: jest.fn().mockImplementation(() => {
+            throw new Error('Something went wrong');
+          }),
+        }));
         const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
         const wrapper = mount(
           <TestProviders>
@@ -170,7 +194,7 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[0]).toEqual([
-          'signal.rule.name',
+          'kibana.alert.rule.name',
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [
@@ -183,6 +207,7 @@ describe('AlertsHistogramPanel', () => {
               },
             },
           ],
+          undefined,
         ]);
       });
       wrapper.unmount();
@@ -196,7 +221,7 @@ describe('AlertsHistogramPanel', () => {
         meta: {
           alias: null,
           disabled: false,
-          key: 'signal.status',
+          key: 'kibana.alert.workflow_status',
           negate: false,
           params: {
             query: 'open',
@@ -205,7 +230,7 @@ describe('AlertsHistogramPanel', () => {
         },
         query: {
           term: {
-            'signal.status': 'open',
+            'kibana.alert.workflow_status': 'open',
           },
         },
       };
@@ -223,19 +248,20 @@ describe('AlertsHistogramPanel', () => {
 
       await waitFor(() => {
         expect(mockGetAlertsHistogramQuery.mock.calls[1]).toEqual([
-          'signal.rule.name',
+          'kibana.alert.rule.name',
           '2020-07-07T08:20:18.966Z',
           '2020-07-08T08:20:18.966Z',
           [
             {
               bool: {
-                filter: [{ term: { 'signal.status': 'open' } }],
+                filter: [{ term: { 'kibana.alert.workflow_status': 'open' } }],
                 must: [],
                 must_not: [],
                 should: [],
               },
             },
           ],
+          undefined,
         ]);
       });
       wrapper.unmount();
@@ -321,6 +347,42 @@ describe('AlertsHistogramPanel', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('toggleQuery', () => {
+    it('toggles', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
+        expect(mockSetToggle).toBeCalledWith(false);
+      });
+    });
+    it('toggleStatus=true, render', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+
+        expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+      });
+    });
+    it('toggleStatus=false, hide', async () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+      });
     });
   });
 });

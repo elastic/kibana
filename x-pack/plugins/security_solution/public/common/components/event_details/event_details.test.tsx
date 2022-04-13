@@ -11,7 +11,7 @@ import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
-import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId, rawEventData, TestProviders } from '../../mock';
 
 import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -48,6 +48,9 @@ describe('EventDetails', () => {
     timelineId: 'test',
     eventView: EventsViewType.summaryView,
     hostRisk: { fields: [], loading: true },
+    indexName: 'test',
+    handleOnEventClosed: jest.fn(),
+    rawEventData,
   };
 
   const alertsProps = {
@@ -136,6 +139,21 @@ describe('EventDetails', () => {
     it('renders a "no enrichments" panel view if there are no enrichments', () => {
       alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
       expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
+    });
+    it('does not render if readOnly prop is passed', async () => {
+      const newProps = { ...defaultProps, isReadOnly: true };
+      wrapper = mount(
+        <TestProviders>
+          <EventDetails {...newProps} />
+        </TestProviders>
+      ) as ReactWrapper;
+      alertsWrapper = mount(
+        <TestProviders>
+          <EventDetails {...{ ...alertsProps, ...newProps }} />
+        </TestProviders>
+      ) as ReactWrapper;
+      await waitFor(() => wrapper.update());
+      expect(alertsWrapper.find('[data-test-subj="threatIntelTab"]').exists()).toBeFalsy();
     });
   });
 });

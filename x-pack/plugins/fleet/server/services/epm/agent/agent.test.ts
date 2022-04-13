@@ -29,7 +29,7 @@ foo: {{bar}}
 some_text_field: {{should_be_text}}
 multi_text_field:
 {{#each multi_text}}
-  - {{this}}
+  - !!str {{this}}
 {{/each}}
       `;
     const vars = {
@@ -37,7 +37,7 @@ multi_text_field:
       password: { type: 'password', value: '' },
       optional_field: { type: 'text', value: undefined },
       bar: { type: 'text', value: 'bar' },
-      should_be_text: { type: 'text', value: '1234' },
+      should_be_text: { type: 'text', value: 'textvalue' },
       multi_text: { type: 'text', value: ['1234', 'foo', 'bar'] },
     };
 
@@ -49,7 +49,7 @@ multi_text_field:
       processors: [{ add_locale: null }],
       password: '',
       foo: 'bar',
-      some_text_field: '1234',
+      some_text_field: 'textvalue',
       multi_text_field: ['1234', 'foo', 'bar'],
     });
   });
@@ -217,12 +217,13 @@ input: logs
     });
   });
 
-  it('should escape string values when necessary', () => {
+  it('should suport !!str for string values', () => {
     const stringTemplate = `
 my-package:
     asteriskOnly: {{asteriskOnly}}
     startsWithAsterisk: {{startsWithAsterisk}}
-    numeric: {{numeric}}
+    numeric_with_str: !!str {{numeric}}
+    numeric_without_str: {{numeric}}
     mixed: {{mixed}}
     concatenatedEnd: {{a}}{{b}}
     concatenatedMiddle: {{c}}{{d}}
@@ -245,7 +246,8 @@ my-package:
       'my-package': {
         asteriskOnly: '*',
         startsWithAsterisk: '*lala',
-        numeric: '100',
+        numeric_with_str: '100',
+        numeric_without_str: 100,
         mixed: '1s',
         concatenatedEnd: '/opt/package/*/logs/my.log*',
         concatenatedMiddle: '/opt/*/package/logs/*my.log',
@@ -255,5 +257,20 @@ my-package:
 
     const output = compileTemplate(vars, stringTemplate);
     expect(output).toEqual(targetOutput);
+  });
+
+  it('should throw on invalid handlebar template', () => {
+    const streamTemplate = `
+input: log
+paths:
+{{ if test}}
+  - {{ test}}
+{{ end }}
+`;
+    const vars = {};
+
+    expect(() => compileTemplate(vars, streamTemplate)).toThrowError(
+      'Error while compiling agent template: options.inverse is not a function'
+    );
   });
 });

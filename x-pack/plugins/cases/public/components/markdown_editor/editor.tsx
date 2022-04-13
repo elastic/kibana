@@ -15,12 +15,7 @@ import React, {
   ElementRef,
 } from 'react';
 import { PluggableList } from 'unified';
-import {
-  EuiMarkdownEditor,
-  EuiMarkdownEditorProps,
-  EuiMarkdownAstNode,
-  EuiMarkdownEditorUiPlugin,
-} from '@elastic/eui';
+import { EuiMarkdownEditor, EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
@@ -33,11 +28,11 @@ interface MarkdownEditorProps {
   onChange: (content: string) => void;
   parsingPlugins?: PluggableList;
   processingPlugins?: PluggableList;
-  uiPlugins?: EuiMarkdownEditorUiPlugin[] | undefined;
+  disabledUiPlugins?: string[] | undefined;
   value: string;
 }
 
-type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
+export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
 
 export interface MarkdownEditorRef {
   textarea: HTMLTextAreaElement | null;
@@ -46,14 +41,15 @@ export interface MarkdownEditorRef {
 }
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }, ref) => {
+  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
       setMarkdownErrorMessages(err ? [err] : messages);
       astRef.current = ast;
     }, []);
-    const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
+
+    const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
     useLensButtonToggle({
@@ -95,5 +91,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
     );
   }
 );
+
+MarkdownEditorComponent.displayName = 'MarkdownEditor';
 
 export const MarkdownEditor = memo(MarkdownEditorComponent);

@@ -16,7 +16,8 @@ export interface CorePreboot
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [elasticsearch](./kibana-plugin-core-server.corepreboot.elasticsearch.md) | <code>ElasticsearchServicePreboot</code> | [ElasticsearchServicePreboot](./kibana-plugin-core-server.elasticsearchservicepreboot.md) |
-|  [http](./kibana-plugin-core-server.corepreboot.http.md) | <code>HttpServicePreboot</code> | [HttpServicePreboot](./kibana-plugin-core-server.httpservicepreboot.md) |
-|  [preboot](./kibana-plugin-core-server.corepreboot.preboot.md) | <code>PrebootServicePreboot</code> | [PrebootServicePreboot](./kibana-plugin-core-server.prebootservicepreboot.md) |
+|  [analytics](./kibana-plugin-core-server.corepreboot.analytics.md) | AnalyticsServicePreboot | [AnalyticsServicePreboot](./kibana-plugin-core-server.analyticsservicepreboot.md) |
+|  [elasticsearch](./kibana-plugin-core-server.corepreboot.elasticsearch.md) | ElasticsearchServicePreboot | [ElasticsearchServicePreboot](./kibana-plugin-core-server.elasticsearchservicepreboot.md) |
+|  [http](./kibana-plugin-core-server.corepreboot.http.md) | HttpServicePreboot | [HttpServicePreboot](./kibana-plugin-core-server.httpservicepreboot.md) |
+|  [preboot](./kibana-plugin-core-server.corepreboot.preboot.md) | PrebootServicePreboot | [PrebootServicePreboot](./kibana-plugin-core-server.prebootservicepreboot.md) |
 

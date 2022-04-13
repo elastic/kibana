@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -17,7 +17,7 @@ import { TabContent, TabProps } from './shared';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
 import { findInventoryFields } from '../../../../../../../common/inventory_models';
-import { useLinkProps } from '../../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../../observability/public';
 import { getNodeLogsUrl } from '../../../../../link_to';
 
 const TabComponent = (props: TabProps) => {
@@ -25,15 +25,13 @@ const TabComponent = (props: TabProps) => {
   const endTimestamp = props.currentTime;
   const startTimestamp = endTimestamp - 60 * 60 * 1000; // 60 minutes
   const { nodeType } = useWaffleOptionsContext();
-  const { options, node } = props;
+  const { node } = props;
 
   const throttledTextQuery = useThrottle(textQuery, textQueryThrottleInterval);
 
   const filter = useMemo(() => {
     const query = [
-      ...(options.fields != null
-        ? [`${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`]
-        : []),
+      `${findInventoryFields(nodeType).id}: "${node.id}"`,
       ...(throttledTextQuery !== '' ? [throttledTextQuery] : []),
     ].join(' and ');
 
@@ -41,7 +39,7 @@ const TabComponent = (props: TabProps) => {
       language: 'kuery',
       query,
     };
-  }, [options.fields, nodeType, node.id, throttledTextQuery]);
+  }, [nodeType, node.id, throttledTextQuery]);
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTextQuery(e.target.value);

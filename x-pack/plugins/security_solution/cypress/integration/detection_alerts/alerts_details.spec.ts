@@ -5,56 +5,53 @@
  * 2.0.
  */
 
-import { ALERT_FLYOUT, CELL_TEXT, JSON_LINES, TABLE_ROWS } from '../../screens/alerts_details';
-
 import {
-  expandFirstAlert,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import { openJsonView, openTable, scrollJsonViewToBottom } from '../../tasks/alerts_details';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
+  ALERT_FLYOUT,
+  CELL_TEXT,
+  JSON_TEXT,
+  TABLE_CONTAINER,
+  TABLE_ROWS,
+} from '../../screens/alerts_details';
+
+import { expandFirstAlert } from '../../tasks/alerts';
+import { openJsonView, openTable } from '../../tasks/alerts_details';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { esArchiverLoad } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { getUnmappedRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Alert details with unmapped fields', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    createCustomRuleActivated(getUnmappedRule());
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
+    login();
+    createCustomRuleEnabled(getUnmappedRule());
+    visitWithoutDateRange(ALERTS_URL);
+    waitForAlertsToPopulate();
     expandFirstAlert();
+  });
+  after(() => {
+    esArchiverUnload('unmapped_fields');
   });
 
   it('Displays the unmapped field on the JSON view', () => {
-    const expectedUnmappedField = { line: 2, text: '  "unmapped": "This is the unmapped field"' };
+    const expectedUnmappedValue = 'This is the unmapped field';
 
     openJsonView();
-    scrollJsonViewToBottom();
 
-    cy.get(ALERT_FLYOUT)
-      .find(JSON_LINES)
-      .then((elements) => {
-        const length = elements.length;
-        cy.wrap(elements)
-          .eq(length - expectedUnmappedField.line)
-          .invoke('text')
-          .should('include', expectedUnmappedField.text);
-      });
+    cy.get(JSON_TEXT).then((x) => {
+      const parsed = JSON.parse(x.text());
+      expect(parsed._source.unmapped).to.equal(expectedUnmappedValue);
+    });
   });
 
   it('Displays the unmapped field on the table', () => {
     const expectedUnmmappedField = {
-      row: 86,
       field: 'unmapped',
       text: 'This is the unmapped field',
     };
@@ -62,10 +59,25 @@ describe('Alert details with unmapped fields', () => {
     openTable();
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
-      .eq(expectedUnmmappedField.row)
       .within(() => {
-        cy.get(CELL_TEXT).eq(2).should('have.text', expectedUnmmappedField.field);
-        cy.get(CELL_TEXT).eq(4).should('have.text', expectedUnmmappedField.text);
+        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.field);
+        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.text);
+      });
+  });
+
+  // This test makes sure that the table does not overflow horizontally
+  it('Table does not scroll horizontally', () => {
+    openTable();
+
+    cy.get(ALERT_FLYOUT)
+      .find(TABLE_CONTAINER)
+      .within(($tableContainer) => {
+        expect($tableContainer[0].scrollLeft).to.equal(0);
+
+        // Try to scroll left and make sure that the table hasn't actually scrolled
+        $tableContainer[0].scroll({ left: 1000 });
+
+        expect($tableContainer[0].scrollLeft).to.equal(0);
       });
   });
 });

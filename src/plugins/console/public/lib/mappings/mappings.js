@@ -6,20 +6,17 @@
  * Side Public License, v 1.
  */
 
-import $ from 'jquery';
 import _ from 'lodash';
 import * as es from '../es/es';
 
-// NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
-// due to timing issues in our app.js tests.
-const POLL_INTERVAL = 60000;
 let pollTimeoutId;
 
 let perIndexTypes = {};
-let perAliasIndexes = [];
-let templates = [];
-
-const mappingObj = {};
+let perAliasIndexes = {};
+let legacyTemplates = [];
+let indexTemplates = [];
+let componentTemplates = [];
+let dataStreams = [];
 
 export function expandAliases(indicesOrAliases) {
   // takes a list of indices or aliases or a string which may be either and returns a list of indices
@@ -32,7 +29,8 @@ export function expandAliases(indicesOrAliases) {
   if (typeof indicesOrAliases === 'string') {
     indicesOrAliases = [indicesOrAliases];
   }
-  indicesOrAliases = $.map(indicesOrAliases, function (iOrA) {
+
+  indicesOrAliases = indicesOrAliases.map((iOrA) => {
     if (perAliasIndexes[iOrA]) {
       return perAliasIndexes[iOrA];
     }
@@ -40,17 +38,31 @@ export function expandAliases(indicesOrAliases) {
   });
   let ret = [].concat.apply([], indicesOrAliases);
   ret.sort();
-  let last;
-  ret = $.map(ret, function (v) {
-    const r = last === v ? null : v;
-    last = v;
-    return r;
-  });
+  ret = ret.reduce((result, value, index, array) => {
+    const last = array[index - 1];
+    if (last !== value) {
+      result.push(value);
+    }
+    return result;
+  }, []);
+
   return ret.length > 1 ? ret : ret[0];
 }
 
-export function getTemplates() {
-  return [...templates];
+export function getLegacyTemplates() {
+  return [...legacyTemplates];
+}
+
+export function getIndexTemplates() {
+  return [...indexTemplates];
+}
+
+export function getComponentTemplates() {
+  return [...componentTemplates];
+}
+
+export function getDataStreams() {
+  return [...dataStreams];
 }
 
 export function getFields(indices, types) {
@@ -69,8 +81,8 @@ export function getFields(indices, types) {
       ret = f ? f : [];
     } else {
       // filter what we need
-      $.each(typeDict, function (type, fields) {
-        if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
+      Object.entries(typeDict).forEach(([type, fields]) => {
+        if (!types || types.length === 0 || types.includes(type)) {
           ret.push(fields);
         }
       });
@@ -79,11 +91,12 @@ export function getFields(indices, types) {
     }
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function (index) {
-      if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
+    Object.keys(perIndexTypes).forEach((index) => {
+      if (!indices || indices.length === 0 || indices.includes(index)) {
         ret.push(getFields(index, types));
       }
     });
+
     ret = [].concat.apply([], ret);
   }
 
@@ -102,13 +115,19 @@ export function getTypes(indices) {
     }
 
     // filter what we need
-    $.each(typeDict, function (type) {
-      ret.push(type);
-    });
+    if (Array.isArray(typeDict)) {
+      typeDict.forEach((type) => {
+        ret.push(type);
+      });
+    } else if (typeof typeDict === 'object') {
+      Object.keys(typeDict).forEach((type) => {
+        ret.push(type);
+      });
+    }
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function (index) {
-      if (!indices || $.inArray(index, indices) !== -1) {
+    Object.keys(perIndexTypes).forEach((index) => {
+      if (!indices || indices.includes(index)) {
         ret.push(getTypes(index));
       }
     });
@@ -120,11 +139,15 @@ export function getTypes(indices) {
 
 export function getIndices(includeAliases) {
   const ret = [];
-  $.each(perIndexTypes, function (index) {
-    ret.push(index);
+  Object.keys(perIndexTypes).forEach((index) => {
+    // ignore .ds* indices in the suggested indices list.
+    if (!index.startsWith('.ds')) {
+      ret.push(index);
+    }
   });
+
   if (typeof includeAliases === 'undefined' ? true : includeAliases) {
-    $.each(perAliasIndexes, function (alias) {
+    Object.keys(perAliasIndexes).forEach((alias) => {
       ret.push(alias);
     });
   }
@@ -140,7 +163,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   function applyPathSettings(nestedFieldNames) {
     const pathType = fieldMapping.path || 'full';
     if (pathType === 'full') {
-      return $.map(nestedFieldNames, function (f) {
+      return nestedFieldNames.map((f) => {
         f.name = fieldName + '.' + f.name;
         return f;
       });
@@ -163,7 +186,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   }
 
   if (fieldMapping.fields) {
-    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
+    nestedFields = Object.entries(fieldMapping.fields).flatMap(([fieldName, fieldMapping]) => {
       return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
     nestedFields = applyPathSettings(nestedFields);
@@ -175,7 +198,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 }
 
 function getFieldNamesFromProperties(properties = {}) {
-  const fieldList = $.map(properties, function (fieldMapping, fieldName) {
+  const fieldList = Object.entries(properties).flatMap(([fieldName, fieldMapping]) => {
     return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
   });
 
@@ -185,22 +208,34 @@ function getFieldNamesFromProperties(properties = {}) {
   });
 }
 
-function loadTemplates(templatesObject = {}) {
-  templates = Object.keys(templatesObject);
+export function loadLegacyTemplates(templatesObject = {}) {
+  legacyTemplates = Object.keys(templatesObject);
+}
+
+export function loadIndexTemplates(data) {
+  indexTemplates = (data.index_templates ?? []).map(({ name }) => name);
+}
+
+export function loadComponentTemplates(data) {
+  componentTemplates = (data.component_templates ?? []).map(({ name }) => name);
+}
+
+export function loadDataStreams(data) {
+  dataStreams = (data.data_streams ?? []).map(({ name }) => name);
 }
 
 export function loadMappings(mappings) {
   perIndexTypes = {};
 
-  $.each(mappings, function (index, indexMapping) {
+  Object.entries(mappings).forEach(([index, indexMapping]) => {
     const normalizedIndexMappings = {};
 
     // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
-    if (indexMapping.mappings && _.keys(indexMapping).length === 1) {
+    if (indexMapping.mappings && Object.keys(indexMapping).length === 1) {
       indexMapping = indexMapping.mappings;
     }
 
-    $.each(indexMapping, function (typeName, typeMapping) {
+    Object.entries(indexMapping).forEach(([typeName, typeMapping]) => {
       if (typeName === 'properties') {
         const fieldList = getFieldNamesFromProperties(typeMapping);
         normalizedIndexMappings[typeName] = fieldList;
@@ -208,18 +243,17 @@ export function loadMappings(mappings) {
         normalizedIndexMappings[typeName] = [];
       }
     });
-
     perIndexTypes[index] = normalizedIndexMappings;
   });
 }
 
 export function loadAliases(aliases) {
   perAliasIndexes = {};
-  $.each(aliases || {}, function (index, omdexAliases) {
+  Object.entries(aliases).forEach(([index, omdexAliases]) => {
     // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
-    $.each(omdexAliases.aliases || {}, function (alias) {
+    Object.keys(omdexAliases.aliases || {}).forEach((alias) => {
       if (alias === index) {
         return;
       } // alias which is identical to index means no index.
@@ -238,27 +272,37 @@ export function loadAliases(aliases) {
 export function clear() {
   perIndexTypes = {};
   perAliasIndexes = {};
-  templates = [];
+  legacyTemplates = [];
+  indexTemplates = [];
+  componentTemplates = [];
 }
 
-function retrieveSettings(settingsKey, settingsToRetrieve) {
+function retrieveSettings(http, settingsKey, settingsToRetrieve) {
   const settingKeyToPathMap = {
     fields: '_mapping',
     indices: '_aliases',
-    templates: '_template',
+    legacyTemplates: '_template',
+    indexTemplates: '_index_template',
+    componentTemplates: '_component_template',
+    dataStreams: '_data_stream',
   };
-
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    return es.send('GET', settingKeyToPathMap[settingsKey], null, true);
+    // Use pretty=false in these request in order to compress the response by removing whitespace
+    const path = `${settingKeyToPathMap[settingsKey]}?pretty=false`;
+    const method = 'GET';
+    const asSystemRequest = true;
+    const withProductOrigin = true;
+
+    return es.send({ http, method, path, asSystemRequest, withProductOrigin });
   } else {
-    const settingsPromise = new $.Deferred();
     if (settingsToRetrieve[settingsKey] === false) {
       // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return settingsPromise.resolveWith(this, [[JSON.stringify({})]]);
+      return Promise.resolve({});
+      // return settingsPromise.resolveWith(this, [{}]);
     } else {
       // If the user doesn't want autocomplete suggestions, then clear any that exist
-      return settingsPromise.resolve();
+      return Promise.resolve();
     }
   }
 }
@@ -280,53 +324,87 @@ export function clearSubscriptions() {
   }
 }
 
+const retrieveMappings = async (http, settingsToRetrieve) => {
+  const mappings = await retrieveSettings(http, 'fields', settingsToRetrieve);
+
+  if (mappings) {
+    const maxMappingSize = Object.keys(mappings).length > 10 * 1024 * 1024;
+    let mappingsResponse;
+    if (maxMappingSize) {
+      console.warn(
+        `Mapping size is larger than 10MB (${
+          Object.keys(mappings).length / 1024 / 1024
+        } MB). Ignoring...`
+      );
+      mappingsResponse = '{}';
+    } else {
+      mappingsResponse = mappings;
+    }
+    loadMappings(mappingsResponse);
+  }
+};
+
+const retrieveAliases = async (http, settingsToRetrieve) => {
+  const aliases = await retrieveSettings(http, 'indices', settingsToRetrieve);
+
+  if (aliases) {
+    loadAliases(aliases);
+  }
+};
+
+const retrieveTemplates = async (http, settingsToRetrieve) => {
+  const legacyTemplates = await retrieveSettings(http, 'legacyTemplates', settingsToRetrieve);
+  const indexTemplates = await retrieveSettings(http, 'indexTemplates', settingsToRetrieve);
+  const componentTemplates = await retrieveSettings(http, 'componentTemplates', settingsToRetrieve);
+
+  if (legacyTemplates) {
+    loadLegacyTemplates(legacyTemplates);
+  }
+
+  if (indexTemplates) {
+    loadIndexTemplates(indexTemplates);
+  }
+
+  if (componentTemplates) {
+    loadComponentTemplates(componentTemplates);
+  }
+};
+
+const retrieveDataStreams = async (http, settingsToRetrieve) => {
+  const dataStreams = await retrieveSettings(http, 'dataStreams', settingsToRetrieve);
+
+  if (dataStreams) {
+    loadDataStreams(dataStreams);
+  }
+};
 /**
  *
  * @param settings Settings A way to retrieve the current settings
  * @param settingsToRetrieve any
  */
-export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
+export function retrieveAutoCompleteInfo(http, settings, settingsToRetrieve) {
   clearSubscriptions();
 
-  const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
-  const aliasesPromise = retrieveSettings('indices', settingsToRetrieve);
-  const templatesPromise = retrieveSettings('templates', settingsToRetrieve);
+  const templatesSettingToRetrieve = {
+    ...settingsToRetrieve,
+    legacyTemplates: settingsToRetrieve.templates,
+    indexTemplates: settingsToRetrieve.templates,
+    componentTemplates: settingsToRetrieve.templates,
+  };
 
-  $.when(mappingPromise, aliasesPromise, templatesPromise).done((mappings, aliases, templates) => {
-    let mappingsResponse;
-    if (mappings) {
-      const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
-      if (maxMappingSize) {
-        console.warn(
-          `Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`
-        );
-        mappingsResponse = '[{}]';
-      } else {
-        mappingsResponse = mappings[0];
-      }
-      loadMappings(JSON.parse(mappingsResponse));
-    }
-
-    if (aliases) {
-      loadAliases(JSON.parse(aliases[0]));
-    }
-
-    if (templates) {
-      loadTemplates(JSON.parse(templates[0]));
-    }
-
-    if (mappings && aliases) {
-      // Trigger an update event with the mappings, aliases
-      $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
-    }
-
+  Promise.allSettled([
+    retrieveMappings(http, settingsToRetrieve),
+    retrieveAliases(http, settingsToRetrieve),
+    retrieveTemplates(http, templatesSettingToRetrieve),
+    retrieveDataStreams(http, settingsToRetrieve),
+  ]).then(() => {
     // Schedule next request.
     pollTimeoutId = setTimeout(() => {
       // This looks strange/inefficient, but it ensures correct behavior because we don't want to send
       // a scheduled request if the user turns off polling.
       if (settings.getPolling()) {
-        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
       }
-    }, POLL_INTERVAL);
+    }, settings.getPollInterval());
   });
 }

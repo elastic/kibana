@@ -16,7 +16,7 @@ const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
 const FINAL_PIPELINE_VERSION = 1;
 
-let pkgKey: string;
+let pkgVersion: string;
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -45,22 +45,22 @@ export default function (providerContext: FtrProviderContext) {
       const { body: getPackagesRes } = await supertest.get(
         `/api/fleet/epm/packages?experimental=true`
       );
-      const logPackage = getPackagesRes.response.find((p: any) => p.name === 'log');
+      const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
       if (!logPackage) {
         throw new Error('No log package');
       }
 
-      pkgKey = `log-${logPackage.version}`;
+      pkgVersion = logPackage.version;
 
       await supertest
-        .post(`/api/fleet/epm/packages/${pkgKey}`)
+        .post(`/api/fleet/epm/packages/log/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
     after(async () => {
       await supertest
-        .delete(`/api/fleet/epm/packages/${pkgKey}`)
+        .delete(`/api/fleet/epm/packages/log/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
         index: TEST_INDEX,
       });
 
-      for (const hit of res.body.hits.hits) {
+      for (const hit of res.hits.hits) {
         await es.delete({
           id: hit._id,
           index: hit._index,
@@ -100,17 +100,18 @@ export default function (providerContext: FtrProviderContext) {
       });
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
-      expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
-      expect(pipelineRes.body[FINAL_PIPELINE_ID].version).to.be(1);
+      expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
+      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(2);
     });
 
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
-      expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
+      expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
-      expect(res.body.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
-      expect(res.body.index_templates[0]?.index_template?.composed_of).to.contain(
-        '.fleet_component_template-1'
+      expect(res.index_templates.length).to.be(FINAL_PIPELINE_VERSION);
+      expect(res.index_templates[0]?.index_template?.composed_of).to.contain('.fleet_globals-1');
+      expect(res.index_templates[0]?.index_template?.composed_of).to.contain(
+        '.fleet_agent_id_verification-1'
       );
     });
 
@@ -123,9 +124,9 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      const { body: doc } = await es.get({
-        id: res.body._id,
-        index: res.body._index,
+      const doc = await es.get({
+        id: res._id,
+        index: res._index,
       });
       // @ts-expect-error
       const ingestTimestamp = doc._source.event.ingested;
@@ -146,9 +147,9 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      const { body: doc } = await es.get({
-        id: res.body._id,
-        index: res.body._index,
+      const doc = await es.get({
+        id: res._id,
+        index: res._index,
       });
       // @ts-expect-error
       const event = doc._source.event;
@@ -197,12 +198,17 @@ export default function (providerContext: FtrProviderContext) {
     for (const scenario of scenarios) {
       it(`Should write the correct event.agent_id_status for ${scenario.name}`, async () => {
         // Create an API key
-        const { body: apiKeyRes } = await es.security.createApiKey({
-          body: {
-            name: `test api key`,
-            ...(scenario.apiKey || {}),
+        const apiKeyRes = await es.security.createApiKey(
+          {
+            body: {
+              name: `test api key`,
+              ...(scenario.apiKey || {}),
+            },
           },
-        });
+          {
+            headers: { 'es-security-runas-user': 'elastic' }, // run as elastic suer
+          }
+        );
 
         const res = await indexUsingApiKey(
           {
@@ -213,7 +219,7 @@ export default function (providerContext: FtrProviderContext) {
           Buffer.from(`${apiKeyRes.id}:${apiKeyRes.api_key}`).toString('base64')
         );
 
-        const { body: doc } = await es.get({
+        const doc = await es.get({
           id: res.body._id as string,
           index: res.body._index as string,
         });

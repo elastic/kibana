@@ -23,7 +23,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Filter } from '@kbn/es-query';
 
-import { QueryDslBoolQuery, QueryDslNestedQuery } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { hasLargeValueList } from '../has_large_value_list';
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists;
@@ -40,11 +40,11 @@ export type ExceptionItemSansLargeValueLists =
   | CreateExceptionListItemNonLargeList;
 
 export interface BooleanFilter {
-  bool: QueryDslBoolQuery;
+  bool: estypes.QueryDslBoolQuery;
 }
 
 export interface NestedFilter {
-  nested: QueryDslNestedQuery;
+  nested: estypes.QueryDslNestedQuery;
 }
 
 export const chunkExceptions = (
@@ -141,10 +141,12 @@ export const buildExceptionFilter = ({
   lists,
   excludeExceptions,
   chunkSize,
+  alias = null,
 }: {
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   excludeExceptions: boolean;
   chunkSize: number;
+  alias: string | null;
 }): Filter | undefined => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
@@ -154,7 +156,7 @@ export const buildExceptionFilter = ({
 
   const exceptionFilter: Filter = {
     meta: {
-      alias: null,
+      alias,
       disabled: false,
       negate: excludeExceptions,
     },
@@ -195,7 +197,7 @@ export const buildExceptionFilter = ({
 
     return {
       meta: {
-        alias: null,
+        alias,
         disabled: false,
         negate: excludeExceptions,
       },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiAccordion, EuiSpacer } from '@elastic/eui';
@@ -46,6 +46,14 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
     ...item,
     seriesId: id,
   };
+
+  const [isExpandedOnce, setIsExpandedOnce] = useState(false);
+
+  useEffect(() => {
+    if (isExpanded) {
+      setIsExpandedOnce(true);
+    }
+  }, [isExpanded]);
 
   return (
     <EuiPanel hasBorder={true} data-test-subj={`exploratoryViewSeriesPanel${0}`}>
@@ -91,7 +99,7 @@ export function Series({ item, isExpanded, toggleExpanded }: Props) {
       >
         <EuiSpacer size="s" />
         <EuiPanel color="subdued">
-          <ExpandedSeriesRow {...seriesProps} />
+          {isExpandedOnce && <ExpandedSeriesRow {...seriesProps} />}
         </EuiPanel>
       </StyledAccordion>
     </EuiPanel>

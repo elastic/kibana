@@ -8,13 +8,13 @@
 import React, { useMemo, useState } from 'react';
 import { EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 interface InspectPanelProps {
   showInspect: boolean;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   lastRequest?: string;
   lastResponse?: string;
 }

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MetricVisOptions } from './components/metric_vis_options';
+import { MetricVisOptions } from './components';
 import { ColorSchemas, ColorMode } from '../../../charts/public';
 import { VisTypeDefinition } from '../../../visualizations/public';
 import { AggGroupNames } from '../../../data/public';
@@ -86,7 +86,16 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
     ],
   },

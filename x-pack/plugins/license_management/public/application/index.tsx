@@ -26,6 +26,7 @@ export const renderApp = (element: Element, dependencies: AppDependencies) => {
       <AppWithRouter
         telemetry={dependencies.plugins.telemetry}
         history={dependencies.services.history}
+        executionContext={dependencies.core.executionContext}
       />
     </AppProviders>,
     element
@@ -36,4 +37,4 @@ export const renderApp = (element: Element, dependencies: AppDependencies) => {
   };
 };
 
-export { AppDependencies };
+export type { AppDependencies };

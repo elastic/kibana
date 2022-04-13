@@ -13,24 +13,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import uuid from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { useHistory } from 'react-router-dom';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
-import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
+import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
-import { ElasticDocsLink } from '../Links/ElasticDocsLink';
+import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { fromQuery, toQuery } from '../links/url_helpers';
 
 type ApiResponse =
-  APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 interface InitialState {
   requestId: string;
@@ -60,12 +62,14 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
+  showPerPageOptions?: boolean;
   showAggregationAccurateCallout?: boolean;
   environment: string;
   fixedHeight?: boolean;
   kuery: string;
   start: string;
   end: string;
+  saveTableOptionsToUrl?: boolean;
 }
 
 export function TransactionsTable({
@@ -73,70 +77,79 @@ export function TransactionsTable({
   hideViewTransactionsLink = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
+  showPerPageOptions = true,
   showAggregationAccurateCallout = false,
   environment,
   kuery,
   start,
   end,
+  saveTableOptionsToUrl = false,
 }: Props) {
+  const history = useHistory();
+
+  const {
+    query: {
+      comparisonEnabled,
+      offset,
+      latencyAggregationType,
+      page: urlPage = 0,
+      pageSize: urlPageSize = numberOfTransactionsPerPage,
+      sortField: urlSortField = 'impact',
+      sortDirection: urlSortDirection = 'desc',
+    },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions',
+    '/services/{serviceName}/overview'
+  );
+
   const [tableOptions, setTableOptions] = useState<{
-    pageIndex: number;
-    sort: {
-      direction: SortDirection;
-      field: SortField;
-    };
+    page: { index: number; size: number };
+    sort: { direction: SortDirection; field: SortField };
   }>({
-    pageIndex: 0,
-    sort: DEFAULT_SORT,
+    page: { index: urlPage, size: urlPageSize },
+    sort: {
+      field: urlSortField as SortField,
+      direction: urlSortDirection as SortDirection,
+    },
   });
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
   const { isXl } = useBreakpoints();
   const shouldShowSparkPlots = isSingleColumn || !isXl;
 
-  const { pageIndex, sort } = tableOptions;
+  const { page, sort } = tableOptions;
   const { direction, field } = sort;
+  const { index, size } = page;
 
   const { transactionType, serviceName } = useApmServiceContext();
-  const {
-    urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useUrlParams();
-
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !latencyAggregationType || !transactionType) {
         return;
       }
-      return callApmApi({
-        endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
-        params: {
-          path: { serviceName },
-          query: {
-            environment,
-            kuery,
-            start,
-            end,
-            transactionType,
-            latencyAggregationType,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionType,
+              latencyAggregationType:
+                latencyAggregationType as LatencyAggregationType,
+            },
           },
-        },
-      }).then((response) => {
+        }
+      ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
           field,
           direction
-        ).slice(
-          pageIndex * numberOfTransactionsPerPage,
-          (pageIndex + 1) * numberOfTransactionsPerPage
-        );
+        ).slice(index * size, (index + 1) * size);
 
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
@@ -158,11 +171,12 @@ export function TransactionsTable({
       end,
       transactionType,
       latencyAggregationType,
-      pageIndex,
+      index,
+      size,
       direction,
       field,
-      // not used, but needed to trigger an update when comparisonType is changed either manually by user or when time range is changed
-      comparisonType,
+      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
+      offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
     ]
@@ -178,7 +192,10 @@ export function TransactionsTable({
     },
   } = data;
 
-  const { data: transactionGroupDetailedStatistics } = useFetcher(
+  const {
+    data: transactionGroupDetailedStatistics,
+    status: transactionGroupDetailedStatisticsStatus,
+  } = useFetcher(
     (callApmApi) => {
       if (
         transactionGroupsTotalItems &&
@@ -187,27 +204,28 @@ export function TransactionsTable({
         transactionType &&
         latencyAggregationType
       ) {
-        return callApmApi({
-          endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              numBuckets: 20,
-              transactionType,
-              latencyAggregationType,
-              transactionNames: JSON.stringify(
-                transactionGroups.map(({ name }) => name).sort()
-              ),
-              comparisonStart,
-              comparisonEnd,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                numBuckets: 20,
+                transactionType,
+                latencyAggregationType:
+                  latencyAggregationType as LatencyAggregationType,
+                transactionNames: JSON.stringify(
+                  transactionGroups.map(({ name }) => name).sort()
+                ),
+                offset: comparisonEnabled ? offset : undefined,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call
@@ -218,24 +236,40 @@ export function TransactionsTable({
 
   const columns = getColumns({
     serviceName,
-    latencyAggregationType,
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+    transactionGroupDetailedStatisticsLoading:
+      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
+      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,
+    offset,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
 
-  const pagination = {
-    pageIndex,
-    pageSize: numberOfTransactionsPerPage,
-    totalItemCount: transactionGroupsTotalItems,
-    hidePerPageOptions: true,
-  };
+  const pagination = useMemo(
+    () => ({
+      pageIndex: index,
+      pageSize: size,
+      totalItemCount: transactionGroupsTotalItems,
+      showPerPageOptions,
+    }),
+    [index, size, transactionGroupsTotalItems, showPerPageOptions]
+  );
+
+  const sorting = useMemo(
+    () => ({ sort: { field, direction } }),
+    [field, direction]
+  );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="transactionsGroupTable"
+    >
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -309,15 +343,6 @@ export function TransactionsTable({
             }
           >
             <EuiBasicTable
-              noItemsMessage={
-                isLoading
-                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
-                      defaultMessage: 'Loading...',
-                    })
-                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
-                      defaultMessage: 'No transaction groups found',
-                    })
-              }
               loading={isLoading}
               error={
                 status === FETCH_STATUS.FAILURE
@@ -329,15 +354,17 @@ export function TransactionsTable({
               items={transactionGroups}
               columns={columns}
               pagination={pagination}
-              sorting={{ sort: { field, direction } }}
+              sorting={sorting}
               onChange={(newTableOptions: {
-                page?: {
-                  index: number;
-                };
+                page?: { index: number; size: number };
                 sort?: { field: string; direction: SortDirection };
               }) => {
                 setTableOptions({
-                  pageIndex: newTableOptions.page?.index ?? 0,
+                  page: {
+                    index: newTableOptions.page?.index ?? 0,
+                    size:
+                      newTableOptions.page?.size ?? numberOfTransactionsPerPage,
+                  },
                   sort: newTableOptions.sort
                     ? {
                         field: newTableOptions.sort.field as SortField,
@@ -345,6 +372,18 @@ export function TransactionsTable({
                       }
                     : DEFAULT_SORT,
                 });
+                if (saveTableOptionsToUrl) {
+                  history.push({
+                    ...history.location,
+                    search: fromQuery({
+                      ...toQuery(history.location.search),
+                      page: newTableOptions.page?.index,
+                      pageSize: newTableOptions.page?.size,
+                      sortField: newTableOptions.sort?.field,
+                      sortDirection: newTableOptions.sort?.direction,
+                    }),
+                  });
+                }
               }}
             />
           </OverviewTableContainer>

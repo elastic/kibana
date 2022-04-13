@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from 'src/core/public';
 import { TemplateClone } from '../../../public/application/sections/template_clone';
 import { WithAppDependencies } from '../helpers';
 
-import { formSetup } from './template_form.helpers';
+import { formSetup, TestSubjects } from './template_form.helpers';
 import { TEMPLATE_NAME } from './constants';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/clone_template/${TEMPLATE_NAME}`],
     componentRoutePath: `/clone_template/:name`,
@@ -20,6 +21,11 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(TemplateClone), testBedConfig);
+export const setup = async (httpSetup: HttpSetup) => {
+  const initTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(TemplateClone, httpSetup),
+    testBedConfig
+  );
 
-export const setup: any = formSetup.bind(null, initTestBed);
+  return formSetup(initTestBed);
+};

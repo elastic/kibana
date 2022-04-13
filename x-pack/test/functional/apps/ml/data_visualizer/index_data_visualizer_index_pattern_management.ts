@@ -7,23 +7,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
-import { FieldVisConfig } from '../../../../../plugins/data_visualizer/public/application/common/components/stats_table/types';
-
-interface MetricFieldVisConfig extends FieldVisConfig {
-  statsMaxDecimalPlaces: number;
-  docCountFormatted: string;
-  topValuesCount: number;
-  viewableInLens: boolean;
-  hasActionMenu: boolean;
-}
-
-interface NonMetricFieldVisConfig extends FieldVisConfig {
-  docCountFormatted: string;
-  exampleCount: number;
-  viewableInLens: boolean;
-  hasActionMenu: boolean;
-}
-
+import { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;
@@ -46,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   const originalTestData: TestData = {
-    suiteTitle: 'original index pattern',
+    suiteTitle: 'original data view',
     sourceIndexOrSavedSearch: 'ft_farequote',
     expected: {
       totalDocCountFormatted: '86,274',
@@ -188,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.dataVisualizerIndexBased.assertTotalFieldsCount(testData.expected.totalFieldsCount);
   }
 
-  describe('index pattern management', function () {
+  describe('data view management', function () {
     this.tags(['mlqa']);
     const indexPatternTitle = 'ft_farequote';
     before(async () => {

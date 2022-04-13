@@ -27,10 +27,13 @@ import { appContextService } from '../../app_context';
 
 import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
 import type { ArchiveEntry } from './index';
-import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './validation';
+import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './parse';
 
+const ONE_BYTE = 1024 * 1024;
 // could be anything, picked this from https://github.com/elastic/elastic-agent-client/issues/17
-const MAX_ES_ASSET_BYTES = 4 * 1024 * 1024;
+const MAX_ES_ASSET_BYTES = 4 * ONE_BYTE;
+// Updated to accomodate larger package size in some ML model packages
+const ML_MAX_ES_ASSET_BYTES = 50 * ONE_BYTE;
 
 export interface PackageAsset {
   package_name: string;
@@ -64,15 +67,20 @@ export async function archiveEntryToESDocument(opts: {
   const bufferIsBinary = await isBinaryFile(buffer);
   const dataUtf8 = bufferIsBinary ? '' : buffer.toString('utf8');
   const dataBase64 = bufferIsBinary ? buffer.toString('base64') : '';
+  const currentMaxAssetBytes = path.includes('ml_model')
+    ? ML_MAX_ES_ASSET_BYTES
+    : MAX_ES_ASSET_BYTES;
 
   // validation: filesize? asset type? anything else
-  if (dataUtf8.length > MAX_ES_ASSET_BYTES) {
-    throw new Error(`File at ${path} is larger than maximum allowed size of ${MAX_ES_ASSET_BYTES}`);
+  if (dataUtf8.length > currentMaxAssetBytes) {
+    throw new Error(
+      `File at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
+    );
   }
 
-  if (dataBase64.length > MAX_ES_ASSET_BYTES) {
+  if (dataBase64.length > currentMaxAssetBytes) {
     throw new Error(
-      `After base64 encoding file at ${path} is larger than maximum allowed size of ${MAX_ES_ASSET_BYTES}`
+      `After base64 encoding file at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
 
@@ -256,7 +264,7 @@ export const getEsPackage = async (
       dataStreams.push({
         dataset: dataset || `${pkgName}.${dataStreamPath}`,
         package: pkgName,
-        ingest_pipeline: ingestPipeline || 'default',
+        ingest_pipeline: ingestPipeline,
         path: dataStreamPath,
         streams,
         ...dataStreamManifestProps,

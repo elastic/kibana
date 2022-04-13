@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -34,7 +34,7 @@ import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
-import { JobSpacesList } from '../../../../../components/job_spaces_list';
+import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -290,11 +290,11 @@ export const useColumns = (
         }),
         render: (item: DataFrameAnalyticsListRow) =>
           Array.isArray(item.spaceIds) ? (
-            <JobSpacesList
+            <MLSavedObjectsSpacesList
               spacesApi={spacesApi}
               spaceIds={item.spaceIds ?? []}
-              jobId={item.id}
-              jobType="data-frame-analytics"
+              id={item.id}
+              mlSavedObjectType="data-frame-analytics"
               refresh={refresh}
             />
           ) : null,

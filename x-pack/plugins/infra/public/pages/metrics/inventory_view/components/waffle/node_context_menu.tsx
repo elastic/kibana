@@ -7,13 +7,12 @@
 
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
-import { createUptimeLink } from '../../lib/create_uptime_link';
 import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
@@ -27,7 +26,9 @@ import {
   SectionLink,
   ActionMenuDivider,
 } from '../../../../../../../observability/public';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { useLinkProps } from '../../../../../../../observability/public';
+import { navigateToUptime } from '../../lib/navigate_to_uptime';
+import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -41,7 +42,9 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-    const uiCapabilities = useKibana().services.application?.capabilities;
+    const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>()
+      .services;
+    const uiCapabilities = application?.capabilities;
     // Due to the changing nature of the fields between APM and this UI,
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
     // #26620 for the details for these fields.
@@ -64,16 +67,14 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
           return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
         }
       } else {
-        if (options.fields) {
-          const { id } = findInventoryFields(nodeType, options.fields);
-          return {
-            label: <EuiCode>{id}</EuiCode>,
-            value: node.id,
-          };
-        }
+        const { id } = findInventoryFields(nodeType);
+        return {
+          label: <EuiCode>{id}</EuiCode>,
+          value: node.id,
+        };
       }
       return { label: '', value: '' };
-    }, [nodeType, node.ip, node.id, options.fields]);
+    }, [nodeType, node.ip, node.id]);
 
     const nodeLogsMenuItemLinkProps = useLinkProps(
       getNodeLogsUrl({
@@ -97,7 +98,6 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         kuery: `${apmField}:"${node.id}"`,
       },
     });
-    const uptimeMenuItemLinkProps = useLinkProps(createUptimeLink(options, nodeType, node));
 
     const nodeLogsMenuItem: SectionLinkProps = {
       label: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
@@ -133,7 +133,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} in Uptime',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      ...uptimeMenuItemLinkProps,
+      onClick: () => navigateToUptime(share.url.locators, nodeType, node),
       isDisabled: !showUptimeLink,
     };
 
@@ -173,7 +173,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
               <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
               <SectionLink {...nodeDetailMenuItem} />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
-              <SectionLink {...uptimeMenuItem} />
+              <SectionLink {...uptimeMenuItem} color={'primary'} />
             </SectionLinks>
             <ActionMenuDivider />
             <SectionLinks>
@@ -184,11 +184,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
 
         {flyoutVisible && (
           <AlertFlyout
-            filter={
-              options.fields
-                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-                : ''
-            }
+            filter={`${findInventoryFields(nodeType).id}: "${node.id}"`}
             options={options}
             nodeType={nodeType}
             setVisible={setFlyoutVisible}

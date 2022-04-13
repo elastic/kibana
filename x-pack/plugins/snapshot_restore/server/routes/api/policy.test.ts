@@ -75,8 +75,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
         fooPolicy: mockEsPolicy,
         barPolicy: mockEsPolicy,
       };
-      getClusterSettingsFn.mockResolvedValue({ body: {} });
-      getLifecycleFn.mockResolvedValue({ body: mockEsResponse });
+      getClusterSettingsFn.mockResolvedValue({});
+      getLifecycleFn.mockResolvedValue(mockEsResponse);
       const expectedResponse = {
         policies: [
           {
@@ -96,8 +96,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return empty array if no repositories returned from ES', async () => {
       const mockEsResponse = {};
-      getClusterSettingsFn.mockResolvedValue({ body: {} });
-      getLifecycleFn.mockResolvedValue({ body: mockEsResponse });
+      getClusterSettingsFn.mockResolvedValue({});
+      getLifecycleFn.mockResolvedValue(mockEsResponse);
       const expectedResponse = { policies: [] };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: expectedResponse,
@@ -126,8 +126,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
         [name]: mockEsPolicy,
       };
 
-      getLifecycleFn.mockResolvedValue({ body: mockEsResponse });
-      getClusterSettingsFn.mockResolvedValue({ body: {} });
+      getLifecycleFn.mockResolvedValue(mockEsResponse);
+      getClusterSettingsFn.mockResolvedValue({});
 
       const expectedResponse = {
         policy: {
@@ -154,7 +154,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should throw if ES error', async () => {
       getLifecycleFn.mockRejectedValueOnce(new Error('something unexpected'));
-      getClusterSettingsFn.mockResolvedValueOnce({ body: {} });
+      getClusterSettingsFn.mockResolvedValueOnce({});
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
@@ -175,7 +175,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       const mockEsResponse = {
         snapshot_name: 'foo-policy-snapshot',
       };
-      executeLifecycleFn.mockResolvedValue({ body: mockEsResponse });
+      executeLifecycleFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = {
         snapshotName: 'foo-policy-snapshot',
@@ -206,7 +206,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return successful ES responses', async () => {
       const mockEsResponse = { acknowledged: true };
-      deleteLifecycleFn.mockResolvedValue({ body: mockEsResponse });
+      deleteLifecycleFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = { itemsDeleted: names, errors: [] };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -243,7 +243,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       const mockEsResponse = { acknowledged: true };
 
       deleteLifecycleFn.mockRejectedValueOnce(mockEsError);
-      deleteLifecycleFn.mockResolvedValueOnce({ body: mockEsResponse });
+      deleteLifecycleFn.mockResolvedValueOnce(mockEsResponse);
 
       const expectedResponse = {
         itemsDeleted: [names[1]],
@@ -277,8 +277,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
 
-      getLifecycleFn.mockResolvedValue({ body: {} });
-      putLifecycleFn.mockResolvedValue({ body: mockEsResponse });
+      getLifecycleFn.mockResolvedValue({});
+      putLifecycleFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = { ...mockEsResponse };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -288,14 +288,14 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return error if policy with the same name already exists', async () => {
       const mockEsResponse = { [name]: {} };
-      getLifecycleFn.mockResolvedValue({ body: mockEsResponse });
+      getLifecycleFn.mockResolvedValue(mockEsResponse);
 
       const response = await router.runRequest(mockRequest);
       expect(response.status).toBe(409);
     });
 
     it('should throw if ES error', async () => {
-      getLifecycleFn.mockResolvedValue({ body: {} });
+      getLifecycleFn.mockResolvedValue({});
       putLifecycleFn.mockRejectedValue(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
@@ -317,8 +317,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      getLifecycleFn.mockResolvedValue({ body: { [name]: {} } });
-      putLifecycleFn.mockResolvedValue({ body: mockEsResponse });
+      getLifecycleFn.mockResolvedValue({ [name]: {} });
+      putLifecycleFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = { ...mockEsResponse };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
@@ -360,7 +360,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
         ],
       };
 
-      resolveIndicesFn.mockResolvedValue({ body: mockEsResponse });
+      resolveIndicesFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = {
         indices: ['fooIndex'],
@@ -375,7 +375,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
         aliases: [],
         data_streams: [],
       };
-      resolveIndicesFn.mockResolvedValue({ body: mockEsResponse });
+      resolveIndicesFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = { indices: [], dataStreams: [] };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
@@ -400,7 +400,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      putClusterSettingsFn.mockResolvedValue({ body: mockEsResponse });
+      putClusterSettingsFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = { ...mockEsResponse };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });

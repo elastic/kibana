@@ -50,58 +50,10 @@ export type ServerRoute<
       : {})) => Promise<TReturnType>;
 } & TRouteCreateOptions;
 
-export interface ServerRouteRepository<
-  TRouteHandlerResources extends ServerRouteHandlerResources = ServerRouteHandlerResources,
-  TRouteCreateOptions extends ServerRouteCreateOptions = ServerRouteCreateOptions,
-  TRouteState extends RouteState = RouteState
-> {
-  add<
-    TEndpoint extends string,
-    TReturnType,
-    TRouteParamsRT extends RouteParamsRT | undefined = undefined
-  >(
-    route: ServerRoute<
-      TEndpoint,
-      TRouteParamsRT,
-      TRouteHandlerResources,
-      TReturnType,
-      TRouteCreateOptions
-    >
-  ): ServerRouteRepository<
-    TRouteHandlerResources,
-    TRouteCreateOptions,
-    TRouteState & {
-      [key in TEndpoint]: ServerRoute<
-        TEndpoint,
-        TRouteParamsRT,
-        TRouteHandlerResources,
-        TReturnType,
-        TRouteCreateOptions
-      >;
-    }
-  >;
-  merge<
-    TServerRouteRepository extends ServerRouteRepository<
-      TRouteHandlerResources,
-      TRouteCreateOptions
-    >
-  >(
-    repository: TServerRouteRepository
-  ): TServerRouteRepository extends ServerRouteRepository<
-    TRouteHandlerResources,
-    TRouteCreateOptions,
-    infer TRouteStateToMerge
-  >
-    ? ServerRouteRepository<
-        TRouteHandlerResources,
-        TRouteCreateOptions,
-        TRouteState & TRouteStateToMerge
-      >
-    : never;
-  getRoutes: () => Array<
-    ServerRoute<string, RouteParamsRT, TRouteHandlerResources, unknown, TRouteCreateOptions>
-  >;
-}
+export type ServerRouteRepository = Record<
+  string,
+  ServerRoute<string, RouteParamsRT | undefined, any, any, Record<string, any>>
+>;
 
 type ClientRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
   TRouteParamsRT extends t.Mixed
@@ -117,72 +69,62 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
       }>
     : {};
 
-export type EndpointOf<TServerRouteRepository extends ServerRouteRepository<any, any, any>> =
-  TServerRouteRepository extends ServerRouteRepository<any, any, infer TRouteState>
-    ? keyof TRouteState
-    : never;
+export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =
+  keyof TServerRouteRepository;
 
 export type ReturnOf<
-  TServerRouteRepository extends ServerRouteRepository<any, any, any>,
-  TEndpoint extends EndpointOf<TServerRouteRepository>
-> = TServerRouteRepository extends ServerRouteRepository<any, any, infer TRouteState>
-  ? TEndpoint extends keyof TRouteState
-    ? TRouteState[TEndpoint] extends ServerRoute<
-        any,
-        any,
-        any,
-        infer TReturnType,
-        ServerRouteCreateOptions
-      >
-      ? TReturnType
-      : never
-    : never
+  TServerRouteRepository extends ServerRouteRepository,
+  TEndpoint extends keyof TServerRouteRepository
+> = TServerRouteRepository[TEndpoint] extends ServerRoute<
+  any,
+  any,
+  any,
+  infer TReturnType,
+  ServerRouteCreateOptions
+>
+  ? TReturnType
   : never;
 
 export type DecodedRequestParamsOf<
-  TServerRouteRepository extends ServerRouteRepository<any, any, any>,
-  TEndpoint extends EndpointOf<TServerRouteRepository>
-> = TServerRouteRepository extends ServerRouteRepository<any, any, infer TRouteState>
-  ? TEndpoint extends keyof TRouteState
-    ? TRouteState[TEndpoint] extends ServerRoute<
-        any,
-        infer TRouteParamsRT,
-        any,
-        any,
-        ServerRouteCreateOptions
-      >
-      ? TRouteParamsRT extends RouteParamsRT
-        ? DecodedRequestParamsOfType<TRouteParamsRT>
-        : {}
-      : never
-    : never
+  TServerRouteRepository extends ServerRouteRepository,
+  TEndpoint extends keyof TServerRouteRepository
+> = TServerRouteRepository[TEndpoint] extends ServerRoute<
+  any,
+  infer TRouteParamsRT,
+  any,
+  any,
+  ServerRouteCreateOptions
+>
+  ? TRouteParamsRT extends RouteParamsRT
+    ? DecodedRequestParamsOfType<TRouteParamsRT>
+    : {}
   : never;
 
 export type ClientRequestParamsOf<
-  TServerRouteRepository extends ServerRouteRepository<any, any, any>,
-  TEndpoint extends EndpointOf<TServerRouteRepository>
-> = TServerRouteRepository extends ServerRouteRepository<any, any, infer TRouteState>
-  ? TEndpoint extends keyof TRouteState
-    ? TRouteState[TEndpoint] extends ServerRoute<
-        any,
-        infer TRouteParamsRT,
-        any,
-        any,
-        ServerRouteCreateOptions
-      >
-      ? TRouteParamsRT extends RouteParamsRT
-        ? ClientRequestParamsOfType<TRouteParamsRT>
-        : {}
-      : never
-    : never
+  TServerRouteRepository extends ServerRouteRepository,
+  TEndpoint extends keyof TServerRouteRepository
+> = TServerRouteRepository[TEndpoint] extends ServerRoute<
+  any,
+  infer TRouteParamsRT,
+  any,
+  any,
+  ServerRouteCreateOptions
+>
+  ? TRouteParamsRT extends RouteParamsRT
+    ? ClientRequestParamsOfType<TRouteParamsRT>
+    : {}
   : never;
 
+type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends never
+  ? [T] | []
+  : [T];
+
 export type RouteRepositoryClient<
-  TServerRouteRepository extends ServerRouteRepository<any, any, any>,
+  TServerRouteRepository extends ServerRouteRepository,
   TAdditionalClientOptions extends Record<string, any>
-> = <TEndpoint extends EndpointOf<TServerRouteRepository>>(
-  options: {
-    endpoint: TEndpoint;
-  } & ClientRequestParamsOf<TServerRouteRepository, TEndpoint> &
-    TAdditionalClientOptions
+> = <TEndpoint extends keyof TServerRouteRepository>(
+  endpoint: TEndpoint,
+  ...args: MaybeOptionalArgs<
+    ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions
+  >
 ) => Promise<ReturnOf<TServerRouteRepository, TEndpoint>>;

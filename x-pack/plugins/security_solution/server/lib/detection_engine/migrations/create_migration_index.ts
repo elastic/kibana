@@ -32,11 +32,12 @@ export const createMigrationIndex = async ({
   const paddedVersion = `${version}`.padStart(6, '0');
   const destinationIndexName = `${index}-r${paddedVersion}`;
 
-  const response = await esClient.indices.create<{ index: string }>({
+  const response = await esClient.indices.create({
     index: destinationIndexName,
     body: {
       settings: {
         index: {
+          // @ts-expect-error `name` is required on IndicesIndexSettingsLifecycle
           lifecycle: {
             indexing_complete: true,
           },
@@ -45,5 +46,5 @@ export const createMigrationIndex = async ({
     },
   });
 
-  return response.body.index;
+  return response.index;
 };

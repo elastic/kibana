@@ -84,6 +84,11 @@ export enum TextDecoration {
   UNDERLINE = 'underline',
 }
 
+export enum FontSizeUnit {
+  PX = 'px',
+  PT = 'pt',
+}
+
 /**
  * Represents the various style properties that can be applied to an element.
  */

@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { GeoIndexPatternSelect } from './geo_index_pattern_select';
-import { IndexPatternsContract } from 'src/plugins/data/public';
+import { DataViewsContract } from 'src/plugins/data/public';
 import { HttpSetup } from 'kibana/public';
 
 class MockIndexPatternSelectComponent extends React.Component {
@@ -24,7 +24,7 @@ function makeMockIndexPattern(id: string, fields: unknown) {
   };
 }
 
-const mockIndexPatternService: IndexPatternsContract = {
+const mockIndexPatternService: DataViewsContract = {
   get(id: string) {
     if (id === 'foobar_with_geopoint') {
       return makeMockIndexPattern(id, [{ type: 'geo_point' }]);
@@ -32,7 +32,7 @@ const mockIndexPatternService: IndexPatternsContract = {
       return makeMockIndexPattern(id, [{ type: 'string' }]);
     }
   },
-} as unknown as IndexPatternsContract;
+} as unknown as DataViewsContract;
 
 test('should render without error after mounting', async () => {
   const component = shallow(
@@ -53,7 +53,7 @@ test('should render without error after mounting', async () => {
   expect(component).toMatchSnapshot();
 });
 
-test('should render with error when index pattern does not have geo_point field', async () => {
+test('should render with error when data view does not have geo_point field', async () => {
   const component = shallow(
     <GeoIndexPatternSelect
       http={{} as unknown as HttpSetup}

@@ -43,8 +43,8 @@ export class QueryContext {
     this.query = query;
   }
 
-  async search<TParams>(params: TParams) {
-    return this.callES.search(params);
+  async search<TParams>(params: TParams, operationName?: string) {
+    return this.callES.search(params, operationName);
   }
 
   async count(params: any): Promise<any> {
@@ -102,6 +102,17 @@ export class QueryContext {
     // latencies and slowdowns that's dangerous. Making this value larger makes things
     // only slower, but only marginally so, and prevents people from seeing weird
     // behavior.
+
+    if (this.dateRangeEnd === 'now') {
+      return {
+        range: {
+          'monitor.timespan': {
+            gte: 'now-5m',
+            lte: 'now',
+          },
+        },
+      };
+    }
 
     const tsEnd = parseRelativeDate(this.dateRangeEnd, { roundUp: true })!;
     const tsStart = moment(tsEnd).subtract(5, 'minutes');

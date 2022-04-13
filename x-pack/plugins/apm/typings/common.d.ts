@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
-import '../../../typings/rison_node';
 import '../../infra/types/eui';
-// EUIBasicTable
-import '../../reporting/public/components/report_listing';
-import '../../reporting/server/lib/puid';
 import './apm_rum_react';
 
 // Allow unknown properties in an object
@@ -24,6 +19,12 @@ type AllowUnknownObjectProperties<T> = T extends object
     }
   : T;
 
-export type PromiseValueType<T extends Promise<any>> = UnwrapPromise<T>;
-
 export type Maybe<T> = T | null | undefined;
+
+export type RecursivePartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer U>
+    ? Array<RecursivePartial<U>>
+    : T[P] extends object
+    ? RecursivePartial<T[P]>
+    : T[P];
+};

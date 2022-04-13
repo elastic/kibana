@@ -3,13 +3,13 @@
 exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft"
+  data-test-subj="add-element-button"
 >
   <div
     className="euiPopover__anchor"
   >
     <button
-      aria-label="Add an element"
-      className="euiButton euiButton--primary euiButton--small euiButton--fill canvasElementMenu__popoverButton"
+      className="euiButton euiButton--primary euiButton--fill solutionToolbarButton undefined"
       data-test-subj="add-element-button"
       disabled={false}
       onClick={[Function]}
@@ -28,7 +28,9 @@ exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
           color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
         <span
           className="euiButton__text"
         >

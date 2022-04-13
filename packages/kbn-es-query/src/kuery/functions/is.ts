@@ -7,12 +7,12 @@
  */
 
 import { isUndefined } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode, IndexPatternFieldBase, KueryQueryOptions } from '../..';
+import { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../..';
 
 import * as ast from '../ast';
 
@@ -40,7 +40,7 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
 ): estypes.QueryDslQueryContainer {
@@ -101,7 +101,7 @@ export function toElasticsearchQuery(
     return { match_all: {} };
   }
 
-  const queries = fields!.reduce((accumulator: any, field: IndexPatternFieldBase) => {
+  const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.

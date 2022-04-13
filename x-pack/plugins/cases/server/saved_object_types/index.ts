@@ -6,8 +6,8 @@
  */
 
 export { createCaseSavedObjectType } from './cases';
-export { subCaseSavedObjectType } from './sub_case';
 export { caseConfigureSavedObjectType } from './configure';
 export { createCaseCommentSavedObjectType } from './comments';
 export { caseUserActionSavedObjectType } from './user_actions';
 export { caseConnectorMappingsSavedObjectType } from './connector_mappings';
+export { casesTelemetrySavedObjectType } from './telemetry';

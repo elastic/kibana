@@ -8,19 +8,23 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { pairwise, startWith } from 'rxjs/operators';
 
-import { InternalChromeStart } from '../chrome';
-import { InternalApplicationStart } from '../application';
-import { OverlayStart } from '../overlays';
+import type { InternalChromeStart } from '../chrome';
+import type { InternalApplicationStart } from '../application';
+import type { OverlayStart } from '../overlays';
+import type { ThemeServiceStart } from '../theme';
+import type { I18nStart } from '../i18n';
+import { CoreContextProvider } from '../utils';
 import { AppWrapper } from './app_containers';
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
+  theme: ThemeServiceStart;
+  i18n: I18nStart;
 }
 
 /**
@@ -32,7 +36,7 @@ interface StartDeps {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, overlays, targetDomElement }: StartDeps) {
+  start({ application, chrome, overlays, theme, i18n, targetDomElement }: StartDeps) {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
@@ -47,7 +51,7 @@ export class RenderingService {
       });
 
     ReactDOM.render(
-      <I18nProvider>
+      <CoreContextProvider i18n={i18n} theme={theme} globalStyles={true}>
         <>
           {/* Fixed headers */}
           {chromeHeader}
@@ -64,7 +68,7 @@ export class RenderingService {
             {appComponent}
           </AppWrapper>
         </>
-      </I18nProvider>,
+      </CoreContextProvider>,
       targetDomElement
     );
   }

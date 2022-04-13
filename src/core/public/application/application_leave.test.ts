@@ -54,5 +54,17 @@ describe('getLeaveAction', () => {
       title: 'a title',
       callback,
     });
+    expect(
+      getLeaveAction((actions) =>
+        actions.confirm('another message', 'a title', callback, 'confirm button text', 'danger')
+      )
+    ).toEqual({
+      type: AppLeaveActionType.confirm,
+      text: 'another message',
+      title: 'a title',
+      callback,
+      confirmButtonText: 'confirm button text',
+      buttonColor: 'danger',
+    });
   });
 });

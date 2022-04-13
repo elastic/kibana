@@ -12,6 +12,7 @@ import {
   PrimitiveValue,
   Settings,
   TooltipInfo,
+  PartialTheme,
 } from '@elastic/charts';
 import {
   EuiCheckbox,
@@ -146,21 +147,23 @@ export function ServiceProfilingFlamegraph({
         return undefined;
       }
 
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/profiling/statistics',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/profiling/statistics',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              kuery,
+              start,
+              end,
+              environment,
+              valueType,
+            },
           },
-          query: {
-            kuery,
-            start,
-            end,
-            environment,
-            valueType,
-          },
-        },
-      });
+        }
+      );
     },
     [kuery, start, end, environment, serviceName, valueType]
   );
@@ -284,6 +287,18 @@ export function ServiceProfilingFlamegraph({
   }, [points, highlightFilter, data]);
 
   const chartTheme = useChartTheme();
+  const themeOverrides: PartialTheme = {
+    chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
+    partition: {
+      fillLabel: {
+        fontFamily: theme.eui.euiCodeFontFamily,
+        clipText: true,
+      },
+      fontFamily: theme.eui.euiCodeFontFamily,
+      minFontSize: 9,
+      maxFontSize: 9,
+    },
+  };
 
   const chartSize = {
     height: layers.length * 20,
@@ -303,7 +318,7 @@ export function ServiceProfilingFlamegraph({
       <EuiFlexItem grow>
         <Chart size={chartSize}>
           <Settings
-            theme={chartTheme}
+            theme={[themeOverrides, ...chartTheme]}
             tooltip={{
               customTooltip: (info) => (
                 <CustomTooltip
@@ -318,20 +333,11 @@ export function ServiceProfilingFlamegraph({
             id="profile_graph"
             data={points}
             layers={layers}
+            drilldown
+            maxRowCount={1}
+            layout={PartitionLayout.icicle}
             valueAccessor={(d: Datum) => d.value as number}
             valueFormatter={() => ''}
-            config={{
-              fillLabel: {
-                fontFamily: theme.eui.euiCodeFontFamily,
-                clipText: true,
-              },
-              drilldown: true,
-              fontFamily: theme.eui.euiCodeFontFamily,
-              minFontSize: 9,
-              maxFontSize: 9,
-              maxRowCount: 1,
-              partitionLayout: PartitionLayout.icicle,
-            }}
           />
         </Chart>
       </EuiFlexItem>
@@ -381,7 +387,7 @@ export function ServiceProfilingFlamegraph({
               }}
               pagination={{
                 pageSize: 20,
-                hidePerPageOptions: true,
+                showPerPageOptions: false,
               }}
               compressed
               columns={[

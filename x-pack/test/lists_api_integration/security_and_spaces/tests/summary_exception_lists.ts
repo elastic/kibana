@@ -21,16 +21,16 @@ interface SummaryResponseType {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const log = getService('log');
 
   describe('summary_exception_lists', () => {
     describe('summary exception lists', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
       afterEach(async () => {
-        await deleteListsIndex(supertest);
-        await deleteAllExceptions(es);
+        await deleteListsIndex(supertest, log);
+        await deleteAllExceptions(supertest, log);
       });
 
       it('should give a validation error if the list_id and the id are not supplied', async () => {
@@ -89,6 +89,40 @@ export default ({ getService }: FtrProviderContext) => {
           linux: 1,
           macos: 1,
           total: 3,
+          windows: 1,
+        };
+        expect(body).to.eql(expected);
+      });
+
+      it('should not sum up the items by OS for summary total', async () => {
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListMinimalSchemaMock())
+          .expect(200);
+
+        const item = getCreateExceptionListItemMinimalSchemaMock();
+
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...item,
+            os_types: ['windows', 'linux', 'macos'],
+            item_id: `${item.item_id}-some_item_id`,
+          })
+          .expect(200);
+
+        const { body }: SummaryResponseType = await supertest
+          .get(`${EXCEPTION_LIST_URL}/summary?list_id=${LIST_ID}`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        const expected: ExceptionListSummarySchema = {
+          linux: 1,
+          macos: 1,
+          total: 1,
           windows: 1,
         };
         expect(body).to.eql(expected);

@@ -13,7 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../types';
 import { Loading } from '../../../components';
@@ -49,7 +49,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   );
 
   // Configure inputs (and their streams)
-  // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
       <>
@@ -107,7 +106,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
     ) : (
       <EuiEmptyPrompt
         iconType="checkInCircleFilled"
-        iconColor="secondary"
+        iconColor="success"
         body={
           <EuiText>
             <p>

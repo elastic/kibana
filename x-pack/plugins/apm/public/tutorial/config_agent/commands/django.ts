@@ -18,7 +18,7 @@ INSTALLED_APPS = (
 # ...
 )
 
-ELASTIC_APM = {curlyOpen}
+ELASTIC_APM = {
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
   {
@@ -58,7 +58,7 @@ ELASTIC_APM = {curlyOpen}
   }
 )}
 'ENVIRONMENT': 'production',
-{curlyClose}
+}
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',

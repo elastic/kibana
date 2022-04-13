@@ -5,19 +5,11 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { i18n } from '@kbn/i18n';
-
-import styled, { useTheme } from 'styled-components';
-
-import type { EuiTheme } from 'src/plugins/kibana_react/common';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
-
-import { useLinks } from '../hooks';
 
 import { WithHeaderLayout } from './';
 
@@ -26,43 +18,18 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const Illustration = styled(EuiImage)`
-  margin-bottom: -68px;
-  width: 80%;
-`;
-
-const HeroImage = memo(() => {
-  const { toSharedAssets } = useLinks();
-  const theme = useTheme() as EuiTheme;
-  const IS_DARK_THEME = theme.darkMode;
-
-  return (
-    <Illustration
-      alt={i18n.translate('xpack.fleet.epm.illustrationAltText', {
-        defaultMessage: 'Illustration of an integration',
-      })}
-      url={
-        IS_DARK_THEME
-          ? toSharedAssets('illustration_integrations_darkmode.svg')
-          : toSharedAssets('illustration_integrations_lightmode.svg')
-      }
-    />
-  );
-});
-
 export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, children }) => {
   const { getHref } = useLink();
 
   return (
     <WithHeaderLayout
-      rightColumn={<HeroImage />}
       leftColumn={
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
           <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.fleet.integrationsHeaderTitle"
-                defaultMessage="Elastic Agent Integrations"
+                defaultMessage="Integrations"
               />
             </h1>
           </EuiText>
@@ -70,11 +37,11 @@ export const DefaultLayout: React.FunctionComponent<Props> = memo(({ section, ch
           <EuiSpacer size="s" />
 
           <EuiFlexItem grow={false}>
-            <EuiText size="m" color="subdued">
+            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.pageSubtitle"
-                  defaultMessage="Collect data from popular apps and services using Elastic Agent"
+                  defaultMessage="Choose an integration to start collecting and analyzing your data."
                 />
               </p>
             </EuiText>

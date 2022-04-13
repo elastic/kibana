@@ -4,7 +4,7 @@
 
 ## ICspConfig.disableEmbedding property
 
-Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled \*and\* no custom rules have been defined, a restrictive 'frame-ancestors' rule will be added to the default CSP rules.
+Whether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled, a restrictive 'frame-ancestors' rule will be added to the default CSP rules.
 
 <b>Signature:</b>
 

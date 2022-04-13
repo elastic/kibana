@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getXyVisualization } from './xy_visualization';
-import { Operation } from '../types';
+import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { defaultThresholdColor } from './color_assignment';
+import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
+import { defaultReferenceLineColor } from './color_assignment';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
     paletteService: chartPluginMock.createPaletteRegistry(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    kibanaTheme: themeServiceMock.createStartContract(),
+    useLegacyTimeAxis: false,
+    eventAnnotationService: eventAnnotationServiceMock,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -28,14 +33,14 @@ describe('#toExpression', () => {
     mockDatasource = createMockDatasource('testDatasource');
 
     mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
-      { columnId: 'd' },
-      { columnId: 'a' },
-      { columnId: 'b' },
-      { columnId: 'c' },
+      { columnId: 'd', fields: [] },
+      { columnId: 'a', fields: [] },
+      { columnId: 'b', fields: [] },
+      { columnId: 'c', fields: [] },
     ]);
 
     mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((col) => {
-      return { label: `col_${col}`, dataType: 'number' } as Operation;
+      return { label: `col_${col}`, dataType: 'number' } as OperationDescriptor;
     });
 
     frame.datasourceLayers = {
@@ -51,6 +56,8 @@ describe('#toExpression', () => {
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
+          endValue: 'Nearest',
+          emphasizeFitting: true,
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
           labelsOrientation: {
             x: 0,
@@ -338,17 +345,14 @@ describe('#toExpression', () => {
             yConfig: [{ forAccessor: 'a' }],
           },
           {
-            layerId: 'threshold',
-            layerType: layerTypes.THRESHOLD,
-            seriesType: 'area',
-            splitAccessor: 'd',
-            xAccessor: 'a',
+            layerId: 'referenceLine',
+            layerType: layerTypes.REFERENCELINE,
             accessors: ['b', 'c'],
             yConfig: [{ forAccessor: 'a' }],
           },
         ],
       },
-      { ...frame.datasourceLayers, threshold: mockDatasource.publicAPIMock }
+      { ...frame.datasourceLayers, referenceLine: mockDatasource.publicAPIMock }
     ) as Ast;
 
     function getYConfigColorForLayer(ast: Ast, index: number) {
@@ -356,6 +360,6 @@ describe('#toExpression', () => {
         .chain[0].arguments.color;
     }
     expect(getYConfigColorForLayer(expression, 0)).toEqual([]);
-    expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultThresholdColor]);
+    expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
   });
 });

@@ -16,8 +16,8 @@ import { createIndexPatternsStartMock } from '../data_views/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '../../../bfetch/server/mocks';
-import { of } from 'rxjs';
-import {
+import { lastValueFrom, of } from 'rxjs';
+import type {
   IEsSearchRequest,
   IEsSearchResponse,
   IScopedSearchClient,
@@ -25,8 +25,8 @@ import {
   ISearchSessionService,
   ISearchStart,
   ISearchStrategy,
-  NoSearchIdInSessionError,
 } from '.';
+import { NoSearchIdInSessionError } from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '../../../expressions/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
@@ -182,7 +182,7 @@ describe('Search service', () => {
           throw new NoSearchIdInSessionError();
         });
 
-        const res = await mockScopedClient.search(searchRequest, options).toPromise();
+        const res = await lastValueFrom(mockScopedClient.search(searchRequest, options));
 
         const [request, callOptions] = mockStrategy.search.mock.calls[0];
         expect(callOptions).toBe(options);

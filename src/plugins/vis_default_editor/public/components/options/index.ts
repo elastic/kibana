@@ -9,11 +9,14 @@
 export { BasicOptions } from './basic_options';
 export { SwitchOption } from './switch';
 export { SelectOption } from './select';
-export { ColorRanges, SetColorRangeValue } from './color_ranges';
-export { ColorSchemaOptions, SetColorSchemaOptionsValue } from './color_schema';
+export type { SetColorRangeValue } from './color_ranges';
+export { ColorRanges } from './color_ranges';
+export type { SetColorSchemaOptionsValue } from './color_schema';
+export { ColorSchemaOptions } from './color_schema';
 export { NumberInputOption } from './number_input';
 export { RangeOption } from './range';
 export { RequiredNumberInputOption } from './required_number_input';
 export { TextInputOption } from './text_input';
 export { PercentageModeOption } from './percentage_mode';
 export { LongLegendOptions } from './long_legend_options';
+export { LegendSizeSettings } from './legend_size_settings';

@@ -6,20 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from 'kibana/server';
 import type { UsageCollectionSetup } from '../../../../../usage_collection/server';
 import { fetchProvider, TelemetryResponse } from './collector_fetch';
 
 export function makeSampleDataUsageCollector(
   usageCollection: UsageCollectionSetup,
-  context: PluginInitializerContext
+  kibanaIndex: string
 ) {
-  const config = context.config.legacy.get();
-  const index = config.kibana.index;
-
   const collector = usageCollection.makeUsageCollector<TelemetryResponse>({
     type: 'sample-data',
-    fetch: fetchProvider(index),
+    fetch: fetchProvider(kibanaIndex),
     isReady: () => true,
     schema: {
       installed: { type: 'array', items: { type: 'keyword' } },

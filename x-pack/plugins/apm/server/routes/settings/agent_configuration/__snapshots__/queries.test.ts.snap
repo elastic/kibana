@@ -1,0 +1,260 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`agent configuration queries findExactConfiguration find configuration by service.environment 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "bar",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`agent configuration queries findExactConfiguration find configuration by service.name 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.environment",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`agent configuration queries findExactConfiguration find configuration by service.name and service.environment 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "bar",
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`agent configuration queries getAllEnvironments fetches all environments 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "error",
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": undefined,
+          "size": 50,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
+exports[`agent configuration queries getExistingEnvironmentsForService fetches unavailable environments 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": "ALL_OPTION_VALUE",
+          "size": 50,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`agent configuration queries listConfigurations fetches configurations 1`] = `
+Object {
+  "index": "myIndex",
+  "size": 200,
+}
+`;
+
+exports[`agent configuration queries searchConfigurations fetches filtered configurations with an environment 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "minimum_should_match": 2,
+        "should": Array [
+          Object {
+            "constant_score": Object {
+              "boost": 2,
+              "filter": Object {
+                "term": Object {
+                  "service.name": "foo",
+                },
+              },
+            },
+          },
+          Object {
+            "constant_score": Object {
+              "boost": 1,
+              "filter": Object {
+                "term": Object {
+                  "service.environment": "bar",
+                },
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.environment",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`agent configuration queries searchConfigurations fetches filtered configurations without an environment 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "minimum_should_match": 2,
+        "should": Array [
+          Object {
+            "constant_score": Object {
+              "boost": 2,
+              "filter": Object {
+                "term": Object {
+                  "service.name": "foo",
+                },
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.environment",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;

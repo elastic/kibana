@@ -66,12 +66,12 @@ export const EventRateChart: FC<Props> = ({
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
         <Chart>
           {showAxis === true && <Axes />}
-
-          {onBrushEnd === undefined ? (
-            <Settings tooltip={TooltipType.None} theme={theme} />
-          ) : (
-            <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
-          )}
+          <Settings
+            tooltip={TooltipType.None}
+            onBrushEnd={onBrushEnd}
+            // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+            theme={theme}
+          />
 
           {overlayRanges &&
             overlayRanges.map((range, i) => (

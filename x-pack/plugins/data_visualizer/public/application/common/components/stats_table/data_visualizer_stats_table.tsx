@@ -19,11 +19,13 @@ import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   EuiResizeObserver,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
-import { JOB_FIELD_TYPES, JobFieldType, DataVisualizerTableState } from '../../../../../common';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
+import type { JobFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
 
@@ -33,12 +35,13 @@ import {
   FieldVisConfig,
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
-} from './types/field_vis_config';
+} from '../../../../../common/types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
 import { BooleanContentPreview } from './components/field_data_row';
 import { calculateTableColumnsDimensions } from './utils';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { FieldTypeIcon } from '../field_type_icon';
+import './_index.scss';
 
 const FIELD_NAME = 'fieldName';
 
@@ -54,6 +57,7 @@ interface DataVisualizerTableProps<T> {
   showPreviewByDefault?: boolean;
   /** Callback to receive any updates when table or page state is changed **/
   onChange?: (update: Partial<DataVisualizerTableState>) => void;
+  loading?: boolean;
 }
 
 export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -64,6 +68,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   extendedColumns,
   showPreviewByDefault,
   onChange,
+  loading,
 }: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
@@ -180,7 +185,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           defaultMessage: 'Type',
         }),
         render: (fieldType: JobFieldType) => {
-          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} needsAria={true} />;
+          return <FieldTypeIcon type={fieldType} tooltipEnabled={true} />;
         },
         width: dimensions.type,
         sortable: true,
@@ -275,6 +280,15 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         ),
         render: (item: DataVisualizerTableItem) => {
           if (item === undefined || showDistributions === false) return null;
+
+          if ('loading' in item && item.loading === true) {
+            return (
+              <EuiText textAlign="center">
+                <EuiLoadingSpinner size="s" />
+              </EuiText>
+            );
+          }
+
           if (
             (item.type === JOB_FIELD_TYPES.KEYWORD || item.type === JOB_FIELD_TYPES.IP) &&
             item.stats?.topValues !== undefined
@@ -284,7 +298,12 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
 
           if (item.type === JOB_FIELD_TYPES.NUMBER) {
             if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
-              return <IndexBasedNumberContentPreview config={item} />;
+              // If the cardinality is only low, show the top values instead of a distribution chart
+              return item.stats?.distribution?.percentiles.length <= 2 ? (
+                <TopValuesPreview config={item} isNumeric={true} />
+              ) : (
+                <IndexBasedNumberContentPreview config={item} />
+              );
             } else {
               return <FileBasedNumberContentPreview config={item} />;
             }
@@ -322,6 +341,13 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       {(resizeRef) => (
         <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
+            message={
+              loading
+                ? i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
+                    defaultMessage: 'Searching',
+                  })
+                : undefined
+            }
             className={'dvTable'}
             items={items}
             itemId={FIELD_NAME}

@@ -32,12 +32,14 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -93,13 +95,8 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
           <EuiFormControlLayout
             compressed={false}
             fullWidth={true}
-            icon={
-              Object {
-                "side": "right",
-                "type": "arrowDown",
-              }
-            }
             inputId="generated-id"
+            isDropdown={true}
             isLoading={false}
             prepend="Every"
           >
@@ -122,7 +119,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
               >
                 <EuiValidatableControl>
                   <select
-                    className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                    className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                     data-test-subj="cronFrequencySelect"
                     id="generated-id"
                     onBlur={[Function]}
@@ -171,12 +168,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
                   compressed={false}
-                  icon={
-                    Object {
-                      "side": "right",
-                      "type": "arrowDown",
-                    }
-                  }
+                  isDropdown={true}
                   isLoading={false}
                 >
                   <div
@@ -589,12 +581,14 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Time"
@@ -738,12 +732,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                     <EuiFormControlLayout
                       compressed={false}
                       fullWidth={true}
-                      icon={
-                        Object {
-                          "side": "right",
-                          "type": "arrowDown",
-                        }
-                      }
+                      isDropdown={true}
                       isLoading={false}
                       prepend="At"
                     >
@@ -765,7 +754,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                           <EuiValidatableControl>
                             <select
                               aria-label="Hour"
-                              className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                              className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                               data-test-subj="cronFrequencyDailyHourSelect"
                               onChange={[Function]}
                               onMouseUp={[Function]}
@@ -919,12 +908,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
                             compressed={false}
-                            icon={
-                              Object {
-                                "side": "right",
-                                "type": "arrowDown",
-                              }
-                            }
+                            isDropdown={true}
                             isLoading={false}
                           >
                             <div
@@ -1219,12 +1203,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                     <EuiFormControlLayout
                       compressed={false}
                       fullWidth={true}
-                      icon={
-                        Object {
-                          "side": "right",
-                          "type": "arrowDown",
-                        }
-                      }
+                      isDropdown={true}
                       isLoading={false}
                       prepend=":"
                     >
@@ -1246,7 +1225,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                           <EuiValidatableControl>
                             <select
                               aria-label="Minute"
-                              className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                              className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                               data-test-subj="cronFrequencyDailyMinuteSelect"
                               onChange={[Function]}
                               onMouseUp={[Function]}
@@ -1616,12 +1595,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
                             compressed={false}
-                            icon={
-                              Object {
-                                "side": "right",
-                                "type": "arrowDown",
-                              }
-                            }
+                            isDropdown={true}
                             isLoading={false}
                           >
                             <div
@@ -1698,12 +1672,14 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -1759,13 +1735,8 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
           <EuiFormControlLayout
             compressed={false}
             fullWidth={true}
-            icon={
-              Object {
-                "side": "right",
-                "type": "arrowDown",
-              }
-            }
             inputId="generated-id"
+            isDropdown={true}
             isLoading={false}
             prepend="Every"
           >
@@ -1788,7 +1759,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
               >
                 <EuiValidatableControl>
                   <select
-                    className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                    className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                     data-test-subj="cronFrequencySelect"
                     id="generated-id"
                     onBlur={[Function]}
@@ -1837,12 +1808,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
                   compressed={false}
-                  icon={
-                    Object {
-                      "side": "right",
-                      "type": "arrowDown",
-                    }
-                  }
+                  isDropdown={true}
                   isLoading={false}
                 >
                   <div
@@ -2154,12 +2120,14 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Minute"
@@ -2431,13 +2399,8 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
             <EuiFormControlLayout
               compressed={false}
               fullWidth={true}
-              icon={
-                Object {
-                  "side": "right",
-                  "type": "arrowDown",
-                }
-              }
               inputId="generated-id"
+              isDropdown={true}
               isLoading={false}
               prepend="At"
             >
@@ -2460,7 +2423,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                 >
                   <EuiValidatableControl>
                     <select
-                      className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                      className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                       data-test-subj="cronFrequencyHourlyMinuteSelect"
                       id="generated-id"
                       onBlur={[Function]}
@@ -2833,12 +2796,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
                     compressed={false}
-                    icon={
-                      Object {
-                        "side": "right",
-                        "type": "arrowDown",
-                      }
-                    }
+                    isDropdown={true}
                     isLoading={false}
                   >
                     <div
@@ -2911,12 +2869,14 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -2972,13 +2932,8 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
           <EuiFormControlLayout
             compressed={false}
             fullWidth={true}
-            icon={
-              Object {
-                "side": "right",
-                "type": "arrowDown",
-              }
-            }
             inputId="generated-id"
+            isDropdown={true}
             isLoading={false}
             prepend="Every"
           >
@@ -3001,7 +2956,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
               >
                 <EuiValidatableControl>
                   <select
-                    className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                    className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                     data-test-subj="cronFrequencySelect"
                     id="generated-id"
                     onBlur={[Function]}
@@ -3050,12 +3005,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
                   compressed={false}
-                  icon={
-                    Object {
-                      "side": "right",
-                      "type": "arrowDown",
-                    }
-                  }
+                  isDropdown={true}
                   isLoading={false}
                 >
                   <div
@@ -3127,12 +3077,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -3188,13 +3140,8 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
           <EuiFormControlLayout
             compressed={false}
             fullWidth={true}
-            icon={
-              Object {
-                "side": "right",
-                "type": "arrowDown",
-              }
-            }
             inputId="generated-id"
+            isDropdown={true}
             isLoading={false}
             prepend="Every"
           >
@@ -3217,7 +3164,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
               >
                 <EuiValidatableControl>
                   <select
-                    className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                    className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                     data-test-subj="cronFrequencySelect"
                     id="generated-id"
                     onBlur={[Function]}
@@ -3266,12 +3213,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
                   compressed={false}
-                  icon={
-                    Object {
-                      "side": "right",
-                      "type": "arrowDown",
-                    }
-                  }
+                  isDropdown={true}
                   isLoading={false}
                 >
                   <div
@@ -3813,12 +3755,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Date"
@@ -3974,13 +3918,8 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
             <EuiFormControlLayout
               compressed={false}
               fullWidth={true}
-              icon={
-                Object {
-                  "side": "right",
-                  "type": "arrowDown",
-                }
-              }
               inputId="generated-id"
+              isDropdown={true}
               isLoading={false}
               prepend="On the"
             >
@@ -4003,7 +3942,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                 >
                   <EuiValidatableControl>
                     <select
-                      className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                      className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                       data-test-subj="cronFrequencyMonthlyDateSelect"
                       id="generated-id"
                       onBlur={[Function]}
@@ -4202,12 +4141,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
                     compressed={false}
-                    icon={
-                      Object {
-                        "side": "right",
-                        "type": "arrowDown",
-                      }
-                    }
+                    isDropdown={true}
                     isLoading={false}
                   >
                     <div
@@ -4271,12 +4205,14 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Time"
@@ -4420,12 +4356,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                     <EuiFormControlLayout
                       compressed={false}
                       fullWidth={true}
-                      icon={
-                        Object {
-                          "side": "right",
-                          "type": "arrowDown",
-                        }
-                      }
+                      isDropdown={true}
                       isLoading={false}
                       prepend="At"
                     >
@@ -4447,7 +4378,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                           <EuiValidatableControl>
                             <select
                               aria-label="Hour"
-                              className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                              className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                               data-test-subj="cronFrequencyMonthlyHourSelect"
                               onChange={[Function]}
                               onMouseUp={[Function]}
@@ -4601,12 +4532,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
                             compressed={false}
-                            icon={
-                              Object {
-                                "side": "right",
-                                "type": "arrowDown",
-                              }
-                            }
+                            isDropdown={true}
                             isLoading={false}
                           >
                             <div
@@ -4901,12 +4827,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                     <EuiFormControlLayout
                       compressed={false}
                       fullWidth={true}
-                      icon={
-                        Object {
-                          "side": "right",
-                          "type": "arrowDown",
-                        }
-                      }
+                      isDropdown={true}
                       isLoading={false}
                       prepend=":"
                     >
@@ -4928,7 +4849,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                           <EuiValidatableControl>
                             <select
                               aria-label="Minute"
-                              className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                              className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                               data-test-subj="cronFrequencyMonthlyMinuteSelect"
                               onChange={[Function]}
                               onMouseUp={[Function]}
@@ -5298,12 +5219,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
                             compressed={false}
-                            icon={
-                              Object {
-                                "side": "right",
-                                "type": "arrowDown",
-                              }
-                            }
+                            isDropdown={true}
                             isLoading={false}
                           >
                             <div
@@ -5380,12 +5296,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -5441,13 +5359,8 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
           <EuiFormControlLayout
             compressed={false}
             fullWidth={true}
-            icon={
-              Object {
-                "side": "right",
-                "type": "arrowDown",
-              }
-            }
             inputId="generated-id"
+            isDropdown={true}
             isLoading={false}
             prepend="Every"
           >
@@ -5470,7 +5383,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
               >
                 <EuiValidatableControl>
                   <select
-                    className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                    className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                     data-test-subj="cronFrequencySelect"
                     id="generated-id"
                     onBlur={[Function]}
@@ -5519,12 +5432,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
                   compressed={false}
-                  icon={
-                    Object {
-                      "side": "right",
-                      "type": "arrowDown",
-                    }
-                  }
+                  isDropdown={true}
                   isLoading={false}
                 >
                   <div
@@ -5970,12 +5878,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Day"
@@ -6035,13 +5945,8 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
             <EuiFormControlLayout
               compressed={false}
               fullWidth={true}
-              icon={
-                Object {
-                  "side": "right",
-                  "type": "arrowDown",
-                }
-              }
               inputId="generated-id"
+              isDropdown={true}
               isLoading={false}
               prepend="On"
             >
@@ -6064,7 +5969,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                 >
                   <EuiValidatableControl>
                     <select
-                      className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                      className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                       data-test-subj="cronFrequencyWeeklyDaySelect"
                       id="generated-id"
                       onBlur={[Function]}
@@ -6119,12 +6024,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
                     compressed={false}
-                    icon={
-                      Object {
-                        "side": "right",
-                        "type": "arrowDown",
-                      }
-                    }
+                    isDropdown={true}
                     isLoading={false}
                   >
                     <div
@@ -6188,12 +6088,14 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Time"
@@ -6337,12 +6239,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                     <EuiFormControlLayout
                       compressed={false}
                       fullWidth={true}
-                      icon={
-                        Object {
-                          "side": "right",
-                          "type": "arrowDown",
-                        }
-                      }
+                      isDropdown={true}
                       isLoading={false}
                       prepend="At"
                     >
@@ -6364,7 +6261,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                           <EuiValidatableControl>
                             <select
                               aria-label="Hour"
-                              className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                              className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                               data-test-subj="cronFrequencyWeeklyHourSelect"
                               onChange={[Function]}
                               onMouseUp={[Function]}
@@ -6518,12 +6415,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
                             compressed={false}
-                            icon={
-                              Object {
-                                "side": "right",
-                                "type": "arrowDown",
-                              }
-                            }
+                            isDropdown={true}
                             isLoading={false}
                           >
                             <div
@@ -6818,12 +6710,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                     <EuiFormControlLayout
                       compressed={false}
                       fullWidth={true}
-                      icon={
-                        Object {
-                          "side": "right",
-                          "type": "arrowDown",
-                        }
-                      }
+                      isDropdown={true}
                       isLoading={false}
                       prepend=":"
                     >
@@ -6845,7 +6732,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                           <EuiValidatableControl>
                             <select
                               aria-label="Minute"
-                              className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                              className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                               data-test-subj="cronFrequencyWeeklyMinuteSelect"
                               onChange={[Function]}
                               onMouseUp={[Function]}
@@ -7215,12 +7102,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
                             compressed={false}
-                            icon={
-                              Object {
-                                "side": "right",
-                                "type": "arrowDown",
-                              }
-                            }
+                            isDropdown={true}
                             isLoading={false}
                           >
                             <div
@@ -7297,12 +7179,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
         <EuiFormLabel
           className="euiFormRow__label"
           htmlFor="generated-id"
+          id="generated-id-label"
           isFocused={false}
           type="label"
         >
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             <FormattedMessage
               defaultMessage="Frequency"
@@ -7358,13 +7242,8 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
           <EuiFormControlLayout
             compressed={false}
             fullWidth={true}
-            icon={
-              Object {
-                "side": "right",
-                "type": "arrowDown",
-              }
-            }
             inputId="generated-id"
+            isDropdown={true}
             isLoading={false}
             prepend="Every"
           >
@@ -7387,7 +7266,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
               >
                 <EuiValidatableControl>
                   <select
-                    className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                    className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                     data-test-subj="cronFrequencySelect"
                     id="generated-id"
                     onBlur={[Function]}
@@ -7436,12 +7315,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                 </EuiValidatableControl>
                 <EuiFormControlLayoutIcons
                   compressed={false}
-                  icon={
-                    Object {
-                      "side": "right",
-                      "type": "arrowDown",
-                    }
-                  }
+                  isDropdown={true}
                   isLoading={false}
                 >
                   <div
@@ -8036,12 +7910,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Month"
@@ -8121,13 +7997,8 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             <EuiFormControlLayout
               compressed={false}
               fullWidth={true}
-              icon={
-                Object {
-                  "side": "right",
-                  "type": "arrowDown",
-                }
-              }
               inputId="generated-id"
+              isDropdown={true}
               isLoading={false}
               prepend="In"
             >
@@ -8150,7 +8021,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                 >
                   <EuiValidatableControl>
                     <select
-                      className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                      className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                       data-test-subj="cronFrequencyYearlyMonthSelect"
                       id="generated-id"
                       onBlur={[Function]}
@@ -8235,12 +8106,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
                     compressed={false}
-                    icon={
-                      Object {
-                        "side": "right",
-                        "type": "arrowDown",
-                      }
-                    }
+                    isDropdown={true}
                     isLoading={false}
                   >
                     <div
@@ -8304,12 +8170,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Date"
@@ -8465,13 +8333,8 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             <EuiFormControlLayout
               compressed={false}
               fullWidth={true}
-              icon={
-                Object {
-                  "side": "right",
-                  "type": "arrowDown",
-                }
-              }
               inputId="generated-id"
+              isDropdown={true}
               isLoading={false}
               prepend="On the"
             >
@@ -8494,7 +8357,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                 >
                   <EuiValidatableControl>
                     <select
-                      className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                      className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                       data-test-subj="cronFrequencyYearlyDateSelect"
                       id="generated-id"
                       onBlur={[Function]}
@@ -8693,12 +8556,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                   </EuiValidatableControl>
                   <EuiFormControlLayoutIcons
                     compressed={false}
-                    icon={
-                      Object {
-                        "side": "right",
-                        "type": "arrowDown",
-                      }
-                    }
+                    isDropdown={true}
                     isLoading={false}
                   >
                     <div
@@ -8762,12 +8620,14 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
           <EuiFormLabel
             className="euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
             isFocused={false}
             type="label"
           >
             <label
               className="euiFormLabel euiFormRow__label"
               htmlFor="generated-id"
+              id="generated-id-label"
             >
               <FormattedMessage
                 defaultMessage="Time"
@@ -8911,12 +8771,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     <EuiFormControlLayout
                       compressed={false}
                       fullWidth={true}
-                      icon={
-                        Object {
-                          "side": "right",
-                          "type": "arrowDown",
-                        }
-                      }
+                      isDropdown={true}
                       isLoading={false}
                       prepend="At"
                     >
@@ -8938,7 +8793,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                           <EuiValidatableControl>
                             <select
                               aria-label="Hour"
-                              className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                              className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                               data-test-subj="cronFrequencyYearlyHourSelect"
                               onChange={[Function]}
                               onMouseUp={[Function]}
@@ -9092,12 +8947,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
                             compressed={false}
-                            icon={
-                              Object {
-                                "side": "right",
-                                "type": "arrowDown",
-                              }
-                            }
+                            isDropdown={true}
                             isLoading={false}
                           >
                             <div
@@ -9392,12 +9242,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     <EuiFormControlLayout
                       compressed={false}
                       fullWidth={true}
-                      icon={
-                        Object {
-                          "side": "right",
-                          "type": "arrowDown",
-                        }
-                      }
+                      isDropdown={true}
                       isLoading={false}
                       prepend=":"
                     >
@@ -9419,7 +9264,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                           <EuiValidatableControl>
                             <select
                               aria-label="Minute"
-                              className="euiSelect euiSelect--fullWidth euiSelect--inGroup"
+                              className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
                               data-test-subj="cronFrequencyYearlyMinuteSelect"
                               onChange={[Function]}
                               onMouseUp={[Function]}
@@ -9789,12 +9634,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                           </EuiValidatableControl>
                           <EuiFormControlLayoutIcons
                             compressed={false}
-                            icon={
-                              Object {
-                                "side": "right",
-                                "type": "arrowDown",
-                              }
-                            }
+                            isDropdown={true}
                             isLoading={false}
                           >
                             <div

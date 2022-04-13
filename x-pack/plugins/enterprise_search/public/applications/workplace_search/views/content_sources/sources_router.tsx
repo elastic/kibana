@@ -14,17 +14,27 @@ import { useActions, useValues } from 'kea';
 import { LicensingLogic } from '../../../shared/licensing';
 import { AppLogic } from '../../app_logic';
 import {
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+  GITHUB_VIA_APP_SERVICE_TYPE,
+} from '../../constants';
+import {
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
   PRIVATE_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
+  getAddPath,
+  ADD_CUSTOM_PATH,
 } from '../../routes';
+import { hasMultipleConnectorOptions } from '../../utils';
 
-import { AddSource, AddSourceList } from './components/add_source';
+import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
+import { AddCustomSource } from './components/add_source/add_custom_source';
+import { ExternalConnectorConfig } from './components/add_source/add_external_connector';
+import { ConfigurationChoice } from './components/add_source/configuration_choice';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticSourceData } from './source_data';
+import { staticCustomSourceData, staticSourceData as sources } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -66,30 +76,122 @@ export const SourcesRouter: React.FC = () => {
       <Route exact path={SOURCES_PATH}>
         <OrganizationSources />
       </Route>
-      {staticSourceData.map(({ addPath, accountContextOnly }, i) => (
-        <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>
-          {!hasPlatinumLicense && accountContextOnly ? (
-            <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-          ) : (
-            <AddSource sourceIndex={i} />
-          )}
-        </Route>
-      ))}
-      {staticSourceData.map(({ addPath }, i) => (
-        <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-          <AddSource connect sourceIndex={i} />
-        </Route>
-      ))}
-      {staticSourceData.map(({ addPath }, i) => (
-        <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/reauthenticate`}>
-          <AddSource reAuthenticate sourceIndex={i} />
-        </Route>
-      ))}
-      {staticSourceData.map(({ addPath, configuration: { needsConfiguration } }, i) => {
-        if (needsConfiguration)
+      <Route exact path={getAddPath(GITHUB_VIA_APP_SERVICE_TYPE)}>
+        <GitHubViaApp isGithubEnterpriseServer={false} />
+      </Route>
+      <Route exact path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}>
+        <GitHubViaApp isGithubEnterpriseServer />
+      </Route>
+      {sources.map((sourceData, i) => {
+        const { serviceType, externalConnectorAvailable, internalConnectorAvailable } = sourceData;
+        const path = `${getSourcesPath(getAddPath(serviceType), isOrganization)}`;
+        const defaultOption = internalConnectorAvailable
+          ? 'internal'
+          : externalConnectorAvailable
+          ? 'external'
+          : 'custom';
+        const showChoice = defaultOption !== 'internal' && hasMultipleConnectorOptions(sourceData);
+        return (
+          <Route key={i} exact path={path}>
+            {showChoice ? (
+              <ConfigurationChoice sourceData={sourceData} />
+            ) : (
+              <Redirect exact from={path} to={`${path}/${defaultOption}`} />
+            )}
+          </Route>
+        );
+      })}
+      <Route exact path={getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}>
+        <AddCustomSource sourceData={staticCustomSourceData} />
+      </Route>
+      {sources
+        .filter((sourceData) => sourceData.internalConnectorAvailable)
+        .map((sourceData, i) => {
+          const { serviceType, accountContextOnly } = sourceData;
           return (
-            <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/configure`}>
-              <AddSource configure sourceIndex={i} />
+            <Route
+              key={i}
+              exact
+              path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`}
+            >
+              {!hasPlatinumLicense && accountContextOnly ? (
+                <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
+              ) : (
+                <AddSource sourceData={sourceData} />
+              )}
+            </Route>
+          );
+        })}
+      {sources
+        .filter((sourceData) => sourceData.externalConnectorAvailable)
+        .map((sourceData, i) => {
+          const { serviceType, accountContextOnly } = sourceData;
+
+          return (
+            <Route
+              key={i}
+              exact
+              path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/external`}
+            >
+              {!hasPlatinumLicense && accountContextOnly ? (
+                <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
+              ) : (
+                <ExternalConnectorConfig sourceData={sourceData} />
+              )}
+            </Route>
+          );
+        })}
+      {sources
+        .filter((sourceData) => sourceData.customConnectorAvailable)
+        .map((sourceData, i) => {
+          const { serviceType, accountContextOnly } = sourceData;
+          return (
+            <Route
+              key={i}
+              exact
+              path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/custom`}
+            >
+              {!hasPlatinumLicense && accountContextOnly ? (
+                <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
+              ) : (
+                <AddCustomSource sourceData={sourceData} initialValue={sourceData.name} />
+              )}
+            </Route>
+          );
+        })}
+      {sources.map((sourceData, i) => (
+        <Route
+          key={i}
+          exact
+          path={`${getSourcesPath(getAddPath(sourceData.serviceType), isOrganization)}/connect`}
+        >
+          <AddSource connect sourceData={sourceData} />
+        </Route>
+      ))}
+      {sources.map((sourceData, i) => (
+        <Route
+          key={i}
+          exact
+          path={`${getSourcesPath(
+            getAddPath(sourceData.serviceType),
+            isOrganization
+          )}/reauthenticate`}
+        >
+          <AddSource reAuthenticate sourceData={sourceData} />
+        </Route>
+      ))}
+      {sources.map((sourceData, i) => {
+        if (sourceData.configuration.needsConfiguration)
+          return (
+            <Route
+              key={i}
+              exact
+              path={`${getSourcesPath(
+                getAddPath(sourceData.serviceType),
+                isOrganization
+              )}/configure`}
+            >
+              <AddSource configure sourceData={sourceData} />
             </Route>
           );
       })}

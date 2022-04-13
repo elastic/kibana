@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { IndexPatternBase } from '../..';
-import { RangeFilterParams } from '../../filters';
+import { DataViewBase } from '../..';
 
 import * as range from './range';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 jest.mock('../grammar');
 
 describe('kuery functions', () => {
   describe('range', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 
     describe('buildNodeParams', () => {
       test('arguments should contain the provided fieldName as a literal', () => {
-        const result = range.buildNodeParams('bytes', { gt: 1000, lt: 8000 });
+        const result = range.buildNodeParams('bytes', 'gt', 1000);
         const {
           arguments: [fieldName],
         } = result;
@@ -37,22 +37,14 @@ describe('kuery functions', () => {
         expect(fieldName).toHaveProperty('value', 'bytes');
       });
 
-      test('arguments should contain the provided params as named arguments', () => {
-        const givenParams: RangeFilterParams = { gt: 1000, lt: 8000, format: 'epoch_millis' };
-        const result = range.buildNodeParams('bytes', givenParams);
+      test('arguments should contain the provided value as a literal', () => {
+        const result = range.buildNodeParams('bytes', 'gt', 1000);
         const {
-          arguments: [, ...params],
+          arguments: [, , valueArg],
         } = result;
 
-        expect(Array.isArray(params)).toBeTruthy();
-        expect(params.length).toBeGreaterThan(1);
-
-        params.map((param: any) => {
-          expect(param).toHaveProperty('type', 'namedArg');
-          expect(['gt', 'lt', 'format'].includes(param.name)).toBe(true);
-          expect(param.value.type).toBe('literal');
-          expect(param.value.value).toBe(get(givenParams, param.name));
-        });
+        expect(valueArg).toHaveProperty('type', 'literal');
+        expect(valueArg).toHaveProperty('value', 1000);
       });
     });
 
@@ -65,7 +57,6 @@ describe('kuery functions', () => {
                 range: {
                   bytes: {
                     gt: 1000,
-                    lt: 8000,
                   },
                 },
               },
@@ -73,7 +64,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
+        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -87,7 +78,6 @@ describe('kuery functions', () => {
                 range: {
                   bytes: {
                     gt: 1000,
-                    lt: 8000,
                   },
                 },
               },
@@ -96,7 +86,7 @@ describe('kuery functions', () => {
           },
         };
 
-        const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
+        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
         const result = range.toElasticsearchQuery(node);
 
         expect(result).toEqual(expected);
@@ -110,7 +100,6 @@ describe('kuery functions', () => {
                 range: {
                   bytes: {
                     gt: 1000,
-                    lt: 8000,
                   },
                 },
               },
@@ -119,14 +108,14 @@ describe('kuery functions', () => {
           },
         };
 
-        const node = nodeTypes.function.buildNode('range', 'byt*', { gt: 1000, lt: 8000 });
+        const node = nodeTypes.function.buildNode('range', 'byt*', 'gt', 1000);
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
 
       test('should support scripted fields', () => {
-        const node = nodeTypes.function.buildNode('range', 'script number', { gt: 1000, lt: 8000 });
+        const node = nodeTypes.function.buildNode('range', 'script number', 'gt', 1000);
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
@@ -142,7 +131,6 @@ describe('kuery functions', () => {
                 range: {
                   '@timestamp': {
                     gt: '2018-01-03T19:04:17',
-                    lt: '2018-04-03T19:04:17',
                   },
                 },
               },
@@ -150,10 +138,12 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', '@timestamp', {
-          gt: '2018-01-03T19:04:17',
-          lt: '2018-04-03T19:04:17',
-        });
+        const node = nodeTypes.function.buildNode(
+          'range',
+          '@timestamp',
+          'gt',
+          '2018-01-03T19:04:17'
+        );
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -168,7 +158,6 @@ describe('kuery functions', () => {
                 range: {
                   '@timestamp': {
                     gt: '2018-01-03T19:04:17',
-                    lt: '2018-04-03T19:04:17',
                     time_zone: 'America/Phoenix',
                   },
                 },
@@ -177,10 +166,12 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', '@timestamp', {
-          gt: '2018-01-03T19:04:17',
-          lt: '2018-04-03T19:04:17',
-        });
+        const node = nodeTypes.function.buildNode(
+          'range',
+          '@timestamp',
+          'gt',
+          '2018-01-03T19:04:17'
+        );
         const result = range.toElasticsearchQuery(node, indexPattern, config);
 
         expect(result).toEqual(expected);
@@ -194,7 +185,6 @@ describe('kuery functions', () => {
                 range: {
                   'nestedField.bytes': {
                     gt: 1000,
-                    lt: 8000,
                   },
                 },
               },
@@ -202,7 +192,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
+        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
         const result = range.toElasticsearchQuery(
           node,
           indexPattern,
@@ -223,7 +213,6 @@ describe('kuery functions', () => {
                   query: {
                     range: {
                       'nestedField.nestedChild.doublyNestedChild': {
-                        gt: 1000,
                         lt: 8000,
                       },
                     },
@@ -235,10 +224,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', '*doublyNested*', {
-          gt: 1000,
-          lt: 8000,
-        });
+        const node = nodeTypes.function.buildNode('range', '*doublyNested*', 'lt', 8000);
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);

@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/elastic/kibana/issues"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/master/packages/safer-lodash-set#readme",
+  "homepage": "https://github.com/elastic/kibana/tree/main/packages/safer-lodash-set#readme",
   "standard": {
     "ignore": [
       "/lodash/"

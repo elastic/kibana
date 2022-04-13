@@ -33,13 +33,28 @@ At a super high-level, Kibana is composed of **plugins**, **core**, and **Kibana
 
 <DocAccordion buttonContent="(Internal only) FAQ: Should I put my code in a plugin or a package?" color="warning">
 <DocCallOut color="warning">
-If it's stateful, it has to go in a plugin, but packages are often a good choices for stateless utilities. Stateless code exported publicly from a plugin will increase the page load bundle size of _every single page_, even if none of those plugin's services are actually needed. With packages, however, only code that is needed for the current page is downloaded.
+When the [Bazel migration](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0015_bazel.md) is complete, all code, including plugins, will be a package. With that, packages won't be required to be in the `packages/` directory and can be located somewhere that makes more sense structurally.
 
-The downside however is that the packages folder is far away from the plugins folder so having a part of your code in a plugin and the rest in a package may make it hard to find, leading to duplication.
+In the meantime, the following can be used to determine whether it makes sense to add code to a package inside the `packages` folder, or a plugin inside `src/plugins` or `x-pack/plugins`. 
 
-The Operations team hopes to resolve this conundrum by supporting co-located packages and plugins and automatically putting all stateless code inside a package. You can track this work by following [this issue](https://github.com/elastic/kibana/issues/112886).
 
-Until then, consider whether it makes sense to logically separate the code, and consider the size of the exports, when determining whether you should put stateless public exports in a package or a plugin.
+**If the code is stateful, it has to be exposed from a plugin's <DocLink id="kibPlatformIntro" section="lifecycle-methods" text="lifecycle methods"/>. Do not statically export stateful code.**
+
+Benefits to packages:
+
+1. <b>_Potentially_ reduced page load time</b>. All code that is statically exported from plugins will be downloaded on _every single page load_, even if that code isn't needed. With packages, only code that is imported is downloaded, which can be minimized by using async imports.
+2. <b>Puts the consumer is in charge of how and when to async import</b>. If a consumer async imports code exported from a plugin, it makes no difference, because of the above point. It's already been downloaded. However, simply moving code into a package is _not_ a guaranteed performance improvement. It does give the consumer the power to make smart performance choices, however. If they require code from multiple packages, the consumer can async import from multiple packages at the same time. Read more in our <DocLink id="kibDevPerformance" text="performance docs"/>.
+
+Downsides to packages:
+
+1. <b>It's not <DocLink id="kibDevPrinciples" text="organized by domain"/></b>. The packages folder is far away from the plugins folder. Having your stateless code in a plugin and the rest in a package may make it hard to find, leading to duplication. The Operations team hopes to fix this by supporting packages and plugins existing in the same folder. You can track this work by following [this issue](https://github.com/elastic/kibana/issues/112886).
+
+2. <b>Development overhead</b>. Developers have to run `yarn kbn watch` to have changes rebuilt automatically. [Phase II](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0015_bazel.md#phase-ii---docs-developer-experience) of the Bazel migration work will bring the development experience on par with plugin development. This work can be tracked [here](https://github.com/elastic/kibana/issues/104519). 
+
+3. <b>Development performance</b>. Rebuild time is typically longer than it would be for the same code in a plugin. The reasons are captured in [this issue](https://github.com/elastic/kibana/issues/107648). The ops team is actively working to reduce this performance increase.
+
+
+As you can see, the answer to "Should I put my code in a plugin or a package" is 'It Depends'. If you are still having a hard time determining what the best path location is, reach out to the Kibana Operations Team (#kibana-operations) for help.
 
 </DocCallOut>
 </DocAccordion>
@@ -138,7 +153,7 @@ plugins to customize the Kibana experience. Examples of extension points are:
 - core.overlays.showModal
 - embeddables.registerEmbeddableFactory
 - uiActions.registerAction
-- core.saedObjects.registerType
+- core.savedObjects.registerType
 
 ## Follow up material
 

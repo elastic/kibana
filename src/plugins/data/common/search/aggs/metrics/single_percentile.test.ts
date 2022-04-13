@@ -73,6 +73,11 @@ describe('AggTypeMetricSinglePercentileProvider class', () => {
     ).toEqual(123);
   });
 
+  it('should not throw error for empty buckets', () => {
+    const agg = aggConfigs.getResponseAggs()[0];
+    expect(agg.getValue({})).toEqual(NaN);
+  });
+
   it('produces the expected expression ast', () => {
     const agg = aggConfigs.getResponseAggs()[0];
     expect(agg.toExpressionAst()).toMatchInlineSnapshot(`

@@ -9,9 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
+  EuiBadge,
   EuiBetaBadge,
-  EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -21,15 +22,18 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
+import { splitPkgKey } from '../../../../../../../common';
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,
   useUIExtension,
   useBreadcrumbs,
   useStartServices,
+  useAuthz,
+  usePermissionCheck,
 } from '../../../../hooks';
 import {
   PLUGIN_ID,
@@ -37,12 +41,7 @@ import {
   INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
 } from '../../../../constants';
-import {
-  useCapabilities,
-  useGetPackageInfoByKey,
-  useLink,
-  useAgentPolicyContext,
-} from '../../../../hooks';
+import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type {
   CreatePackagePolicyRouteState,
@@ -50,7 +49,7 @@ import type {
   PackageInfo,
 } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, Loading } from '../../../../components';
+import { Error, EuiButtonWithTooltip, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
@@ -61,6 +60,7 @@ import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
 import { CustomViewPage } from './custom';
+
 import './index.scss';
 
 export interface DetailParams {
@@ -95,7 +95,13 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const hasWriteCapabilites = useCapabilities().write;
+  const canInstallPackages = useAuthz().integrations.installPackages;
+  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
+  const permissionCheck = usePermissionCheck();
+  const missingSecurityConfiguration =
+    !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
+  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -123,24 +129,42 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
-    isLoading,
-  } = useGetPackageInfoByKey(pkgkey);
+    isLoading: packageInfoLoading,
+    isInitialRequest: packageIsInitialRequest,
+    resendRequest: refreshPackageInfo,
+  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+
+  // Refresh package info when status change
+  const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
+
+  useEffect(() => {
+    if (packageInstallStatus === 'not_installed') {
+      setOldPackageStatus(packageInstallStatus);
+    }
+    if (oldPackageInstallStatus === 'not_installed' && packageInstallStatus === 'installed') {
+      setOldPackageStatus(packageInstallStatus);
+      refreshPackageInfo();
+    }
+  }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
+
+  const isLoading = (packageInfoLoading && !packageIsInitialRequest) || permissionCheck.isLoading;
 
   const showCustomTab =
-    useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
+    useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.response) {
-      const packageInfoResponse = packageInfoData.response;
+    if (packageInfoData?.item) {
+      const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
 
       let installedVersion;
-      const { name } = packageInfoData.response;
+      const { name } = packageInfoData.item;
       if ('savedObject' in packageInfoResponse) {
         installedVersion = packageInfoResponse.savedObject.attributes.version;
       }
@@ -196,11 +220,22 @@ export function Detail() {
             </FlexItemWithMaxHeight>
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
-                <FlexItemWithMinWidth grow={false}>
-                  <EuiText>
-                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
-                  </EuiText>
+                <FlexItemWithMinWidth grow={true}>
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiText>
+                        {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                        <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="default">
+                        {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                          defaultMessage: 'Elastic Agent',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </FlexItemWithMinWidth>
                 {packageInfo?.release && packageInfo.release !== 'ga' ? (
                   <EuiFlexItem grow={false}>
@@ -239,7 +274,7 @@ export function Detail() {
 
       let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
         CreatePackagePolicyRouteState['onCancelNavigateTo'];
-
+      let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
       if (agentPolicyIdFromContext) {
         redirectToPath = [
           PLUGIN_ID,
@@ -249,24 +284,37 @@ export function Detail() {
             })[1],
           },
         ];
+
+        onSaveQueryParams = {
+          showAddAgentHelp: true,
+          openEnrollmentFlyout: true,
+        };
       } else {
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
             path: pagePathGetters.integration_details_policies({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ];
+
+        onSaveQueryParams = {
+          showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
+          openEnrollmentFlyout: { renameKey: 'addAgentToPolicyId', policyIdAsValue: true },
+        };
       }
 
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
         onSaveNavigateTo: redirectToPath,
+        onSaveQueryParams,
         onCancelNavigateTo: [
           INTEGRATIONS_PLUGIN_ID,
           {
             path: pagePathGetters.integration_details_overview({
               pkgkey,
+              ...(integration ? { integration } : {}),
             })[1],
           },
         ],
@@ -327,10 +375,9 @@ export function Detail() {
               { isDivider: true },
               {
                 content: (
-                  // eslint-disable-next-line @elastic/eui/href-or-on-click
-                  <EuiButton
+                  <EuiButtonWithTooltip
                     fill
-                    isDisabled={!hasWriteCapabilites}
+                    isDisabled={!userCanInstallPackages}
                     iconType="plusInCircle"
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
@@ -341,6 +388,23 @@ export function Detail() {
                     })}
                     onClick={handleAddIntegrationPolicyClick}
                     data-test-subj="addIntegrationPolicyButton"
+                    tooltip={
+                      !userCanInstallPackages
+                        ? {
+                            content: missingSecurityConfiguration ? (
+                              <FormattedMessage
+                                id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
+                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the All privilege for Fleet. Contact your administrator."
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
+                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet and All privilege for Integrations. Contact your administrator."
+                              />
+                            ),
+                          }
+                        : undefined
+                    }
                   >
                     <FormattedMessage
                       id="xpack.fleet.epm.addPackagePolicyButtonText"
@@ -349,7 +413,7 @@ export function Detail() {
                         packageName: integrationInfo?.title || packageInfo.title,
                       }}
                     />
-                  </EuiButton>
+                  </EuiButtonWithTooltip>
                 ),
               },
             ].map((item, index) => (
@@ -370,16 +434,17 @@ export function Detail() {
         </>
       ) : undefined,
     [
-      getHref,
-      handleAddIntegrationPolicyClick,
-      hasWriteCapabilites,
-      integration,
-      integrationInfo,
       packageInfo,
-      packageInstallStatus,
-      pkgkey,
       updateAvailable,
+      packageInstallStatus,
+      userCanInstallPackages,
+      getHref,
+      pkgkey,
+      integration,
       agentPolicyIdFromContext,
+      handleAddIntegrationPolicyClick,
+      missingSecurityConfiguration,
+      integrationInfo?.title,
     ]
   );
 
@@ -407,13 +472,13 @@ export function Detail() {
       },
     ];
 
-    if (packageInstallStatus === InstallStatus.installed) {
+    if (canReadIntegrationPolicies && packageInstallStatus === InstallStatus.installed) {
       tabs.push({
         id: 'policies',
         name: (
           <FormattedMessage
             id="xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText"
-            defaultMessage="Policies"
+            defaultMessage="Integration policies"
           />
         ),
         isSelected: panel === 'policies',
@@ -443,23 +508,25 @@ export function Detail() {
       });
     }
 
-    tabs.push({
-      id: 'settings',
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.epm.packageDetailsNav.settingsLinkText"
-          defaultMessage="Settings"
-        />
-      ),
-      isSelected: panel === 'settings',
-      'data-test-subj': `tab-settings`,
-      href: getHref('integration_details_settings', {
-        pkgkey: packageInfoKey,
-        ...(integration ? { integration } : {}),
-      }),
-    });
+    if (canReadPackageSettings) {
+      tabs.push({
+        id: 'settings',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.settingsLinkText"
+            defaultMessage="Settings"
+          />
+        ),
+        isSelected: panel === 'settings',
+        'data-test-subj': `tab-settings`,
+        href: getHref('integration_details_settings', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
 
-    if (showCustomTab) {
+    if (canReadPackageSettings && showCustomTab) {
       tabs.push({
         id: 'custom',
         name: (
@@ -478,13 +545,56 @@ export function Detail() {
     }
 
     return tabs;
-  }, [packageInfo, panel, getHref, integration, packageInstallStatus, showCustomTab, CustomAssets]);
+  }, [
+    packageInfo,
+    panel,
+    getHref,
+    integration,
+    canReadIntegrationPolicies,
+    canReadPackageSettings,
+    packageInstallStatus,
+    CustomAssets,
+    showCustomTab,
+  ]);
+
+  const securityCallout = missingSecurityConfiguration ? (
+    <>
+      <EuiCallOut
+        color="warning"
+        iconType="lock"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutTitle"
+            defaultMessage="Security needs to be enabled in order to add Elastic Agent integrations"
+          />
+        }
+      >
+        <FormattedMessage
+          id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescription"
+          defaultMessage="In order to fully use Fleet, you must enable Elasticsearch and Kibana security features.
+        Follow the {guideLink} to enable security."
+          values={{
+            guideLink: (
+              <a href={services.http.basePath.prepend('/app/fleet')}>
+                <FormattedMessage
+                  id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescriptionGuideLink"
+                  defaultMessage="steps in this guide"
+                />
+              </a>
+            ),
+          }}
+        />
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  ) : undefined;
 
   return (
     <WithHeaderLayout
       leftColumn={headerLeftContent}
       rightColumn={headerRightContent}
       rightColumnGrow={false}
+      topContent={securityCallout}
       tabs={headerTabs}
       tabsClassName="fleet__epm__shiftNavTabs"
     >
@@ -509,7 +619,7 @@ export function Detail() {
             <OverviewPage packageInfo={packageInfo} integrationInfo={integrationInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
-            <SettingsPage packageInfo={packageInfo} />
+            <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} />

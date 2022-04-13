@@ -58,13 +58,11 @@ describe('GET privileges', () => {
 
   it('should return the correct response when a user has privileges', async () => {
     const privilegesResponseMock = {
-      body: {
-        username: 'elastic',
-        has_all_requested: true,
-        cluster: { manage_index_templates: true },
-        index: {},
-        application: {},
-      },
+      username: 'elastic',
+      has_all_requested: true,
+      cluster: { manage_index_templates: true },
+      index: {},
+      application: {},
     };
 
     const routeContextMock = mockRouteContext({
@@ -84,13 +82,11 @@ describe('GET privileges', () => {
 
   it('should return the correct response when a user does not have privileges', async () => {
     const privilegesResponseMock = {
-      body: {
-        username: 'elastic',
-        has_all_requested: false,
-        cluster: { manage_index_templates: false },
-        index: {},
-        application: {},
-      },
+      username: 'elastic',
+      has_all_requested: false,
+      cluster: { manage_index_templates: false },
+      index: {},
+      application: {},
     };
 
     const routeContextMock = mockRouteContext({

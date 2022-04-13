@@ -32,7 +32,7 @@ Yarn Package Manager handles the installation of NPM dependencies, and the migra
 
 ### Building packages
 
-The building of [packages](https://github.com/elastic/kibana/tree/master/packages) happens during the bootstrap process initiated by running `yarn kbn bootstrap` and without any cache takes about a minute. Currently, we maintain a single cache item per package, so drastic changes like switching branches frequently results in the worst-case scenario of no-cache being usable.
+The building of [packages](https://github.com/elastic/kibana/tree/main/packages) happens during the bootstrap process initiated by running `yarn kbn bootstrap` and without any cache takes about a minute. Currently, we maintain a single cache item per package, so drastic changes like switching branches frequently results in the worst-case scenario of no-cache being usable.
 
 ### Building TypeScript project references
 
@@ -40,7 +40,7 @@ The size of the project and the amount of TypeScript has created scaling issues,
 
 ### Building client-side plugins
 
-The [@kbn/optimizer](https://github.com/elastic/kibana/tree/master/packages/kbn-optimizer) package is responsible for building client-side plugins and is initiated during `yarn start`. Without any cache, it takes between three and four minutes, but is highly dependent on the amount of CPU cores available. The caching works similar to packages and requires a rebuild if any files change. Under the hood, this package is managing a set number of workers to run individual Webpack instances. When we first introduced Webpack back in [June of 2015](https://github.com/elastic/kibana/pull/4335), it was responsible for bundling all client-side code within a single process. As the Kibana project continued to grow over time, this Webpack process continued to impact the developer experience. A common theme to address these issues was through reducing the responsibilities of Webpack by separating [SCSS](https://github.com/elastic/kibana/pull/19643) and [vendor code](https://github.com/elastic/kibana/pull/22618). Knowing we would need to continue to scale, one of the new platform’s core objectives was to be able to build each plugin independently. This work paved the way for what we are proposing here and led to the [creation of @kbn/optimizer](https://github.com/elastic/kibana/pull/53976), which improved performance by separating and parallelizing Webpack builds. 
+The [@kbn/optimizer](https://github.com/elastic/kibana/tree/main/packages/kbn-optimizer) package is responsible for building client-side plugins and is initiated during `yarn start`. Without any cache, it takes between three and four minutes, but is highly dependent on the amount of CPU cores available. The caching works similar to packages and requires a rebuild if any files change. Under the hood, this package is managing a set number of workers to run individual Webpack instances. When we first introduced Webpack back in [June of 2015](https://github.com/elastic/kibana/pull/4335), it was responsible for bundling all client-side code within a single process. As the Kibana project continued to grow over time, this Webpack process continued to impact the developer experience. A common theme to address these issues was through reducing the responsibilities of Webpack by separating [SCSS](https://github.com/elastic/kibana/pull/19643) and [vendor code](https://github.com/elastic/kibana/pull/22618). Knowing we would need to continue to scale, one of the new platform’s core objectives was to be able to build each plugin independently. This work paved the way for what we are proposing here and led to the [creation of @kbn/optimizer](https://github.com/elastic/kibana/pull/53976), which improved performance by separating and parallelizing Webpack builds. 
 
 ### Compiling server-side code
 
@@ -76,7 +76,7 @@ A Bazel [macro](https://docs.bazel.build/versions/master/skylark/macros.html) wi
 
 A Bazel [macro](https://docs.bazel.build/versions/master/skylark/macros.html) will be created to centralize the usage of Webpack. The macro will, at minimum, accept a configuration file and supply a base `webpack.config.js` file. Currently, all plugins share the same Webpack configuration. Allowing a plugin to provide additional configuration will allow plugins the ability to add loaders without affecting the performance of others.
 
-While running Kibana from source in development, the proxy server will ensure that client-side code for plugins is compiled and available. This is currently handled by the [basePathProxy](https://github.com/elastic/kibana/blob/master/src/core/server/http/base_path_proxy_server.ts), where server restarts and optimizer builds are observed and cause the proxy to pause requests. With Bazel, we will utilize [iBazel](https://github.com/bazelbuild/bazel-watche) to watch for file changes and re-build the plugin targets when necessary. The watcher will emit [events](https://github.com/bazelbuild/bazel-watcher#remote-events) that we will use to block requests and provide feedback to the logs.
+While running Kibana from source in development, the proxy server will ensure that client-side code for plugins is compiled and available. This is currently handled by the [basePathProxy](https://github.com/elastic/kibana/blob/main/src/core/server/http/base_path_proxy_server.ts), where server restarts and optimizer builds are observed and cause the proxy to pause requests. With Bazel, we will utilize [iBazel](https://github.com/bazelbuild/bazel-watche) to watch for file changes and re-build the plugin targets when necessary. The watcher will emit [events](https://github.com/bazelbuild/bazel-watcher#remote-events) that we will use to block requests and provide feedback to the logs.
 
 While there are a few proofs of concepts for a Webpack 5 Bazel rule, none currently exist which are deemed production-ready. In the meantime, we can use the Webpack CLI directly. One of the main advantages being explored in these rules will be the support for using the Bazel worker to provide incremental builds similar to what `@kbn/optimizer` is doing today.
 
@@ -85,7 +85,7 @@ We are aware there are quite a few alternatives to Webpack, but our plan is to c
 
 ### Unit Testing
 
-A Bazel macro will be created to centralize the usage of Jest unit testing. The macro will, at minimum, accept a Jest configuration file, add the [Jest preset](https://github.com/elastic/kibana/blob/master/packages/kbn-test/jest-preset.js) and its dependencies as sources, then use the Jest CLI to execute tests. 
+A Bazel macro will be created to centralize the usage of Jest unit testing. The macro will, at minimum, accept a Jest configuration file, add the [Jest preset](https://github.com/elastic/kibana/blob/main/packages/kbn-test/jest-preset.js) and its dependencies as sources, then use the Jest CLI to execute tests. 
 
 Developers currently use `yarn test:jest` to efficiently run tests in a given directory without remembering the command or path. This command will continue to work as it does today, but will begin running tests through Bazel for packages or plugins which have been migrated.
 

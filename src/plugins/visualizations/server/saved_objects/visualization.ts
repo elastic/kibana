@@ -7,12 +7,16 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { visualizationSavedObjectTypeMigrations } from '../migrations/visualization_saved_object_migrations';
+import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 
-export const visualizationSavedObjectType: SavedObjectsType = {
+export const getVisualizationSavedObjectType = (
+  getSearchSourceMigrations: () => MigrateFunctionsObject
+): SavedObjectsType => ({
   name: 'visualization',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'visualizeApp',
     defaultSearchField: 'title',
@@ -40,5 +44,5 @@ export const visualizationSavedObjectType: SavedObjectsType = {
       visState: { type: 'text', index: false },
     },
   },
-  migrations: visualizationSavedObjectTypeMigrations,
-};
+  migrations: () => getAllMigrations(getSearchSourceMigrations()),
+});

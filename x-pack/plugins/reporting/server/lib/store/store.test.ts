@@ -4,24 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { ElasticsearchClient } from 'src/core/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { Report, ReportDocument, ReportingStore, SavedReport } from './';
 
-const { createApiResponse } = elasticsearchServiceMock;
-
 describe('ReportingStore', () => {
-  const mockLogger = createMockLevelLogger();
+  const mockLogger = loggingSystemMock.createLogger();
   let mockCore: ReportingCore;
-  let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(async () => {
     const reportingConfig = {
@@ -31,12 +23,12 @@ describe('ReportingStore', () => {
     mockCore = await createMockReportingCore(createMockConfigSchema(reportingConfig));
     mockEsClient = (await mockCore.getEsClient()).asInternalUser as typeof mockEsClient;
 
-    mockEsClient.indices.create.mockResolvedValue({} as any);
-    mockEsClient.indices.exists.mockResolvedValue({} as any);
-    mockEsClient.indices.refresh.mockResolvedValue({} as any);
-    mockEsClient.get.mockResolvedValue({} as any);
-    mockEsClient.index.mockResolvedValue({ body: { _id: 'stub-id', _index: 'stub-index' } } as any);
-    mockEsClient.update.mockResolvedValue({} as any);
+    mockEsClient.indices.create.mockResponse({} as any);
+    mockEsClient.indices.exists.mockResponse({} as any);
+    mockEsClient.indices.refresh.mockResponse({} as any);
+    mockEsClient.get.mockResponse({} as any);
+    mockEsClient.index.mockResponse({ _id: 'stub-id', _index: 'stub-index' } as any);
+    mockEsClient.update.mockResponse({} as any);
   });
 
   describe('addReport', () => {
@@ -85,7 +77,7 @@ describe('ReportingStore', () => {
 
     it('handles error creating the index', async () => {
       // setup
-      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.exists.mockResponse(false);
       mockEsClient.indices.create.mockRejectedValue(new Error('horrible error'));
 
       const store = new ReportingStore(mockCore, mockLogger);
@@ -108,7 +100,7 @@ describe('ReportingStore', () => {
      */
     it('ignores index creation error if the index already exists and continues adding the report', async () => {
       // setup
-      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.exists.mockResponse(false);
       mockEsClient.indices.create.mockRejectedValue(new Error('devastating error'));
 
       const store = new ReportingStore(mockCore, mockLogger);
@@ -125,7 +117,7 @@ describe('ReportingStore', () => {
 
     it('skips creating the index if already exists', async () => {
       // setup
-      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.exists.mockResponse(false);
       // will be triggered but ignored
       mockEsClient.indices.create.mockRejectedValue(new Error('resource_already_exists_exception'));
 
@@ -149,7 +141,7 @@ describe('ReportingStore', () => {
 
     it('allows username string to be `false`', async () => {
       // setup
-      mockEsClient.indices.exists.mockResolvedValue({ body: false } as any);
+      mockEsClient.indices.exists.mockResponse(false);
       // will be triggered but ignored
       mockEsClient.indices.create.mockRejectedValue(new Error('resource_already_exists_exception'));
 
@@ -189,18 +181,25 @@ describe('ReportingStore', () => {
         migration_version: 'X.0.0',
         created_at: 'some time',
         created_by: 'some security person',
-        jobtype: 'csv',
+        jobtype: 'csv_searchsource',
         status: 'pending',
         meta: { testMeta: 'meta' } as any,
         payload: { testPayload: 'payload' } as any,
-        browser_type: 'browser type string',
         attempts: 0,
         max_attempts: 1,
         timeout: 30000,
         output: null,
+        metrics: {
+          png: {
+            cpu: 0.02,
+            cpuInPercentage: 2,
+            memory: 1024 * 1024,
+            memoryInMegabytes: 1,
+          },
+        },
       },
     };
-    mockEsClient.get.mockResolvedValue({ body: mockReport } as any);
+    mockEsClient.get.mockResponse(mockReport as any);
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new Report({
       ...mockReport,
@@ -214,16 +213,23 @@ describe('ReportingStore', () => {
         "_primary_term": 1234,
         "_seq_no": 5678,
         "attempts": 0,
-        "browser_type": "browser type string",
         "completed_at": undefined,
         "created_at": "some time",
         "created_by": "some security person",
-        "jobtype": "csv",
+        "jobtype": "csv_searchsource",
         "kibana_id": undefined,
         "kibana_name": undefined,
         "max_attempts": 1,
         "meta": Object {
           "testMeta": "meta",
+        },
+        "metrics": Object {
+          "png": Object {
+            "cpu": 0.02,
+            "cpuInPercentage": 2,
+            "memory": 1048576,
+            "memoryInMegabytes": 1,
+          },
         },
         "migration_version": "7.14.0",
         "output": null,
@@ -247,7 +253,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -262,7 +267,8 @@ describe('ReportingStore', () => {
     await store.setReportClaimed(report, { testDoc: 'test' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`processing`);
     expect(updateCall.if_seq_no).toBe(42);
@@ -278,7 +284,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -293,7 +298,7 @@ describe('ReportingStore', () => {
     await store.setReportFailed(report, { errors: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`failed`);
     expect(updateCall.if_seq_no).toBe(43);
@@ -309,7 +314,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -324,7 +328,7 @@ describe('ReportingStore', () => {
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`completed`);
     expect(updateCall.if_seq_no).toBe(44);
@@ -340,7 +344,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       max_attempts: 50,
       payload: {
         title: 'test report',
@@ -360,7 +363,7 @@ describe('ReportingStore', () => {
     } as any);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
 
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`completed_with_warnings`);
@@ -384,7 +387,6 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report-2',
       created_by: 'created_by_test_string',
-      browser_type: 'browser_type_test_string',
       status: 'processing',
       process_expiration: '2002',
       max_attempts: 3,
@@ -401,7 +403,7 @@ describe('ReportingStore', () => {
     await store.prepareReportForRetry(report);
 
     const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = updateCall.body?.doc as Report;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
 
     expect(response.migration_version).toBe(`7.14.0`);
     expect(response.status).toBe(`pending`);
@@ -411,13 +413,13 @@ describe('ReportingStore', () => {
 
   describe('start', () => {
     it('creates an ILM policy for managing reporting indices if there is not already one', async () => {
-      mockEsClient.ilm.getLifecycle.mockRejectedValueOnce(createApiResponse({ statusCode: 404 }));
-      mockEsClient.ilm.putLifecycle.mockResolvedValueOnce(createApiResponse());
+      mockEsClient.ilm.getLifecycle.mockRejectedValue({ statusCode: 404 });
+      mockEsClient.ilm.putLifecycle.mockResponse({} as any);
 
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
 
-      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
           "body": Object {
@@ -429,18 +431,18 @@ describe('ReportingStore', () => {
               },
             },
           },
-          "policy": "kibana-reporting",
+          "name": "kibana-reporting",
         }
       `);
     });
 
     it('does not create an ILM policy for managing reporting indices if one already exists', async () => {
-      mockEsClient.ilm.getLifecycle.mockResolvedValueOnce(createApiResponse());
+      mockEsClient.ilm.getLifecycle.mockResponse({});
 
       const store = new ReportingStore(mockCore, mockLogger);
       await store.start();
 
-      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ policy: 'kibana-reporting' });
+      expect(mockEsClient.ilm.getLifecycle).toHaveBeenCalledWith({ name: 'kibana-reporting' });
       expect(mockEsClient.ilm.putLifecycle).not.toHaveBeenCalled();
     });
   });

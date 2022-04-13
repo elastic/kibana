@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { DataView } from '../../../../../../../src/plugins/data/common';
 import {
   esKuery,
-  IndexPattern,
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useDynamicIndexPatternFetcher } from '../../../hooks/use_dynamic_index_pattern';
-import { fromQuery, toQuery } from '../Links/url_helpers';
+import { useDynamicDataViewFetcher } from '../../../hooks/use_dynamic_data_view';
+import { fromQuery, toQuery } from '../links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
-import { Typeahead } from './Typeahead';
+import { Typeahead } from './typeahead';
 import { useProcessorEvent } from './use_processor_event';
 
 interface State {
@@ -30,29 +30,33 @@ interface State {
   isLoadingSuggestions: boolean;
 }
 
-function convertKueryToEsQuery(kuery: string, indexPattern: IndexPattern) {
+function convertKueryToEsQuery(kuery: string, dataView: DataView) {
   const ast = esKuery.fromKueryExpression(kuery);
-  return esKuery.toElasticsearchQuery(ast, indexPattern);
+  return esKuery.toElasticsearchQuery(ast, dataView);
 }
 
 export function KueryBar(props: {
   placeholder?: string;
   boolFilter?: QueryDslQueryContainer[];
   prepend?: React.ReactNode | string;
+  onSubmit?: (value: string) => void;
+  onChange?: (value: string) => void;
+  value?: string;
 }) {
   const { path, query } = useApmParams('/*');
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
   const groupId = 'groupId' in path ? path.groupId : undefined;
   const environment = 'environment' in query ? query.environment : undefined;
-  const kuery = 'kuery' in query ? query.kuery : undefined;
+  const _kuery = 'kuery' in query ? query.kuery : undefined;
+  const kuery = props.value || _kuery;
 
   const history = useHistory();
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingSuggestions: false,
   });
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const location = useLocation();
   const { data } = useApmPluginContext().plugins;
 
@@ -70,7 +74,7 @@ export function KueryBar(props: {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useDynamicIndexPatternFetcher();
+  const { dataView } = useDynamicDataViewFetcher();
 
   const placeholder =
     props.placeholder ??
@@ -88,7 +92,10 @@ export function KueryBar(props: {
     });
 
   async function onChange(inputValue: string, selectionStart: number) {
-    if (indexPattern == null) {
+    if (typeof props.onChange === 'function') {
+      props.onChange(inputValue);
+    }
+    if (dataView == null) {
       return;
     }
 
@@ -101,7 +108,7 @@ export function KueryBar(props: {
       const suggestions = (
         (await data.autocomplete.getQuerySuggestions({
           language: 'kuery',
-          indexPatterns: [indexPattern],
+          indexPatterns: [dataView],
           boolFilter:
             props.boolFilter ??
             getBoolFilter({
@@ -130,16 +137,18 @@ export function KueryBar(props: {
   }
 
   function onSubmit(inputValue: string) {
-    if (indexPattern == null) {
+    if (dataView == null) {
       return;
     }
 
     try {
-      const res = convertKueryToEsQuery(
-        inputValue,
-        indexPattern as IndexPattern
-      );
+      const res = convertKueryToEsQuery(inputValue, dataView as DataView);
       if (!res) {
+        return;
+      }
+
+      if (typeof props.onSubmit === 'function') {
+        props.onSubmit(inputValue.trim());
         return;
       }
 

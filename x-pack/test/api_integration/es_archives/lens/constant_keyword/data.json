@@ -1,0 +1,25 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "existence_index_1",
+    "source": {
+      "filter_field": "a",
+      "textfield1": "test",
+      "ts": "2021-01-02"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "existence_index_2",
+    "source": {
+      "filter_field": "b",
+      "textfield2": "test",
+      "ts": "2022-01-02"
+    }
+  }
+}

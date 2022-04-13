@@ -22,11 +22,14 @@ import { alertsReducer } from '../alerts/alerts';
 import { journeyReducer } from './journey';
 import { networkEventsReducer } from './network_events';
 import { syntheticsReducer } from './synthetics';
+import { monitorManagementListReducer } from './monitor_management';
+import { testNowRunsReducer } from './test_now_runs';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
   ui: uiReducer,
   monitorList: monitorListReducer,
+  monitorManagementList: monitorManagementListReducer,
   monitorStatus: monitorStatusReducer,
   dynamicSettings: dynamicSettingsReducer,
   ping: pingReducer,
@@ -40,4 +43,5 @@ export const rootReducer = combineReducers({
   journeys: journeyReducer,
   networkEvents: networkEventsReducer,
   synthetics: syntheticsReducer,
+  testNowRuns: testNowRunsReducer,
 });

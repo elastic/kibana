@@ -17,7 +17,7 @@ import {
   EuiScreenReaderOnly,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { lightenColor } from '../../services/palettes/lighten_color';
 import './color_picker.scss';
 
@@ -156,7 +156,6 @@ export const ColorPicker = ({
                 size="l"
                 color={selectedColor}
                 className={classNames('visColorPicker__valueDot', {
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
                   'visColorPicker__valueDot-isSelected': color === selectedColor,
                 })}
                 style={{ color }}

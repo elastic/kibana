@@ -12,13 +12,13 @@ import {
   toElasticsearchQuery,
   buildEsQuery,
   buildQueryFromFilters,
-  IndexPatternBase,
+  DataViewBase,
 } from '@kbn/es-query';
 import { IUiSettingsClient } from 'kibana/public';
 import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
-import { getQueryFromSavedSearch } from '../../../util/index_utils';
+import { getQueryFromSavedSearchObject } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.
 
@@ -38,7 +38,7 @@ export function getDefaultDatafeedQuery() {
 
 export function createSearchItems(
   kibanaConfig: IUiSettingsClient,
-  indexPattern: IndexPatternBase | undefined,
+  indexPattern: DataViewBase | undefined,
   savedSearch: SavedSearchSavedObject | null
 ) {
   // query is only used by the data visualizer as it needs
@@ -52,7 +52,7 @@ export function createSearchItems(
 
   let combinedQuery: any = getDefaultDatafeedQuery();
   if (savedSearch !== null) {
-    const data = getQueryFromSavedSearch(savedSearch);
+    const data = getQueryFromSavedSearchObject(savedSearch);
 
     query = data.query;
     const filter = data.filter;
@@ -65,6 +65,20 @@ export function createSearchItems(
         combinedQuery = toElasticsearchQuery(ast, indexPattern);
       }
       const filterQuery = buildQueryFromFilters(filters, indexPattern);
+
+      if (combinedQuery.bool === undefined) {
+        combinedQuery.bool = {};
+        // toElasticsearchQuery may add a single multi_match item to the
+        // root of its returned query, rather than putting it inside
+        // a bool.should
+        // in this case, move it to a bool.should
+        if (combinedQuery.multi_match !== undefined) {
+          combinedQuery.bool.should = {
+            multi_match: combinedQuery.multi_match,
+          };
+          delete combinedQuery.multi_match;
+        }
+      }
 
       if (Array.isArray(combinedQuery.bool.filter) === false) {
         combinedQuery.bool.filter =

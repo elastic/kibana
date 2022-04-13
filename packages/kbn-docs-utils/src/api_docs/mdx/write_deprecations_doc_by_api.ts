@@ -6,22 +6,23 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { ToolingLog } from '@kbn/dev-utils';
 import dedent from 'dedent';
 import fs from 'fs';
 import Path from 'path';
 import {
-  ApiDeclaration,
   ApiReference,
   ReferencedDeprecationsByAPI,
   ReferencedDeprecationsByPlugin,
+  UnreferencedDeprecationsByPlugin,
 } from '../types';
 import { getPluginApiDocId } from '../utils';
 
 export function writeDeprecationDocByApi(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
-  unReferencedDeprecations: ApiDeclaration[],
+  unReferencedDeprecations: UnreferencedDeprecationsByPlugin,
   log: ToolingLog
 ): void {
   const deprecationReferencesByApi = Object.values(deprecationsByPlugin).reduce(
@@ -79,7 +80,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2021-07-27
+date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
@@ -92,14 +93,18 @@ ${tableMdx}
 
 Safe to remove.
 
-| Deprecated API |
-| ---------------|
-${unReferencedDeprecations
-  .map(
-    (api) =>
-      `| <DocLink id="${getPluginApiDocId(api.parentPluginId)}" section="${api.id}" text="${
-        api.label
-      }"/> |`
+| Deprecated API |  Plugin Id |
+| ---------------|------------|
+${Object.values(unReferencedDeprecations)
+  .map((apis) =>
+    apis
+      .map(
+        (api) =>
+          `| <DocLink id="${getPluginApiDocId(api.parentPluginId)}" section="${api.id}" text="${
+            api.label
+          }"/> | ${api.parentPluginId} | `
+      )
+      .join('\n')
   )
   .join('\n')}
 

@@ -28,7 +28,7 @@ describe('crawler sitemap routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/sitemaps',
         params: {
           respond_with: 'index',
         },
@@ -69,7 +69,7 @@ describe('crawler sitemap routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
         params: {
           respond_with: 'index',
         },
@@ -110,7 +110,7 @@ describe('crawler sitemap routes', () => {
 
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/as/v0/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
+        path: '/api/as/v1/engines/:engineName/crawler/domains/:domainId/sitemaps/:sitemapId',
         params: {
           respond_with: 'index',
         },

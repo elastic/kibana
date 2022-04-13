@@ -18,9 +18,9 @@ const defaultParams = {
   origin: FIELD_ORIGIN.SOURCE,
 };
 
-describe('supportsFieldMeta', () => {
+describe('supportsFieldMetaFromEs', () => {
   test('Counting aggregations should not support field meta', () => {
     const countMetric = new CountAggField({ ...defaultParams });
-    expect(countMetric.supportsFieldMeta()).toBe(false);
+    expect(countMetric.supportsFieldMetaFromEs()).toBe(false);
   });
 });

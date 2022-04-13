@@ -13,4 +13,4 @@ var process = require('process');
 var args = process.argv.slice(2);
 
 var backport = require('backport');
-backport.run({}, args);
+backport.backportRun({}, args);

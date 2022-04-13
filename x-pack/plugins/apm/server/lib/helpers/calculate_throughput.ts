@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * @deprecated use calculateThroughputWithRange instead
+ */
 export function calculateThroughput({
   start,
   end,
@@ -15,6 +18,30 @@ export function calculateThroughput({
   value: number;
 }) {
   const durationAsMinutes = (end - start) / 1000 / 60;
+  return value / durationAsMinutes;
+}
+
+export function calculateThroughputWithRange({
+  start,
+  end,
+  value,
+}: {
+  start: number;
+  end: number;
+  value: number;
+}) {
+  const durationAsMinutes = (end - start) / 1000 / 60;
+  return value / durationAsMinutes;
+}
+
+export function calculateThroughputWithInterval({
+  bucketSize,
+  value,
+}: {
+  bucketSize: number;
+  value: number;
+}) {
+  const durationAsMinutes = bucketSize / 60;
   return value / durationAsMinutes;
 }
 

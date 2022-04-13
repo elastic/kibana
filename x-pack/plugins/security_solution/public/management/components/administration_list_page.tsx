@@ -26,6 +26,7 @@ interface AdministrationListPageProps {
   actions?: React.ReactNode;
   restrictWidth?: boolean | number;
   hasBottomBorder?: boolean;
+  hideHeader?: boolean;
   headerBackComponent?: React.ReactNode;
 }
 
@@ -37,6 +38,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     children,
     restrictWidth = false,
     hasBottomBorder = true,
+    hideHeader = false,
     headerBackComponent,
     ...otherProps
   }) => {
@@ -63,15 +65,20 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     return (
       <div {...otherProps}>
-        <EuiPageHeader
-          pageTitle={header}
-          description={description}
-          bottomBorder={hasBottomBorder}
-          rightSideItems={[actions]}
-          restrictWidth={restrictWidth}
-          data-test-subj={getTestId('header')}
-        />
-        <EuiSpacer size="l" />
+        {!hideHeader && (
+          <>
+            <EuiPageHeader
+              pageTitle={header}
+              description={description}
+              bottomBorder={hasBottomBorder}
+              rightSideItems={actions ? [actions] : undefined}
+              restrictWidth={restrictWidth}
+              data-test-subj={getTestId('header')}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
         <EuiPageContent
           hasBorder={false}
           hasShadow={false}

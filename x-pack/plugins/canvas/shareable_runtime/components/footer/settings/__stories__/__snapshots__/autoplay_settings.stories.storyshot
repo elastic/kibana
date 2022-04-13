@@ -48,12 +48,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -87,6 +91,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>
@@ -102,6 +107,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -211,12 +217,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -250,6 +260,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>
@@ -265,6 +276,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -374,12 +386,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -413,6 +429,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>
@@ -428,6 +445,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
-import { PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../constants';
+import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
@@ -15,7 +13,9 @@ import {
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
   UpgradePackagePoliciesRequestSchema,
+  DryRunPackagePoliciesRequestSchema,
 } from '../../types';
+import type { FleetAuthzRouter } from '../security';
 
 import {
   getPackagePoliciesHandler,
@@ -24,15 +24,18 @@ import {
   updatePackagePolicyHandler,
   deletePackagePolicyHandler,
   upgradePackagePolicyHandler,
+  dryRunUpgradePackagePolicyHandler,
 } from './handlers';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   // List
   router.get(
     {
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetPackagePoliciesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
     },
     getPackagePoliciesHandler
   );
@@ -42,7 +45,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       validate: GetOnePackagePolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
     },
     getOnePackagePolicyHandler
   );
@@ -52,7 +57,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreatePackagePolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
     },
     createPackagePolicyHandler
   );
@@ -62,7 +69,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
       validate: UpdatePackagePolicyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
     },
     updatePackagePolicyHandler
   );
@@ -72,7 +81,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackagePoliciesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
     },
     deletePackagePolicyHandler
   );
@@ -82,8 +93,22 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN,
       validate: UpgradePackagePoliciesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
     },
     upgradePackagePolicyHandler
+  );
+
+  // Upgrade - DryRun
+  router.post(
+    {
+      path: PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN,
+      validate: DryRunPackagePoliciesRequestSchema,
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
+    },
+    dryRunUpgradePackagePolicyHandler
   );
 };

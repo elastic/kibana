@@ -7,14 +7,14 @@
  */
 
 export { getFieldByName, findIndexPatternById } from './utils';
+export type { FieldDescriptor } from './fetcher';
 export {
   IndexPatternsFetcher,
-  FieldDescriptor,
   shouldReadFieldFromDocValues,
   mergeCapabilitiesWithFields,
   getCapabilitiesForRollupIndices,
 } from './fetcher';
-export { IndexPatternsServiceStart } from './types';
+export type { IndexPatternsServiceStart } from './types';
 
 import { PluginInitializerContext } from 'src/core/server';
 import { DataViewsServerPlugin } from './plugin';
@@ -30,8 +30,29 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DataViewsServerPlugin(initializerContext);
 }
 
-export {
-  DataViewsServerPlugin as Plugin,
+export type {
   DataViewsServerPluginSetup as PluginSetup,
   DataViewsServerPluginStart as PluginStart,
 };
+export { DataViewsServerPlugin as Plugin };
+
+export {
+  SERVICE_PATH,
+  SERVICE_PATH_LEGACY,
+  DATA_VIEW_PATH,
+  DATA_VIEW_PATH_LEGACY,
+  SPECIFIC_DATA_VIEW_PATH,
+  SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  RUNTIME_FIELD_PATH,
+  RUNTIME_FIELD_PATH_LEGACY,
+  SPECIFIC_RUNTIME_FIELD_PATH,
+  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
+  SCRIPTED_FIELD_PATH,
+  SCRIPTED_FIELD_PATH_LEGACY,
+  SPECIFIC_SCRIPTED_FIELD_PATH,
+  SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from './constants';
+
+export type { SERVICE_KEY_TYPE } from './constants';

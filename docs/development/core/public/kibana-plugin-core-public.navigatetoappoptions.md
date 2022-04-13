@@ -16,9 +16,10 @@ export interface NavigateToAppOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [deepLinkId](./kibana-plugin-core-public.navigatetoappoptions.deeplinkid.md) | <code>string</code> | optional [deep link](./kibana-plugin-core-public.app.deeplinks.md) id inside the application to navigate to. If an additional [path](./kibana-plugin-core-public.navigatetoappoptions.path.md) is defined it will be appended to the deep link path. |
-|  [openInNewTab](./kibana-plugin-core-public.navigatetoappoptions.openinnewtab.md) | <code>boolean</code> | if true, will open the app in new tab, will share session information via window.open if base |
-|  [path](./kibana-plugin-core-public.navigatetoappoptions.path.md) | <code>string</code> | optional path inside application to deep link to. If undefined, will use [the app's default path](./kibana-plugin-core-public.app.defaultpath.md) as default. |
-|  [replace](./kibana-plugin-core-public.navigatetoappoptions.replace.md) | <code>boolean</code> | if true, will not create a new history entry when navigating (using <code>replace</code> instead of <code>push</code>) |
-|  [state](./kibana-plugin-core-public.navigatetoappoptions.state.md) | <code>unknown</code> | optional state to forward to the application |
+|  [deepLinkId?](./kibana-plugin-core-public.navigatetoappoptions.deeplinkid.md) | string | <i>(Optional)</i> optional [deep link](./kibana-plugin-core-public.app.deeplinks.md) id inside the application to navigate to. If an additional [path](./kibana-plugin-core-public.navigatetoappoptions.path.md) is defined it will be appended to the deep link path. |
+|  [openInNewTab?](./kibana-plugin-core-public.navigatetoappoptions.openinnewtab.md) | boolean | <i>(Optional)</i> if true, will open the app in new tab, will share session information via window.open if base |
+|  [path?](./kibana-plugin-core-public.navigatetoappoptions.path.md) | string | <i>(Optional)</i> optional path inside application to deep link to. If undefined, will use [the app's default path](./kibana-plugin-core-public.app.defaultpath.md) as default. |
+|  [replace?](./kibana-plugin-core-public.navigatetoappoptions.replace.md) | boolean | <i>(Optional)</i> if true, will not create a new history entry when navigating (using <code>replace</code> instead of <code>push</code>) |
+|  [skipAppLeave?](./kibana-plugin-core-public.navigatetoappoptions.skipappleave.md) | boolean | <i>(Optional)</i> if true, will bypass the default onAppLeave behavior |
+|  [state?](./kibana-plugin-core-public.navigatetoappoptions.state.md) | unknown | <i>(Optional)</i> optional state to forward to the application |
 

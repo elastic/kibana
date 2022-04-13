@@ -9,21 +9,23 @@
 import { CoreStart, NotificationsStart, IUiSettingsClient, DocLinksStart } from 'src/core/public';
 
 import { DataPublicPluginStart } from '../../../data/public';
+import { DataViewsPublicPluginStart } from '../../../data_views/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
-import { MapServiceSettings } from './vega_view/vega_map_view/map_service_settings';
+import type { MapsEmsPluginPublicStart } from '../../../maps_ems/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
+
+export const [getDataViews, setDataViews] =
+  createGetterSetter<DataViewsPublicPluginStart>('DataViews');
 
 export const [getNotifications, setNotifications] =
   createGetterSetter<NotificationsStart>('Notifications');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+export const [getMapsEms, setMapsEms] = createGetterSetter<MapsEmsPluginPublicStart>('mapsEms');
 
 export const [getInjectedMetadata, setInjectedMetadata] =
   createGetterSetter<CoreStart['injectedMetadata']>('InjectedMetadata');
-
-export const [getMapServiceSettings, setMapServiceSettings] =
-  createGetterSetter<MapServiceSettings>('MapServiceSettings');
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   enableExternalUrls: boolean;

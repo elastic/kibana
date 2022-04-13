@@ -35,6 +35,8 @@ class MockSource {
 describe('getDescriptorWithUpdatedStyleProps', () => {
   const previousFieldName = 'doIStillExist';
   const mapColors = [];
+  const layer = {};
+  const customIcons = [];
   const properties = {
     fillColor: {
       type: STYLE_TYPE.STATIC,
@@ -69,7 +71,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
   describe('When there is no mismatch in configuration', () => {
     it('Should return no changes when next ordinal fields contain existing style property fields', async () => {
-      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+      const vectorStyle = new VectorStyle({ properties }, new MockSource(), layer, customIcons);
 
       const nextFields = [new MockField({ fieldName: previousFieldName, dataType: 'number' })];
       const { hasChanges } = await vectorStyle.getDescriptorWithUpdatedStyleProps(
@@ -83,7 +85,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
   describe('When styles should revert to static styling', () => {
     it('Should convert dynamic styles to static styles when there are no next fields', async () => {
-      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+      const vectorStyle = new VectorStyle({ properties }, new MockSource(), layer, customIcons);
 
       const nextFields = [];
       const { hasChanges, nextStyleDescriptor } =
@@ -104,14 +106,30 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
     });
 
     it('Should convert dynamic ICON_SIZE static style when there are no next ordinal fields', async () => {
-      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+      const vectorStyle = new VectorStyle({ properties }, new MockSource(), layer, customIcons);
 
       const nextFields = [
-        new MockField({
-          fieldName: previousFieldName,
-          dataType: 'number',
-          supportsAutoDomain: false,
-        }),
+        {
+          getDataType: async () => {
+            return 'number';
+          },
+          getLabel: async () => {
+            return previousFieldName + '_label';
+          },
+          getName: () => {
+            return previousFieldName;
+          },
+          getOrigin: () => {
+            return FIELD_ORIGIN.SOURCE;
+          },
+          // ordinal field must support auto domain
+          supportsFieldMetaFromLocalData: () => {
+            return false;
+          },
+          supportsFieldMetaFromEs: () => {
+            return false;
+          },
+        },
       ];
       const { hasChanges, nextStyleDescriptor } =
         await vectorStyle.getDescriptorWithUpdatedStyleProps(nextFields, previousFields, mapColors);
@@ -127,7 +145,7 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
   describe('When styles should not be cleared', () => {
     it('Should update field in styles when the fields and style combination remains compatible', async () => {
-      const vectorStyle = new VectorStyle({ properties }, new MockSource());
+      const vectorStyle = new VectorStyle({ properties }, new MockSource(), layer, customIcons);
 
       const nextFields = [new MockField({ fieldName: 'someOtherField', dataType: 'number' })];
       const { hasChanges, nextStyleDescriptor } =
@@ -158,6 +176,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 });
 
 describe('pluckStyleMetaFromSourceDataRequest', () => {
+  const layer = {};
+  const customIcons = [];
   describe('has features', () => {
     it('Should identify when feature collection only contains points', async () => {
       const sourceDataRequest = new DataRequest({
@@ -179,7 +199,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
           ],
         },
       });
-      const vectorStyle = new VectorStyle({}, new MockSource());
+      const vectorStyle = new VectorStyle({}, new MockSource(), layer, customIcons);
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
       expect(featuresMeta.geometryTypes.isPointsOnly).toBe(true);
@@ -215,7 +235,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
           ],
         },
       });
-      const vectorStyle = new VectorStyle({}, new MockSource());
+      const vectorStyle = new VectorStyle({}, new MockSource(), layer, customIcons);
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
       expect(featuresMeta.geometryTypes.isPointsOnly).toBe(false);
@@ -264,7 +284,9 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
             },
           },
         },
-        new MockSource()
+        new MockSource(),
+        layer,
+        customIcons
       );
 
       const featuresMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
@@ -288,7 +310,9 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
             },
           },
         },
-        new MockSource()
+        new MockSource(),
+        layer,
+        customIcons
       );
 
       const styleMeta = await vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);

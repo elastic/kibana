@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
   const browser = getService('browser');
@@ -18,8 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard back button', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/dashboard/current/kibana'
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.uiSettings.replace({
@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('after navigation from listing page to dashboard back button works', async () => {

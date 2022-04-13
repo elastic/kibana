@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useState, useEffect, useContext } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { isAdvancedJobCreator } from '../../../../../common/job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';

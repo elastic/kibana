@@ -14,7 +14,14 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 
 describe('import_rules_schema', () => {
   test('it should validate an empty import response with no errors', () => {
-    const payload: ImportRulesSchema = { success: true, success_count: 0, errors: [] };
+    const payload: ImportRulesSchema = {
+      success: true,
+      success_count: 0,
+      errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+    };
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
@@ -28,6 +35,26 @@ describe('import_rules_schema', () => {
       success: false,
       success_count: 0,
       errors: [{ error: { status_code: 400, message: 'some message' } }],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+    };
+    const decoded = importRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should validate an empty import response with a single exceptions error', () => {
+    const payload: ImportRulesSchema = {
+      success: false,
+      success_count: 0,
+      errors: [],
+      exceptions_errors: [{ error: { status_code: 400, message: 'some message' } }],
+      exceptions_success: true,
+      exceptions_success_count: 0,
     };
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -45,6 +72,9 @@ describe('import_rules_schema', () => {
         { error: { status_code: 400, message: 'some message' } },
         { error: { status_code: 500, message: 'some message' } },
       ],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
     };
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -54,11 +84,34 @@ describe('import_rules_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should NOT validate a status_count that is a negative number', () => {
+  test('it should validate an empty import response with two exception errors', () => {
+    const payload: ImportRulesSchema = {
+      success: false,
+      success_count: 0,
+      errors: [],
+      exceptions_errors: [
+        { error: { status_code: 400, message: 'some message' } },
+        { error: { status_code: 500, message: 'some message' } },
+      ],
+      exceptions_success: true,
+      exceptions_success_count: 0,
+    };
+    const decoded = importRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should NOT validate a success_count that is a negative number', () => {
     const payload: ImportRulesSchema = {
       success: false,
       success_count: -1,
       errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
     };
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -66,6 +119,25 @@ describe('import_rules_schema', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "-1" supplied to "success_count"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should NOT validate a exceptions_success_count that is a negative number', () => {
+    const payload: ImportRulesSchema = {
+      success: false,
+      success_count: 0,
+      errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: -1,
+    };
+    const decoded = importRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "exceptions_success_count"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -93,6 +165,9 @@ describe('import_rules_schema', () => {
       success: 'hello',
       success_count: 0,
       errors: [],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
     };
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded as UnsafeCastForTest);
@@ -102,12 +177,54 @@ describe('import_rules_schema', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('it should NOT validate a exceptions_success that is not a boolean', () => {
+    type UnsafeCastForTest = Either<
+      Errors,
+      {
+        success: boolean;
+        exceptions_success: string;
+        success_count: number;
+        errors: Array<
+          {
+            id?: string | undefined;
+            rule_id?: string | undefined;
+          } & {
+            error: {
+              status_code: number;
+              message: string;
+            };
+          }
+        >;
+      }
+    >;
+    const payload: Omit<ImportRulesSchema, 'exceptions_success'> & { exceptions_success: string } =
+      {
+        success: true,
+        success_count: 0,
+        errors: [],
+        exceptions_errors: [],
+        exceptions_success: 'hello',
+        exceptions_success_count: 0,
+      };
+    const decoded = importRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded as UnsafeCastForTest);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "hello" supplied to "exceptions_success"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
   test('it should NOT validate a success an extra invalid field', () => {
     const payload: ImportRulesSchema & { invalid_field: string } = {
       success: true,
       success_count: 0,
       errors: [],
       invalid_field: 'invalid_data',
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
     };
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -117,7 +234,7 @@ describe('import_rules_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate an extra field in the second position of the array', () => {
+  test('it should NOT validate an extra field in the second position of the errors array', () => {
     type InvalidError = ErrorSchema & { invalid_data?: string };
     const payload: Omit<ImportRulesSchema, 'errors'> & {
       errors: InvalidError[];
@@ -128,6 +245,9 @@ describe('import_rules_schema', () => {
         { error: { status_code: 400, message: 'some message' } },
         { invalid_data: 'something', error: { status_code: 500, message: 'some message' } },
       ],
+      exceptions_errors: [],
+      exceptions_success: true,
+      exceptions_success_count: 0,
     };
     const decoded = importRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

@@ -32,7 +32,7 @@ describe('buildIndicatorShouldClauses', () => {
 
     expect(buildIndicatorShouldClauses(eventFields)).toContainEqual({
       match: {
-        'threatintel.indicator.file.hash.md5': {
+        'threat.indicator.file.hash.md5': {
           _name: 'file.hash.md5',
           query: '1eee2bf3f56d8abed72da2bc523e7431',
         },
@@ -44,8 +44,8 @@ describe('buildIndicatorShouldClauses', () => {
     const eventFields = { 'source.ip': '127.0.0.1', 'url.full': 'elastic.co' };
     expect(buildIndicatorShouldClauses(eventFields)).toEqual(
       expect.arrayContaining([
-        { match: { 'threatintel.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
-        { match: { 'threatintel.indicator.url.full': { _name: 'url.full', query: 'elastic.co' } } },
+        { match: { 'threat.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
+        { match: { 'threat.indicator.url.full': { _name: 'url.full', query: 'elastic.co' } } },
       ])
     );
   });
@@ -54,6 +54,10 @@ describe('buildIndicatorShouldClauses', () => {
 describe('getTotalCount', () => {
   it('returns 0 when total is null (not tracking)', () => {
     expect(getTotalCount(null)).toEqual(0);
+  });
+
+  it('returns 0 when total is undefined (not tracking)', () => {
+    expect(getTotalCount(undefined)).toEqual(0);
   });
 
   it('returns total when total is a number', () => {
@@ -83,7 +87,7 @@ describe('buildIndicatorEnrichments', () => {
         _index: '_index',
         matched_queries: ['file.hash.md5'],
         fields: {
-          'threatintel.indicator.file.hash.md5': ['indicator_value'],
+          'threat.indicator.file.hash.md5': ['indicator_value'],
         },
       },
     ];
@@ -94,7 +98,7 @@ describe('buildIndicatorEnrichments', () => {
         'matched.field': ['file.hash.md5'],
         'matched.id': ['_id'],
         'matched.index': ['_index'],
-        'threatintel.indicator.file.hash.md5': ['indicator_value'],
+        'threat.indicator.file.hash.md5': ['indicator_value'],
       }),
     ]);
   });
@@ -106,8 +110,8 @@ describe('buildIndicatorEnrichments', () => {
         _index: '_index',
         matched_queries: ['file.hash.md5', 'source.ip'],
         fields: {
-          'threatintel.indicator.file.hash.md5': ['indicator_value'],
-          'threatintel.indicator.ip': ['127.0.0.1'],
+          'threat.indicator.file.hash.md5': ['indicator_value'],
+          'threat.indicator.ip': ['127.0.0.1'],
         },
       },
     ];
@@ -118,16 +122,16 @@ describe('buildIndicatorEnrichments', () => {
         'matched.field': ['file.hash.md5'],
         'matched.id': ['_id'],
         'matched.index': ['_index'],
-        'threatintel.indicator.file.hash.md5': ['indicator_value'],
-        'threatintel.indicator.ip': ['127.0.0.1'],
+        'threat.indicator.file.hash.md5': ['indicator_value'],
+        'threat.indicator.ip': ['127.0.0.1'],
       }),
       expect.objectContaining({
         'matched.atomic': ['127.0.0.1'],
         'matched.field': ['source.ip'],
         'matched.id': ['_id'],
         'matched.index': ['_index'],
-        'threatintel.indicator.file.hash.md5': ['indicator_value'],
-        'threatintel.indicator.ip': ['127.0.0.1'],
+        'threat.indicator.file.hash.md5': ['indicator_value'],
+        'threat.indicator.ip': ['127.0.0.1'],
       }),
     ]);
   });
@@ -139,7 +143,7 @@ describe('buildIndicatorEnrichments', () => {
         _index: '_index',
         matched_queries: ['file.hash.md5'],
         fields: {
-          'threatintel.indicator.file.hash.md5': ['indicator_value'],
+          'threat.indicator.file.hash.md5': ['indicator_value'],
         },
       },
       {
@@ -147,7 +151,7 @@ describe('buildIndicatorEnrichments', () => {
         _index: '_index2',
         matched_queries: ['source.ip'],
         fields: {
-          'threatintel.indicator.ip': ['127.0.0.1'],
+          'threat.indicator.ip': ['127.0.0.1'],
         },
       },
     ];
@@ -158,14 +162,14 @@ describe('buildIndicatorEnrichments', () => {
         'matched.field': ['file.hash.md5'],
         'matched.id': ['_id'],
         'matched.index': ['_index'],
-        'threatintel.indicator.file.hash.md5': ['indicator_value'],
+        'threat.indicator.file.hash.md5': ['indicator_value'],
       }),
       expect.objectContaining({
         'matched.atomic': ['127.0.0.1'],
         'matched.field': ['source.ip'],
         'matched.id': ['_id2'],
         'matched.index': ['_index2'],
-        'threatintel.indicator.ip': ['127.0.0.1'],
+        'threat.indicator.ip': ['127.0.0.1'],
       }),
     ]);
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import { Inspect, Maybe, Direction } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
 import { HostsFields } from '../common';

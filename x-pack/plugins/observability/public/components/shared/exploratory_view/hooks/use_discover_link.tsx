@@ -6,10 +6,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { Filter } from '@kbn/es-query';
 import { useKibana } from '../../../../utils/kibana_react';
 import { SeriesConfig, SeriesUrl } from '../types';
-import { useAppIndexPatternContext } from './use_app_index_pattern';
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter } from '../configurations/utils';
+import { useAppDataViewContext } from './use_app_data_view';
+import { buildExistsFilter, urlFilterToPersistedFilter } from '../configurations/utils';
 import { getFiltersFromDefs } from './use_lens_attributes';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
 
@@ -24,54 +25,54 @@ export const useDiscoverLink = ({ series, seriesConfig }: UseDiscoverLink) => {
     application: { navigateToUrl },
   } = kServices;
 
-  const { indexPatterns } = useAppIndexPatternContext();
+  const { dataViews } = useAppDataViewContext();
 
-  const urlGenerator = kServices.discover?.urlGenerator;
+  const locator = kServices.discover?.locator;
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
-    const indexPattern = indexPatterns?.[series.dataType];
+    const dataView = dataViews?.[series.dataType];
 
-    const definitions = series.reportDefinitions ?? {};
-    const filters = [...(seriesConfig?.baseFilters ?? [])];
+    if (dataView) {
+      const definitions = series.reportDefinitions ?? {};
 
-    const definitionFilters = getFiltersFromDefs(definitions);
+      const urlFilters = (series.filters ?? []).concat(getFiltersFromDefs(definitions));
 
-    definitionFilters.forEach(({ field, values = [] }) => {
-      if (values.length > 1) {
-        filters.push(buildPhrasesFilter(field, values, indexPattern)[0]);
-      } else {
-        filters.push(buildPhraseFilter(field, values[0], indexPattern)[0]);
+      const filters = urlFilterToPersistedFilter({
+        dataView,
+        urlFilters,
+        initFilters: seriesConfig?.baseFilters,
+      }) as Filter[];
+
+      const selectedMetricField = series.selectedMetricField;
+
+      if (
+        selectedMetricField &&
+        selectedMetricField !== RECORDS_FIELD &&
+        selectedMetricField !== RECORDS_PERCENTAGE_FIELD
+      ) {
+        filters.push(buildExistsFilter(selectedMetricField, dataView)[0]);
       }
-    });
 
-    const selectedMetricField = series.selectedMetricField;
+      const getDiscoverUrl = async () => {
+        if (!locator) return;
 
-    if (
-      selectedMetricField &&
-      selectedMetricField !== RECORDS_FIELD &&
-      selectedMetricField !== RECORDS_PERCENTAGE_FIELD
-    ) {
-      filters.push(buildExistsFilter(selectedMetricField, indexPattern)[0]);
+        const newUrl = await locator.getUrl({
+          filters,
+          indexPatternId: dataView?.id,
+        });
+        setDiscoverUrl(newUrl);
+      };
+      getDiscoverUrl();
     }
-
-    const getDiscoverUrl = async () => {
-      if (!urlGenerator?.createUrl) return;
-
-      const newUrl = await urlGenerator.createUrl({
-        filters,
-        indexPatternId: indexPattern?.id,
-      });
-      setDiscoverUrl(newUrl);
-    };
-    getDiscoverUrl();
   }, [
-    indexPatterns,
+    dataViews,
     series.dataType,
+    series.filters,
     series.reportDefinitions,
     series.selectedMetricField,
     seriesConfig?.baseFilters,
-    urlGenerator,
+    locator,
   ]);
 
   const onClick = useCallback(

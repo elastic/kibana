@@ -120,14 +120,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.backToTop();
       });
 
-      it('should go the end of the table when using the accessible Skip button', async function () {
+      it('should go the end and back to top of the classic table when using the accessible buttons', async function () {
         // click the Skip to the end of the table
         await PageObjects.discover.skipToEndOfDocTable();
         // now check the footer text content
         const footer = await PageObjects.discover.getDocTableFooter();
-        log.debug(await footer.getVisibleText());
         expect(await footer.getVisibleText()).to.have.string(rowsHardLimit);
         await PageObjects.discover.backToTop();
+        // check that the skip to end of the table button now has focus
+        const skipButton = await testSubjects.find('discoverSkipTableButton');
+        const activeElement = await find.activeElement();
+        const activeElementText = await activeElement.getVisibleText();
+        const skipButtonText = await skipButton.getVisibleText();
+        expect(skipButtonText === activeElementText).to.be(true);
       });
 
       describe('expand a document row', function () {
@@ -182,6 +187,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
 
             expect(defaultMessageElResubmit).to.be.ok();
+          });
+        });
+        it('should show allow toggling columns from the expanded document', async function () {
+          await PageObjects.discover.clickNewSearchButton();
+          await testSubjects.click('dscExplorerCalloutClose');
+          await retry.try(async function () {
+            await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
+
+            // add columns
+            const fields = ['_id', '_index', 'agent'];
+            for (const field of fields) {
+              await testSubjects.click(`toggleColumnButton-${field}`);
+            }
+
+            const headerWithFields = await docTable.getHeaderFields();
+            expect(headerWithFields.join(' ')).to.contain(fields.join(' '));
+
+            // remove columns
+            for (const field of fields) {
+              await testSubjects.click(`toggleColumnButton-${field}`);
+            }
+
+            const headerWithoutFields = await docTable.getHeaderFields();
+            expect(headerWithoutFields.join(' ')).not.to.contain(fields.join(' '));
           });
         });
       });

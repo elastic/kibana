@@ -6,8 +6,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-
+import { i18n } from '@kbn/i18n';
 import { TRANSFORM_STATE } from '../constants';
+import { isRuntimeField } from '../shared_imports';
 
 export const transformIdsSchema = schema.arrayOf(
   schema.object({
@@ -28,12 +29,12 @@ export const transformStateSchema = schema.oneOf([
   schema.literal(TRANSFORM_STATE.WAITING),
 ]);
 
-export const indexPatternTitleSchema = schema.object({
-  /** Title of the index pattern for which to return stats. */
-  indexPatternTitle: schema.string(),
+export const dataViewTitleSchema = schema.object({
+  /** Title of the data view for which to return stats. */
+  dataViewTitle: schema.string(),
 });
 
-export type IndexPatternTitleSchema = TypeOf<typeof indexPatternTitleSchema>;
+export type DataViewTitleSchema = TypeOf<typeof dataViewTitleSchema>;
 
 export const transformIdParamSchema = schema.object({
   transformId: schema.string(),
@@ -57,26 +58,17 @@ export interface CommonResponseStatusSchema {
 }
 
 export const runtimeMappingsSchema = schema.maybe(
-  schema.recordOf(
-    schema.string(),
-    schema.object({
-      type: schema.oneOf([
-        schema.literal('keyword'),
-        schema.literal('long'),
-        schema.literal('double'),
-        schema.literal('date'),
-        schema.literal('ip'),
-        schema.literal('boolean'),
-        schema.literal('geo_point'),
-      ]),
-      script: schema.maybe(
-        schema.oneOf([
-          schema.string(),
-          schema.object({
-            source: schema.string(),
-          }),
-        ])
-      ),
-    })
+  schema.object(
+    {},
+    {
+      unknowns: 'allow',
+      validate: (v: object) => {
+        if (Object.values(v).some((o) => !isRuntimeField(o))) {
+          return i18n.translate('xpack.transform.invalidRuntimeFieldMessage', {
+            defaultMessage: 'Invalid runtime field',
+          });
+        }
+      },
+    }
   )
 );

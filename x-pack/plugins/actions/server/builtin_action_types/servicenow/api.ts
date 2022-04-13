@@ -6,7 +6,7 @@
  */
 
 import {
-  ExternalServiceApi,
+  ExternalServiceAPI,
   GetChoicesHandlerArgs,
   GetChoicesResponse,
   GetCommonFieldsHandlerArgs,
@@ -19,7 +19,11 @@ import {
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
-const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {};
+const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {
+  const { externalId: id } = params;
+  const res = await externalService.getIncident(id);
+  return res;
+};
 
 const pushToServiceHandler = async ({
   externalService,
@@ -42,6 +46,7 @@ const pushToServiceHandler = async ({
       incident: {
         ...incident,
         caller_id: secrets.username,
+        opened_by: secrets.username,
       },
     });
   }
@@ -84,7 +89,7 @@ const getChoicesHandler = async ({
   return res;
 };
 
-export const api: ExternalServiceApi = {
+export const api: ExternalServiceAPI = {
   getChoices: getChoicesHandler,
   getFields: getFieldsHandler,
   getIncident: getIncidentHandler,

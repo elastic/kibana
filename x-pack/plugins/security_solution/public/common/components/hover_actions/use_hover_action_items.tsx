@@ -17,7 +17,7 @@ import { allowTopN } from '../drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererScope } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
@@ -30,6 +30,7 @@ export interface UseHoverActionItemsProps {
   enableOverflowButton?: boolean;
   field: string;
   handleHoverActionClicked: () => void;
+  hideAddToTimeline: boolean;
   hideTopN: boolean;
   isCaseView: boolean;
   isObjectArray: boolean;
@@ -60,6 +61,7 @@ export const useHoverActionItems = ({
   field,
   handleHoverActionClicked,
   hideTopN,
+  hideAddToTimeline,
   isCaseView,
   isObjectArray,
   isOverflowPopoverOpen,
@@ -116,7 +118,7 @@ export const useHoverActionItems = ({
         )
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
-  const { browserFields } = useSourcererScope(activeScope);
+  const { browserFields } = useSourcererDataView(activeScope);
 
   /*
    * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
@@ -204,7 +206,7 @@ export const useHoverActionItems = ({
             })}
           </div>
         ) : null,
-        values != null && (draggableId != null || !isEmpty(dataProvider)) ? (
+        values != null && (draggableId != null || !isEmpty(dataProvider)) && !hideAddToTimeline ? (
           <div data-test-subj="hover-actions-add-timeline" key="hover-actions-add-timeline">
             {getAddToTimelineButton({
               Component: enableOverflowButton ? EuiContextMenuItem : undefined,
@@ -258,6 +260,7 @@ export const useHoverActionItems = ({
       getFilterForValueButton,
       getFilterOutValueButton,
       handleHoverActionClicked,
+      hideAddToTimeline,
       hideTopN,
       isObjectArray,
       onFilterAdded,

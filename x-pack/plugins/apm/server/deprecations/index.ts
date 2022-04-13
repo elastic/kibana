@@ -9,15 +9,20 @@ import { GetDeprecationsContext, DeprecationsDetails } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { CloudSetup } from '../../../cloud/server';
-import { getCloudAgentPolicy } from '../lib/fleet/get_cloud_apm_package_policy';
+import {
+  getCloudAgentPolicy,
+  getApmPackagePolicy,
+} from '../routes/fleet/get_cloud_apm_package_policy';
 import { APMRouteHandlerResources } from '../';
 
 export function getDeprecations({
   cloudSetup,
   fleet,
+  branch,
 }: {
   cloudSetup?: CloudSetup;
   fleet?: APMRouteHandlerResources['plugins']['fleet'];
+  branch: string;
 }) {
   return async ({
     savedObjectsClient,
@@ -26,6 +31,8 @@ export function getDeprecations({
     if (!fleet) {
       return deprecations;
     }
+    // TODO: remove when docs support "main"
+    const docBranch = branch === 'main' ? 'master' : branch;
 
     const fleetPluginStart = await fleet.start();
     const cloudAgentPolicy = await getCloudAgentPolicy({
@@ -34,20 +41,19 @@ export function getDeprecations({
     });
 
     const isCloudEnabled = !!cloudSetup?.isCloudEnabled;
-
     const hasCloudAgentPolicy = !isEmpty(cloudAgentPolicy);
+    const hasAPMPackagePolicy = !isEmpty(getApmPackagePolicy(cloudAgentPolicy));
 
-    if (isCloudEnabled && !hasCloudAgentPolicy) {
+    if (isCloudEnabled && hasCloudAgentPolicy && !hasAPMPackagePolicy) {
       deprecations.push({
         title: i18n.translate('xpack.apm.deprecations.legacyModeTitle', {
           defaultMessage: 'APM Server running in legacy mode',
         }),
         message: i18n.translate('xpack.apm.deprecations.message', {
           defaultMessage:
-            'Running the APM Server binary directly is considered a legacy option and is deprecated since 7.16. Switch to APM Server managed by an Elastic Agent instead. Read our documentation to learn more.',
+            'Running the APM Server binary directly is considered a legacy option and will be deprecated and removed in the future.',
         }),
-        documentationUrl:
-          'https://www.elastic.co/guide/en/apm/server/current/apm-integration.html',
+        documentationUrl: `https://www.elastic.co/guide/en/apm/server/${docBranch}/apm-integration.html`,
         level: 'warning',
         correctiveActions: {
           manualSteps: [
@@ -62,7 +68,7 @@ export function getDeprecations({
             }),
             i18n.translate('xpack.apm.deprecations.steps.switch', {
               defaultMessage:
-                'Click "Switch to data streams". You will be guided through the process',
+                'Click "Switch to Elastic Agent". You will be guided through the process',
             }),
           ],
         },

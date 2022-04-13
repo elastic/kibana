@@ -22,10 +22,9 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { truncate, unit } from '../../../utils/style';
-import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
+import { ServiceNodeMetricOverviewLink } from '../../shared/links/apm/service_node_metric_overview_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 
-const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';
 const INITIAL_SORT_DIRECTION = 'desc';
 
@@ -47,20 +46,22 @@ function ServiceNodeOverview() {
       if (!start || !end) {
         return undefined;
       }
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/serviceNodes',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              kuery,
+              environment,
+              start,
+              end,
+            },
           },
-          query: {
-            kuery,
-            environment,
-            start,
-            end,
-          },
-        },
-      });
+        }
+      );
     },
     [kuery, environment, serviceName, start, end]
   );
@@ -170,7 +171,6 @@ function ServiceNodeOverview() {
       })}
       items={items}
       columns={columns}
-      initialPageSize={INITIAL_PAGE_SIZE}
       initialSortField={INITIAL_SORT_FIELD}
       initialSortDirection={INITIAL_SORT_DIRECTION}
     />

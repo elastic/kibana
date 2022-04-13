@@ -75,12 +75,11 @@ export class Plugin() {
     core.deprecations.registerDeprecations({ getDeprecations });
   }
 }
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | <code>(deprecationContext: RegisterDeprecationsConfig) =&gt; void</code> |  |
+|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | (deprecationContext: RegisterDeprecationsConfig) =&gt; void |  |
 

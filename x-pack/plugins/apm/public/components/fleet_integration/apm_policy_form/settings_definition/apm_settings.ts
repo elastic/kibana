@@ -10,17 +10,12 @@ import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_
 import { OPTIONAL_LABEL, REQUIRED_LABEL } from '../settings_form/utils';
 import { SettingsRow } from '../typings';
 
-export function getApmSettings({
-  isCloudPolicy,
-}: {
-  isCloudPolicy: boolean;
-}): SettingsRow[] {
+export function getApmSettings(): SettingsRow[] {
   return [
     {
       type: 'text',
       key: 'host',
       labelAppend: REQUIRED_LABEL,
-      readOnly: isCloudPolicy,
       label: i18n.translate(
         'xpack.apm.fleet_integration.settings.apm.hostLabel',
         { defaultMessage: 'Host' }
@@ -33,23 +28,23 @@ export function getApmSettings({
         'xpack.apm.fleet_integration.settings.apm.hostDescription',
         {
           defaultMessage:
-            'Choose a name and description to help identify how this integration will be used.',
+            'Host defines the host and port the server is listening on. URL is the unchangeable, publicly reachable server URL for deployments on Elastic Cloud or ECK.',
         }
       ),
-
+      dataTestSubj: 'packagePolicyHostInput',
       required: true,
     },
     {
       type: 'text',
       key: 'url',
       labelAppend: REQUIRED_LABEL,
-      readOnly: isCloudPolicy,
       label: i18n.translate(
         'xpack.apm.fleet_integration.settings.apm.urlLabel',
         {
           defaultMessage: 'URL',
         }
       ),
+      dataTestSubj: 'packagePolicyUrlInput',
       required: true,
     },
     {
@@ -78,7 +73,7 @@ export function getApmSettings({
         },
         {
           key: 'idle_timeout',
-          type: 'text',
+          type: 'duration',
           labelAppend: OPTIONAL_LABEL,
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.idleTimeoutLabel',
@@ -91,7 +86,7 @@ export function getApmSettings({
         },
         {
           key: 'read_timeout',
-          type: 'text',
+          type: 'duration',
           labelAppend: OPTIONAL_LABEL,
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.readTimeoutLabel',
@@ -101,7 +96,7 @@ export function getApmSettings({
         },
         {
           key: 'shutdown_timeout',
-          type: 'text',
+          type: 'duration',
           labelAppend: OPTIONAL_LABEL,
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.shutdownTimeoutLabel',
@@ -114,7 +109,7 @@ export function getApmSettings({
         },
         {
           key: 'write_timeout',
-          type: 'text',
+          type: 'duration',
           labelAppend: OPTIONAL_LABEL,
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.writeTimeoutLabel',
@@ -164,10 +159,7 @@ export function getApmSettings({
           ),
           rowDescription: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.responseHeadersDescription',
-            {
-              defaultMessage:
-                'Set limits on request headers sizes and timing configurations.',
-            }
+            { defaultMessage: 'Custom HTTP headers added to HTTP responses' }
           ),
         },
         {

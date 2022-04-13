@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '../../../../src/plugins/data/common';
 
+export const APP_ID = 'data_visualizer';
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
 
 export const MB = Math.pow(2, 20);
@@ -19,6 +21,13 @@ export const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 // Value to use in the Elasticsearch index mapping meta data to identify the
 // index as having been created by the File Data Visualizer.
 export const INDEX_META_DATA_CREATED_BY = 'file-data-visualizer';
+
+export const FILE_FORMATS = {
+  DELIMITED: 'delimited',
+  NDJSON: 'ndjson',
+  SEMI_STRUCTURED_TEXT: 'semi_structured_text',
+  // XML: 'xml',
+};
 
 export const JOB_FIELD_TYPES = {
   BOOLEAN: 'boolean',
@@ -39,3 +48,10 @@ export const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
   KBN_FIELD_TYPES.GEO_SHAPE,
   KBN_FIELD_TYPES.HISTOGRAM,
 ]);
+
+export const FILE_DATA_VIS_TAB_ID = 'fileDataViz';
+export const applicationPath = `/app/home#/tutorial_directory/${FILE_DATA_VIS_TAB_ID}`;
+export const featureTitle = i18n.translate('xpack.dataVisualizer.title', {
+  defaultMessage: 'Upload a file',
+});
+export const featureId = `file_data_visualizer`;

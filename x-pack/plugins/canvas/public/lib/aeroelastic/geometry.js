@@ -73,7 +73,13 @@ const planeTuple = (transformMatrix, x, y) => {
   const x0 = rightPoint[0] - centerPoint[0];
   const y0 = rightPoint[1] - centerPoint[1];
   const x1 = upPoint[0] - centerPoint[0];
-  const y1 = upPoint[1] - centerPoint[1];
+  // If the shape is rotated so it's straight up or down (90 deg or -90 deg) then
+  // y1 is going to be zero here and cause divide by zero issues further down.
+  // The resulting planeVector accounts for this, but it's returning something incorrect that causes z
+  // to be calculated incorrectly.
+  // So instead we're going to set y1 to almost zero so we don't have to worry abou the divide by zeros
+  // and we still end up with an almost correct planeVector
+  const y1 = upPoint[1] - centerPoint[1] || 0.00000000001;
   const rightSlope = y1 ? rightPoint[2] - centerPoint[2] : 0; // handle degenerate case: y1 === 0 (infinite slope)
   const upSlope = y1 ? upPoint[2] - centerPoint[2] : 0; // handle degenerate case: y1 === 0 (infinite slope)
   const inverseProjection = invert(transformMatrix);

@@ -8,7 +8,7 @@
 
 import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import { EuiFormLabel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 
 import { CodeEditor, useKibana } from '../../../../kibana_react/public';
@@ -25,7 +25,7 @@ interface TimelionExpressionInputProps {
 }
 
 function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputProps) {
-  const functionList = useRef([]);
+  const functionList = useRef<ITimelionFunction[]>([]);
   const kibana = useKibana();
   const argValueSuggestions = useMemo(getArgValueSuggestions, []);
 
@@ -83,11 +83,17 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
   );
 
   useEffect(() => {
+    const abortController = new AbortController();
     if (kibana.services.http) {
-      kibana.services.http.get('../api/timelion/functions').then((data) => {
-        functionList.current = data;
-      });
+      kibana.services.http
+        .get<ITimelionFunction[]>('../api/timelion/functions', { signal: abortController.signal })
+        .then((data) => {
+          functionList.current = data;
+        });
     }
+    return () => {
+      abortController.abort();
+    };
   }, [kibana.services.http]);
 
   return (

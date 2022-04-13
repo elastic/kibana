@@ -75,9 +75,6 @@ export const Security: React.FC = () => {
   };
 
   const headerActions = [
-    <EuiButtonEmpty disabled={!unsavedChanges || dataLoading} onClick={resetState}>
-      {RESET_BUTTON}
-    </EuiButtonEmpty>,
     <EuiButton
       disabled={!hasPlatinumLicense || !unsavedChanges || dataLoading}
       onClick={showConfirmModal}
@@ -86,13 +83,15 @@ export const Security: React.FC = () => {
     >
       {SAVE_SETTINGS_BUTTON}
     </EuiButton>,
+    <EuiButtonEmpty disabled={!unsavedChanges || dataLoading} onClick={resetState}>
+      {RESET_BUTTON}
+    </EuiButtonEmpty>,
   ];
 
   const allSourcesToggle = (
     <EuiPanel
       paddingSize="none"
       hasShadow={false}
-      color="subdued"
       className={classNames({
         'euiPanel--disabled': !hasPlatinumLicense,
       })}
@@ -170,7 +169,7 @@ export const Security: React.FC = () => {
         hasUnsavedChanges={unsavedChanges}
         messageText={SECURITY_UNSAVED_CHANGES_MESSAGE}
       />
-      <EuiPanel color="subdued" hasBorder={false}>
+      <EuiPanel hasShadow={false} hasBorder>
         {allSourcesToggle}
         {!hasPlatinumLicense && platinumLicenseCallout}
         {sourceTables}

@@ -13,7 +13,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
@@ -22,7 +25,9 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice } from './types';
-import { choicesToEuiOptions } from './helpers';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
+import { DeprecatedCallout } from './deprecated_callout';
+import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -35,9 +40,12 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowSIRActionParams>
 > = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const {
+    docLinks,
     http,
     notifications: { toasts },
   } = useKibana().services;
+
+  const isDeprecatedActionConnector = checkConnectorIsDeprecated(actionConnector);
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -68,9 +76,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
 
   const editComment = useCallback(
     (key, value) => {
-      if (value.length > 0) {
-        editSubActionProperty(key, [{ commentId: '1', comment: value }]);
-      }
+      editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
   );
@@ -115,7 +121,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: DEFAULT_CORRELATION_ID },
           comments: [],
         },
         index
@@ -132,7 +138,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       editAction(
         'subActionParams',
         {
-          incident: {},
+          incident: { correlation_id: DEFAULT_CORRELATION_ID },
           comments: [],
         },
         index
@@ -143,8 +149,9 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
 
   return (
     <>
+      {isDeprecatedActionConnector && <DeprecatedCallout />}
       <EuiTitle size="s">
-        <h3>{i18n.INCIDENT}</h3>
+        <h3>{i18n.SECURITY_INCIDENT}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -162,48 +169,8 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           editAction={editSubActionProperty}
           messageVariables={messageVariables}
           paramsProperty={'short_description'}
-          inputTargetValue={incident?.short_description ?? undefined}
+          inputTargetValue={incident?.short_description}
           errors={errors['subActionParams.incident.short_description'] as string[]}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.SOURCE_IP_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'source_ip'}
-          inputTargetValue={incident?.source_ip ?? undefined}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.DEST_IP_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'dest_ip'}
-          inputTargetValue={incident?.dest_ip ?? undefined}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_URL_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'malware_url'}
-          inputTargetValue={incident?.malware_url ?? undefined}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.MALWARE_HASH_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'malware_hash'}
-          inputTargetValue={incident?.malware_hash ?? undefined}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -245,22 +212,64 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="subcategorySelect"
-              hasNoInitialSelection
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              options={subcategoryOptions}
-              // Needs an empty string instead of undefined to select the blank option when changing categories
-              value={incident.subcategory ?? ''}
-              onChange={(e) => editSubActionProperty('subcategory', e.target.value)}
-            />
-          </EuiFormRow>
+          {subcategoryOptions?.length > 0 ? (
+            <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
+              <EuiSelect
+                fullWidth
+                data-test-subj="subcategorySelect"
+                hasNoInitialSelection
+                isLoading={isLoadingChoices}
+                disabled={isLoadingChoices}
+                options={subcategoryOptions}
+                // Needs an empty string instead of undefined to select the blank option when changing categories
+                value={incident.subcategory ?? ''}
+                onChange={(e) => editSubActionProperty('subcategory', e.target.value)}
+              />
+            </EuiFormRow>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {!isDeprecatedActionConnector && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={i18n.CORRELATION_ID}
+                helpText={
+                  <EuiLink href={docLinks.links.alerting.serviceNowSIRAction} target="_blank">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIRAction.correlationIDHelpLabel"
+                      defaultMessage="Identifier for updating incidents"
+                    />
+                  </EuiLink>
+                }
+              >
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'correlation_id'}
+                  inputTargetValue={incident?.correlation_id ?? undefined}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={i18n.CORRELATION_DISPLAY}>
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editSubActionProperty}
+                  messageVariables={messageVariables}
+                  paramsProperty={'correlation_display'}
+                  inputTargetValue={incident?.correlation_display ?? undefined}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubActionProperty}
@@ -277,6 +286,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
       />
+      <EuiSpacer size="m" />
     </>
   );
 };

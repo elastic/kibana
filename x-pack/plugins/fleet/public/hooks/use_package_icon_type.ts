@@ -66,11 +66,11 @@ export const usePackageIconType = ({
     }
 
     if (tryApi && !paramIcons && !iconList) {
-      sendGetPackageInfoByKey(cacheKey)
+      sendGetPackageInfoByKey(packageName, version)
         .catch((error) => undefined) // Ignore API errors
         .then((res) => {
           CACHED_ICONS.delete(cacheKey);
-          setIconList(res?.data?.response?.icons);
+          setIconList(res?.data?.item?.icons);
         });
     }
 

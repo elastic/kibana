@@ -11,7 +11,7 @@ import { EuiBadge } from '@elastic/eui';
 
 import { allCaseStatus, statuses } from './config';
 import * as i18n from './translations';
-import { CaseStatusWithAllStatus, StatusAll } from '../../../common';
+import { CaseStatusWithAllStatus, StatusAll } from '../../../common/ui/types';
 
 interface Props {
   disabled?: boolean;
@@ -46,5 +46,6 @@ const StatusComponent: React.FC<Props> = ({
     </EuiBadge>
   );
 };
+StatusComponent.displayName = 'Status';
 
 export const Status = memo(StatusComponent);

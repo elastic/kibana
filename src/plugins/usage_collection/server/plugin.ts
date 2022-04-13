@@ -15,7 +15,6 @@ import type {
   Plugin,
   ElasticsearchClient,
   SavedObjectsClientContract,
-  KibanaRequest,
 } from 'src/core/server';
 import type { ConfigType } from './config';
 import { CollectorSet } from './collector';
@@ -39,12 +38,8 @@ export interface UsageCollectionSetup {
    * Creates a usage collector to collect plugin telemetry data.
    * registerCollector must be called to connect the created collector with the service.
    */
-  makeUsageCollector: <
-    TFetchReturn,
-    WithKibanaRequest extends boolean = false,
-    ExtraOptions extends object = {}
-  >(
-    options: UsageCollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  makeUsageCollector: <TFetchReturn, ExtraOptions extends object = {}>(
+    options: UsageCollectorOptions<TFetchReturn, ExtraOptions>
   ) => Collector<TFetchReturn, ExtraOptions>;
   /**
    * Register a usage collector or a stats collector.
@@ -60,18 +55,12 @@ export interface UsageCollectionSetup {
     type: string
   ) => Collector<TFetchReturn, ExtraOptions> | undefined;
   /**
-   * Returns if all the collectors are ready to fetch their reported usage.
-   * @internal: telemetry use
-   */
-  areAllCollectorsReady: () => Promise<boolean>;
-  /**
    * Fetches the collection from all the registered collectors
    * @internal: telemetry use
    */
   bulkFetch: <TFetchReturn, ExtraOptions extends object>(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
     collectors?: Map<string, Collector<TFetchReturn, ExtraOptions>>
   ) => Promise<Array<{ type: string; result: unknown }>>;
   /**
@@ -93,12 +82,8 @@ export interface UsageCollectionSetup {
    * registerCollector must be called to connect the created collector with the service.
    * @internal: telemetry and monitoring use
    */
-  makeStatsCollector: <
-    TFetchReturn,
-    WithKibanaRequest extends boolean,
-    ExtraOptions extends object = {}
-  >(
-    options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  makeStatsCollector: <TFetchReturn, ExtraOptions extends object = {}>(
+    options: CollectorOptions<TFetchReturn, ExtraOptions>
   ) => Collector<TFetchReturn, ExtraOptions>;
 }
 
@@ -113,9 +98,11 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
 
   public setup(core: CoreSetup): UsageCollectionSetup {
     const config = this.initializerContext.config.get<ConfigType>();
+    const kibanaIndex = core.savedObjects.getKibanaIndex();
 
     const collectorSet = new CollectorSet({
       logger: this.logger.get('usage-collection', 'collector-set'),
+      executionContext: core.executionContext,
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
@@ -128,7 +115,6 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     const { createUsageCounter, getUsageCounterByType } = this.usageCountersService.setup(core);
 
     const uiCountersUsageCounter = createUsageCounter('uiCounter');
-    const globalConfig = this.initializerContext.config.legacy.get();
     const router = core.http.createRouter();
     setupRoutes({
       router,
@@ -137,7 +123,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
       collectorSet,
       config: {
         allowAnonymous: core.status.isStatusPageAnonymous(),
-        kibanaIndex: globalConfig.kibana.index,
+        kibanaIndex,
         kibanaVersion: this.initializerContext.env.packageInfo.version,
         server: core.http.getServerInfo(),
         uuid: this.initializerContext.env.instanceUuid,
@@ -147,7 +133,6 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     });
 
     return {
-      areAllCollectorsReady: collectorSet.areAllCollectorsReady,
       bulkFetch: collectorSet.bulkFetch,
       getCollectorByType: collectorSet.getCollectorByType,
       makeStatsCollector: collectorSet.makeStatsCollector,

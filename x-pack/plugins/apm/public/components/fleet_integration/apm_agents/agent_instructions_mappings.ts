@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ComponentType } from 'react';
 import {
   createDotNetAgentInstructions,
   createDjangoAgentInstructions,
@@ -18,6 +19,19 @@ import {
   createRackAgentInstructions,
 } from '../../../../common/tutorial/instructions/apm_agent_instructions';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+// TODO: Uncomment once https://github.com/elastic/beats/issues/29631 has been closed
+import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
+import {
+  NewPackagePolicy,
+  PackagePolicy,
+  PackagePolicyEditExtensionComponentProps,
+} from '../apm_policy_form/typings';
+
+export interface AgentRuntimeAttachmentProps {
+  policy: PackagePolicy;
+  newPolicy: NewPackagePolicy;
+  onChange: PackagePolicyEditExtensionComponentProps['onChange'];
+}
 
 export type CreateAgentInstructions = (
   apmServerUrl?: string,
@@ -35,12 +49,14 @@ export const ApmAgentInstructionsMappings: Array<{
   title: string;
   variantId: string;
   createAgentInstructions: CreateAgentInstructions;
+  AgentRuntimeAttachment?: ComponentType<AgentRuntimeAttachmentProps>;
 }> = [
   {
     agentName: 'java',
     title: 'Java',
     variantId: 'java',
     createAgentInstructions: createJavaAgentInstructions,
+    AgentRuntimeAttachment: JavaRuntimeAttachment,
   },
   {
     agentName: 'rum-js',

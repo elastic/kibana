@@ -15,7 +15,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
-import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
+import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import * as i18n from '../../../timelines/components/timeline/body/renderers/translations';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
@@ -984,7 +984,7 @@ describe('SourceDestinationIp', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
       )
-    ).toEqual('9987');
+    ).toContain('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and both destinationIp and destinationPort are populated', () => {
@@ -1038,7 +1038,7 @@ describe('SourceDestinationIp', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
       )
-    ).toEqual('80');
+    ).toContain('80');
   });
 
   test('it renders the expected source port when type is `source`, but only sourcePort is populated', () => {
@@ -1092,7 +1092,7 @@ describe('SourceDestinationIp', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
       )
-    ).toEqual('9987');
+    ).toContain('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and only destinationPort is populated', () => {
@@ -1147,7 +1147,7 @@ describe('SourceDestinationIp', () => {
       removeExternalLinkText(
         wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
       )
-    ).toEqual('80');
+    ).toContain('80');
   });
 
   test('it does NOT render the badge when type is `source`, but both sourceIp and sourcePort are undefined', () => {

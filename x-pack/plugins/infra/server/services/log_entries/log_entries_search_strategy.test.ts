@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { of, throwError } from 'rxjs';
+import { errors } from '@elastic/elasticsearch';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -20,12 +20,9 @@ import {
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
 import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
-import {
-  createIndexPatternMock,
-  createIndexPatternsStartMock,
-} from '../../../common/dependency_mocks/index_patterns';
-import { InfraSource } from '../../lib/sources';
-import { createInfraSourcesMock } from '../../lib/sources/mocks';
+import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
+import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
+import { createLogViewsServiceStartMock } from '../log_views/log_views_service.mock';
 import {
   logEntriesSearchRequestStateRT,
   logEntriesSearchStrategyProvider,
@@ -45,17 +42,19 @@ describe('LogEntries search strategy', () => {
     });
 
     const dataMock = createDataPluginMock(esSearchStrategyMock);
-    const sourcesMock = createInfraSourcesMock();
-    sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
+    const logViewsClientMock = createLogViewsClientMock();
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    const logViewsMock = createLogViewsServiceStartMock();
+    logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
     const mockDependencies = createSearchStrategyDependenciesMock();
 
     const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
       data: dataMock,
-      sources: sourcesMock,
+      logViews: logViewsMock,
     });
 
-    const response = await logEntriesSearchStrategy
-      .search(
+    const response = await lastValueFrom(
+      logEntriesSearchStrategy.search(
         {
           params: {
             sourceId: 'SOURCE_ID',
@@ -67,9 +66,10 @@ describe('LogEntries search strategy', () => {
         {},
         mockDependencies
       )
-      .toPromise();
+    );
 
-    expect(sourcesMock.getSourceConfiguration).toHaveBeenCalled();
+    expect(logViewsMock.getScopedClient).toHaveBeenCalled();
+    expect(logViewsClientMock.getResolvedLogView).toHaveBeenCalled();
     expect(esSearchStrategyMock.search).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
@@ -80,7 +80,6 @@ describe('LogEntries search strategy', () => {
               runtime_field: {
                 type: 'keyword',
                 script: {
-                  lang: 'painless',
                   source: 'emit("runtime value")',
                 },
               },
@@ -110,7 +109,6 @@ describe('LogEntries search strategy', () => {
             {
               _id: 'HIT_ID',
               _index: 'HIT_INDEX',
-              _type: '_doc',
               _score: 0,
               _source: null,
               fields: {
@@ -126,20 +124,22 @@ describe('LogEntries search strategy', () => {
       },
     });
     const dataMock = createDataPluginMock(esSearchStrategyMock);
-    const sourcesMock = createInfraSourcesMock();
-    sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
+    const logViewsClientMock = createLogViewsClientMock();
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    const logViewsMock = createLogViewsServiceStartMock();
+    logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
     const mockDependencies = createSearchStrategyDependenciesMock();
 
     const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
       data: dataMock,
-      sources: sourcesMock,
+      logViews: logViewsMock,
     });
     const requestId = logEntriesSearchRequestStateRT.encode({
       esRequestId: 'ASYNC_REQUEST_ID',
     });
 
-    const response = await logEntriesSearchStrategy
-      .search(
+    const response = await lastValueFrom(
+      logEntriesSearchStrategy.search(
         {
           id: requestId,
           params: {
@@ -152,9 +152,10 @@ describe('LogEntries search strategy', () => {
         {},
         mockDependencies
       )
-      .toPromise();
+    );
 
-    expect(sourcesMock.getSourceConfiguration).toHaveBeenCalled();
+    expect(logViewsMock.getScopedClient).toHaveBeenCalled();
+    expect(logViewsClientMock.getResolvedLogView).toHaveBeenCalled();
     expect(esSearchStrategyMock.search).toHaveBeenCalled();
     expect(response.id).toEqual(requestId);
     expect(response.isRunning).toBe(false);
@@ -207,13 +208,15 @@ describe('LogEntries search strategy', () => {
       },
     });
     const dataMock = createDataPluginMock(esSearchStrategyMock);
-    const sourcesMock = createInfraSourcesMock();
-    sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
+    const logViewsClientMock = createLogViewsClientMock();
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    const logViewsMock = createLogViewsServiceStartMock();
+    logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
     const mockDependencies = createSearchStrategyDependenciesMock();
 
     const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
       data: dataMock,
-      sources: sourcesMock,
+      logViews: logViewsMock,
     });
 
     const response = logEntriesSearchStrategy.search(
@@ -230,7 +233,7 @@ describe('LogEntries search strategy', () => {
       mockDependencies
     );
 
-    await expect(response.toPromise()).rejects.toThrowError(ResponseError);
+    await expect(response.toPromise()).rejects.toThrowError(errors.ResponseError);
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {
@@ -245,13 +248,16 @@ describe('LogEntries search strategy', () => {
       },
     });
     const dataMock = createDataPluginMock(esSearchStrategyMock);
-    const sourcesMock = createInfraSourcesMock();
-    sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
+    const logViewsClientMock = createLogViewsClientMock();
+    logViewsClientMock.getResolvedLogView.mockResolvedValue(createResolvedLogViewMock());
+    const logViewsMock = createLogViewsServiceStartMock();
+    logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
+
     const mockDependencies = createSearchStrategyDependenciesMock();
 
     const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
       data: dataMock,
-      sources: sourcesMock,
+      logViews: logViewsMock,
     });
     const requestId = logEntriesSearchRequestStateRT.encode({
       esRequestId: 'ASYNC_REQUEST_ID',
@@ -263,43 +269,6 @@ describe('LogEntries search strategy', () => {
   });
 });
 
-const createSourceConfigurationMock = (): InfraSource => ({
-  id: 'SOURCE_ID',
-  origin: 'stored' as const,
-  configuration: {
-    name: 'SOURCE_NAME',
-    description: 'SOURCE_DESCRIPTION',
-    logIndices: {
-      type: 'index_pattern',
-      indexPatternId: 'test-index-pattern',
-    },
-    metricAlias: 'metric-indices-*',
-    inventoryDefaultView: 'DEFAULT_VIEW',
-    metricsExplorerDefaultView: 'DEFAULT_VIEW',
-    logColumns: [
-      { timestampColumn: { id: 'TIMESTAMP_COLUMN_ID' } },
-      {
-        fieldColumn: {
-          id: 'DATASET_COLUMN_ID',
-          field: 'event.dataset',
-        },
-      },
-      {
-        messageColumn: { id: 'MESSAGE_COLUMN_ID' },
-      },
-    ],
-    fields: {
-      pod: 'POD_FIELD',
-      host: 'HOST_FIELD',
-      container: 'CONTAINER_FIELD',
-      message: ['MESSAGE_FIELD'],
-      timestamp: 'TIMESTAMP_FIELD',
-      tiebreaker: 'TIEBREAKER_FIELD',
-    },
-    anomalyThreshold: 20,
-  },
-});
-
 const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
   search: jest.fn((esSearchRequest: IEsSearchRequest) => {
     if (typeof esSearchRequest.id === 'string') {
@@ -307,7 +276,7 @@ const createEsSearchStrategyMock = (esSearchResponse: IEsSearchResponse) => ({
         return of(esSearchResponse);
       } else {
         return throwError(
-          new ResponseError({
+          new errors.ResponseError({
             body: {},
             headers: {},
             meta: {} as any,
@@ -337,33 +306,4 @@ const createDataPluginMock = (esSearchStrategyMock: ISearchStrategy): any => ({
   search: {
     getSearchStrategy: jest.fn().mockReturnValue(esSearchStrategyMock),
   },
-  indexPatterns: createIndexPatternsStartMock(0, [
-    createIndexPatternMock({
-      id: 'test-index-pattern',
-      title: 'log-indices-*',
-      timeFieldName: '@timestamp',
-      fields: [
-        {
-          name: 'event.dataset',
-          type: 'string',
-          esTypes: ['keyword'],
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'runtime_field',
-          type: 'string',
-          runtimeField: {
-            type: 'keyword',
-            script: {
-              source: 'emit("runtime value")',
-            },
-          },
-          esTypes: ['keyword'],
-          aggregatable: true,
-          searchable: true,
-        },
-      ],
-    }),
-  ]),
 });

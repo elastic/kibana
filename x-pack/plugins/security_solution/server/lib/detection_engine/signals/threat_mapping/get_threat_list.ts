@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import {
-  GetSortWithTieBreakerOptions,
   GetThreatListOptions,
-  SortWithTieBreaker,
   ThreatListCountOptions,
   ThreatListDoc,
+  ThreatListItem,
 } from './types';
 
 /**
  * This should not exceed 10000 (10k)
  */
-export const MAX_PER_PAGE = 9000;
+export const INDICATOR_PER_PAGE = 1000;
 
 export const getThreatList = async ({
   esClient,
   query,
   language,
   index,
-  perPage,
   searchAfter,
-  sortField,
-  sortOrder,
   exceptionItems,
   threatFilters,
-  listClient,
   buildRuleMessage,
   logger,
+  threatListConfig,
+  pitId,
+  reassignPitId,
+  perPage,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
-  const calculatedPerPage = perPage ?? MAX_PER_PAGE;
+  const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
@@ -52,60 +51,27 @@ export const getThreatList = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
-  const { body: response } = await esClient.search<ThreatListDoc>({
+
+  const response = await esClient.search<
+    ThreatListDoc,
+    Record<string, estypes.AggregationsAggregate>
+  >({
     body: {
+      ...threatListConfig,
       query: queryFilter,
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-      ],
       search_after: searchAfter,
-      sort: getSortWithTieBreaker({
-        sortField,
-        sortOrder,
-        index,
-        listItemIndex: listClient.getListItemIndex(),
-      }),
+      sort: ['_shard_doc', { '@timestamp': 'asc' }],
     },
     track_total_hits: false,
-    ignore_unavailable: true,
-    index,
     size: calculatedPerPage,
+    pit: { id: pitId },
   });
 
   logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
-  return response;
-};
 
-/**
- * This returns the sort with a tiebreaker if we find out we are only
- * querying against the list items index. If we are querying against any
- * other index we are assuming we are 1 or more ECS compatible indexes and
- * will query against those indexes using just timestamp since we don't have
- * a tiebreaker.
- */
-export const getSortWithTieBreaker = ({
-  sortField,
-  sortOrder,
-  index,
-  listItemIndex,
-}: GetSortWithTieBreakerOptions): SortWithTieBreaker[] => {
-  const ascOrDesc = sortOrder ?? 'asc';
-  if (index.length === 1 && index[0] === listItemIndex) {
-    if (sortField != null) {
-      return [{ [sortField]: ascOrDesc, tie_breaker_id: 'asc' }];
-    } else {
-      return [{ tie_breaker_id: 'asc' }];
-    }
-  } else {
-    if (sortField != null) {
-      return [{ [sortField]: ascOrDesc, '@timestamp': 'desc' }];
-    } else {
-      return [{ '@timestamp': 'desc' }];
-    }
-  }
+  reassignPitId(response.pit_id);
+
+  return response;
 };
 
 export const getThreatListCount = async ({
@@ -123,7 +89,7 @@ export const getThreatListCount = async ({
     index,
     exceptionItems
   );
-  const { body: response } = await esClient.count({
+  const response = await esClient.count({
     body: {
       query: queryFilter,
     },
@@ -131,4 +97,23 @@ export const getThreatListCount = async ({
     index,
   });
   return response.count;
+};
+
+export const getAllThreatListHits = async (
+  params: Omit<GetThreatListOptions, 'searchAfter'>
+): Promise<ThreatListItem[]> => {
+  let allThreatListHits: ThreatListItem[] = [];
+  let threatList = await getThreatList({ ...params, searchAfter: undefined });
+
+  allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
+
+  while (threatList.hits.hits.length !== 0) {
+    threatList = await getThreatList({
+      ...params,
+      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
+    });
+
+    allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
+  }
+  return allThreatListHits;
 };

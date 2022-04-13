@@ -10,6 +10,7 @@ import Url from 'url';
 
 import { withProcRunner } from '@kbn/dev-utils';
 
+import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrProviderContext) {
@@ -23,6 +24,33 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
     await procs.run('cypress', {
       cmd: 'yarn',
       args: ['cypress:run'],
+      cwd: resolve(__dirname, '../../plugins/security_solution'),
+      env: {
+        FORCE_COLOR: '1',
+        CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
+        CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+        CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+        CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+        ...process.env,
+      },
+      wait: true,
+    });
+  });
+}
+
+export async function SecuritySolutionCypressCliCasesTestRunner({
+  getService,
+}: FtrProviderContext) {
+  const log = getService('log');
+  const config = getService('config');
+  const esArchiver = getService('esArchiver');
+
+  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
+
+  await withProcRunner(log, async (procs) => {
+    await procs.run('cypress', {
+      cmd: 'yarn',
+      args: ['cypress:run:cases'],
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
@@ -117,19 +145,26 @@ export async function SecuritySolutionCypressUpgradeCliTestRunner({
   getService,
 }: FtrProviderContext) {
   const log = getService('log');
-  const config = getService('config');
+  let command = '';
+
+  if (semver.gt(process.env.ORIGINAL_VERSION!, '7.10.0')) {
+    command = 'cypress:run:upgrade';
+  } else {
+    command = 'cypress:run:upgrade:old';
+  }
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:run:upgrade'],
+      args: [command],
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
-        CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
-        CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-        CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-        CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+        CYPRESS_BASE_URL: process.env.TEST_KIBANA_URL,
+        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
+        CYPRESS_ELASTICSEARCH_USERNAME: process.env.TEST_ES_USER,
+        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TEST_ES_PASS,
+        CYPRESS_ORIGINAL_VERSION: process.env.ORIGINAL_VERSION,
         ...process.env,
       },
       wait: true,

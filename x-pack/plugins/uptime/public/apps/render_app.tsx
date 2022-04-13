@@ -22,7 +22,8 @@ export function renderApp(
   core: CoreStart,
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
-  appMountParameters: AppMountParameters
+  appMountParameters: AppMountParameters,
+  isDev: boolean
 ) {
   const {
     application: { capabilities },
@@ -40,6 +41,7 @@ export function renderApp(
   const canSave = (capabilities.uptime.save ?? false) as boolean;
 
   const props: UptimeAppProps = {
+    isDev,
     plugins,
     canSave,
     core,

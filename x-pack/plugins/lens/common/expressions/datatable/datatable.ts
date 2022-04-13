@@ -16,12 +16,22 @@ export interface SortingState {
   direction: 'asc' | 'desc' | 'none';
 }
 
+export interface PagingState {
+  size: number;
+  enabled: boolean;
+}
+
 export interface DatatableArgs {
   title: string;
   description?: string;
   columns: ColumnConfigArg[];
   sortingColumnId: SortingState['columnId'];
   sortingDirection: SortingState['direction'];
+  fitRowToContent?: boolean;
+  rowHeightLines?: number;
+  headerRowHeight?: 'auto' | 'single' | 'custom';
+  headerRowHeightLines?: number;
+  pageSize?: PagingState['size'];
 }
 
 export const getDatatable = (
@@ -55,6 +65,26 @@ export const getDatatable = (
     },
     sortingDirection: {
       types: ['string'],
+      help: '',
+    },
+    fitRowToContent: {
+      types: ['boolean'],
+      help: '',
+    },
+    rowHeightLines: {
+      types: ['number'],
+      help: '',
+    },
+    headerRowHeight: {
+      types: ['string'],
+      help: '',
+    },
+    headerRowHeightLines: {
+      types: ['number'],
+      help: '',
+    },
+    pageSize: {
+      types: ['number'],
       help: '',
     },
   },

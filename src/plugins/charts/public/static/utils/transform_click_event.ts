@@ -9,7 +9,7 @@
 import {
   XYChartSeriesIdentifier,
   GeometryValue,
-  XYBrushArea,
+  XYBrushEvent,
   Accessor,
   AccessorFn,
   Datum,
@@ -28,19 +28,21 @@ export interface BrushTriggerEvent {
   data: RangeSelectContext['data'];
 }
 
-type AllSeriesAccessors = Array<[accessor: Accessor | AccessorFn, value: string | number]>;
+type AllSeriesAccessors<D = any> = Array<
+  [accessor: Accessor<D> | AccessorFn<D>, value: string | number]
+>;
 
 /**
  * returns accessor value from string or function accessor
  * @param datum
  * @param accessor
  */
-function getAccessorValue(datum: Datum, accessor: Accessor | AccessorFn) {
+function getAccessorValue<D>(datum: D, accessor: Accessor<D> | AccessorFn<D>) {
   if (typeof accessor === 'function') {
     return accessor(datum);
   }
 
-  return datum[accessor];
+  return (datum as Datum)[accessor];
 }
 
 /**
@@ -259,9 +261,11 @@ export const getFilterFromSeriesFn =
 /**
  * Helper function to transform `@elastic/charts` brush event into brush action event
  */
-export const getBrushFromChartBrushEventFn =
-  (table: Datatable, xAccessor: Accessor | AccessorFn) =>
-  ({ x: selectedRange }: XYBrushArea): BrushTriggerEvent => {
+export function getBrushFromChartBrushEventFn<D = never>(
+  table: Datatable,
+  xAccessor: Accessor<D> | AccessorFn<D>
+) {
+  return ({ x: selectedRange }: XYBrushEvent): BrushTriggerEvent => {
     const [start, end] = selectedRange ?? [0, 0];
     const range: [number, number] = [start, end];
     const column = table.columns.findIndex(({ id }) => validateAccessorId(id, xAccessor));
@@ -275,3 +279,4 @@ export const getBrushFromChartBrushEventFn =
       name: 'brush',
     };
   };
+}

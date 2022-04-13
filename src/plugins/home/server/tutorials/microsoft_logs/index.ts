@@ -24,12 +24,12 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
   return {
     id: 'microsoftLogs',
     name: i18n.translate('home.tutorials.microsoftLogs.nameTitle', {
-      defaultMessage: 'Microsoft Defender ATP logs',
+      defaultMessage: 'Microsoft Defender ATP Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.microsoftLogs.shortDescription', {
-      defaultMessage: 'Collect Microsoft Defender ATP alerts.',
+      defaultMessage: 'Collect and parse alerts from Microsoft Defender ATP with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.microsoftLogs.longDescription', {
       defaultMessage:
@@ -57,8 +57,8 @@ export function microsoftLogsSpecProvider(context: TutorialContext): TutorialSch
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/microsoft_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['network', 'security', 'azure'],
   };
 }

@@ -35,7 +35,7 @@ describe('[CCR API] Update auto-follow pattern', () => {
     const routeContextMock = mockRouteContext({
       ccr: {
         // Just echo back what we send so we can inspect it.
-        putAutoFollowPattern: jest.fn().mockImplementation((payload) => ({ body: payload })),
+        putAutoFollowPattern: jest.fn().mockImplementation((payload) => payload),
       },
     });
 

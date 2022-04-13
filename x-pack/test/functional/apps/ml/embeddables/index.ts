@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('embeddables', function () {
     this.tags(['skipFirefox']);
     loadTestFile(require.resolve('./anomaly_charts_dashboard_embeddables'));
+    loadTestFile(require.resolve('./anomaly_embeddables_migration'));
   });
 }

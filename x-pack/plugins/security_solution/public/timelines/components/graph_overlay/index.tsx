@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiToolTip,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-
-import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
-import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
+import styled, { css } from 'styled-components';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -30,101 +19,74 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
-import { sourcererSelectors } from '../../../common/store';
-import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
+import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import {
   isLoadingSelector,
   startSelector,
   endSelector,
 } from '../../../common/components/super_date_picker/selectors';
-import * as i18n from './translations';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { sourcererSelectors } from '../../../common/store';
 
-const OverlayContainer = styled.div`
+const OverlayStyle = css`
   display: flex;
   flex-direction: column;
   flex: 1;
   width: 100%;
 `;
 
-const FullScreenOverlayContainer = styled.div`
+const OverlayContainer = styled.div`
+  ${OverlayStyle}
+`;
+
+const FullScreenOverlayStyles = css`
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: ${(props) => props.theme.eui.euiZLevel3};
+  z-index: ${euiThemeVars.euiZLevel3};
+`;
+
+const FullScreenOverlayContainer = styled.div`
+  ${FullScreenOverlayStyles}
 `;
 
 const StyledResolver = styled(Resolver)`
   height: 100%;
 `;
 
-const FullScreenButtonIcon = styled(EuiButtonIcon)`
-  margin: 4px 0 4px 0;
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+  overflow: hidden;
+  width: 100%;
 `;
 
-interface OwnProps {
+interface GraphOverlayProps {
   timelineId: TimelineId;
+  SessionView: JSX.Element | null;
+  Navigation: JSX.Element | null;
 }
 
-interface NavigationProps {
-  fullScreen: boolean;
-  globalFullScreen: boolean;
-  onCloseOverlay: () => void;
-  timelineId: TimelineId;
-  timelineFullScreen: boolean;
-  toggleFullScreen: () => void;
-}
-
-const NavigationComponent: React.FC<NavigationProps> = ({
-  fullScreen,
-  globalFullScreen,
-  onCloseOverlay,
+const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
   timelineId,
-  timelineFullScreen,
-  toggleFullScreen,
-}) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
-        {i18n.CLOSE_ANALYZER}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    {timelineId !== TimelineId.active && (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
-          <FullScreenButtonIcon
-            aria-label={
-              isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
-                ? EXIT_FULL_SCREEN
-                : FULL_SCREEN
-            }
-            className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-            color={fullScreen ? 'ghost' : 'primary'}
-            data-test-subj="full-screen"
-            iconType="fullScreen"
-            onClick={toggleFullScreen}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
-
-NavigationComponent.displayName = 'NavigationComponent';
-
-const Navigation = React.memo(NavigationComponent);
-
-const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
+  SessionView,
+  Navigation,
+}) => {
   const dispatch = useDispatch();
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen } = useTimelineFullScreen();
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
+  const sessionViewConfig = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).sessionViewConfig
+  );
+
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
@@ -157,56 +119,62 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
   );
 
   const isInTimeline = timelineId === TimelineId.active;
-  const onCloseOverlay = useCallback(() => {
-    if (timelineId === TimelineId.active) {
-      setTimelineFullScreen(false);
-    } else {
-      setGlobalFullScreen(false);
-    }
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-  }, [dispatch, timelineId, setTimelineFullScreen, setGlobalFullScreen]);
 
-  const toggleFullScreen = useCallback(() => {
-    if (timelineId === TimelineId.active) {
-      setTimelineFullScreen(!timelineFullScreen);
-    } else {
-      setGlobalFullScreen(!globalFullScreen);
-    }
-  }, [
-    timelineId,
-    setTimelineFullScreen,
-    timelineFullScreen,
-    setGlobalFullScreen,
-    globalFullScreen,
-  ]);
+  useEffect(() => {
+    return () => {
+      if (timelineId === TimelineId.active) {
+        dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen: false }));
+      } else {
+        dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen: false }));
+      }
+    };
+  }, [dispatch, timelineId]);
 
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+  const getDefaultDataViewSelector = useMemo(
+    () => sourcererSelectors.defaultDataViewSelector(),
     []
   );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
-  if (fullScreen && !isInTimeline) {
+  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
+
+  const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const selectedPatterns = useMemo(
+    () => (isInTimeline ? timelinePatterns : defaultDataView.patternList),
+    [defaultDataView.patternList, isInTimeline, timelinePatterns]
+  );
+
+  const sessionContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (fullScreen && sessionContainerRef.current) {
+      sessionContainerRef.current.setAttribute('style', FullScreenOverlayStyles.join(''));
+    } else if (sessionContainerRef.current) {
+      sessionContainerRef.current.setAttribute('style', OverlayStyle.join(''));
+    }
+  }, [fullScreen]);
+
+  if (!isInTimeline && sessionViewConfig !== null) {
+    return (
+      <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
+        <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
+          <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
+          <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
+        </EuiFlexGroup>
+      </OverlayContainer>
+    );
+  } else if (fullScreen && !isInTimeline) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">
         <EuiHorizontalRule margin="none" />
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <Navigation
-              fullScreen={fullScreen}
-              globalFullScreen={globalFullScreen}
-              onCloseOverlay={onCloseOverlay}
-              timelineId={timelineId}
-              timelineFullScreen={timelineFullScreen}
-              toggleFullScreen={toggleFullScreen}
-            />
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
         {graphEventId !== undefined ? (
           <StyledResolver
             databaseDocumentID={graphEventId}
             resolverComponentInstanceID={timelineId}
-            indices={existingIndexNames}
+            indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
           />
@@ -222,23 +190,14 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ timelineId }) => {
       <OverlayContainer data-test-subj="overlayContainer">
         <EuiHorizontalRule margin="none" />
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <Navigation
-              fullScreen={fullScreen}
-              globalFullScreen={globalFullScreen}
-              onCloseOverlay={onCloseOverlay}
-              timelineId={timelineId}
-              timelineFullScreen={timelineFullScreen}
-              toggleFullScreen={toggleFullScreen}
-            />
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="none" />
         {graphEventId !== undefined ? (
           <StyledResolver
             databaseDocumentID={graphEventId}
             resolverComponentInstanceID={timelineId}
-            indices={existingIndexNames}
+            indices={selectedPatterns}
             shouldUpdate={shouldUpdate}
             filters={{ from, to }}
           />

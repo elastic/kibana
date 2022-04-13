@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpStart as Http, ToastsSetup } from 'kibana/public';
+import { Observable } from 'rxjs';
+import { HttpStart as Http, ToastsSetup, CoreTheme } from 'kibana/public';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { LicenseStatus } from '../../common';
+import { KibanaThemeProvider } from '../shared_imports';
 import { App } from './app';
 import { AppContextProvider } from './contexts/app_context';
 import { ProfileContextProvider } from './contexts/profiler_context';
@@ -20,6 +23,8 @@ interface AppDependencies {
   I18nContext: any;
   notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
+  theme$: Observable<CoreTheme>;
+  location: RouteComponentProps['location'];
 }
 
 export const renderApp = ({
@@ -28,14 +33,18 @@ export const renderApp = ({
   I18nContext,
   notifications,
   initialLicenseStatus,
+  theme$,
+  location,
 }: AppDependencies) => {
   render(
     <I18nContext>
-      <AppContextProvider args={{ initialLicenseStatus, notifications, http }}>
-        <ProfileContextProvider>
-          <App />
-        </ProfileContextProvider>
-      </AppContextProvider>
+      <KibanaThemeProvider theme$={theme$}>
+        <AppContextProvider args={{ initialLicenseStatus, notifications, http, location }}>
+          <ProfileContextProvider>
+            <App />
+          </ProfileContextProvider>
+        </AppContextProvider>
+      </KibanaThemeProvider>
     </I18nContext>,
     el
   );

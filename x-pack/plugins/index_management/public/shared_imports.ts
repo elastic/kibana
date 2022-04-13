@@ -7,11 +7,15 @@
 
 export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 
-export {
+export type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
   UseRequestResponse,
+  Error,
+} from '../../../../src/plugins/es_ui_shared/public';
+
+export {
   sendRequest,
   useRequest,
   Forms,
@@ -20,16 +24,18 @@ export {
   attemptToURIDecode,
   PageLoading,
   PageError,
-  Error,
   SectionLoading,
   EuiCodeEditor,
 } from '../../../../src/plugins/es_ui_shared/public';
 
-export {
+export type {
   FormSchema,
+  FieldConfig,
+} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+
+export {
   FIELD_TYPES,
   VALIDATION_TYPES,
-  FieldConfig,
   useForm,
   useFormData,
   Form,
@@ -57,4 +63,6 @@ export {
   createKibanaReactContext,
   reactRouterNavigate,
   useKibana,
+  KibanaThemeProvider,
+  useExecutionContext,
 } from '../../../../src/plugins/kibana_react/public';

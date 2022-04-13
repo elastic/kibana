@@ -1,0 +1,35 @@
+steps:
+  - label: ':pipeline: Create pipeline with priority'
+    agents:
+      queue: kibana-default
+    concurrency_group: bazel_macos
+    concurrency: 1
+    concurrency_method: eager
+    # We have to use a dynamic pipeline to set PRIORITY at runtime based on the branch
+    # We want the main branch to be prioritized higher than other branches
+    # The other option would be to have a slightly different version of this yaml live on different branches
+    # But this makes backports easier / everything cleaner
+    command: |
+      if [[ "$${BUILDKITE_BRANCH}" == "$${BUILDKITE_PIPELINE_DEFAULT_BRANCH}" ]]; then
+        export PRIORITY=1
+      else
+        export PRIORITY=0
+      fi
+      buildkite-agent pipeline upload <<YAML
+      steps:
+      - command: .buildkite/scripts/steps/bazel_cache/bootstrap_mac.sh
+        label: Bootstrap (MacOS x86)
+        priority: $${PRIORITY}
+        agents:
+          queue: macos-x86
+        timeout_in_minutes: 60
+        concurrency_group: bazel_macos
+        concurrency: 1
+        concurrency_method: eager
+      - command: .buildkite/scripts/steps/bazel_cache/bootstrap_mac.sh
+        label: Bootstrap (MacOS ARM)
+        priority: $${PRIORITY}
+        agents:
+          queue: macos-arm
+        timeout_in_minutes: 60
+      YAML

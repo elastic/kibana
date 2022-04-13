@@ -12,8 +12,10 @@ export const ML_PAGES = {
   ANOMALY_EXPLORER: 'explorer',
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
   DATA_FRAME_ANALYTICS_JOBS_MANAGE: 'data_frame_analytics',
+  DATA_FRAME_ANALYTICS_SOURCE_SELECTION: 'data_frame_analytics/source_selection',
   DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
-  DATA_FRAME_ANALYTICS_MODELS_MANAGE: 'data_frame_analytics/models',
+  TRAINED_MODELS_MANAGE: 'trained_models',
+  TRAINED_MODELS_NODES: 'trained_models/nodes',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
   /**
@@ -22,7 +24,7 @@ export const ML_PAGES = {
   DATA_VISUALIZER: 'datavisualizer',
   /**
    * Page: Data Visualizer
-   * Open data visualizer by selecting a Kibana index pattern or saved search
+   * Open data visualizer by selecting a Kibana data view or saved search
    */
   DATA_VISUALIZER_INDEX_SELECT: 'datavisualizer_index_select',
   /**

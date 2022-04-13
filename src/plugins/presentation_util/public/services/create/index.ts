@@ -9,8 +9,9 @@
 import { PluginServiceRegistry } from './registry';
 
 export { PluginServiceRegistry } from './registry';
-export { PluginServiceProvider, PluginServiceProviders } from './provider';
-export {
+export type { PluginServiceProviders } from './provider';
+export { PluginServiceProvider } from './provider';
+export type {
   PluginServiceFactory,
   KibanaPluginServiceFactory,
   KibanaPluginServiceParams,

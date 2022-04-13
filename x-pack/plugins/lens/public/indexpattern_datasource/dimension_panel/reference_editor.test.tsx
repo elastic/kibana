@@ -9,15 +9,18 @@ import React from 'react';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
-import { mountWithIntl as mount } from '@kbn/test/jest';
-import 'jest-canvas-mock';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { OperationMetadata } from '../../types';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
-import { insertOrReplaceColumn } from '../operations';
+import {
+  insertOrReplaceColumn,
+  LastValueIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '../operations';
 import { FieldSelect } from './field_select';
 
 jest.mock('../operations');
@@ -123,7 +126,7 @@ describe('reference editor', () => {
               operationType: 'terms',
               sourceField: 'dest',
               params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'desc' },
-            },
+            } as TermsIndexPatternColumn,
           },
         }}
         validation={{
@@ -490,7 +493,7 @@ describe('reference editor', () => {
               params: {
                 sortField: 'timestamp',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
         }}
         validation={{
@@ -522,7 +525,7 @@ describe('reference editor', () => {
               params: {
                 sortField: 'timestamp',
               },
-            },
+            } as LastValueIndexPatternColumn,
           },
           incompleteColumns: {
             ref: { operationType: 'max' },

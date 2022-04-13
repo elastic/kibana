@@ -14,27 +14,28 @@ import { AlertsConfigType } from './types';
 export type RulesClient = PublicMethodsOf<RulesClientClass>;
 
 export type {
-  AlertType,
+  RuleType,
   ActionGroup,
   ActionGroupIdsOf,
   AlertingPlugin,
-  AlertExecutorOptions,
-  AlertActionParams,
-  AlertServices,
-  AlertTypeState,
-  AlertTypeParams,
-  PartialAlert,
+  RuleExecutorOptions,
+  RuleExecutorServices,
+  RuleActionParams,
+  RuleTypeState,
+  RuleTypeParams,
+  PartialRule,
   AlertInstanceState,
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
 } from './types';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
-export { PluginSetupContract, PluginStartContract } from './plugin';
-export { FindResult } from './rules_client';
-export { PublicAlertInstance as AlertInstance } from './alert_instance';
+export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { FindResult } from './rules_client';
+export type { PublicAlert as Alert } from './alert';
 export { parseDuration } from './lib';
 export { getEsErrorMessage } from './lib/errors';
+export type { AlertingRulesConfig } from './config';
 export {
   ReadOperations,
   AlertingAuthorizationFilterType,
@@ -48,14 +49,23 @@ export const plugin = (initContext: PluginInitializerContext) => new AlertingPlu
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck'),
+    renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
-      'xpack.alerting.invalidateApiKeysTask.interval'
+      'xpack.alerting.invalidateApiKeysTask.interval',
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.removalDelay',
-      'xpack.alerting.invalidateApiKeysTask.removalDelay'
+      'xpack.alerting.invalidateApiKeysTask.removalDelay',
+      { level: 'warning' }
+    ),
+    renameFromRoot(
+      'xpack.alerting.defaultRuleTaskTimeout',
+      'xpack.alerting.rules.execution.timeout',
+      {
+        level: 'warning',
+      }
     ),
   ],
 };

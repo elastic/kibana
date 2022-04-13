@@ -49,6 +49,7 @@ describe('ruleTypesRoute', () => {
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
         isExportable: true,
+        ruleTaskTimeout: '10m',
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {
@@ -57,6 +58,8 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'test',
         enabledInLicense: true,
+        defaultScheduleInterval: '10m',
+        doesSetRecoveryContext: false,
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<AsApiContract<RegistryAlertTypeWithAuth>> = [
@@ -70,8 +73,11 @@ describe('ruleTypesRoute', () => {
           },
         ],
         default_action_group_id: 'default',
+        default_schedule_interval: '10m',
+        does_set_recovery_context: false,
         minimum_license_required: 'basic',
         is_exportable: true,
+        rule_task_timeout: '10m',
         recovery_action_group: RecoveredActionGroup,
         authorized_consumers: {},
         action_variables: {
@@ -102,6 +108,8 @@ describe('ruleTypesRoute', () => {
             },
             "authorized_consumers": Object {},
             "default_action_group_id": "default",
+            "default_schedule_interval": "10m",
+            "does_set_recovery_context": false,
             "enabled_in_license": true,
             "id": "1",
             "is_exportable": true,
@@ -112,6 +120,7 @@ describe('ruleTypesRoute', () => {
               "id": "recovered",
               "name": "Recovered",
             },
+            "rule_task_timeout": "10m",
           },
         ],
       }

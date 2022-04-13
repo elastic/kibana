@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 export default function () {
   return {
@@ -22,19 +22,25 @@ export default function () {
 
         lifecycle.testFailure.add(async (err, test) => {
           log.info('testFailure %s %s', err.message, test.fullTitle());
-          await delay(10);
+          await setTimeoutAsync(10);
           log.info('testFailureAfterDelay %s %s', err.message, test.fullTitle());
         });
 
         lifecycle.testHookFailure.add(async (err, test) => {
           log.info('testHookFailure %s %s', err.message, test.fullTitle());
-          await delay(10);
+          await setTimeoutAsync(10);
           log.info('testHookFailureAfterDelay %s %s', err.message, test.fullTitle());
         });
       },
     },
     mochaReporter: {
       captureLogOutput: false,
+      sendToCiStats: false,
+    },
+    servers: {
+      elasticsearch: {
+        port: 1234,
+      },
     },
   };
 }

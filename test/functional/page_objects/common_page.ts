@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
+import moment from 'moment';
 import { FtrService } from '../ftr_provider_context';
 
 interface NavigateProps {
@@ -30,6 +31,7 @@ export class CommonPageObject extends FtrService {
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -212,7 +214,7 @@ export class CommonPageObject extends FtrService {
 
   async sleep(sleepMilliseconds: number) {
     this.log.debug(`... sleep(${sleepMilliseconds}) start`);
-    await delay(sleepMilliseconds);
+    await setTimeoutAsync(sleepMilliseconds);
     this.log.debug(`... sleep(${sleepMilliseconds}) end`);
   }
 
@@ -276,6 +278,9 @@ export class CommonPageObject extends FtrService {
           const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
+        }
+        if (appName === 'discover') {
+          await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
         }
         return currentUrl;
       });
@@ -500,4 +505,48 @@ export class CommonPageObject extends FtrService {
       await this.testSubjects.exists(validator);
     }
   }
+
+  /**
+   * Due to a warning thrown, documented at:
+   * https://github.com/elastic/kibana/pull/114997#issuecomment-950823874
+   * this fn formats time in a format specified, or defaulted
+   * to the same format in
+   * [getTimeDurationInHours()](https://github.com/elastic/kibana/blob/main/test/functional/page_objects/time_picker.ts#L256)
+   * @param time
+   * @param fmt
+   */
+  formatTime(time: TimeStrings, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
+    return Object.keys(time)
+      .map((x) => moment.utc(time[x], [fmt]).format())
+      .reduce(
+        (acc, curr, idx) => {
+          if (idx === 0) acc.from = curr;
+          acc.to = curr;
+          return acc;
+        },
+        { from: '', to: '' }
+      );
+  }
+
+  /**
+   * Previously, many tests were using the time picker.
+   * To speed things up, we are now setting time here.
+   * The formatting fn is called here, such that the tests
+   * that were using the time picker can use the same time
+   * parameters as before, but they are auto-formatted.
+   * @param time
+   */
+  async setTime(time: TimeStrings) {
+    await this.kibanaServer.uiSettings.replace({
+      'timepicker:timeDefaults': JSON.stringify(this.formatTime(time)),
+    });
+  }
+
+  async unsetTime() {
+    await this.kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+  }
+}
+export interface TimeStrings extends Record<string, any> {
+  from: string;
+  to: string;
 }

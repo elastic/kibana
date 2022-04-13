@@ -10,12 +10,14 @@ import expect from '@kbn/expect';
 export function MonitoringClusterOverviewProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
 
   const SUBJ_CLUSTER_ALERTS = `clusterAlertsContainer`;
-  const SUBJ_CLUSTER_OVERVIEW = 'clusterOverviewContainer';
-  const SUBJ_CLUSTER_NAME = `${SUBJ_CLUSTER_OVERVIEW} > clusterName`;
+  const SUBJ_CLUSTER_NAME = `overviewTabsclusterName`;
 
-  const SUBJ_ES_PANEL = `clusterItemContainerElasticsearch`;
+  const SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX = `clusterItemContainer`;
+
+  const SUBJ_ES_PANEL = `${SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX}Elasticsearch`;
   const SUBJ_ES_STATUS = `${SUBJ_ES_PANEL} > statusIcon`;
   const SUBJ_ES_VERSION = `${SUBJ_ES_PANEL} > esVersion`;
   const SUBJ_ES_UPTIME = `${SUBJ_ES_PANEL} > esUptime`;
@@ -30,7 +32,7 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   const SUBJ_ES_REPLICA_SHARDS = `${SUBJ_ES_PANEL} > esReplicaShards`;
   const SUBJ_ES_ML_JOBS = `${SUBJ_ES_PANEL} > esMlJobs`;
 
-  const SUBJ_KBN_PANEL = `clusterItemContainerKibana`;
+  const SUBJ_KBN_PANEL = `${SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX}Kibana`;
   const SUBJ_KBN_STATUS = `${SUBJ_KBN_PANEL} > statusIcon`;
   const SUBJ_KBN_REQUESTS = `${SUBJ_KBN_PANEL} > kbnRequests`;
   const SUBJ_KBN_MAX_RESPONSE_TIME = `${SUBJ_KBN_PANEL} > kbnMaxResponseTime`;
@@ -39,20 +41,27 @@ export function MonitoringClusterOverviewProvider({ getService }) {
   const SUBJ_KBN_OVERVIEW = `${SUBJ_KBN_PANEL} > kbnOverview`;
   const SUBJ_KBN_INSTANCES = `${SUBJ_KBN_PANEL} > kbnInstances`;
 
-  const SUBJ_LS_PANEL = `clusterItemContainerLogstash`;
+  const SUBJ_LS_PANEL = `${SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX}Logstash`;
   const SUBJ_LS_EVENTS_RECEIVED = `${SUBJ_LS_PANEL} > lsEventsReceived`;
   const SUBJ_LS_EVENTS_EMITTED = `${SUBJ_LS_PANEL} > lsEventsEmitted`;
   const SUBJ_LS_NODES = `${SUBJ_LS_PANEL} > lsNodes`;
   const SUBJ_LS_UPTIME = `${SUBJ_LS_PANEL} > lsUptime`;
   const SUBJ_LS_JVM_HEAP = `${SUBJ_LS_PANEL} > lsJvmHeap`;
   const SUBJ_LS_PIPELINES = `${SUBJ_LS_PANEL} > lsPipelines`;
+  const SUBJ_LS_OVERVIEW = `${SUBJ_LS_PANEL} > lsOverview`;
 
-  const SUBJ_BEATS_PANEL = `clusterItemContainerBeats`;
+  const SUBJ_BEATS_PANEL = `${SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX}Beats`;
   const SUBJ_BEATS_OVERVIEW = `${SUBJ_BEATS_PANEL} > beatsOverview`;
   const SUBJ_BEATS_TOTAL_EVENTS = `${SUBJ_BEATS_PANEL} > beatsTotalEvents`;
   const SUBJ_BEATS_BYTES_SENT = `${SUBJ_BEATS_PANEL} > beatsBytesSent`;
   const SUBJ_BEATS_LISTING = `${SUBJ_BEATS_PANEL} > beatsListing`;
   const SUBJ_BEATS_TYPES_COUNTS = `${SUBJ_BEATS_PANEL} > beatTypeCount`;
+
+  const SUBJ_ENT_SEARCH_PANEL = `${SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX}Enterprise Search`;
+  const SUBJ_ENT_SEARCH_TOTAL_NODES = `${SUBJ_ENT_SEARCH_PANEL} > entSearchTotalNodes`;
+  const SUBJ_ENT_SEARCH_OVERVIEW = `${SUBJ_ENT_SEARCH_PANEL} > entSearchOverview`;
+  const SUBJ_ENT_SEARCH_ENGINES = `${SUBJ_ENT_SEARCH_PANEL} > appSearchEngines`;
+  const SUBJ_ENT_SEARCH_ORG_SOURCES = `${SUBJ_ENT_SEARCH_PANEL} > workplaceSearchOrgSources`;
 
   return new (class ClusterOverview {
     async isOnClusterOverview() {
@@ -81,6 +90,16 @@ export function MonitoringClusterOverviewProvider({ getService }) {
 
     acceptAlertsModal() {
       return testSubjects.click('alerts-modal-button');
+    }
+
+    async getPresentPanels() {
+      const panelElements = await find.allByCssSelector(
+        `[data-test-subj^="${SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX}"]`
+      );
+      const panelTestSubjects = await Promise.all(
+        panelElements.map((e) => e.getAttribute('data-test-subj'))
+      );
+      return panelTestSubjects.map((e) => e.replace(SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX, ''));
     }
 
     getEsStatus() {
@@ -134,9 +153,6 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.getVisibleText(SUBJ_ES_ML_JOBS);
     }
 
-    doesKbnPanelExist() {
-      return testSubjects.exists(SUBJ_KBN_PANEL);
-    }
     getKbnStatus() {
       return testSubjects.getVisibleText(SUBJ_KBN_STATUS);
     }
@@ -162,9 +178,6 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.click(SUBJ_KBN_INSTANCES);
     }
 
-    doesLsPanelExist() {
-      return testSubjects.exists(SUBJ_LS_PANEL);
-    }
     getLsEventsReceived() {
       return testSubjects.getVisibleText(SUBJ_LS_EVENTS_RECEIVED);
     }
@@ -179,6 +192,12 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     }
     getLsJvmHeap() {
       return testSubjects.getVisibleText(SUBJ_LS_JVM_HEAP);
+    }
+    clickLsOverview() {
+      return testSubjects.click(SUBJ_LS_OVERVIEW);
+    }
+    clickLsNodes() {
+      return testSubjects.click(SUBJ_LS_NODES);
     }
     getLsPipelines() {
       return testSubjects.getVisibleText(SUBJ_LS_PIPELINES);
@@ -218,6 +237,19 @@ export function MonitoringClusterOverviewProvider({ getService }) {
     }
     clickBeatsListing() {
       return testSubjects.click(SUBJ_BEATS_LISTING);
+    }
+
+    getEntSearchTotalNodes() {
+      return testSubjects.getVisibleText(SUBJ_ENT_SEARCH_TOTAL_NODES);
+    }
+    getEntSearchTotalEngines() {
+      return testSubjects.getVisibleText(SUBJ_ENT_SEARCH_ENGINES);
+    }
+    getEntSearchTotalOrgSources() {
+      return testSubjects.getVisibleText(SUBJ_ENT_SEARCH_ORG_SOURCES);
+    }
+    clickEntSearchOverview() {
+      return testSubjects.click(SUBJ_ENT_SEARCH_OVERVIEW);
     }
   })();
 }

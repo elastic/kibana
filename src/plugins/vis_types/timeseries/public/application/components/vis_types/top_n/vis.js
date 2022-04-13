@@ -15,10 +15,12 @@ import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { sortBy, first, get } from 'lodash';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {
@@ -31,7 +33,7 @@ function sortSeries(visData, model) {
   const series = get(visData, `${model.id}.series`, []);
   return model.series.reduce((acc, item) => {
     const itemSeries = series.filter((s) => {
-      const id = first(s.id.split(/:/));
+      const id = first(s.id.split(SERIES_SEPARATOR));
       return id === item.id;
     });
     const direction = item.terms_direction || 'desc';
@@ -41,10 +43,12 @@ function sortSeries(visData, model) {
 }
 
 function TopNVisualization(props) {
+  const [accessDeniedDrilldownUrl, setAccessDeniedDrilldownUrl] = useState(null);
+  const coreStart = getCoreStart();
   const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
 
   const series = sortSeries(visData, model).map((item) => {
-    const id = first(item.id.split(/:/));
+    const id = first(item.id.split(SERIES_SEPARATOR));
     const seriesConfig = model.series.find((s) => s.id === id);
     if (seriesConfig) {
       const tickFormatter =
@@ -82,14 +86,28 @@ function TopNVisualization(props) {
 
   if (model.drilldown_url) {
     params.onClick = (item) => {
-      const url = replaceVars(model.drilldown_url, {}, { key: item.label });
-      getCoreStart().application.navigateToUrl(url);
+      const url = replaceVars(model.drilldown_url, {}, { key: item.label }, { noEscape: true });
+      const validatedUrl = coreStart.http.externalUrl.validateUrl(url);
+      if (validatedUrl) {
+        setAccessDeniedDrilldownUrl(null);
+        coreStart.application.navigateToUrl(url);
+      } else {
+        setAccessDeniedDrilldownUrl(url);
+      }
     };
   }
+
+  const closeExternalUrlErrorModal = useCallback(() => setAccessDeniedDrilldownUrl(null), []);
 
   return (
     <div className="tvbVis" style={style}>
       <TopN {...params} />
+      {accessDeniedDrilldownUrl && (
+        <ExternalUrlErrorModal
+          url={accessDeniedDrilldownUrl}
+          handleClose={closeExternalUrlErrorModal}
+        />
+      )}
     </div>
   );
 }

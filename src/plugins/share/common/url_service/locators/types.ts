@@ -8,17 +8,22 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { DependencyList } from 'react';
-import { PersistableState } from 'src/plugins/kibana_utils/common';
+import {
+  MigrateFunction,
+  PersistableState,
+  PersistableStateService,
+  VersionedState,
+} from 'src/plugins/kibana_utils/common';
 import type { FormatSearchParamsOptions } from './redirect';
 
 /**
  * URL locator registry.
  */
-export interface ILocatorClient {
+export interface ILocatorClient extends PersistableStateService<LocatorData> {
   /**
    * Create and register a new locator.
    *
-   * @param urlGenerator Definition of the new locator.
+   * @param locatorDefinition Definition of the new locator.
    */
   create<P extends SerializableRecord>(locatorDefinition: LocatorDefinition<P>): LocatorPublic<P>;
 
@@ -65,9 +70,10 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
   /**
    * Returns a URL as a string.
    *
-   * @deprecated Use `getRedirectUrl` instead. `getRedirectUrl` will preserve
-   * the location state, whereas the `getUrl` just return the URL without
-   * the location state.
+   * You may want to use `getRedirectUrl` instead. `getRedirectUrl` will
+   * preserve the location state, whereas the `getUrl` just returns the URL
+   * without the location state. Use this method if you know you don't need
+   * remember the location state and version of the URL locator.
    *
    * @param params URL locator parameters.
    * @param getUrlParams URL construction parameters.
@@ -92,6 +98,16 @@ export interface LocatorPublic<P extends SerializableRecord> extends Persistable
    * @param navigationParams Navigation parameters.
    */
   navigate(params: P, navigationParams?: LocatorNavigationParams): Promise<void>;
+
+  /**
+   * Synchronous fire-and-forget navigation method. Use it when you want to
+   * navigate without waiting for the navigation to complete and you don't
+   * care to process any async promise errors.
+   *
+   * @param params URL locator parameters.
+   * @param navigationParams Navigation parameters.
+   */
+  navigateSync(params: P, navigationParams?: LocatorNavigationParams): void;
 
   /**
    * React hook which returns a URL string given locator parameters. Returns
@@ -141,3 +157,22 @@ export interface KibanaLocation<S = object> {
    */
   state: S;
 }
+
+/**
+ * Represents a serializable state of a locator. Includes locator ID, version
+ * and its params.
+ */
+export interface LocatorData<LocatorParams extends SerializableRecord = SerializableRecord>
+  extends VersionedState<LocatorParams>,
+    SerializableRecord {
+  /**
+   * Locator ID.
+   */
+  id: string;
+}
+
+export interface LocatorsMigrationMap {
+  [semver: string]: LocatorMigrationFunction;
+}
+
+export type LocatorMigrationFunction = MigrateFunction<LocatorData, LocatorData>;

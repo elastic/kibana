@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { popupVersionsMap } from '../protections/popup_options_to_versions';
 
@@ -17,7 +17,7 @@ export const SupportedVersionNotice = ({ optionName }: { optionName: string }) =
   }
 
   return (
-    <EuiText color="subdued" size="xs">
+    <EuiText color="subdued" size="xs" data-test-subj="policySupportedVersions">
       <i>
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policyDetails.supportedVersion"

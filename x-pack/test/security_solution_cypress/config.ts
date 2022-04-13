@@ -35,12 +35,25 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         // retrieve rules from the filesystem but not from fleet for Cypress tests
         '--xpack.securitySolution.prebuiltRulesFromFileSystem=true',
         '--xpack.securitySolution.prebuiltRulesFromSavedObjects=false',
-        '--xpack.securitySolution.enableExperimental=["riskyHostsEnabled"]',
+        '--xpack.ruleRegistry.write.enabled=true',
+        '--xpack.ruleRegistry.write.cache.enabled=false',
+        '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
+        // Without below line, default interval for rules is 1m
+        // See https://github.com/elastic/kibana/pull/125396 for details
+        '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
+        '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'riskyHostsEnabled',
+          'usersEnabled',
+          'riskyUsersEnabled',
+          'ruleRegistryEnabled',
+        ])}`,
         `--home.disableWelcomeScreen=true`,
       ],
     },

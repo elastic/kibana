@@ -7,25 +7,34 @@
  */
 
 import { LocatorClient, LocatorClientDependencies } from './locators';
-import { IShortUrlClientFactory } from './short_urls';
+import {
+  IShortUrlClientFactoryProvider,
+  IShortUrlClientFactory,
+  IShortUrlClient,
+} from './short_urls';
 
-export interface UrlServiceDependencies<D = unknown> extends LocatorClientDependencies {
-  shortUrls: IShortUrlClientFactory<D>;
+export interface UrlServiceDependencies<
+  D = unknown,
+  ShortUrlClient extends IShortUrlClient = IShortUrlClient
+> extends LocatorClientDependencies {
+  shortUrls: IShortUrlClientFactoryProvider<D, ShortUrlClient>;
 }
 
 /**
  * Common URL Service client interface for server-side and client-side.
  */
-export class UrlService<D = unknown> {
+export class UrlService<D = unknown, ShortUrlClient extends IShortUrlClient = IShortUrlClient> {
   /**
    * Client to work with locators.
    */
   public readonly locators: LocatorClient;
 
-  public readonly shortUrls: IShortUrlClientFactory<D>;
+  public readonly shortUrls: IShortUrlClientFactory<D, ShortUrlClient>;
 
-  constructor(protected readonly deps: UrlServiceDependencies<D>) {
+  constructor(protected readonly deps: UrlServiceDependencies<D, ShortUrlClient>) {
     this.locators = new LocatorClient(deps);
-    this.shortUrls = deps.shortUrls;
+    this.shortUrls = deps.shortUrls({
+      locators: this.locators,
+    });
   }
 }

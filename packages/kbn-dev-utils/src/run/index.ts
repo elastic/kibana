@@ -10,3 +10,4 @@ export * from './run';
 export * from './run_with_commands';
 export * from './flags';
 export * from './fail';
+export type { CleanupTask } from './cleanup';

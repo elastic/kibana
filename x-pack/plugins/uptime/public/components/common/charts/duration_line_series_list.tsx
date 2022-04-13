@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { LineSeries, CurveType, Fit } from '@elastic/charts';
+import { LineSeries, CurveType, Fit, ScaleType } from '@elastic/charts';
 import { LocationDurationLine } from '../../../../common/types';
 import { microToMilli, microToSec } from '../../../lib/formatting';
 import { MS_LABEL, SEC_LABEL } from '../translations';
@@ -27,10 +27,11 @@ export const DurationLineSeriesList = ({ monitorType, lines }: Props) => (
         key={`loc-line-${name}`}
         name={name}
         xAccessor={0}
-        xScaleType="time"
+        xScaleType={ScaleType.Time}
         yAccessors={[1]}
-        yScaleType="linear"
+        yScaleType={ScaleType.Linear}
         fit={Fit.Linear}
+        timeZone="local"
         tickFormat={(d) =>
           monitorType === 'browser'
             ? `${microToSec(d)} ${SEC_LABEL}`

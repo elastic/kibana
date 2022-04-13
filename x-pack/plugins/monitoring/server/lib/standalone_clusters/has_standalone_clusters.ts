@@ -9,8 +9,22 @@ import moment from 'moment';
 import { get } from 'lodash';
 import { LegacyRequest } from '../../types';
 import { standaloneClusterFilter } from './';
+import { Globals } from '../../static_globals';
+import { getLegacyIndexPattern, getNewIndexPatterns } from '../cluster/get_index_patterns';
 
-export async function hasStandaloneClusters(req: LegacyRequest, indexPatterns: string[]) {
+export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
+  const lsIndexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'logstash',
+    ccs,
+  });
+  // use legacy because no integration exists for beats
+  const beatsIndexPatterns = getLegacyIndexPattern({
+    moduleType: 'beats',
+    config: Globals.app.config,
+    ccs,
+  });
+  const indexPatterns = [lsIndexPatterns, beatsIndexPatterns];
   const indexPatternList = indexPatterns.reduce((list, patterns) => {
     list.push(...patterns.split(','));
     return list;
@@ -28,7 +42,12 @@ export async function hasStandaloneClusters(req: LegacyRequest, indexPatterns: s
           },
           {
             terms: {
-              'metricset.name': ['logstash_stats', 'logstash_state', 'beats_stats', 'beats_state'],
+              'metricset.name': ['node', 'node_stats', 'stats', 'state'],
+            },
+          },
+          {
+            terms: {
+              'data_stream.dataset': ['node', 'node_stats', 'stats', 'state'],
             },
           },
         ],

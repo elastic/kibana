@@ -28,6 +28,54 @@ const ConfigRecordSchema = schema.recordOf(
   })
 );
 
+const PackagePolicyStreamsSchema = {
+  id: schema.maybe(schema.string()), // BWC < 7.11
+  enabled: schema.boolean(),
+  keep_enabled: schema.maybe(schema.boolean()),
+  data_stream: schema.object({
+    dataset: schema.string(),
+    type: schema.string(),
+    elasticsearch: schema.maybe(
+      schema.object({
+        privileges: schema.maybe(
+          schema.object({
+            indices: schema.maybe(schema.arrayOf(schema.string())),
+          })
+        ),
+      })
+    ),
+  }),
+  vars: schema.maybe(ConfigRecordSchema),
+  config: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        type: schema.maybe(schema.string()),
+        value: schema.maybe(schema.any()),
+      })
+    )
+  ),
+  compiled_stream: schema.maybe(schema.any()),
+};
+
+const PackagePolicyInputsSchema = {
+  type: schema.string(),
+  policy_template: schema.maybe(schema.string()),
+  enabled: schema.boolean(),
+  keep_enabled: schema.maybe(schema.boolean()),
+  vars: schema.maybe(ConfigRecordSchema),
+  config: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        type: schema.maybe(schema.string()),
+        value: schema.maybe(schema.any()),
+      })
+    )
+  ),
+  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
+};
+
 const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
@@ -42,60 +90,55 @@ const PackagePolicyBaseSchema = {
     })
   ),
   output_id: schema.string(),
-  inputs: schema.arrayOf(
-    schema.object({
-      type: schema.string(),
-      policy_template: schema.maybe(schema.string()),
-      enabled: schema.boolean(),
-      keep_enabled: schema.maybe(schema.boolean()),
-      vars: schema.maybe(ConfigRecordSchema),
-      config: schema.maybe(
-        schema.recordOf(
-          schema.string(),
-          schema.object({
-            type: schema.maybe(schema.string()),
-            value: schema.maybe(schema.any()),
-          })
-        )
-      ),
-      streams: schema.arrayOf(
-        schema.object({
-          id: schema.maybe(schema.string()), // BWC < 7.11
-          enabled: schema.boolean(),
-          keep_enabled: schema.maybe(schema.boolean()),
-          data_stream: schema.object({
-            dataset: schema.string(),
-            type: schema.string(),
-            elasticsearch: schema.maybe(
-              schema.object({
-                privileges: schema.maybe(
-                  schema.object({
-                    indices: schema.maybe(schema.arrayOf(schema.string())),
-                  })
-                ),
-              })
-            ),
-          }),
-          vars: schema.maybe(ConfigRecordSchema),
-          config: schema.maybe(
-            schema.recordOf(
-              schema.string(),
-              schema.object({
-                type: schema.maybe(schema.string()),
-                value: schema.maybe(schema.any()),
-              })
-            )
-          ),
-        })
-      ),
-    })
-  ),
+  inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
 };
 
 export const NewPackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
   id: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
+});
+
+const CreatePackagePolicyProps = {
+  ...PackagePolicyBaseSchema,
+  namespace: schema.maybe(NamespaceSchema),
+  policy_id: schema.maybe(schema.string()),
+  enabled: schema.maybe(schema.boolean()),
+  package: schema.maybe(
+    schema.object({
+      name: schema.string(),
+      title: schema.maybe(schema.string()),
+      version: schema.string(),
+    })
+  ),
+  output_id: schema.maybe(schema.string()),
+  inputs: schema.arrayOf(
+    schema.object({
+      ...PackagePolicyInputsSchema,
+      streams: schema.maybe(schema.arrayOf(schema.object(PackagePolicyStreamsSchema))),
+    })
+  ),
+};
+
+export const CreatePackagePolicyRequestBodySchema = schema.object({
+  ...CreatePackagePolicyProps,
+  id: schema.maybe(schema.string()),
+  force: schema.maybe(schema.boolean()),
+});
+
+export const UpdatePackagePolicyRequestBodySchema = schema.object({
+  ...CreatePackagePolicyProps,
+  name: schema.maybe(schema.string()),
+  inputs: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        ...PackagePolicyInputsSchema,
+        streams: schema.maybe(schema.arrayOf(schema.object(PackagePolicyStreamsSchema))),
+      })
+    )
+  ),
+  version: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
 });
 
@@ -108,4 +151,24 @@ export const PackagePolicySchema = schema.object({
   ...PackagePolicyBaseSchema,
   id: schema.string(),
   version: schema.maybe(schema.string()),
+  revision: schema.number(),
+  updated_at: schema.string(),
+  updated_by: schema.string(),
+  created_at: schema.string(),
+  created_by: schema.string(),
+  elasticsearch: schema.maybe(
+    schema.object({
+      privileges: schema.maybe(
+        schema.object({
+          cluster: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
+    })
+  ),
+  inputs: schema.arrayOf(
+    schema.object({
+      ...PackagePolicyInputsSchema,
+      compiled_input: schema.maybe(schema.any()),
+    })
+  ),
 });

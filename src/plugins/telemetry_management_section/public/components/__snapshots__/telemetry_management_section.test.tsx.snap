@@ -1,50 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TelemetryManagementSectionComponent does not show the endpoint link when isSecurityExampleEnabled returns false 1`] = `
-<React.Fragment>
-  <p>
-    <FormattedMessage
-      defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
-      id="telemetry.telemetryConfigAndLinkDescription"
-      values={
-        Object {
-          "privacyStatementLink": <EuiLink
-            href="https://www.elastic.co/legal/privacy-statement"
-            target="_blank"
-          >
-            <FormattedMessage
-              defaultMessage="Privacy Statement"
-              id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-              values={Object {}}
-            />
-          </EuiLink>,
-        }
-      }
-    />
-  </p>
-  <p>
-    <FormattedMessage
-      defaultMessage="See an example of the {clusterData} that we collect."
-      id="telemetry.seeExampleOfClusterData"
-      values={
-        Object {
-          "clusterData": <EuiLink
-            data-test-id="cluster_data_example"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="cluster data"
-              id="telemetry.clusterData"
-              values={Object {}}
-            />
-          </EuiLink>,
-        }
-      }
-    />
-  </p>
-</React.Fragment>
-`;
-
 exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 <Fragment>
   <_EuiSplitPanelOuter
@@ -92,13 +47,19 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           size="s"
         />
         <lazy
-          dockLinks={Object {}}
+          docLinks={
+            Object {
+              "legal": Object {
+                "privacyStatement": "https://some-host/some-url",
+              },
+            }
+          }
           enableSaving={true}
           handleChange={[Function]}
           loading={false}
           setting={
             Object {
-              "ariaName": "Provide usage statistics",
+              "ariaName": "Provide usage data",
               "category": Array [],
               "defVal": true,
               "description": <React.Fragment>
@@ -109,7 +70,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                     values={
                       Object {
                         "privacyStatementLink": <EuiLink
-                          href="https://www.elastic.co/legal/privacy-statement"
+                          href="https://some-host/some-url"
                           target="_blank"
                         >
                           <FormattedMessage
@@ -124,7 +85,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 </p>
                 <p>
                   <FormattedMessage
-                    defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
+                    defaultMessage="See examples of the {clusterData} and {securityData} that we collect."
                     id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
                     values={
                       Object {
@@ -138,12 +99,13 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                             values={Object {}}
                           />
                         </EuiLink>,
-                        "endpointSecurityData": <EuiLink
+                        "securityData": <EuiLink
                           data-test-id="endpoint_security_example"
-                          onClick={[Function]}
+                          href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
+                          target="_blank"
                         >
                           <FormattedMessage
-                            defaultMessage="endpoint security data"
+                            defaultMessage="security data"
                             id="telemetry.securityData"
                             values={Object {}}
                           />
@@ -153,7 +115,7 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                   />
                 </p>
               </React.Fragment>,
-              "displayName": "Provide usage statistics",
+              "displayName": "Provide usage data",
               "isCustom": true,
               "isOverridden": false,
               "name": "telemetry:enabled",
@@ -183,7 +145,13 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 
 exports[`TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`] = `
 <TelemetryManagementSection
-  docLinks={Object {}}
+  docLinks={
+    Object {
+      "legal": Object {
+        "privacyStatement": "https://some-host/some-url",
+      },
+    }
+  }
   enableSaving={true}
   intl={
     Object {
@@ -287,19 +255,6 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "timeZone": null,
     }
   }
-  isSecurityExampleEnabled={
-    [MockFunction] {
-      "calls": Array [
-        Array [],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": true,
-        },
-      ],
-    }
-  }
   onQueryMatchChange={[MockFunction]}
   showAppliesSettingMessage={true}
   telemetryService={
@@ -315,6 +270,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "sendUsageTo": "staging",
       },
       "fetchExample": [Function],
+      "fetchLastReported": [Function],
       "fetchTelemetry": [Function],
       "getCanChangeOptInStatus": [Function],
       "getIsOptedIn": [Function],
@@ -336,6 +292,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         },
         "delete": [MockFunction],
         "externalUrl": Object {
+          "isInternalUrl": [MockFunction],
           "validateUrl": [MockFunction],
         },
         "fetch": [MockFunction],
@@ -365,6 +322,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "reportOptInStatusChange": false,
       "setOptIn": [Function],
       "setUserHasSeenNotice": [Function],
+      "updateLastReported": [Function],
       "updatedConfig": undefined,
     }
   }

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreStart } from '../../../../../src/core/public';
 
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { AlertStatus } from '../../../timelines/common';
+import type { AlertStatus } from '../../../timelines/common/types';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   RAC_ALERTS_BULK_UPDATE_URL,
@@ -17,6 +17,8 @@ import {
 
 /**
  * Update alert status by query
+ *
+ * @param useDetectionEngine logic flag for using the regular Detection Engine URL or the RAC URL
  *
  * @param status to update to('open' / 'closed' / 'acknowledged')
  * @param index index to be updated
@@ -26,7 +28,7 @@ import {
  * @throws An error if response is not OK
  */
 export const useUpdateAlertsStatus = (
-  timelineId: string
+  useDetectionEngine: boolean = false
 ): {
   updateAlertStatus: (params: {
     status: AlertStatus;
@@ -37,19 +39,18 @@ export const useUpdateAlertsStatus = (
   const { http } = useKibana<CoreStart>().services;
   return {
     updateAlertStatus: async ({ status, index, query }) => {
-      if (['detections-page', 'detections-rules-details-page'].includes(timelineId)) {
-        return http!.fetch(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
+      if (useDetectionEngine) {
+        return http.fetch<estypes.UpdateByQueryResponse>(DETECTION_ENGINE_SIGNALS_STATUS_URL, {
           method: 'POST',
           body: JSON.stringify({ status, query }),
         });
       } else {
-        const { body } = await http.post(RAC_ALERTS_BULK_UPDATE_URL, {
-          body: JSON.stringify({ index, status, query }),
-        });
-        return body;
+        const response = await http.post<estypes.UpdateByQueryResponse>(
+          RAC_ALERTS_BULK_UPDATE_URL,
+          { body: JSON.stringify({ index, status, query }) }
+        );
+        return response;
       }
     },
   };
 };
-
-//

@@ -11,7 +11,7 @@ import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@e
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   onChange: (visible: boolean) => void;

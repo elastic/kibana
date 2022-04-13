@@ -9,7 +9,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs/operators';
 import { App, PublicAppInfo } from '../application';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
@@ -21,10 +21,12 @@ import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 
 class FakeApp implements App {
-  public title = `${this.id} App`;
+  public title: string;
   public mount = () => () => {};
 
-  constructor(public id: string, public chromeless?: boolean) {}
+  constructor(public id: string, public chromeless?: boolean) {
+    this.title = `${this.id} App`;
+  }
 }
 
 const store = new Map();
@@ -227,7 +229,7 @@ describe('start', () => {
       const { chrome, service } = await start({ startDeps });
       const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
 
-      const availableApps = await applications$.pipe(take(1)).toPromise();
+      const availableApps = await Rx.firstValueFrom(applications$);
       [...availableApps.keys()].forEach((appId) => navigateToApp(appId));
       service.stop();
 

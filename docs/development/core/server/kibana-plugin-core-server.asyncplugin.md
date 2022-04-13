@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Asynchronous lifecycles are deprecated, and should be migrated to sync [plugin](./kibana-plugin-core-server.plugin.md)
+> Asynchronous lifecycles are deprecated, and should be migrated to sync   8.8.0
 > 
 
 A plugin with asynchronous lifecycle methods.
@@ -23,5 +23,5 @@ export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends
 |  --- | --- |
 |  [setup(core, plugins)](./kibana-plugin-core-server.asyncplugin.setup.md) |  |
 |  [start(core, plugins)](./kibana-plugin-core-server.asyncplugin.start.md) |  |
-|  [stop()](./kibana-plugin-core-server.asyncplugin.stop.md) |  |
+|  [stop()?](./kibana-plugin-core-server.asyncplugin.stop.md) | <i>(Optional)</i> |
 

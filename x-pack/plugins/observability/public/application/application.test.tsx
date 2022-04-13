@@ -6,51 +6,73 @@
  */
 
 import { createMemoryHistory } from 'history';
+import { noop } from 'lodash';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from 'src/core/public';
-import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
+import { themeServiceMock } from 'src/core/public/mocks';
+import { KibanaPageTemplate } from 'src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from './';
 
 describe('renderApp', () => {
   const originalConsole = global.console;
+
   beforeAll(() => {
-    // mocks console to avoid poluting the test output
+    // mocks console to avoid polluting the test output
     global.console = { error: jest.fn() } as unknown as typeof console;
   });
 
   afterAll(() => {
     global.console = originalConsole;
   });
+
   it('renders', async () => {
     const plugins = {
-      usageCollection: { reportUiCounter: () => {} },
+      usageCollection: { reportUiCounter: noop },
       data: {
         query: {
           timefilter: {
-            timefilter: { setTime: jest.fn(), getTime: jest.fn().mockImplementation(() => ({})) },
+            timefilter: {
+              setTime: jest.fn(),
+              getTime: jest.fn().mockReturnValue({}),
+              getTimeDefaults: jest.fn().mockReturnValue({}),
+              getRefreshInterval: jest.fn().mockReturnValue({}),
+              getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+            },
           },
         },
       },
     } as unknown as ObservabilityPublicPluginsStart;
+
     const core = {
-      application: { currentAppId$: new Observable(), navigateToUrl: () => {} },
+      application: { currentAppId$: new Observable(), navigateToUrl: noop },
       chrome: {
-        docTitle: { change: () => {} },
-        setBreadcrumbs: () => {},
-        setHelpExtension: () => {},
+        docTitle: { change: noop },
+        setBreadcrumbs: noop,
+        setHelpExtension: noop,
       },
       i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
       uiSettings: { get: () => false },
       http: { basePath: { prepend: (path: string) => path } },
+      theme: themeServiceMock.createStartContract(),
     } as unknown as CoreStart;
-    const config = { unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } } };
+
+    const config = {
+      unsafe: {
+        alertingExperience: { enabled: true },
+        cases: { enabled: true },
+        overviewNext: { enabled: false },
+        rules: { enabled: true },
+      },
+    };
+
     const params = {
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
-      setHeaderActionMenu: () => {},
+      setHeaderActionMenu: noop,
+      theme$: themeServiceMock.createTheme$(),
     } as unknown as AppMountParameters;
 
     expect(() => {
@@ -61,6 +83,7 @@ describe('renderApp', () => {
         appMountParameters: params,
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
+        kibanaFeatures: [],
       });
       unmount();
     }).not.toThrowError();

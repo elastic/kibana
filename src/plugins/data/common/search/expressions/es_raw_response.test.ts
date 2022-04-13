@@ -78,7 +78,6 @@ describe('esRawResponse', () => {
               {
                 _index: 'kibana_sample_data_ecommerce',
                 _id: 'AncqUnMBMY_orZma2mZy',
-                _type: 'document',
                 _score: 0,
                 _source: {
                   category: ["Men's Clothing"],
@@ -164,7 +163,6 @@ describe('esRawResponse', () => {
               {
                 _index: 'kibana_sample_data_ecommerce',
                 _id: 'I3cqUnMBMY_orZma2mZy',
-                _type: 'document',
                 _score: 0,
                 _source: {
                   category: ["Men's Clothing"],
@@ -251,7 +249,6 @@ describe('esRawResponse', () => {
                 _index: 'kibana_sample_data_ecommerce',
                 _id: 'JHcqUnMBMY_orZma2mZy',
                 _score: 0,
-                _type: 'document',
                 _source: {
                   category: ["Men's Clothing"],
                   currency: 'EUR',
@@ -337,7 +334,6 @@ describe('esRawResponse', () => {
                 _index: 'kibana_sample_data_ecommerce',
                 _id: 'LHcqUnMBMY_orZma2mZy',
                 _score: 0,
-                _type: 'document',
                 _source: {
                   category: ["Women's Shoes", "Women's Clothing"],
                   currency: 'EUR',
@@ -448,7 +444,6 @@ describe('esRawResponse', () => {
             {
               _index: 'kibana_sample_data_ecommerce',
               _id: 'AncqUnMBMY_orZma2mZy',
-              _type: 'document',
               _score: 0,
               _source: {
                 category: ["Men's Clothing"],
@@ -534,7 +529,6 @@ describe('esRawResponse', () => {
             {
               _index: 'kibana_sample_data_ecommerce',
               _id: 'I3cqUnMBMY_orZma2mZy',
-              _type: 'document',
               _score: 0,
               _source: {
                 category: ["Men's Clothing"],
@@ -621,7 +615,6 @@ describe('esRawResponse', () => {
               _index: 'kibana_sample_data_ecommerce',
               _id: 'JHcqUnMBMY_orZma2mZy',
               _score: 0,
-              _type: 'document',
               _source: {
                 category: ["Men's Clothing"],
                 currency: 'EUR',
@@ -707,7 +700,6 @@ describe('esRawResponse', () => {
               _index: 'kibana_sample_data_ecommerce',
               _id: 'LHcqUnMBMY_orZma2mZy',
               _score: 0,
-              _type: 'document',
               _source: {
                 category: ["Women's Shoes", "Women's Clothing"],
                 currency: 'EUR',

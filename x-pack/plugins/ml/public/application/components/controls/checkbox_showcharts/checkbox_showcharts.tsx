@@ -7,23 +7,24 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 import { EuiCheckbox, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-
-export interface CheckboxShowChartsProps {
-  showCharts: boolean;
-  setShowCharts: (update: boolean) => void;
-}
+import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
+import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 
 /*
  * React component for a checkbox element to toggle charts display.
  */
-export const CheckboxShowCharts: FC<CheckboxShowChartsProps> = ({ showCharts, setShowCharts }) => {
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setShowCharts(e.target.checked);
-    },
-    [setShowCharts]
+export const CheckboxShowCharts: FC = () => {
+  const { chartsStateService } = useAnomalyExplorerContext();
+
+  const showCharts = useObservable(
+    chartsStateService.getShowCharts$(),
+    chartsStateService.getShowCharts()
   );
+
+  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    chartsStateService.setShowCharts(e.target.checked);
+  }, []);
 
   const id = useMemo(() => htmlIdGenerator()(), []);
 

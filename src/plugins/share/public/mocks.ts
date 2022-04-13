@@ -9,39 +9,36 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import { SharePluginSetup, SharePluginStart } from '.';
 import { LocatorPublic, UrlService } from '../common/url_service';
+import { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
+import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 
 export type Setup = jest.Mocked<SharePluginSetup>;
 export type Start = jest.Mocked<SharePluginStart>;
 
-const url = new UrlService({
+const url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
   navigate: async () => {},
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
-  shortUrls: {
-    get: () => ({
-      create: async () => {
-        throw new Error('Not implemented');
-      },
-      get: async () => {
-        throw new Error('Not implemented');
-      },
-      delete: async () => {
-        throw new Error('Not implemented');
-      },
-      resolve: async () => {
-        throw new Error('Not implemented.');
-      },
-    }),
-  },
+  shortUrls: ({ locators }) => ({
+    get: () =>
+      new BrowserShortUrlClient({
+        locators,
+        http: {
+          basePath: {
+            get: () => '',
+          },
+          fetch: async () => {
+            throw new Error('fetch not implemented');
+          },
+        },
+      }),
+  }),
 });
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     register: jest.fn(),
-    urlGenerators: {
-      registerUrlGenerator: jest.fn(),
-    },
     url,
     navigate: jest.fn(),
     setAnonymousAccessServiceProvider: jest.fn(),
@@ -52,9 +49,6 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     url,
-    urlGenerators: {
-      getUrlGenerator: jest.fn(),
-    },
     toggleShareContextMenu: jest.fn(),
     navigate: jest.fn(),
   };
@@ -70,6 +64,7 @@ const createLocator = <T extends SerializableRecord = SerializableRecord>(): jes
   getRedirectUrl: jest.fn(),
   useUrl: jest.fn(),
   navigate: jest.fn(),
+  navigateSync: jest.fn(),
   extract: jest.fn(),
   inject: jest.fn(),
   telemetry: jest.fn(),

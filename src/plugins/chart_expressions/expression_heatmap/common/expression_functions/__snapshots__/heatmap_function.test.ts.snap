@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interpreter/functions#heatmap logs correct datatable to inspector 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "col-0-1",
+      "meta": Object {
+        "dimensionName": "Metric",
+        "type": "number",
+      },
+      "name": "Count",
+    },
+    Object {
+      "id": "col-1-2",
+      "meta": Object {
+        "dimensionName": "X axis",
+        "type": "string",
+      },
+      "name": "Dest",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "col-0-1": 0,
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`interpreter/functions#heatmap returns an object with the correct structure 1`] = `
+Object {
+  "as": "heatmap",
+  "type": "render",
+  "value": Object {
+    "args": Object {
+      "ariaLabel": undefined,
+      "gridConfig": Object {
+        "isCellLabelVisible": true,
+        "isXAxisLabelVisible": true,
+        "isXAxisTitleVisible": true,
+        "isYAxisLabelVisible": true,
+        "isYAxisTitleVisible": true,
+        "type": "heatmap_grid",
+      },
+      "highlightInHover": false,
+      "lastRangeIsRightOpen": true,
+      "legend": Object {
+        "isVisible": true,
+        "position": "top",
+        "type": "heatmap_legend",
+      },
+      "palette": Object {
+        "name": "",
+        "params": Object {
+          "colors": Array [
+            "rgb(0, 0, 0, 0)",
+            "rgb(112, 38, 231)",
+          ],
+          "gradient": false,
+          "range": "number",
+          "rangeMax": 150,
+          "rangeMin": 0,
+          "stops": Array [
+            0,
+            10000,
+          ],
+        },
+        "type": "palette",
+      },
+      "percentageMode": false,
+      "showTooltip": true,
+      "splitColumnAccessor": undefined,
+      "splitRowAccessor": undefined,
+      "valueAccessor": "col-0-1",
+      "xAccessor": "col-1-2",
+      "yAccessor": undefined,
+    },
+    "data": Object {
+      "columns": Array [
+        Object {
+          "id": "col-0-1",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        Object {
+          "id": "col-1-2",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "Dest",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "col-0-1": 0,
+        },
+      ],
+      "type": "datatable",
+    },
+  },
+}
+`;

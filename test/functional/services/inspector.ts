@@ -16,6 +16,7 @@ export class InspectorService extends FtrService {
   private readonly flyout = this.ctx.getService('flyout');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   private async getIsEnabled(): Promise<boolean> {
     const ariaDisabled = await this.testSubjects.getAttribute('openInspectorButton', 'disabled');
@@ -200,8 +201,12 @@ export class InspectorService extends FtrService {
    */
   public async openInspectorView(viewId: string): Promise<void> {
     this.log.debug(`Open Inspector view ${viewId}`);
-    await this.testSubjects.click('inspectorViewChooser');
-    await this.testSubjects.click(viewId);
+    await this.retry.try(async () => {
+      await this.testSubjects.click('inspectorViewChooser');
+      // check whether popover menu opens, if not, fail and retry opening
+      await this.testSubjects.existOrFail(viewId, { timeout: 2000 });
+      await this.testSubjects.click(viewId);
+    });
   }
 
   /**
@@ -212,20 +217,29 @@ export class InspectorService extends FtrService {
   }
 
   /**
-   * Returns request name as the comma-separated string
+   * Returns the selected option value from combobox
+   */
+  public async getSelectedOption(): Promise<string> {
+    await this.openInspectorRequestsView();
+    const selectedOption = await this.comboBox.getComboBoxSelectedOptions(
+      'inspectorRequestChooser'
+    );
+
+    if (selectedOption.length !== 1) {
+      return 'Combobox has multiple options';
+    }
+
+    return selectedOption[0];
+  }
+
+  /**
+   * Returns request name as the comma-separated string from combobox
    */
   public async getRequestNames(): Promise<string> {
     await this.openInspectorRequestsView();
-    const requestChooserExists = await this.testSubjects.exists('inspectorRequestChooser');
-    if (requestChooserExists) {
-      await this.testSubjects.click('inspectorRequestChooser');
-      const menu = await this.testSubjects.find('inspectorRequestChooserMenuPanel');
-      const requestNames = await menu.getVisibleText();
-      return requestNames.trim().split('\n').join(',');
-    }
 
-    const singleRequest = await this.testSubjects.find('inspectorRequestName');
-    return await singleRequest.getVisibleText();
+    const comboBoxOptions = await this.comboBox.getOptionsList('inspectorRequestChooser');
+    return comboBoxOptions.trim().split('\n').join(',');
   }
 
   public getOpenRequestStatisticButton() {
@@ -238,5 +252,18 @@ export class InspectorService extends FtrService {
 
   public getOpenRequestDetailResponseButton() {
     return this.testSubjects.find('inspectorRequestDetailResponse');
+  }
+
+  /**
+   * Returns true if the value equals the combobox options list
+   * @param value default combobox single option text
+   */
+  public async hasSingleRequest(
+    value: string = "You've selected all available options"
+  ): Promise<boolean> {
+    await this.openInspectorRequestsView();
+    const comboBoxOptions = await this.comboBox.getOptionsList('inspectorRequestChooser');
+
+    return value === comboBoxOptions;
   }
 }

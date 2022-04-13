@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getApmHref } from './get_apm_href';
+import { getLegacyApmHref } from './get_apm_href';
 import { MonitorSummary, makePing } from '../../../../common/runtime_types';
 
-describe('getApmHref', () => {
+describe('getLegacyApmHref', () => {
   let summary: MonitorSummary;
   beforeEach(() => {
     summary = {
@@ -37,14 +37,14 @@ describe('getApmHref', () => {
   });
 
   it('creates href with base path when present', () => {
-    const result = getApmHref(summary, 'foo', 'now-15m', 'now');
+    const result = getLegacyApmHref(summary, 'foo', 'now-15m', 'now');
     expect(result).toMatchInlineSnapshot(
       `"foo/app/apm#/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`
     );
   });
 
   it('does not add a base path or extra slash when base path is empty string', () => {
-    const result = getApmHref(summary, '', 'now-15m', 'now');
+    const result = getLegacyApmHref(summary, '', 'now-15m', 'now');
     expect(result).toMatchInlineSnapshot(
       `"/app/apm#/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`
     );
@@ -57,7 +57,7 @@ describe('getApmHref', () => {
     });
 
     it('links to the named service', () => {
-      const result = getApmHref(summary, 'foo', 'now-15m', 'now');
+      const result = getLegacyApmHref(summary, 'foo', 'now-15m', 'now');
       expect(result).toMatchInlineSnapshot(
         `"foo/app/apm#/services?kuery=service.name:%20%22${serviceName}%22&rangeFrom=now-15m&rangeTo=now"`
       );

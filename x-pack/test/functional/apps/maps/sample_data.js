@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   describe('maps loaded from sample data', () => {
     before(async () => {
       //installing the sample data with test user with super user role and then switching roles with limited privileges
-      await security.testUser.setRoles(['superuser'], false);
+      await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -91,7 +91,12 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
       //running the rest of the tests with limited roles
-      await security.testUser.setRoles(['global_maps_all', 'kibana_sample_read'], false);
+      await security.testUser.setRoles(
+        ['global_maps_all', 'geoall_data_writer', 'kibana_sample_read'],
+        {
+          skipBrowserRefresh: true,
+        }
+      );
     });
 
     after(async () => {
@@ -108,7 +113,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     describe('ecommerce', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
-        await PageObjects.maps.toggleLayerVisibility('Road map');
+        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
         await PageObjects.maps.toggleLayerVisibility('United Kingdom');
         await PageObjects.maps.toggleLayerVisibility('France');
         await PageObjects.maps.toggleLayerVisibility('United States');
@@ -136,7 +141,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     describe('flights', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
-        await PageObjects.maps.toggleLayerVisibility('Road map');
+        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();
@@ -160,7 +165,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     describe('web logs', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
-        await PageObjects.maps.toggleLayerVisibility('Road map');
+        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();

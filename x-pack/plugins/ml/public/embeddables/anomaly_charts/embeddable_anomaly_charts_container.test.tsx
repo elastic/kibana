@@ -12,7 +12,7 @@ import {
   EmbeddableAnomalyChartsContainerProps,
 } from './embeddable_anomaly_charts_container';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import { CoreStart } from 'kibana/public';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
@@ -49,6 +49,9 @@ describe('EmbeddableAnomalyChartsContainer', () => {
 
   const onInputChange = jest.fn();
   const onOutputChange = jest.fn();
+  const onRenderComplete = jest.fn();
+  const onLoading = jest.fn();
+  const onError = jest.fn();
 
   const mockedInput = {
     viewMode: 'view',
@@ -145,6 +148,9 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         refresh={refresh}
         onInputChange={onInputChange}
         onOutputChange={onOutputChange}
+        onLoading={onLoading}
+        onRenderComplete={onRenderComplete}
+        onError={onError}
       />,
       defaultOptions
     );
@@ -172,6 +178,9 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         refresh={refresh}
         onInputChange={onInputChange}
         onOutputChange={onOutputChange}
+        onLoading={onLoading}
+        onRenderComplete={onRenderComplete}
+        onError={onError}
       />,
       defaultOptions
     );

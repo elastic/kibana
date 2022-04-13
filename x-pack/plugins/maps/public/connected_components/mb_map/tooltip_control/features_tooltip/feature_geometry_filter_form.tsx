@@ -8,12 +8,12 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { Geometry, Polygon } from 'geojson';
 import rison, { RisonObject } from 'rison-node';
 import { URL_MAX_LENGTH } from '../../../../../../../../src/core/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/unified_search/public';
 import {
   createSpatialFilterWithGeometry,
   PreIndexedShape,
@@ -98,7 +98,9 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
     // Ensure filter will not overflow URL. Filters that contain geometry can be extremely large.
     // No elasticsearch support for pre-indexed shapes and geo_point spatial queries.
     if (
-      window.location.href.length + rison.encode(filter as RisonObject).length + META_OVERHEAD >
+      window.location.href.length +
+        rison.encode(filter as unknown as RisonObject).length +
+        META_OVERHEAD >
       URL_MAX_LENGTH
     ) {
       this.setState({

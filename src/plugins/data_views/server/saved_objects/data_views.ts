@@ -13,8 +13,10 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 export const dataViewSavedObjectType: SavedObjectsType = {
   name: DATA_VIEW_SAVED_OBJECT_TYPE,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
+    displayName: 'data view',
     icon: 'indexPatternApp',
     defaultSearchField: 'title',
     importableAndExportable: true,
@@ -22,11 +24,11 @@ export const dataViewSavedObjectType: SavedObjectsType = {
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`;
+      return `/management/kibana/dataViews/dataView/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
+        path: `/app/management/kibana/dataViews/dataView/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'management.kibana.indexPatterns',
       };
     },

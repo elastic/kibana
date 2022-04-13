@@ -16,6 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
+  const config = getService('config');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -59,6 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Afancilenstest');
       await PageObjects.lens.clickVisualizeListItemTitle('Afancilenstest');
       await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       expect(await PageObjects.lens.getTitle()).to.eql('Afancilenstest');
 
@@ -80,6 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         keepOpen: true,
       });
       await PageObjects.lens.addFilterToAgg(`geo.src : CN`);
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // Verify that the field was persisted from the transition
       expect(await PageObjects.lens.getFiltersAggLabels()).to.eql([`ip : *`, `geo.src : CN`]);
@@ -142,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
-      await testSubjects.existOrFail('empty-workspace');
+      await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
     it('should edit settings of xy line chart', async () => {
@@ -196,7 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const longLabel =
         'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
       await PageObjects.lens.editDimensionLabel(longLabel);
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -236,19 +240,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.changeAxisSide('right');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(2);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
 
       await PageObjects.lens.changeAxisSide('left');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y.length).to.eql(1);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(false);
 
       await PageObjects.lens.changeAxisSide('right');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       await PageObjects.lens.closeDimensionEditor();
     });
@@ -256,9 +260,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
       await PageObjects.lens.openVisualOptions();
-      await testSubjects.click('lnsXY_valueLabels_inside');
+      await testSubjects.click('lns_valueLabels_inside');
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // check for value labels
       let data = await PageObjects.lens.getCurrentChartDebugState();
@@ -266,7 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // switch to stacked bar chart
       await PageObjects.lens.switchToVisualization('bar_stacked');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // check for value labels
       data = await PageObjects.lens.getCurrentChartDebugState();
@@ -279,14 +283,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
@@ -334,7 +338,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
-        'Top values of geo.dest'
+        'Top 5 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
@@ -410,6 +414,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
 
       await PageObjects.lens.configureDimension({
@@ -431,7 +436,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.switchToVisualization('heatmap', 'heatmap');
+      await PageObjects.lens.switchToVisualization('heatmap', 'heat');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsHeatmap_xDimensionPanel > lns-empty-dimension',
@@ -504,6 +509,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsDatatable_rows > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+        disableEmptyRows: true,
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
@@ -681,8 +687,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow to change index pattern', async () => {
-      await PageObjects.lens.switchFirstLayerIndexPattern('log*');
-      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('log*');
+      let indexPatternString;
+      if (config.get('esTestCluster.ccs')) {
+        indexPatternString = 'ftr-remote:log*';
+      } else {
+        indexPatternString = 'log*';
+      }
+      await PageObjects.lens.switchFirstLayerIndexPattern(indexPatternString);
+      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal(indexPatternString);
     });
 
     it('should show a download button only when the configuration is valid', async () => {
@@ -765,6 +777,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasExtensionFilter).to.be(true);
 
       await filterBar.removeFilter('extension.raw');
+    });
+
+    it('should show visual options button group for a donut chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.switchToVisualization('donut');
+
+      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
+      expect(hasVisualOptionsButton).to.be(true);
+
+      await PageObjects.lens.openVisualOptions();
+      await retry.try(async () => {
+        expect(await PageObjects.lens.hasEmptySizeRatioButtonGroup()).to.be(true);
+      });
+    });
+
+    it('should not show visual options button group for a pie chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.switchToVisualization('pie');
+
+      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
+      expect(hasVisualOptionsButton).to.be(false);
     });
   });
 }

@@ -18,34 +18,6 @@ The `defaultMessage` must contain ICU references to all keys in the `values` and
 
 The `description` is optional, `values` is optional too unless `defaultMessage` references to it.
 
-* **Angular (.html)**
-
-  * **Filter**
-
-    ```
-    {{ ::'pluginNamespace.messageId' | i18n: {
-      defaultMessage: 'Default message string literal, {key}',
-      values: { key: 'value' },
-      description: 'Message context or description'
-    } }}
-    ```
-
-    * Don't break `| i18n: {` with line breaks, and don't skip whitespaces around `i18n:`.
-    * `::` operator is optional. Omit it if you need data binding for the `values`.
-
-  * **Directive**
-
-    ```html
-    <p
-      i18n-id="pluginNamespace.messageId"
-      i18n-default-message="Default message string literal, {key}. {emphasizedText}"
-      i18n-values="{ key: value, html_emphasizedText: htmlString }"
-      i18n-description="Message context or description"
-    ></p>
-    ```
-
-    * `html_` prefixes will be removed from `i18n-values` keys before validation.
-
 * **React (.jsx, .tsx)**
 
   * **\<FormattedMessage\>**

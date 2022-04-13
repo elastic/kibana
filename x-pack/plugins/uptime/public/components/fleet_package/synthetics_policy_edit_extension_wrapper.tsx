@@ -7,10 +7,11 @@
 
 import React, { memo, useMemo } from 'react';
 import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
-import { PolicyConfig, ConfigKeys, DataStream, ITLSFields, ICustomFields } from './types';
+import { PolicyConfig, MonitorFields } from './types';
+import { ConfigKey, DataStream, TLSFields } from '././types';
 import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
 import {
-  MonitorTypeContextProvider,
+  PolicyConfigContextProvider,
   HTTPContextProvider,
   TCPContextProvider,
   ICMPSimpleFieldsContextProvider,
@@ -27,12 +28,14 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
   ({ policy: currentPolicy, newPolicy, onChange }) => {
     const {
       enableTLS: isTLSEnabled,
+      enableZipUrlTLS: isZipUrlTLSEnabled,
       fullConfig: fullDefaultConfig,
       monitorTypeConfig: defaultConfig,
       monitorType,
       tlsConfig: defaultTLSConfig,
     } = useMemo(() => {
       let enableTLS = false;
+      let enableZipUrlTLS = false;
       const getDefaultConfig = () => {
         // find the enabled input to identify the current monitor type
         const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
@@ -44,31 +47,36 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
           Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
         )?.vars;
 
-        const type: DataStream = vars?.[ConfigKeys.MONITOR_TYPE].value as DataStream;
+        const type: DataStream = vars?.[ConfigKey.MONITOR_TYPE].value as DataStream;
 
-        const configKeys: ConfigKeys[] = Object.values(ConfigKeys) || ([] as ConfigKeys[]);
-        const formattedDefaultConfigForMonitorType: ICustomFields =
-          configKeys.reduce<ICustomFields>((acc: ICustomFields, key: ConfigKeys) => {
+        const configKeys: ConfigKey[] = Object.values(ConfigKey) || ([] as ConfigKey[]);
+        const formattedDefaultConfigForMonitorType: MonitorFields =
+          configKeys.reduce<MonitorFields>((acc: MonitorFields, key: ConfigKey) => {
             return {
               ...acc,
               [key]: normalizers[key]?.(vars),
             };
-          }, {} as ICustomFields);
+          }, {} as MonitorFields);
 
-        const tlsConfig: ITLSFields = {
-          [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
-            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
-          [ConfigKeys.TLS_CERTIFICATE]:
-            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_CERTIFICATE],
-          [ConfigKeys.TLS_KEY]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_KEY],
-          [ConfigKeys.TLS_KEY_PASSPHRASE]:
-            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_KEY_PASSPHRASE],
-          [ConfigKeys.TLS_VERIFICATION_MODE]:
-            formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERIFICATION_MODE],
-          [ConfigKeys.TLS_VERSION]: formattedDefaultConfigForMonitorType[ConfigKeys.TLS_VERSION],
+        const tlsConfig: TLSFields = {
+          [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]:
+            formattedDefaultConfigForMonitorType[ConfigKey.TLS_CERTIFICATE_AUTHORITIES],
+          [ConfigKey.TLS_CERTIFICATE]:
+            formattedDefaultConfigForMonitorType[ConfigKey.TLS_CERTIFICATE],
+          [ConfigKey.TLS_KEY]: formattedDefaultConfigForMonitorType[ConfigKey.TLS_KEY],
+          [ConfigKey.TLS_KEY_PASSPHRASE]:
+            formattedDefaultConfigForMonitorType[ConfigKey.TLS_KEY_PASSPHRASE],
+          [ConfigKey.TLS_VERIFICATION_MODE]:
+            formattedDefaultConfigForMonitorType[ConfigKey.TLS_VERIFICATION_MODE],
+          [ConfigKey.TLS_VERSION]: formattedDefaultConfigForMonitorType[ConfigKey.TLS_VERSION],
         };
 
-        enableTLS = Object.values(tlsConfig).some((value) => value?.isEnabled);
+        enableTLS =
+          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_tls_enabled ||
+          Boolean(vars?.[ConfigKey.TLS_VERIFICATION_MODE]?.value);
+        enableZipUrlTLS =
+          formattedDefaultConfigForMonitorType[ConfigKey.METADATA].is_zip_url_tls_enabled ||
+          Boolean(vars?.[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]?.value);
 
         const formattedDefaultConfig: Partial<PolicyConfig> = {
           [type]: formattedDefaultConfigForMonitorType,
@@ -78,8 +86,9 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
           fullConfig: formattedDefaultConfig,
           monitorTypeConfig: formattedDefaultConfigForMonitorType,
           tlsConfig,
-          enableTLS,
           monitorType: type,
+          enableTLS,
+          enableZipUrlTLS,
         };
       };
 
@@ -87,7 +96,12 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
     }, [currentPolicy]);
 
     return (
-      <MonitorTypeContextProvider defaultValue={monitorType}>
+      <PolicyConfigContextProvider
+        defaultMonitorType={monitorType}
+        defaultIsTLSEnabled={isTLSEnabled}
+        defaultIsZipUrlTLSEnabled={isZipUrlTLSEnabled}
+        isEditable={true}
+      >
         <TLSFieldsContextProvider defaultValues={isTLSEnabled ? defaultTLSConfig : undefined}>
           <HTTPContextProvider defaultValues={fullDefaultConfig?.[DataStream.HTTP]}>
             <TCPContextProvider defaultValues={fullDefaultConfig?.[DataStream.TCP]}>
@@ -97,14 +111,13 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
                     newPolicy={newPolicy}
                     onChange={onChange}
                     defaultConfig={defaultConfig}
-                    isTLSEnabled={isTLSEnabled}
                   />
                 </BrowserContextProvider>
               </ICMPSimpleFieldsContextProvider>
             </TCPContextProvider>
           </HTTPContextProvider>
         </TLSFieldsContextProvider>
-      </MonitorTypeContextProvider>
+      </PolicyConfigContextProvider>
     );
   }
 );

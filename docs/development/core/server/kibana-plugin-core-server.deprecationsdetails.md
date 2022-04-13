@@ -2,24 +2,11 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md)
 
-## DeprecationsDetails interface
+## DeprecationsDetails type
 
 
 <b>Signature:</b>
 
 ```typescript
-export interface DeprecationsDetails 
+export declare type DeprecationsDetails = ConfigDeprecationDetails | FeatureDeprecationDetails;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [correctiveActions](./kibana-plugin-core-server.deprecationsdetails.correctiveactions.md) | <code>{</code><br/><code>        api?: {</code><br/><code>            path: string;</code><br/><code>            method: 'POST' &#124; 'PUT';</code><br/><code>            body?: {</code><br/><code>                [key: string]: any;</code><br/><code>            };</code><br/><code>        };</code><br/><code>        manualSteps: string[];</code><br/><code>    }</code> | corrective action needed to fix this deprecation. |
-|  [deprecationType](./kibana-plugin-core-server.deprecationsdetails.deprecationtype.md) | <code>'config' &#124; 'feature'</code> | (optional) Used to identify between different deprecation types. Example use case: in Upgrade Assistant, we may want to allow the user to sort by deprecation type or show each type in a separate tab.<!-- -->Feel free to add new types if necessary. Predefined types are necessary to reduce having similar definitions with different keywords across kibana deprecations. |
-|  [documentationUrl](./kibana-plugin-core-server.deprecationsdetails.documentationurl.md) | <code>string</code> | (optional) link to the documentation for more details on the deprecation. |
-|  [level](./kibana-plugin-core-server.deprecationsdetails.level.md) | <code>'warning' &#124; 'critical' &#124; 'fetch_error'</code> | levels: - warning: will not break deployment upon upgrade - critical: needs to be addressed before upgrade. - fetch\_error: Deprecations service failed to grab the deprecation details for the domain. |
-|  [message](./kibana-plugin-core-server.deprecationsdetails.message.md) | <code>string</code> | The description message to be displayed for the deprecation. Check the README for writing deprecations in <code>src/core/server/deprecations/README.mdx</code> |
-|  [requireRestart](./kibana-plugin-core-server.deprecationsdetails.requirerestart.md) | <code>boolean</code> | (optional) specify the fix for this deprecation requires a full kibana restart. |
-|  [title](./kibana-plugin-core-server.deprecationsdetails.title.md) | <code>string</code> | The title of the deprecation. Check the README for writing deprecations in <code>src/core/server/deprecations/README.mdx</code> |
-

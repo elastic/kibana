@@ -15,37 +15,37 @@ import * as ace from './ace';
 import * as GlobalFlyout from './global_flyout';
 import * as XJson from './xjson';
 
-export { JsonEditor, OnJsonEditorUpdateHandler, JsonEditorState } from './components/json_editor';
+export type { OnJsonEditorUpdateHandler, JsonEditorState } from './components/json_editor';
+export { JsonEditor } from './components/json_editor';
 
 export { PageLoading } from './components/page_loading';
 export { SectionLoading } from './components/section_loading';
 
-export { EuiCodeEditor, EuiCodeEditorProps } from './components/code_editor';
-export { Frequency, CronEditor } from './components/cron_editor';
+export type { EuiCodeEditorProps } from './components/code_editor';
+export { EuiCodeEditor } from './components/code_editor';
+export type { Frequency } from './components/cron_editor';
+export { CronEditor } from './components/cron_editor';
+export { ViewApiRequestFlyout } from './components/view_api_request_flyout';
 
-export {
+export type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
   UseRequestResponse,
-  sendRequest,
-  useRequest,
 } from './request';
+export { sendRequest, useRequest } from './request';
 
 export { indices } from './indices';
 
+export type { Privileges, MissingPrivileges, Error, Authorization } from './authorization';
 export {
   AuthorizationContext,
   AuthorizationProvider,
   NotAuthorizedSection,
   WithPrivileges,
-  Privileges,
-  MissingPrivileges,
   SectionError,
   PageError,
-  Error,
   useAuthorizationContext,
-  Authorization,
 } from './authorization';
 
 export { Forms, ace, GlobalFlyout, XJson };

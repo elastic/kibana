@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { of } from 'rxjs';
-import { ComponentType } from 'enzyme';
 import { LocationDescriptorObject } from 'history';
+
 import {
   docLinksServiceMock,
   uiSettingsServiceMock,
   notificationServiceMock,
   httpServiceMock,
   scopedHistoryMock,
+  executionContextServiceMock,
 } from '../../../../../../src/core/public/mocks';
-import { AppContextProvider } from '../../../public/application/app_context';
+import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
 
 class MockTimeBuckets {
@@ -35,7 +35,7 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}${location.search ? '?' + location.search : ''}`;
 });
 
-export const mockContextValue = {
+export const mockContextValue: AppDeps = {
   licenseStatus$: of<LicenseStatus>({ valid: true }),
   docLinks: docLinksServiceMock.createStartContract(),
   setBreadcrumbs: jest.fn(),
@@ -49,12 +49,5 @@ export const mockContextValue = {
   http: httpServiceMock.createSetupContract(),
   history,
   getUrlForApp: jest.fn(),
-};
-
-export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
-  return (
-    <AppContextProvider value={mockContextValue}>
-      <Component {...props} />
-    </AppContextProvider>
-  );
+  executionContext: executionContextServiceMock.createStartContract(),
 };

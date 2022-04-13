@@ -5,6 +5,27 @@
  * 2.0.
  */
 
+function deleteAllRules() {
+  cy.request({
+    log: false,
+    method: 'GET',
+    url: '/api/alerting/rules/_find',
+  }).then(({ body }) => {
+    if (body.data.length > 0) {
+      cy.log(`Deleting rules`);
+    }
+
+    body.data.map(({ id }: { id: string }) => {
+      cy.request({
+        headers: { 'kbn-xsrf': 'true' },
+        log: false,
+        method: 'DELETE',
+        url: `/api/alerting/rule/${id}`,
+      });
+    });
+  });
+}
+
 describe('Rules', () => {
   describe('Error count', () => {
     const ruleName = 'Error count threshold';
@@ -12,59 +33,35 @@ describe('Rules', () => {
       '.euiPopover__panel-isOpen [data-test-subj=comboBoxSearchInput]';
     const confirmModalButtonSelector =
       '.euiModal button[data-test-subj=confirmModalConfirmButton]';
-    const deleteButtonSelector =
-      '[data-test-subj=deleteActionHoverButton]:first';
-    const editButtonSelector = '[data-test-subj=editActionHoverButton]:first';
 
     describe('when created from APM', () => {
       describe('when created from Service Inventory', () => {
         before(() => {
           cy.loginAsPowerUser();
+          deleteAllRules();
         });
 
-        it('creates and updates a rule', () => {
+        after(() => {
+          deleteAllRules();
+        });
+
+        it('creates a rule', () => {
           // Create a rule in APM
           cy.visit('/app/apm/services');
           cy.contains('Alerts and rules').click();
-          cy.contains('Error count').click();
-          cy.contains('Create threshold rule').click();
+          cy.contains('Create error count rule').click();
 
-          // Change the environment to "testing"
-          cy.contains('Environment All').click();
-          cy.get(comboBoxInputSelector).type('testing{enter}');
+          // Check for the existence of these elements to make sure the form
+          // has loaded.
+          cy.contains('for the last');
+          cy.contains('Actions');
+          cy.contains('Save').should('not.be.disabled');
 
           // Save, with no actions
-          cy.contains('button:not(:disabled)', 'Save').click();
+          cy.contains('Save').click();
           cy.get(confirmModalButtonSelector).click();
 
           cy.contains(`Created rule "${ruleName}`);
-
-          // Go to Stack Management
-          cy.contains('Alerts and rules').click();
-          cy.contains('Manage rules').click();
-
-          // Edit the rule, changing the environment to "All"
-          cy.get(editButtonSelector).click();
-          cy.contains('Environment testing').click();
-          cy.get(comboBoxInputSelector).type('All{enter}');
-          cy.contains('button:not(:disabled)', 'Save').click();
-
-          cy.contains(`Updated '${ruleName}'`);
-
-          // Wait for the table to be ready for next edit click
-          cy.get('.euiBasicTable').not('.euiBasicTable-loading');
-
-          // Ensure the rule now shows "All" for the environment
-          cy.get(editButtonSelector).click();
-          cy.contains('Environment All');
-          cy.contains('button', 'Cancel').click();
-
-          // Delete the rule
-          cy.get(deleteButtonSelector).click();
-          cy.get(confirmModalButtonSelector).click();
-
-          // Ensure the table is empty
-          cy.contains('Create your first rule');
         });
       });
     });
@@ -72,6 +69,11 @@ describe('Rules', () => {
     describe('when created from Stack management', () => {
       before(() => {
         cy.loginAsPowerUser();
+        deleteAllRules();
+      });
+
+      after(() => {
+        deleteAllRules();
       });
 
       it('creates a rule', () => {
@@ -80,6 +82,7 @@ describe('Rules', () => {
 
         // Create a rule
         cy.contains('button', 'Create rule').click();
+
         cy.get('[name=name]').type(ruleName);
         cy.contains('.euiFlyout button', ruleName).click();
 
@@ -92,16 +95,6 @@ describe('Rules', () => {
         cy.get(confirmModalButtonSelector).click();
 
         cy.contains(`Created rule "${ruleName}`);
-
-        // Wait for the table to be ready for next delete click
-        cy.get('.euiBasicTable').not('.euiBasicTable-loading');
-
-        // Delete the rule
-        cy.get(deleteButtonSelector).click();
-        cy.get(confirmModalButtonSelector).click();
-
-        // Ensure the table is empty
-        cy.contains('Create your first rule');
       });
     });
   });

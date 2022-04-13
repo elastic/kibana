@@ -4,27 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger, SavedObject } from '../../../../../../../src/core/server';
+import { Logger } from '../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
-import { GenericBulkCreateResponse } from './bulk_create_factory';
+import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
-import { AlertAttributes, BulkCreate, WrapHits } from './types';
-import { MachineLearningRuleParams } from '../schemas/rule_schemas';
+import { BulkCreate, WrapHits } from './types';
+import { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
 import { buildReasonMessageForMlAlert } from './reason_formatters';
+import { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
-  ruleSO: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  completeRule: CompleteRule<MachineLearningRuleParams>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
@@ -86,7 +87,7 @@ const transformAnomalyResultsToEcs = (
 
 export const bulkCreateMlSignals = async (
   params: BulkCreateMlSignalsParams
-): Promise<GenericBulkCreateResponse<{}>> => {
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
   const anomalyResults = params.someResult;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 

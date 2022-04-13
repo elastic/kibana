@@ -278,6 +278,31 @@ describe('Exceptions Lists API', () => {
       expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
     });
 
+    test('it returns expected exception lists when empty filter', async () => {
+      const exceptionResponse = await fetchExceptionLists({
+        filters: '',
+        http: httpMock,
+        namespaceTypes: 'single,agnostic',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_find', {
+        method: 'GET',
+        query: {
+          namespace_type: 'single,agnostic',
+          page: '1',
+          per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
+        },
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
+    });
+
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListSchemaMock();
       // @ts-expect-error
@@ -759,7 +784,7 @@ describe('Exceptions Lists API', () => {
       });
 
       expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_export', {
-        method: 'GET',
+        method: 'POST',
         query: {
           id: 'some-id',
           list_id: 'list-id',

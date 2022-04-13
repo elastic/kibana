@@ -1,0 +1,4842 @@
+{
+  "id": "triggersActionsUi",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.Plugin",
+        "type": "Class",
+        "tags": [],
+        "label": "Plugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          "<",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.TriggersAndActionsUIPublicPluginSetup",
+            "text": "TriggersAndActionsUIPublicPluginSetup"
+          },
+          ", ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.TriggersAndActionsUIPublicPluginStart",
+            "text": "TriggersAndActionsUIPublicPluginStart"
+          },
+          ", PluginsSetup, PluginsStart>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.Plugin.experimentalFeatures",
+            "type": "Object",
+            "tags": [],
+            "label": "experimentalFeatures",
+            "description": [],
+            "signature": [
+              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly rulesDetailLogs: boolean; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.Plugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.Plugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<object>"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.Plugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, plugins: PluginsSetup) => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.TriggersAndActionsUIPublicPluginSetup",
+                "text": "TriggersAndActionsUIPublicPluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.Plugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.Plugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "PluginsSetup"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.Plugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.TriggersAndActionsUIPublicPluginStart",
+                "text": "TriggersAndActionsUIPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.Plugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ActionForm",
+        "type": "Function",
+        "tags": [],
+        "label": "ActionForm",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ActionAccordionFormProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionForm.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AlertConditions",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertConditions",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "RuleConditionsProps",
+          "<unknown, string> & { children?: React.ReactNode; }> & { readonly _result: <ConditionProps extends unknown, ActionGroupIds extends string>({ headline, actionGroups, onInitializeConditionsFor, onResetConditionsFor, includeBuiltInActionGroups, children, }: React.PropsWithChildren<",
+          "RuleConditionsProps",
+          "<ConditionProps, ActionGroupIds>>) => JSX.Element; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertConditions.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AlertConditionsGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertConditionsGroup",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<{ actionGroup?: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.ActionGroupWithCondition",
+            "text": "ActionGroupWithCondition"
+          },
+          "<unknown, string> | undefined; } & Pick<",
+          "RuleConditionsProps",
+          "<unknown, string>, \"onResetConditionsFor\"> & { children?: React.ReactNode; }> & { readonly _result: <ConditionProps extends unknown>({ actionGroup, onResetConditionsFor, children, ...otherProps }: React.PropsWithChildren<",
+          "RuleConditionsGroupProps",
+          "<ConditionProps>>) => JSX.Element | null; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/index.tsx",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertConditionsGroup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ConnectorAddFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorAddFlyout",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ConnectorAddFlyoutProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ConnectorAddFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ConnectorEditFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorEditFlyout",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ConnectorEditFlyoutProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ConnectorEditFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.deleteRules",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteRules",
+        "description": [],
+        "signature": [
+          "({\n  ids,\n  http,\n}: { ids: string[]; http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<{ successes: string[]; errors: string[]; }>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/delete.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.deleteRules.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ids,\n  http,\n}",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/delete.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.deleteRules.$1.ids",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/delete.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.deleteRules.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/delete.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.disableRule",
+        "type": "Function",
+        "tags": [],
+        "label": "disableRule",
+        "description": [],
+        "signature": [
+          "({ id, http }: { id: string; http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/disable.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.disableRule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ id, http }",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/disable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.disableRule.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/disable.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.disableRule.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/disable.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.enableRule",
+        "type": "Function",
+        "tags": [],
+        "label": "enableRule",
+        "description": [],
+        "signature": [
+          "({ id, http }: { id: string; http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/enable.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.enableRule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ id, http }",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/enable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.enableRule.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/enable.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.enableRule.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/enable.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ForLastExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "ForLastExpression",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ForLastExpressionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ForLastExpression.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getFields",
+        "description": [],
+        "signature": [
+          "(http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          ", indexes: string[]) => Promise<{ name: string; type: string; normalizedType: string; searchable: boolean; aggregatable: boolean; }[]>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getFields.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-public.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getFields.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "indexes",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getIndexOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexOptions",
+        "description": [],
+        "signature": [
+          "(http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          ", pattern: string) => Promise<",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.IOption",
+            "text": "IOption"
+          },
+          "[]>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getIndexOptions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-public.HttpSetup",
+                "text": "HttpSetup"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getIndexOptions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getTimeFieldOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeFieldOptions",
+        "description": [],
+        "signature": [
+          "(fields: { type: string; name: string; }[]) => TimeFieldOptions[]"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getTimeFieldOptions.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "{ type: string; name: string; }[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getTimeOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeOptions",
+        "description": [],
+        "signature": [
+          "(unitSize: number) => { text: string; value: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.TIME_UNITS",
+            "text": "TIME_UNITS"
+          },
+          "; }[]"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getTimeOptions.$1",
+            "type": "number",
+            "tags": [],
+            "label": "unitSize",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.getTimeUnitLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeUnitLabel",
+        "description": [],
+        "signature": [
+          "(timeUnit: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.TIME_UNITS",
+            "text": "TIME_UNITS"
+          },
+          ", timeValue: string) => string"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getTimeUnitLabel.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "timeUnit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.TIME_UNITS",
+                "text": "TIME_UNITS"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.getTimeUnitLabel.$2",
+            "type": "string",
+            "tags": [],
+            "label": "timeValue",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.GroupByExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "GroupByExpression",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "GroupByExpressionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.GroupByExpression.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.loadActionTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "loadActionTypes",
+        "description": [],
+        "signature": [
+          "({ http }: { http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionType",
+            "text": "ActionType"
+          },
+          "[]>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.loadActionTypes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ http }",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadActionTypes.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.loadRuleAggregations",
+        "type": "Function",
+        "tags": [],
+        "label": "loadRuleAggregations",
+        "description": [],
+        "signature": [
+          "({\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleStatusesFilter,\n}: { http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; searchText?: string | undefined; typesFilter?: string[] | undefined; actionTypesFilter?: string[] | undefined; ruleStatusesFilter?: string[] | undefined; }) => Promise<",
+          "RuleAggregations",
+          ">"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.loadRuleAggregations.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleStatusesFilter,\n}",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRuleAggregations.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRuleAggregations.$1.searchText",
+                "type": "string",
+                "tags": [],
+                "label": "searchText",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRuleAggregations.$1.typesFilter",
+                "type": "Array",
+                "tags": [],
+                "label": "typesFilter",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRuleAggregations.$1.actionTypesFilter",
+                "type": "Array",
+                "tags": [],
+                "label": "actionTypesFilter",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRuleAggregations.$1.ruleStatusesFilter",
+                "type": "Array",
+                "tags": [],
+                "label": "ruleStatusesFilter",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.loadRules",
+        "type": "Function",
+        "tags": [],
+        "label": "loadRules",
+        "description": [],
+        "signature": [
+          "({\n  http,\n  page,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleStatusesFilter,\n  sort = { field: 'name', direction: 'asc' },\n}: { http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; page: ",
+          "Pagination",
+          "; searchText?: string | undefined; typesFilter?: string[] | undefined; actionTypesFilter?: string[] | undefined; ruleStatusesFilter?: string[] | undefined; sort?: ",
+          "Sorting",
+          " | undefined; }) => Promise<{ page: number; perPage: number; total: number; data: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.Rule",
+            "text": "Rule"
+          },
+          "<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          ">[]; }>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.loadRules.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  page,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleStatusesFilter,\n  sort = { field: 'name', direction: 'asc' },\n}",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRules.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRules.$1.page",
+                "type": "Object",
+                "tags": [],
+                "label": "page",
+                "description": [],
+                "signature": [
+                  "Pagination"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRules.$1.searchText",
+                "type": "string",
+                "tags": [],
+                "label": "searchText",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRules.$1.typesFilter",
+                "type": "Array",
+                "tags": [],
+                "label": "typesFilter",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRules.$1.actionTypesFilter",
+                "type": "Array",
+                "tags": [],
+                "label": "actionTypesFilter",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRules.$1.ruleStatusesFilter",
+                "type": "Array",
+                "tags": [],
+                "label": "ruleStatusesFilter",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.loadRules.$1.sort",
+                "type": "Object",
+                "tags": [],
+                "label": "sort",
+                "description": [],
+                "signature": [
+                  "Sorting",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rules.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.muteRule",
+        "type": "Function",
+        "tags": [],
+        "label": "muteRule",
+        "description": [],
+        "signature": [
+          "({ id, http }: { id: string; http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.muteRule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ id, http }",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.muteRule.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.muteRule.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/mute.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.OfExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "OfExpression",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "OfExpressionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.OfExpression.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ThresholdExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "ThresholdExpression",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ThresholdExpressionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ThresholdExpression.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.unmuteRule",
+        "type": "Function",
+        "tags": [],
+        "label": "unmuteRule",
+        "description": [],
+        "signature": [
+          "({ id, http }: { id: string; http: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          },
+          "; }) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.unmuteRule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ id, http }",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.unmuteRule.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.unmuteRule.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unmute.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.useLoadRuleTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "useLoadRuleTypes",
+        "description": [],
+        "signature": [
+          "({ filteredSolutions }: RuleTypesProps) => { ruleTypes: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleType",
+            "text": "RuleType"
+          },
+          "<string, string>[]; error: string | null; ruleTypeIndex: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleTypeIndex",
+            "text": "RuleTypeIndex"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.useLoadRuleTypes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ filteredSolutions }",
+            "description": [],
+            "signature": [
+              "RuleTypesProps"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ValueExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "ValueExpression",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "ValueExpressionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ValueExpression.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.WhenExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "WhenExpression",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "WhenExpressionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.WhenExpression.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ActionType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionType",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.enabledInConfig",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabledInConfig",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.enabledInLicense",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabledInLicense",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.minimumLicenseRequired",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "minimumLicenseRequired",
+            "description": [],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AggregationType",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggregationType",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AggregationType.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AggregationType.fieldRequired",
+            "type": "boolean",
+            "tags": [],
+            "label": "fieldRequired",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AggregationType.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AggregationType.validNormalizedTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "validNormalizedTypes",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.Comparator",
+        "type": "Interface",
+        "tags": [],
+        "label": "Comparator",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.Comparator.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.Comparator.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.Comparator.requiredValues",
+            "type": "number",
+            "tags": [],
+            "label": "requiredValues",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.GroupByType",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupByType",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.GroupByType.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.GroupByType.sizeRequired",
+            "type": "boolean",
+            "tags": [],
+            "label": "sizeRequired",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.GroupByType.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.GroupByType.validNormalizedTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "validNormalizedTypes",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.IErrorObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "IErrorObject",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.IErrorObject.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: string | string[] | IErrorObject",
+            "description": [],
+            "signature": [
+              "[key: string]:  string | string[] | ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.IErrorObject",
+                "text": "IErrorObject"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.IOption",
+        "type": "Interface",
+        "tags": [],
+        "label": "IOption",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.IOption.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.IOption.options",
+            "type": "Array",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ value: string; label: string; }[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleAction",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.group",
+            "type": "string",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.actionTypeId",
+            "type": "string",
+            "tags": [],
+            "label": "actionTypeId",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "SavedObjectAttributes"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleTableItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleTableItem",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleTableItem",
+            "text": "RuleTableItem"
+          },
+          " extends ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.Rule",
+            "text": "Rule"
+          },
+          "<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.ruleType",
+            "type": "string",
+            "tags": [],
+            "label": "ruleType",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.actionsCount",
+            "type": "number",
+            "tags": [],
+            "label": "actionsCount",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.isEditable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEditable",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.enabledInLicense",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabledInLicense",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.showIntervalWarning",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showIntervalWarning",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleType",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleType",
+            "text": "RuleType"
+          },
+          "<ActionGroupIds, RecoveryActionGroupId> extends Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleType",
+            "text": "RuleType"
+          },
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"actionGroups\" | \"defaultActionGroupId\" | \"recoveryActionGroup\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.actionVariables",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "actionVariables",
+            "description": [],
+            "signature": [
+              "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.authorizedConsumers",
+            "type": "Object",
+            "tags": [],
+            "label": "authorizedConsumers",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { read: boolean; all: boolean; }; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.enabledInLicense",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabledInLicense",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleTypeModel",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleTypeModel",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleTypeModel",
+            "text": "RuleTypeModel"
+          },
+          "<Params>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.iconClass",
+            "type": "string",
+            "tags": [],
+            "label": "iconClass",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.documentationUrl",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "documentationUrl",
+            "description": [],
+            "signature": [
+              "string | ((docLinks: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.DocLinksStart",
+                "text": "DocLinksStart"
+              },
+              ") => string) | null"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "(ruleParams: Params) => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.ValidationResult",
+                "text": "ValidationResult"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.RuleTypeModel.validate.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "ruleParams",
+                "description": [],
+                "signature": [
+                  "Params"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.ruleParamsExpression",
+            "type": "Function",
+            "tags": [],
+            "label": "ruleParamsExpression",
+            "description": [],
+            "signature": [
+              "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeParamsExpressionProps",
+                "text": "RuleTypeParamsExpressionProps"
+              },
+              "<Params, Record<string, unknown>, string>>>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.RuleTypeModel.ruleParamsExpression.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.requiresAppContext",
+            "type": "boolean",
+            "tags": [],
+            "label": "requiresAppContext",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.defaultActionMessage",
+            "type": "string",
+            "tags": [],
+            "label": "defaultActionMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleTypeParamsExpressionProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleTypeParamsExpressionProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleTypeParamsExpressionProps",
+            "text": "RuleTypeParamsExpressionProps"
+          },
+          "<Params, MetaData, ActionGroupIds>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.ruleParams",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "ruleParams",
+            "description": [],
+            "signature": [
+              "Params"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.ruleInterval",
+            "type": "string",
+            "tags": [],
+            "label": "ruleInterval",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.ruleThrottle",
+            "type": "string",
+            "tags": [],
+            "label": "ruleThrottle",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.alertNotifyWhen",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertNotifyWhen",
+            "description": [],
+            "signature": [
+              "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.setRuleParams",
+            "type": "Function",
+            "tags": [],
+            "label": "setRuleParams",
+            "description": [],
+            "signature": [
+              "<Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.RuleTypeParamsExpressionProps.setRuleParams.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "property",
+                "description": [],
+                "signature": [
+                  "Key"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.RuleTypeParamsExpressionProps.setRuleParams.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "Params[Key] | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.setRuleProperty",
+            "type": "Function",
+            "tags": [],
+            "label": "setRuleProperty",
+            "description": [],
+            "signature": [
+              "<Prop extends \"id\" | \"monitoring\" | \"name\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeEndTime\" | \"ruleTypeId\">(key: Prop, value: ",
+              "SanitizedRule",
+              "<Params>[Prop] | null) => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.RuleTypeParamsExpressionProps.setRuleProperty.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "Prop"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.RuleTypeParamsExpressionProps.setRuleProperty.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "SanitizedRule",
+                  "<Params>[Prop] | null"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.errors",
+            "type": "Object",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.IErrorObject",
+                "text": "IErrorObject"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.defaultActionGroupId",
+            "type": "string",
+            "tags": [],
+            "label": "defaultActionGroupId",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.actionGroups",
+            "type": "Array",
+            "tags": [],
+            "label": "actionGroups",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.ActionGroup",
+                "text": "ActionGroup"
+              },
+              "<ActionGroupIds>[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.metadata",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "MetaData | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.charts",
+            "type": "Object",
+            "tags": [],
+            "label": "charts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "public",
+                "docId": "kibChartsPluginApi",
+                "section": "def-public.ChartsPluginSetup",
+                "text": "ChartsPluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeParamsExpressionProps.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.TriggersAndActionsUiServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "TriggersAndActionsUiServices",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.TriggersAndActionsUiServices",
+            "text": "TriggersAndActionsUiServices"
+          },
+          " extends ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreStart",
+            "text": "CoreStart"
+          }
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.charts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "charts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "public",
+                "docId": "kibChartsPluginApi",
+                "section": "def-public.ChartsPluginSetup",
+                "text": "ChartsPluginSetup"
+              },
+              " & { activeCursor: ",
+              "ActiveCursor",
+              "; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.alerting",
+            "type": "Object",
+            "tags": [],
+            "label": "alerting",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "public",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-public.PluginStartContract",
+                "text": "PluginStartContract"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesApi",
+                "text": "SpacesApi"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.storage",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.Storage",
+                "text": "Storage"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.isCloud",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloud",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.setBreadcrumbs",
+            "type": "Function",
+            "tags": [],
+            "label": "setBreadcrumbs",
+            "description": [],
+            "signature": [
+              "(crumbs: ",
+              "EuiBreadcrumb",
+              "[]) => void"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.TriggersAndActionsUiServices.setBreadcrumbs.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "crumbs",
+                "description": [],
+                "signature": [
+                  "EuiBreadcrumb",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.actionTypeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "actionTypeRegistry",
+            "description": [],
+            "signature": [
+              "{ list: () => ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>[]; get: (id: string) => ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>; register: (objectType: ",
+              "ActionTypeModel",
+              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.ruleTypeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleTypeRegistry",
+            "description": [],
+            "signature": [
+              "{ list: () => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">[]; get: (id: string) => ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">; register: (objectType: ",
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "public",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-public.RuleTypeModel",
+                "text": "RuleTypeModel"
+              },
+              "<",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">) => void; has: (id: string) => boolean; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.history",
+            "type": "Object",
+            "tags": [],
+            "label": "history",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.ScopedHistory",
+                "text": "ScopedHistory"
+              },
+              "<unknown>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.kibanaFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "kibanaFeatures",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "features",
+                "scope": "common",
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeature",
+                "text": "KibanaFeature"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.element",
+            "type": "Object",
+            "tags": [],
+            "label": "element",
+            "description": [],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.theme$",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.unifiedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "unifiedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchPublicPluginStart",
+                "text": "UnifiedSearchPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ValidationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "ValidationResult",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ValidationResult.errors",
+            "type": "Object",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AGGREGATION_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "AGGREGATION_TYPES",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.COMPARATORS",
+        "type": "Enum",
+        "tags": [],
+        "label": "COMPARATORS",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleFlyoutCloseReason",
+        "type": "Enum",
+        "tags": [],
+        "label": "RuleFlyoutCloseReason",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.TIME_UNITS",
+        "type": "Enum",
+        "tags": [],
+        "label": "TIME_UNITS",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/constants/time_units.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ActionConnector",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionConnector",
+        "description": [],
+        "signature": [
+          "PreConfiguredActionConnector",
+          " | ",
+          "UserConfiguredActionConnector",
+          "<Config, Secrets>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ActionGroupWithCondition",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionGroupWithCondition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<ActionGroupIds> & ({ conditions?: T | undefined; isRequired?: false | undefined; } | { conditions: T; isRequired: true; })"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_conditions.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ActionTypeRegistryContract",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionTypeRegistryContract",
+        "description": [],
+        "signature": [
+          "{ list: () => ",
+          "ActionTypeModel",
+          "<ActionConnector, ActionParams, any>[]; get: (id: string) => ",
+          "ActionTypeModel",
+          "<ActionConnector, ActionParams, any>; register: (objectType: ",
+          "ActionTypeModel",
+          "<ActionConnector, ActionParams, any>) => void; has: (id: string) => boolean; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.ActionVariables",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionVariables",
+        "description": [],
+        "signature": [
+          "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.AsApiContract",
+        "type": "Type",
+        "tags": [],
+        "label": "AsApiContract",
+        "description": [],
+        "signature": [
+          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
+        ],
+        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.DEFAULT_HIDDEN_ACTION_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_HIDDEN_ACTION_TYPES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.Rule",
+        "type": "Type",
+        "tags": [],
+        "label": "Rule",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<Params>, \"alertTypeId\"> & { ruleTypeId: string; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleTypeIndex",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeIndex",
+        "description": [],
+        "signature": [
+          "Map<string, ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleType",
+            "text": "RuleType"
+          },
+          "<string, string>>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleTypeParams",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeParams",
+        "description": [],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RuleTypeRegistryContract",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeRegistryContract",
+        "description": [],
+        "signature": [
+          "{ list: () => ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleTypeModel",
+            "text": "RuleTypeModel"
+          },
+          "<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          ">[]; get: (id: string) => ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleTypeModel",
+            "text": "RuleTypeModel"
+          },
+          "<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          ">; register: (objectType: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleTypeModel",
+            "text": "RuleTypeModel"
+          },
+          "<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          ">) => void; has: (id: string) => boolean; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.VIEW_LICENSE_OPTIONS_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "VIEW_LICENSE_OPTIONS_LINK",
+        "description": [],
+        "signature": [
+          "\"https://www.elastic.co/subscriptions\""
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.builtInAggregationTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "builtInAggregationTypes",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInAggregationTypes.count",
+            "type": "Object",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.count.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.count.fieldRequired",
+                "type": "boolean",
+                "tags": [],
+                "label": "fieldRequired",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.count.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.AGGREGATION_TYPES",
+                    "text": "AGGREGATION_TYPES"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.count.validNormalizedTypes",
+                "type": "Array",
+                "tags": [],
+                "label": "validNormalizedTypes",
+                "description": [],
+                "signature": [
+                  "never[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInAggregationTypes.avg",
+            "type": "Object",
+            "tags": [],
+            "label": "avg",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.avg.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.avg.fieldRequired",
+                "type": "boolean",
+                "tags": [],
+                "label": "fieldRequired",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.avg.validNormalizedTypes",
+                "type": "Array",
+                "tags": [],
+                "label": "validNormalizedTypes",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.avg.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.AGGREGATION_TYPES",
+                    "text": "AGGREGATION_TYPES"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInAggregationTypes.sum",
+            "type": "Object",
+            "tags": [],
+            "label": "sum",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.sum.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.sum.fieldRequired",
+                "type": "boolean",
+                "tags": [],
+                "label": "fieldRequired",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.sum.validNormalizedTypes",
+                "type": "Array",
+                "tags": [],
+                "label": "validNormalizedTypes",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.sum.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.AGGREGATION_TYPES",
+                    "text": "AGGREGATION_TYPES"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInAggregationTypes.min",
+            "type": "Object",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.min.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.min.fieldRequired",
+                "type": "boolean",
+                "tags": [],
+                "label": "fieldRequired",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.min.validNormalizedTypes",
+                "type": "Array",
+                "tags": [],
+                "label": "validNormalizedTypes",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.min.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.AGGREGATION_TYPES",
+                    "text": "AGGREGATION_TYPES"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInAggregationTypes.max",
+            "type": "Object",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.max.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.max.fieldRequired",
+                "type": "boolean",
+                "tags": [],
+                "label": "fieldRequired",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.max.validNormalizedTypes",
+                "type": "Array",
+                "tags": [],
+                "label": "validNormalizedTypes",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInAggregationTypes.max.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.AGGREGATION_TYPES",
+                    "text": "AGGREGATION_TYPES"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.builtInComparators",
+        "type": "Object",
+        "tags": [],
+        "label": "builtInComparators",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.GREATER_THAN]",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.GREATER_THAN_OR_EQUALS]",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.LESS_THAN]",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.LESS_THAN_OR_EQUALS]",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInComparators.COMPARATORS.BETWEEN",
+            "type": "Object",
+            "tags": [],
+            "label": "[COMPARATORS.BETWEEN]",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.value",
+                "type": "Enum",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "triggersActionsUi",
+                    "scope": "public",
+                    "docId": "kibTriggersActionsUiPluginApi",
+                    "section": "def-public.COMPARATORS",
+                    "text": "COMPARATORS"
+                  }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.requiredValues",
+                "type": "number",
+                "tags": [],
+                "label": "requiredValues",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.builtInGroupByTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "builtInGroupByTypes",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInGroupByTypes.all",
+            "type": "Object",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInGroupByTypes.all.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInGroupByTypes.all.sizeRequired",
+                "type": "boolean",
+                "tags": [],
+                "label": "sizeRequired",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInGroupByTypes.all.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInGroupByTypes.all.validNormalizedTypes",
+                "type": "Array",
+                "tags": [],
+                "label": "validNormalizedTypes",
+                "description": [],
+                "signature": [
+                  "never[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.builtInGroupByTypes.top",
+            "type": "Object",
+            "tags": [],
+            "label": "top",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInGroupByTypes.top.text",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInGroupByTypes.top.sizeRequired",
+                "type": "boolean",
+                "tags": [],
+                "label": "sizeRequired",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInGroupByTypes.top.value",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.builtInGroupByTypes.top.validNormalizedTypes",
+                "type": "Array",
+                "tags": [],
+                "label": "validNormalizedTypes",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.firstFieldOption",
+        "type": "Object",
+        "tags": [],
+        "label": "firstFieldOption",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.firstFieldOption.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.firstFieldOption.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "setup": {
+      "parentPluginId": "triggersActionsUi",
+      "id": "def-public.TriggersAndActionsUIPublicPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "TriggersAndActionsUIPublicPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginSetup.actionTypeRegistry",
+          "type": "Object",
+          "tags": [],
+          "label": "actionTypeRegistry",
+          "description": [],
+          "signature": [
+            "TypeRegistry",
+            "<",
+            "ActionTypeModel",
+            "<any, any, any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginSetup.ruleTypeRegistry",
+          "type": "Object",
+          "tags": [],
+          "label": "ruleTypeRegistry",
+          "description": [],
+          "signature": [
+            "TypeRegistry",
+            "<",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.RuleTypeModel",
+              "text": "RuleTypeModel"
+            },
+            "<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "triggersActionsUi",
+      "id": "def-public.TriggersAndActionsUIPublicPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "TriggersAndActionsUIPublicPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.actionTypeRegistry",
+          "type": "Object",
+          "tags": [],
+          "label": "actionTypeRegistry",
+          "description": [],
+          "signature": [
+            "TypeRegistry",
+            "<",
+            "ActionTypeModel",
+            "<any, any, any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.ruleTypeRegistry",
+          "type": "Object",
+          "tags": [],
+          "label": "ruleTypeRegistry",
+          "description": [],
+          "signature": [
+            "TypeRegistry",
+            "<",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.RuleTypeModel",
+              "text": "RuleTypeModel"
+            },
+            "<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddConnectorFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "getAddConnectorFlyout",
+          "description": [],
+          "signature": [
+            "(props: Omit<",
+            "ConnectorAddFlyoutProps",
+            ", \"actionTypeRegistry\">) => React.ReactElement<",
+            "ConnectorAddFlyoutProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddConnectorFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "Omit<",
+                "ConnectorAddFlyoutProps",
+                ", \"actionTypeRegistry\">"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditConnectorFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "getEditConnectorFlyout",
+          "description": [],
+          "signature": [
+            "(props: Omit<",
+            "ConnectorEditFlyoutProps",
+            ", \"actionTypeRegistry\">) => React.ReactElement<",
+            "ConnectorEditFlyoutProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditConnectorFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "Omit<",
+                "ConnectorEditFlyoutProps",
+                ", \"actionTypeRegistry\">"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "getAddAlertFlyout",
+          "description": [],
+          "signature": [
+            "(props: Omit<",
+            "RuleAddProps",
+            "<Record<string, any>>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "RuleAddProps",
+            "<Record<string, any>>, string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddAlertFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "Omit<",
+                "RuleAddProps",
+                "<Record<string, any>>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "getEditAlertFlyout",
+          "description": [],
+          "signature": [
+            "(props: Omit<",
+            "RuleEditProps",
+            "<Record<string, any>>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "RuleEditProps",
+            "<Record<string, any>>, string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getEditAlertFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "Omit<",
+                "RuleEditProps",
+                "<Record<string, any>>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertsTable",
+          "type": "Function",
+          "tags": [],
+          "label": "getAlertsTable",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "AlertsTableProps",
+            ") => React.ReactElement<",
+            "AlertsTableProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAlertsTable.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "AlertsTableProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-server.validateCoreQueryBody",
+        "type": "Function",
+        "tags": [],
+        "label": "validateCoreQueryBody",
+        "description": [],
+        "signature": [
+          "(anyParams: unknown) => string | undefined"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.validateCoreQueryBody.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "anyParams",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-server.validateTimeWindowUnits",
+        "type": "Function",
+        "tags": [],
+        "label": "validateTimeWindowUnits",
+        "description": [],
+        "signature": [
+          "(timeWindowUnit: string) => string | undefined"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.validateTimeWindowUnits.$1",
+            "type": "string",
+            "tags": [],
+            "label": "timeWindowUnit",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-server.CoreQueryParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CoreQueryParams",
+        "description": [],
+        "signature": [
+          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-server.DEFAULT_GROUPS",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_GROUPS",
+        "description": [],
+        "signature": [
+          "100"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-server.MAX_GROUPS",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_GROUPS",
+        "description": [],
+        "signature": [
+          "1000"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-server.MAX_INTERVALS",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_INTERVALS",
+        "description": [],
+        "signature": [
+          "1000"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-server.TimeSeriesQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeSeriesQuery",
+        "description": [],
+        "signature": [
+          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-server.CoreQueryParamsSchemaProperties",
+        "type": "Object",
+        "tags": [],
+        "label": "CoreQueryParamsSchemaProperties",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.index",
+            "type": "Object",
+            "tags": [],
+            "label": "index",
+            "description": [
+              "// name of the indices to search"
+            ],
+            "signature": [
+              "Type",
+              "<string | string[]>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.timeField",
+            "type": "Object",
+            "tags": [],
+            "label": "timeField",
+            "description": [
+              "// field in index used for date/time"
+            ],
+            "signature": [
+              "Type",
+              "<string>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.aggType",
+            "type": "Object",
+            "tags": [],
+            "label": "aggType",
+            "description": [
+              "// aggregation type"
+            ],
+            "signature": [
+              "Type",
+              "<string>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.aggField",
+            "type": "Object",
+            "tags": [],
+            "label": "aggField",
+            "description": [
+              "// aggregation field"
+            ],
+            "signature": [
+              "Type",
+              "<string | undefined>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.groupBy",
+            "type": "Object",
+            "tags": [],
+            "label": "groupBy",
+            "description": [
+              "// how to group"
+            ],
+            "signature": [
+              "Type",
+              "<string>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.termField",
+            "type": "Object",
+            "tags": [],
+            "label": "termField",
+            "description": [
+              "// field to group on (for groupBy: top)"
+            ],
+            "signature": [
+              "Type",
+              "<string | undefined>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.termSize",
+            "type": "Object",
+            "tags": [],
+            "label": "termSize",
+            "description": [
+              "// limit on number of groups returned"
+            ],
+            "signature": [
+              "Type",
+              "<number | undefined>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.timeWindowSize",
+            "type": "Object",
+            "tags": [],
+            "label": "timeWindowSize",
+            "description": [
+              "// size of time window for date range aggregations"
+            ],
+            "signature": [
+              "Type",
+              "<number>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.timeWindowUnit",
+            "type": "Object",
+            "tags": [],
+            "label": "timeWindowUnit",
+            "description": [
+              "// units of time window for date range aggregations"
+            ],
+            "signature": [
+              "Type",
+              "<string>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "start": {
+      "parentPluginId": "triggersActionsUi",
+      "id": "def-server.PluginStartContract",
+      "type": "Interface",
+      "tags": [],
+      "label": "PluginStartContract",
+      "description": [],
+      "path": "x-pack/plugins/triggers_actions_ui/server/plugin.ts",
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-server.PluginStartContract.data",
+          "type": "Object",
+          "tags": [],
+          "label": "data",
+          "description": [],
+          "signature": [
+            "{ timeSeriesQuery: (params: ",
+            "TimeSeriesQueryParameters",
+            ") => Promise<",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "common",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-common.TimeSeriesResult",
+              "text": "TimeSeriesResult"
+            },
+            ">; }"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/server/plugin.ts",
+          "deprecated": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.getExperimentalAllowedValues",
+        "type": "Function",
+        "tags": [],
+        "label": "getExperimentalAllowedValues",
+        "description": [],
+        "signature": [
+          "() => string[]"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.isValidExperimentalValue",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidExperimentalValue",
+        "description": [],
+        "signature": [
+          "(value: string) => boolean"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.isValidExperimentalValue.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.parseExperimentalConfigValue",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "parseExperimentalConfigValue",
+        "description": [
+          "\nParses the string value used in `xpack.triggersActionsUi.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
+        ],
+        "signature": [
+          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; rulesDetailLogs: boolean; }>"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.parseExperimentalConfigValue.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "configValue",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.parseInterval",
+        "type": "Function",
+        "tags": [],
+        "label": "parseInterval",
+        "description": [],
+        "signature": [
+          "(intervalString: string) => { value: number; unit: string; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/parse_interval.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.parseInterval.$1",
+            "type": "string",
+            "tags": [],
+            "label": "intervalString",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/parse_interval.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.TimeSeriesResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeSeriesResult",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.TimeSeriesResult.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "common",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-common.TimeSeriesResultRow",
+                "text": "TimeSeriesResultRow"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.TimeSeriesResultRow",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeSeriesResultRow",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.TimeSeriesResultRow.group",
+            "type": "string",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.TimeSeriesResultRow.metrics",
+            "type": "Array",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "common",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-common.MetricResult",
+                "text": "MetricResult"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.BASE_TRIGGERS_ACTIONS_UI_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_TRIGGERS_ACTIONS_UI_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/triggers_actions_ui\""
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.ExperimentalFeatures",
+        "type": "Type",
+        "tags": [],
+        "label": "ExperimentalFeatures",
+        "description": [],
+        "signature": [
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly rulesDetailLogs: boolean; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.MetricResult",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricResult",
+        "description": [],
+        "signature": [
+          "[string, number]"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.allowedExperimentalValues",
+        "type": "Object",
+        "tags": [],
+        "label": "allowedExperimentalValues",
+        "description": [
+          "\nA list of allowed values that can be used in `xpack.triggersActionsUi.enableExperimental`.\nThis object is then used to validate and parse the value entered."
+        ],
+        "signature": [
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly rulesDetailLogs: boolean; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.INTERVAL_STRING_RE",
+        "type": "Object",
+        "tags": [],
+        "label": "INTERVAL_STRING_RE",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/common/parse_interval.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

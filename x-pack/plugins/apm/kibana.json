@@ -8,11 +8,11 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
-    "apmOss",
     "data",
     "embeddable",
     "features",
     "infra",
+    "inspector",
     "licensing",
     "observability",
     "ruleRegistry",
@@ -22,14 +22,13 @@
     "actions",
     "alerting",
     "cloud",
+    "fleet",
     "home",
-    "maps",
     "ml",
     "security",
     "spaces",
     "taskManager",
-    "usageCollection",
-    "fleet"
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
@@ -39,7 +38,6 @@
     "home",
     "kibanaReact",
     "kibanaUtils",
-    "maps",
     "ml",
     "observability"
   ]

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { SectionPanel } from './section_panel';
 

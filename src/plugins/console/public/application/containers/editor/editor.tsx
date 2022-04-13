@@ -11,19 +11,21 @@ import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';
-import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
+import { Panel, PanelsContainer } from '../../containers';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import type { SenseEditor } from '../../models';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
 interface Props {
   loading: boolean;
+  setEditorInstance: (instance: SenseEditor) => void;
 }
 
-export const Editor = memo(({ loading }: Props) => {
+export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const {
     services: { storage },
   } = useServicesContext();
@@ -61,7 +63,10 @@ export const Editor = memo(({ loading }: Props) => {
           {loading ? (
             <EditorContentSpinner />
           ) : (
-            <EditorUI initialTextValue={currentTextObject.text} />
+            <EditorUI
+              initialTextValue={currentTextObject.text}
+              setEditorInstance={setEditorInstance}
+            />
           )}
         </Panel>
         <Panel

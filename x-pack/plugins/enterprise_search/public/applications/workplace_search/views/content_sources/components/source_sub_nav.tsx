@@ -37,7 +37,7 @@ export const useSourceSubNav = () => {
   if (!id) return undefined;
 
   const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
-  const showSynchronization = isIndexedSource && isOrganization;
+  const showSynchronization = isIndexedSource && isOrganization && !isCustom;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {

@@ -17,10 +17,12 @@
   "optionalPlugins": [
     "security",
     "usageCollection",
+    "spaces",
     "alerting"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [
+    "unifiedSearch",
     "esUiShared",
     "discover",
     "kibanaUtils",

@@ -6,8 +6,8 @@
  */
 
 import { remove, uniq } from 'lodash';
-import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
-import { OWNER_FIELD } from '../../common';
+import { nodeBuilder, KueryNode } from '@kbn/es-query';
+import { OWNER_FIELD } from '../../common/api';
 
 export const getOwnersFilter = (
   savedObjectType: string,
@@ -58,7 +58,7 @@ export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean
 };
 
 export const includeFieldsRequiredForAuthentication = (fields?: string[]): string[] | undefined => {
-  if (fields === undefined) {
+  if (fields === undefined || fields.length === 0) {
     return;
   }
   return uniq([...fields, OWNER_FIELD]);

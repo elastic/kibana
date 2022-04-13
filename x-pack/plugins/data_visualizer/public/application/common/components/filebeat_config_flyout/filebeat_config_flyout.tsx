@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -33,14 +33,12 @@ export enum EDITOR_MODE {
 interface Props {
   index: string;
   results: FindFileStructureResponse;
-  indexPatternId: string;
   ingestPipelineId: string;
   closeFlyout(): void;
 }
 export const FilebeatConfigFlyout: FC<Props> = ({
   index,
   results,
-  indexPatternId,
   ingestPipelineId,
   closeFlyout,
 }) => {

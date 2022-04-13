@@ -8,6 +8,7 @@
 import type React from 'react';
 import { EuiTitleSize } from '@elastic/eui';
 import { ScaleType, Position, TickFormatter } from '@elastic/charts';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ActionCreator } from 'redux';
 import { ESQuery } from '../../../../common/typed_json';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -15,7 +16,8 @@ import { MatrixHistogramType } from '../../../../common/search_strategy/security
 import { UpdateDateRange } from '../charts/common';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { DocValueFields } from '../../../../common/search_strategy';
-import { Threshold } from '../../../detections/components/rules/query_preview';
+import { FieldValueThreshold } from '../../../detections/components/rules/threshold_input';
+import { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -32,9 +34,11 @@ export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 export interface MatrixHistogramConfigs {
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
+  getLensAttributes?: GetLensAttributes;
   hideHistogramIfEmpty?: boolean;
   histogramType: MatrixHistogramType;
   legendPosition?: Position;
+  lensAttributes?: LensAttributes;
   mapping?: MatrixHistogramMappingTypes;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
@@ -52,6 +56,7 @@ interface MatrixHistogramBasicProps {
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   panelHeight?: number;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];
   stackByOptions: MatrixHistogramOption[];
@@ -76,10 +81,11 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   histogramType: MatrixHistogramType;
-  threshold?: Threshold;
+  threshold?: FieldValueThreshold;
   skip?: boolean;
   isPtrIncluded?: boolean;
   includeMissingData?: boolean;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {

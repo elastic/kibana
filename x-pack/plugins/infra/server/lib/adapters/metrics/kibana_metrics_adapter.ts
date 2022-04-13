@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flatten, get } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { flatten, get } from 'lodash';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
@@ -36,7 +37,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
     const indexPattern = `${options.sourceConfiguration.metricAlias}`;
-    const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
+    const fields = findInventoryFields(options.nodeType);
     const nodeField = fields.id;
 
     const search = <Aggregation>(searchOptions: object) =>
@@ -62,7 +63,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       .then((results) => {
         return results.filter(isVisSeriesData).map((result) => {
           const metricIds = Object.keys(result).filter(
-            (k) => !['type', 'uiRestrictions'].includes(k)
+            (k) => !['type', 'uiRestrictions', 'trackedEsSearches'].includes(k)
           );
 
           return metricIds.map((id: string) => {
@@ -82,7 +83,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
               series: panel.series.map((series) => {
                 return {
                   id: series.id,
-                  label: series.label,
+                  // In case of grouping by multiple fields, "series.label" is array.
+                  // If infra will perform this type of grouping, the following code needs to be updated
+                  label: [series.label].flat()[0],
                   data: series.data.map((point) => ({
                     timestamp: point[0] as number,
                     value: point[1] as number | null,
@@ -122,11 +125,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       max: options.timerange.to,
     };
 
-    const model = createTSVBModel(
-      options.sourceConfiguration.fields.timestamp,
-      indexPattern,
-      options.timerange.interval
-    );
+    const model = createTSVBModel(TIMESTAMP_FIELD, indexPattern, options.timerange.interval);
 
     const client = <Hit = {}, Aggregation = undefined>(
       opts: CallWithRequestParams
@@ -137,7 +136,6 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       client,
       {
         indexPattern: `${options.sourceConfiguration.metricAlias}`,
-        timestampField: options.sourceConfiguration.fields.timestamp,
         timerange: options.timerange,
       },
       model.requires

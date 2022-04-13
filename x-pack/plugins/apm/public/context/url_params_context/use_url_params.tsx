@@ -10,7 +10,7 @@ import { useMemo, useContext } from 'react';
 import type { ApmUrlParams } from './types';
 import { UrlParamsContext } from './url_params_context';
 
-export function useUrlParams(): Assign<
+export function useLegacyUrlParams(): Assign<
   React.ContextType<typeof UrlParamsContext>,
   { urlParams: ApmUrlParams }
 > {

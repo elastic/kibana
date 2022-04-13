@@ -2,12 +2,10 @@
   "author": [
     "Elastic"
   ],
-  "description": "Detects changes to registry persistence keys that are uncommonly used or modified by legitimate programs. This could be an indication of an adversary's attempt to persist in a stealthy manner.",
+  "description": "Detects changes to registry persistence keys that are not commonly used or modified by legitimate programs. This could be an indication of an adversary's attempt to persist in a stealthy manner.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -34,7 +32,20 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
-      "technique": []
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.001",
+              "name": "Registry Run Keys / Startup Folder",
+              "reference": "https://attack.mitre.org/techniques/T1547/001/"
+            }
+          ]
+        }
+      ]
     },
     {
       "framework": "MITRE ATT&CK",
@@ -52,7 +63,9 @@
       ]
     }
   ],
+  "timeline_id": "3e47ef71-ebfc-4520-975c-cb27fc090799",
+  "timeline_title": "Comprehensive Registry Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 6
 }

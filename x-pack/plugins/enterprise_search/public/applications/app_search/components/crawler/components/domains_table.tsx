@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiBasicTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FormattedNumber } from '@kbn/i18n/react';
+import { FormattedNumber } from '@kbn/i18n-react';
 
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
 import { KibanaLogic } from '../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../shared/react_router_helpers';
+import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 import { AppLogic } from '../../../app_logic';
 import { ENGINE_CRAWLER_DOMAIN_PATH } from '../../../routes';
 import { generateEnginePath } from '../../engine';
-import { CrawlerLogic } from '../crawler_logic';
-import { CrawlerOverviewLogic } from '../crawler_overview_logic';
+import { CrawlerDomainsLogic } from '../crawler_domains_logic';
 import { CrawlerDomain } from '../types';
 
 import { getDeleteDomainConfirmationMessage } from '../utils';
@@ -29,9 +30,12 @@ import { getDeleteDomainConfirmationMessage } from '../utils';
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
 export const DomainsTable: React.FC = () => {
-  const { domains } = useValues(CrawlerLogic);
+  const { domains, meta, dataLoading } = useValues(CrawlerDomainsLogic);
+  const { fetchCrawlerDomainsData, onPaginate, deleteDomain } = useActions(CrawlerDomainsLogic);
 
-  const { deleteDomain } = useActions(CrawlerOverviewLogic);
+  useEffect(() => {
+    fetchCrawlerDomainsData();
+  }, [meta.page.current]);
 
   const {
     myRole: { canManageEngineCrawler },
@@ -45,6 +49,14 @@ export const DomainsTable: React.FC = () => {
         {
           defaultMessage: 'Domain URL',
         }
+      ),
+      render: (_, domain: CrawlerDomain) => (
+        <EuiLinkTo
+          data-test-subj="CrawlerDomainURL"
+          to={generateEnginePath(ENGINE_CRAWLER_DOMAIN_PATH, { domainId: domain.id })}
+        >
+          {domain.url}
+        </EuiLinkTo>
       ),
     },
     {
@@ -116,5 +128,16 @@ export const DomainsTable: React.FC = () => {
     columns.push(actionsColumn);
   }
 
-  return <EuiInMemoryTable items={domains} columns={columns} />;
+  return (
+    <EuiBasicTable
+      loading={dataLoading}
+      items={domains}
+      columns={columns}
+      pagination={{
+        ...convertMetaToPagination(meta),
+        showPerPageOptions: false,
+      }}
+      onChange={handlePageChange(onPaginate)}
+    />
+  );
 };

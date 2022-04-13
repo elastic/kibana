@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { registerExpressionsLanguage } from '.';
 import { PresentationLabsService } from './services/labs';
+import { DataViewsPublicPluginStart } from '../../data_views/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
@@ -14,9 +16,11 @@ export interface PresentationUtilPluginSetup {}
 export interface PresentationUtilPluginStart {
   ContextProvider: React.FC;
   labsService: PresentationLabsService;
+  registerExpressionsLanguage: typeof registerExpressionsLanguage;
 }
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetupDeps {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PresentationUtilPluginStartDeps {}
+
+export interface PresentationUtilPluginStartDeps {
+  dataViews: DataViewsPublicPluginStart;
+}

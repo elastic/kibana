@@ -29,10 +29,10 @@ const MIN_TIME_SPAN_READABLE = '2 hours';
 
 export async function isValidTimeField({ asCurrentUser }: IScopedClusterClient, job: CombinedJob) {
   const index = job.datafeed_config.indices.join(',');
-  const timeField = job.data_description.time_field;
+  const timeField = job.data_description.time_field!;
 
   // check if time_field is of type 'date' or 'date_nanos'
-  const { body: fieldCaps } = await asCurrentUser.fieldCaps({
+  const fieldCaps = await asCurrentUser.fieldCaps({
     index,
     fields: [timeField],
   });

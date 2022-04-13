@@ -8,41 +8,56 @@
 import { act } from 'react-dom/test-utils';
 
 import type { MlAction } from '../../../common/types';
-import { ElasticsearchTestBed, setupElasticsearchPage, setupEnvironment } from '../helpers';
+import { setupEnvironment } from '../helpers';
+import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
 
 describe('Machine learning deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
   const mlDeprecation = esDeprecationsMockResponse.deprecations[0];
-
-  afterAll(() => {
-    server.restore();
-  });
-
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
+
     httpRequestsMockHelpers.setLoadEsDeprecationsResponse(esDeprecationsMockResponse);
+    httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({ mlUpgradeModeEnabled: false });
     httpRequestsMockHelpers.setUpgradeMlSnapshotStatusResponse({
       nodeId: 'my_node',
       snapshotId: MOCK_SNAPSHOT_ID,
       jobId: MOCK_JOB_ID,
       status: 'idle',
     });
-
-    await act(async () => {
-      testBed = await setupElasticsearchPage({ isReadOnlyMode: false });
+    httpRequestsMockHelpers.setReindexStatusResponse('reindex_index', {
+      reindexOp: null,
+      warnings: [],
+      hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+        aliases: [],
+      },
     });
 
-    const { find, exists, actions, component } = testBed;
+    await act(async () => {
+      testBed = await setupElasticsearchPage(mockEnvironment.httpSetup, { isReadOnlyMode: false });
+    });
 
+    const { actions, component } = testBed;
     component.update();
+    await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+  });
 
-    await actions.clickMlDeprecationAt(0);
+  test('renders a flyout with deprecation details', async () => {
+    const { find, exists } = testBed;
 
     expect(exists('mlSnapshotDetails')).toBe(true);
     expect(find('mlSnapshotDetails.flyoutTitle').text()).toContain(
       'Upgrade or delete model snapshot'
     );
+    expect(find('mlSnapshotDetails.documentationLink').props().href).toBe(mlDeprecation.url);
   });
 
   describe('upgrade snapshots', () => {
@@ -63,31 +78,34 @@ describe('Machine learning deprecation flyout', () => {
         status: 'complete',
       });
 
+      expect(exists('mlSnapshotDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('mlSnapshotDetails.upgradeSnapshotButton').text()).toEqual('Upgrade');
 
-      await actions.clickUpgradeMlSnapshot();
+      await actions.mlDeprecationFlyout.clickUpgradeSnapshot();
 
       // First, we expect a POST request to upgrade the snapshot
-      const upgradeRequest = server.requests[server.requests.length - 2];
-      expect(upgradeRequest.method).toBe('POST');
-      expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        '/api/upgrade_assistant/ml_snapshots',
+        expect.anything()
+      );
 
       // Next, we expect a GET request to check the status of the upgrade
-      const statusRequest = server.requests[server.requests.length - 1];
-      expect(statusRequest.method).toBe('GET');
-      expect(statusRequest.url).toBe(
-        `/api/upgrade_assistant/ml_snapshots/${MOCK_JOB_ID}/${MOCK_SNAPSHOT_ID}`
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `/api/upgrade_assistant/ml_snapshots/${MOCK_JOB_ID}/${MOCK_SNAPSHOT_ID}`,
+        expect.anything()
       );
 
       // Verify the "Resolution" column of the table is updated
       expect(find('mlActionResolutionCell').text()).toContain('Upgrade complete');
 
       // Reopen the flyout
-      await actions.clickMlDeprecationAt(0);
+      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
 
-      // Flyout actions should not be visible if deprecation was resolved
+      // Flyout actions should be hidden if deprecation was resolved
       expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
       expect(exists('mlSnapshotDetails.deleteSnapshotButton')).toBe(false);
+      // Badge should be updated in flyout title
+      expect(exists('mlSnapshotDetails.resolvedDeprecationBadge')).toBe(true);
     });
 
     it('handles upgrade failure', async () => {
@@ -108,17 +126,18 @@ describe('Machine learning deprecation flyout', () => {
         error,
       });
 
-      await actions.clickUpgradeMlSnapshot();
+      await actions.mlDeprecationFlyout.clickUpgradeSnapshot();
 
-      const upgradeRequest = server.requests[server.requests.length - 1];
-      expect(upgradeRequest.method).toBe('POST');
-      expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        '/api/upgrade_assistant/ml_snapshots',
+        expect.anything()
+      );
 
       // Verify the "Resolution" column of the table is updated
       expect(find('mlActionResolutionCell').text()).toContain('Upgrade failed');
 
       // Reopen the flyout
-      await actions.clickMlDeprecationAt(0);
+      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
 
       // Verify the flyout shows an error message
       expect(find('mlSnapshotDetails.resolveSnapshotError').text()).toContain(
@@ -127,34 +146,62 @@ describe('Machine learning deprecation flyout', () => {
       // Verify the upgrade button text changes
       expect(find('mlSnapshotDetails.upgradeSnapshotButton').text()).toEqual('Retry upgrade');
     });
+
+    it('Disables actions if ml_upgrade_mode is enabled', async () => {
+      httpRequestsMockHelpers.setLoadMlUpgradeModeResponse({
+        mlUpgradeModeEnabled: true,
+      });
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      });
+
+      const { actions, exists, component } = testBed;
+
+      component.update();
+
+      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+
+      // Shows an error callout with a docs link
+      expect(exists('mlSnapshotDetails.mlUpgradeModeEnabledError')).toBe(true);
+      expect(exists('mlSnapshotDetails.setUpgradeModeDocsLink')).toBe(true);
+      // Flyout actions should be hidden
+      expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
+      expect(exists('mlSnapshotDetails.deleteSnapshotButton')).toBe(false);
+    });
   });
 
   describe('delete snapshots', () => {
     it('successfully deletes snapshots', async () => {
-      const { find, actions } = testBed;
+      const { find, actions, exists } = testBed;
 
-      httpRequestsMockHelpers.setDeleteMlSnapshotResponse({
+      const jobId = (mlDeprecation.correctiveAction! as MlAction).jobId;
+      const snapshotId = (mlDeprecation.correctiveAction! as MlAction).snapshotId;
+      httpRequestsMockHelpers.setDeleteMlSnapshotResponse(jobId, snapshotId, {
         acknowledged: true,
       });
 
+      expect(exists('mlSnapshotDetails.criticalDeprecationBadge')).toBe(true);
       expect(find('mlSnapshotDetails.deleteSnapshotButton').text()).toEqual('Delete');
 
-      await actions.clickDeleteMlSnapshot();
+      await actions.mlDeprecationFlyout.clickDeleteSnapshot();
 
-      const request = server.requests[server.requests.length - 1];
-
-      expect(request.method).toBe('DELETE');
-      expect(request.url).toBe(
-        `/api/upgrade_assistant/ml_snapshots/${
-          (mlDeprecation.correctiveAction! as MlAction).jobId
-        }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
+      expect(httpSetup.delete).toHaveBeenLastCalledWith(
+        `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`,
+        expect.anything()
       );
 
       // Verify the "Resolution" column of the table is updated
       expect(find('mlActionResolutionCell').at(0).text()).toEqual('Deletion complete');
 
       // Reopen the flyout
-      await actions.clickMlDeprecationAt(0);
+      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+
+      // Flyout actions should be hidden if deprecation was resolved
+      expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
+      expect(exists('mlSnapshotDetails.deleteSnapshotButton')).toBe(false);
+      // Badge should be updated in flyout title
+      expect(exists('mlSnapshotDetails.resolvedDeprecationBadge')).toBe(true);
     });
 
     it('handles delete failure', async () => {
@@ -166,24 +213,22 @@ describe('Machine learning deprecation flyout', () => {
         message: 'Upgrade snapshot error',
       };
 
-      httpRequestsMockHelpers.setDeleteMlSnapshotResponse(undefined, error);
+      const jobId = (mlDeprecation.correctiveAction! as MlAction).jobId;
+      const snapshotId = (mlDeprecation.correctiveAction! as MlAction).snapshotId;
+      httpRequestsMockHelpers.setDeleteMlSnapshotResponse(jobId, snapshotId, undefined, error);
 
-      await actions.clickDeleteMlSnapshot();
+      await actions.mlDeprecationFlyout.clickDeleteSnapshot();
 
-      const request = server.requests[server.requests.length - 1];
-
-      expect(request.method).toBe('DELETE');
-      expect(request.url).toBe(
-        `/api/upgrade_assistant/ml_snapshots/${
-          (mlDeprecation.correctiveAction! as MlAction).jobId
-        }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
+      expect(httpSetup.delete).toHaveBeenLastCalledWith(
+        `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`,
+        expect.anything()
       );
 
       // Verify the "Resolution" column of the table is updated
       expect(find('mlActionResolutionCell').at(0).text()).toEqual('Deletion failed');
 
       // Reopen the flyout
-      await actions.clickMlDeprecationAt(0);
+      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
 
       // Verify the flyout shows an error message
       expect(find('mlSnapshotDetails.resolveSnapshotError').text()).toContain(

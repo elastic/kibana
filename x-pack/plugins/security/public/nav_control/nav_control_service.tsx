@@ -14,6 +14,7 @@ import { map, takeUntil } from 'rxjs/operators';
 
 import type { CoreStart } from 'src/core/public';
 
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';
 import type { UserMenuLink } from './nav_control_component';
@@ -50,7 +51,7 @@ export class SecurityNavControlService {
 
   private securityFeaturesSubscription?: Subscription;
 
-  private readonly stop$ = new ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
 
   public setup({ securityLicense, authc, logoutUrl }: SetupDeps) {
@@ -110,8 +111,9 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(
-    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application'>
+    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application' | 'theme'>
   ) {
+    const { theme$ } = core.theme;
     const currentUserPromise = this.authc.getCurrentUser();
     core.chrome.navControls.registerRight({
       order: 2000,
@@ -126,7 +128,9 @@ export class SecurityNavControlService {
         };
         ReactDOM.render(
           <I18nContext>
-            <SecurityNavControl {...props} />
+            <KibanaThemeProvider theme$={theme$}>
+              <SecurityNavControl {...props} />
+            </KibanaThemeProvider>
           </I18nContext>,
           el
         );

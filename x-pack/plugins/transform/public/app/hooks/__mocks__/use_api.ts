@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { HttpFetchError } from 'kibana/public';
 
@@ -166,7 +166,7 @@ const apiFactory = () => ({
     return Promise.resolve([]);
   },
   async getHistogramsForFields(
-    indexPatternTitle: string,
+    dataViewTitle: string,
     fields: FieldHistogramRequestConfig[],
     query: string | SavedSearchQuery,
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE

@@ -11,6 +11,8 @@ exports[`Paginated Table Component rendering it renders the default load more ta
     <HeaderSectionComponent
       subtitle="Showing: 1 Test Unit"
       title="Hosts"
+      toggleQuery={[Function]}
+      toggleStatus={true}
       tooltip="My test tooltip"
     >
       <p>
@@ -22,34 +24,43 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         Array [
           Object {
             "field": "node.host.name",
-            "hideForMobile": false,
+            "mobileOptions": Object {
+              "show": true,
+            },
             "name": "Host",
             "render": [Function],
             "truncateText": false,
           },
           Object {
             "field": "node.host.firstSeen",
-            "hideForMobile": false,
+            "mobileOptions": Object {
+              "show": true,
+            },
             "name": "First seen",
             "render": [Function],
             "truncateText": false,
           },
           Object {
             "field": "node.host.os",
-            "hideForMobile": false,
+            "mobileOptions": Object {
+              "show": true,
+            },
             "name": "OS",
             "render": [Function],
             "truncateText": false,
           },
           Object {
             "field": "node.host.version",
-            "hideForMobile": false,
+            "mobileOptions": Object {
+              "show": true,
+            },
             "name": "Version",
             "render": [Function],
             "truncateText": false,
           },
         ]
       }
+      data-test-subj="paginated-basic-table"
       items={
         Array [
           Object {

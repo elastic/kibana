@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/api/types';
-import {
-  ALERT_ORIGINAL_TIME,
-  ALERT_RULE_THRESHOLD_FIELD,
-} from '../../rule_types/field_maps/field_names';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 
 import { SimpleHit, ThresholdSignalHistory } from '../types';
-import { getThresholdTermsHash, isWrappedRACAlert, isWrappedSignalHit } from '../utils';
+import { getThresholdTermsHash, isWrappedDetectionAlert, isWrappedSignalHit } from '../utils';
 
 interface GetThresholdSignalHistoryParams {
   alerts: Array<SearchHit<unknown>>;
 }
 
 const getTerms = (alert: SimpleHit) => {
-  if (isWrappedRACAlert(alert)) {
-    return (alert._source[ALERT_RULE_THRESHOLD_FIELD] as string[]).map((field) => ({
+  if (isWrappedDetectionAlert(alert)) {
+    const parameters = alert._source[ALERT_RULE_PARAMETERS] as unknown as Record<
+      string,
+      Record<string, string[]>
+    >;
+    return parameters.threshold.field.map((field) => ({
       field,
       value: alert._source[field] as string,
     }));
@@ -33,7 +35,7 @@ const getTerms = (alert: SimpleHit) => {
 };
 
 const getOriginalTime = (alert: SimpleHit) => {
-  if (isWrappedRACAlert(alert)) {
+  if (isWrappedDetectionAlert(alert)) {
     const originalTime = alert._source[ALERT_ORIGINAL_TIME];
     return originalTime != null ? new Date(originalTime as string).getTime() : undefined;
   } else if (isWrappedSignalHit(alert)) {

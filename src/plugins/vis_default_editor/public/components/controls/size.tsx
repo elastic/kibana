@@ -9,7 +9,7 @@
 import React, { useEffect } from 'react';
 import { isUndefined } from 'lodash';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AggParamEditorProps } from '../agg_param_props';
 

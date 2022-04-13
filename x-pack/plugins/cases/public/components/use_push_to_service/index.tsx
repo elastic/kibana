@@ -19,16 +19,15 @@ import {
   getCaseClosedInfo,
 } from './helpers';
 import * as i18n from './translations';
-import { Case, CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
+import { Case } from '../../../common/ui/types';
+import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { CasesNavigation } from '../links';
 import { ErrorMessage } from './callout/types';
 
 export interface UsePushToService {
   caseId: string;
   caseServices: CaseServices;
   caseStatus: string;
-  configureCasesNavigation: CasesNavigation;
   connector: CaseConnector;
   connectors: ActionConnector[];
   hasDataToPush: boolean;
@@ -47,7 +46,6 @@ export const usePushToService = ({
   caseId,
   caseServices,
   caseStatus,
-  configureCasesNavigation,
   connector,
   connectors,
   hasDataToPush,
@@ -175,7 +173,6 @@ export const usePushToService = ({
       pushCallouts:
         errorsMsg.length > 0 ? (
           <CaseCallOut
-            configureCasesNavigation={configureCasesNavigation}
             hasConnectors={connectors.length > 0}
             hasLicenseError={hasLicenseError}
             messages={errorsMsg}
@@ -184,7 +181,6 @@ export const usePushToService = ({
         ) : null,
     }),
     [
-      configureCasesNavigation,
       connector.name,
       connectors.length,
       errorsMsg,

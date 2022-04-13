@@ -7,12 +7,12 @@
 
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { IFieldType } from 'src/plugins/data/public';
+import { FieldSpec } from 'src/plugins/data_views/common';
 
 interface Props {
   selectedGroups?: string[];
   onChange: (groupBy: string[]) => void;
-  fields: IFieldType[];
+  fields: FieldSpec[];
   label: string;
   placeholder: string;
 }

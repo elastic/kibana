@@ -7,7 +7,11 @@
 
 import { readRules } from './read_rules';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { getAlertMock, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
+import {
+  resolveAlertMock,
+  getAlertMock,
+  getFindResultWithSingleHit,
+} from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 export class TestError extends Error {
@@ -33,7 +37,9 @@ describe.each([
   describe('readRules', () => {
     test('should return the output from rulesClient if id is set but ruleId is undefined', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.resolve.mockResolvedValue(
+        resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      );
 
       const rule = await readRules({
         isRuleRegistryEnabled,
@@ -45,10 +51,10 @@ describe.each([
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       // @ts-expect-error
       delete result.alertTypeId;
-      rulesClient.get.mockResolvedValue(result);
+      rulesClient.resolve.mockResolvedValue(result);
 
       const rule = await readRules({
         isRuleRegistryEnabled,
@@ -61,7 +67,7 @@ describe.each([
 
     test('should return error if alerts client throws 404 error on get', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockImplementation(() => {
+      rulesClient.resolve.mockImplementation(() => {
         throw new TestError();
       });
 
@@ -76,7 +82,7 @@ describe.each([
 
     test('should return error if alerts client throws error on get', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockImplementation(() => {
+      rulesClient.resolve.mockImplementation(() => {
         throw new Error('Test error');
       });
       try {

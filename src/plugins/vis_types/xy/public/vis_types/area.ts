@@ -26,6 +26,7 @@ import {
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
+import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 export const areaVisTypeDefinition = {
   name: 'area',
@@ -36,6 +37,7 @@ export const areaVisTypeDefinition = {
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  updateVisTypeOnParamsChange: getVisTypeFromParams,
   visConfig: {
     defaults: {
       type: ChartType.Area,
@@ -74,7 +76,7 @@ export const areaVisTypeDefinition = {
           labels: {
             show: true,
             rotate: LabelRotation.Horizontal,
-            filter: false,
+            filter: true,
             truncate: 100,
           },
           title: {
@@ -95,7 +97,7 @@ export const areaVisTypeDefinition = {
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
-          circlesRadius: 3,
+          circlesRadius: 1,
           interpolate: InterpolationMode.Linear,
           valueAxis: 'ValueAxis-1',
         },
@@ -155,7 +157,16 @@ export const areaVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -165,7 +176,16 @@ export const areaVisTypeDefinition = {
         }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -175,7 +195,16 @@ export const areaVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
     ],
   },

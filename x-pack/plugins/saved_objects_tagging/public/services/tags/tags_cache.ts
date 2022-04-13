@@ -11,7 +11,7 @@ import { takeUntil } from 'rxjs/operators';
 import { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { Tag, TagAttributes } from '../../../common/types';
 
-export { ITagsCache };
+export type { ITagsCache };
 
 export interface ITagsChangeListener {
   onDelete: (id: string) => void;
@@ -46,7 +46,7 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
     this.refreshHandler = refreshHandler;
     this.refreshInterval = refreshInterval;
 
-    this.stop$ = new Subject();
+    this.stop$ = new Subject<void>();
     this.internal$ = new BehaviorSubject<Tag[]>([]);
     this.public$ = this.internal$.pipe(takeUntil(this.stop$));
   }

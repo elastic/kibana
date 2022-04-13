@@ -13,10 +13,9 @@ import * as Rx from 'rxjs';
 import { mergeMap, reduce } from 'rxjs/operators';
 import execa from 'execa';
 import { run, createFailError } from '@kbn/dev-utils';
-import { lastValueFrom } from '@kbn/std';
 
 import { PROJECTS } from './projects';
-import { buildAllTsRefs } from './build_ts_refs';
+import { buildTsRefs } from './build_ts_refs';
 import { updateRootRefsConfig } from './root_refs_config';
 
 export async function runTypeCheckCli() {
@@ -25,11 +24,6 @@ export async function runTypeCheckCli() {
       // if the tsconfig.refs.json file is not self-managed then make sure it has
       // a reference to every composite project in the repo
       await updateRootRefsConfig(log);
-
-      const { failed } = await buildAllTsRefs({ log, procRunner, verbose: !!flags.verbose });
-      if (failed) {
-        throw createFailError('Unable to build TS project refs');
-      }
 
       const projectFilter =
         flags.project && typeof flags.project === 'string'
@@ -40,6 +34,16 @@ export async function runTypeCheckCli() {
         return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
       });
 
+      const { failed } = await buildTsRefs({
+        log,
+        procRunner,
+        verbose: !!flags.verbose,
+        project: projects.length === 1 ? projects[0] : undefined,
+      });
+      if (failed) {
+        throw createFailError('Unable to build TS project refs');
+      }
+
       if (!projects.length) {
         if (projectFilter) {
           throw createFailError(`Unable to find project at ${flags.project}`);
@@ -48,23 +52,8 @@ export async function runTypeCheckCli() {
         }
       }
 
-      const nonCompositeProjects = projects.filter((p) => !p.isCompositeProject());
-      if (!nonCompositeProjects.length) {
-        if (projectFilter) {
-          log.success(
-            `${flags.project} is a composite project so its types are validated by scripts/build_ts_refs`
-          );
-        } else {
-          log.success(
-            `All projects are composite so their types are validated by scripts/build_ts_refs`
-          );
-        }
-
-        return;
-      }
-
       const concurrency = Math.min(4, Math.round((Os.cpus() || []).length / 2) || 1) || 1;
-      log.info('running type check in', nonCompositeProjects.length, 'non-composite projects');
+      log.info('running type check in', projects.length, 'projects');
 
       const tscArgs = [
         ...['--emitDeclarationOnly', 'false'],
@@ -75,8 +64,8 @@ export async function runTypeCheckCli() {
           : ['--skipLibCheck', 'false']),
       ];
 
-      const failureCount = await lastValueFrom(
-        Rx.from(nonCompositeProjects).pipe(
+      const failureCount = await Rx.lastValueFrom(
+        Rx.from(projects).pipe(
           mergeMap(async (p) => {
             const relativePath = Path.relative(process.cwd(), p.tsConfigPath);
 
@@ -85,7 +74,7 @@ export async function runTypeCheckCli() {
               [
                 '--max-old-space-size=5120',
                 require.resolve('typescript/bin/tsc'),
-                ...['--project', p.tsConfigPath, ...(flags.verbose ? ['--verbose'] : [])],
+                ...['--project', p.tsConfigPath],
                 ...tscArgs,
               ],
               {

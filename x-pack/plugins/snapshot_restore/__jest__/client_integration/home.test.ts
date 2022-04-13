@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/application/constants';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '../../common';
 import {
   setupEnvironment,
   pageHelpers,
@@ -22,23 +22,13 @@ import { REPOSITORY_NAME } from './helpers/constant';
 const { setup } = pageHelpers.home;
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
-jest.mock('@kbn/i18n/react', () => {
-  const original = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const original = jest.requireActual('@kbn/i18n-react');
 
   return {
     ...original,
     FormattedDate: () => '',
     FormattedTime: () => '',
-  };
-});
-
-jest.mock('../../common/constants', () => {
-  const original = jest.requireActual('../../common/constants');
-
-  return {
-    ...original,
-    // Mocking this value to a lower number in order to more easily trigger the max snapshots warning in the tests
-    SNAPSHOT_LIST_MAX_SIZE: 2,
   };
 });
 
@@ -51,16 +41,12 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
   });
 
 describe('<SnapshotRestoreHome />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;
-
-  afterAll(() => {
-    server.restore();
-  });
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
 
     test('should set the correct app title', () => {
@@ -89,7 +75,7 @@ describe('<SnapshotRestoreHome />', () => {
 
     describe('tabs', () => {
       beforeEach(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
 
         await act(async () => {
           await nextTick();
@@ -142,7 +128,7 @@ describe('<SnapshotRestoreHome />', () => {
       });
 
       test('should display an empty prompt', async () => {
-        const { component, exists } = await setup();
+        const { component, exists } = await setup(httpSetup);
 
         await act(async () => {
           await nextTick();
@@ -174,7 +160,7 @@ describe('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories });
 
-        testBed = await setup();
+        testBed = await setup(httpSetup);
 
         await act(async () => {
           await nextTick();
@@ -218,7 +204,6 @@ describe('<SnapshotRestoreHome />', () => {
 
       test('should have a button to reload the repositories', async () => {
         const { component, exists, actions } = testBed;
-        const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
         await act(async () => {
@@ -227,9 +212,9 @@ describe('<SnapshotRestoreHome />', () => {
           component.update();
         });
 
-        expect(server.requests.length).toBe(totalRequests + 1);
-        expect(server.requests[server.requests.length - 1].url).toBe(
-          `${API_BASE_PATH}repositories`
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}repositories`,
+          expect.anything()
         );
       });
 
@@ -283,10 +268,10 @@ describe('<SnapshotRestoreHome />', () => {
             component.update();
           });
 
-          const latestRequest = server.requests[server.requests.length - 1];
-
-          expect(latestRequest.method).toBe('DELETE');
-          expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}`);
+          expect(httpSetup.delete).toHaveBeenLastCalledWith(
+            `${API_BASE_PATH}repositories/${repo1.name}`,
+            expect.anything()
+          );
         });
       });
 
@@ -314,23 +299,20 @@ describe('<SnapshotRestoreHome />', () => {
         });
 
         test('should show a loading state while fetching the repository', async () => {
-          server.respondImmediately = false;
           const { find, exists, actions } = testBed;
 
           // By providing undefined, the "loading section" will be displayed
-          httpRequestsMockHelpers.setGetRepositoryResponse(undefined);
+          httpRequestsMockHelpers.setGetRepositoryResponse(repo1.name, undefined);
 
           await actions.clickRepositoryAt(0);
 
           expect(exists('repositoryDetail.sectionLoading')).toBe(true);
           expect(find('repositoryDetail.sectionLoading').text()).toEqual('Loading repository…');
-
-          server.respondImmediately = true;
         });
 
         describe('when the repository has been fetched', () => {
           beforeEach(async () => {
-            httpRequestsMockHelpers.setGetRepositoryResponse({
+            httpRequestsMockHelpers.setGetRepositoryResponse(repo1.name, {
               repository: {
                 name: 'my-repo',
                 type: 'fs',
@@ -367,16 +349,72 @@ describe('<SnapshotRestoreHome />', () => {
               component.update();
             });
 
-            const latestRequest = server.requests[server.requests.length - 1];
+            expect(httpSetup.get).toHaveBeenLastCalledWith(
+              `${API_BASE_PATH}repositories/${repo1.name}/verify`,
+              expect.anything()
+            );
+          });
 
-            expect(latestRequest.method).toBe('GET');
-            expect(latestRequest.url).toBe(`${API_BASE_PATH}repositories/${repo1.name}/verify`);
+          describe('clean repository', () => {
+            test('shows results when request succeeds', async () => {
+              httpRequestsMockHelpers.setCleanupRepositoryResponse(repo1.name, {
+                cleanup: {
+                  cleaned: true,
+                  response: {
+                    results: {
+                      deleted_bytes: 0,
+                      deleted_blobs: 0,
+                    },
+                  },
+                },
+              });
+
+              const { exists, find, component } = testBed;
+              await act(async () => {
+                find('repositoryDetail.cleanupRepositoryButton').simulate('click');
+              });
+              component.update();
+
+              expect(httpSetup.post).toHaveBeenLastCalledWith(
+                `${API_BASE_PATH}repositories/${repo1.name}/cleanup`,
+                expect.anything()
+              );
+
+              expect(exists('repositoryDetail.cleanupCodeBlock')).toBe(true);
+              expect(exists('repositoryDetail.cleanupError')).toBe(false);
+            });
+
+            test('shows error when success fails', async () => {
+              httpRequestsMockHelpers.setCleanupRepositoryResponse(repo1.name, {
+                cleanup: {
+                  cleaned: false,
+                  error: {
+                    message: 'Error message',
+                    statusCode: 400,
+                  },
+                },
+              });
+
+              const { exists, find, component } = testBed;
+              await act(async () => {
+                find('repositoryDetail.cleanupRepositoryButton').simulate('click');
+              });
+              component.update();
+
+              expect(httpSetup.post).toHaveBeenLastCalledWith(
+                `${API_BASE_PATH}repositories/${repo1.name}/cleanup`,
+                expect.anything()
+              );
+
+              expect(exists('repositoryDetail.cleanupCodeBlock')).toBe(false);
+              expect(exists('repositoryDetail.cleanupError')).toBe(true);
+            });
           });
         });
 
         describe('when the repository has been fetched (and has snapshots)', () => {
           beforeEach(async () => {
-            httpRequestsMockHelpers.setGetRepositoryResponse({
+            httpRequestsMockHelpers.setGetRepositoryResponse(repo1.name, {
               repository: {
                 name: 'my-repo',
                 type: 'fs',
@@ -404,7 +442,7 @@ describe('<SnapshotRestoreHome />', () => {
       });
 
       beforeEach(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
@@ -431,9 +469,10 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots: [],
           repositories: ['my-repo'],
+          total: 0,
         });
 
-        testBed = await setup();
+        testBed = await setup(httpSetup);
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
@@ -469,9 +508,10 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
           repositories: [REPOSITORY_NAME],
+          total: 2,
         });
 
-        testBed = await setup();
+        testBed = await setup(httpSetup);
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
@@ -501,18 +541,10 @@ describe('<SnapshotRestoreHome />', () => {
         });
       });
 
-      test('should show a warning if the number of snapshots exceeded the limit', () => {
-        // We have mocked the SNAPSHOT_LIST_MAX_SIZE to 2, so the warning should display
-        const { find, exists } = testBed;
-        expect(exists('maxSnapshotsWarning')).toBe(true);
-        expect(find('maxSnapshotsWarning').text()).toContain(
-          'Cannot show the full list of snapshots'
-        );
-      });
-
       test('should show a warning if one repository contains errors', async () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
+          total: 2,
           repositories: [REPOSITORY_NAME],
           errors: {
             repository_with_errors: {
@@ -523,7 +555,7 @@ describe('<SnapshotRestoreHome />', () => {
           },
         });
 
-        testBed = await setup();
+        testBed = await setup(httpSetup);
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
@@ -551,7 +583,7 @@ describe('<SnapshotRestoreHome />', () => {
           },
         });
 
-        testBed = await setup();
+        testBed = await setup(httpSetup);
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
@@ -587,7 +619,6 @@ describe('<SnapshotRestoreHome />', () => {
 
       test('should have a button to reload the snapshots', async () => {
         const { component, exists, actions } = testBed;
-        const totalRequests = server.requests.length;
         expect(exists('reloadButton')).toBe(true);
 
         await act(async () => {
@@ -596,13 +627,19 @@ describe('<SnapshotRestoreHome />', () => {
           component.update();
         });
 
-        expect(server.requests.length).toBe(totalRequests + 1);
-        expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}snapshots`);
+        expect(httpSetup.get).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}snapshots`,
+          expect.anything()
+        );
       });
 
       describe('detail panel', () => {
         beforeEach(async () => {
-          httpRequestsMockHelpers.setGetSnapshotResponse(snapshot1);
+          httpRequestsMockHelpers.setGetSnapshotResponse(
+            snapshot1.repository,
+            snapshot1.snapshot,
+            snapshot1
+          );
         });
 
         test('should show the detail when clicking on a snapshot', async () => {
@@ -618,17 +655,18 @@ describe('<SnapshotRestoreHome />', () => {
         // that makes the component crash. I tried a few things with no luck so, as this
         // is a low impact test, I prefer to skip it and move on.
         test.skip('should show a loading while fetching the snapshot', async () => {
-          server.respondImmediately = false;
           const { find, exists, actions } = testBed;
           // By providing undefined, the "loading section" will be displayed
-          httpRequestsMockHelpers.setGetSnapshotResponse(undefined);
+          httpRequestsMockHelpers.setGetSnapshotResponse(
+            snapshot1.repository,
+            snapshot1.snapshot,
+            undefined
+          );
 
           await actions.clickSnapshotAt(0);
 
           expect(exists('snapshotDetail.sectionLoading')).toBe(true);
           expect(find('snapshotDetail.sectionLoading').text()).toEqual('Loading snapshot…');
-
-          server.respondImmediately = true;
         });
 
         describe('on mount', () => {
@@ -719,7 +757,11 @@ describe('<SnapshotRestoreHome />', () => {
 
                 const setSnapshotStateAndUpdateDetail = async (state: string) => {
                   const updatedSnapshot = { ...snapshot1, state };
-                  httpRequestsMockHelpers.setGetSnapshotResponse(updatedSnapshot);
+                  httpRequestsMockHelpers.setGetSnapshotResponse(
+                    itemIndexToClickOn === 0 ? snapshot1.repository : snapshot2.repository,
+                    itemIndexToClickOn === 0 ? snapshot1.snapshot : snapshot2.snapshot,
+                    updatedSnapshot
+                  );
                   await actions.clickSnapshotAt(itemIndexToClickOn); // click another snapshot to trigger the HTTP call
                 };
 
@@ -731,7 +773,7 @@ describe('<SnapshotRestoreHome />', () => {
 
                   const stateMessage = find('snapshotDetail.state.value').text();
                   try {
-                    expect(stateMessage).toBe(expectedMessage);
+                    expect(stateMessage).toContain(expectedMessage); // Messages may include the word "Info" to account for the rendered text coming from EuiIcon
                   } catch {
                     throw new Error(
                       `Expected snapshot state message "${expectedMessage}" for state "${state}, but got "${stateMessage}".`
@@ -749,9 +791,12 @@ describe('<SnapshotRestoreHome />', () => {
                 };
 
                 // Call sequentially each state and verify that the message is ok
-                return Object.entries(mapStateToMessage).reduce((promise, [state, message]) => {
-                  return promise.then(async () => expectMessageForSnapshotState(state, message));
-                }, Promise.resolve());
+                return Object.entries(mapStateToMessage).reduce(
+                  async (promise, [state, message]) => {
+                    return promise.then(async () => expectMessageForSnapshotState(state, message));
+                  },
+                  Promise.resolve()
+                );
               });
             });
 
@@ -767,8 +812,12 @@ describe('<SnapshotRestoreHome />', () => {
 
               test('should display a message when snapshot in progress ', async () => {
                 const { find, actions } = testBed;
-                const updatedSnapshot = { ...snapshot1, state: 'IN_PROGRESS' };
-                httpRequestsMockHelpers.setGetSnapshotResponse(updatedSnapshot);
+                const updatedSnapshot = { ...snapshot2, state: 'IN_PROGRESS' };
+                httpRequestsMockHelpers.setGetSnapshotResponse(
+                  snapshot2.repository,
+                  snapshot2.snapshot,
+                  updatedSnapshot
+                );
 
                 await actions.clickSnapshotAt(1); // click another snapshot to trigger the HTTP call
                 actions.selectSnapshotDetailTab('failedIndices');
@@ -787,7 +836,11 @@ describe('<SnapshotRestoreHome />', () => {
 
         beforeEach(async () => {
           const updatedSnapshot = { ...snapshot1, indexFailures };
-          httpRequestsMockHelpers.setGetSnapshotResponse(updatedSnapshot);
+          httpRequestsMockHelpers.setGetSnapshotResponse(
+            updatedSnapshot.repository,
+            updatedSnapshot.snapshot,
+            updatedSnapshot
+          );
           await testBed.actions.clickSnapshotAt(0);
           testBed.actions.selectSnapshotDetailTab('failedIndices');
         });

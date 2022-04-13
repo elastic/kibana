@@ -26,17 +26,18 @@ export function useInstanceDetailsFetcher({
       if (!start || !end) {
         return;
       }
-      return callApmApi({
-        endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
-        params: {
-          path: {
-            serviceName,
-            serviceNodeName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
+        {
+          params: {
+            path: {
+              serviceName,
+              serviceNodeName,
+            },
+            query: { start, end },
           },
-          query: { start, end },
-        },
-      });
+        }
+      );
     },
     [serviceName, serviceNodeName, start, end]
   );

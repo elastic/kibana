@@ -28,7 +28,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -87,7 +87,7 @@ const getDomain = (alertInterval: string, startAt: Date) => {
 };
 
 interface Props {
-  alertParams: IndexThresholdAlertParams;
+  ruleParams: IndexThresholdAlertParams;
   alertInterval: string;
   aggregationTypes: { [key: string]: AggregationType };
   comparators: {
@@ -108,7 +108,7 @@ enum LoadingStateType {
 
 type MetricResult = [number, number]; // [epochMillis, value]
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({
-  alertParams,
+  ruleParams,
   alertInterval,
   aggregationTypes,
   comparators,
@@ -128,7 +128,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     timeWindowUnit,
     groupBy,
     threshold,
-  } = alertParams;
+  } = ruleParams;
   const { http, uiSettings } = useKibana().services;
   const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
@@ -192,7 +192,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   };
 
   // Fetching visualization data is independent of alert actions
-  const alertWithoutActions = { ...alertParams, actions: [], type: 'threshold' };
+  const alertWithoutActions = { ...ruleParams, actions: [], type: 'threshold' };
 
   if (loadingState === LoadingStateType.FirstLoad) {
     return (
@@ -277,7 +277,12 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
+            <Axis
+              domain={{ max: maxY, min: NaN }}
+              id="left"
+              title={aggLabel}
+              position={Position.Left}
+            />
             {alertVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries

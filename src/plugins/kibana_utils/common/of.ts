@@ -15,6 +15,7 @@
  *
  * @param promise Promise to convert to 3-tuple.
  */
+
 export const of = async <T, E = any>(
   promise: Promise<T>
 ): Promise<[T | undefined, E | undefined, boolean]> => {

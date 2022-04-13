@@ -2,7 +2,7 @@
 == Advanced Settings
 
 *Advanced Settings* control the behavior of {kib}. For example, you can change the format used to display dates,
-specify the default index pattern, and set the precision for displayed decimal values.
+specify the default data view, and set the precision for displayed decimal values.
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
 . Scroll or search for the setting.
@@ -134,10 +134,6 @@ value by the maximum number of aggregations in each visualization.
 [[history-limit]]`history:limit`::
 In fields that have history, such as query inputs, show this many recent values.
 
-[[indexpattern-placeholder]]`indexPattern:placeholder`::
-The default placeholder value to use in
-*Management > Index Patterns > Create Index Pattern*.
-
 [[metafields]]`metaFields`::
 Fields that exist outside of `_source`. Kibana merges these fields into the
 document when displaying it.
@@ -189,7 +185,7 @@ Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
 to apply the setting.
 
 [[theme-version]]`theme:version`::
-Specifies the {kib} theme. If you change the setting, refresh the page to apply the setting.
+Kibana only ships with the v8 theme now, so this setting can no longer be edited.
 
 [[timepicker-quickranges]]`timepicker:quickRanges`::
 The list of ranges to show in the Quick section of the time filter. This should
@@ -283,7 +279,7 @@ value is 5.
 [[context-tiebreakerfields]]`context:tieBreakerFields`::
 A comma-separated list of fields to use for breaking a tie between documents
 that have the same timestamp value. The first field that is present and sortable
-in the current index pattern is used.
+in the current data view is used.
 
 [[defaultcolumns]]`defaultColumns`::
 The columns that appear by default on the *Discover* page. The default is
@@ -296,7 +292,7 @@ The number of rows to show in the *Discover* table.
 Specifies the maximum number of fields to show in the document column of the *Discover* table.
 
 [[discover-modify-columns-on-switch]]`discover:modifyColumnsOnSwitch`::
-When enabled, removes the columns that are not in the new index pattern.
+When enabled, removes the columns that are not in the new data view.
 
 [[discover-sample-size]]`discover:sampleSize`::
 Specifies the number of rows to display in the *Discover* table.
@@ -314,7 +310,7 @@ does not have an effect when loading a saved search.
 When enabled, displays multi-fields in the expanded document view.
 
 [[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
-The default sort direction for time-based index patterns.
+The default sort direction for time-based data views.
 
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
 Hides the "Time" column in *Discover* and in all saved searches on dashboards.
@@ -324,7 +320,9 @@ Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
 
 [[doctable-legacy]]`doc_table:legacy`::
-Controls the way the document table looks and works. Set this property to `true` to revert to the legacy implementation.
+Controls the way the document table looks and works.
+To use the new *Document Explorer* instead of the classic view, turn off this option.
+The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
 
 [float]
 [[kibana-ml-settings]]
@@ -392,7 +390,7 @@ A custom image to use in the footer of the PDF.
 
 [horizontal]
 [[rollups-enableindexpatterns]]`rollups:enableIndexPatterns`::
-Enables the creation of index patterns that capture rollup indices, which in
+Enables the creation of data views that capture rollup indices, which in
 turn enables visualizations based on rollup data. Refresh the page to apply the
 changes.
 
@@ -408,7 +406,7 @@ to use when `courier:setRequestPreference` is set to "custom".
 [[courier-ignorefilteriffieldnotinindex]]`courier:ignoreFilterIfFieldNotInIndex`::
 Skips filters that apply to fields that don't exist in the index for a
 visualization. Useful when dashboards consist of visualizations from multiple
-index patterns.
+data views.
 
 [[courier-maxconcurrentshardrequests]]`courier:maxConcurrentShardRequests`::
 Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests]
@@ -426,6 +424,7 @@ because requests can be spread across all shard copies. However, results might
 be inconsistent because different shards might be in different refresh states.
 
 [[search-includefrozen]]`search:includeFrozen`::
+**This setting is deprecated and will not be supported as of 9.0.**
 Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
@@ -479,24 +478,12 @@ The default index when using the `.es()` query.
 [[timelion-estimefield]]`timelion:es.timefield`::
 The default field containing a timestamp when using the `.es()` query.
 
-[[timelion-graphite-url]]`timelion:graphite.url`::
-experimental:[]
-Used with graphite queries, this is the URL of your graphite host
-in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can
-be selected from an allow-list configured in the `kibana.yml` under
-`timelion.graphiteUrls`.
-
 [[timelion-maxbuckets]]`timelion:max_buckets`::
 The maximum number of buckets a single data source can return. This value is
 used for calculating automatic intervals in visualizations.
 
 [[timelion-mininterval]]`timelion:min_interval`::
 The smallest interval to calculate when using "auto".
-
-[[timelion-quandlkey]]`timelion:quandl.key`::
-experimental:[]
-Used with quandl queries, this is your API key from
-https://www.quandl.com/[www.quandl.com].
 
 [[timelion-targetbuckets]]`timelion:target_buckets`::
 Used for calculating automatic intervals in visualizations, this is the number
@@ -515,11 +502,17 @@ Enables the legacy charts library for timelion charts in Visualize.
 **This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in charts using the *Compatibility* palette.
 
+[[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
+Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
+
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
 [[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
-The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use to the legacy charts library.
+The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use the legacy charts library.
+
+[[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
+Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
 [[visualize-enablelabs]]`visualize:enableLabs`::
 Enables users to create, view, and edit experimental visualizations. When disabled,

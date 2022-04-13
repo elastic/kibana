@@ -43,6 +43,28 @@ feature branch, and force-pushing (see below for instructions).
 * When merging, we'll squash your commits into a single commit.
 
 [discrete]
+==== Commit using your `@elastic.co` email address
+
+In order to assist with developer tooling we ask that all Elastic engineers use their `@elastic.co` email address when committing to the Kibana repo. We have implemented a CI check that validates any PR opened by a member of the `@elastic` organization has at least one commit that is attributed to an `@elastic.co` email address. If you have a PR that is failing because of this check you can fix your PR by following these steps:
+
+ 1. Ensure that you don't have any staged changes
+ 2. Checkout the branch for your PR
+ 3. Update the git config for your current repository to commit with your `@elastic.co` email:
++
+["source","shell"]
+-----------
+git config user.email YOUR_ELASTIC_EMAIL@elastic.co
+-----------
+ 4. Create a commit using the new email address
++
+["source","shell"]
+-----------
+git commit -m 'commit using @elastic.co' --allow-empty
+-----------
++
+ 5. Push the new commit to your PR and the status should now be green
+
+[discrete]
 ==== Rebasing and fixing merge conflicts
 
 Rebasing can be tricky, and fixing merge conflicts can be even trickier
