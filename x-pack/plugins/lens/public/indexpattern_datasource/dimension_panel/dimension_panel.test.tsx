@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { unifiedSearchPluginMock } from '../../../../../../src/plugins/unified_search/public/mocks';
-// import { UnifiedSearchPublicPluginStart } from '../../../../../../src/plugins/unified_search/public';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
