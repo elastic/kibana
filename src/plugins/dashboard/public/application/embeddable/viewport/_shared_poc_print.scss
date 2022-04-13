@@ -49,68 +49,59 @@ $a4PageContentWidth: $a4PageWidth;
   margin-bottom: $a4PageMarginBottom;
 }
 
-@mixin globalScreenRules {
-  @media screen, projection {
-    .printFooter, .printHeader {
-      display: none;
-    }
+@media screen, projection {
+  .printFooter, .printHeader {
+    display: none;
   }
 }
 
-@mixin globalPrintRules {
-  @media print {
+@media print {
 
-    html {
-      background-color: #FFF;
-    }
-
-    // When printing it is good practice to show the full url
-    a[href]:after {
-      content: ' [' attr(href) ']';
-    }
-
-    figure {
-      break-inside: avoid;
-    }
-
-    * {
-      -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
-      color-adjust: exact !important;                 /*Firefox*/
-    }
-
-    .printHeader {
-      display: table-header-group;
-      position: fixed;
-      top: 0;
-      left: 50%;
-      padding-top: 2mm;
-      transform: translateX(-50%);
-    }
-
-    .printFooter {
-      display: table-footer-group;
-      position: fixed;
-      bottom: 0;
-      margin: 0 2mm 2mm 5mm;
-      > img {
-        height: 8mm;
-      }
-    }
-
-    // There is a known limitation that Chrome does not increment the counter of fixed elements even though
-    // they appear for each page. So we leave this out for now.
-    // See https://bugs.chromium.org/p/chromium/issues/detail?id=774830
-    // .printFooter::after {
-    //   position: fixed;
-    //   bottom: 2mm;
-    //   left: 50%;
-    //   transform: translateX(-50%);
-    //   content: 'Page ' counter(x);
-    // }
+  html {
+    background-color: #FFF;
   }
-}
 
-@mixin globalSharedRules {
-  @include globalScreenRules();
-  @include globalPrintRules();
+  // When printing it is good practice to show the full url
+  a[href]:after {
+    content: ' [' attr(href) ']';
+  }
+
+  figure {
+    break-inside: avoid;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
+    color-adjust: exact !important;                 /*Firefox*/
+  }
+
+  .printHeader {
+    display: table-header-group;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    padding-top: 2mm;
+    transform: translateX(-50%);
+  }
+
+  .printFooter {
+    display: table-footer-group;
+    position: fixed;
+    bottom: 0;
+    margin: 0 2mm 2mm 5mm;
+    > img {
+      height: 8mm;
+    }
+  }
+
+  // There is a known limitation that Chrome does not increment the counter of fixed elements even though
+  // they appear for each page. So we leave this out for now.
+  // See https://bugs.chromium.org/p/chromium/issues/detail?id=774830
+  // .printFooter::after {
+  //   position: fixed;
+  //   bottom: 2mm;
+  //   left: 50%;
+  //   transform: translateX(-50%);
+  //   content: 'Page ' counter(x);
+  // }
 }
