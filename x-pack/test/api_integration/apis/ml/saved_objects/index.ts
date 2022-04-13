@@ -12,7 +12,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./jobs_spaces'));
     loadTestFile(require.resolve('./can_delete_job'));
     loadTestFile(require.resolve('./can_delete_trained_model'));
-    loadTestFile(require.resolve('./initialize'));
+    loadTestFile(require.resolve('./initialize_jobs'));
+    loadTestFile(require.resolve('./initialize_trained_models'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./sync'));
     loadTestFile(require.resolve('./update_jobs_spaces'));

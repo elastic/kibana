@@ -1124,6 +1124,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return model;
     },
 
+    async createTrainedModelES(modelId: string, body: PutTrainedModelConfig) {
+      log.debug(`Creating trained model with id "${modelId}"`);
+      const { body: model, status } = await esSupertest
+        .put(`/_ml/trained_models/${modelId}`)
+        .send(body);
+      this.assertResponseStatusCode(200, status, model);
+
+      log.debug('> Trained model created');
+      return model;
+    },
+
     async createTestTrainedModels(
       modelType: ModelType,
       count: number = 10,
