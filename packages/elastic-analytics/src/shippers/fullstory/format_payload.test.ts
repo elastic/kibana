@@ -107,6 +107,17 @@ describe('formatPayload', () => {
     expect(formatPayload(payload)).toEqual({});
   });
 
+  test('throws if null is provided', () => {
+    const payload = {
+      foo: null,
+      baz: [null],
+    };
+
+    expect(() => formatPayload(payload)).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported type: object"`
+    );
+  });
+
   describe('String to Date identification', () => {
     test('appends `_date` to ISO string values', () => {
       const payload = {
