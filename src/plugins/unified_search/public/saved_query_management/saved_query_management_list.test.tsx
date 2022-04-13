@@ -13,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock, applicationServiceMock } from '../../../../core/public/mocks';
 import { dataPluginMock } from '../../../data/public/mocks';
 import {
   SavedQueryManagementListProps,
@@ -23,10 +23,19 @@ import {
 describe('Saved query management list component', () => {
   const startMock = coreMock.createStart();
   const dataMock = dataPluginMock.createStartContract();
+  const applicationMock = applicationServiceMock.createStartContract();
+  const application = {
+    ...applicationMock,
+    capabilities: {
+      ...applicationMock.capabilities,
+      savedObjectsManagement: { edit: true },
+    },
+  };
   function wrapSavedQueriesListComponentInContext(testProps: SavedQueryManagementListProps) {
     const services = {
       uiSettings: startMock.uiSettings,
       http: startMock.http,
+      application,
     };
 
     return (

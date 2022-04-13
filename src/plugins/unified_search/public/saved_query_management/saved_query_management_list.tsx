@@ -121,7 +121,7 @@ export function SavedQueryManagementList({
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState(null as SavedQuery | null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
-  const { uiSettings, http } = kibana.services;
+  const { uiSettings, http, application } = kibana.services;
   const format = uiSettings.get('dateFormat');
 
   useEffect(() => {
@@ -238,6 +238,8 @@ export function SavedQueryManagementList({
     }) as unknown as SelectableProps[];
   };
 
+  const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
+
   const listComponent = (
     <>
       {savedQueries.length > 0 ? (
@@ -296,17 +298,22 @@ export function SavedQueryManagementList({
         </>
       )}
       <EuiPopoverFooter paddingSize="s">
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={http.basePath.prepend(
-                `/app/management/kibana/objects?initialQuery=type:("query")`
-              )}
-              size="s"
-            >
-              Manage
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="s"
+          justifyContent={canEditSavedObjects ? 'spaceBetween' : 'flexEnd'}
+        >
+          {canEditSavedObjects && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={http.basePath.prepend(
+                  `/app/management/kibana/objects?initialQuery=type:("query")`
+                )}
+                size="s"
+              >
+                Manage
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
