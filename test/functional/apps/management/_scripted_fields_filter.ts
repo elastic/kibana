@@ -79,7 +79,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(lang).to.be('expression');
         }
       });
-      console.log('TEST - last check');
       await PageObjects.settings.clearScriptedFieldLanguageFilter('expression');
     });
   });
