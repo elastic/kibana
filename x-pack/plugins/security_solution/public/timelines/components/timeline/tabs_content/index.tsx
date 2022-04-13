@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiBetaBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -37,6 +37,7 @@ import {
   getEventIdToNoteIdsSelector,
 } from './selectors';
 import * as i18n from './translations';
+import { BETA } from '../../../../common/translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -357,6 +358,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             isSelected={activeTab === TimelineTabs.session}
             disabled={sessionViewConfig === null}
             key={TimelineTabs.session}
+            append={<EuiBetaBadge label={BETA} size="s" />}
           >
             {i18n.SESSION_TAB}
           </EuiTab>

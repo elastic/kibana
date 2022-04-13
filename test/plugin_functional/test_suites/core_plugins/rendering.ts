@@ -129,6 +129,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.banner (boolean)',
         'telemetry.enabled (boolean)',
+        'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (any)',
         'telemetry.sendUsageFrom (alternatives)',
         'telemetry.sendUsageTo (any)',

@@ -310,7 +310,7 @@ export const useDashboardAppState = ({
        * the last saved state on save.
        */
       setLastSavedState(savedDashboardState);
-      dashboardBuildContext.$checkForUnsavedChanges.next();
+      dashboardBuildContext.$checkForUnsavedChanges.next(undefined);
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
