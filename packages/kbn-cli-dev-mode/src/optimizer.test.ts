@@ -12,7 +12,6 @@ import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import { OptimizerUpdate } from '@kbn/optimizer';
 import { observeLines, createReplaceSerializer } from '@kbn/dev-utils';
-import { firstValueFrom } from '@kbn/std';
 
 import { Optimizer, Options } from './optimizer';
 
@@ -130,7 +129,7 @@ it('uses options to create valid OptimizerConfig', () => {
 
 it('is ready when optimizer phase is success or issue and logs in familiar format', async () => {
   const writeLogTo = new PassThrough();
-  const linesPromise = firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
+  const linesPromise = Rx.firstValueFrom(observeLines(writeLogTo).pipe(toArray()));
 
   const { update$, optimizer } = setup({
     ...defaultOptions,
