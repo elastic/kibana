@@ -23,9 +23,8 @@ import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { statusColors } from '../../../common/constants';
 import type { PostureTrend, Stats } from '../../../../common/types';
-import * as TEXT from '../translations';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import {RULE_FAILED, RULE_PASSED} from "../../../../common/constants";
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 
 interface CloudPostureScoreChartProps {
   trend: PostureTrend[];
