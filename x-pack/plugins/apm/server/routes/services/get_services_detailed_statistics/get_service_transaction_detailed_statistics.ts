@@ -93,7 +93,7 @@ export async function getServiceTransactionDetailedStatistics({
           },
         },
         aggs: {
-          sampled: {
+          sample: {
             random_sampler: {
               probability,
             },
@@ -140,7 +140,7 @@ export async function getServiceTransactionDetailedStatistics({
   );
 
   return keyBy(
-    response.aggregations?.sampled.services.buckets.map((bucket) => {
+    response.aggregations?.sample.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
         bucket.transactionType.buckets.find(
           ({ key }) =>

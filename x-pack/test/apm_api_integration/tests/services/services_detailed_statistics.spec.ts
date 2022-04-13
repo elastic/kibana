@@ -5,19 +5,18 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import url from 'url';
 import moment from 'moment';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
+import { ApmApiError } from '../../common/apm_api_supertest';
 
 type ServicesDetailedStatisticsReturn =
   APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
 
   const apmApiClient = getService('apmApiClient');
 
@@ -111,21 +110,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns empty when empty service names is passed', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/services/detailed_statistics`,
-          params: {
-            query: {
-              start,
-              end,
-              serviceNames: JSON.stringify([]),
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-              probability: 1,
+        try {
+          await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/services/detailed_statistics`,
+            params: {
+              query: {
+                start,
+                end,
+                serviceNames: JSON.stringify([]),
+                environment: 'ENVIRONMENT_ALL',
+                kuery: '',
+                probability: 1,
+              },
             },
-          },
-        });
-        expect(response.status).to.be(400);
-        expect(response.body.message).to.equal('serviceNames cannot be empty');
+          });
+          expect().fail('Expected API call to throw an error');
+        } catch (error: unknown) {
+          const apiError = error as ApmApiError;
+          expect(apiError.res.status).eql(400);
+
+          expect(apiError.res.body.message).eql('serviceNames cannot be empty');
+        }
       });
 
       it('filters by environment', async () => {

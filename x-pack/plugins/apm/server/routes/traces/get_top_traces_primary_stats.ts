@@ -103,7 +103,7 @@ export function getTopTracesPrimaryStats({
             },
           },
           aggs: {
-            sampled: {
+            sample: {
               random_sampler: { probability },
               aggs: {
                 transaction_groups: {
@@ -159,12 +159,12 @@ export function getTopTracesPrimaryStats({
     );
 
     const calculateImpact = calculateImpactBuilder(
-      response.aggregations?.sampled.transaction_groups.buckets.map(
+      response.aggregations?.sample.transaction_groups.buckets.map(
         ({ sum }) => sum.value
       )
     );
 
-    const items = response.aggregations?.sampled.transaction_groups.buckets.map(
+    const items = response.aggregations?.sample.transaction_groups.buckets.map(
       (bucket) => {
         return {
           key: bucket.key as BucketKey,
