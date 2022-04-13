@@ -301,7 +301,7 @@ describe('metric_visualization', () => {
                       Object {
                         "arguments": Object {
                           "align": Array [
-                            "center",
+                            "left",
                           ],
                           "lHeight": Array [
                             82.5,
@@ -329,7 +329,7 @@ describe('metric_visualization', () => {
                       Object {
                         "arguments": Object {
                           "align": Array [
-                            "center",
+                            "left",
                           ],
                           "lHeight": Array [
                             24,
