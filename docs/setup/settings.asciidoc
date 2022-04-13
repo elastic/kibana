@@ -289,11 +289,11 @@ is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
 
-| `data.autocomplete.valueSuggestions.timeout:` {ess-icon}
+| `unifiedSearch.autocomplete.valueSuggestions.timeout:` {ess-icon}
  | Time in milliseconds to wait for autocomplete suggestions from {es}.
 This value must be a whole number greater than zero. *Default: `"1000"`*
 
-| `data.autocomplete.valueSuggestions.terminateAfter:` {ess-icon}
+| `unifiedSearch.autocomplete.valueSuggestions.terminateAfter:` {ess-icon}
  | Maximum number of documents loaded by each shard to generate autocomplete
 suggestions. This value must be a whole number greater than zero.
 *Default: `"100000"`*
