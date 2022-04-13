@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { isEmpty, isEqual, pick } from 'lodash/fp';
-import { Subscription } from 'rxjs/internal/Subscription';
+import { Subscription } from 'rxjs';
 
 import memoizeOne from 'memoize-one';
 import { DataViewBase } from '@kbn/es-query';

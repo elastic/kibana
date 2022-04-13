@@ -15,8 +15,8 @@ import { map, mergeAll, mergeMap } from 'rxjs/operators';
 // @ts-ignore
 import { assertAbsolute } from './fs';
 
-const getStat$ = Rx.bindNodeCallback(Fs.stat) as (path: string) => Rx.Observable<Fs.Stats>;
-const getReadDir$ = Rx.bindNodeCallback(Fs.readdir) as (path: string) => Rx.Observable<string[]>;
+const getStat$ = Rx.bindNodeCallback<[string], [Fs.Stats]>(Fs.stat);
+const getReadDir$ = Rx.bindNodeCallback<[string], [string[]]>(Fs.readdir);
 
 /**
  * Return an observable of all files in a directory, starting with the

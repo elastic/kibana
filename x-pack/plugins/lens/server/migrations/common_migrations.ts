@@ -25,13 +25,13 @@ import {
   VisState716,
   VisState810,
   VisState820,
+  VisState830,
   CustomVisualizationMigrations,
   LensDocShape810,
-  LensDocShape820,
-  XYVisualizationStatePre820,
-  XYVisualizationState820,
+  LensDocShape830,
+  VisStatePre830,
 } from './types';
-import { DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -240,6 +240,21 @@ export const commonSetIncludeEmptyRowsDateHistogram = (
   return newAttributes;
 };
 
+export const commonLockOldMetricVisSettings = (
+  attributes: LensDocShape810
+): LensDocShape830<VisState830> => {
+  const newAttributes = cloneDeep(attributes);
+  if (newAttributes.visualizationType !== 'lnsMetric') {
+    return newAttributes as LensDocShape830<VisState830>;
+  }
+
+  const visState = newAttributes.state.visualization as MetricState;
+  visState.textAlign = visState.textAlign ?? 'center';
+  visState.titlePosition = visState.titlePosition ?? 'bottom';
+  visState.size = visState.size ?? 'xl';
+  return newAttributes as LensDocShape830<VisState830>;
+};
+
 const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
   return (savedObject: { attributes: LensDocShape }) => {
     if (savedObject.attributes.visualizationType !== id) return savedObject;
@@ -331,9 +346,9 @@ export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): L
 };
 
 export const commonFixValueLabelsInXY = (
-  attributes: LensDocShape820<XYVisualizationStatePre820>
-): LensDocShape820<XYVisualizationState820> => {
-  const newAttributes: LensDocShape820<XYVisualizationStatePre820> = cloneDeep(attributes);
+  attributes: LensDocShape830<VisStatePre830>
+): LensDocShape830<VisState830> => {
+  const newAttributes: LensDocShape830<VisStatePre830> = cloneDeep(attributes);
   const { visualization } = newAttributes.state;
   const { valueLabels } = visualization;
   return {

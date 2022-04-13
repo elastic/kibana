@@ -746,7 +746,7 @@ const getMappedAccessors = ({
   layer,
 }: {
   accessors: string[];
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
   state: XYState;

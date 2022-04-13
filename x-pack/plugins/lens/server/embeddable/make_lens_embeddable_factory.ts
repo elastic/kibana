@@ -15,6 +15,7 @@ import { DOC_TYPE } from '../../common';
 import {
   commonEnhanceTableRowHeight,
   commonFixValueLabelsInXY,
+  commonLockOldMetricVisSettings,
   commonMakeReversePaletteAsCustom,
   commonRemoveTimezoneDateHistogramParam,
   commonRenameFilterReferences,
@@ -34,8 +35,9 @@ import {
   LensDocShapePre712,
   VisState716,
   VisState810,
+  VisState820,
   VisStatePre715,
-  XYVisualizationStatePre820,
+  VisStatePre830,
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
 
@@ -97,16 +99,25 @@ export const makeLensEmbeddableFactory =
             },
             '8.2.0': (state) => {
               const lensState = state as unknown as {
-                attributes: LensDocShape810<VisState810 | XYVisualizationStatePre820>;
+                attributes: LensDocShape810<VisState810>;
               };
               let migratedLensState = commonSetLastValueShowArrayValues(lensState.attributes);
               migratedLensState = commonEnhanceTableRowHeight(
                 migratedLensState as LensDocShape810<VisState810>
               );
               migratedLensState = commonSetIncludeEmptyRowsDateHistogram(migratedLensState);
+
+              return {
+                ...lensState,
+                attributes: migratedLensState,
+              } as unknown as SerializableRecord;
+            },
+            '8.3.0': (state) => {
+              const lensState = state as unknown as { attributes: LensDocShape810<VisState820> };
+              let migratedLensState = commonLockOldMetricVisSettings(lensState.attributes);
               if (migratedLensState.visualizationType !== 'lnsXY') {
                 migratedLensState = commonFixValueLabelsInXY(
-                  migratedLensState as LensDocShape810<XYVisualizationStatePre820>
+                  migratedLensState as LensDocShape810<VisStatePre830>
                 );
               }
               return {

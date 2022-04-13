@@ -5,7 +5,7 @@ exports[`XYChart component annotations should render basic annotation 1`] = `
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591917125,
+        "dataValue": 1647591917140,
         "details": "Annotation",
         "header": "2022-03-18T08:25:17.140Z",
       },
@@ -169,7 +169,7 @@ exports[`XYChart component annotations should render simplified annotation when 
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591917125,
+        "dataValue": 1647591917140,
         "details": "Annotation",
         "header": "2022-03-18T08:25:17.140Z",
       },

@@ -83,7 +83,7 @@ export function RulesPage() {
     application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
-  const documentationLink = docLinks.links.alerting.guide;
+  const documentationLink = docLinks.links.observability.createAlerts;
   const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });

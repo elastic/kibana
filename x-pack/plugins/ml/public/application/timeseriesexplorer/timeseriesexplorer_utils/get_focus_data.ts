@@ -148,7 +148,11 @@ export function getFocusData(
         modelPlotEnabled,
         functionDescription
       );
-      focusChartData = processScheduledEventsForChart(focusChartData, scheduledEvents);
+      focusChartData = processScheduledEventsForChart(
+        focusChartData,
+        scheduledEvents,
+        focusAggregationInterval
+      );
 
       const refreshFocusData: FocusData = {
         scheduledEvents,

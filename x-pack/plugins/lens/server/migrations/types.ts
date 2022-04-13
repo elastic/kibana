@@ -259,12 +259,15 @@ export interface VisState820 {
   rowHeightLines: number;
 }
 
-export type LensDocShape820<VisualizationState = unknown> = LensDocShape810<VisualizationState>;
+export type LensDocShape830<VisualizationState = unknown> = LensDocShape810<VisualizationState>;
 
-export interface XYVisualizationStatePre820 {
+export interface XYVisualizationStatePre830 extends VisState820 {
   valueLabels: 'hide' | 'inside' | 'outside';
 }
 
-export interface XYVisualizationState820 {
+export interface XYVisualizationState830 extends VisState820 {
   valueLabels: ValueLabelConfig;
 }
+
+export type VisStatePre830 = XYVisualizationStatePre830 & VisState820;
+export type VisState830 = XYVisualizationState830 & VisState820;

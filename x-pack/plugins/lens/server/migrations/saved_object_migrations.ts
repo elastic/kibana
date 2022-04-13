@@ -30,9 +30,9 @@ import {
   VisState716,
   CustomVisualizationMigrations,
   LensDocShape810,
-  LensDocShape820,
-  XYVisualizationStatePre820,
-  XYVisualizationState820,
+  LensDocShape830,
+  XYVisualizationStatePre830,
+  XYVisualizationState830,
   VisState810,
   VisState820,
 } from './types';
@@ -50,6 +50,7 @@ import {
   commonEnhanceTableRowHeight,
   commonSetIncludeEmptyRowsDateHistogram,
   commonFixValueLabelsInXY,
+  commonLockOldMetricVisSettings,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -495,8 +496,8 @@ const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, 
 };
 
 const fixValueLabelsInXY: SavedObjectMigrationFn<
-  LensDocShape820<XYVisualizationStatePre820>,
-  LensDocShape820<XYVisualizationState820 | unknown>
+  LensDocShape830<XYVisualizationStatePre830>,
+  LensDocShape830<XYVisualizationState830 | unknown>
 > = (doc) => {
   if (doc.attributes.visualizationType !== 'lnsXY') {
     return doc;
@@ -505,6 +506,10 @@ const fixValueLabelsInXY: SavedObjectMigrationFn<
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
 };
+
+const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => ({ ...doc, attributes: commonLockOldMetricVisSettings(doc.attributes) });
 
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
@@ -523,9 +528,9 @@ const lensMigrations: SavedObjectMigrationMap = {
   '8.2.0': flow(
     setLastValueShowArrayValues,
     setIncludeEmptyRowsDateHistogram,
-    enhanceTableRowHeight,
-    fixValueLabelsInXY
+    enhanceTableRowHeight
   ),
+  '8.3.0': flow(lockOldMetricVisSettings, fixValueLabelsInXY),
 };
 
 export const getAllMigrations = (

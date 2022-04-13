@@ -18,7 +18,7 @@ import {
   XYAnnotationLayerConfig,
 } from './types';
 import type { ValidXYDataLayerConfig } from './types';
-import { OperationMetadata, DatasourcePublicAPI } from '../types';
+import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type {
   ExtendedYConfig,
@@ -52,7 +52,7 @@ export const getSortedAccessors = (
 
 export const toExpression = (
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   datasourceExpressionsByLayers: Record<string, Ast>,
@@ -110,7 +110,7 @@ const simplifiedLayerExpression = {
 
 export function toPreviewExpression(
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
@@ -163,7 +163,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType

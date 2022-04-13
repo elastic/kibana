@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PaletteOutput } from 'src/plugins/charts/public';
-import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
-import {
+import type { PaletteOutput } from '@kbn/coloring';
+import type { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import type {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -16,7 +16,7 @@ import {
   ExtendedYConfig,
 } from '../../../../../lens/public';
 
-import { PersistableFilter } from '../../../../../lens/common';
+import type { PersistableFilter } from '../../../../../lens/common';
 import type { DataView } from '../../../../../../../src/plugins/data_views/common';
 
 export const ReportViewTypes = {
