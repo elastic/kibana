@@ -28,7 +28,7 @@ export function esIndexRoute(server) {
           clusterUuid: schema.string(),
           id: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),

@@ -5,29 +5,24 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getStats, getApms } from '../../../../lib/apm';
 import { handleError } from '../../../../lib/errors';
 import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
+import {
+  postApmInstancesRequestParamsRT,
+  postApmInstancesRequestPayloadRT,
+} from '../../../../../common/http_api/apm';
+import { createValidationFunction } from '../../../../../common/runtime_types';
+import { MonitoringCore } from '../../../../types';
 
-export function apmInstancesRoute(server) {
+export function apmInstancesRoute(server: MonitoringCore) {
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/instances',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        payload: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: createValidationFunction(postApmInstancesRequestParamsRT),
+      body: createValidationFunction(postApmInstancesRequestPayloadRT),
     },
     async handler(req) {
       const config = server.config;

@@ -24,7 +24,7 @@ export function esIndicesRoute(server) {
         query: schema.object({
           show_system_indices: schema.boolean(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),

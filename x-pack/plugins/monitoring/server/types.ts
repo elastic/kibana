@@ -37,6 +37,7 @@ import { CloudSetup } from '../../cloud/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
+import { RouteConfig, RouteMethod } from '../../../../src/core/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -79,10 +80,25 @@ export interface RouteDependencies {
   logger: Logger;
 }
 
+export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
+  // NOTE / TODO: These uppercase versions are here temporarily until all routes are converted to TS,
+  // and using the standard RouteMethod type.
+  method: RouteMethod | 'GET' | 'POST' | 'PUT';
+} & RouteConfig<Params, Query, Body, Method> & {
+    // NOTE / TODO: Ideally we'd make all routes stop using this nested custom "config" as
+    // validate already exists on the RouteConfig type.
+    config?: {
+      validate: RouteConfig<Params, Query, Body, Method>['validate'];
+    };
+    handler: (request: LegacyRequest) => any;
+  };
+
 export interface MonitoringCore {
   config: MonitoringConfig;
   log: Logger;
-  route: (options: any) => void;
+  route: <Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    options: MonitoringRouteConfig<Params, Query, Body, Method>
+  ) => void;
 }
 
 export interface LegacyShimDependencies {
@@ -144,7 +160,8 @@ export interface LegacyServer {
   };
 }
 
-export type Cluster = ElasticsearchModifiedSource & {
+export type Cluster = Omit<ElasticsearchModifiedSource, 'timestamp'> & {
+  timestamp?: string;
   ml?: { jobs: any };
   logs?: any;
   alerts?: AlertsOnCluster;

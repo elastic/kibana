@@ -5,32 +5,26 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_instance';
 import { handleError } from '../../../../lib/errors';
 import { getApmInfo } from '../../../../lib/apm';
 import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
+import {
+  postApmInstanceRequestParamsRT,
+  postApmInstanceRequestPayloadRT,
+} from '../../../../../common/http_api/apm';
+import { createValidationFunction } from '../../../../../common/runtime_types';
+import { MonitoringCore } from '../../../../types';
 
-export function apmInstanceRoute(server) {
+export function apmInstanceRoute(server: MonitoringCore) {
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/{apmUuid}',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-          apmUuid: schema.string(),
-        }),
-        payload: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: createValidationFunction(postApmInstanceRequestParamsRT),
+      body: createValidationFunction(postApmInstanceRequestPayloadRT),
     },
     async handler(req) {
       const apmUuid = req.params.apmUuid;
@@ -42,7 +36,9 @@ export function apmInstanceRoute(server) {
       const showCgroupMetrics = config.ui.container.apm.enabled;
       if (showCgroupMetrics) {
         const metricCpu = metricSet.find((m) => m.name === 'apm_cpu');
-        metricCpu.keys = ['apm_cgroup_cpu'];
+        if (metricCpu) {
+          metricCpu.keys = ['apm_cgroup_cpu'];
+        }
       }
 
       try {

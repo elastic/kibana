@@ -8,14 +8,14 @@
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest, Cluster } from '../../types';
 import { getNewIndexPatterns } from './get_index_patterns';
 import { Globals } from '../../static_globals';
 
 async function findSupportedBasicLicenseCluster(
   req: LegacyRequest,
-  clusters: ElasticsearchModifiedSource[],
+  clusters: Cluster[],
   ccs: string,
   kibanaUuid: string,
   serverLog: (message: string) => void
@@ -90,7 +90,7 @@ async function findSupportedBasicLicenseCluster(
  */
 export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
   const serverLog = (message: string) => req.getLogger('supported-clusters').debug(message);
-  const flagAllSupported = (clusters: ElasticsearchModifiedSource[]) => {
+  const flagAllSupported = (clusters: Cluster[]) => {
     clusters.forEach((cluster) => {
       if (cluster.license || cluster.elasticsearch?.cluster?.stats?.license) {
         cluster.isSupported = true;
@@ -99,7 +99,7 @@ export function flagSupportedClusters(req: LegacyRequest, ccs: string) {
     return clusters;
   };
 
-  return async function (clusters: ElasticsearchModifiedSource[]) {
+  return async function (clusters: Cluster[]) {
     // Standalone clusters are automatically supported in the UI so ignore those for
     // our calculations here
     let linkedClusterCount = 0;

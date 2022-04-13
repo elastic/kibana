@@ -5,29 +5,24 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
 import { getApmClusterStatus } from './_get_apm_cluster_status';
+import {
+  postApmOverviewRequestParamsRT,
+  postApmOverviewRequestPayloadRT,
+} from '../../../../../common/http_api/apm';
+import { createValidationFunction } from '../../../../../common/runtime_types';
+import { MonitoringCore } from '../../../../types';
 
-export function apmOverviewRoute(server) {
+export function apmOverviewRoute(server: MonitoringCore) {
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        payload: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: createValidationFunction(postApmOverviewRequestParamsRT),
+      body: createValidationFunction(postApmOverviewRequestPayloadRT),
     },
     async handler(req) {
       const config = server.config;
@@ -36,7 +31,9 @@ export function apmOverviewRoute(server) {
       const showCgroupMetrics = config.ui.container.apm.enabled;
       if (showCgroupMetrics) {
         const metricCpu = metricSet.find((m) => m.name === 'apm_cpu');
-        metricCpu.keys = ['apm_cgroup_cpu'];
+        if (metricCpu) {
+          metricCpu.keys = ['apm_cgroup_cpu'];
+        }
       }
 
       try {

@@ -25,7 +25,7 @@ export function esOverviewRoute(server) {
         params: schema.object({
           clusterUuid: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),

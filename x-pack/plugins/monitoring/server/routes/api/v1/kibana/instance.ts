@@ -31,7 +31,7 @@ export function kibanaInstanceRoute(server: LegacyServer) {
           clusterUuid: schema.string(),
           kibanaUuid: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),

@@ -28,7 +28,7 @@ export function esNodeRoute(server) {
           clusterUuid: schema.string(),
           nodeUuid: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           showSystemIndices: schema.boolean({ defaultValue: false }), // show/hide system indices in shard allocation table
           timeRange: schema.object({
