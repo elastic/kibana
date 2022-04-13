@@ -53,8 +53,7 @@ export async function getServiceLocations(server: UptimeServerSetup) {
     const throttling = pick(
       data.throttling,
       BandwidthLimitKey.DOWNLOAD,
-      BandwidthLimitKey.UPLOAD,
-      BandwidthLimitKey.LATENCY
+      BandwidthLimitKey.UPLOAD
     ) as ThrottlingOptions;
 
     return { throttling, locations };
