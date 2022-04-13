@@ -83,25 +83,22 @@ export const getPackagePolicyDeleteCallback = (
   logger: Logger
 ): PostPackagePolicyDeleteCallback => {
   return async (deletedPackagePolicies): Promise<void> => {
-    deletedPackagePolicies.map(async (deletedPackagePolicy) => {
+    for (const deletedPackagePolicy of deletedPackagePolicies) {
       if (isCspPackagePolicy(deletedPackagePolicy)) {
         try {
           const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleSchema> =
             await soClient.find({
               type: cspRuleAssetSavedObjectType,
+              filter: `csp_rule.attributes.package_policy_id: ${deletedPackagePolicy.policy_id}`,
             });
-          // Get attached rules per package policy
-
-          cspRules
-            .filter((rule) => rule.attributes.package_policy_id === deletedPackagePolicy.policy_id)
-            .map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id));
+          cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id));
         } catch (e) {
           logger.error(
             `Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`
           );
         }
       }
-    });
+    }
   };
 };
 
