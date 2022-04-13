@@ -75,9 +75,9 @@ describe('Config Deprecations', () => {
     `);
   });
 
-  it('renames kibana.autocomplete.querySuggestions.enabled to unifiedSearch.autocomplete.querySuggestions.enabled', () => {
+  it('renames data.autocomplete.querySuggestions.enabled to unifiedSearch.autocomplete.querySuggestions.enabled', () => {
     const config = {
-      kibana: {
+      data: {
         autocomplete: {
           querySuggestions: {
             enabled: false,
@@ -86,18 +86,18 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.kibana?.autocomplete.querySuggestions.enabled).not.toBeDefined();
+    expect(migrated.data?.autocomplete.querySuggestions.enabled).not.toBeDefined();
     expect(migrated.unifiedSearch.autocomplete.querySuggestions.enabled).toEqual(false);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"kibana.autocomplete.querySuggestions.enabled\\" has been replaced by \\"unifiedSearch.autocomplete.querySuggestions.enabled\\"",
+        "Setting \\"data.autocomplete.querySuggestions.enabled\\" has been replaced by \\"unifiedSearch.autocomplete.querySuggestions.enabled\\"",
       ]
     `);
   });
 
-  it('renames kibana.autocomplete.valueSuggestions.enabled to unifiedSearch.autocomplete.valueSuggestions.enabled', () => {
+  it('renames data.autocomplete.valueSuggestions.enabled to unifiedSearch.autocomplete.valueSuggestions.enabled', () => {
     const config = {
-      kibana: {
+      data: {
         autocomplete: {
           valueSuggestions: {
             enabled: false,
@@ -106,18 +106,18 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.kibana?.autocomplete.valueSuggestions.enabled).not.toBeDefined();
+    expect(migrated.data?.autocomplete.valueSuggestions.enabled).not.toBeDefined();
     expect(migrated.unifiedSearch.autocomplete.valueSuggestions.enabled).toEqual(false);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"kibana.autocomplete.valueSuggestions.enabled\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.enabled\\"",
+        "Setting \\"data.autocomplete.valueSuggestions.enabled\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.enabled\\"",
       ]
     `);
   });
 
-  it('renames kibana.autocomplete.valueSuggestions.tiers to unifiedSearch.autocomplete.valueSuggestions.tiers', () => {
+  it('renames data.autocomplete.valueSuggestions.tiers to unifiedSearch.autocomplete.valueSuggestions.tiers', () => {
     const config = {
-      kibana: {
+      data: {
         autocomplete: {
           valueSuggestions: {
             tiers: [],
@@ -126,11 +126,11 @@ describe('Config Deprecations', () => {
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.kibana?.autocomplete.valueSuggestions.tiers).not.toBeDefined();
+    expect(migrated.data?.autocomplete.valueSuggestions.tiers).not.toBeDefined();
     expect(migrated.unifiedSearch.autocomplete.valueSuggestions.tiers).toEqual([]);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"kibana.autocomplete.valueSuggestions.tiers\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.tiers\\"",
+        "Setting \\"data.autocomplete.valueSuggestions.tiers\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.tiers\\"",
       ]
     `);
   });

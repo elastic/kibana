@@ -43,13 +43,6 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
     }
   ),
   renameFromRoot(
-    'kibana.autocomplete.querySuggestions.enabled',
-    'unifiedSearch.autocomplete.querySuggestions.enabled',
-    {
-      level: 'warning',
-    }
-  ),
-  renameFromRoot(
     'data.autocomplete.valueSuggestions.enabled',
     'unifiedSearch.autocomplete.valueSuggestions.enabled',
     {
@@ -57,21 +50,7 @@ export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = 
     }
   ),
   renameFromRoot(
-    'kibana.autocomplete.valueSuggestions.enabled',
-    'unifiedSearch.autocomplete.valueSuggestions.enabled',
-    {
-      level: 'warning',
-    }
-  ),
-  renameFromRoot(
     'data.autocomplete.valueSuggestions.tiers',
-    'unifiedSearch.autocomplete.valueSuggestions.tiers',
-    {
-      level: 'warning',
-    }
-  ),
-  renameFromRoot(
-    'kibana.autocomplete.valueSuggestions.tiers',
     'unifiedSearch.autocomplete.valueSuggestions.tiers',
     {
       level: 'warning',
