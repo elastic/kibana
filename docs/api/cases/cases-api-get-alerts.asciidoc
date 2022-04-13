@@ -1,0 +1,61 @@
+[[cases-api-get-alerts]]
+== Get alerts attached to case API
+++++
+<titleabbrev>Get alerts</titleabbrev>
+++++
+
+preview::[]
+
+Gets all alerts attached to a case.
+
+=== {api-request-title}
+
+`GET <kibana host>:<port>/api/cases/<case_id>/alerts`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/alerts`
+
+=== {api-prereq-title}
+
+////
+//TBD, for example
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're seeking.
+////
+
+=== {api-path-parms-title}
+
+`<case_id>`::
+(Required, string) The identifier for the case. To retrieve case IDs, use <<cases-api-find-cases>>.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the default space is used.
+
+=== {api-response-codes-title}
+
+`200`::
+   Indicates a successful call.
+
+=== {api-example-title}
+
+Return all alerts attached to case `293f1bc0-74f6-11ea-b83a-553aecdb28b6`:
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/alerts
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON array listing the retrieved alert comments. For example:
+
+[source,json]
+--------------------------------------------------
+[
+   {
+      "id":"9241255e1e761ff068768671f6971bcbef869862b02188971036ed4ebba842f1",
+      "index":".siem-signals-siem-estc-dev-default-000028",
+      "attached_at": "2020-03-31T07:52:46.702Z",
+   }
+]
+--------------------------------------------------
