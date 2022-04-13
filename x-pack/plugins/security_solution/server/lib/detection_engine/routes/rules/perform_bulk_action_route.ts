@@ -38,6 +38,7 @@ import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
 import { readRules } from '../../rules/read_rules';
+import { bulkEditRules } from '../../rules/bulk_edit_rules';
 import {
   operationAdapterForRulesClient,
   splitBulkEditActions,
@@ -304,7 +305,9 @@ export const performBulkActionRoute = (
             body.edit
           );
 
-          const { rules, errors } = await rulesClient.bulkEdit({
+          const { rules, errors } = await bulkEditRules({
+            rulesClient,
+            isRuleRegistryEnabled,
             filter: query,
             ...(body.ids ? { ids: body.ids ?? [] } : {}),
             operations: rulesClientOperations.map(operationAdapterForRulesClient),

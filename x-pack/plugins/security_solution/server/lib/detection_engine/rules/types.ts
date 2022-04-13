@@ -93,7 +93,7 @@ import {
   NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
-import { RulesClient, PartialRule, BulkEditOperation, RuleTypeParams } from '../../../../../alerting/server';
+import { RulesClient, PartialRule, BulkEditOperation } from '../../../../../alerting/server';
 import { SanitizedRule } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -288,9 +288,9 @@ export interface BulkEditRulesOptions {
   isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   operations: BulkEditOperation[];
-  filter: QueryFilterOrUndefined;
-  ids: string[];
-  paramsModifier: (params: RuleTypeParams) => Promise<RuleTypeParams>;
+  filter?: QueryFilterOrUndefined;
+  ids?: string[];
+  paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
 }
 
 
