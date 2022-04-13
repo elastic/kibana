@@ -92,12 +92,12 @@ function EditorOutputUI() {
             let editorOutput;
             if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
               editorOutput = safeExpandLiteralStrings(value as string);
-            }
-
-            if (isMapboxVectorTile(contentType)) {
+            } else if (isMapboxVectorTile(contentType)) {
               const vectorTile = new VectorTile(new Protobuf(value as ArrayBuffer));
               const vectorTileJson = convertMapboxVectorTileToJson(vectorTile);
               editorOutput = safeExpandLiteralStrings(vectorTileJson as string);
+            } else {
+              editorOutput = value;
             }
 
             return editorOutput;
