@@ -178,7 +178,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('kbnOverviewAddIntegrations', { timeout: config.get('timeouts.waitFor') });
+        await testSubjects.existOrFail('kbnOverviewAddIntegrations', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
     });
   });
