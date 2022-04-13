@@ -19,16 +19,9 @@ enum LegendSizes {
   EXTRA_LARGE = '230',
 }
 
+const DEFAULT_LEGEND_SIZE = LegendSizes.MEDIUM;
+
 const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
-  {
-    value: LegendSizes.AUTO,
-    inputDisplay: i18n.translate(
-      'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.auto',
-      {
-        defaultMessage: 'Auto',
-      }
-    ),
-  },
   {
     value: LegendSizes.SMALL,
     inputDisplay: i18n.translate(
@@ -93,7 +86,7 @@ export const LegendSizeSettings = ({
     <EuiSuperSelect
       fullWidth
       compressed
-      valueOfSelected={legendSize?.toString() ?? LegendSizes.AUTO}
+      valueOfSelected={legendSize?.toString() ?? DEFAULT_LEGEND_SIZE}
       options={legendSizeOptions}
       onChange={onLegendSizeOptionChange}
       disabled={!isVerticalLegend}
