@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -53,15 +53,15 @@ describe('LogEntry search strategy', () => {
       logViews: logViewsMock,
     });
 
-    const response = await logEntrySearchStrategy
-      .search(
+    const response = await lastValueFrom(
+      logEntrySearchStrategy.search(
         {
           params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
         },
         {},
         mockDependencies
       )
-      .toPromise();
+    );
 
     expect(logViewsMock.getScopedClient).toHaveBeenCalled();
     expect(logViewsClientMock.getResolvedLogView).toHaveBeenCalled();
@@ -137,8 +137,8 @@ describe('LogEntry search strategy', () => {
       esRequestId: 'ASYNC_REQUEST_ID',
     });
 
-    const response = await logEntrySearchStrategy
-      .search(
+    const response = await lastValueFrom(
+      logEntrySearchStrategy.search(
         {
           id: requestId,
           params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
@@ -146,7 +146,7 @@ describe('LogEntry search strategy', () => {
         {},
         mockDependencies
       )
-      .toPromise();
+    );
 
     expect(logViewsMock.getScopedClient).not.toHaveBeenCalled();
     expect(logViewsClientMock.getResolvedLogView).not.toHaveBeenCalled();

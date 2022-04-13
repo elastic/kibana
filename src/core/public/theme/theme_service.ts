@@ -17,7 +17,7 @@ export interface SetupDeps {
 
 export class ThemeService {
   private theme$?: Observable<CoreTheme>;
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
 
   public setup({ injectedMetadata }: SetupDeps): ThemeServiceSetup {
     const theme = injectedMetadata.getTheme();
