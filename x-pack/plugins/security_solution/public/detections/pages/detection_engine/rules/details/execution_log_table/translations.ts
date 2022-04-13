@@ -181,6 +181,13 @@ export const ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION = i18n.transla
   }
 );
 
+export const ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_RESTORE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionSearchFiltersUpdatedRestoreButtonTitle',
+  {
+    defaultMessage: 'Restore previous filters',
+  }
+);
+
 export const ACTIONS_FIELD_NOT_FOUND_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionFieldNotFoundErrorTitle',
   {

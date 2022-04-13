@@ -7,8 +7,10 @@
 
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import React, { useCallback, useMemo, useState } from 'react';
+import moment from 'moment';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiTextColor,
   EuiFlexGroup,
@@ -20,9 +22,11 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiBasicTable,
+  EuiButton,
 } from '@elastic/eui';
-import { buildFilter, FILTERS } from '@kbn/es-query';
+import { buildFilter, Filter, FILTERS, Query } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
+import { mountReactNode } from '../../../../../../../../../../src/core/public/utils';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../../common/constants';
 import { AggregateRuleExecutionEvent } from '../../../../../../../common/detection_engine/schemas/common';
 
@@ -34,7 +38,14 @@ import {
 } from '../../../../../../common/components/utility_bar';
 import { useSourcererDataView } from '../../../../../../common/containers/sourcerer';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
+import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { inputsSelectors } from '../../../../../../common/store';
+import {
+  setAbsoluteRangeDatePicker,
+  setFilterQuery,
+} from '../../../../../../common/store/inputs/actions';
+import { AbsoluteTimeRange, RelativeTimeRange } from '../../../../../../common/store/inputs/model';
 import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { useRuleExecutionEvents } from '../../../../../containers/detection_engine/rules';
 import * as i18n from './translations';
@@ -54,6 +65,12 @@ const DatePickerEuiFlexItem = styled(EuiFlexItem)`
 interface ExecutionLogTableProps {
   ruleId: string;
   selectAlertsTab: () => void;
+}
+
+interface CachedGlobalQueryState {
+  filters: Filter[];
+  query: Query;
+  timerange: AbsoluteTimeRange | RelativeTimeRange;
 }
 
 const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
@@ -89,7 +106,42 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
   // Index for `add filter` action and toasts for errors
   const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-  const { addError, addSuccess } = useAppToasts();
+  const { addError, addSuccess, remove } = useAppToasts();
+
+  // QueryString, Filters, and TimeRange state
+  const dispatch = useDispatch();
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const timerange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const cachedGlobalQueryState = useRef<CachedGlobalQueryState>({ filters, query, timerange });
+  const successToastId = useRef('');
+
+  const resetGlobalQueryState = useCallback(() => {
+    dispatch(
+      // TODO: Determine relative vs absolute so `Today` is replaced instead of absolute
+      setAbsoluteRangeDatePicker({
+        id: 'global',
+        from: cachedGlobalQueryState.current.timerange.from,
+        to: cachedGlobalQueryState.current.timerange.to,
+      })
+    );
+    dispatch(
+      setFilterQuery({
+        id: 'global',
+        query: cachedGlobalQueryState.current.query.query,
+        language: cachedGlobalQueryState.current.query.language,
+      })
+    );
+    // Using filterManager directly as dispatch(setSearchBarFilter()) was not replacing filters
+    filterManager.removeAll();
+    filterManager.addFilters(cachedGlobalQueryState.current.filters);
+    remove(successToastId.current);
+  }, [dispatch, filterManager, remove]);
 
   // Table data state
   const {
@@ -170,6 +222,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
       if (uuidDataViewField != null) {
+        // Update cached global query state with current state as a rollback point
+        cachedGlobalQueryState.current = { filters, query, timerange };
+        // Create filter & daterange constraints
         const filter = buildFilter(
           indexPattern,
           uuidDataViewField,
@@ -179,20 +234,55 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
           executionId,
           null
         );
+        dispatch(
+          setAbsoluteRangeDatePicker({
+            id: 'global',
+            from: moment(executionStart).subtract(1, 'days').toISOString(),
+            to: moment(executionStart).add(1, 'days').toISOString(),
+          })
+        );
         filterManager.removeAll();
         filterManager.addFilters(filter);
+        dispatch(setFilterQuery({ id: 'global', query: '', language: 'kuery' }));
         selectAlertsTab();
-        addSuccess({
-          title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
-          text: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION,
-        });
+        successToastId.current = addSuccess(
+          {
+            title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
+            text: mountReactNode(
+              <>
+                <p>{i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION}</p>
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton size="s" onClick={resetGlobalQueryState}>
+                      {i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_RESTORE_BUTTON}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            ),
+          },
+          // Essentially keep toast around till user dismisses via 'x'
+          { toastLifeTimeMs: 10 * 60 * 1000 }
+        ).id;
       } else {
         addError(i18n.ACTIONS_FIELD_NOT_FOUND_ERROR, {
           title: i18n.ACTIONS_FIELD_NOT_FOUND_ERROR_TITLE,
         });
       }
     },
-    [addError, addSuccess, filterManager, indexPattern, selectAlertsTab, uuidDataViewField]
+    [
+      addError,
+      addSuccess,
+      dispatch,
+      filterManager,
+      filters,
+      indexPattern,
+      query,
+      resetGlobalQueryState,
+      selectAlertsTab,
+      timerange,
+      uuidDataViewField,
+    ]
   );
 
   const onShowMetricColumnsCallback = useCallback(
@@ -223,8 +313,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     };
   }, [sortDirection, sortField]);
 
-  // TODO: Re-add actions once alert count is displayed in table and UX is finalized
-  // @ts-expect-error unused constant
   const actions = useMemo(
     () => [
       {
@@ -258,9 +346,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   const executionLogColumns = useMemo(
     () =>
       showMetricColumns
-        ? [...EXECUTION_LOG_COLUMNS, ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks)]
-        : [...EXECUTION_LOG_COLUMNS],
-    [docLinks, showMetricColumns]
+        ? [...EXECUTION_LOG_COLUMNS, ...GET_EXECUTION_LOG_METRICS_COLUMNS(docLinks), ...actions]
+        : [...EXECUTION_LOG_COLUMNS, ...actions],
+    [actions, docLinks, showMetricColumns]
   );
 
   return (
