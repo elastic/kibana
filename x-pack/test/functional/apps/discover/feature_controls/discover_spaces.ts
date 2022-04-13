@@ -172,13 +172,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space_no_index_patterns');
       });
 
-      it('Navigates to Kibana home rather than index pattern management when no index patterns exist', async () => {
+      it('Navigates to Kibana Analytics overview  when no data views exist', async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space_no_index_patterns',
           ensureCurrentUrl: false,
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await testSubjects.existOrFail('kbnOverviewAddIntegrations', { timeout: config.get('timeouts.waitFor') });
       });
     });
   });
