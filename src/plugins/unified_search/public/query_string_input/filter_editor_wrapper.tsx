@@ -17,7 +17,7 @@ import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
-interface FilterEditorWrapperPropsProps {
+interface FilterEditorWrapperProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
@@ -31,7 +31,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   timeRangeForSuggestionsOverride,
   closePopover,
   onFiltersUpdated,
-}: FilterEditorWrapperPropsProps) {
+}: FilterEditorWrapperProps) {
   const kibana = useKibana<IDataPluginServices>();
   const { uiSettings, data, usageCollection, appName } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
