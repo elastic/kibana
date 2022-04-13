@@ -237,7 +237,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
+    if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // TODO: Add comment as to what could be causing a timeout waiting for the index
+        // to turn yellow.
+        return delayRetryState(stateP, left.message, stateP.retryAttempts);
+      } else {
+        return throwBadResponse(stateP, left);
+      }
+    } else if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'LEGACY_REINDEX',
@@ -346,6 +355,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'CHECK_UNKNOWN_DOCUMENTS',
       };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // The cluster might be busy so we retry this step until the default number of
+        // retries specified in the migration config.
+        return delayRetryState(stateP, left.message, stateP.retryAttempts);
+      } else {
+        return throwBadResponse(stateP, left);
+      }
     } else {
       return throwBadResponse(stateP, res);
     }
@@ -427,6 +445,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT' };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // TODO: Add comment about manually retying the action
+        return delayRetryState(stateP, left.message, stateP.retryAttempts);
+      } else {
+        return throwBadResponse(stateP, left);
+      }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any
@@ -892,6 +918,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'MARK_VERSION_INDEX_READY',
       };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // TODO: Add comment as to why we have to manually retry this state
+        // TODO: Double check if we need to reset the delay retry state
+        return delayRetryState(stateP, left.message, stateP.retryAttempts);
+      } else {
+        return throwBadResponse(stateP, left);
+      }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any

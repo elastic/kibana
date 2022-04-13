@@ -22,7 +22,7 @@ import {
   INDEX_AUTO_EXPAND_REPLICAS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+import { IndexNotYellowTimeout, waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 
 function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
   const result: Record<string, estypes.IndicesAlias> = {};
@@ -54,7 +54,10 @@ export const createIndex = ({
   indexName,
   mappings,
   aliases = [],
-}: CreateIndexParams): TaskEither.TaskEither<RetryableEsClientError, 'create_index_succeeded'> => {
+}: CreateIndexParams): TaskEither.TaskEither<
+  RetryableEsClientError | IndexNotYellowTimeout,
+  'create_index_succeeded'
+> => {
   const createIndexTask: TaskEither.TaskEither<
     RetryableEsClientError,
     AcknowledgeResponse

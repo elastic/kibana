@@ -21,6 +21,11 @@ export interface WaitForIndexStatusYellowParams {
   index: string;
   timeout?: string;
 }
+
+export interface IndexNotYellowTimeout {
+  type: 'index_not_yellow_timeout';
+  message: string;
+}
 /**
  * A yellow index status means the index's primary shard is allocated and the
  * index is ready for searching/indexing documents, but ES wasn't able to
@@ -37,7 +42,10 @@ export const waitForIndexStatusYellow =
     client,
     index,
     timeout = DEFAULT_TIMEOUT,
-  }: WaitForIndexStatusYellowParams): TaskEither.TaskEither<RetryableEsClientError, {}> =>
+  }: WaitForIndexStatusYellowParams): TaskEither.TaskEither<
+    RetryableEsClientError | IndexNotYellowTimeout,
+    {}
+  > =>
   () => {
     return client.cluster
       .health(
@@ -53,7 +61,7 @@ export const waitForIndexStatusYellow =
       .then((res) => {
         if (res.timed_out === true) {
           return Either.left({
-            type: 'retryable_es_client_error' as const,
+            type: 'index_not_yellow_timeout' as const,
             message: `Timeout waiting for the status of the [${index}] index to become 'yellow'`,
           });
         }
