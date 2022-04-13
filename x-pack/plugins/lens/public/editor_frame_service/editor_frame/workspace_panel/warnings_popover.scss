@@ -1,5 +1,5 @@
 .lnsWorkspaceWarning__buttonText {
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint('xs', 's', 'm', 'l') {
     @include euiScreenReaderOnly;
   }
 }

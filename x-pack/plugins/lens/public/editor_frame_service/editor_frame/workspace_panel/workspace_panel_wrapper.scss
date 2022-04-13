@@ -98,7 +98,7 @@
 }
 
 .lnsWorkspacePanelWrapper__applyButton .euiButton__text {
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint('xs', 's', 'm', 'l') {
     @include euiScreenReaderOnly;
   }
 }

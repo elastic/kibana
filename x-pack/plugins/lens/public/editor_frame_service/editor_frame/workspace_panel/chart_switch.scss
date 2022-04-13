@@ -9,13 +9,13 @@
   transform: translateY(-1px);
   color: $euiTextSubduedColor;
 
-  @include euiBreakpoint('l', 'xl') {
+  @include euiBreakpoint('xl') {
     margin-right: $euiSizeS;
   }
 }
 
 .lnsChartSwitch__summaryText {
-  @include euiBreakpoint('xs', 's', 'm') {
+  @include euiBreakpoint('xs', 's', 'm', 'l') {
     @include euiScreenReaderOnly;
   }
 }
