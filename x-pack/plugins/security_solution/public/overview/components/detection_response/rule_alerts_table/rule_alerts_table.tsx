@@ -24,7 +24,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 
 import { LastUpdatedAt, SEVERITY_COLOR } from '../util';
 import * as i18n from '../translations';
-import { useRuleAlertsItems, RuleAlertsItem } from './rule_alerts_items';
+import { useRuleAlertsItems, RuleAlertsItem } from './use_rule_alerts_items';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';

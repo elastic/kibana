@@ -18,7 +18,7 @@ import {
   useRuleAlertsItems,
   UseRuleAlertsItems,
   UseRuleAlertsItemsProps,
-} from './rule_alerts_items';
+} from './use_rule_alerts_items';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
