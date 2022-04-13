@@ -92,6 +92,12 @@ EOF
 GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
 
+KIBANA_DOCKER_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_USERNAME
+
+KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_PASSWORD
+
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
 
