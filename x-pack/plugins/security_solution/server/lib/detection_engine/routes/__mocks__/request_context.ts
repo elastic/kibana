@@ -6,6 +6,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { AwaitedProperties } from '@kbn/utility-types';
 import { coreMock } from 'src/core/server/mocks';
 
 import { ActionsApiRequestHandlerContext } from '../../../../../../actions/server';
@@ -70,7 +71,7 @@ type SecuritySolutionRequestHandlerContextMock =
 const createRequestContextMock = (
   clients: MockClients = createMockClients(),
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
-): SecuritySolutionRequestHandlerContextMock => {
+): AwaitedProperties<SecuritySolutionRequestHandlerContextMock> => {
   return {
     core: clients.core,
     securitySolution: createSecuritySolutionRequestContextMock(clients, overrides),

@@ -204,10 +204,7 @@ export function createRouteHandlerContext(
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ) {
-  const context = requestContextMock.create(
-    createMockClients(),
-    overrides
-  ) as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  const context = requestContextMock.create(createMockClients(), overrides);
   context.core.elasticsearch.client = dataClient;
   context.core.savedObjects.client = savedObjectsClient;
   return context;
