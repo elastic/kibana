@@ -248,7 +248,7 @@ describe('checkSearchSessionsByPage', () => {
 
     test('fetching is abortable', async () => {
       let i = 0;
-      const abort$ = new Subject();
+      const abort$ = new Subject<void>();
 
       const checkFn = jest.fn().mockImplementation(() => {
         if (++i === 2) {

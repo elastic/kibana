@@ -8,9 +8,9 @@
 
 import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
-import { catchError, first, tap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { from } from 'rxjs';
+import { firstValueFrom, from } from 'rxjs';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -107,7 +107,7 @@ export const enhancedEsSearchStrategyProvider = (
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    const legacyConfig = await legacyConfig$.pipe(first()).toPromise();
+    const legacyConfig = await firstValueFrom(legacyConfig$);
     const { body, index, ...params } = request.params!;
     const method = 'POST';
     const path = encodeURI(`/${index}/_rollup_search`);

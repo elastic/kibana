@@ -76,7 +76,6 @@
     { "path": "../plugins/licensing/tsconfig.json" },
     { "path": "../plugins/lists/tsconfig.json" },
     { "path": "../plugins/logstash/tsconfig.json" },
-    { "path": "../plugins/metrics_entities/tsconfig.json" },
     { "path": "../plugins/ml/tsconfig.json" },
     { "path": "../plugins/monitoring/tsconfig.json" },
     { "path": "../plugins/observability/tsconfig.json" },

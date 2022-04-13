@@ -660,7 +660,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -725,7 +725,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -1042,7 +1042,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -1107,7 +1107,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -1424,7 +1424,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -1489,7 +1489,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -1806,7 +1806,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -1871,7 +1871,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -2188,7 +2188,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -2253,7 +2253,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -2570,7 +2570,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -2635,7 +2635,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -2952,7 +2952,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -3017,7 +3017,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -3334,7 +3334,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -3399,7 +3399,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -3716,7 +3716,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -3781,7 +3781,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -4098,7 +4098,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -4163,7 +4163,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -4812,7 +4812,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -4877,7 +4877,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -5194,7 +5194,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -5259,7 +5259,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -5576,7 +5576,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -5641,7 +5641,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -5958,7 +5958,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -6023,7 +6023,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -6340,7 +6340,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -6405,7 +6405,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -6722,7 +6722,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -6787,7 +6787,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -7104,7 +7104,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -7169,7 +7169,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -7486,7 +7486,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -7551,7 +7551,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -7868,7 +7868,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -7933,7 +7933,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -8250,7 +8250,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -8315,7 +8315,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -8921,7 +8921,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -8986,7 +8986,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -9303,7 +9303,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -9368,7 +9368,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -9685,7 +9685,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -9750,7 +9750,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -10067,7 +10067,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -10132,7 +10132,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -10449,7 +10449,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -10514,7 +10514,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -10831,7 +10831,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -10896,7 +10896,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -11213,7 +11213,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -11278,7 +11278,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -11595,7 +11595,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -11660,7 +11660,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -11977,7 +11977,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -12042,7 +12042,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -12359,7 +12359,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
@@ -12424,7 +12424,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                             >
                               <div
                                 aria-label="someone"
-                                class="euiAvatar euiAvatar--s euiAvatar--user"
+                                class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
                                 role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"

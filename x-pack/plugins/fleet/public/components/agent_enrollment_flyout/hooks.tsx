@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../hooks';
+
 import { FLEET_KUBERNETES_PACKAGE } from '../../../common';
+
+import type { K8sMode } from './types';
 
 export function useAgentPolicyWithPackagePolicies(policyId?: string) {
   const [agentPolicyWithPackagePolicies, setAgentPolicy] = useState<AgentPolicy | null>(null);
@@ -41,9 +44,7 @@ export function useAgentPolicyWithPackagePolicies(policyId?: string) {
 }
 
 export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
-  const [isK8s, setIsK8s] = useState<'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES'>(
-    'IS_LOADING'
-  );
+  const [isK8s, setIsK8s] = useState<K8sMode>('IS_LOADING');
   useEffect(() => {
     async function checkifK8s() {
       if (!agentPolicy) {

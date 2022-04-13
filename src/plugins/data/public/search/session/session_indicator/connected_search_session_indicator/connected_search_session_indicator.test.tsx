@@ -13,6 +13,7 @@ import { Storage } from '../../../../../../kibana_utils/public/';
 import { dataPluginMock } from '../../../../mocks';
 import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   ISessionService,
   RefreshInterval,
@@ -36,7 +37,7 @@ let usageCollector: jest.Mocked<SearchUsageCollector>;
 
 const refreshInterval$ = new BehaviorSubject<RefreshInterval>({ value: 0, pause: true });
 const timeFilter = dataStart.query.timefilter.timefilter as jest.Mocked<TimefilterContract>;
-timeFilter.getRefreshIntervalUpdate$.mockImplementation(() => refreshInterval$);
+timeFilter.getRefreshIntervalUpdate$.mockImplementation(() => refreshInterval$.pipe(map(() => {})));
 timeFilter.getRefreshInterval.mockImplementation(() => refreshInterval$.getValue());
 
 const disableSaveAfterSessionCompletesTimeout = 5 * 60 * 1000;

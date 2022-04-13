@@ -234,7 +234,16 @@ export function DiscoverLayout({
           history={history}
         />
         <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
-          {savedSearch.title}
+          {savedSearch.title
+            ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                defaultMessage: 'Discover - {savedSearchTitle}',
+                values: {
+                  savedSearchTitle: savedSearch.title,
+                },
+              })
+            : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                defaultMessage: 'Discover - Search not yet saved',
+              })}
         </h1>
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
           <EuiFlexItem grow={false}>
@@ -298,7 +307,7 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next()} />
+                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
