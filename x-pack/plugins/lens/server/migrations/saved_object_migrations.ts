@@ -44,6 +44,7 @@ import {
   commonSetLastValueShowArrayValues,
   commonEnhanceTableRowHeight,
   commonSetIncludeEmptyRowsDateHistogram,
+  commonLockOldMetricVisSettings,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -485,6 +486,10 @@ const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, 
   return { ...doc, attributes: commonSetIncludeEmptyRowsDateHistogram(doc.attributes) };
 };
 
+const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => ({ ...doc, attributes: commonLockOldMetricVisSettings(doc.attributes) });
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -504,6 +509,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     setIncludeEmptyRowsDateHistogram,
     enhanceTableRowHeight
   ),
+  '8.3.0': lockOldMetricVisSettings,
 };
 
 export const getAllMigrations = (
