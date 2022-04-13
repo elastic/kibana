@@ -132,7 +132,7 @@ You can modify the scheduled agent policies for a prebuilt pack, but you cannot 
 === Load and activate prebuilt Elastic packs
 
 . Go to *Packs*, and then click *Load Elastic prebuilt packs*.
-
++
 NOTE: This option is only available if new or updated prebuilt packs are available.
 
 . For each pack that you want to schedule: 
