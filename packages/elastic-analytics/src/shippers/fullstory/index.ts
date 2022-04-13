@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from './services';
-import { pageObjects } from '../functional/page_objects';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export { FullStoryShipper } from './fullstory_shipper';
+export type { FullStoryShipperConfig } from './fullstory_shipper';
+export type { FullStorySnippetConfig } from './load_snippet';
