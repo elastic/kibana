@@ -33,6 +33,7 @@ import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
+import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -47,6 +48,7 @@ import type {
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
   AlertsTableProps,
+  RuleStatusDropdownProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
@@ -72,6 +74,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
+  getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
 }
 
 interface PluginsSetup {
@@ -223,6 +226,9 @@ export class Plugin
       },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);
+      },
+      getRuleStatusDropdown: (props: RuleStatusDropdownProps) => {
+        return getRuleStatusDropdownLazy(props);
       },
     };
   }

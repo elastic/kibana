@@ -46,6 +46,7 @@ import {
   RuleType as CommonRuleType,
 } from '../../alerting/common';
 import { RuleRegistrySearchRequestPagination } from '../../rule_registry/common';
+import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -77,6 +78,7 @@ export type {
   RuleTypeParams,
   ResolvedRule,
   SanitizedRule,
+  RuleStatusDropdownProps,
 };
 export type { ActionType, AsApiContract };
 export {

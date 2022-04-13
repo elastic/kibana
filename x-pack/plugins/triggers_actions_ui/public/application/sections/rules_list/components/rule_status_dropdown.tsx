@@ -44,7 +44,6 @@ export interface ComponentOpts {
   snoozeRule: (snoozeEndTime: string | -1, interval: string | null) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
   isEditable: boolean;
-  previousSnoozeInterval: string | null;
   direction?: 'column' | 'row';
 }
 
@@ -55,6 +54,17 @@ const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
   [1, 'd'],
 ];
 
+const PREV_SNOOZE_INTERVAL_KEY = 'previousSnoozeInterval';
+const usePreviousSnoozeInterval: () => [string | null, (n: string) => void] = () => {
+  const interval = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
+  const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(interval);
+  const storeAndSetPreviousSnoozeInterval = (newInterval: string) => {
+    localStorage.setItem(PREV_SNOOZE_INTERVAL_KEY, newInterval);
+    setPreviousSnoozeInterval(newInterval);
+  };
+  return [previousSnoozeInterval, storeAndSetPreviousSnoozeInterval];
+};
+
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   item,
   onRuleChanged,
@@ -63,11 +73,12 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   snoozeRule,
   unsnoozeRule,
   isEditable,
-  previousSnoozeInterval,
   direction = 'column',
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(isItemSnoozed(item));
+  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval();
+
   useEffect(() => {
     setIsEnabled(item.enabled);
   }, [item.enabled]);
@@ -79,6 +90,15 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   const onClickBadge = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), [setIsPopoverOpen]);
   const onClosePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+  const snoozeRuleAndStoreInterval = useCallback(
+    (snoozeEndTime: string | -1, interval: string | null) => {
+      if (interval) {
+        setPreviousSnoozeInterval(interval);
+      }
+      return snoozeRule(snoozeEndTime, interval);
+    },
+    [setPreviousSnoozeInterval, snoozeRule]
+  );
 
   const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
@@ -105,10 +125,10 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       setIsUpdating(true);
       try {
         if (value === -1) {
-          await snoozeRule(-1, null);
+          await snoozeRuleAndStoreInterval(-1, null);
         } else if (value !== 0) {
           const snoozeEndTime = moment().add(value, unit).toISOString();
-          await snoozeRule(snoozeEndTime, `${value}${unit}`);
+          await snoozeRuleAndStoreInterval(snoozeEndTime, `${value}${unit}`);
         } else await unsnoozeRule();
         setIsSnoozed(value !== 0);
         onRuleChanged();
@@ -116,7 +136,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
         setIsUpdating(false);
       }
     },
-    [setIsUpdating, setIsSnoozed, onRuleChanged, snoozeRule, unsnoozeRule]
+    [setIsUpdating, setIsSnoozed, onRuleChanged, snoozeRuleAndStoreInterval, unsnoozeRule]
   );
 
   const badgeColor = !isEnabled ? 'default' : isSnoozed ? 'warning' : 'primary';
@@ -548,3 +568,6 @@ const ONE: Record<SnoozeUnit, string> = {
     defaultMessage: '1 month',
   }),
 };
+
+// eslint-disable-next-line import/no-default-export
+export { RuleStatusDropdown as default };
