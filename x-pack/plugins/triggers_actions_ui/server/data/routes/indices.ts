@@ -45,6 +45,7 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     const pattern = req.body.pattern;
+    const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
     logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
     if (pattern.trim() === '') {
@@ -53,14 +54,14 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
 
     let aliases: string[] = [];
     try {
-      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.client.asCurrentUser, pattern);
+      aliases = await getAliasesFromPattern(esClient, pattern);
     } catch (err) {
       logger.warn(`route ${path} error getting aliases from pattern "${pattern}": ${err.message}`);
     }
 
     let indices: string[] = [];
     try {
-      indices = await getIndicesFromPattern(ctx.core.elasticsearch.client.asCurrentUser, pattern);
+      indices = await getIndicesFromPattern(esClient, pattern);
     } catch (err) {
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
