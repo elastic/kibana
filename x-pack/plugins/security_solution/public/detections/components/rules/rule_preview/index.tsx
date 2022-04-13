@@ -33,6 +33,7 @@ export interface RulePreviewProps {
   index: string[];
   isDisabled: boolean;
   query: FieldValueQueryBar;
+  dataViewId: string | null | undefined;
   ruleType: Type;
   threatIndex: string[];
   threatMapping: ThreatMapping;
@@ -54,6 +55,7 @@ const defaultTimeRange: Unit = 'h';
 
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
+  dataViewId,
   isDisabled,
   query,
   ruleType,

@@ -17,6 +17,7 @@ import { RulePreviewLogs } from '../../../../../common/detection_engine/schemas/
 interface PreviewRouteParams {
   isDisabled: boolean;
   index: string[];
+  dataViewId: string | null | undefined;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -30,6 +31,7 @@ interface PreviewRouteParams {
 
 export const usePreviewRoute = ({
   index,
+  dataViewId,
   isDisabled,
   query,
   threatIndex,

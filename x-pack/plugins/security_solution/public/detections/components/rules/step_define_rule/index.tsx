@@ -643,11 +643,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         <EuiSpacer size="s" />
         <RulePreview
           index={index}
+          dataViewId={dataViewId}
           isDisabled={getIsRulePreviewDisabled({
             ruleType,
             isQueryBarValid,
             isThreatQueryBarValid,
             index,
+            dataViewId,
             threatIndex,
             threatMapping: formThreatMapping,
             machineLearningJobId,
