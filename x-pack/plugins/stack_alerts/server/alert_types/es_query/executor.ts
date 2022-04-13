@@ -24,7 +24,7 @@ export async function executor(
 ) {
   const esQueryAlert = isEsQueryAlert(options);
   const { alertId, name, services, params, state } = options;
-  const { alertFactory, scopedClusterClient, searchSourceClient } = services;
+  const { alertFactory, scopedClusterClient, searchSourceUtils } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
 
@@ -51,10 +51,7 @@ export async function executor(
         alertId,
         params as OnlySearchSourceAlertParams,
         latestTimestamp,
-        {
-          searchSourceClient,
-          logger,
-        }
+        { searchSourceUtils, logger }
       );
 
   // apply the alert condition

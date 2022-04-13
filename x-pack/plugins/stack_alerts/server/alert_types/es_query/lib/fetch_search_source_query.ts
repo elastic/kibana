@@ -6,6 +6,10 @@
  */
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import { Logger } from 'kibana/server';
+import {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { OnlySearchSourceAlertParams } from '../types';
 import {
   getTime,
@@ -14,18 +18,26 @@ import {
   SortDirection,
 } from '../../../../../../../src/plugins/data/common';
 
+interface SearchSourceUtils {
+  searchSourceClient: ISearchStartSearchSource;
+  wrappedFetch: (
+    searchSource: ISearchSource
+  ) => Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>>;
+}
+
 export async function fetchSearchSourceQuery(
   alertId: string,
   params: OnlySearchSourceAlertParams,
   latestTimestamp: string | undefined,
   services: {
     logger: Logger;
-    searchSourceClient: Promise<ISearchStartSearchSource>;
+    searchSourceUtils: SearchSourceUtils;
   }
 ) {
-  const { logger, searchSourceClient } = services;
-  const client = await searchSourceClient;
-  const initialSearchSource = await client.create(params.searchConfiguration);
+  const { logger, searchSourceUtils } = services;
+  const { searchSourceClient, wrappedFetch } = searchSourceUtils;
+
+  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const { searchSource, dateStart, dateEnd } = updateSearchSource(
     initialSearchSource,
@@ -39,7 +51,7 @@ export async function fetchSearchSourceQuery(
     )}`
   );
 
-  const searchResult = await searchSource.fetch();
+  const searchResult = await wrappedFetch(searchSource);
 
   return {
     numMatches: Number(searchResult.hits.total),

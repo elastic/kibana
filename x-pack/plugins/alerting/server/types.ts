@@ -12,6 +12,10 @@ import type {
   IUiSettingsClient,
 } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -42,7 +46,7 @@ import {
   MappedParams,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
-import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
+import { ISearchSource, ISearchStartSearchSource } from '../../../../src/plugins/data/common';
 import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
@@ -74,7 +78,12 @@ export interface RuleExecutorServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > {
-  searchSourceClient: Promise<ISearchStartSearchSource>;
+  searchSourceUtils: {
+    searchSourceClient: ISearchStartSearchSource;
+    wrappedFetch: (
+      searchSource: ISearchSource
+    ) => Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>>;
+  };
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;

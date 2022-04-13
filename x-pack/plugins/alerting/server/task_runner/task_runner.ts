@@ -16,7 +16,6 @@ import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_man
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
-  createWrappedScopedClusterClientFactory,
   ElasticsearchError,
   ErrorWithReason,
   executionStatusFromError,
@@ -74,6 +73,7 @@ import {
   ScheduleActionsForRecoveredAlertsParams,
   TrackAlertDurationsParams,
 } from './types';
+import { createWrappedSearchClientsFactory } from '../lib/wrap_scoped_cluster_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -356,7 +356,7 @@ export class TaskRunner<
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
     const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
-    const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
+    const wrappedScopedClusterClient = createWrappedSearchClientsFactory({
       scopedClusterClient,
       rule: {
         name: rule.name,
@@ -367,6 +367,11 @@ export class TaskRunner<
       logger: this.logger,
       abortController: this.searchAbortController,
     });
+    const searchSourceClient = await this.context.data.search.searchSource.asScoped(fakeRequest);
+    const searchSourceUtils = {
+      searchSourceClient,
+      wrappedFetch: wrappedScopedClusterClient.searchSourceFetch(),
+    };
 
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
@@ -389,9 +394,9 @@ export class TaskRunner<
           executionId: this.executionId,
           services: {
             savedObjectsClient,
+            searchSourceUtils,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
-            scopedClusterClient: wrappedScopedClusterClient.client(),
-            searchSourceClient: this.context.data.search.searchSource.asScoped(fakeRequest),
+            scopedClusterClient: wrappedScopedClusterClient.scopedClusterClient(),
             alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
