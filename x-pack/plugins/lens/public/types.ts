@@ -7,7 +7,7 @@
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference, SavedObjectsResolveResponse } from 'kibana/public';
-import type { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
@@ -476,7 +476,13 @@ export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProp
   dropType: DropType;
 };
 
-export type FieldOnlyDataType = 'document' | 'ip' | 'histogram' | 'geo_point' | 'geo_shape';
+export type FieldOnlyDataType =
+  | 'document'
+  | 'ip'
+  | 'histogram'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'murmur3';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
 // An operation represents a column in a table, not any information

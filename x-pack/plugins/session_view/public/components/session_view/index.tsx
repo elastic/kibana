@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../process_tree';
 import {
@@ -33,6 +34,7 @@ import {
   useFetchSessionViewProcessEvents,
   useFetchSessionViewAlerts,
 } from './hooks';
+import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 
 /**
  * The main wrapper component for the session view.
@@ -40,6 +42,7 @@ import {
 export const SessionView = ({
   sessionEntityId,
   height,
+  isFullScreen = false,
   jumpToEntityId,
   jumpToCursor,
   investigatedAlertId,
@@ -55,16 +58,24 @@ export const SessionView = ({
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Process[] | null>(null);
-  const [displayOptions, setDisplayOptions] = useState<DisplayOptionsState>({
-    timestamp: true,
-    verboseMode: true,
-  });
+  const [displayOptions, setDisplayOptions] = useLocalStorage<DisplayOptionsState>(
+    LOCAL_STORAGE_DISPLAY_OPTIONS_KEY,
+    {
+      timestamp: true,
+      verboseMode: false,
+    }
+  );
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
   const [updatedAlertsStatus, setUpdatedAlertsStatus] = useState<AlertStatusEventEntityIdMap>({});
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
 
-  const styles = useStyles({ height });
+  const styles = useStyles({ height, isFullScreen });
+
+  // to give an indication to the user that there may be more search results if they turn on verbose mode.
+  const showVerboseSearchTooltip = useMemo(() => {
+    return !!(!displayOptions?.verboseMode && searchQuery && searchResults?.length === 0);
+  }, [displayOptions?.verboseMode, searchResults, searchQuery]);
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
@@ -136,9 +147,12 @@ export const SessionView = ({
     [loadAlertDetails, handleOnAlertDetailsClosed]
   );
 
-  const handleOptionChange = useCallback((checkedOptions: DisplayOptionsState) => {
-    setDisplayOptions(checkedOptions);
-  }, []);
+  const handleOptionChange = useCallback(
+    (checkedOptions: DisplayOptionsState) => {
+      setDisplayOptions(checkedOptions);
+    },
+    [setDisplayOptions]
+  );
 
   if (!isFetching && !hasData) {
     return (
@@ -183,8 +197,9 @@ export const SessionView = ({
 
             <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
               <SessionViewDisplayOptions
-                displayOptions={displayOptions}
+                displayOptions={displayOptions!}
                 onChange={handleOptionChange}
+                showVerboseSearchTooltip={showVerboseSearchTooltip}
               />
             </EuiFlexItem>
 
@@ -264,8 +279,8 @@ export const SessionView = ({
                       setSearchResults={setSearchResults}
                       updatedAlertsStatus={updatedAlertsStatus}
                       onShowAlertDetails={onShowAlertDetails}
-                      timeStampOn={displayOptions.timestamp}
-                      verboseModeOn={displayOptions.verboseMode}
+                      showTimestamp={displayOptions?.timestamp}
+                      verboseMode={displayOptions?.verboseMode}
                     />
                   </div>
                 )}

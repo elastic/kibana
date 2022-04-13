@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { DataPublicPluginStart, search, IAggConfigs } from '../../../../../data/public';
 import { Dimensions, HistogramParamsBounds } from '../components/chart/point_series';
 

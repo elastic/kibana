@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
-import { LocationsCodec, ServiceLocationErrors } from './locations';
+import { MonitorServiceLocationsCodec, ServiceLocationErrors } from './locations';
 import {
   DataStreamCodec,
   ModeCodec,
@@ -68,7 +68,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.SCHEDULE]: Schedule,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
-    [ConfigKey.LOCATIONS]: LocationsCodec,
+    [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
   }),
   t.partial({
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
