@@ -55,14 +55,14 @@ export const waitForIndexStatusYellow =
           timeout,
         },
         // Don't reject on status code 408 so that we can handle the timeout
-        // explicitly and provide more context in the error message
+        // explicitly with a custom response type and provide more context in the error message
         { ignore: [408] }
       )
       .then((res) => {
         if (res.timed_out === true) {
           return Either.left({
             type: 'index_not_yellow_timeout' as const,
-            message: `Timeout waiting for the status of the [${index}] index to become 'yellow'`,
+            message: `[index_not_yellow_timeout] Timeout waiting for the status of the [${index}] index to become 'yellow'`,
           });
         }
         return Either.right({});

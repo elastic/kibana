@@ -12,13 +12,18 @@ export const delayRetryState = <S extends State>(
   state: S,
   errorMessage: string,
   /** How many times to retry a step that fails */
-  maxRetryAttempts: number
+  maxRetryAttempts: number,
+  /** optional link to docs */
+  docLink?: string
 ): S => {
+  const defaultReason = `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating.`;
   if (state.retryCount >= maxRetryAttempts) {
     return {
       ...state,
       controlState: 'FATAL',
-      reason: `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating.`,
+      reason: docLink
+        ? `${defaultReason} Refer to ${docLink} for information on how to resolve the issue.`
+        : defaultReason,
     };
   } else {
     const retryCount = state.retryCount + 1;

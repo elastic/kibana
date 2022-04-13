@@ -57,15 +57,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
-  if (
-    Either.isLeft<unknown, unknown>(resW) &&
-    isLeftTypeof(resW.left, 'retryable_es_client_error')
-  ) {
-    // Retry the same step after an exponentially increasing delay.
-    return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
+  if (Either.isLeft<unknown, unknown>(resW)) {
+    if (isLeftTypeof(resW.left, 'retryable_es_client_error')) {
+      // Retry the same step after an exponentially increasing delay.
+      return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
+    }
   } else {
-    // If the action didn't fail with a retryable_es_client_error, reset the
-    // retry counter and retryDelay state
+    // If any action returns a right response, reset the retryCount and retryDelay state
     stateP = resetRetryState(stateP);
   }
 
@@ -242,7 +240,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
         // TODO: Add comment as to what could be causing a timeout waiting for the index
         // to turn yellow.
-        return delayRetryState(stateP, left.message, stateP.retryAttempts);
+        return delayRetryState(
+          stateP,
+          left.message,
+          stateP.retryAttempts,
+          stateP.migrationDocLinks.resolveMigrationFailures
+        );
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -360,7 +363,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
         // The cluster might be busy so we retry this step until the default number of
         // retries specified in the migration config.
-        return delayRetryState(stateP, left.message, stateP.retryAttempts);
+        return delayRetryState(
+          stateP,
+          left.message,
+          stateP.retryAttempts,
+          stateP.migrationDocLinks.resolveMigrationFailures
+        );
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -449,7 +457,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       const left = res.left;
       if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
         // TODO: Add comment about manually retying the action
-        return delayRetryState(stateP, left.message, stateP.retryAttempts);
+        return delayRetryState(
+          stateP,
+          left.message,
+          stateP.retryAttempts,
+          stateP.migrationDocLinks.resolveMigrationFailures
+        );
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -673,6 +686,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'REFRESH_TARGET',
         };
+      } else if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // TODO: add code comment as to why we manually retry this step
+        // Alsodouble check to see if we need to reset the counter on any right response for this state
+        return delayRetryState(
+          stateP,
+          left.message,
+          stateP.retryAttempts,
+          stateP.migrationDocLinks.resolveMigrationFailures
+        );
       } else {
         throwBadResponse(stateP, left);
       }
@@ -904,7 +926,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
         // After waiting for the specified timeout, the task has not yet
         // completed. Retry this step to see if the task has completed after an
-        // exponential delay. We will basically keep polling forever until the
+        // exponential delay.  We will basically keep polling forever until the
         // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
       } else {
@@ -923,7 +945,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
         // TODO: Add comment as to why we have to manually retry this state
         // TODO: Double check if we need to reset the delay retry state
-        return delayRetryState(stateP, left.message, stateP.retryAttempts);
+        return delayRetryState(
+          stateP,
+          left.message,
+          stateP.retryAttempts,
+          stateP.migrationDocLinks.resolveMigrationFailures
+        );
       } else {
         return throwBadResponse(stateP, left);
       }

@@ -112,6 +112,32 @@ describe('delayRetryState', () => {
       reason: `Unable to complete the TEST step after 5 attempts, terminating.`,
     });
   });
+
+  it('returns a FATAL state with an extended message if a doc link is provided', () => {
+    const state = createState({
+      controlState: 'TEST',
+      hello: 'dolly',
+      retryCount: 5,
+      retryDelay: 64,
+      migrationDocLinks: {
+        specificErrorLink: 'specificErrorLink',
+      },
+    });
+
+    expect(
+      delayRetryState(state, 'some-error', 5, state.migrationDocLinks.specificErrorLink)
+    ).toEqual({
+      controlState: 'FATAL',
+      hello: 'dolly',
+      retryCount: 5,
+      retryDelay: 64,
+      migrationDocLinks: {
+        specificErrorLink: 'specificErrorLink',
+      },
+      reason:
+        'Unable to complete the TEST step after 5 attempts, terminating. Refer to specificErrorLink for information on how to resolve the issue.',
+    });
+  });
 });
 
 describe('resetRetryState', () => {

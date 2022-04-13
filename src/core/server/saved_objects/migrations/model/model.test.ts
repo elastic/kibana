@@ -94,6 +94,9 @@ describe('migrations v2 model', () => {
     },
     knownTypes: ['dashboard', 'config'],
     excludeFromUpgradeFilterHooks: {},
+    migrationDocLinks: {
+      resolveMigrationFailures: 'resolveMigrationFailures',
+    },
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -169,20 +172,6 @@ describe('migrations v2 model', () => {
         },
       });
       const newState = model({ ...state, ...{ retryCount: 5, retryDelay: 32000 } }, res);
-
-      expect(newState.retryCount).toEqual(0);
-      expect(newState.retryDelay).toEqual(0);
-    });
-
-    test('resets retryCount, retryDelay when an action fails with a non-retryable error', () => {
-      const legacyReindexState = {
-        ...state,
-        ...{ controlState: 'LEGACY_REINDEX_WAIT_FOR_TASK', retryCount: 5, retryDelay: 32000 },
-      };
-      const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
-        type: 'target_index_had_write_block',
-      });
-      const newState = model(legacyReindexState as State, res);
 
       expect(newState.retryCount).toEqual(0);
       expect(newState.retryDelay).toEqual(0);
@@ -574,9 +563,29 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-      // The createIndex action called by LEGACY_CREATE_REINDEX_TARGET never
-      // returns a left, it will always succeed or timeout. Since timeout
-      // failures are always retried we don't explicitly test this logic
+      test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_yellow_timeout', () => {
+        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> = Either.left({
+          message: '[index_not_yellow_timeout] Timeout waiting for ...',
+          type: 'index_not_yellow_timeout',
+        });
+        const newState = model(legacyCreateReindexTargetState, res);
+        expect(newState.controlState).toEqual('LEGACY_CREATE_REINDEX_TARGET');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      test('LEGACY_CREATE_REINDEX_TARGET -> LEGACY_REINDEX resets retry count and retry delay if action succeeds', () => {
+        const res: ResponseType<'LEGACY_CREATE_REINDEX_TARGET'> =
+          Either.right('create_index_succeeded');
+        const testState = {
+          ...legacyCreateReindexTargetState,
+          retryCount: 1,
+          retryDelay: 2000,
+        };
+        const newState = model(testState, res);
+        expect(newState.controlState).toEqual('LEGACY_REINDEX');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
     });
 
     describe('LEGACY_REINDEX', () => {
@@ -647,6 +656,17 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
+      test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_REINDEX_WAIT_FOR_TASK with incremented retryCount if action fails with wait_for_task_completion_timeout a second time', () => {
+        const state = Object.assign({}, legacyReindexWaitForTaskState, { retryCount: 1 });
+        const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('LEGACY_REINDEX_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(2);
+        expect(newState.retryDelay).toEqual(4000);
+      });
     });
 
     describe('LEGACY_DELETE', () => {
@@ -703,6 +723,33 @@ describe('migrations v2 model', () => {
       test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS if action succeeds', () => {
         const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
         const newState = model(waitForYellowSourceState, res);
+        expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
+
+        expect(newState).toMatchObject({
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          sourceIndex: Option.some('.kibana_3'),
+        });
+      });
+
+      test('WAIT_FOR_YELLOW_SOURCE -> WAIT_FOR_YELLOW_SOURCE if action fails with index_not_yellow_timeout', () => {
+        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.left({
+          message: '[index_not_yellow_timeout] Timeout waiting for ...',
+          type: 'index_not_yellow_timeout',
+        });
+        const newState = model(waitForYellowSourceState, res);
+        expect(newState.controlState).toEqual('WAIT_FOR_YELLOW_SOURCE');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS resets retry count and delay if action succeeds', () => {
+        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+        const testState = {
+          ...waitForYellowSourceState,
+          retryCount: 1,
+          retryDelay: 2000,
+        };
+        const newState = model(testState, res);
         expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
 
         expect(newState).toMatchObject({
@@ -899,6 +946,28 @@ describe('migrations v2 model', () => {
       it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT if action succeeds', () => {
         const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
         const newState = model(state, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      it('CREATE_REINDEX_TEMP -> CREATE_REINDEX_TEMP if action fails with index_not_yellow_timeout', () => {
+        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.left({
+          message: '[index_not_yellow_timeout] Timeout waiting for ...',
+          type: 'index_not_yellow_timeout',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CREATE_REINDEX_TEMP');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      it('CREATE_REINDEX_TEMP -> REINDEX_SOURCE_TO_TEMP_OPEN_PIT resets retry count if action succeeds', () => {
+        const res: ResponseType<'CREATE_REINDEX_TEMP'> = Either.right('create_index_succeeded');
+        const testState = {
+          ...state,
+          retryCount: 1,
+          retryDelay: 2000,
+        };
+        const newState = model(testState, res);
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_OPEN_PIT');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
@@ -1211,6 +1280,31 @@ describe('migrations v2 model', () => {
           index: 'temp_index',
         });
         const newState = model(state, res);
+        expect(newState.controlState).toBe('REFRESH_TARGET');
+        expect(newState.retryCount).toBe(0);
+        expect(newState.retryDelay).toBe(0);
+      });
+      it('CLONE_TEMP_TO_TARGET -> CLONE_TEMP_TO_TARGET if action fails with index_not_yellow_timeout', () => {
+        const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.left({
+          message: '[index_not_yellow_timeout] Timeout waiting for ...',
+          type: 'index_not_yellow_timeout',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('CLONE_TEMP_TO_TARGET');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      it('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+        const res: ResponseType<'CLONE_TEMP_TO_TARGET'> = Either.right({
+          acknowledged: true,
+          shardsAcknowledged: true,
+        });
+        const testState = {
+          ...state,
+          retryCount: 1,
+          retryDelay: 2000,
+        };
+        const newState = model(testState, res);
         expect(newState.controlState).toBe('REFRESH_TARGET');
         expect(newState.retryCount).toBe(0);
         expect(newState.retryDelay).toBe(0);
@@ -1670,6 +1764,17 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
+      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK with incremented retry count when response is left wait_for_task_completion_timeout a second time', () => {
+        const state = Object.assign({}, updateTargetMappingsWaitForTaskState, { retryCount: 1 });
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(state, res) as UpdateTargetMappingsWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(2);
+        expect(newState.retryDelay).toEqual(4000);
+      });
     });
 
     describe('CREATE_NEW_TARGET', () => {
@@ -1686,6 +1791,29 @@ describe('migrations v2 model', () => {
       test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY', () => {
         const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
         const newState = model(createNewTargetState, res);
+        expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
+      });
+      test('CREATE_NEW_TARGET -> CREATE_NEW_TARGET if action fails with index_not_yellow_timeout', () => {
+        const res: ResponseType<'CREATE_NEW_TARGET'> = Either.left({
+          message: '[index_not_yellow_timeout] Timeout waiting for ...',
+          type: 'index_not_yellow_timeout',
+        });
+        const newState = model(createNewTargetState, res);
+        expect(newState.controlState).toEqual('CREATE_NEW_TARGET');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+      test('CREATE_NEW_TARGET -> MARK_VERSION_INDEX_READY resets the retry count and delay', () => {
+        const res: ResponseType<'CREATE_NEW_TARGET'> = Either.right('create_index_succeeded');
+        const testState = {
+          ...createNewTargetState,
+          retryCount: 1,
+          retryDelay: 2000,
+        };
+
+        const newState = model(testState, res);
         expect(newState.controlState).toEqual('MARK_VERSION_INDEX_READY');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
