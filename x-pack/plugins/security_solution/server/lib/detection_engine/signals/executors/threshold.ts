@@ -41,6 +41,7 @@ import { BuildRuleMessage } from '../rule_messages';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
+import { IRuleDataReader } from '../../../../../../rule_registry/server';
 
 export const thresholdExecutor = async ({
   completeRule,
@@ -55,6 +56,7 @@ export const thresholdExecutor = async ({
   state,
   bulkCreate,
   wrapHits,
+  ruleDataReader,
 }: {
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
@@ -68,6 +70,7 @@ export const thresholdExecutor = async ({
   state: ThresholdAlertState;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  ruleDataReader: IRuleDataReader;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   let result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -77,15 +80,11 @@ export const thresholdExecutor = async ({
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
       ? { signalHistory: state.signalHistory, searchErrors: [] }
       : await getThresholdSignalHistory({
-          indexPattern: ['*'], // TODO: get outputIndex?
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          services,
-          logger,
           ruleId: ruleParams.ruleId,
           bucketByFields: ruleParams.threshold.field,
-          timestampOverride: ruleParams.timestampOverride,
-          buildRuleMessage,
+          ruleDataReader,
         });
 
     if (!state.initialized) {

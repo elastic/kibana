@@ -9,8 +9,8 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable } from 'rxjs';
+import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '@kbn/logging';
 
 import { Config, ConfigPath, Env } from '.';
@@ -170,7 +170,7 @@ export class ConfigService {
     const namespace = pathToString(path);
     const hasSchema = this.schemas.has(namespace);
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (!hasSchema && config.has(path)) {
       // Throw if there is no schema, but a config exists at the path.
       throw new Error(`No validation schema has been defined for [${namespace}]`);
@@ -195,13 +195,13 @@ export class ConfigService {
   }
 
   public async getUnusedPaths() {
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     const handledPaths = [...this.handledPaths.values()].map(pathToString);
     return config.getFlattenedPaths().filter((path) => !isPathHandled(path, handledPaths));
   }
 
   public async getUsedPaths() {
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     const handledPaths = [...this.handledPaths.values()].map(pathToString);
     return config.getFlattenedPaths().filter((path) => isPathHandled(path, handledPaths));
   }
@@ -211,8 +211,8 @@ export class ConfigService {
   }
 
   private async logDeprecation() {
-    const rawConfig = await this.rawConfigProvider.getConfig$().pipe(take(1)).toPromise();
-    const deprecations = await this.deprecations.pipe(take(1)).toPromise();
+    const rawConfig = await firstValueFrom(this.rawConfigProvider.getConfig$());
+    const deprecations = await firstValueFrom(this.deprecations);
     const deprecationMessages: string[] = [];
     const createAddDeprecation = (domainId: string) => (context: DeprecatedConfigDetails) => {
       if (!context.silent) {
