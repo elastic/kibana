@@ -74,7 +74,6 @@ const PackagePolicyInputsSchema = {
     )
   ),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
-  compiled_input: schema.maybe(schema.any()),
 };
 
 const PackagePolicyBaseSchema = {
