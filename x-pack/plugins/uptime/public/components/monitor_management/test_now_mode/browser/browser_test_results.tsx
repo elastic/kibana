@@ -7,12 +7,13 @@
 
 import { useEffect } from 'react';
 import * as React from 'react';
-import { EuiAccordion, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { StepsList } from '../../../synthetics/check_steps/steps_list';
 import { CheckGroupResult, useBrowserRunOnceMonitors } from './use_browser_run_once_monitors';
 import { TestResultHeader } from '../test_result_header';
+import { StdErrorLogs } from '../../../synthetics/check_steps/stderr_logs';
 
 interface Props {
   monitorId: string;
@@ -44,6 +45,7 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, expectPings, o
 
         return (
           <AccordionWrapper
+            key={'accordion-' + checkGroupId}
             id={'accordion-' + checkGroupId}
             element="fieldset"
             className="euiAccordionForm"
@@ -68,9 +70,9 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, expectPings, o
             )}
 
             {isStepsLoadingFailed &&
-            summaryDoc?.error?.message?.includes('journey did not finish executing') && (
-              <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
-            )}
+              summaryDoc?.error?.message?.includes('journey did not finish executing') && (
+                <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
+              )}
 
             {completedSteps > 0 && (
               <StepsList

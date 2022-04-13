@@ -18,7 +18,7 @@ import {
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useRunOnceErrors } from '../hooks/use_run_once_errors';
 import { TestRunResult } from './test_run_results';
-import { MonitorFields, ServiceLocationErrors } from '../../../../common/runtime_types';
+import { Locations, MonitorFields, ServiceLocationErrors } from '../../../../common/runtime_types';
 import { runOnceMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 
@@ -59,7 +59,7 @@ export function TestNowMode({
     testRunId: testRun?.id ?? '',
     serviceError,
     errors: errors ?? [],
-    locations: testRun?.monitor.locations ?? [],
+    locations: (testRun?.monitor.locations ?? []) as Locations,
   });
 
   useEffect(() => {

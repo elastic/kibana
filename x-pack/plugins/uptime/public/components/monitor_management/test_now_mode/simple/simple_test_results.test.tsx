@@ -23,7 +23,7 @@ describe('SimpleTestResults', function () {
   });
 
   it('should render properly', async function () {
-    render(<SimpleTestResults monitorId={testId} onDone={onDone} />);
+    render(<SimpleTestResults monitorId={testId} expectPings={1} onDone={onDone} />);
     expect(await screen.findByText('Test result')).toBeInTheDocument();
     const dataApi = (kibanaService.core as any).data.search;
 
@@ -51,19 +51,21 @@ describe('SimpleTestResults', function () {
     const doc = data.hits.hits[0];
     jest.spyOn(runOnceHooks, 'useSimpleRunOnceMonitors').mockReturnValue({
       data: data as any,
-      summaryDoc: {
-        ...(doc._source as unknown as Ping),
-        timestamp: (doc._source as unknown as Record<string, string>)?.['@timestamp'],
-        docId: doc._id,
-      },
+      summaryDocs: [
+        {
+          ...(doc._source as unknown as Ping),
+          timestamp: (doc._source as unknown as Record<string, string>)?.['@timestamp'],
+          docId: doc._id,
+        },
+      ],
       loading: false,
+      lastUpdated: Date.now(),
     });
 
-    render(<SimpleTestResults monitorId={'test-id'} onDone={onDone} />);
+    render(<SimpleTestResults monitorId={'test-id'} expectPings={1} onDone={onDone} />);
 
     expect(await screen.findByText('Test result')).toBeInTheDocument();
 
-    expect(await screen.findByText('COMPLETED')).toBeInTheDocument();
     expect(await screen.findByText('191 ms')).toBeInTheDocument();
     expect(await screen.findByText('151.101.2.217')).toBeInTheDocument();
     expect(await screen.findByText('Checked Jan 12, 2022 11:54:27 AM')).toBeInTheDocument();
