@@ -91,7 +91,7 @@ const mockLayer = {
   },
   getDescriptor: () => {
     return {};
-  }
+  },
 } as unknown as ILayer;
 
 const defaultProps = {
