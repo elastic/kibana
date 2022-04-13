@@ -591,7 +591,7 @@ interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
 }
 export interface Suggestion {
   visualizationId: string;
@@ -683,9 +683,11 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
+export type DatasourceLayers = Record<string, DatasourcePublicAPI>;
+
 export interface FramePublicAPI {
-  datasourceLayers: Record<string, DatasourcePublicAPI>;
-  appliedDatasourceLayers?: Record<string, DatasourcePublicAPI>; // this is only set when auto-apply is turned off
+  datasourceLayers: DatasourceLayers;
+  dateRange: DateRange;
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
@@ -694,7 +696,6 @@ export interface FramePublicAPI {
   activeData?: Record<string, Datatable>;
 }
 export interface FrameDatasourceAPI extends FramePublicAPI {
-  dateRange: DateRange;
   query: Query;
   filters: Filter[];
 }
@@ -884,7 +885,7 @@ export interface Visualization<T = unknown> {
 
   toExpression: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>,
+    datasourceLayers: DatasourceLayers,
     attributes?: Partial<{ title: string; description: string }>
   ) => ExpressionAstExpression | string | null;
   /**
@@ -893,7 +894,7 @@ export interface Visualization<T = unknown> {
    */
   toPreviewExpression?: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>
+    datasourceLayers: DatasourceLayers
   ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
@@ -901,7 +902,7 @@ export interface Visualization<T = unknown> {
    */
   getErrorMessages: (
     state: T,
-    datasourceLayers?: Record<string, DatasourcePublicAPI>
+    datasourceLayers?: DatasourceLayers
   ) =>
     | Array<{
         shortMessage: string;
