@@ -10,10 +10,7 @@ import { Pagination } from '@elastic/eui';
 import { useQuery } from 'react-query';
 import type { ServerApiError } from '../../../../common/types';
 import { useIsMounted } from '../../hooks/use_is_mounted';
-import {
-  MANAGEMENT_DEFAULT_PAGE_SIZE,
-  MANAGEMENT_PAGE_SIZE_OPTIONS,
-} from '../../../common/constants';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
 import { useUrlParams } from '../../hooks/use_url_params';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { ArtifactListPageUrlParams } from '../types';
