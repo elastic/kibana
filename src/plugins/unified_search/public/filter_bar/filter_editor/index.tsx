@@ -56,6 +56,7 @@ export interface Props {
   onCancel: () => void;
   intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
+  mode?: 'edit' | 'add';
 }
 
 interface State {
@@ -111,7 +112,7 @@ class FilterEditorUI extends Component<Props, State> {
       <div>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
-            <EuiFlexItem>{panelTitleEdit}</EuiFlexItem>
+            <EuiFlexItem>{this.props.mode === 'add' ? panelTitleAdd : panelTitleEdit}</EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -183,7 +184,7 @@ class FilterEditorUI extends Component<Props, State> {
                   isDisabled={!this.isFilterValid()}
                   data-test-subj="saveFilter"
                 >
-                  {updateButtonLabel}
+                  {this.props.mode === 'add' ? addButtonLabel : updateButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

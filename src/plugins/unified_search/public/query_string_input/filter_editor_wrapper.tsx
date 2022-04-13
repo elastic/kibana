@@ -77,6 +77,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
         onCancel={() => closePopover?.()}
         key={JSON.stringify(newFilter)}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+        mode="add"
       />
     </div>
   );
