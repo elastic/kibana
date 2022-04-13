@@ -41,8 +41,8 @@ import type {
 } from '../../encrypted_saved_objects/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { FleetConfigType, FleetAuthz } from '../common';
-import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import type { FleetConfigType, FleetAuthz, ExperimentalFeatures } from '../common';
+import { INTEGRATIONS_PLUGIN_ID, parseExperimentalConfigValue } from '../common';
 import type { CloudSetup } from '../../cloud/server';
 import type { SpacesPluginStart } from '../../spaces/server';
 
@@ -120,6 +120,7 @@ export interface FleetAppContext {
   securityStart: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   configInitialValue: FleetConfigType;
+  experimentalFeatures: ExperimentalFeatures;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -393,6 +394,9 @@ export class FleetPlugin
       securityStart: plugins.security,
       configInitialValue: this.configInitialValue,
       config$: this.config$,
+      experimentalFeatures: parseExperimentalConfigValue(
+        this.configInitialValue.enableExperimental || []
+      ),
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,

@@ -12,6 +12,7 @@ export type {
   PackagePolicyConfigValidationResults,
   PackagePolicyInputValidationResults,
 } from '../../common';
+export { ExperimentalFeaturesService } from './experimental_features';
 export {
   AgentStatusKueryHelper,
   agentPolicyRouteService,
