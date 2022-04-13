@@ -590,7 +590,6 @@
     "xpack.lens.indexPattern.percentile.signature": "field: string, [percentile]: number",
     "xpack.lens.indexPattern.percentileOf": "{name} 的{percentile, selectordinal, one {第一个} two {第二个} few {第三个} other {第 #th 个}}百分位数",
     "xpack.lens.indexPattern.pinnedTopValuesLabel": "{field} 的筛选",
-    "xpack.lens.indexPattern.precisionErrorWarning": "由于数据的索引方式，此可视化的 {name} 可能为近似值。尝试增加 {topValues} 的数量或使用 {filters}（而不是 {topValues}），以获得准确的结果。有关此限制的详情，{link}。",
     "xpack.lens.indexPattern.precisionErrorWarning.filters": "筛选",
     "xpack.lens.indexPattern.precisionErrorWarning.link": "访问文档",
     "xpack.lens.indexPattern.precisionErrorWarning.topValues": "排名最前值",
