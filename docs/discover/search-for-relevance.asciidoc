@@ -21,7 +21,7 @@ Warsaw OR Venice OR Clear
 . From the list of *Available fields*, add `_score` and any other fields you want to the document table.
 +
 At this point, you're sorting by the`timestamp` field.
-. To turn off sorting for the `timestamp` field, click the *field sorted* option, and then click *Clear sorting.*
+. To turn off sorting by the `timestamp` field, click the *field sorted* option, and then click *Clear sorting.*
 . To turn on sorting by the `_score` field in descending order, open the dropdown menu and click *_score*, and then select *High-Low*.
 +
 [role="screenshot"]
