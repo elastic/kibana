@@ -91,6 +91,7 @@ export const getMultiTermsBucketAgg = () => {
     },
     createFilter: createFilterMultiTerms,
     postFlightRequest: createOtherBucketPostFlightRequest(constructMultiTermOtherFilter),
+    hasPrecisionError: (aggBucket) => Boolean(aggBucket?.doc_count_error_upper_bound),
     params: [
       {
         name: 'fields',
