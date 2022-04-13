@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { useAgentDetails } from './use_agent_details';
@@ -22,15 +22,17 @@ const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
   const { data } = useAgentDetails({ agentId, skip: !agentId });
 
   return (
-    <EuiLink
-      className="eui-textTruncate"
-      href={getUrlForApp(PLUGIN_ID, {
-        path: pagePathGetters.agent_details({ agentId })[1],
-      })}
-      target="_blank"
-    >
-      {data?.local_metadata.host.name ?? agentId}
-    </EuiLink>
+    <EuiToolTip position="top" content={<p>{agentId}</p>}>
+      <EuiLink
+        className="eui-textTruncate"
+        href={getUrlForApp(PLUGIN_ID, {
+          path: pagePathGetters.agent_details({ agentId })[1],
+        })}
+        target="_blank"
+      >
+        {data?.local_metadata.host.name ?? agentId}
+      </EuiLink>
+    </EuiToolTip>
   );
 };
 

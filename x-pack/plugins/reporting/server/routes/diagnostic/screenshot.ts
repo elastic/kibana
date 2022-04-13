@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Logger } from 'kibana/server';
+import { lastValueFrom } from 'rxjs';
 import { ReportingCore } from '../..';
 import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
@@ -50,14 +51,16 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      return generatePngObservable(reporting, logger, {
-        layout,
-        request,
-        browserTimezone: 'America/Los_Angeles',
-        urls: [hashUrl],
-      })
-        .pipe()
-        .toPromise()
+      return lastValueFrom(
+        generatePngObservable(reporting, logger, {
+          layout,
+          request,
+          browserTimezone: 'America/Los_Angeles',
+          urls: [hashUrl],
+        })
+          // Pipe is required to ensure that we can subscribe to it
+          .pipe()
+      )
         .then((screenshot) => {
           // NOTE: the screenshot could be returned as a string using `data:image/png;base64,` + results.buffer.toString('base64')
           if (screenshot.warnings.length) {

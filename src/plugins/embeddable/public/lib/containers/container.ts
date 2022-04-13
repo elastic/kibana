@@ -135,9 +135,19 @@ export abstract class Container<
   public removeEmbeddable(embeddableId: string) {
     // Just a shortcut for removing the panel from input state, all internal state will get cleaned up naturally
     // by the listener.
+    const panels = this.onRemoveEmbeddable(embeddableId);
+    this.updateInput({ panels } as Partial<TContainerInput>);
+  }
+
+  /**
+   * Control the panels that are pushed to the input stream when an embeddable is
+   * removed. This can be used if removing one embeddable has knock-on effects, like
+   * re-ordering embeddables that come after it.
+   */
+  protected onRemoveEmbeddable(embeddableId: string): ContainerInput['panels'] {
     const panels = { ...this.input.panels };
     delete panels[embeddableId];
-    this.updateInput({ panels } as Partial<TContainerInput>);
+    return panels;
   }
 
   public getChildIds(): string[] {

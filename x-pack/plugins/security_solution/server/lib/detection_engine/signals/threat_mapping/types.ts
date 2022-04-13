@@ -18,11 +18,12 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
 import { ITelemetryEventsSender } from '../../../telemetry/sender';
@@ -56,7 +57,7 @@ export interface CreateThreatSignalsOptions {
   query: string;
   savedId: string | undefined;
   searchAfterSize: number;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPath;
@@ -86,7 +87,7 @@ export interface CreateThreatSignalOptions {
   query: string;
   savedId: string | undefined;
   searchAfterSize: number;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatEnrichment: SignalsEnrichment;
   threatMapping: ThreatMapping;
   tuple: RuleRangeTuple;
@@ -112,7 +113,7 @@ export interface CreateEventSignalOptions {
   query: string;
   savedId: string | undefined;
   searchAfterSize: number;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatEnrichment: SignalsEnrichment;
   tuple: RuleRangeTuple;
   type: Type;
@@ -123,8 +124,9 @@ export interface CreateEventSignalOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
-  threatListConfig: ThreatListConfig;
   perPage?: number;
+  threatPitId: OpenPointInTimeResponse['id'];
+  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 type EntryKey = 'field' | 'value';
@@ -186,6 +188,8 @@ export interface GetThreatListOptions {
   searchAfter: estypes.SortResults | undefined;
   threatFilters: unknown[];
   threatListConfig: ThreatListConfig;
+  pitId: OpenPointInTimeResponse['id'];
+  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 export interface ThreatListCountOptions {
@@ -230,16 +234,18 @@ export interface BuildThreatEnrichmentOptions {
   buildRuleMessage: BuildRuleMessage;
   exceptionItems: ExceptionListItemSchema[];
   logger: Logger;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPath;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
+  pitId: string;
+  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 export interface EventsOptions {
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   query: string;
   buildRuleMessage: BuildRuleMessage;
   language: ThreatLanguageOrUndefined;

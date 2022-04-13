@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
@@ -56,9 +56,10 @@ export class IndexLifecycleManagementPlugin
             i18n: { Context: I18nContext },
             application,
             docLinks,
+            executionContext,
           } = coreStart;
 
-          const license = await licensing.license$.pipe(first()).toPromise();
+          const license = await firstValueFrom(licensing.license$);
 
           docTitle.change(PLUGIN.TITLE);
           this.breadcrumbService.setup(setBreadcrumbs);
@@ -74,6 +75,7 @@ export class IndexLifecycleManagementPlugin
             license,
             theme$,
             docLinks,
+            executionContext,
             cloud
           );
 

@@ -39,7 +39,7 @@ describe('Reporting server createConfig$', () => {
       encryptionKey: undefined,
     });
     const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
+    const result = await Rx.lastValueFrom(createConfig$(mockCoreSetup, mockConfig$, mockLogger));
 
     expect(result.encryptionKey).toMatch(/\S{32,}/); // random 32 characters
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
@@ -55,7 +55,7 @@ describe('Reporting server createConfig$', () => {
       })
     );
     const mockConfig$ = createMockConfig(mockInitContext);
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
+    const result = await Rx.lastValueFrom(createConfig$(mockCoreSetup, mockConfig$, mockLogger));
     expect(result.encryptionKey).toMatch('iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });

@@ -17,7 +17,7 @@ import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses, CommentType } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -189,7 +189,7 @@ describe('AllCasesListGeneric', () => {
         useGetCasesMockState.data.cases[0].title
       );
       expect(
-        wrapper.find(`span[data-test-subj="case-table-column-tags-0"]`).first().prop('title')
+        wrapper.find(`span[data-test-subj="case-table-column-tags-coke"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
         useGetCasesMockState.data.cases[0].createdBy.username
@@ -515,46 +515,6 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should call postComment when a case is selected in isSelectorView=true and has attachments', async () => {
-    const postCommentMockedValue = { status: { isLoading: false }, postComment: jest.fn() };
-    usePostCommentMock.mockReturnValueOnce(postCommentMockedValue);
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList
-          isSelectorView={true}
-          attachments={[
-            {
-              type: CommentType.alert,
-              alertId: 'alert-id-201',
-              owner: 'test',
-              index: 'index-id-1',
-              rule: {
-                id: 'rule-id-1',
-                name: 'Awesome myrule',
-              },
-            },
-          ]}
-        />
-      </TestProviders>
-    );
-    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
-    await waitFor(() => {
-      expect(postCommentMockedValue.postComment).toHaveBeenCalledWith({
-        caseId: '1',
-        data: {
-          alertId: 'alert-id-201',
-          index: 'index-id-1',
-          owner: 'test',
-          rule: {
-            id: 'rule-id-1',
-            name: 'Awesome myrule',
-          },
-          type: 'alert',
-        },
-      });
-    });
-  });
-
   it('should call onRowClick with no cases and isSelectorView=true', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
@@ -851,15 +811,16 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should hide the alerts column if the alert feature is disabled', async () => {
-    expect.assertions(1);
-
-    const { findAllByTestId } = render(
+    const result = render(
       <TestProviders features={{ alerts: { enabled: false } }}>
         <AllCasesList />
       </TestProviders>
     );
 
-    await expect(findAllByTestId('case-table-column-alertsCount')).rejects.toThrow();
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('case-table-column-alertsCount').length).toBe(0);
+    });
   });
 
   it('should show the alerts column if the alert feature is enabled', async () => {

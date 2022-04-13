@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { KbnClient } from '@kbn/test';
 import { ALERT_RULE_RULE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
@@ -25,6 +26,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ToolingLog } from '@kbn/dev-utils';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SavedObjectReference } from 'kibana/server';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import {
   CreateRulesSchema,
@@ -49,6 +52,7 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
@@ -57,8 +61,9 @@ import {
   SECURITY_TELEMETRY_URL,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
-import { RACAlert } from '../../plugins/security_solution/server/lib/detection_engine/rule_types/types';
 import { DetectionMetrics } from '../../plugins/security_solution/server/usage/detections/types';
+import { LegacyRuleActions } from '../../plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types';
+import { DetectionAlert } from '../../plugins/security_solution/common/detection_engine/schemas/alerts';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -112,12 +117,12 @@ export const getSimpleRule = (ruleId = 'rule-1', enabled = false): QueryCreateSc
 /**
  * This is a typical simple preview rule for testing that is easy for most basic testing
  * @param ruleId
- * @param enabled The number of times the rule will be run through the executors. Defaulted to 20,
+ * @param enabled The number of times the rule will be run through the executors. Defaulted to 12,
  * the execution time for the default interval time of 5m.
  */
 export const getSimplePreviewRule = (
   ruleId = 'preview-rule-1',
-  invocationCount = 20
+  invocationCount = 12
 ): PreviewRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
@@ -509,25 +514,18 @@ export const deleteAllAlerts = async (
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find?per_page=9999`)
-        .set('kbn-xsrf', 'true')
-        .send();
-
-      const ids = body.data.map((rule: FullResponseSchema) => ({
-        id: rule.id,
-      }));
-
       await supertest
-        .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
-        .send(ids)
+        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
+        .send({ action: 'delete', query: '' })
         .set('kbn-xsrf', 'true');
 
       const { body: finalCheck } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
         .send();
-      return finalCheck.data.length === 0;
+      return {
+        passed: finalCheck.data.length === 0,
+      };
     },
     'deleteAllAlerts',
     log,
@@ -584,7 +582,7 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
 
 /**
  * Remove all rules execution info saved objects from the .kibana index
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  * @param log The tooling logger
  */
@@ -609,7 +607,7 @@ export const deleteAllRuleExecutionInfo = async (es: Client, log: ToolingLog): P
 
 /**
  * Creates the signals index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
@@ -619,7 +617,9 @@ export const createSignalsIndex = async (
   await countDownTest(
     async () => {
       await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'createSignalsIndex',
     log
@@ -637,7 +637,7 @@ export const createLegacyRuleAction = async (
     .query({ alert_id: alertId })
     .send({
       name: 'Legacy notification with one action',
-      interval: '1m',
+      interval: '1h',
       actions: [
         {
           id: connectorId,
@@ -661,7 +661,9 @@ export const deleteSignalsIndex = async (
   await countDownTest(
     async () => {
       await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'deleteSignalsIndex',
     log
@@ -961,17 +963,19 @@ export const countDownES = async (
   esFunction: () => Promise<TransportResult<Record<string, any>, unknown>>,
   esFunctionName: string,
   log: ToolingLog,
-  retryCount: number = 20,
+  retryCount: number = 50,
   timeoutWait = 250
 ): Promise<void> => {
   await countDownTest(
     async () => {
       const result = await esFunction();
       if (result.body.version_conflicts !== 0) {
-        log.error(`Version conflicts for ${result.body.version_conflicts}`);
-        return false;
+        return {
+          passed: false,
+          errorMessage: 'Version conflicts for ${result.body.version_conflicts}',
+        };
       } else {
-        return true;
+        return { passed: true };
       }
     },
     esFunctionName,
@@ -1002,22 +1006,37 @@ export const refreshIndex = async (es: Client, index?: string) => {
  * @param retryCount The number of times to retry before giving up (has default)
  * @param timeoutWait Time to wait before trying again (has default)
  */
-export const countDownTest = async (
-  functionToTest: () => Promise<boolean>,
+export const countDownTest = async <T>(
+  functionToTest: () => Promise<{
+    passed: boolean;
+    returnValue?: T | undefined;
+    errorMessage?: string;
+  }>,
   name: string,
   log: ToolingLog,
-  retryCount: number = 20,
+  retryCount: number = 50,
   timeoutWait = 250,
   ignoreThrow: boolean = false
-) => {
+): Promise<T | undefined> => {
   if (retryCount > 0) {
     try {
-      const passed = await functionToTest();
-      if (!passed) {
-        log.error(`Failure trying to ${name}, retries left are: ${retryCount - 1}`);
+      const testReturn = await functionToTest();
+      if (!testReturn.passed) {
+        const error = testReturn.errorMessage != null ? ` error: ${testReturn.errorMessage},` : '';
+        log.error(`Failure trying to ${name},${error} retries left are: ${retryCount - 1}`);
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
-        await countDownTest(functionToTest, name, log, retryCount - 1, timeoutWait, ignoreThrow);
+        const returnValue = await countDownTest(
+          functionToTest,
+          name,
+          log,
+          retryCount - 1,
+          timeoutWait,
+          ignoreThrow
+        );
+        return returnValue;
+      } else {
+        return testReturn.returnValue;
       }
     } catch (err) {
       if (ignoreThrow) {
@@ -1030,11 +1049,20 @@ export const countDownTest = async (
         );
         // retry, counting down, and delay a bit before
         await new Promise((resolve) => setTimeout(resolve, timeoutWait));
-        await countDownTest(functionToTest, name, log, retryCount - 1, timeoutWait, ignoreThrow);
+        const returnValue = await countDownTest(
+          functionToTest,
+          name,
+          log,
+          retryCount - 1,
+          timeoutWait,
+          ignoreThrow
+        );
+        return returnValue;
       }
     }
   } else {
     log.error(`Could not ${name}, no retries are left`);
+    return undefined;
   }
 };
 
@@ -1467,6 +1495,124 @@ export const waitForSignalsToBePresent = async (
 };
 
 /**
+ * Waits for the event-log execution completed doc count to be greater than the
+ * supplied number before continuing with a default of at least one execution
+ * @param es The ES client
+ * @param log
+ * @param ruleId The id of rule to check execution logs for
+ * @param totalExecutions The number of executions to wait for, default is 1
+ */
+export const waitForEventLogExecuteComplete = async (
+  es: Client,
+  log: ToolingLog,
+  ruleId: string,
+  totalExecutions = 1
+): Promise<void> => {
+  await waitFor(
+    async () => {
+      const executionCount = await getEventLogExecuteCompleteById(es, log, ruleId);
+      return executionCount >= totalExecutions;
+    },
+    'waitForEventLogExecuteComplete',
+    log
+  );
+};
+
+/**
+ * Given a single rule id this will return the number of event-log execution
+ * completed docs
+ * @param es The ES client
+ * @param log
+ * @param ruleId Rule id
+ */
+export const getEventLogExecuteCompleteById = async (
+  es: Client,
+  log: ToolingLog,
+  ruleId: string
+): Promise<number> => {
+  const response = await es.search({
+    index: '.kibana-event-log*',
+    track_total_hits: true,
+    size: 0,
+    query: {
+      bool: {
+        must: [],
+        filter: [
+          {
+            match_phrase: {
+              'event.provider': 'alerting',
+            },
+          },
+          {
+            match_phrase: {
+              'event.action': 'execute',
+            },
+          },
+          {
+            match_phrase: {
+              'rule.id': ruleId,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    },
+  });
+
+  return (response?.hits?.total as SearchTotalHits)?.value ?? 0;
+};
+
+/**
+ * Indexes provided execution events into .kibana-event-log-*
+ * @param es The ElasticSearch handle
+ * @param log The tooling logger
+ * @param events
+ */
+export const indexEventLogExecutionEvents = async (
+  es: Client,
+  log: ToolingLog,
+  events: object[]
+): Promise<void> => {
+  const operations = events.flatMap((doc: object) => [
+    { index: { _index: '.kibana-event-log-*' } },
+    doc,
+  ]);
+
+  await es.bulk({ refresh: true, operations });
+
+  return;
+};
+
+/**
+ * Remove all .kibana-event-log-* documents with an execution.uuid
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
+ * @param es The ElasticSearch handle
+ * @param log The tooling logger
+ */
+export const deleteAllEventLogExecutionEvents = async (
+  es: Client,
+  log: ToolingLog
+): Promise<void> => {
+  return countDownES(
+    async () => {
+      return es.deleteByQuery(
+        {
+          index: '.kibana-event-log-*',
+          q: '_exists_:kibana.alert.rule.execution.uuid',
+          wait_for_completion: true,
+          refresh: true,
+          body: {},
+        },
+        { meta: true }
+      );
+    },
+    'deleteAllEventLogExecutionEvents',
+    log
+  );
+};
+
+/**
  * Returns all signals both closed and opened by ruleId
  * @param supertest Deps
  */
@@ -1474,22 +1620,33 @@ export const getSignalsByRuleIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   ruleIds: string[]
-): Promise<estypes.SearchResponse<RACAlert>> => {
-  const response = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsRuleId(ruleIds));
-
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when getting a signal by rule_id (getSignalsByRuleIds). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
+  const signalsOpen = await countDownTest<estypes.SearchResponse<DetectionAlert>>(
+    async () => {
+      const response = await supertest
+        .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getQuerySignalsRuleId(ruleIds));
+      if (response.status !== 200) {
+        return {
+          passed: false,
+          errorMessage: `Status is not 200 as expected, it is: ${response.status}`,
+        };
+      } else {
+        return {
+          passed: true,
+          returnValue: response.body,
+        };
+      }
+    },
+    'getSignalsByRuleIds',
+    log
+  );
+  if (signalsOpen == null) {
+    throw new Error('Signals not defined after countdown, cannot continue');
+  } else {
+    return signalsOpen;
   }
-
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
-  return signalsOpen;
 };
 
 /**
@@ -1503,21 +1660,33 @@ export const getSignalsByIds = async (
   log: ToolingLog,
   ids: string[],
   size?: number
-): Promise<estypes.SearchResponse<RACAlert>> => {
-  const response = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids, size));
-
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when getting a signal by id. CI issues could happen (getSignalsByIds). Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
+  const signalsOpen = await countDownTest<estypes.SearchResponse<DetectionAlert>>(
+    async () => {
+      const response = await supertest
+        .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getQuerySignalsId(ids, size));
+      if (response.status !== 200) {
+        return {
+          passed: false,
+          errorMessage: `Status is not 200 as expected, it is: ${response.status}`,
+        };
+      } else {
+        return {
+          passed: true,
+          returnValue: response.body,
+        };
+      }
+    },
+    'getSignalsByIds',
+    log
+  );
+  if (signalsOpen == null) {
+    throw new Error('Signals not defined after countdown, cannot continue');
+  } else {
+    return signalsOpen;
   }
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
-  return signalsOpen;
 };
 
 /**
@@ -1529,21 +1698,33 @@ export const getSignalsById = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   id: string
-): Promise<estypes.SearchResponse<RACAlert>> => {
-  const response = await supertest
-    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-    .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId([id]));
-
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when getting signals by id (getSignalsById). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
+): Promise<estypes.SearchResponse<DetectionAlert>> => {
+  const signalsOpen = await countDownTest<estypes.SearchResponse<DetectionAlert>>(
+    async () => {
+      const response = await supertest
+        .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getQuerySignalsId([id]));
+      if (response.status !== 200) {
+        return {
+          passed: false,
+          returnValue: undefined,
+        };
+      } else {
+        return {
+          passed: true,
+          returnValue: response.body,
+        };
+      }
+    },
+    'getSignalsById',
+    log
+  );
+  if (signalsOpen == null) {
+    throw new Error('Signals not defined after countdown, cannot continue');
+  } else {
+    return signalsOpen;
   }
-  const { body: signalsOpen }: { body: estypes.SearchResponse<RACAlert> } = response;
-  return signalsOpen;
 };
 
 export const installPrePackagedRules = async (
@@ -1557,14 +1738,15 @@ export const installPrePackagedRules = async (
         .set('kbn-xsrf', 'true')
         .send();
       if (status !== 200) {
-        log.debug(
-          `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
+        return {
+          passed: false,
+          errorMessage: `Did not get an expected 200 "ok" when installing pre-packaged rules (installPrePackagedRules) yet. Retrying until we get a 200 "ok". body: ${JSON.stringify(
             body
-          )}, status: ${JSON.stringify(status)}`
-        );
+          )}, status: ${JSON.stringify(status)}`,
+        };
+      } else {
+        return { passed: true };
       }
-
-      return status === 200;
     },
     'installPrePackagedRules',
     log
@@ -1981,3 +2163,17 @@ export const getSimpleThreatMatch = (
   ],
   threat_filters: [],
 });
+
+interface LegacyActionSO extends LegacyRuleActions {
+  references: SavedObjectReference[];
+}
+
+/**
+ * Fetch all legacy action sidecar SOs from the .kibana index
+ * @param es The ElasticSearch service
+ */
+export const getLegacyActionSO = async (es: Client): Promise<SearchResponse<LegacyActionSO>> =>
+  es.search({
+    index: '.kibana',
+    q: 'type:siem-detection-engine-rule-actions',
+  });

@@ -16,6 +16,7 @@ import {
   useSwitchInput,
   useStartServices,
   sendPutOutput,
+  useFleetStatus,
 } from '../../../../hooks';
 import type { Output, PostOutputRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -32,6 +33,12 @@ import {
 import { confirmUpdate } from './confirm_update';
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
+  const fleetStatus = useFleetStatus();
+
+  const hasEncryptedSavedObjectConfigured = !fleetStatus.missingOptionalFeatures?.includes(
+    'encrypted_saved_object_encryption_key_required'
+  );
+
   const [isLoading, setIsloading] = useState(false);
   const { notifications } = useStartServices();
   const { confirm } = useConfirmModal();
@@ -234,6 +241,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     inputs,
     submit,
     isLoading,
-    isDisabled: isLoading || isPreconfigured || (output && !hasChanged),
+    hasEncryptedSavedObjectConfigured,
+    isDisabled:
+      isLoading ||
+      isPreconfigured ||
+      (output && !hasChanged) ||
+      (isLogstash && !hasEncryptedSavedObjectConfigured),
   };
 }

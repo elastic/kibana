@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageTemplateProps, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -235,7 +235,7 @@ const getRoutes = (): RouteProps[] => {
     },
     {
       title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
-        defaultMessage: 'Manage Monitors | {baseTitle}',
+        defaultMessage: 'Monitor Management | {baseTitle}',
         values: { baseTitle },
       }),
       path: MONITOR_MANAGEMENT_ROUTE + '/:type',
@@ -248,10 +248,23 @@ const getRoutes = (): RouteProps[] => {
       telemetryId: UptimePage.MonitorManagement,
       pageHeader: {
         pageTitle: (
-          <FormattedMessage
-            id="xpack.uptime.monitorManagement.pageHeader.title"
-            defaultMessage="Manage monitors"
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.uptime.monitorManagement.pageHeader.title"
+                defaultMessage="Monitor Management"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label="Beta"
+                tooltipContent={i18n.translate('xpack.uptime.routes.monitorManagement.betaLabel', {
+                  defaultMessage:
+                    'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
         rightSideItems: [<AddMonitorBtn />],
       },

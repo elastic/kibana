@@ -71,6 +71,9 @@ const MyEuiPanel = styled(EuiPanel)<{
       display: none;
     }
   }
+  .euiAccordion__childWrapper {
+    transform: none; /* To circumvent an issue in Eui causing the fullscreen datagrid to break */
+  }
 `;
 
 MyEuiPanel.displayName = 'MyEuiPanel';

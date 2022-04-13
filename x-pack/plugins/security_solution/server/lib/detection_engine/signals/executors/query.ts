@@ -10,7 +10,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { getFilter } from '../get_filter';
@@ -44,7 +44,7 @@ export const queryExecutor = async ({
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
   logger: Logger;
@@ -84,7 +84,6 @@ export const queryExecutor = async ({
       eventsTelemetry,
       id: completeRule.alertId,
       inputIndexPattern: inputIndex,
-      signalsIndex: ruleParams.outputIndex,
       filter: esFilter,
       pageSize: searchAfterSize,
       buildReasonMessage: buildReasonMessageForQueryAlert,

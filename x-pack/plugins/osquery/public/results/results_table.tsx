@@ -46,6 +46,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
+  hideFullscreen?: true;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -53,6 +54,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   agentIds,
   startDate,
   endDate,
+  hideFullscreen,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -307,6 +309,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
+      showFullScreenSelector: !hideFullscreen,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -324,7 +327,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </>
       ),
     }),
-    [actionId, endDate, startDate]
+    [actionId, endDate, startDate, hideFullscreen]
   );
 
   useEffect(
@@ -368,6 +371,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
+            data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}
             columnVisibility={columnVisibility}
