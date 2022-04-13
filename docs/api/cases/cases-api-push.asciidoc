@@ -4,7 +4,7 @@
 <titleabbrev>Push case</titleabbrev>
 ++++
 
-Push case to an external service.
+Pushes a case to an external service.
 
 === {api-request-title}
 
@@ -14,12 +14,12 @@ Push case to an external service.
 
 === {api-prereq-title}
 
-////
-//TBD, for example
 You must have `all` privileges for the *Actions and Connectors* feature in the
 *Management* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>.
-////
+<<kibana-feature-privileges,{kib} feature privileges>>. You must also have `all`
+privileges for the *Cases* feature in the *Management*, *{observability}*, or
+*Security* section of the {kib} feature privileges, depending on the
+`owner` of the case you're pushing.
 
 === {api-path-parms-title}
 
@@ -32,7 +32,8 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
 use <<cases-api-find-connectors>>.
 
 <space_id>::
-(Optional, string) An identifier for the space. If it is not specified, the default space is used.
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
 
 === {api-response-codes-title}
 
@@ -59,53 +60,51 @@ The API returns a JSON object representing the pushed case. For example:
   "version": "Wzk4LDFd",
   "comments": [],
   "totalComment": 0,
+  "totalAlerts": 0,
+  "title": "This case will self-destruct in 5 seconds",
+  "tags": [ "phishing", "social engineering", "bubblegum" ],
+  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
+  "settings": {
+    "syncAlerts": true
+  },
+  "owner": "securitySolution",
   "closed_at": null,
   "closed_by": null,
-  "created_at": "2020-03-29T11:30:02.658Z",
+  "created_at": "2022-03-29T11:30:02.658Z",
   "created_by": {
     "email": "ahunley@imf.usa.gov",
     "full_name": "Alan Hunley",
     "username": "ahunley"
   },
-  "external_service": {
-    "pushed_at":"2021-07-26T18:19:43.688Z",
-    "pushed_by":{
-        "username":"classified@hms.oo.gov.uk",
-        "full_name":null,
-        "email":null
-    },
-    "connector_id":"3d6c7b20-e5ab-11eb-98bb-85a0e2a49315",
-    "connector_name":"Test",
-    "external_id":"10110",
-    "external_title":"TPN-103",
-    "external_url":"https://cases.jira.com"
-  },
-  "updated_at": "2020-03-29T12:01:50.244Z",
+  "status": "open",
+  "updated_at": "2022-03-29T12:01:50.244Z",
   "updated_by": {
     "full_name": "Classified",
     "email": "classified@hms.oo.gov.uk",
     "username": "M"
   },
-  "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
-  "title": "This case will self-destruct in 5 seconds",
-  "status": "open",
   "connector": {
-    "id": "131d4448-abe0-4789-939d-8ef60680b498",
+    "id": "08046500-bb7b-11ec-89c3-ef74ed34b2e9",
     "name": "My connector",
     "type": ".jira",
     "fields": {
       "issueType": "10006",
       "priority": "High",
+      "parent": null
     }
   },
-  "settings": {
-    "syncAlerts": true
-  },
-  "owner": "securitySolution",
-  "tags": [
-    "phishing",
-    "social engineering",
-    "bubblegum"
-  ]
+  "external_service": {
+    "pushed_at":"2022-07-26T18:19:43.688Z",
+    "pushed_by":{
+        "username":"classified@hms.oo.gov.uk",
+        "full_name":null,
+        "email":null
+    },
+    "connector_name":"My connector",
+    "external_id":"10110",
+    "external_title":"TPN-103",
+    "external_url":"https://cases.jira.com",
+    "connector_id":"08046500-bb7b-11ec-89c3-ef74ed34b2e9",
+  }
 }
 --------------------------------------------------
