@@ -18,10 +18,11 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
 
-  describe('setup api', async () => {
+  // eslint-disable-next-line
+  describe.only('setup api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-    describe.only('setup performs upgrades', async () => {
+    describe('setup performs upgrades', async () => {
       const oldEndpointVersion = '0.13.0';
       beforeEach(async () => {
         const url = '/api/fleet/epm/packages/endpoint';
