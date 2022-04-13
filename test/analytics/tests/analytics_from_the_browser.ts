@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ): Promise<TelemetryCounter[]> => {
       return await browser.execute(
         ({ takeNumberOfCounters }) =>
-          window.__analyticsPluginA__.stats.slice(-takeNumberOfCounters),
+          window.__analyticsPluginA__.stats
+            .filter((counter) => counter.event_type === 'test-plugin-lifecycle')
+            .slice(-takeNumberOfCounters),
         { takeNumberOfCounters: _takeNumberOfCounters }
       );
     };
@@ -70,6 +72,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(context).to.have.property('user_agent');
       expect(context.user_agent).to.be.a('string');
 
+      const reportEventContext = actions[2].meta[1].context;
+      expect(reportEventContext).to.have.property('user_agent');
+      expect(reportEventContext.user_agent).to.be.a('string');
+
       expect(actions).to.eql([
         { action: 'optIn', meta: true },
         { action: 'extendContext', meta: context },
@@ -85,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               timestamp: actions[2].meta[1].timestamp,
               event_type: 'test-plugin-lifecycle',
-              context,
+              context: reportEventContext,
               properties: { plugin: 'analyticsPluginA', step: 'start' },
             },
           ],
@@ -103,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         {
           timestamp: actions[2].meta[1].timestamp,
           event_type: 'test-plugin-lifecycle',
-          context,
+          context: reportEventContext,
           properties: { plugin: 'analyticsPluginA', step: 'start' },
         },
       ]);
