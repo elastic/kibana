@@ -8,6 +8,8 @@ A data view can point to one or more indices, {ref}/data-streams.html[data strea
 For example, a data view can point to your log data from yesterday,
 or all indices that contain your data.
 
+{es} indices contain time-series or non-time-series data. When indices contain time-series data, the system-generated `@timestamp` field represents the first time a document was ingested. Depending on how you map your data, your date values could be mapped to a different field other than `@timestamp`, or reflect the actual date from the source system recorded before reaching the Elastic Stack. 
+
 [float]
 [[data-views-read-only-access]]
 === Required permissions
