@@ -56,13 +56,14 @@ export async function getEsGridTile({
       runtime_mappings: requestBody.runtime_mappings,
     };
 
+    const esClient = (await context.core).elasticsearch.client;
     const tile = await core.executionContext.withContext(
       makeExecutionContext({
         description: 'mvt:get_grid_tile',
         url,
       }),
       async () => {
-        return await context.core.elasticsearch.client.asCurrentUser.transport.request(
+        return await esClient.asCurrentUser.transport.request(
           {
             method: 'GET',
             path,

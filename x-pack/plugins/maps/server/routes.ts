@@ -73,7 +73,8 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
       }
 
       try {
-        const resp = await context.core.elasticsearch.client.asCurrentUser.indices.getSettings({
+        const coreContext = await context.core;
+        const resp = await coreContext.elasticsearch.client.asCurrentUser.indices.getSettings({
           index: query.indexPatternTitle,
         });
         const indexPatternSettings = getIndexPatternSettings(
