@@ -88,15 +88,13 @@
 
 .lnsWorkspacePanelWrapper__toolbar {
   margin-bottom: $euiSizeXS;
+}
 
-  // &.lnsWorkspacePanelWrapper__toolbar--fullscreen {
-  //   padding: $euiSizeS $euiSizeS 0 $euiSizeS;
-  //   background-color: #FFF;
-  // }
-
-  // & > .euiFlexItem {
-  //   min-height: $euiButtonHeightSmall;
-  // }
+.lnsWorkspacePanelWrapper__toolbar--fullscreen {
+  background-color: $euiColorEmptyShade;
+  justify-content: flex-end;
+  margin-bottom: 0;
+  padding: $euiSizeS $euiSizeS 0;
 }
 
 .lnsWorkspacePanelWrapper__applyButton .euiButton__text {
