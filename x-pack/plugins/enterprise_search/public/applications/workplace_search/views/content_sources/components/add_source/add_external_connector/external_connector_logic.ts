@@ -20,7 +20,7 @@ import { AppLogic } from '../../../../../app_logic';
 
 import { getAddPath, getSourcesPath } from '../../../../../routes';
 
-import { AddSourceLogic, SourceConfigData } from '../add_source_logic';
+import { SourceConfigData } from '../add_source_logic';
 
 export interface ExternalConnectorActions {
   fetchExternalSource: () => true;
@@ -121,8 +121,6 @@ export const ExternalConnectorLogic = kea<
     ],
   },
   listeners: ({ actions, values }) => ({
-    [AddSourceLogic.actionTypes.setSourceConfigData]: (sourceConfigData) =>
-      actions.fetchExternalSourceSuccess(sourceConfigData),
     fetchExternalSource: async () => {
       const route = '/internal/workplace_search/org/settings/connectors/external';
 

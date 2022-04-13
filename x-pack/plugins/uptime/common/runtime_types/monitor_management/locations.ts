@@ -12,19 +12,16 @@ import { tEnum } from '../../utils/t_enum';
 export enum BandwidthLimitKey {
   DOWNLOAD = 'download',
   UPLOAD = 'upload',
-  LATENCY = 'latency',
 }
 
 export const DEFAULT_BANDWIDTH_LIMIT = {
   [BandwidthLimitKey.DOWNLOAD]: 100,
   [BandwidthLimitKey.UPLOAD]: 30,
-  [BandwidthLimitKey.LATENCY]: 1000,
 };
 
 export const DEFAULT_THROTTLING = {
   [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
   [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
-  [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
 };
 
 export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
@@ -34,7 +31,7 @@ export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
 
 export type BandwidthLimitKeyType = t.TypeOf<typeof BandwidthLimitKeyCodec>;
 
-const LocationGeoCodec = t.interface({
+export const LocationGeoCodec = t.interface({
   lat: t.number,
   lon: t.number,
 });
@@ -53,7 +50,20 @@ export const ServiceLocationCodec = t.interface({
   label: t.string,
   geo: LocationGeoCodec,
   url: t.string,
+  isServiceManaged: t.boolean,
 });
+
+export const MonitorServiceLocationCodec = t.intersection([
+  t.interface({
+    id: t.string,
+    isServiceManaged: t.boolean,
+  }),
+  t.partial({
+    label: t.string,
+    geo: LocationGeoCodec,
+    url: t.string,
+  }),
+]);
 
 export const ServiceLocationErrors = t.array(
   t.interface({
@@ -79,6 +89,7 @@ export const ServiceLocationErrors = t.array(
 );
 
 export const ServiceLocationsCodec = t.array(ServiceLocationCodec);
+export const MonitorServiceLocationsCodec = t.array(MonitorServiceLocationCodec);
 
 export const LocationCodec = t.intersection([
   ServiceLocationCodec,
@@ -87,13 +98,12 @@ export const LocationCodec = t.intersection([
 
 export const LocationsCodec = t.array(LocationCodec);
 
-export const isServiceLocationInvalid = (location: ServiceLocation) =>
-  isLeft(ServiceLocationCodec.decode(location));
+export const isServiceLocationInvalid = (location: MonitorServiceLocation) =>
+  isLeft(MonitorServiceLocationCodec.decode(location));
 
 export const ThrottlingOptionsCodec = t.interface({
   [BandwidthLimitKey.DOWNLOAD]: t.number,
   [BandwidthLimitKey.UPLOAD]: t.number,
-  [BandwidthLimitKey.LATENCY]: t.number,
 });
 
 export const ServiceLocationsApiResponseCodec = t.interface({
@@ -104,6 +114,8 @@ export const ServiceLocationsApiResponseCodec = t.interface({
 export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
 export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
 export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
+export type MonitorServiceLocation = t.TypeOf<typeof MonitorServiceLocationCodec>;
+export type MonitorServiceLocations = t.TypeOf<typeof MonitorServiceLocationsCodec>;
 export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;
 export type ServiceLocationErrors = t.TypeOf<typeof ServiceLocationErrors>;
 export type ThrottlingOptions = t.TypeOf<typeof ThrottlingOptionsCodec>;

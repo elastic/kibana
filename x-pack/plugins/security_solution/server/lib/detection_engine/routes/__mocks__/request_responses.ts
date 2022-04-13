@@ -24,6 +24,9 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
+  DETECTION_ENGINE_RULES_BULK_UPDATE,
+  DETECTION_ENGINE_RULES_BULK_DELETE,
+  DETECTION_ENGINE_RULES_BULK_CREATE,
 } from '../../../../../common/constants';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { RuleAlertType, HapiReadableStream } from '../../rules/types';
@@ -35,7 +38,7 @@ import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/det
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
+import { SanitizedRule, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import {
   getPerformBulkActionSchemaMock,
@@ -110,21 +113,21 @@ export const getFindRequest = () =>
 export const getReadBulkRequest = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    path: DETECTION_ENGINE_RULES_BULK_CREATE,
     body: [getCreateRulesSchemaMock()],
   });
 
 export const getUpdateBulkRequest = () =>
   requestMock.create({
     method: 'put',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
     body: [getCreateRulesSchemaMock()],
   });
 
 export const getPatchBulkRequest = () =>
   requestMock.create({
     method: 'patch',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
     body: [getCreateRulesSchemaMock()],
   });
 
@@ -145,28 +148,28 @@ export const getBulkActionEditRequest = () =>
 export const getDeleteBulkRequest = () =>
   requestMock.create({
     method: 'delete',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ rule_id: 'rule-1' }],
   });
 
 export const getDeleteBulkRequestById = () =>
   requestMock.create({
     method: 'delete',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequestById = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequest = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ rule_id: 'rule-1' }],
   });
 
@@ -244,10 +247,8 @@ export const getRuleExecutionEventsRequest = () =>
       ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     },
     query: {
-      start: 'now-30',
-      end: 'now',
-      query_text: '',
-      status_filters: '',
+      start: '2022-03-31T22:02:01.622Z',
+      end: '2022-03-31T22:02:31.622Z',
     },
   });
 
@@ -391,7 +392,7 @@ export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
 export const getAlertMock = <T extends RuleParams>(
   isRuleRegistryEnabled: boolean,
   params: T
-): SanitizedAlert<T> => ({
+): SanitizedRule<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],

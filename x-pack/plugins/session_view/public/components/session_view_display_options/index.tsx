@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiToolTip,
   EuiPopover,
   EuiSelectable,
   EuiPopoverTitle,
@@ -22,17 +23,50 @@ import { useStyles } from './styles';
 
 const TIMESTAMP_OPTION_KEY = 'Timestamp';
 const VERBOSE_MODE_OPTION_KEY = 'Verbose mode';
+const TOOLTIP_SHOW_DELAY = 3000;
+const TOOLTIP_HIDE_DELAY = 5000;
+
+const VERBOSE_TOOLTIP_TITLE = i18n.translate(
+  'xpack.sessionView.sessionViewToggle.sessionViewVerboseTipTitle',
+  {
+    defaultMessage: 'Some results may be hidden',
+  }
+);
+
+const VERBOSE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.sessionView.sessionViewToggle.sessionViewVerboseTipContent',
+  {
+    defaultMessage: 'For a complete set of results, turn on Verbose mode.',
+  }
+);
 
 export const SessionViewDisplayOptions = ({
   onChange,
   displayOptions,
+  showVerboseSearchTooltip,
 }: {
   onChange: (vars: DisplayOptionsState) => void;
   displayOptions: DisplayOptionsState;
+  showVerboseSearchTooltip: boolean;
 }) => {
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
-
   const styles = useStyles();
+  const tooltipRef = useRef(null);
+
+  useEffect(() => {
+    if (tooltipRef.current) {
+      setTimeout(() => {
+        if (tooltipRef.current) {
+          (tooltipRef.current as EuiToolTip).onFocus();
+          setTimeout(() => {
+            if (tooltipRef.current) {
+              (tooltipRef.current as EuiToolTip).onBlur();
+            }
+          }, TOOLTIP_HIDE_DELAY);
+        }
+      }, TOOLTIP_SHOW_DELAY);
+    }
+  }, [showVerboseSearchTooltip]);
 
   const optionsList: EuiSelectableOption[] = useMemo(
     () => [
@@ -82,7 +116,7 @@ export const SessionViewDisplayOptions = ({
     <EuiFlexItem grow={false}>
       <EuiButtonIcon
         iconType="eye"
-        display={displayOptions.verboseMode ? 'fill' : 'empty'}
+        display={displayOptions.verboseMode || displayOptions.timestamp ? 'fill' : 'empty'}
         onClick={toggleOptionButton}
         size="m"
         aria-label="Session view display option"
@@ -106,27 +140,38 @@ export const SessionViewDisplayOptions = ({
     onChange(updateOptionState);
   };
 
-  return (
-    <>
-      <EuiPopover
-        button={OptionButton}
-        isOpen={isOptionDropdownOpen}
-        closePopover={closeOptionButton}
-      >
-        <EuiSelectable options={optionsList} onChange={handleSelect}>
-          {(list) => (
-            <div css={styles.selectable}>
-              <EuiPopoverTitle>
-                <FormattedMessage
-                  defaultMessage="Display options"
-                  id="xpack.sessionView.sessionViewToggle.sessionViewToggleTitle"
-                />
-              </EuiPopoverTitle>
-              {list}
-            </div>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </>
+  const popOver = (
+    <EuiPopover
+      button={OptionButton}
+      isOpen={isOptionDropdownOpen}
+      closePopover={closeOptionButton}
+    >
+      <EuiSelectable options={optionsList} onChange={handleSelect}>
+        {(list) => (
+          <div css={styles.selectable}>
+            <EuiPopoverTitle>
+              <FormattedMessage
+                defaultMessage="Display options"
+                id="xpack.sessionView.sessionViewToggle.sessionViewToggleTitle"
+              />
+            </EuiPopoverTitle>
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+
+  return !isOptionDropdownOpen && showVerboseSearchTooltip ? (
+    <EuiToolTip
+      ref={tooltipRef}
+      position="bottom"
+      title={VERBOSE_TOOLTIP_TITLE}
+      content={VERBOSE_TOOLTIP_CONTENT}
+    >
+      {popOver}
+    </EuiToolTip>
+  ) : (
+    popOver
   );
 };

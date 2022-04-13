@@ -120,7 +120,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         description: (
           <DetailPanelCopy textToCopy={workingDirectory}>
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {workingDirectory}
+              {dataOrDash(workingDirectory)}
             </EuiTextColor>
           </DetailPanelCopy>
         ),
@@ -260,7 +260,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
                   return (
                     <div key={`executable-${idx}`} css={styles.description}>
                       <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {exec}
+                        {dataOrDash(exec)}
                       </EuiTextColor>
                       <EuiTextColor color="subdued" css={styles.executableAction}>
                         {eventAction}
@@ -305,7 +305,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>start</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={start}>
-                <span css={styles.description}>{start}</span>
+                <span css={styles.description}>{dataOrDash(start)}</span>
               </DetailPanelCopy>
             ),
           },
@@ -313,7 +313,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
             title: <DetailPanelListItem>end</DetailPanelListItem>,
             description: (
               <DetailPanelCopy textToCopy={end}>
-                <span css={styles.description}>{end}</span>
+                <span css={styles.description}>{dataOrDash(end)}</span>
               </DetailPanelCopy>
             ),
           },

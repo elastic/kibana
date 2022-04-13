@@ -11,7 +11,6 @@ import { getLayerList } from '../../../selectors/map_selectors';
 import { MapStore } from '../../../reducers/store';
 
 export function waitUntilTimeLayersLoad$(store: MapStore) {
-  // @ts-expect-error
   const reduxState$ = from(store);
   return reduxState$.pipe(
     debounceTime(300),

@@ -11,7 +11,7 @@ import {
   PutTrustedAppUpdateRequest,
 } from '../../../../../common/endpoint/types';
 import { HttpRequestValidationError } from './errors';
-import { sendGetAgentPolicyList } from '../../policy/store/services/ingest';
+import { sendGetAgentPolicyList } from '../../../services/policies/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 
 /**

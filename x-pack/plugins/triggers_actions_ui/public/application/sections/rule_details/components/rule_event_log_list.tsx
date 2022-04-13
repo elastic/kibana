@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import {
   EuiDataGrid,
   EuiFlexItem,
@@ -25,6 +25,7 @@ import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constan
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
 
+import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
 import {
@@ -233,6 +234,8 @@ const updateButtonProps = {
 export type RuleEventLogListProps = {
   rule: Rule;
   localStorageKey?: string;
+  refreshToken?: number;
+  requestRefresh?: () => Promise<void>;
 } & Pick<RuleApis, 'loadExecutionLogAggregations'>;
 
 export const RuleEventLogList = (props: RuleEventLogListProps) => {
@@ -240,6 +243,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     rule,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     loadExecutionLogAggregations,
+    refreshToken,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -276,6 +280,8 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         })) || []
     );
   });
+
+  const isInitialized = useRef(false);
 
   // Main cell renderer, renders durations, statuses, etc.
   const renderCell = ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
@@ -407,6 +413,14 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
   }, [sortingColumns, dateStart, dateEnd, filter, pagination.pageIndex, pagination.pageSize]);
 
   useEffect(() => {
+    if (isInitialized.current) {
+      loadEventLogs();
+    }
+    isInitialized.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshToken]);
+
+  useEffect(() => {
     localStorage.setItem(localStorageKey, JSON.stringify(visibleColumns));
   }, [localStorageKey, visibleColumns]);
 
@@ -445,6 +459,10 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         columnVisibility={columnVisibilityProps}
         sorting={sortingProps}
         pagination={paginationProps}
+      />
+      <RefineSearchPrompt
+        documentSize={pagination.totalItemCount}
+        backToTopAnchor="rule_event_log_list"
       />
     </div>
   );

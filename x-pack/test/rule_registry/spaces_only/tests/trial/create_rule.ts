@@ -29,7 +29,7 @@ import {
   deleteAlert,
 } from '../../../common/lib/helpers';
 import { AlertDef, AlertParams } from '../../../common/types';
-import { Alert } from '../../../../../plugins/alerting/common';
+import { Rule } from '../../../../../plugins/alerting/common';
 import { APM_METRIC_INDEX_NAME } from '../../../common/constants';
 import { obsOnly } from '../../../common/lib/authentication/users';
 
@@ -58,7 +58,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
 
       describe('when creating a rule', () => {
         let createResponse: {
-          alert: Alert;
+          alert: Rule;
           status: number;
         };
         before(async () => {

@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MonitorSummariesResultType } from '../../../../../plugins/uptime/common/runtime_types';
+import {
+  MonitorSummariesResult,
+  MonitorSummariesResultType,
+} from '../../../../../plugins/uptime/common/runtime_types';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 interface ExpectedMonitorStatesPage {
@@ -40,7 +43,8 @@ const checkMonitorStatesResponse = ({
   const decoded = MonitorSummariesResultType.decode(response);
   expect(isRight(decoded)).to.be.ok();
   if (isRight(decoded)) {
-    const { summaries, prevPagePagination, nextPagePagination } = decoded.right;
+    const { summaries, prevPagePagination, nextPagePagination } =
+      decoded.right as MonitorSummariesResult;
     expect(summaries).to.have.length(size);
     expect(summaries?.map((s) => s.monitor_id)).to.eql(statesIds);
     expect(

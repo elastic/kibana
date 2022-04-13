@@ -11,11 +11,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visualBuilder, timeToVisualize, dashboard } = getPageObjects([
+  const { visualize, visualBuilder, timeToVisualize, dashboard, common } = getPageObjects([
     'visualBuilder',
     'visualize',
     'timeToVisualize',
     'dashboard',
+    'common',
   ]);
   const security = getService('security');
   const testSubjects = getService('testSubjects');
@@ -26,7 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('visual builder', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/129785
+  describe.skip('visual builder', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -185,10 +187,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
             await dashboard.waitForRenderComplete();
             const el = await elasticChart.getCanvas();
-            // click on specific coordinates
+
+            await retry.try(async () => {
+              // click on specific coordinates
+              await browser
+                .getActions()
+                .move({ x: 105, y: 115, origin: el._webElement })
+                .click()
+                .perform();
+              await common.sleep(2000);
+              await testSubjects.click('applyFiltersPopoverButton');
+              await testSubjects.missingOrFail('applyFiltersPopoverButton');
+            });
+
+            const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
+            expect(hasMachineRawFilter).to.be(true);
+          });
+
+          it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
+            const expectedFilterPills = ['0, win xp, logstash-2015.09.20'];
+            await visualBuilder.setMetricsGroupByTerms('bytes');
+            await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
+            await visualBuilder.setAnotherGroupByTermsField('_index');
+
+            await visualBuilder.clickSeriesOption();
+            await visualBuilder.setChartType('Bar');
+            await visualBuilder.setStackedType('Stacked');
+            await visualBuilder.clickPanelOptions('timeSeries');
+            await visualBuilder.setIntervalValue('1w');
+
+            const el = await elasticChart.getCanvas();
+            await el.scrollIntoViewIfNecessary();
             await browser
               .getActions()
-              .move({ x: 105, y: 115, origin: el._webElement })
+              .move({ x: 100, y: 65, origin: el._webElement })
               .click()
               .perform();
 
@@ -197,8 +229,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               await testSubjects.missingOrFail('applyFiltersPopoverButton');
             });
 
-            const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
-            expect(hasMachineRawFilter).to.be(true);
+            const filterPills = await filterBar.getFiltersLabel();
+            expect(filterPills).to.eql(expectedFilterPills);
           });
         });
       });
