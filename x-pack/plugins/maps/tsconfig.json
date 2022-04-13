@@ -33,6 +33,7 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/shared_ux/tsconfig.json" },
+    { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
     { "path": "../cloud/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },

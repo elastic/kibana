@@ -80,6 +80,7 @@ import type { LensPublicSetup } from '../../lens/public';
 
 import { setupLensChoroplethChart } from './lens';
 import { SharedUXPluginStart } from '../../../../src/plugins/shared_ux/public';
+import { ScreenshotModePluginSetup } from '../../../../src/plugins/screenshot_mode/public';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -92,6 +93,7 @@ export interface MapsPluginSetupDependencies {
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -149,7 +151,12 @@ export class MapsPlugin
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
-    setMapAppConfig(config);
+    setMapAppConfig({
+      ...config,
+      preserveDrawingBuffer: plugins.screenshotMode.isScreenshotMode()
+        ? true
+        : config.preserveDrawingBuffer,
+    });
 
     const locator = plugins.share.url.locators.create(
       new MapsAppLocatorDefinition({
