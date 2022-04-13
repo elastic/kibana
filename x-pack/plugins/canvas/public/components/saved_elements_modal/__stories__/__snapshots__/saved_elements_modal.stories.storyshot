@@ -692,7 +692,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+                className="euiFieldSearch euiFormControlLayout--1icons euiFieldSearch--fullWidth euiFieldSearch-isClearable"
                 onChange={[Function]}
                 onKeyUp={[Function]}
                 placeholder="Find element"

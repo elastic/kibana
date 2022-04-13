@@ -310,7 +310,7 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next()} />
+                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (

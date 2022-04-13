@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { first, filter, take, switchMap } from 'rxjs/operators';
+import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { filter, take, switchMap } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
@@ -314,14 +314,12 @@ export class SavedObjectsService
     this.setupDeps = setupDeps;
     const { http, elasticsearch, coreUsageData, deprecations } = setupDeps;
 
-    const savedObjectsConfig = await this.coreContext.configService
-      .atPath<SavedObjectsConfigType>('savedObjects')
-      .pipe(first())
-      .toPromise();
-    const savedObjectsMigrationConfig = await this.coreContext.configService
-      .atPath<SavedObjectsMigrationConfigType>('migrations')
-      .pipe(first())
-      .toPromise();
+    const savedObjectsConfig = await firstValueFrom(
+      this.coreContext.configService.atPath<SavedObjectsConfigType>('savedObjects')
+    );
+    const savedObjectsMigrationConfig = await firstValueFrom(
+      this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
+    );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
     deprecations.getRegistry('savedObjects').registerDeprecations(
@@ -340,7 +338,7 @@ export class SavedObjectsService
       coreUsageData,
       logger: this.logger,
       config: this.config,
-      migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      migratorPromise: firstValueFrom(this.migrator$),
       kibanaIndex,
       kibanaVersion: this.kibanaVersion,
     });
