@@ -128,7 +128,7 @@ export async function toPdf(
       throw error;
     }
   } else {
-    buffer = results[0].screenshots[0].data;
+    buffer = results[0].screenshots[0].data; // This buffer is already the PDF
     pages = -1; // TODO: Figure out how to get page numbers
   }
 

@@ -149,7 +149,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           )}
           {this.state.controlGroupReady && <DashboardGrid container={container} />}
         </div>
-        <SharedPocPrintUi onClosePrintView={() => {}} title="My cool page" />
+        <SharedPocPrintUi title={this.state.title} />
       </>
     );
   }
