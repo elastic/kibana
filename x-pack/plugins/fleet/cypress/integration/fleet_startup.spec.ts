@@ -10,6 +10,7 @@ import {
   ADD_AGENT_BUTTON_TOP,
   AGENT_FLYOUT_CLOSE_BUTTON,
   STANDALONE_TAB,
+  AGENT_POLICY_CODE_BLOCK,
 } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
@@ -60,12 +61,11 @@ describe('Fleet startup', () => {
         cy.log('Create agent policy took: ' + (Date.now() - startTime) / 1000 + ' s');
         agentPolicyId = xhr.response.body.item.id;
 
-        cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
-
         // verify create button changed to dropdown
         cy.getBySel('agentPolicyDropdown');
+
         // verify agent.yml code block has new policy id
-        cy.get('.euiCodeBlock__code').contains(`id: ${agentPolicyId}`);
+        cy.getBySel(AGENT_POLICY_CODE_BLOCK).contains(`id: ${agentPolicyId}`);
 
         cy.getBySel(AGENT_FLYOUT_CLOSE_BUTTON).click();
 
@@ -78,7 +78,6 @@ describe('Fleet startup', () => {
 
     it('should create Fleet Server policy', () => {
       cy.getBySel('createFleetServerPolicyBtn').click();
-      cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
 
       // verify policy is created and has fleet server and system package
       verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);

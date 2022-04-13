@@ -11,8 +11,7 @@ import {
   fetchServerSearchableTypesMock,
 } from './search_service.test.mocks';
 
-import { Observable, of } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
@@ -472,7 +471,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start(startDeps());
-        const batch = await find({ term: 'foobar' }, {}).pipe(take(1)).toPromise();
+        const batch = await firstValueFrom(find({ term: 'foobar' }, {}));
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({
