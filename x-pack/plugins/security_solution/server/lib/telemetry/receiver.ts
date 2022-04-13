@@ -542,17 +542,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               },
               {
                 bool: {
-                  must_not: {
-                    bool: {
-                      should: [
-                        {
-                          match_phrase: {
-                            'event.module': 'endpoint',
-                          },
-                        },
-                      ],
+                  should: [
+                    {
+                      match: {
+                        'kibana.alert.rule.tags': 'Endpoint Security',
+                      },
                     },
-                  },
+                  ],
                 },
               },
               {
