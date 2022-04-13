@@ -15,6 +15,7 @@ import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 import { retrieveAutoCompleteInfo } from '../../lib/mappings/mappings';
 import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
+import type { SenseEditor } from '../models';
 
 const getAutocompleteDiff = (
   newSettings: DevToolsSettings,
@@ -70,9 +71,10 @@ const fetchAutocompleteSettingsIfNeeded = (
 
 export interface Props {
   onClose: () => void;
+  editorInstance: SenseEditor | null;
 }
 
-export function Settings({ onClose }: Props) {
+export function Settings({ onClose, editorInstance }: Props) {
   const {
     services: { settings, http },
   } = useServicesContext();
@@ -102,6 +104,7 @@ export function Settings({ onClose }: Props) {
         refreshAutocompleteSettings(http, settings, selectedSettings)
       }
       settings={settings.toJSON()}
+      editorInstance={editorInstance}
     />
   );
 }

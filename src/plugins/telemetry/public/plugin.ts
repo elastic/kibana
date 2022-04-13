@@ -134,7 +134,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { http, notifications, getStartServices }: CoreSetup,
+    { analytics, http, notifications, getStartServices }: CoreSetup,
     { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
     const config = this.config;
@@ -155,6 +155,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig();
+      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
     });
 
     if (home && !this.config.hidePrivacyStatement) {
@@ -179,6 +180,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public start({
+    analytics,
     http,
     overlays,
     application,
@@ -211,6 +213,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
       // Refresh and get telemetry config
       const updatedConfig = await this.refreshConfig();
+
+      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+
       const telemetryBanner = updatedConfig?.banner;
 
       this.maybeStartTelemetryPoller();
