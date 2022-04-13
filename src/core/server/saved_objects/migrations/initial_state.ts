@@ -13,6 +13,7 @@ import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { InitState } from './state';
 import { excludeUnusedTypesQuery } from '../migrations/core';
+import { DocLinksServiceStart } from '../../doc_links';
 
 /**
  * Construct the initial state for the model
@@ -25,6 +26,7 @@ export const createInitialState = ({
   indexPrefix,
   migrationsConfig,
   typeRegistry,
+  docLinks,
 }: {
   kibanaVersion: string;
   targetMappings: IndexMapping;
@@ -33,6 +35,7 @@ export const createInitialState = ({
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
+  docLinks: DocLinksServiceStart;
 }): InitState => {
   const outdatedDocumentsQuery = {
     bool: {
@@ -64,6 +67,8 @@ export const createInitialState = ({
       .filter((type) => !!type.excludeOnUpgrade)
       .map((type) => [type.name, type.excludeOnUpgrade!])
   );
+  // short key to access savedObjects entries directly from docLinks
+  const migrationDocLinks = docLinks.links.kibanaUpgradeSavedObjects;
 
   return {
     controlState: 'INIT',
@@ -87,5 +92,6 @@ export const createInitialState = ({
     unusedTypesQuery: excludeUnusedTypesQuery,
     knownTypes,
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
+    migrationDocLinks,
   };
 };

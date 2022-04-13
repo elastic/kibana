@@ -46,7 +46,11 @@ Take these extra steps to ensure you are ready for migration.
 
 [float]
 ==== Ensure your {es} cluster is healthy
-Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensure that your cluster has:
+Problems with your {es} cluster can prevent {kib} upgrades from succeeding.
+
+During the upgrade process, {kib} creates new indices into which updated documents are written. If a cluster is approaching the low watermark, there's a high risk of {kib} not being able to create these. Reading, transforming and writing updated documents can be memory intensive, using more available heap than during routine operation. You must make sure that enough heap is available to prevent requests from timing out or throwing errors from circuit breaker exceptions. You should also ensure that all shards are replicated and assigned.
+
+A healthy cluster has:
 
  * Enough free disk space, at least twice the amount of storage taken up by the `.kibana` and `.kibana_task_manager` indices
  * Sufficient heap size

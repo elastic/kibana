@@ -99,7 +99,7 @@ object types will also log the following warning message:
 
 [source,sh]
 --------------------------------------------
-CHECK_UNKNOWN_DOCUMENTS Upgrades will fail for 8.0+ because documents were found for unknown saved object types. To ensure that upgrades will succeed in the future, either re-enable plugins or delete these documents from the ".kibana_7.17.0_001" index after the current upgrade completes.
+CHECK_UNKNOWN_DOCUMENTS Upgrades will fail for 8.0+ because documents were found for unknown saved object types. To ensure that future upgrades will succeed, either re-enable plugins or delete these documents from the ".kibana_7.17.0_001" index after the current upgrade completes.
 --------------------------------------------
 
 If you fail to remedy this, your upgrade to 8.0+ will fail with a message like:
@@ -123,3 +123,67 @@ In {kib} 7.5.0 and earlier, when the task manager index is set to `.tasks`
 with the configuration setting `xpack.tasks.index: ".tasks"`,
 upgrade migrations fail. In {kib} 7.5.1 and later, the incompatible configuration
 setting prevents upgrade migrations from starting.
+
+[float]
+==== Repeated time-out requests that eventually fail
+Migrations get stuck in a loop of retry attempts waiting for index yellow status that's never reached.
+In the CLONE_TEMP_TO_TARGET or CREATE_REINDEX_TEMP steps, you might see a log entry similar to:
+
+[source,sh]
+--------------------------------------------
+Action failed with "Request timed out". Retrying attempt 1 in 2 seconds.
+--------------------------------------------
+The process is waiting for a yellow index status. There are two known causes:
+
+* Cluster hits the low watermark for disk usage
+* Cluster has <<routing-allocation-disabled,routing allocation disabled>>
+
+Before retrying the migration, inspect the output of the `_cluster/allocation/explain?index=${targetIndex}` API to identify why the index isn't yellow:
+
+[source,sh]
+--------------------------------------------
+GET _cluster/allocation/explain
+{
+  "index": ".kibana_8.1.0_001",
+  "shard": 0,
+  "primary": true,
+}
+--------------------------------------------
+If the cluster exceeded the low watermark for disc usage, the output should contain a message similar to this:
+
+[source,sh]
+--------------------------------------------
+"The node is above the low watermark cluster setting [cluster.routing.allocation.disk.watermark.low=85%], using more disk space than the maximum allowed [85.0%], actual free: [11.692661332965082%]"
+--------------------------------------------
+Refer to the {es} guide for how to {ref}/fix-common-cluster-issues.html#_error_disk_usage_exceeded_flood_stage_watermark_index_has_read_only_allow_delete_block[fix common cluster issues].
+
+If routing allocation is the issue, you should see an entry similar to this:
+
+[source,sh]
+--------------------------------------------
+"allocate_explanation" : "cannot allocate because allocation is not permitted to any of the nodes"
+--------------------------------------------
+
+[float]
+[[routing-allocation-disabled]]
+==== Routing allocation disabled or restricted
+Upgrade migrations fail because routing allocation is disabled or restricted (`cluster.routing.allocation.enable: none/primaries/new_primaries`), which causes {kib} to log errors such as:
+
+[source,sh]
+--------------------------------------------
+Unable to complete saved object migrations for the [.kibana] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}
+--------------------------------------------
+
+To get around the issue, remove the transient and persisted routing allocation settings:
+[source,sh]
+--------------------------------------------
+PUT /_cluster/settings
+{
+  "transient": {
+    "cluster.routing.allocation.enable": null
+  }, 
+  "persistent": {
+    "cluster.routing.allocation.enable": null
+  }
+}
+--------------------------------------------
