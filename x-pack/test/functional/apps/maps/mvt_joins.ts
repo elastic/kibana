@@ -30,10 +30,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
 
-      //field display name
+      // field display name
       expect(split[0]).to.equal('max prop1');
 
-      //bands 1-8
+      // bands 1-8
       expect(split[1]).to.equal('< 4.13');
       expect(split[2]).to.equal('4.13 up to 5.25');
       expect(split[3]).to.equal('5.25 up to 6.38');
@@ -68,10 +68,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
         const split = layerTOCDetails.trim().split('\n');
 
-        //field display name
+        // field display name
         expect(split[0]).to.equal('max prop1');
 
-        //bands 1-8
+        // bands 1-8
         expect(split[1]).to.equal('< 3.63');
         expect(split[2]).to.equal('3.63 up to 4.25');
         expect(split[3]).to.equal('4.25 up to 4.88');
@@ -91,6 +91,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(Math.ceil(zoom)).to.equal(5);
       });
     });
-
   });
 }
