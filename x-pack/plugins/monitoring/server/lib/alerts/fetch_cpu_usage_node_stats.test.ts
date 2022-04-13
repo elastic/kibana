@@ -21,6 +21,7 @@ jest.mock('../../static_globals', () => ({
     },
   },
 }));
+import { Globals } from '../../static_globals';
 
 describe('fetchCpuUsageNodeStats', () => {
   const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
@@ -281,5 +282,34 @@ describe('fetchCpuUsageNodeStats', () => {
         },
       },
     });
+  });
+
+  it('should call ES with correct query when ccs disabled', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = false;
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return Promise.resolve({} as estypes.SearchResponse);
+    });
+    await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
+    // @ts-ignore
+    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.node_stats-*');
+  });
+
+  it('should call ES with correct query when ccs enabled and monitoring.ui.ccs.remotePatterns has array value', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = true;
+    Globals.app.config.ui.ccs.remotePatterns = ['remote1', 'remote2'];
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return Promise.resolve({} as estypes.SearchResponse);
+    });
+    await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size);
+    // @ts-ignore
+    expect(params.index).toBe(
+      'remote1:.monitoring-es-*,remote2:.monitoring-es-*,remote1:metrics-elasticsearch.node_stats-*,remote2:metrics-elasticsearch.node_stats-*'
+    );
   });
 });

@@ -243,4 +243,26 @@ describe('fetchMissingMonitoringData', () => {
     // @ts-ignore
     expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.node_stats-*');
   });
+  it('should call ES with correct query  when monitoring.ui.ccs.remotePatterns has array of values', async () => {
+    const now = 10;
+    const clusters = [
+      {
+        clusterUuid: 'clusterUuid1',
+        clusterName: 'clusterName1',
+      },
+    ];
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = true;
+    Globals.app.config.ui.ccs.remotePatterns = ['remote1', 'remote2'];
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return Promise.resolve({} as any);
+    });
+    await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
+    // @ts-ignore
+    expect(params.index).toBe(
+      'remote1:.monitoring-es-*,remote2:.monitoring-es-*,remote1:metrics-elasticsearch.node_stats-*,remote2:metrics-elasticsearch.node_stats-*'
+    );
+  });
 });

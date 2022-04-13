@@ -148,4 +148,19 @@ describe('fetchKibanaVersions', () => {
     // @ts-ignore
     expect(params.index).toBe('.monitoring-kibana-*,metrics-kibana.stats-*');
   });
+  it('should call ES with correct query when ccs enabled and monitoring.ui.ccs.remotePatterns has array value', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = true;
+    Globals.app.config.ui.ccs.remotePatterns = ['remote1', 'remote2'];
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return Promise.resolve({} as any);
+    });
+    await fetchKibanaVersions(esClient, clusters, size);
+    // @ts-ignore
+    expect(params.index).toBe(
+      'remote1:.monitoring-kibana-*,remote2:.monitoring-kibana-*,remote1:metrics-kibana.stats-*,remote2:metrics-kibana.stats-*'
+    );
+  });
 });

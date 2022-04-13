@@ -8,7 +8,7 @@
 import { MonitoringConfig } from '../..';
 import { getNewIndexPatterns } from './get_index_patterns';
 
-const getConfigWithCcs = (ccsEnabled: boolean) => {
+const getConfigWithCcs = (ccsEnabled: boolean, remotePatterns: string | string[] = ['*']) => {
   return {
     ui: {
       ccs: {
@@ -73,7 +73,7 @@ describe('getNewIndexPatterns', () => {
     });
     expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.*-*');
   });
-  it('returns elasticsearch index patterns without ccs prefixes when ccs is disabled but ccs request payload has a value', () => {
+  it('returns elasticsearch index patterns without ccs prefixes when ccs is disabled but ccs has a value', () => {
     const indexPatterns = getNewIndexPatterns({
       config: getConfigWithCcs(false),
       ccs: 'myccs',
@@ -81,7 +81,7 @@ describe('getNewIndexPatterns', () => {
     });
     expect(indexPatterns).toBe('.monitoring-es-*,metrics-elasticsearch.*-*');
   });
-  it('returns elasticsearch index patterns with custom ccs prefixes when ccs is enabled and ccs request payload has a value', () => {
+  it('returns elasticsearch index patterns with custom ccs prefixes when ccs is enabled and ccs has a value', () => {
     const indexPatterns = getNewIndexPatterns({
       config: getConfigWithCcs(true),
       ccs: 'myccs',
@@ -89,7 +89,7 @@ describe('getNewIndexPatterns', () => {
     });
     expect(indexPatterns).toBe('myccs:.monitoring-es-*,myccs:metrics-elasticsearch.*-*');
   });
-  it('returns elasticsearch index patterns with ccs prefixes and local index patterns when ccs is enabled and ccs request payload value is *', () => {
+  it('returns elasticsearch index patterns with ccs prefixes and local index patterns when ccs is enabled and ccs value is *', () => {
     const indexPatterns = getNewIndexPatterns({
       config: getConfigWithCcs(true),
       ccs: '*',
@@ -97,6 +97,26 @@ describe('getNewIndexPatterns', () => {
     });
     expect(indexPatterns).toBe(
       '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.*-*,metrics-elasticsearch.*-*'
+    );
+  });
+  it('returns elasticsearch index patterns with ccs prefixes and local index patterns when monitoring.ui.ccs.enabled: true and ccs value is an array with default', () => {
+    const indexPatterns = getNewIndexPatterns({
+      config: getConfigWithCcs(true),
+      ccs: ['*'],
+      moduleType: 'elasticsearch',
+    });
+    expect(indexPatterns).toBe(
+      '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.*-*,metrics-elasticsearch.*-*'
+    );
+  });
+  it('returns elasticsearch index patterns with ccs prefixes when monitoring.ui.ccs.enabled: true and ccs value is an array with multiple custom values', () => {
+    const indexPatterns = getNewIndexPatterns({
+      config: getConfigWithCcs(true),
+      ccs: ['myremote', 'myremote2'],
+      moduleType: 'elasticsearch',
+    });
+    expect(indexPatterns).toBe(
+      'myremote:.monitoring-es-*,myremote2:.monitoring-es-*,myremote:metrics-elasticsearch.*-*,myremote2:metrics-elasticsearch.*-*'
     );
   });
 });

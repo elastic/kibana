@@ -213,4 +213,19 @@ describe('fetchNodesFromClusterStats', () => {
     // @ts-ignore
     expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
   });
+  it('should call ES with correct query when monitoring.ui.ccs.remotePatterns has array of values', async () => {
+    // @ts-ignore
+    Globals.app.config.ui.ccs.enabled = true;
+    Globals.app.config.ui.ccs.remotePatterns = ['remote1', 'remote2'];
+    let params = null;
+    esClient.search.mockImplementation((...args) => {
+      params = args[0];
+      return Promise.resolve(esRes as any);
+    });
+    await fetchNodesFromClusterStats(esClient, clusters);
+    // @ts-ignore
+    expect(params.index).toBe(
+      'remote1:.monitoring-es-*,remote2:.monitoring-es-*,remote1:metrics-elasticsearch.cluster_stats-*,remote2:metrics-elasticsearch.cluster_stats-*'
+    );
+  });
 });

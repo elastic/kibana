@@ -22,7 +22,6 @@ jest.mock('../../static_globals', () => ({
       config: {
         ui: {
           ccs: { enabled: true, remotePatterns: '*' },
-          metricbeat: { index: 'metricbeat-*' },
           container: { elasticsearch: { enabled: false } },
         },
       },
