@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
@@ -52,12 +51,11 @@ export function EnvironmentSelect({
 }) {
   const [searchValue, setSearchValue] = useState('');
   const serviceName = useServiceName();
-  const { query } = useApmParams('/*');
 
-  const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
-  const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+  const { query } = useApmParams('/services/{serviceName}/*');
+  const { rangeFrom, rangeTo } = query;
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [
     {
@@ -84,8 +82,8 @@ export function EnvironmentSelect({
               fieldName: SERVICE_ENVIRONMENT,
               fieldValue: searchValue ?? '',
               serviceName,
-              start: start ?? moment().subtract(24, 'h').toISOString(),
-              end: end ?? moment().toISOString(),
+              start: start,
+              end: end,
             },
           },
         });

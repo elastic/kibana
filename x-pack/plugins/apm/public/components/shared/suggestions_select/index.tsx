@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { throttle } from 'lodash';
 import React, { useCallback, useState } from 'react';
@@ -16,8 +15,8 @@ interface SuggestionsSelectProps {
   customOptionText?: string;
   defaultValue?: string;
   fieldName: string;
-  start?: string;
-  end?: string;
+  start: string;
+  end: string;
   onChange: (value?: string) => void;
   isClearable?: boolean;
   isInvalid?: boolean;
@@ -58,8 +57,8 @@ export function SuggestionsSelect({
           query: {
             fieldName,
             fieldValue: searchValue,
-            start: start ?? moment().subtract(24, 'h').toISOString(),
-            end: end ?? moment().toISOString(),
+            start: start,
+            end: end,
           },
         },
       });

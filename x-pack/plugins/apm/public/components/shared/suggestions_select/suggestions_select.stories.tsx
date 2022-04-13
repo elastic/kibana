@@ -65,6 +65,8 @@ export const Example: Story<Args> = ({
       fieldName={field}
       onChange={() => {}}
       placeholder={placeholder}
+      start={'2022-04-13T10:29:28.541Z'}
+      end={'2021-04-13T10:29:28.541Z'}
     />
   );
 };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +32,9 @@ export function FormRowSuggestionsSelect({
   onChange,
   dataTestSubj,
 }: Props) {
+  const start = moment().subtract(24, 'h').toISOString();
+  const end = moment().toISOString();
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -50,6 +53,8 @@ export function FormRowSuggestionsSelect({
             { defaultMessage: 'Select Option' }
           )}
           dataTestSubj={dataTestSubj}
+          start={start}
+          end={end}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

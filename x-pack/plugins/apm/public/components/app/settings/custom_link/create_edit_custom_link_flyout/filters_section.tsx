@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -35,6 +35,9 @@ export function FiltersSection({
   filters: Filter[];
   onChangeFilters: (filters: Filter[]) => void;
 }) {
+  const start = moment().subtract(24, 'h').toISOString();
+  const end = moment().toISOString();
+
   const onChangeFilter = (
     key: Filter['key'],
     value: Filter['value'],
@@ -129,6 +132,8 @@ export function FiltersSection({
                 }
                 defaultValue={value}
                 isInvalid={!isEmpty(key) && isEmpty(value)}
+                start={start}
+                end={end}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

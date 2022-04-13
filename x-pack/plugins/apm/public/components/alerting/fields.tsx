@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -20,6 +20,9 @@ import {
 } from '../../../common/environment_filter_values';
 import { SuggestionsSelect } from '../shared/suggestions_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
+
+const start = moment().subtract(24, 'h').toISOString();
+const end = moment().toISOString();
 
 export function ServiceField({
   allowAll = true,
@@ -51,6 +54,8 @@ export function ServiceField({
         placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {
           defaultMessage: 'Select service name',
         })}
+        start={start}
+        end={end}
       />
     </PopoverExpression>
   );
@@ -84,6 +89,8 @@ export function EnvironmentField({
         placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
           defaultMessage: 'Select environment',
         })}
+        start={start}
+        end={end}
       />
     </PopoverExpression>
   );
@@ -118,6 +125,8 @@ export function TransactionTypeField({
             defaultMessage: 'Select transaction type',
           }
         )}
+        start={start}
+        end={end}
       />
     </PopoverExpression>
   );
