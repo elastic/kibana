@@ -40,6 +40,9 @@ When enabled, specifies the email address where you want to receive cluster aler
 `monitoring.ui.ccs.enabled`::
 Set to `true` (default) to enable {ref}/modules-cross-cluster-search.html[cross-cluster search] of your monitoring data. The {ref}/modules-remote-clusters.html#remote-cluster-settings[`remote_cluster_client`] role must exist on each node.
 
+`monitoring.ui.ccs.remotePatterns`::
+Set to `*` (default) to perform a {ref}/modules-cross-cluster-search.html[cross-cluster search] for all available clusters. Accepts a string or array of custom remote names to only search. The {ref}/modules-remote-clusters.html#remote-cluster-settings[`remote_cluster_client`] role must exist on each node. `monitoring.ui.ccs.enabled` must be enabled.
+
 `monitoring.ui.elasticsearch.hosts`::
 Specifies the location of the {es} cluster where your monitoring data is stored.
 +
