@@ -24,7 +24,7 @@ export function registerPipelineDeleteRoute(router: LogstashPluginRouter) {
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
         const { id } = request.params;
-        const { client } = context.core.elasticsearch;
+        const { client } = (await context.core).elasticsearch;
 
         try {
           await client.asCurrentUser.logstash.deletePipeline({ id });
