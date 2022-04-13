@@ -94,17 +94,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       ),
     });
   }
-  if (isInternalShareableComponentsSandboxEnabled) {
-    tabs.push({
-      id: '__components_sandbox',
-      name: (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.home.sandboxTabTitle"
-          defaultMessage="Components Sandbox (Internal use only)"
-        />
-      ),
-    });
-  }
 
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
