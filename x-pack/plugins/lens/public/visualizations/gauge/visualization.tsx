@@ -25,7 +25,7 @@ import {
   HorizontalBulletIcon,
 } from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
 import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
-import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
+import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
   GROUP_ID,
@@ -115,7 +115,7 @@ const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizatio
 const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
@@ -140,12 +140,12 @@ const toExpression = (
           colorMode: [state?.colorMode ?? 'none'],
           palette: state.palette?.params
             ? [
-                paletteService
-                  .get(CUSTOM_PALETTE)
-                  .toExpression(
-                    computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                  ),
-              ]
+              paletteService
+                .get(CUSTOM_PALETTE)
+                .toExpression(
+                  computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
+                ),
+            ]
             : [],
           ticksPosition: state.ticksPosition ? [state.ticksPosition] : ['auto'],
           labelMinor: state.labelMinor ? [state.labelMinor] : [],
@@ -253,17 +253,17 @@ export const getGaugeVisualization = ({
           }),
           accessors: metricAccessor
             ? [
-                palette
-                  ? {
-                      columnId: metricAccessor,
-                      triggerIcon: 'colorBy',
-                      palette,
-                    }
-                  : {
-                      columnId: metricAccessor,
-                      triggerIcon: 'none',
-                    },
-              ]
+              palette
+                ? {
+                  columnId: metricAccessor,
+                  triggerIcon: 'colorBy',
+                  palette,
+                }
+                : {
+                  columnId: metricAccessor,
+                  triggerIcon: 'none',
+                },
+            ]
             : [],
           filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: !metricAccessor,
@@ -396,22 +396,22 @@ export const getGaugeVisualization = ({
         }),
         initialDimensions: state
           ? [
-              {
-                groupId: 'min',
-                columnId: generateId(),
-                staticValue: minValue,
-              },
-              {
-                groupId: 'max',
-                columnId: generateId(),
-                staticValue: maxValue,
-              },
-              {
-                groupId: 'goal',
-                columnId: generateId(),
-                staticValue: goalValue,
-              },
-            ]
+            {
+              groupId: 'min',
+              columnId: generateId(),
+              staticValue: minValue,
+            },
+            {
+              groupId: 'max',
+              columnId: generateId(),
+              staticValue: maxValue,
+            },
+            {
+              groupId: 'goal',
+              columnId: generateId(),
+              staticValue: goalValue,
+            },
+          ]
           : undefined,
       },
     ];
