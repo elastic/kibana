@@ -45,7 +45,7 @@ export const getPackagePolicyCreateCallback = (
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<PackagePolicy> => {
-    // We only care about Endpoint package policies
+    // We only care about Cloud Security Posture package policies
     if (!isCspPackagePolicy(packagePolicy)) {
       return packagePolicy;
     }
@@ -95,8 +95,6 @@ export const getPackagePolicyDeleteCallback = (
           cspRules
             .filter((rule) => rule.attributes.package_policy_id === deletedPackagePolicy.policy_id)
             .map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id));
-
-          // await Promise.all(cspRules);
         } catch (e) {
           logger.error(
             `Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`
