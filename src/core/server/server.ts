@@ -358,6 +358,7 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
+    this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();

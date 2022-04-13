@@ -9,5 +9,5 @@ Exposes the public APIs of the AnalyticsClient during the preboot phase
 <b>Signature:</b>
 
 ```typescript
-export declare type AnalyticsServicePreboot = AnalyticsClient;
+export declare type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
 ```

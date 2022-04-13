@@ -55,5 +55,10 @@ export type {
   AllowedSchemaTypes,
 } from './schema';
 
-export type { IShipper, FullStorySnippetConfig, FullStoryShipperConfig } from './shippers';
-export { FullStoryShipper } from './shippers';
+export type {
+  IShipper,
+  ElasticV3ShipperOptions,
+  FullStorySnippetConfig,
+  FullStoryShipperConfig,
+} from './shippers';
+export { ElasticV3Shipper, FullStoryShipper } from './shippers';

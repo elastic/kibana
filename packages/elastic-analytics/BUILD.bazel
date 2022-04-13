@@ -37,6 +37,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//moment",
+  "@npm//node-fetch",
   "@npm//rxjs",
 ]
 
@@ -51,6 +52,7 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@types/node",
+  "@npm//@types/node-fetch",
   "@npm//@types/jest",
   "@npm//moment",
   "@npm//rxjs",

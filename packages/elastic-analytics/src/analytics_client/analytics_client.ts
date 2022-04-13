@@ -208,6 +208,15 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.shipperRegistered$.next();
   };
 
+  public shutdown = () => {
+    this.shippersRegistry.allShippers.forEach((shipper) => shipper.shutdown());
+    this.internalEventQueue$.complete();
+    this.internalTelemetryCounter$.complete();
+    this.shipperRegistered$.complete();
+    this.optInConfig$.complete();
+    this.context$.complete();
+  };
+
   /**
    * Forwards the `events` to the registered shippers, bearing in mind if the shipper is opted-in for that eventType.
    * @param eventType The event type's name

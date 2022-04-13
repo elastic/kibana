@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ElasticV3Shipper } from '@elastic/analytics';
+
 import type {
   Plugin,
   CoreStart,
@@ -151,6 +153,11 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     getStartServices().then(([{ docLinks }]) => {
       telemetryConstants = getTelemetryConstants(docLinks);
+    });
+
+    analytics.registerShipper(ElasticV3Shipper, {
+      channelName: 'kibana', // TODO: Do we want to send a different channel name for UI and Server?
+      version: currentKibanaVersion,
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {

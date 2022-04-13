@@ -32,6 +32,10 @@ describe('AnalyticsClient', () => {
     });
   });
 
+  afterEach(() => {
+    analyticsClient.shutdown();
+  });
+
   describe('registerEventType', () => {
     test('successfully registers a event type', () => {
       analyticsClient.registerEventType({

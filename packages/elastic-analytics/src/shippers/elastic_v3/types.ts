@@ -6,10 +6,20 @@
  * Side Public License, v 1.
  */
 
-export type { IShipper } from './types';
-
-export { ElasticV3Shipper } from './elastic_v3';
-export type { ElasticV3ShipperOptions } from './elastic_v3';
-
-export { FullStoryShipper } from './fullstory';
-export type { FullStorySnippetConfig, FullStoryShipperConfig } from './fullstory';
+/**
+ * Options for the Elastic V3 shipper
+ */
+export interface ElasticV3ShipperOptions {
+  /**
+   * The name of the channel to stream all the events to.
+   */
+  channelName: string;
+  /**
+   * The product's version.
+   */
+  version: string;
+  /**
+   * Should show debug information about the requests it makes to the V3 API.
+   */
+  debug?: boolean;
+}

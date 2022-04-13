@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { IShipper } from './types';
-
-export { ElasticV3Shipper } from './elastic_v3';
-export type { ElasticV3ShipperOptions } from './elastic_v3';
-
-export { FullStoryShipper } from './fullstory';
-export type { FullStorySnippetConfig, FullStoryShipperConfig } from './fullstory';
+export type { ElasticV3ShipperOptions } from './types';
+export { ElasticV3Shipper } from './elastic_v3_shipper';

@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { IShipper } from './types';
+import type { Event } from '../../../events';
 
-export { ElasticV3Shipper } from './elastic_v3';
-export type { ElasticV3ShipperOptions } from './elastic_v3';
-
-export { FullStoryShipper } from './fullstory';
-export type { FullStorySnippetConfig, FullStoryShipperConfig } from './fullstory';
+export function eventsToNDJSON(events: Event[]): string {
+  return `${events.map((event) => JSON.stringify(event)).join('\n')}\n`;
+}

@@ -32,4 +32,8 @@ export interface IShipper {
    * Observable to emit the stats of the processed events.
    */
   telemetryCounter$?: Observable<TelemetryCounter>;
+  /**
+   * Shutdown the shipper.
+   */
+  shutdown: () => void;
 }

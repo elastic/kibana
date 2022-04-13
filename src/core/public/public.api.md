@@ -71,7 +71,7 @@ export { AnalyticsClient }
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
 // @public
-export type AnalyticsServiceSetup = AnalyticsClient;
+export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //

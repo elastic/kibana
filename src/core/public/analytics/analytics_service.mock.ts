@@ -40,6 +40,7 @@ const createAnalyticsServiceMock = (): jest.Mocked<AnalyticsServiceContract> => 
   return {
     setup: jest.fn().mockImplementation(createAnalyticsServiceSetup),
     start: jest.fn().mockImplementation(createAnalyticsServiceStart),
+    stop: jest.fn(),
   };
 };
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { IShipper } from './types';
+export const fetchMock = jest.fn().mockResolvedValue({
+  status: 200,
+  ok: true,
+  text: () => Promise.resolve('{"status": "ok"}'),
+});
 
-export { ElasticV3Shipper } from './elastic_v3';
-export type { ElasticV3ShipperOptions } from './elastic_v3';
-
-export { FullStoryShipper } from './fullstory';
-export type { FullStorySnippetConfig, FullStoryShipperConfig } from './fullstory';
+jest.doMock('node-fetch', () => fetchMock);
