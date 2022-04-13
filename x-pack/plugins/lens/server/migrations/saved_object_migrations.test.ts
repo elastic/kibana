@@ -21,10 +21,10 @@ import {
   VisStatePre715,
   VisState810,
   VisState820,
+  VisState830,
 } from './types';
 import { layerTypes, MetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
-import { XYState } from '../../public';
 
 describe('Lens migrations', () => {
   const migrations = getAllMigrations({}, {});
@@ -2137,7 +2137,7 @@ describe('Lens migrations', () => {
       const result = migrations['8.3.0'](example, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
-      const visState = result.attributes.state.visualization as XYState;
+      const visState = result.attributes.state.visualization as VisState830;
       expect(visState.valueLabels).toBe('show');
     });
 
@@ -2158,7 +2158,7 @@ describe('Lens migrations', () => {
         },
         context
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
-      const visState = result.attributes.state.visualization as XYState;
+      const visState = result.attributes.state.visualization as VisState830;
       expect(visState.valueLabels).toBe('hide');
     });
   });
