@@ -15,13 +15,21 @@ export default ({ getService }: FtrProviderContext) => {
   const find = getService('find');
 
   const retry = getService('retry');
-  async function createRule(rule: any) {
+
+  async function createRule(rule: any): Promise<string> {
     const ruleResponse = await supertest
       .post('/api/alerting/rule')
       .set('kbn-xsrf', 'foo')
       .send(rule);
     expect(ruleResponse.status).to.eql(200);
     return ruleResponse.body.id;
+  }
+  async function deleteRuleById(ruleId: string) {
+    const ruleResponse = await supertest
+      .delete(`/api/alerting/rule/${ruleId}`)
+      .set('kbn-xsrf', 'foo');
+    expect(ruleResponse.status).to.eql(204);
+    return true;
   }
 
   const getRulesList = async (tableRows: any[]) => {
@@ -75,7 +83,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Rules table', () => {
+    // eslint-disable-next-line ban/ban
+    describe.only('Rules table', () => {
+      let uptimeRuleId: string;
+      let logThresholdRuleId: string;
       before(async () => {
         const uptimeRule = {
           params: {
@@ -110,9 +121,13 @@ export default ({ getService }: FtrProviderContext) => {
           notify_when: 'onActionGroupChange',
           actions: [],
         };
-        await createRule(uptimeRule);
-        await createRule(logThresholdRule);
+        uptimeRuleId = await createRule(uptimeRule);
+        logThresholdRuleId = await createRule(logThresholdRule);
         await observability.alerts.common.navigateToRulesPage();
+      });
+      after(async () => {
+        await deleteRuleById(uptimeRuleId);
+        await deleteRuleById(logThresholdRuleId);
       });
 
       it('shows the rules table ', async () => {
@@ -130,9 +145,12 @@ export default ({ getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
         await observability.alerts.rulesPage.clickRuleStatusDropDownMenu();
         await observability.alerts.rulesPage.clickDisableFromDropDownMenu();
-        const tableRows = await find.allByCssSelector('.euiTableRow');
-        const rows = await getRulesList(tableRows);
-        expect(rows[0].enabled).to.be('Disabled');
+        await retry.waitFor('The rule to be disabled', async () => {
+          const tableRows = await find.allByCssSelector('.euiTableRow');
+          const rows = await getRulesList(tableRows);
+          expect(rows[0].enabled).to.be('Disabled');
+          return true;
+        });
       });
     });
 
