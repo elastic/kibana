@@ -116,33 +116,6 @@ describe('ExpressionRenderHandler', () => {
       expect(getHandledError()!.message).toEqual('renderer error');
     });
 
-    it('should pass through provided "hasCompatibleActions" to the expression renderer', async () => {
-      const hasCompatibleActions = jest.fn();
-      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
-      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
-        get: () => ({
-          render: (domNode: HTMLElement, config: unknown, handlers: IInterpreterRenderHandlers) => {
-            handlers.hasCompatibleActions!({
-              name: 'something',
-              data: 'bar',
-            });
-          },
-        }),
-      });
-
-      const expressionRenderHandler = new ExpressionRenderHandler(element, {
-        onRenderError: mockMockErrorRenderFunction,
-        hasCompatibleActions,
-      });
-      expect(hasCompatibleActions).toHaveBeenCalledTimes(0);
-      await expressionRenderHandler.render({ type: 'render', as: 'something' });
-      expect(hasCompatibleActions).toHaveBeenCalledTimes(1);
-      expect(hasCompatibleActions.mock.calls[0][0]).toEqual({
-        name: 'something',
-        data: 'bar',
-      });
-    });
-
     it('sends a next observable once rendering is complete', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
       expect.assertions(1);

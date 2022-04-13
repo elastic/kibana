@@ -82,7 +82,6 @@ export interface IInterpreterRenderHandlers {
   reload(): void;
   update(params: IInterpreterRenderUpdateParams): void;
   event(event: IInterpreterRenderEvent): void;
-  hasCompatibleActions?(event: IInterpreterRenderEvent): Promise<boolean>;
   getRenderMode(): RenderMode;
 
   /**

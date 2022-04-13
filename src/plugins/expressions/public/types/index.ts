@@ -16,8 +16,6 @@ import {
   RenderMode,
   IInterpreterRenderEvent,
 } from '../../common';
-import { ExpressionRenderHandlerParams } from '../render';
-
 /**
  * @deprecated
  *
@@ -51,7 +49,6 @@ export interface IExpressionLoaderParams {
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncTooltips?: boolean;
-  hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   executionContext?: KibanaExecutionContext;
 
   /**

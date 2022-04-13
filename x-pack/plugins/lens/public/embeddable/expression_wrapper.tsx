@@ -12,7 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@el
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
-  ReactExpressionRendererProps,
 } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';

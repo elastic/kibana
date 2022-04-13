@@ -30,7 +30,6 @@ export interface ExpressionRenderHandlerParams {
   syncColors?: boolean;
   syncTooltips?: boolean;
   interactive?: boolean;
-  hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
 }
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
@@ -57,7 +56,6 @@ export class ExpressionRenderHandler {
       syncColors,
       syncTooltips,
       interactive,
-      hasCompatibleActions = async () => false,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
@@ -102,7 +100,6 @@ export class ExpressionRenderHandler {
       isInteractive: () => {
         return interactive ?? true;
       },
-      hasCompatibleActions,
     };
   }
 
