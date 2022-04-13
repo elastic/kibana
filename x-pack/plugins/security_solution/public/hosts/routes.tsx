@@ -19,7 +19,7 @@ export const HostsRoutes = () => {
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
     page: SecurityPageName.hosts,
-    type: 'application'
+    type: 'application',
   });
 
   return (

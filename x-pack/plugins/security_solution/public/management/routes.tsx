@@ -22,7 +22,7 @@ const ManagementRoutes = () => {
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
     page: 'Manage',
-    type: 'application'
+    type: 'application',
   });
 
   return (

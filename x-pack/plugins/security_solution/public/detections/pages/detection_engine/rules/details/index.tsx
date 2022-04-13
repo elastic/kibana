@@ -177,7 +177,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
     page: `${SecurityPageName.rules}_details`,
-    type: 'application'
+    type: 'application',
   });
 
   const graphEventId = useShallowEqualSelector(

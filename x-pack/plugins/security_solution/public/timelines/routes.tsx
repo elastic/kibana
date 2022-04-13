@@ -20,7 +20,7 @@ const TimelinesRoutes = () => {
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
     page: SecurityPageName.timelines,
-    type: 'application'
+    type: 'application',
   });
 
   return (

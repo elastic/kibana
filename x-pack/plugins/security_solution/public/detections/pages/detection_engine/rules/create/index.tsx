@@ -98,7 +98,7 @@ const CreateRulePageComponent: React.FC = () => {
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
     page: `${SecurityPageName.rules}_create`,
-    type: 'application'
+    type: 'application',
   });
 
   const loading = userInfoLoading || listsConfigLoading;
