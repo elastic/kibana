@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { lastValueFrom } from '@kbn/std';
+import { lastValueFrom } from 'rxjs';
 import { run, createFlagError, Flags } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';

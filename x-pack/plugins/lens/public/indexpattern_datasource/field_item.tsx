@@ -472,6 +472,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
         </EuiText>
       </>
     );
+  } else if (field.type === 'murmur3') {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsMurmur3Limited', {
+            defaultMessage: `Summary information is not available for murmur3 fields.`,
+          })}
+        </EuiText>
+      </>
+    );
   } else if (field.type === 'geo_point' || field.type === 'geo_shape') {
     return (
       <>

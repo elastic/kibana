@@ -36,7 +36,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
             className="euiFormControlLayout__childrenWrapper"
           >
             <select
-              className="euiSelect euiSelect--compressed"
+              className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
               id="generated-id"
               onBlur={[Function]}
               onChange={[Function]}
@@ -117,7 +117,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -205,7 +205,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -293,7 +293,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
