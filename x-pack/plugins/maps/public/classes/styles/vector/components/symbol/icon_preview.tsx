@@ -130,7 +130,6 @@ export class IconPreview extends Component<Props, State> {
   _createMapInstance(): MapboxMap {
     const map = new mapboxgl.Map({
       container: this._containerRef!,
-      preserveDrawingBuffer: true,
       interactive: false,
       center: [0, 0],
       zoom: 2,
