@@ -582,7 +582,7 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
 
 /**
  * Remove all rules execution info saved objects from the .kibana index
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  * @param log The tooling logger
  */
@@ -607,7 +607,7 @@ export const deleteAllRuleExecutionInfo = async (es: Client, log: ToolingLog): P
 
 /**
  * Creates the signals index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
@@ -963,7 +963,7 @@ export const countDownES = async (
   esFunction: () => Promise<TransportResult<Record<string, any>, unknown>>,
   esFunctionName: string,
   log: ToolingLog,
-  retryCount: number = 20,
+  retryCount: number = 50,
   timeoutWait = 250
 ): Promise<void> => {
   await countDownTest(
@@ -1586,7 +1586,7 @@ export const indexEventLogExecutionEvents = async (
 
 /**
  * Remove all .kibana-event-log-* documents with an execution.uuid
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  * @param log The tooling logger
  */

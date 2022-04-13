@@ -27,7 +27,7 @@ import { countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
@@ -68,7 +68,7 @@ export const deleteListsIndex = async (
 
 /**
  * Creates the exception lists and lists items index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
