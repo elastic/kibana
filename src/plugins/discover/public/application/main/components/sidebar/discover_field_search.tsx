@@ -8,9 +8,10 @@
 
 import './discover_field_search.scss';
 
-import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
+import React, { OptionHTMLAttributes, ReactNode, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiBasicTable,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -24,11 +25,18 @@ import {
   EuiForm,
   EuiFormRow,
   EuiButtonGroup,
-  EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
+  EuiIcon,
+  EuiBasicTableColumn,
+  EuiLink,
+  EuiText,
+  EuiPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldIcon } from '@kbn/react-field';
+import { GetFieldTypeDescription } from './lib/get_field_type_description';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 export interface State {
   searchable: string;
@@ -43,23 +51,31 @@ export interface Props {
    * triggered on input of user into search field
    */
   onChange: (field: string, value: string | boolean | undefined) => void;
-
-  /**
-   * the input value of the user
-   */
-  value?: string;
-
   /**
    * types for the type filter
    */
   types: string[];
+  /**
+   * types presented in current data view
+   */
+  presentFieldTypes: string[];
+  /**
+   * the input value of the user
+   */
+  value?: string;
+}
+
+interface FieldTypeTableItem {
+  id: number;
+  dataType: string;
+  description: string;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types }: Props) {
+export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -80,12 +96,50 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
 
   const [activeFiltersCount, setActiveFiltersCount] = useState(0);
   const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [values, setValues] = useState<State>({
     searchable: 'any',
     aggregatable: 'any',
     type: 'any',
     missing: true,
   });
+
+  const { docLinks } = useDiscoverServices();
+
+  const items: FieldTypeTableItem[] = useMemo(() => {
+    return presentFieldTypes
+      .sort((one, another) => one.localeCompare(another))
+      .map((element, index) => ({
+        id: index,
+        dataType: element,
+        description: GetFieldTypeDescription(element),
+      }));
+  }, [presentFieldTypes]);
+
+  const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
+  const closeHelp = () => setIsHelpOpen(false);
+
+  const columnsSidebar: Array<EuiBasicTableColumn<FieldTypeTableItem>> = [
+    {
+      field: 'dataType',
+      name: 'Data type',
+      width: '110px',
+      render: (name: string) => (
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FieldIcon type={name} />
+          </EuiFlexItem>
+          <EuiFlexItem>{name}</EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+    {
+      field: 'description',
+      name: 'Description',
+      // eslint-disable-next-line react/no-danger
+      render: (description: string) => <div dangerouslySetInnerHTML={{ __html: description }} />,
+    },
+  ];
 
   const filterBtnAriaLabel = isPopoverOpen
     ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
@@ -257,6 +311,26 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     </div>
   );
 
+  const helpButton = (
+    <EuiFilterButton
+      grow={false}
+      onClick={onHelpClick}
+      data-test-subj="fieldTypesHelpButton"
+      className="dscFieldTypesHelp__button"
+      aria-label={i18n.translate('discover.fieldTypesPopover.buttonAriaLabel', {
+        defaultMessage: 'Filter type help',
+      })}
+    >
+      <EuiIcon
+        type="iInCircle"
+        color="primary"
+        title={i18n.translate('discover.fieldTypesPopover.iconTitle', {
+          defaultMessage: 'Filter type help',
+        })}
+      />
+    </EuiFilterButton>
+  );
+
   return (
     <React.Fragment>
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
@@ -272,8 +346,8 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-        <EuiFilterGroup className="dscFieldSearch__filterWrapper">
+      <EuiFlexItem>
+        <EuiFilterGroup fullWidth>
           <EuiPopover
             id="dataPanelTypeFilter"
             panelClassName="euiFilterGroup__popoverPanel"
@@ -294,8 +368,59 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             {selectionPanel}
             {footer()}
           </EuiPopover>
+          <EuiPopover
+            anchorPosition="rightUp"
+            display="block"
+            button={helpButton}
+            isOpen={isHelpOpen}
+            panelPaddingSize="none"
+            className="dscFieldTypesHelp__popover"
+            panelClassName="dscFieldTypesHelp__panel"
+            closePopover={closeHelp}
+            initialFocus="#dscFieldTypesHelpBasicTableId"
+          >
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.translate('discover.fieldChooser.popoverTitle', {
+                defaultMessage: 'Field types',
+              })}
+            </EuiPopoverTitle>
+            <EuiPanel
+              className="eui-yScroll"
+              style={{ maxHeight: '50vh' }}
+              color="transparent"
+              paddingSize="s"
+            >
+              <EuiBasicTable
+                id="dscFieldTypesHelpBasicTableId"
+                tableCaption={i18n.translate('discover.fieldTypesPopover.tableTitle', {
+                  defaultMessage: 'Description of field types',
+                })}
+                items={items}
+                compressed={true}
+                rowHeader="firstName"
+                columns={columnsSidebar}
+                responsive={false}
+              />
+            </EuiPanel>
+            <EuiPanel color="transparent" paddingSize="s">
+              <EuiText color="subdued" size="xs">
+                <p>
+                  {i18n.translate('discover.fieldTypesPopover.learnMoreText', {
+                    defaultMessage: 'Learn more about',
+                  })}
+                  &nbsp;
+                  <EuiLink href={docLinks.links.discover.fieldTypeHelp}>
+                    <FormattedMessage
+                      id="discover.fieldTypesPopover.learnMoreLink"
+                      defaultMessage="field types."
+                    />
+                  </EuiLink>
+                </p>
+              </EuiText>
+            </EuiPanel>
+          </EuiPopover>
         </EuiFilterGroup>
-      </EuiOutsideClickDetector>
+      </EuiFlexItem>
     </React.Fragment>
   );
 }

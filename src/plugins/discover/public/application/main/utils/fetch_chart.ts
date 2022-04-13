@@ -7,6 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
+import { lastValueFrom } from 'rxjs';
 import {
   DataPublicPluginStart,
   isCompleteResponse,
@@ -77,7 +78,7 @@ export function fetchChart(
       })
     );
 
-  return fetch$.toPromise();
+  return lastValueFrom(fetch$);
 }
 
 export function updateSearchSource(

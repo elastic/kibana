@@ -288,11 +288,11 @@ export const EditConnector = React.memo(
           justifyContent="spaceBetween"
           responsive={false}
         >
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="connector-edit-header">
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
-          {!isLoading && !editConnector && userCanCrud && (
+          {!isLoading && !editConnector && userCanCrud && actionsReadCapabilities && (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
                 data-test-subj="connector-edit-button"

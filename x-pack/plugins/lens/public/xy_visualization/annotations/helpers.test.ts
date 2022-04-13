@@ -8,13 +8,17 @@
 import { FramePublicAPI } from '../../types';
 import { getStaticDate } from './helpers';
 
+const frame = {
+  datasourceLayers: {},
+  dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+};
+
 describe('annotations helpers', () => {
   describe('getStaticDate', () => {
-    it('should return `now` value on when nothing is configured', () => {
-      jest.spyOn(Date, 'now').mockReturnValue(new Date('2022-04-08T11:01:58.135Z').valueOf());
-      expect(getStaticDate([], undefined)).toBe('2022-04-08T11:01:58.135Z');
+    it('should return the middle of the date range on when nothing is configured', () => {
+      expect(getStaticDate([], frame)).toBe('2022-03-12T00:00:00.000Z');
     });
-    it('should return `now` value on when there is no active data', () => {
+    it('should return the middle of the date range value on when there is no active data', () => {
       expect(
         getStaticDate(
           [
@@ -26,9 +30,9 @@ describe('annotations helpers', () => {
               xAccessor: 'a',
             },
           ],
-          undefined
+          frame
         )
-      ).toBe('2022-04-08T11:01:58.135Z');
+      ).toBe('2022-03-12T00:00:00.000Z');
     });
 
     it('should return timestamp value for single active data point', () => {
@@ -66,9 +70,55 @@ describe('annotations helpers', () => {
               xAccessor: 'a',
             },
           ],
-          activeData as FramePublicAPI['activeData']
+          {
+            ...frame,
+            activeData: activeData as FramePublicAPI['activeData'],
+          }
         )
       ).toBe('2022-02-27T23:00:00.000Z');
+    });
+
+    it('should return the middle of the date range value on when there the active data lies outside of the timerange (auto apply off case)', () => {
+      const activeData = {
+        layerId: {
+          type: 'datatable',
+          rows: [
+            {
+              a: 1642673600000, // smaller than dateRange.fromDate
+              b: 1050,
+            },
+          ],
+          columns: [
+            {
+              id: 'a',
+              name: 'order_date per week',
+              meta: { type: 'date' },
+            },
+            {
+              id: 'b',
+              name: 'Count of records',
+              meta: { type: 'number', params: { id: 'number' } },
+            },
+          ],
+        },
+      };
+      expect(
+        getStaticDate(
+          [
+            {
+              layerId: 'layerId',
+              accessors: ['b'],
+              seriesType: 'bar_stacked',
+              layerType: 'data',
+              xAccessor: 'a',
+            },
+          ],
+          {
+            ...frame,
+            activeData: activeData as FramePublicAPI['activeData'],
+          }
+        )
+      ).toBe('2022-03-12T00:00:00.000Z');
     });
 
     it('should correctly calculate middle value for active data', () => {
@@ -118,7 +168,10 @@ describe('annotations helpers', () => {
               xAccessor: 'a',
             },
           ],
-          activeData as FramePublicAPI['activeData']
+          {
+            ...frame,
+            activeData: activeData as FramePublicAPI['activeData'],
+          }
         )
       ).toBe('2022-03-26T05:00:00.000Z');
     });
@@ -202,7 +255,11 @@ describe('annotations helpers', () => {
               xAccessor: 'd',
             },
           ],
-          activeData as FramePublicAPI['activeData']
+          {
+            ...frame,
+            dateRange: { fromDate: '2020-02-01T00:00:00.000Z', toDate: '2022-09-20T00:00:00.000Z' },
+            activeData: activeData as FramePublicAPI['activeData'],
+          }
         )
       ).toBe('2020-08-24T12:06:40.000Z');
     });

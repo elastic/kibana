@@ -14,9 +14,9 @@ exports[`InspectorPanel should render as expected 1`] = `
     Object {
       "application": Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -28,10 +28,9 @@ exports[`InspectorPanel should render as expected 1`] = `
           "navLinks": Object {},
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -199,9 +198,9 @@ exports[`InspectorPanel should render as expected 1`] = `
       Object {
         "application": Object {
           "applications$": BehaviorSubject {
-            "_isScalar": false,
             "_value": Map {},
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -213,10 +212,9 @@ exports[`InspectorPanel should render as expected 1`] = `
             "navLinks": Object {},
           },
           "currentAppId$": Observable {
-            "_isScalar": false,
             "source": Subject {
-              "_isScalar": false,
               "closed": false,
+              "currentObservers": null,
               "hasError": false,
               "isStopped": false,
               "observers": Array [],

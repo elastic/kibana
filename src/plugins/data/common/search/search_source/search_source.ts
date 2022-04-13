@@ -70,7 +70,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { defer, EMPTY, from, Observable } from 'rxjs';
+import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { normalizeSortRequest } from './normalize_sort_request';
@@ -325,11 +325,9 @@ export class SearchSource {
    * @removeBy 8.1
    */
   fetch(options: ISearchOptions = {}) {
-    return this.fetch$(options)
-      .toPromise()
-      .then((r) => {
-        return r.rawResponse as estypes.SearchResponse<any>;
-      });
+    return lastValueFrom(this.fetch$(options)).then((r) => {
+      return r.rawResponse as estypes.SearchResponse<any>;
+    });
   }
 
   /**
