@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+jest.mock('os', () => {
+  return {
+    ...jest.requireActual('os'),
+    totalmem: jest.fn(() => 1 * Math.pow(1024, 3)), // 1GB in bytes
+  };
+});
+
+import os from 'os';
 import { of, throwError } from 'rxjs';
 import type { Logger, PackageInfo } from 'src/core/server';
 import { httpServiceMock } from 'src/core/server/mocks';
@@ -23,13 +31,6 @@ import { createMockLayout } from '../layouts/mock';
 import type { PngScreenshotOptions } from '../formats';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
 import { Screenshots, ScreenshotOptions } from '.';
-
-jest.mock('os', () => {
-  return {
-    ...jest.requireActual('os'),
-    totalmem: () => 1 * Math.pow(1024, 3), // 1GB in bytes
-  };
-});
 
 /*
  * Tests
@@ -496,6 +497,10 @@ describe('Screenshot Observable Pipeline', () => {
       cloud.isCloudEnabled = true;
     });
 
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
     it('throws an error when OS memory is under 1GB on cloud', async () => {
       await expect(
         screenshots
@@ -508,6 +513,19 @@ describe('Screenshot Observable Pipeline', () => {
       ).rejects.toEqual(new errors.InsufficientMemoryAvailableOnCloudError());
 
       expect(driver.open).toHaveBeenCalledTimes(0);
+    });
+
+    it('generates a report when OS memory is 2GB on cloud', async () => {
+      (os.totalmem as jest.Mock).mockImplementation(() => 2 * Math.pow(1024, 3));
+      await screenshots
+        .getScreenshots({
+          ...options,
+          expression: 'kibana',
+          input: 'something',
+        } as PngScreenshotOptions)
+        .toPromise();
+
+      expect(driver.open).toHaveBeenCalledTimes(1);
     });
   });
 });
