@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteCustomElementRoute } from './delete';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock, coreMock } from 'src/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {
@@ -17,7 +18,7 @@ const mockRouteContext = {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 describe('DELETE custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -39,7 +40,11 @@ describe('DELETE custom element', () => {
       },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true });
@@ -62,7 +67,11 @@ describe('DELETE custom element', () => {
       throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(400);
   });

@@ -6,7 +6,8 @@
  */
 
 import sinon from 'sinon';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { AwaitedProperties } from '@kbn/utility-types';
+import { savedObjectsClientMock, httpServerMock, coreMock } from 'src/core/server/mocks';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeCreateCustomElementRoute } from './create';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
@@ -18,7 +19,7 @@ const mockRouteContext = {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const mockedUUID = '123abc';
 const now = new Date();
@@ -54,7 +55,11 @@ describe('POST custom element', () => {
       body: mockCustomElement,
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ok: true });
@@ -82,7 +87,11 @@ describe('POST custom element', () => {
       throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(400);
   });

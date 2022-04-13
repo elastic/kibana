@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { initializeESFieldsRoute } from './es_fields';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { httpServerMock, elasticsearchServiceMock, coreMock } from 'src/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {
@@ -16,7 +17,7 @@ const mockRouteContext = {
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const path = `api/canvas/workpad/find`;
 
@@ -71,7 +72,11 @@ describe('Retrieve ES Fields', () => {
 
     fieldCapsMock.mockResolvedValueOnce(mockResults);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`
@@ -99,7 +104,11 @@ describe('Retrieve ES Fields', () => {
 
     fieldCapsMock.mockResolvedValueOnce(mockResults);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot('Object {}');
@@ -127,7 +136,11 @@ describe('Retrieve ES Fields', () => {
 
     fieldCapsMock.mockResolvedValueOnce(mockResults);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`Object {}`);
@@ -148,7 +161,11 @@ describe('Retrieve ES Fields', () => {
     fieldCapsMock.mockRejectedValueOnce(new Error('Index not found'));
 
     await expect(
-      routeHandler(mockRouteContext, request, kibanaResponseFactory)
+      routeHandler(
+        coreMock.createCustomRequestHandlerContext(mockRouteContext),
+        request,
+        kibanaResponseFactory
+      )
     ).rejects.toThrowError('Index not found');
   });
 });

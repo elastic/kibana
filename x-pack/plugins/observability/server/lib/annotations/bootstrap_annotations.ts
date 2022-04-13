@@ -38,13 +38,14 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
   });
 
   return {
-    getScopedAnnotationsClient: (
+    getScopedAnnotationsClient: async (
       requestContext: RequestHandlerContext & { licensing: LicensingApiRequestHandlerContext },
       request: KibanaRequest
     ) => {
+      const esClient = (await requestContext.core).elasticsearch.client;
       return createAnnotationsClient({
         index,
-        esClient: requestContext.core.elasticsearch.client.asCurrentUser,
+        esClient: esClient.asCurrentUser,
         logger,
         license: requestContext.licensing?.license,
       });

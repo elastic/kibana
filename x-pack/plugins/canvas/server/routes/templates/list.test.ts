@@ -6,9 +6,10 @@
  */
 
 import { badRequest } from '@hapi/boom';
+import { AwaitedProperties } from '@kbn/utility-types';
 import { initializeListTemplates } from './list';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock, coreMock } from 'src/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {
@@ -17,7 +18,7 @@ const mockRouteContext = {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 describe('Find workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -50,7 +51,11 @@ describe('Find workpad', () => {
       path: `api/canvas/templates/list`,
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
 
     expect(response.payload).toMatchInlineSnapshot(`
@@ -77,7 +82,11 @@ describe('Find workpad', () => {
       path: `api/canvas/templates/list`,
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(400);
     expect(response.payload).toMatchInlineSnapshot(`

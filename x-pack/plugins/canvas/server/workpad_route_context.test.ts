@@ -7,9 +7,10 @@
 
 import sinon from 'sinon';
 import { fromExpression } from '@kbn/interpreter';
+import { AwaitedProperties } from '@kbn/utility-types';
 import { createWorkpadRouteContext } from './workpad_route_context';
 import { RequestHandlerContext, SavedObjectReference } from 'src/core/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, coreMock } from 'src/core/server/mocks';
 import { CanvasWorkpad } from '../types';
 import { CANVAS_TYPE } from '../common/lib/constants';
 
@@ -26,7 +27,7 @@ const mockContext = {
       client: savedObjectsClient,
     },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const workpadRouteContext = createWorkpadRouteContext({
   expressions: mockedExpressionService as any,
@@ -86,7 +87,7 @@ describe('workpad route context', () => {
       };
 
       const canvasContext = await workpadRouteContext(
-        mockContext,
+        coreMock.createCustomRequestHandlerContext(mockContext),
         undefined as any,
         undefined as any
       );
@@ -120,7 +121,7 @@ describe('workpad route context', () => {
     it('injects references to the saved object', async () => {
       const id = 'so-id';
       const canvasContext = await workpadRouteContext(
-        mockContext,
+        coreMock.createCustomRequestHandlerContext(mockContext),
         undefined as any,
         undefined as any
       );
@@ -145,7 +146,7 @@ describe('workpad route context', () => {
     it('injects references to the saved object', async () => {
       const id = 'so-id';
       const canvasContext = await workpadRouteContext(
-        mockContext,
+        coreMock.createCustomRequestHandlerContext(mockContext),
         undefined as any,
         undefined as any
       );
@@ -172,7 +173,7 @@ describe('workpad route context', () => {
       const createdDate = new Date(2020, 1, 1).toISOString();
 
       const canvasContext = await workpadRouteContext(
-        mockContext,
+        coreMock.createCustomRequestHandlerContext(mockContext),
         undefined as any,
         undefined as any
       );

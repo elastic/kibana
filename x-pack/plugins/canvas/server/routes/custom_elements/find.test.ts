@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { initializeFindCustomElementsRoute } from './find';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock, coreMock } from 'src/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {
@@ -16,7 +17,7 @@ const mockRouteContext = {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 describe('Find custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -52,7 +53,11 @@ describe('Find custom element', () => {
       },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
     expect(findMock.mock.calls[0][0].search).toBe(`${name}* | ${name}`);
     expect(findMock.mock.calls[0][0].perPage).toBe(perPage);
@@ -88,7 +93,11 @@ describe('Find custom element', () => {
       },
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`
