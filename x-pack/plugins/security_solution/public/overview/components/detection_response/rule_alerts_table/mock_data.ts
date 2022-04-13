@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleAlertsItem, SeverityRuleAlertsAggsResponse } from './rule_alerts_items';
+import { RuleAlertsItem, SeverityRuleAlertsAggsResponse } from './use_rule_alerts_items';
 
 export const from = '2022-04-05T12:00:00.000Z';
 export const to = '2022-04-08T12:00:00.000Z';

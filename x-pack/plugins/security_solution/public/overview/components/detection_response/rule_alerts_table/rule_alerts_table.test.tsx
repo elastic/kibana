@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { RuleAlertsTable, RuleAlertsTableProps } from './rule_alerts_table';
-import { RuleAlertsItem, UseRuleAlertsItems } from './rule_alerts_items';
+import { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
 import moment from 'moment';
 import { SecurityPageName } from '../../../../../common/constants';
 
@@ -34,7 +34,7 @@ const mockUseRuleAlertsItems = jest.fn(() => defaultUseRuleAlertsItemsReturn);
 const mockUseRuleAlertsItemsReturn = (param: Partial<UseRuleAlertsItemsReturn>) => {
   mockUseRuleAlertsItems.mockReturnValueOnce({ ...defaultUseRuleAlertsItemsReturn, ...param });
 };
-jest.mock('./rule_alerts_items', () => ({
+jest.mock('./use_rule_alerts_items', () => ({
   useRuleAlertsItems: () => mockUseRuleAlertsItems(),
 }));
 
