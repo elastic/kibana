@@ -45,7 +45,7 @@ const queryBody = {
 };
 
 const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, index: string) => {
-  const client = context.core.elasticsearch.client.asCurrentUser;
+  const client = (await context.core).elasticsearch.client.asCurrentUser;
   const result = await client.search<estypes.SearchResponse<unknown>>({
     index,
     body: queryBody,
