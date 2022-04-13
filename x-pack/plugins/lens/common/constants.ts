@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import type { TimeRange } from '../../../../src/plugins/data/common/query';
 
@@ -72,3 +73,8 @@ export function getEditPath(id: string | undefined, timeRange?: TimeRange) {
 export function getFullPath(id?: string) {
   return `/app/${PLUGIN_ID}${id ? getEditPath(id) : getBasePath()}`;
 }
+
+export const getShowUnderlyingDataLabel = () =>
+  i18n.translate('xpack.lens.app.exploreRawData', {
+    defaultMessage: 'Explore data in Discover',
+  });

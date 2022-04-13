@@ -31,11 +31,8 @@ import {
   DispatchSetState,
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
-import {
-  combineQueryAndFilters,
-  getLayerMetaInfo,
-  getShowUnderlyingDataLabel,
-} from './show_underlying_data';
+import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
+import { getShowUnderlyingDataLabel } from '../../common';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;

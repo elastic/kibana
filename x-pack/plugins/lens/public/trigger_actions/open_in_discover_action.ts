@@ -9,8 +9,7 @@ import type { IEmbeddable } from 'src/plugins/embeddable/public';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import type { Embeddable } from '../embeddable';
 import type { DiscoverStart } from '../../../../../src/plugins/discover/public';
-import { DOC_TYPE } from '../../common';
-import { getShowUnderlyingDataLabel } from '../app_plugin/show_underlying_data';
+import { DOC_TYPE, getShowUnderlyingDataLabel } from '../../common';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
