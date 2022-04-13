@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 
+import { lastValueFrom } from 'rxjs';
 import { EsRawResponse } from './es_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
 import { ISearchGeneric, KibanaContext } from '..';
@@ -125,16 +126,18 @@ export const getEsdslFn = ({
       });
 
       try {
-        const { rawResponse } = await search(
-          {
-            params: {
-              index: args.index,
-              size: args.size,
-              body: dsl,
+        const { rawResponse } = await lastValueFrom(
+          search(
+            {
+              params: {
+                index: args.index,
+                size: args.size,
+                body: dsl,
+              },
             },
-          },
-          { abortSignal }
-        ).toPromise();
+            { abortSignal }
+          )
+        );
 
         const stats: RequestStatistics = {};
 
