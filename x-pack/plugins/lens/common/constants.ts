@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import type { TimeRange } from '../../../../src/plugins/data/common/query';
 
