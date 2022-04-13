@@ -30,7 +30,8 @@ export const createGridColumns = (
   rows: DatatableRow[],
   formattedColumns: FormattedColumns,
   columnsWidth: TableVisUiState['colWidth'],
-  fireEvent: IInterpreterRenderHandlers['event']
+  fireEvent: IInterpreterRenderHandlers['event'],
+  closeCellPopover?: Function
 ) => {
   const onFilterClick = (data: FilterCellData, negate: boolean) => {
     fireEvent({
@@ -55,9 +56,9 @@ export const createGridColumns = (
     const formattedColumn = formattedColumns[col.id];
     const cellActions = formattedColumn.filterable
       ? [
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+            if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
 
             const filterForText = i18n.translate(
@@ -77,24 +78,22 @@ export const createGridColumns = (
             );
 
             return (
-              contentsIsDefined && (
-                <Component
-                  aria-label={filterForAriaLabel}
-                  data-test-subj="tbvChartCell__filterForCellValue"
-                  onClick={() => {
-                    onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
-                    closePopover?.();
-                  }}
-                  iconType="plusInCircle"
-                >
-                  {filterForText}
-                </Component>
-              )
+              <Component
+                aria-label={filterForAriaLabel}
+                data-test-subj="tbvChartCell__filterForCellValue"
+                onClick={() => {
+                  onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
+                  closeCellPopover?.();
+                }}
+                iconType="plusInCircle"
+              >
+                {filterForText}
+              </Component>
             );
           },
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+            if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
 
             const filterOutText = i18n.translate(
@@ -114,18 +113,16 @@ export const createGridColumns = (
             );
 
             return (
-              contentsIsDefined && (
-                <Component
-                  aria-label={filterOutAriaLabel}
-                  onClick={() => {
-                    onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
-                    closePopover?.();
-                  }}
-                  iconType="minusInCircle"
-                >
-                  {filterOutText}
-                </Component>
-              )
+              <Component
+                aria-label={filterOutAriaLabel}
+                onClick={() => {
+                  onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
+                  closeCellPopover?.();
+                }}
+                iconType="minusInCircle"
+              >
+                {filterOutText}
+              </Component>
             );
           },
         ]
