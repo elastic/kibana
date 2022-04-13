@@ -12,7 +12,6 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  metricsEntitiesEnabled: false,
   ruleRegistryEnabled: true,
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
@@ -22,7 +21,6 @@ export const allowedExperimentalValues = Object.freeze({
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
   riskyUsersEnabled: false,
-  securityRulesCancelEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
 
