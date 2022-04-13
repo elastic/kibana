@@ -11,6 +11,8 @@ import {
   deleteMetadataStream,
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataUnitedIndex,
+  deletePolicyStream,
+  deleteAllDocsFromFleetAgents,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
@@ -34,6 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await deleteMetadataStream(getService);
       await deleteAllDocsFromMetadataCurrentIndex(getService);
       await deleteAllDocsFromMetadataUnitedIndex(getService);
+      await deletePolicyStream(getService);
+      await deleteAllDocsFromFleetAgents(getService);
 
       const endpointPackage = await policyTestResources.getEndpointPackage();
       await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
