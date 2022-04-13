@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from './services';
-import { pageObjects } from '../functional/page_objects';
+import { createSerializer } from '@emotion/jest';
 
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+module.exports = createSerializer({
+  classNameReplacer: (className) => className,
+  includeStyles: false,
+});

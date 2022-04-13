@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -154,7 +154,7 @@ export class APMPlugin
     const boundGetApmIndices = async () =>
       getApmIndices({
         savedObjectsClient: await getInternalSavedObjectsClient(core),
-        config: await config$.pipe(take(1)).toPromise(),
+        config: await firstValueFrom(config$),
       });
 
     boundGetApmIndices().then((indices) => {
