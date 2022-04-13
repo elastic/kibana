@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { RequestHandler, RequestHandlerContext } from 'src/core/server';
 import {
   elasticsearchServiceMock,
@@ -20,7 +21,7 @@ export const routeHandlerContextMock = {
     savedObjects: { client: savedObjectsClientMock.create() },
     deprecations: { client: deprecationsServiceMock.createClient() },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 /**
  * Creates a very crude mock of the new platform router implementation. This enables use to test
