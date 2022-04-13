@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a single rule with a rule_id', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule()])
           .expect(200);
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a single rule without a rule_id', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRuleWithoutRuleId()])
           .expect(200);
@@ -70,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id twice', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule(), getSimpleRule()])
           .expect(200);
@@ -88,13 +88,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id that already exists', async () => {
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule()])
           .expect(200);
 
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'foo')
           .send([getSimpleRule()])
           .expect(200);

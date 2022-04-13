@@ -99,6 +99,21 @@ const savedObjectWithDecryptedContent =  await esoClient.getDecryptedAsInternalU
 one would pass to `SavedObjectsClient.get`. These argument allows to specify `namespace` property that, for example, is
 required if Saved Object was created within a non-default space.
 
+Alternative option is using `createPointInTimeFinderAsInternalUser` API method, that can be used to help page through large sets of saved objects.
+Its interface matches interface of corresponding Saved Objects API `createPointInTimeFinder` method :
+
+```typescript
+      const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser({
+        filter,
+        type: 'my-saved-object-type',
+        perPage: 1000,
+      });
+
+      for await (const response of finder.find()) {
+        // process response
+      }
+```
+
 ### Defining migrations
 EncryptedSavedObjects rely on standard SavedObject migrations, but due to the additional complexity introduced by the need to decrypt and reencrypt the migrated document, there are some caveats to how we support this.
 The good news is, most of this complexity is abstracted away by the plugin and all you need to do is leverage our api.
