@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { i18n } from '@kbn/i18n';
+import { firstValueFrom } from 'rxjs';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from './use_agent_policies';
 
@@ -39,8 +40,8 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
   const { isFetched } = useQuery(
     ['agentGroups'],
     async () => {
-      const responseData = await data.search
-        .search<AgentsRequestOptions, AgentsStrategyResponse>(
+      const responseData = await firstValueFrom(
+        data.search.search<AgentsRequestOptions, AgentsStrategyResponse>(
           {
             filterQuery: { terms: { policy_id: osqueryPolicies } },
             factoryQueryType: OsqueryQueries.agents,
@@ -73,7 +74,7 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
             strategy: 'osquerySearchStrategy',
           }
         )
-        .toPromise();
+      );
 
       if (responseData.rawResponse.aggregations) {
         const {
