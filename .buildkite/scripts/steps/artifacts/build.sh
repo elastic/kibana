@@ -15,7 +15,7 @@ node scripts/i18n_extract --output-dir=target/i18n
 
 echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$FULL_VERSION.csv"
-sha512sum "target/dependencies-$FULL_VERSION.csv" > "target/dependencies-$FULL_VERSION.csv.sha512.txt"
+(cd target; sha512sum "dependencies-$FULL_VERSION.csv" > "dependencies-$FULL_VERSION.csv.sha512.txt")
 
 echo "--- Upload Kibana Artifacts"
 cd target
