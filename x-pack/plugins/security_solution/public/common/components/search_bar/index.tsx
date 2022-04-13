@@ -8,7 +8,7 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
@@ -34,10 +34,10 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import { hostsActions } from '../../../hosts/store';
-import { networkActions } from '../../../network/store';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
+import { hostsActions } from '../../../hosts/store';
+import { networkActions } from '../../../network/store';
 
 const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
 
@@ -84,16 +84,24 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       storage,
     } = useKibana().services;
 
+    const dispatch = useDispatch();
+    const setTablesActivePageToZero = useCallback(() => {
+      dispatch(hostsActions.setHostTablesActivePageToZero());
+      dispatch(networkActions.setNetworkTablesActivePageToZero());
+    }, [dispatch]);
+
     useEffect(() => {
       if (fromStr != null && toStr != null) {
         timefilter.setTime({ from: fromStr, to: toStr });
       } else if (start != null && end != null) {
+        setTablesActivePageToZero();
+
         timefilter.setTime({
           from: new Date(start).toISOString(),
           to: new Date(end).toISOString(),
         });
       }
-    }, [end, fromStr, start, timefilter, toStr]);
+    }, [end, fromStr, start, timefilter, toStr, setTablesActivePageToZero]);
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -112,6 +120,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           isQuickSelection,
           updateTime: false,
           filterManager,
+          setTablesActivePageToZero,
         };
         let isStateUpdated = false;
 
@@ -157,6 +166,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         filterQuery,
         queries,
         updateSearch,
+        setTablesActivePageToZero,
       ]
     );
 
@@ -171,12 +181,13 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
             isQuickSelection: true,
             updateTime: true,
             filterManager,
+            setTablesActivePageToZero,
           });
         } else {
           queries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
-      [updateSearch, id, filterManager, queries]
+      [updateSearch, id, filterManager, queries, setTablesActivePageToZero]
     );
 
     const onSaved = useCallback(
@@ -202,6 +213,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           isQuickSelection,
           updateTime: false,
           filterManager,
+          setTablesActivePageToZero,
         };
 
         if (savedQueryUpdated.attributes.timefilter) {
@@ -219,7 +231,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
 
         updateSearch(updateSearchBar);
       },
-      [id, toStr, end, fromStr, start, filterManager, updateSearch]
+      [id, toStr, end, fromStr, start, filterManager, updateSearch, setTablesActivePageToZero]
     );
 
     const onClearSavedQuery = useCallback(() => {
@@ -239,9 +251,20 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           resetSavedQuery: true,
           savedQuery: undefined,
           filterManager,
+          setTablesActivePageToZero,
         });
       }
-    }, [savedQuery, updateSearch, id, toStr, end, fromStr, start, filterManager]);
+    }, [
+      savedQuery,
+      updateSearch,
+      id,
+      toStr,
+      end,
+      fromStr,
+      start,
+      filterManager,
+      setTablesActivePageToZero,
+    ]);
 
     const saveAppStateToStorage = useCallback(
       (filters: Filter[]) => storage.set(APP_STATE_STORAGE_KEY, filters),
@@ -266,6 +289,8 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
                 id,
                 filters: filterManager.getFilters(),
               });
+
+              setTablesActivePageToZero();
             }
           },
         })
@@ -362,6 +387,7 @@ interface UpdateReduxSearchBar extends OnTimeChangeProps {
   resetSavedQuery?: boolean;
   timelineId?: string;
   updateTime: boolean;
+  setTablesActivePageToZero: () => void;
 }
 
 export const dispatchUpdateSearch =
@@ -378,6 +404,7 @@ export const dispatchUpdateSearch =
     timelineId,
     filterManager,
     updateTime = false,
+    setTablesActivePageToZero,
   }: UpdateReduxSearchBar): void => {
     if (updateTime) {
       const fromDate = formatDate(start);
@@ -439,8 +466,7 @@ export const dispatchUpdateSearch =
       dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
     }
 
-    dispatch(hostsActions.setHostTablesActivePageToZero());
-    dispatch(networkActions.setNetworkTablesActivePageToZero());
+    setTablesActivePageToZero();
   };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
