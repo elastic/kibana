@@ -82,6 +82,7 @@ const supportedFieldTypes = new Set([
   'document',
   'geo_point',
   'geo_shape',
+  'murmur3',
 ]);
 
 const fieldTypeNames: Record<DataType, string> = {
@@ -94,6 +95,7 @@ const fieldTypeNames: Record<DataType, string> = {
   histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'histogram' }),
   geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', { defaultMessage: 'geo_point' }),
   geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', { defaultMessage: 'geo_shape' }),
+  murmur3: i18n.translate('xpack.lens.datatypes.murmur3', { defaultMessage: 'murmur3' }),
 };
 
 // Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by

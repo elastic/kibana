@@ -46,7 +46,7 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
     this.refreshHandler = refreshHandler;
     this.refreshInterval = refreshInterval;
 
-    this.stop$ = new Subject();
+    this.stop$ = new Subject<void>();
     this.internal$ = new BehaviorSubject<Tag[]>([]);
     this.public$ = this.internal$.pipe(takeUntil(this.stop$));
   }

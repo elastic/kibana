@@ -370,7 +370,7 @@ const SchemaInformation = ({
       </EuiPopoverTitle>
       <div
         // Limit the width based on UX design
-        style={{ maxWidth: '256px' }}
+        style={{ maxWidth: '268px' }}
       >
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:schema-info"

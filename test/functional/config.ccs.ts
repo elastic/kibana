@@ -7,8 +7,10 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from './services';
+import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
+import { RemoteEsProvider } from './services/remote_es/remote_es';
 
+// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
@@ -17,7 +19,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [require.resolve('./apps/discover')],
 
-    services,
+    services: {
+      ...functionalConfig.get('services'),
+      remoteEs: RemoteEsProvider,
+      remoteEsArchiver: RemoteEsArchiverProvider,
+    },
 
     junit: {
       reportName: 'Kibana CCS Tests',
