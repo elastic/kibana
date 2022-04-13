@@ -131,9 +131,9 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should call bulkCreateAttachments when a case is selected and show a toast message', async () => {
-    const mockedPostMessage = jest.fn();
+    const mockBulkCreateAttachments = jest.fn();
     useBulkCreateAttachmentsMock.mockReturnValueOnce({
-      bulkCreateAttachments: mockedPostMessage,
+      bulkCreateAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -150,7 +150,8 @@ describe('use cases add to existing case modal hook', () => {
     userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(mockedPostMessage).toHaveBeenCalledWith({
+      expect(mockBulkCreateAttachments).toHaveBeenCalledTimes(1);
+      expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
         caseId: 'test',
         data: [alertComment],
         throwOnError: true,
@@ -160,9 +161,9 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should not call bulkCreateAttachments nor show toast success when  a case is not selected', async () => {
-    const mockedPostMessage = jest.fn();
+    const mockBulkCreateAttachments = jest.fn();
     useBulkCreateAttachmentsMock.mockReturnValueOnce({
-      bulkCreateAttachments: mockedPostMessage,
+      bulkCreateAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -180,15 +181,15 @@ describe('use cases add to existing case modal hook', () => {
     // give a small delay for the reducer to run
 
     act(() => {
-      expect(mockedPostMessage).not.toHaveBeenCalled();
+      expect(mockBulkCreateAttachments).not.toHaveBeenCalled();
       expect(mockedToastSuccess).not.toHaveBeenCalled();
     });
   });
 
   it('should not show toast success when a case is selected with attachments and fails to update attachments', async () => {
-    const mockedPostMessage = jest.fn().mockRejectedValue(new Error('Impossible'));
+    const mockBulkCreateAttachments = jest.fn().mockRejectedValue(new Error('Impossible'));
     useBulkCreateAttachmentsMock.mockReturnValueOnce({
-      bulkCreateAttachments: mockedPostMessage,
+      bulkCreateAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToast = jest.fn();
@@ -206,7 +207,7 @@ describe('use cases add to existing case modal hook', () => {
     userEvent.click(result.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(mockedPostMessage).toHaveBeenCalledWith({
+      expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
         caseId: 'test',
         data: [alertComment],
         throwOnError: true,
@@ -214,7 +215,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     act(() => {
-      expect(mockedPostMessage).toHaveBeenCalled();
+      expect(mockBulkCreateAttachments).toHaveBeenCalled();
       expect(mockedToast).not.toHaveBeenCalled();
     });
   });

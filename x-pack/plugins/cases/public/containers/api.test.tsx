@@ -467,26 +467,38 @@ describe('Case Configuration API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
-    const data = {
-      comment: 'comment',
-      owner: SECURITY_SOLUTION_OWNER,
-      type: CommentType.user as const,
-    };
+    const data = [
+      {
+        comment: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
+        type: CommentType.user as const,
+      },
+      {
+        alertId: 'test-id',
+        index: 'test-index',
+        rule: {
+          id: 'test-rule',
+          name: 'Test',
+        },
+        owner: SECURITY_SOLUTION_OWNER,
+        type: CommentType.alert as const,
+      },
+    ];
 
     test('should be called with correct check url, method, signal', async () => {
-      await bulkCreateAttachments([data], basicCase.id, abortCtrl.signal);
+      await bulkCreateAttachments(data, basicCase.id, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(
         INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', basicCase.id),
         {
           method: 'POST',
-          body: JSON.stringify([data]),
+          body: JSON.stringify(data),
           signal: abortCtrl.signal,
         }
       );
     });
 
     test('should return correct response', async () => {
-      const resp = await bulkCreateAttachments([data], basicCase.id, abortCtrl.signal);
+      const resp = await bulkCreateAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
   });

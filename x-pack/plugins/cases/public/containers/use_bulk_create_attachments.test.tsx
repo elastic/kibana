@@ -51,7 +51,7 @@ describe('useBulkCreateAttachments', () => {
     });
   });
 
-  it('calls bulkCreateAttachments with correct arguments - case', async () => {
+  it('calls bulkCreateAttachments with data not as an array', async () => {
     const spyOnBulkCreateAttachments = jest.spyOn(api, 'bulkCreateAttachments');
 
     await act(async () => {
@@ -63,6 +63,30 @@ describe('useBulkCreateAttachments', () => {
       result.current.bulkCreateAttachments({
         caseId: basicCaseId,
         data: samplePost,
+        updateCase: updateCaseCallback,
+      });
+      await waitForNextUpdate();
+      expect(spyOnBulkCreateAttachments).toBeCalledWith(
+        [samplePost],
+        basicCaseId,
+        abortCtrl.signal
+      );
+      expect(toastErrorMock).not.toHaveBeenCalled();
+    });
+  });
+
+  it('calls bulkCreateAttachments with data as an array', async () => {
+    const spyOnBulkCreateAttachments = jest.spyOn(api, 'bulkCreateAttachments');
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseBulkCreateAttachments>(() =>
+        useBulkCreateAttachments()
+      );
+      await waitForNextUpdate();
+
+      result.current.bulkCreateAttachments({
+        caseId: basicCaseId,
+        data: [samplePost],
         updateCase: updateCaseCallback,
       });
       await waitForNextUpdate();
