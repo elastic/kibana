@@ -33,6 +33,7 @@ import {
 } from './visualization_helpers';
 import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
 import { layerTypes } from '../../common';
+import { DEFAULT_LEGEND_SIZE } from '../shared_components/legend_size_settings';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,
@@ -218,7 +219,7 @@ export const buildExpression = (
                       : [],
                     position: [state.legend.position],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
+                    legendSize: [state.legend.legendSize ?? DEFAULT_LEGEND_SIZE],
                     horizontalAlignment: state.legend.horizontalAlignment
                       ? [state.legend.horizontalAlignment]
                       : [],

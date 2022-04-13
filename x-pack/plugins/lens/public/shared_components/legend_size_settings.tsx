@@ -17,6 +17,8 @@ export enum LegendSizes {
   EXTRA_LARGE = '230',
 }
 
+export const DEFAULT_LEGEND_SIZE = LegendSizes.MEDIUM;
+
 interface LegendSizeSettingsProps {
   legendSize: number | undefined;
   onLegendSizeChange: (size?: number) => void;
@@ -24,12 +26,6 @@ interface LegendSizeSettingsProps {
 }
 
 const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
-  {
-    value: LegendSizes.AUTO,
-    inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto', {
-      defaultMessage: 'Auto',
-    }),
-  },
   {
     value: LegendSizes.SMALL,
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.small', {
@@ -87,7 +83,7 @@ export const LegendSizeSettings = ({
     >
       <EuiSuperSelect
         compressed
-        valueOfSelected={legendSize?.toString() ?? LegendSizes.AUTO}
+        valueOfSelected={legendSize?.toString() ?? DEFAULT_LEGEND_SIZE}
         options={legendSizeOptions}
         onChange={onLegendSizeOptionChange}
       />
