@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Observable, of } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
 import { httpServiceMock, httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
@@ -324,7 +323,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start({ core: coreStart, licenseChecker });
-        const batch = await find({ term: 'foobar' }, {}, request).pipe(take(1)).toPromise();
+        const batch = await firstValueFrom(find({ term: 'foobar' }, {}, request));
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({

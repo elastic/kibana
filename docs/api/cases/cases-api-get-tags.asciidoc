@@ -32,9 +32,9 @@ default space is used.
 === Query parameters
 
 `owner`::
-(Optional, string) Specifies the set of applications to limit the retrieved 
-tags. If not specified, the response contains all tags that the user has access 
-to read.
+(Optional, string or array of strings) Specifies the set of applications to 
+limit the retrieved tags. If not specified, the response contains all tags from 
+cases that the user has access to read.
 
 ==== Response code
 
@@ -51,7 +51,8 @@ GET api/cases/tags
 --------------------------------------------------
 // KIBANA
 
-The API returns a JSON object with all tags for all cases. For example: 
+The API returns a JSON object with the names and email addresses of users who 
+opened cases. For example: 
 
 [source,json]
 --------------------------------------------------
