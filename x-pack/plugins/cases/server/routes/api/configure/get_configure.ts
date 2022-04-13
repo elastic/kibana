@@ -15,7 +15,8 @@ export const getCaseConfigureRoute = createCasesRoute({
   path: CASE_CONFIGURE_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
       const options = request.query as GetConfigureFindRequest;
 
       return response.ok({

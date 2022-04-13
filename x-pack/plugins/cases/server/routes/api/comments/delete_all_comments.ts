@@ -20,7 +20,8 @@ export const deleteAllCommentsRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
 
       await client.attachments.deleteAll({
         caseID: request.params.case_id,

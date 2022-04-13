@@ -15,7 +15,8 @@ export const getTagsRoute = createCasesRoute({
   path: CASE_TAGS_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
       const options = request.query as AllTagsFindRequest;
 
       return response.ok({ body: await client.cases.getTags({ ...options }) });
