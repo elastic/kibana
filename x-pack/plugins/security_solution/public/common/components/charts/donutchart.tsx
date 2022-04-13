@@ -15,6 +15,7 @@ import {
   Settings,
   PartitionLayout,
   defaultPartitionValueFormatter,
+  NodeColorAccessor,
 } from '@elastic/charts';
 import styled from 'styled-components';
 import { ThemeContext } from './donut_theme_context';
@@ -32,9 +33,10 @@ interface DonutChartData {
   label?: string;
 }
 
+export type FillColor = string | NodeColorAccessor;
 export interface DonutChartProps {
   data: DonutChartData[] | null | undefined;
-  fillColor: (d: Datum) => string;
+  fillColor: FillColor;
   height?: number;
   label: string;
   legendItems?: LegendItem[] | null | undefined;

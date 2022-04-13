@@ -8,10 +8,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { Datum } from '@elastic/charts';
+import { ShapeTreeNode } from '@elastic/charts';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { DonutChart } from '../../../../common/components/charts/donutchart';
-import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
+import { DonutChart, FillColor } from '../../../../common/components/charts/donutchart';
+import { SecurityPageName } from '../../../../../common/constants';
 import { useNavigation } from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
@@ -73,7 +73,6 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
     (ev) => {
       ev.preventDefault();
       navigateTo({
-        appId: APP_UI_ID,
         deepLinkId: SecurityPageName.alerts,
         path: getDetectionEngineUrl(urlSearch),
       });
@@ -116,7 +115,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
         (donutData?.acknowledged?.total ?? 0) +
         (donutData?.closed?.total ?? 0);
 
-  const fillColor = useCallback((d: Datum) => {
+  const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
     return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
   }, []);
 
