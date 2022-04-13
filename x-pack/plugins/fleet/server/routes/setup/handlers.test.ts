@@ -8,6 +8,7 @@
 import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import type { AwaitedProperties } from '@kbn/utility-types';
+
 import { coreMock } from '../../../../../../src/core/server/mocks';
 import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
