@@ -64,7 +64,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     ) {
       const rollupData = await this.getRollupData(requestContext, indexPatternString);
       const rollupIndices = getRollupIndices(rollupData);
-      const uiSettings = requestContext.core.uiSettings.client;
+      const uiSettings = (await requestContext.core).uiSettings.client;
 
       isViable = rollupIndices.length === 1;
 

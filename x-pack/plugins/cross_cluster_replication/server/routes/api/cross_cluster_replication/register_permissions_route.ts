@@ -22,7 +22,7 @@ export const registerPermissionsRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       if (!license.isEsSecurityEnabled) {
         // If security has been disabled in elasticsearch.yml. we'll just let the user use CCR

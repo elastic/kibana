@@ -33,7 +33,7 @@ export async function initLensUsageRoute(setup: CoreSetup<PluginStartContract>) 
       const { events, suggestionEvents } = req.body;
 
       try {
-        const client = context.core.savedObjects.client;
+        const client = (await context.core).savedObjects.client;
 
         const allEvents: Array<{
           type: 'lens-ui-telemetry';
