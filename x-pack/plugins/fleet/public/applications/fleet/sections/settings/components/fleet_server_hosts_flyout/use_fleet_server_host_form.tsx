@@ -79,7 +79,7 @@ function validateFleetServerHosts(value: string[]) {
   value.forEach((val, idx) => {
     if (!val) {
       res.push({
-        message: i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
+        message: i18n.translate('xpack.fleet.settings.fleetServerHostsRequiredError', {
           defaultMessage: 'Host URL is required',
         }),
         index: idx,
