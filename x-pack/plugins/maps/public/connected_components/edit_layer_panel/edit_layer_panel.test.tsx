@@ -89,6 +89,9 @@ const mockLayer = {
   supportsFitToBounds: () => {
     return true;
   },
+  getDescriptor: () => {
+    return {};
+  }
 } as unknown as ILayer;
 
 const defaultProps = {

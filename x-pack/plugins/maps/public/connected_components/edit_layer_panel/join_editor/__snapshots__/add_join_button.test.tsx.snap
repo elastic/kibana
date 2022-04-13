@@ -2,7 +2,7 @@
 
 exports[`Should disable add button when layer source is MVT and there is one join 1`] = `
 <EuiToolTip
-  content="Vector tiles support one join. To add multiple joins, select 'Limit results' in 'Scaling'."
+  content="Vector tiles support one term join. To add multiple joins, select 'Limit results' in 'Scaling'."
   delay="regular"
   display="inlineBlock"
   position="top"
