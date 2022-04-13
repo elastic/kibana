@@ -186,6 +186,7 @@ describe('When using EPM `get` services', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
       appContextService.start(mockContract);
+      jest.clearAllMocks();
       MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
         name: 'my-package',
         version: '1.0.0',
@@ -319,6 +320,56 @@ describe('When using EPM `get` services', () => {
           latestVersion: '1.0.0',
           status: 'installed',
         });
+      });
+
+      it('sets the latestVersion to installed version when an installed package is newer than package in registry', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            version: '2.0.0',
+            install_status: 'installed',
+          },
+        });
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'installed',
+        });
+      });
+    });
+
+    describe('skipArchive', () => {
+      it('avoids loading archive when skipArchive = true', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
       });
     });
   });
