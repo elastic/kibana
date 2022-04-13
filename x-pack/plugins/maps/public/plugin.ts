@@ -76,6 +76,7 @@ import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_s
 import { MapInspectorView } from './inspector/map_inspector_view';
 
 import { setupLensChoroplethChart } from './lens';
+import { ScreenshotModePluginSetup } from '../../../../src/plugins/screenshot_mode/public';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -88,6 +89,7 @@ export interface MapsPluginSetupDependencies {
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -144,7 +146,15 @@ export class MapsPlugin
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
-    setMapAppConfig(config);
+    setMapAppConfig({
+      ...config,
+
+      // Override this when we know we are taking a screenshot (i.e. no user interaction)
+      // to avoid a blank-canvas issue when rendering maps on a PDF
+      preserveDrawingBuffer: plugins.screenshotMode.isScreenshotMode()
+        ? true
+        : config.preserveDrawingBuffer,
+    });
 
     const locator = plugins.share.url.locators.create(
       new MapsAppLocatorDefinition({
