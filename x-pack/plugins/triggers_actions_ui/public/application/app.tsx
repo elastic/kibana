@@ -17,7 +17,7 @@ import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/pub
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 import {
   ActionTypeRegistryContract,
-  AlertsTableRegistryContract,
+  AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
@@ -48,7 +48,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
-  alertsTableTypeRegistry: AlertsTableRegistryContract;
+  alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;

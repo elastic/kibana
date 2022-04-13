@@ -47,7 +47,7 @@ import type {
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
   AlertsTableProps,
-  AlertsTableRegistry,
+  AlertsTableConfigurationRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
@@ -56,13 +56,13 @@ import { registerAlertsTable } from './application/sections/alerts_table/alerts_
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
-  alertsTableTypeRegistry: TypeRegistry<AlertsTableRegistry>;
+  alertsTableTypeRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
-  alertsTableTypeRegistry: TypeRegistry<AlertsTableRegistry>;
+  alertsTableTypeRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorAddFlyoutProps>;
@@ -105,14 +105,14 @@ export class Plugin
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
-  private alertsTableTypeRegistry: TypeRegistry<AlertsTableRegistry>;
+  private alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   private config: TriggersActionsUiConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
-    this.alertsTableTypeRegistry = new TypeRegistry<AlertsTableRegistry>();
+    this.alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
     this.config = ctx.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
@@ -120,7 +120,7 @@ export class Plugin
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
-    const alertsTableTypeRegistry = this.alertsTableTypeRegistry;
+    const alertsTableConfigurationRegistry = this.alertsTableConfigurationRegistry;
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
@@ -184,7 +184,7 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           ruleTypeRegistry,
-          alertsTableTypeRegistry,
+          alertsTableConfigurationRegistry,
           kibanaFeatures,
         });
       },
@@ -194,12 +194,14 @@ export class Plugin
       actionTypeRegistry: this.actionTypeRegistry,
     });
 
-    registerAlertsTable({ alertsTableTypeRegistry: this.alertsTableTypeRegistry });
+    registerAlertsTable({
+      alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
+    });
 
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
-      alertsTableTypeRegistry: this.alertsTableTypeRegistry,
+      alertsTableTypeRegistry: this.alertsTableConfigurationRegistry,
     };
   }
 
@@ -207,7 +209,7 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
-      alertsTableTypeRegistry: this.alertsTableTypeRegistry,
+      alertsTableTypeRegistry: this.alertsTableConfigurationRegistry,
       getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
       },

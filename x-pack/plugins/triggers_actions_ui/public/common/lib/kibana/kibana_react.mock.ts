@@ -19,7 +19,7 @@ import { TriggersAndActionsUiServices } from '../../../application/app';
 import {
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
-  AlertsTableRegistryContract,
+  AlertsTableConfigurationRegistryContract,
 } from '../../../types';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
@@ -49,12 +49,12 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       get: jest.fn(),
       list: jest.fn(),
     } as ActionTypeRegistryContract,
-    alertsTableTypeRegistry: {
+    alertsTableConfigurationRegistry: {
       has: jest.fn(),
       register: jest.fn(),
       get: jest.fn(),
       list: jest.fn(),
-    } as AlertsTableRegistryContract,
+    } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
     kibanaFeatures: [],

@@ -6,15 +6,15 @@
  */
 
 import { PLUGIN_ID } from '../../../../common/constants';
-import { AlertsTableRegistry } from '../../../../types';
+import { AlertsTableConfigurationRegistry } from '../../../../types';
 import { TypeRegistry } from '../../../type_registry';
 
 export function registerAlertsTable({
-  alertsTableTypeRegistry,
+  alertsTableConfigurationRegistry,
 }: {
-  alertsTableTypeRegistry: TypeRegistry<AlertsTableRegistry>;
+  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
 }) {
-  alertsTableTypeRegistry.register({
+  alertsTableConfigurationRegistry.register({
     id: PLUGIN_ID,
     columns: [
       {

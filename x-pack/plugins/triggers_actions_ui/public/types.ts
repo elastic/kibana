@@ -93,7 +93,9 @@ export type ActionTypeRegistryContract<
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
-export type AlertsTableRegistryContract = PublicMethodsOf<TypeRegistry<AlertsTableRegistry>>;
+export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
+  TypeRegistry<AlertsTableConfigurationRegistry>
+>;
 
 export type ActionConnectorFieldsCallbacks = {
   beforeActionConnectorSave?: () => Promise<void>;
@@ -404,7 +406,7 @@ export interface AlertsTableProps {
   'data-test-subj': string;
 }
 
-export interface AlertsTableRegistry {
+export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
 }
