@@ -760,9 +760,25 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               />
               <EuiSpacer size="m" />
               <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
-                  defaultMessage: 'Enable accuracy mode',
-                })}
+                label={
+                  <>
+                    {i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
+                      defaultMessage: 'Enable accuracy mode',
+                    })}{' '}
+                    <EuiIconTip
+                      color="subdued"
+                      content={i18n.translate('xpack.lens.indexPattern.terms.accuracyModeHelp', {
+                        defaultMessage: `Can improve accuracy for high cardinality datasets by using more resources in your Elasticsearch cluster.`,
+                      })}
+                      iconProps={{
+                        className: 'eui-alignTop',
+                      }}
+                      position="top"
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </>
+                }
                 compressed
                 disabled={currentColumn.params.orderBy.type === 'rare'}
                 data-test-subj="indexPattern-accuracy-mode"
