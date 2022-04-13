@@ -3150,6 +3150,185 @@ describe('RulesPage with items', () => {
   });
 });
 
-describe('RulesPage with items and show only capability', () => {});
+describe('RulesPage with items and show only capability', () => {
+  let wrapper: ReactWrapper<any>;
+  async function setup() {
+    const mockedRulesData = [
+      {
+        id: '1',
+        name: 'test rule',
+        tags: ['tag1'],
+        enabled: true,
+        ruleTypeId: 'test_rule_type',
+        schedule: { interval: '1s' },
+        actions: [],
+        params: { name: 'test rule type name' },
+        scheduledTaskId: null,
+        createdBy: null,
+        updatedBy: null,
+        apiKeyOwner: null,
+        throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'active',
+          lastDuration: 500,
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+          error: null,
+        },
+        monitoring: {
+          execution: {
+            history: [
+              {
+                success: true,
+                duration: 1000000,
+              },
+              {
+                success: true,
+                duration: 200000,
+              },
+              {
+                success: false,
+                duration: 300000,
+              },
+            ],
+            calculated_metrics: {
+              success_ratio: 0.66,
+              p50: 200000,
+              p95: 300000,
+              p99: 300000,
+            },
+          },
+        },
+      },
+      {
+        id: '2',
+        name: 'test rule ok',
+        tags: ['tag1'],
+        enabled: true,
+        ruleTypeId: 'test_rule_type',
+        schedule: { interval: '5d' },
+        actions: [],
+        params: { name: 'test rule type name' },
+        scheduledTaskId: null,
+        createdBy: null,
+        updatedBy: null,
+        apiKeyOwner: null,
+        throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'ok',
+          lastDuration: 61000,
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+          error: null,
+        },
+        monitoring: {
+          execution: {
+            history: [
+              {
+                success: true,
+                duration: 100000,
+              },
+              {
+                success: true,
+                duration: 500000,
+              },
+            ],
+            calculated_metrics: {
+              success_ratio: 1,
+              p50: 0,
+              p95: 100000,
+              p99: 500000,
+            },
+          },
+        },
+      },
+      {
+        id: '3',
+        name: 'test rule pending',
+        tags: ['tag1'],
+        enabled: true,
+        ruleTypeId: 'test_rule_type',
+        schedule: { interval: '5d' },
+        actions: [],
+        params: { name: 'test rule type name' },
+        scheduledTaskId: null,
+        createdBy: null,
+        updatedBy: null,
+        apiKeyOwner: null,
+        throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'pending',
+          lastDuration: 30234,
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+          error: null,
+        },
+        monitoring: {
+          execution: {
+            history: [{ success: false, duration: 100 }],
+            calculated_metrics: {
+              success_ratio: 0,
+            },
+          },
+        },
+      },
+    ];
+
+    const rulesState = {
+      isLoading: false,
+      data: mockedRulesData,
+      error: null,
+      totalItemCount: 3,
+    };
+    const mockedRuleTypeIndex = new Map(
+      Object.entries({
+        '1': {
+          enabledInLicense: true,
+          id: '1',
+          name: 'test rule',
+        },
+        '2': {
+          enabledInLicense: true,
+          id: '2',
+          name: 'test rule ok',
+        },
+        '3': {
+          enabledInLicense: true,
+          id: '3',
+          name: 'test rule pending',
+        },
+      })
+    );
+    const ruleTypes = [
+      {
+        id: 'test_rule_type',
+        name: 'some rule type',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
+        producer: ALERTS_FEATURE_ID,
+        minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: false },
+        },
+        ruleTaskTimeout: '1m',
+      },
+    ];
+    useFetchRules.mockReturnValue({ rulesState });
+    useLoadRuleTypes.mockReturnValue({ ruleTypes, ruleTypeIndex: mockedRuleTypeIndex });
+
+    wrapper = mountWithIntl(<RulesPage />);
+  }
+
+  it('does not render create rule button', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="createRuleButton"]')).toHaveLength(0);
+  });
+});
 
 describe('RulesPage with disabled items', () => {});
