@@ -30,7 +30,10 @@ describe('getRuleExecutionEventsRoute', () => {
       const executionEvents = getAggregateExecutionEvents();
       clients.ruleExecutionLog.getAggregateExecutionEvents.mockResolvedValue(executionEvents);
 
-      const response = await server.inject(getRuleExecutionEventsRequest(), context);
+      const response = await server.inject(
+        getRuleExecutionEventsRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(executionEvents);
@@ -41,7 +44,10 @@ describe('getRuleExecutionEventsRoute', () => {
     it('returns 500 response with it', async () => {
       clients.ruleExecutionLog.getAggregateExecutionEvents.mockRejectedValue(new Error('Boom!'));
 
-      const response = await server.inject(getRuleExecutionEventsRequest(), context);
+      const response = await server.inject(
+        getRuleExecutionEventsRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({

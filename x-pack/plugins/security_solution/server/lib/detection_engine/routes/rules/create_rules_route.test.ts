@@ -24,6 +24,7 @@ import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe.each([
@@ -55,21 +56,30 @@ describe.each([
 
   describe('status codes', () => {
     test('returns 200 with a rule created via RulesClient', async () => {
-      const response = await server.inject(getCreateRequest(), context);
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 if license is not platinum', async () => {
       (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
 
-      const response = await server.inject(getCreateRequest(), context);
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
   });
 
   describe('creating an ML Rule', () => {
     test('is successful', async () => {
-      const response = await server.inject(createMlRuleRequest(), context);
+      const response = await server.inject(
+        createMlRuleRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -80,7 +90,10 @@ describe.each([
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
 
-      const response = await server.inject(createMlRuleRequest(), context);
+      const response = await server.inject(
+        createMlRuleRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(403);
       expect(response.body).toEqual({
         message: 'mocked validation message',
@@ -96,7 +109,10 @@ describe.each([
           getBasicNoShardsSearchResponse()
         )
       );
-      const response = await server.inject(getCreateRequest(), context);
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
 
@@ -110,7 +126,10 @@ describe.each([
 
     test('returns a duplicate error if rule_id already exists', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-      const response = await server.inject(getCreateRequest(), context);
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(409);
       expect(response.body).toEqual({
@@ -123,7 +142,10 @@ describe.each([
       clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getCreateRequest(), context);
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',

@@ -6,8 +6,12 @@
  */
 
 import type { AwaitedProperties } from '@kbn/utility-types';
-import { loggingSystemMock, savedObjectsServiceMock } from '../../../../../src/core/server/mocks';
-import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../../src/core/server';
+import {
+  loggingSystemMock,
+  savedObjectsServiceMock,
+  ScopedClusterClientMock,
+} from '../../../../../src/core/server/mocks';
+import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerting/server/mocks';
@@ -201,7 +205,7 @@ export const createMockMetadataRequestContext = () => {
 };
 
 export function createRouteHandlerContext(
-  dataClient: jest.Mocked<IScopedClusterClient>,
+  dataClient: ScopedClusterClientMock,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
 ) {

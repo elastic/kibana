@@ -21,6 +21,7 @@ interface Route {
   config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;
   handler: RequestHandler;
 }
+
 const getRoute = (routerMock: MockServer['router']): Route => {
   const routeCalls = [
     ...routerMock.get.mock.calls,
@@ -45,7 +46,7 @@ class MockServer {
   constructor(
     public readonly router = httpServiceMock.createRouter(),
     private responseMock = responseFactoryMock.create(),
-    private contextMock = requestContextMock.create(),
+    private contextMock = requestContextMock.convertContext(requestContextMock.create()),
     private resultMock = buildResultMock()
   ) {}
 

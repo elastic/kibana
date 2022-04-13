@@ -67,7 +67,11 @@ export { executionContextServiceMock } from './execution_context/execution_conte
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 export { analyticsServiceMock } from './analytics/analytics_service.mock';
 
-export type { ElasticsearchClientMock } from './elasticsearch/client/mocks';
+export type {
+  ElasticsearchClientMock,
+  ClusterClientMock,
+  ScopedClusterClientMock,
+} from './elasticsearch/client/mocks';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 

@@ -9,6 +9,7 @@
 
 import { KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
 import {
+  coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
@@ -162,7 +163,9 @@ describe('Action Log API', () => {
           path.startsWith(ENDPOINT_ACTION_LOG_ROUTE)
         )!;
         await routeHandler(
-          createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
+          coreMock.createCustomRequestHandlerContext(
+            createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())
+          ) as SecuritySolutionRequestHandlerContext,
           req,
           mockResponse
         );

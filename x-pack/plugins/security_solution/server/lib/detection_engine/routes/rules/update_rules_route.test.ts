@@ -54,13 +54,19 @@ describe.each([
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getUpdateRequest(), context);
+      const response = await server.inject(
+        getUpdateRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      const response = await server.inject(getUpdateRequest(), context);
+      const response = await server.inject(
+        getUpdateRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
@@ -71,7 +77,10 @@ describe.each([
 
     test('returns error when updating non-rule', async () => {
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
-      const response = await server.inject(getUpdateRequest(), context);
+      const response = await server.inject(
+        getUpdateRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
@@ -84,7 +93,10 @@ describe.each([
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getUpdateRequest(), context);
+      const response = await server.inject(
+        getUpdateRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -104,7 +116,7 @@ describe.each([
         body: typicalMlRulePayload(),
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(403);
       expect(response.body).toEqual({
         message: 'mocked validation message',
@@ -123,7 +135,7 @@ describe.each([
           id: undefined,
         },
       });
-      const response = await server.inject(noIdRequest, context);
+      const response = await server.inject(noIdRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         message: ['either "id" or "rule_id" must be set'],
         status_code: 400,

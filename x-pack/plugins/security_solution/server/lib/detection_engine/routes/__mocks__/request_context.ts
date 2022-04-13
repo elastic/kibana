@@ -63,15 +63,16 @@ export const createMockClients = () => {
 
 type MockClients = ReturnType<typeof createMockClients>;
 
-export type SecuritySolutionRequestHandlerContextMock =
-  MockedKeys<SecuritySolutionRequestHandlerContext> & {
-    core: MockClients['core'];
-  };
+export type SecuritySolutionRequestHandlerContextMock = MockedKeys<
+  AwaitedProperties<SecuritySolutionRequestHandlerContext>
+> & {
+  core: MockClients['core'];
+};
 
 const createRequestContextMock = (
   clients: MockClients = createMockClients(),
   overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
-): AwaitedProperties<SecuritySolutionRequestHandlerContextMock> => {
+): SecuritySolutionRequestHandlerContextMock => {
   return {
     core: clients.core,
     securitySolution: createSecuritySolutionRequestContextMock(clients, overrides),
@@ -88,6 +89,14 @@ const createRequestContextMock = (
       getExtensionPointClient: jest.fn(),
     },
   };
+};
+
+const convertRequestContextMock = (
+  context: AwaitedProperties<SecuritySolutionRequestHandlerContextMock>
+): SecuritySolutionRequestHandlerContext => {
+  return coreMock.createCustomRequestHandlerContext(
+    context
+  ) as unknown as SecuritySolutionRequestHandlerContext;
 };
 
 const createSecuritySolutionRequestContextMock = (
@@ -128,6 +137,7 @@ const createTools = () => {
 
 export const requestContextMock = {
   create: createRequestContextMock,
+  convertContext: convertRequestContextMock,
   createMockClients,
   createTools,
 };

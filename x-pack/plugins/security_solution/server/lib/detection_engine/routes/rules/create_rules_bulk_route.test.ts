@@ -54,7 +54,10 @@ describe.each([
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
   });
@@ -67,7 +70,10 @@ describe.each([
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
 
-      const response = await server.inject(createBulkMlRuleRequest(), context);
+      const response = await server.inject(
+        createBulkMlRuleRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
@@ -86,7 +92,10 @@ describe.each([
           getBasicNoShardsSearchResponse()
         )
       );
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
 
@@ -106,7 +115,10 @@ describe.each([
 
     test('returns a duplicate error if rule_id already exists', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -123,7 +135,10 @@ describe.each([
       clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -142,7 +157,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_CREATE,
         body: [getCreateRulesSchemaMock(), getCreateRulesSchemaMock()],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([

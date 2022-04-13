@@ -30,7 +30,7 @@ describe('read_privileges route', () => {
     test('returns 200 when doing a normal request', async () => {
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
-        context
+        requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
     });
@@ -38,7 +38,7 @@ describe('read_privileges route', () => {
     test('returns the payload when doing a normal request', async () => {
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
-        context
+        requestContextMock.convertContext(context)
       );
       const expectedBody = {
         ...getMockPrivilegesResult(),
@@ -58,7 +58,7 @@ describe('read_privileges route', () => {
 
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: true } }),
-        context
+        requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(expectedBody);
@@ -70,7 +70,7 @@ describe('read_privileges route', () => {
       );
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
-        context
+        requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
