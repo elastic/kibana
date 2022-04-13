@@ -18,12 +18,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
+  const commonQuery = {
+    start: new Date(start).toISOString(),
+    end: new Date(end).toISOString(),
+    environment: 'ENVIRONMENT_ALL',
+  };
+
+  async function callApi() {
+    return await apmApiClient.readUser({
+      endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
+      params: {
+        path: { serviceName },
+        query: commonQuery,
+      },
+    });
+  }
+
   async function getThroughputValues(processorEvent: 'transaction' | 'metric') {
-    const commonQuery = {
-      start: new Date(start).toISOString(),
-      end: new Date(end).toISOString(),
-      environment: 'ENVIRONMENT_ALL',
-    };
     const [serviceInventoryAPIResponse, serviceMapsNodeDetails] = await Promise.all([
       apmApiClient.readUser({
         endpoint: 'GET /internal/apm/services',
@@ -78,26 +89,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .rate(GO_PROD_RATE)
               .generator((timestamp) =>
                 serviceGoProdInstance
-                  .transaction('GET /apple 🍎 ', 'Worker')
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .serialize()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_RATE)
-              .spans((timestamp) =>
-                serviceGoProdInstance
-                  .transaction('GET /banana 🍌', 'Worker')
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .serialize()
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_DEV_RATE)
-              .spans((timestamp) =>
-                serviceGoDevInstance
                   .transaction('GET /apple 🍎 ')
                   .duration(1000)
                   .timestamp(timestamp)
@@ -107,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .rate(GO_DEV_RATE)
               .generator((timestamp) =>
                 serviceGoDevInstance
-                  .transaction('GET /banana 🍌')
+                  .transaction('GET /apple 🍎 ')
                   .duration(1000)
                   .timestamp(timestamp)
               ),
@@ -128,7 +119,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             [
               ...Object.values(throughputTransactionValues),
               ...Object.values(throughputMetricValues),
-            ].forEach((value) => expect(roundNumber(value)).to.be.equal(roundNumber(GO_DEV_RATE)));
+            ].forEach((value) =>
+              expect(roundNumber(value)).to.be.equal(roundNumber(GO_DEV_RATE + GO_PROD_RATE))
+            );
+          });
+        });
+
+        describe('when calling service maps API', () => {
+          let serviceMapsNodeThroughput: number | null | undefined;
+          before(async () => {
+            const response = await callApi();
+            serviceMapsNodeThroughput =
+              response.body.currentPeriod.transactionStats?.throughput?.value;
+          });
+
+          it('returns expected throughput value', () => {
+            expect(roundNumber(serviceMapsNodeThroughput)).to.be.equal(
+              roundNumber(GO_DEV_RATE + GO_PROD_RATE)
+            );
           });
         });
       });
