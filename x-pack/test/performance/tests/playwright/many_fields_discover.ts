@@ -41,13 +41,11 @@ export default function manyFieldsDiscover({ getService }: FtrProviderContext) {
           {
             name: 'Expand the first document',
             handler: async ({ page }) => {
-              const expandButtons = page.locator(
-                '[data-test-subj="docTableExpandToggleColumn"]'
-              );
+              const expandButtons = page.locator('[data-test-subj="docTableExpandToggleColumn"]');
               await expandButtons.first().click();
               await page.locator('text="Expanded document"');
-            }
-          }
+            },
+          },
         ],
         {
           requireAuth: false,
