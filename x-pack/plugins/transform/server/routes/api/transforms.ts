@@ -90,14 +90,15 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
       async (ctx, req, res) => {
         try {
-          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+          const esClient = (await ctx.core).elasticsearch.client;
+          const body = await esClient.asCurrentUser.transform.getTransform({
             size: 1000,
             ...req.params,
           });
 
           if (ctx.alerting) {
             const transformHealthService = transformHealthServiceProvider(
-              ctx.core.elasticsearch.client.asCurrentUser,
+              esClient.asCurrentUser,
               ctx.alerting.getRulesClient()
             );
 
@@ -130,7 +131,8 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
       try {
-        const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+        const esClient = (await ctx.core).elasticsearch.client;
+        const body = await esClient.asCurrentUser.transform.getTransform({
           transform_id: transformId,
         });
         return res.ok({ body });
@@ -152,11 +154,11 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
       async (ctx, req, res) => {
         try {
-          const body =
-            await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
-              size: 1000,
-              transform_id: '_all',
-            });
+          const esClient = (await ctx.core).elasticsearch.client;
+          const body = await esClient.asCurrentUser.transform.getTransformStats({
+            size: 1000,
+            transform_id: '_all',
+          });
           return res.ok({ body });
         } catch (e) {
           return res.customError(wrapError(wrapEsError(e)));
@@ -182,7 +184,8 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
       const { transformId } = req.params;
       try {
-        const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransformStats({
+        const esClient = (await ctx.core).elasticsearch.client;
+        const body = await esClient.asCurrentUser.transform.getTransformStats({
           transform_id: transformId,
         });
         return res.ok({ body });
@@ -219,7 +222,8 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           errors: [],
         };
 
-        await ctx.core.elasticsearch.client.asCurrentUser.transform
+        const esClient = (await ctx.core).elasticsearch.client;
+        await esClient.asCurrentUser.transform
           .putTransform({
             // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
             body: req.body,
@@ -263,7 +267,8 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         const { transformId } = req.params;
 
         try {
-          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
+          const esClient = (await ctx.core).elasticsearch.client;
+          const body = await esClient.asCurrentUser.transform.updateTransform({
             // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
             body: req.body,
             transform_id: transformId,
@@ -437,7 +442,8 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     },
     license.guardApiRoute(async (ctx, req, res) => {
       try {
-        const body = await ctx.core.elasticsearch.client.asCurrentUser.search(req.body);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const body = await esClient.asCurrentUser.search(req.body);
         return res.ok({ body });
       } catch (e) {
         return res.customError(wrapError(wrapEsError(e)));
@@ -482,6 +488,10 @@ async function deleteTransforms(
 
   const results: DeleteTransformsResponseSchema = {};
 
+  const coreContext = await ctx.core;
+  const esClient = coreContext.elasticsearch.client;
+  const soClient = coreContext.savedObjects.client;
+
   for (const transformInfo of transformsInfo) {
     let destinationIndex: string | undefined;
 
@@ -501,7 +511,7 @@ async function deleteTransforms(
       if (!shouldForceDelete) {
         // Grab destination index info to delete
         try {
-          const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.getTransform({
+          const body = await esClient.asCurrentUser.transform.getTransform({
             transform_id: transformId,
           });
           const transformConfig = body.transforms[0];
@@ -525,7 +535,7 @@ async function deleteTransforms(
         try {
           // If user does have privilege to delete the index, then delete the index
           // if no permission then return 403 forbidden
-          await ctx.core.elasticsearch.client.asCurrentUser.indices.delete({
+          await esClient.asCurrentUser.indices.delete({
             index: destinationIndex,
           });
           destIndexDeleted.success = true;
@@ -537,9 +547,9 @@ async function deleteTransforms(
       // Delete the data view if there's a data view that matches the name of dest index
       if (destinationIndex && deleteDestDataView) {
         try {
-          const dataViewId = await getDataViewId(destinationIndex, ctx.core.savedObjects.client);
+          const dataViewId = await getDataViewId(destinationIndex, soClient);
           if (dataViewId) {
-            await deleteDestDataViewById(dataViewId, ctx.core.savedObjects.client);
+            await deleteDestDataViewById(dataViewId, soClient);
             destDataViewDeleted.success = true;
           }
         } catch (deleteDestDataViewError) {
@@ -548,7 +558,7 @@ async function deleteTransforms(
       }
 
       try {
-        await ctx.core.elasticsearch.client.asCurrentUser.transform.deleteTransform({
+        await esClient.asCurrentUser.transform.deleteTransform({
           transform_id: transformId,
           force: shouldForceDelete && needToForceDelete,
         });
@@ -589,6 +599,7 @@ async function resetTransforms(
   const { transformsInfo } = reqBody;
 
   const results: ResetTransformsResponseSchema = {};
+  const esClient = (await ctx.core).elasticsearch.client;
 
   for (const transformInfo of transformsInfo) {
     const transformReset: ResponseStatus = { success: false };
@@ -596,7 +607,7 @@ async function resetTransforms(
 
     try {
       try {
-        await ctx.core.elasticsearch.client.asCurrentUser.transform.resetTransform({
+        await esClient.asCurrentUser.transform.resetTransform({
           transform_id: transformId,
         });
         transformReset.success = true;
@@ -632,12 +643,13 @@ const previewTransformHandler: RequestHandler<
 > = async (ctx, req, res) => {
   try {
     const reqBody = req.body;
-    const body = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
+    const esClient = (await ctx.core).elasticsearch.client;
+    const body = await esClient.asCurrentUser.transform.previewTransform({
       body: reqBody,
     });
     if (isLatestTransform(reqBody)) {
       // for the latest transform mappings properties have to be retrieved from the source
-      const fieldCapsResponse = await ctx.core.elasticsearch.client.asCurrentUser.fieldCaps({
+      const fieldCapsResponse = await esClient.asCurrentUser.fieldCaps({
         index: reqBody.source.index,
         fields: '*',
         include_unmapped: false,
@@ -676,7 +688,8 @@ const startTransformsHandler: RequestHandler<
   const transformsInfo = req.body;
 
   try {
-    const body = await startTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser);
+    const esClient = (await ctx.core).elasticsearch.client;
+    const body = await startTransforms(transformsInfo, esClient.asCurrentUser);
     return res.ok({
       body,
     });
@@ -721,8 +734,9 @@ const stopTransformsHandler: RequestHandler<
   const transformsInfo = req.body;
 
   try {
+    const esClient = (await ctx.core).elasticsearch.client;
     return res.ok({
-      body: await stopTransforms(transformsInfo, ctx.core.elasticsearch.client.asCurrentUser),
+      body: await stopTransforms(transformsInfo, esClient.asCurrentUser),
     });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
