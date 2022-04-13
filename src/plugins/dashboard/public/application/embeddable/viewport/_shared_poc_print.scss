@@ -54,12 +54,6 @@ $a4PageContentWidth: $a4PageWidth;
     .printFooter, .printHeader {
       display: none;
     }
-
-    .printViewControls {
-      position: fixed;
-      top: $euiSizeL;
-      right: $euiSizeL;
-    }
   }
 }
 
@@ -82,10 +76,6 @@ $a4PageContentWidth: $a4PageWidth;
     * {
       -webkit-print-color-adjust: exact !important;   /* Chrome, Safari, Edge */
       color-adjust: exact !important;                 /*Firefox*/
-    }
-
-    .printViewControls {
-      display: none;
     }
 
     .printHeader {

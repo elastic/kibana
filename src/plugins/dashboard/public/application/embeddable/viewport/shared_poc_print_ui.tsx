@@ -8,30 +8,19 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiPortal, EuiButtonIcon } from '@elastic/eui';
 
 import { imgData } from './shared_poc_print_ui_logo';
 
 interface Props {
   title: string;
   logo?: string;
-  onClosePrintView: () => void;
 }
 
-export const SharedPocPrintUi: FunctionComponent<Props> = ({
-  title,
-  logo = imgData,
-  onClosePrintView,
-}) => {
+export const SharedPocPrintUi: FunctionComponent<Props> = ({ title, logo = imgData }) => {
   return (
     <>
       {/* NOTE: This UI is purely for test purposes, but it is easy to see how we could move this to some external place that shares this functionality. */}
       <header className="printHeader">{title}</header>
-      <EuiPortal>
-        <div className="printViewControls">
-          <EuiButtonIcon iconType="cross" onClick={onClosePrintView} />
-        </div>
-      </EuiPortal>
       <footer className="printFooter">
         <img
           alt="a cool logo for branding"
