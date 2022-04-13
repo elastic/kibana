@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -41,7 +41,7 @@ export class ElasticsearchService
 {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
   private executionContextClient?: IExecutionContext;
@@ -60,7 +60,7 @@ export class ElasticsearchService
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
     this.log.debug('Prebooting elasticsearch service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     return {
       config: {
         hosts: config.hosts,
@@ -76,7 +76,7 @@ export class ElasticsearchService
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
@@ -112,7 +112,7 @@ export class ElasticsearchService
       throw new Error('ElasticsearchService needs to be setup before calling start');
     }
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     // Log every error we may encounter in the connection to Elasticsearch
     this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
