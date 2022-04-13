@@ -140,8 +140,14 @@ export default class DataViewSelect extends Component<DataViewSelectInternalProp
   };
 
   render() {
-    const { onChange, indexPatternId, placeholder, onNoDataViews, dataViewService, ...rest } =
-      this.props;
+    const {
+      onChange,
+      indexPatternId: dataViewId,
+      placeholder,
+      onNoDataViews,
+      dataViewService,
+      ...rest
+    } = this.props;
 
     return (
       <EuiComboBox
