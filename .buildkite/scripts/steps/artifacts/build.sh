@@ -11,7 +11,7 @@ node scripts/build --all-platforms --debug --docker-cross-compile $(echo "$BUILD
 
 echo "--- Extract default i18n messages"
 mkdir -p target/i18n
-node scripts/i18n_extract
+node scripts/i18n_extract --output-dir=target/i18n
 
 echo "--- Build and upload dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$FULL_VERSION.csv"
