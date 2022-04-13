@@ -6,9 +6,9 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CommentRequest } from '../../common/api';
+import { BulkCreateCommentRequest, CommentRequest } from '../../common/api';
 
-import { postComment } from './api';
+import { bulkCreateAttachments } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
 import { useToasts } from '../common/lib/kibana';
@@ -43,7 +43,7 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
 
 export interface PostComment {
   caseId: string;
-  data: CommentRequest;
+  data: CommentRequest | BulkCreateCommentRequest;
   updateCase?: (newCase: Case) => void;
   throwOnError?: boolean;
 }
@@ -62,13 +62,18 @@ export const usePostComment = (): UsePostComment => {
 
   const postMyComment = useCallback(
     async ({ caseId, data, updateCase, throwOnError }: PostComment) => {
+      const attachments = Array.isArray(data) ? data : [data];
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
 
-        const response = await postComment(data, caseId, abortCtrlRef.current.signal);
+        const response = await bulkCreateAttachments(
+          attachments,
+          caseId,
+          abortCtrlRef.current.signal
+        );
 
         if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS' });

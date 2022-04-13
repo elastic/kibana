@@ -33,7 +33,6 @@ import {
   CASE_STATUS_URL,
   CASE_TAGS_URL,
   CASES_URL,
-  CASES_INTERNAL_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
