@@ -51,6 +51,7 @@ const mockServices = {
       }
     },
   },
+  docLinks: { links: { discover: { fieldTypeHelp: '' } } },
 } as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};

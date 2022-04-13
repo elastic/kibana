@@ -234,7 +234,7 @@ export const getIsRulePreviewDisabled = ({
   if (ruleType === 'machine_learning') {
     return machineLearningJobId.length === 0;
   }
-  if (ruleType === 'eql') {
+  if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
     return queryBar.query.query.length === 0;
   }
   return false;
