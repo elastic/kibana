@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
 import {
   EuiBasicTable,
@@ -96,6 +96,10 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     skip: !toggleStatus,
   });
 
+  const navigateToAlerts = useCallback(() => {
+    navigateTo({ deepLinkId: SecurityPageName.alerts });
+  }, [navigateTo]);
+
   const columns = useMemo(
     () => getTableColumns({ getAppUrl, navigateTo }),
     [getAppUrl, navigateTo]
@@ -123,12 +127,7 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
             }
           />
           <EuiSpacer size="m" />
-          <EuiButton
-            data-test-subj="severityRuleAlertsButton"
-            onClick={() => {
-              navigateTo({ deepLinkId: SecurityPageName.alerts });
-            }}
-          >
+          <EuiButton data-test-subj="severityRuleAlertsButton" onClick={navigateToAlerts}>
             {i18n.OPEN_ALL_ALERTS_BUTTON}
           </EuiButton>
         </>
