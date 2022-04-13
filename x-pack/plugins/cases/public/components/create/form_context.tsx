@@ -84,15 +84,10 @@ export const FormContext: React.FC<Props> = ({
 
         // add attachments to the case
         if (updatedCase && Array.isArray(attachments)) {
-          // TODO currently the API only supports to add a comment at the time
-          // once the API is updated we should use bulk post comment #124814
-          // this operation is intentionally made in sequence
-          for (const attachment of attachments) {
-            await bulkCreateAttachments({
-              caseId: updatedCase.id,
-              data: attachment,
-            });
-          }
+          await bulkCreateAttachments({
+            caseId: updatedCase.id,
+            data: attachments,
+          });
         }
 
         if (afterCaseCreated && updatedCase) {

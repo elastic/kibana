@@ -66,13 +66,12 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
         // add attachments to the case
         const attachments = props.attachments;
         if (attachments !== undefined && attachments.length > 0) {
-          for (const attachment of attachments) {
-            await bulkCreateAttachments({
-              caseId: theCase.id,
-              data: attachment,
-              throwOnError: true,
-            });
-          }
+          await bulkCreateAttachments({
+            caseId: theCase.id,
+            data: attachments,
+            throwOnError: true,
+          });
+
           casesToasts.showSuccessAttach({
             theCase,
             attachments: props.attachments,
