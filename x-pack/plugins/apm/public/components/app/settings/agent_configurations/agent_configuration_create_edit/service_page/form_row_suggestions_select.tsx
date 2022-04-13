@@ -19,6 +19,7 @@ interface Props {
   value?: string;
   allowAll?: boolean;
   onChange: (value?: string) => void;
+  dataTestSubj?: string;
 }
 
 export function FormRowSuggestionsSelect({
@@ -29,6 +30,7 @@ export function FormRowSuggestionsSelect({
   value,
   allowAll = true,
   onChange,
+  dataTestSubj,
 }: Props) {
   return (
     <EuiDescribedFormGroup
@@ -47,6 +49,7 @@ export function FormRowSuggestionsSelect({
             'xpack.apm.agentConfig.servicePage.service.placeholder',
             { defaultMessage: 'Select Option' }
           )}
+          dataTestSubj={dataTestSubj}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

@@ -21,7 +21,6 @@ export default function () {
     },
 
     esShardTimeout: moment.duration(30000),
-    allowedGraphiteUrls: ['https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite'],
   });
 
   tlConfig.time = {
