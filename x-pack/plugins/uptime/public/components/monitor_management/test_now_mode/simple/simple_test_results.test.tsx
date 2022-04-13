@@ -66,6 +66,7 @@ describe('SimpleTestResults', function () {
 
     expect(await screen.findByText('Test result')).toBeInTheDocument();
 
+    expect(await screen.findByText('COMPLETED')).toBeInTheDocument();
     expect(await screen.findByText('191 ms')).toBeInTheDocument();
     expect(await screen.findByText('151.101.2.217')).toBeInTheDocument();
     expect(await screen.findByText('Checked Jan 12, 2022 11:54:27 AM')).toBeInTheDocument();
