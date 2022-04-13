@@ -6,6 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { KibanaRequest, KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
 import {
   elasticsearchServiceMock,
@@ -15,7 +16,6 @@ import {
   savedObjectsClientMock,
 } from 'src/core/server/mocks';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
@@ -50,6 +50,7 @@ import { CasesClientMock } from '../../../../../cases/server/client/mocks';
 import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { PackageClient } from '../../../../../fleet/server';
 import { createMockPackageService } from '../../../../../fleet/server/mocks';
+import { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 
 interface CallRouteInterface {
   body?: HostIsolationRequestBody;
@@ -117,7 +118,7 @@ describe('Host Isolation', () => {
       routePrefix: string,
       opts: CallRouteInterface,
       indexExists?: { endpointDsExists: boolean }
-    ) => Promise<jest.Mocked<SecuritySolutionRequestHandlerContext>>;
+    ) => Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>>;
     const superUser = {
       username: 'superuser',
       roles: ['superuser'],
@@ -185,7 +186,7 @@ describe('Host Isolation', () => {
         routePrefix: string,
         { body, idxResponse, searchResponse, mockUser, license, authz = {} }: CallRouteInterface,
         indexExists?: { endpointDsExists: boolean }
-      ): Promise<jest.Mocked<SecuritySolutionRequestHandlerContext>> => {
+      ): Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>> => {
         const asUser = mockUser ? mockUser : superUser;
         (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
           () => asUser
@@ -236,7 +237,7 @@ describe('Host Isolation', () => {
 
         await routeHandler(ctx, mockRequest, mockResponse);
 
-        return ctx as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>;
+        return ctx;
       };
     });
 

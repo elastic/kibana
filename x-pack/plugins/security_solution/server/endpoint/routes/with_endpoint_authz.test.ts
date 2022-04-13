@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '../../../../../../src/core/server/mocks';
 import { RequestHandler } from 'kibana/server';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
 import { EndpointApiNeededAuthz, withEndpointAuthz } from './with_endpoint_authz';
@@ -61,7 +65,7 @@ describe('When using `withEndpointAuthz()`', () => {
   ])('should grant access when needed authz is %j', (neededAuthz, authzOverrides) => {
     Object.assign(mockContext.securitySolution.endpointAuthz, authzOverrides);
     withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
-      mockContext,
+      coreMock.createCustomRequestHandlerContext(mockContext),
       mockRequest,
       mockResponse
     );
@@ -89,7 +93,7 @@ describe('When using `withEndpointAuthz()`', () => {
     Object.assign(mockContext.securitySolution.endpointAuthz, authzOverrides);
 
     withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
-      mockContext,
+      coreMock.createCustomRequestHandlerContext(mockContext),
       mockRequest,
       mockResponse
     );

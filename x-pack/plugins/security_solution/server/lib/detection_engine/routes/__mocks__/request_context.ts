@@ -63,7 +63,7 @@ export const createMockClients = () => {
 
 type MockClients = ReturnType<typeof createMockClients>;
 
-type SecuritySolutionRequestHandlerContextMock =
+export type SecuritySolutionRequestHandlerContextMock =
   MockedKeys<SecuritySolutionRequestHandlerContext> & {
     core: MockClients['core'];
   };

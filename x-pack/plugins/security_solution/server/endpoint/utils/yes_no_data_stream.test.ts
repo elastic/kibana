@@ -6,6 +6,7 @@
  */
 
 import {
+  coreMock,
   elasticsearchServiceMock,
   savedObjectsClientMock,
   loggingSystemMock,
@@ -18,7 +19,7 @@ import {
 } from './yes_no_data_stream';
 
 describe('Accurately answers if index template for data stream exists', () => {
-  let ctxt: jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  let ctxt: ReturnType<typeof createRouteHandlerContext>;
 
   beforeEach(() => {
     ctxt = createRouteHandlerContext(
@@ -37,7 +38,9 @@ describe('Accurately answers if index template for data stream exists', () => {
       statusCode: 404,
     });
     const doesItExist = await doLogsEndpointActionDsExists({
-      context: ctxt,
+      context: coreMock.createCustomRequestHandlerContext(
+        ctxt
+      ) as SecuritySolutionRequestHandlerContext,
       logger: loggingSystemMock.create().get('host-isolation'),
       dataStreamName: '.test-stream.name',
     });
@@ -50,7 +53,9 @@ describe('Accurately answers if index template for data stream exists', () => {
       statusCode: 200,
     });
     const doesItExist = await doLogsEndpointActionDsExists({
-      context: ctxt,
+      context: coreMock.createCustomRequestHandlerContext(
+        ctxt
+      ) as SecuritySolutionRequestHandlerContext,
       logger: loggingSystemMock.create().get('host-isolation'),
       dataStreamName: '.test-stream.name',
     });
@@ -59,7 +64,7 @@ describe('Accurately answers if index template for data stream exists', () => {
 });
 
 describe('Accurately answers if index exists', () => {
-  let ctxt: jest.Mocked<SecuritySolutionRequestHandlerContext>;
+  let ctxt: ReturnType<typeof createRouteHandlerContext>;
 
   beforeEach(() => {
     ctxt = createRouteHandlerContext(
@@ -78,7 +83,9 @@ describe('Accurately answers if index exists', () => {
       statusCode: 404,
     });
     const doesItExist = await doesLogsEndpointActionsIndexExist({
-      context: ctxt,
+      context: coreMock.createCustomRequestHandlerContext(
+        ctxt
+      ) as SecuritySolutionRequestHandlerContext,
       logger: loggingSystemMock.create().get('host-isolation'),
       indexName: '.test-index.name-default',
     });
@@ -91,7 +98,9 @@ describe('Accurately answers if index exists', () => {
       statusCode: 200,
     });
     const doesItExist = await doesLogsEndpointActionsIndexExist({
-      context: ctxt,
+      context: coreMock.createCustomRequestHandlerContext(
+        ctxt
+      ) as SecuritySolutionRequestHandlerContext,
       logger: loggingSystemMock.create().get('host-isolation'),
       indexName: '.test-index.name-default',
     });

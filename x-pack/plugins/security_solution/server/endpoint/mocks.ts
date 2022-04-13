@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AwaitedProperties } from '@kbn/utility-types';
 import { loggingSystemMock, savedObjectsServiceMock } from '../../../../../src/core/server/mocks';
 import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { listMock } from '../../../lists/server/mocks';
@@ -28,7 +29,6 @@ import {
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
-import { MetadataRequestContext } from './routes/metadata/handlers';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
 // A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
@@ -190,12 +190,13 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
   };
 };
 
-export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestContext> => {
+export const createMockMetadataRequestContext = () => {
   return {
     endpointAppContextService: createMockEndpointAppContextService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    requestHandlerContext:
-      xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<SecuritySolutionRequestHandlerContext>,
+    requestHandlerContext: xpackMocks.createRequestHandlerContext() as unknown as jest.Mocked<
+      AwaitedProperties<SecuritySolutionRequestHandlerContext>
+    >,
   };
 };
 
