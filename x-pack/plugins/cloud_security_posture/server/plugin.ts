@@ -69,27 +69,24 @@ export class CspPlugin
     return {};
   }
 
-  public async start(
-    core: CoreStart,
-    plugins: CspServerPluginStartDeps
-  ): Promise<CspServerPluginStart> {
+  public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
     this.CspAppService.start({
       ...plugins.fleet,
     });
 
-    // initializeCspRules(core.savedObjects.createInternalRepository());
     initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
-    await plugins.fleet.fleetSetupCompleted;
+    plugins.fleet.fleetSetupCompleted().then(() => {
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyPostCreate',
+        getPackagePolicyCreateCallback(this.logger)
+      );
 
-    plugins.fleet.registerExternalCallback(
-      'packagePolicyPostCreate',
-      getPackagePolicyCreateCallback(this.logger)
-    );
+      plugins.fleet.registerExternalCallback(
+        'postPackagePolicyDelete',
+        getPackagePolicyDeleteCallback(core.savedObjects.createInternalRepository(), this.logger)
+      );
+    });
 
-    plugins.fleet.registerExternalCallback(
-      'postPackagePolicyDelete',
-      getPackagePolicyDeleteCallback(core.savedObjects.createInternalRepository())
-    );
     return {};
   }
   public stop() {}
