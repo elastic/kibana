@@ -20,6 +20,7 @@ import { ArtifactListPageUrlParams } from '../types';
 import { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { useKueryFromExceptionsSearchFilter } from './use_kuery_from_exceptions_search_filter';
 import { useListArtifact } from '../../../hooks/artifacts';
+import { useUrlPagination } from '../../hooks/use_url_pagination';
 
 type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
   /**
@@ -46,8 +47,12 @@ export const useWithArtifactListData = (
   const isMounted = useIsMounted();
 
   const {
-    urlParams: { page = 1, pageSize = MANAGEMENT_DEFAULT_PAGE_SIZE, filter, includedPolicies },
+    urlParams: { filter, includedPolicies },
   } = useUrlParams<ArtifactListPageUrlParams>();
+
+  const {
+    pagination: { page, pageSize },
+  } = useUrlPagination();
 
   // Used to determine if the `does data exist` check should be done.
   const kuery = useKueryFromExceptionsSearchFilter(filter, searchableFields, includedPolicies);
