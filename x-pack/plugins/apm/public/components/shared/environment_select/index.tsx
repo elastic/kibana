@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
@@ -75,19 +75,19 @@ export function EnvironmentSelect({
 
   const { data, status: searchStatus } = useFetcher(
     (callApmApi) => {
-      if (searchValue !== '') {
-        return callApmApi('GET /internal/apm/suggestions', {
-          params: {
-            query: {
-              fieldName: SERVICE_ENVIRONMENT,
-              fieldValue: searchValue ?? '',
-              serviceName,
-              start: start,
-              end: end,
+      return isEmpty(searchValue)
+        ? Promise.resolve({ terms: [] })
+        : callApmApi('GET /internal/apm/suggestions', {
+            params: {
+              query: {
+                fieldName: SERVICE_ENVIRONMENT,
+                fieldValue: searchValue,
+                serviceName,
+                start,
+                end,
+              },
             },
-          },
-        });
-      }
+          });
     },
     [searchValue, start, end, serviceName]
   );

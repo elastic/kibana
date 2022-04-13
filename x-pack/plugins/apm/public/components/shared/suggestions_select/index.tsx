@@ -57,8 +57,8 @@ export function SuggestionsSelect({
           query: {
             fieldName,
             fieldValue: searchValue,
-            start: start,
-            end: end,
+            start,
+            end,
           },
         },
       });
