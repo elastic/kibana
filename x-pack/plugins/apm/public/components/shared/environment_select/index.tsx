@@ -66,7 +66,7 @@ export function EnvironmentSelect({
     },
   ];
 
-  const handleChange = useCallback(
+  const onSelect = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       if (changedOptions.length === 1 && changedOptions[0].value) {
         onChange(changedOptions[0].value);
@@ -108,7 +108,8 @@ export function EnvironmentSelect({
         })),
   ];
 
-  const handleSearchChange = useMemo(() => debounce(setSearchValue, 300), []);
+  const onSearch = useMemo(() => debounce(setSearchValue, 300), []);
+
   return (
     <EuiComboBox
       async
@@ -123,8 +124,8 @@ export function EnvironmentSelect({
       singleSelection={{ asPlainText: true }}
       options={options}
       selectedOptions={selectedOptions}
-      onChange={(changedOptions) => handleChange(changedOptions)}
-      onSearchChange={handleSearchChange}
+      onChange={(changedOptions) => onSelect(changedOptions)}
+      onSearchChange={onSearch}
       isLoading={
         status === FETCH_STATUS.LOADING || searchStatus === FETCH_STATUS.LOADING
       }
