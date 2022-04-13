@@ -20,6 +20,7 @@ export const UsersRoutes = () => {
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
     page: SecurityPageName.users,
+    type: 'application'
   });
 
   return (

@@ -32,8 +32,8 @@ const ExceptionsContainerComponent: React.FC = () => {
 
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
-    page: SecurityPageName.exceptions,
-    id: 'new',
+    page: `${SecurityPageName.exceptions}_all`,
+    type: 'application'
   });
 
   return (

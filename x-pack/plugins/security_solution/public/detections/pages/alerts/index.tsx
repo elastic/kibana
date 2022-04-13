@@ -32,7 +32,7 @@ const AlertsContainerComponent: React.FC = () => {
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
     page: SecurityPageName.alerts,
-    id: 'all',
+    type: 'application'
   });
 
   return (

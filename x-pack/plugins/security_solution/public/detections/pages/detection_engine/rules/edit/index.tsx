@@ -85,8 +85,8 @@ const EditRulePageComponent: FC = () => {
 
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
-    page: SecurityPageName.rules,
-    id: 'edit',
+    page: `${SecurityPageName.rules}_edit`,
+    type: 'application'
   });
 
   const formHooks = useRef<RuleStepsFormHooks>({

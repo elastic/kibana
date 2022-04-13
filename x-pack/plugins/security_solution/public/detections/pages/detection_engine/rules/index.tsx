@@ -54,8 +54,8 @@ const RulesPageComponent: React.FC = () => {
 
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
-    page: SecurityPageName.rules,
-    id: 'management',
+    page: `${SecurityPageName.rules}_management`,
+    type: 'application'
   });
 
   const [
