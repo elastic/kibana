@@ -70,6 +70,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
       apmTrans?.end();
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };
