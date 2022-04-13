@@ -1502,9 +1502,14 @@ describe('empty RulesPage', () => {
   });
   it('renders Create rule button', async () => {
     await setup();
-    expect(wrapper.find('[data-test-subj="createFirstRuleButton"]').find('EuiButton')).toHaveLength(
-      1
-    );
+    expect(wrapper.find('EuiButton[data-test-subj="createFirstRuleButton"]')).toHaveLength(1);
+  });
+  it('renders Documentation link', async () => {
+    await setup();
+    expect(wrapper.find('EuiLink[data-test-subj="documentationLink"]')).toHaveLength(1);
+    expect(
+      wrapper.find('EuiLink[data-test-subj="documentationLink"]').getElement().props.href
+    ).toContain('create-and-manage-rules.html');
   });
 });
 
