@@ -42,6 +42,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('createPackagePolicy_pageTitle')).to.equal(
           'Add Endpoint Security integration'
         );
+        const cancelButton = await testSubjects.find('createPackagePolicy_cancelBackLink');
+        cancelButton.click();
+        pageObjects.policy.ensureIsOnListPage();
       });
     });
     describe('with policies', () => {
