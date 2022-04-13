@@ -43,7 +43,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'ccs_remote_search',
+      ]);
       await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
       await kibanaServer.importExport.load(kbnDirectory);
