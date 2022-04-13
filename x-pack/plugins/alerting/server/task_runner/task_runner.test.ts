@@ -2645,7 +2645,7 @@ describe('Task Runner', () => {
     const ruleTypeWithConfig = {
       ...ruleType,
       config: {
-        execution: {
+        run: {
           actions: { max: 3 },
         },
       },
@@ -2718,7 +2718,7 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
 
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(
-      ruleTypeWithConfig.config.execution.actions.max
+      ruleTypeWithConfig.config.run.actions.max
     );
 
     expect(
@@ -2818,7 +2818,7 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.execute,
         outcome: 'success',
         status: 'warning',
-        numberOfTriggeredActions: ruleTypeWithConfig.config.execution.actions.max,
+        numberOfTriggeredActions: ruleTypeWithConfig.config.run.actions.max,
         numberOfScheduledActions: mockActions.length,
         reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         task: true,
