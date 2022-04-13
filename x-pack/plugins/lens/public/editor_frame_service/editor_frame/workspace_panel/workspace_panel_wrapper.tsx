@@ -104,18 +104,17 @@ export function WorkspacePanelWrapper({
     <>
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
         <EuiFlexGroup
-          alignItems="center"
+          alignItems="flexEnd"
           gutterSize="s"
           direction="row"
           className={classNames('lnsWorkspacePanelWrapper__toolbar', {
             'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
           })}
           responsive={false}
-          wrap={true}
         >
           {!isFullscreen && (
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
                 <EuiFlexItem grow={false}>
                   <ChartSwitch
                     data-test-subj="lnsChartSwitcher"
