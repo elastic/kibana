@@ -22,7 +22,7 @@ import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import type { TimeHistoryContract, SavedQuery } from '../../../data/public';
 import type { SavedQueryAttributes } from '../../../data/common';
 import { IDataPluginServices } from '../../../data/public';
-import { FilterBar } from '../filter_bar';
+import { FilterBar, FilterBadgesWrapper } from '../filter_bar';
 import { TimeRange } from '../../../data/common';
 import { DataView } from '../../../data_views/public';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
@@ -405,26 +405,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       />
     );
 
-    let filterBar;
-    if (this.shouldRenderFilterBar()) {
-      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
-        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
-      });
-
-      filterBar = (
-        <div id="globalFilterGroup" className={filterGroupClasses}>
-          <FilterBar
-            className="globalFilterGroup__filterBar"
-            filters={this.props.filters!}
-            onFiltersUpdated={this.props.onFiltersUpdated}
-            indexPatterns={this.props.indexPatterns!}
-            appName={this.services.appName}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          />
-        </div>
-      );
-    }
-
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
@@ -462,8 +442,38 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
-          filterBar={this.shouldShowDatePickerAsBadge() ? filterBar : undefined}
+          filterBar={
+            this.shouldShowDatePickerAsBadge() ? (
+              <FilterBadgesWrapper
+                filters={this.props.filters!}
+                onFiltersUpdated={this.props.onFiltersUpdated}
+                indexPatterns={this.props.indexPatterns!}
+                appName={this.services.appName}
+                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+              />
+            ) : undefined
+          }
         />
+      );
+    }
+
+    let filterBar;
+    if (this.shouldRenderFilterBar()) {
+      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
+      });
+
+      filterBar = (
+        <div id="globalFilterGroup" className={filterGroupClasses}>
+          <FilterBar
+            className="globalFilterGroup__filterBar"
+            filters={this.props.filters!}
+            onFiltersUpdated={this.props.onFiltersUpdated}
+            indexPatterns={this.props.indexPatterns!}
+            appName={this.services.appName}
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          />
+        </div>
       );
     }
 

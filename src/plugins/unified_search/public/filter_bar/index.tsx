@@ -17,6 +17,15 @@ export const FilterBar = (props: React.ComponentProps<typeof LazyFilterBar>) => 
   </React.Suspense>
 );
 
+const LazyFilterBadgesWrapper = React.lazy(() => import('./filter_badges_wrapper'));
+export const FilterBadgesWrapper = (
+  props: React.ComponentProps<typeof LazyFilterBadgesWrapper>
+) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFilterBadgesWrapper {...props} />
+  </React.Suspense>
+);
+
 const LazyFilterLabel = React.lazy(() => import('./filter_editor/lib/filter_label'));
 export const FilterLabel = (props: React.ComponentProps<typeof LazyFilterLabel>) => (
   <React.Suspense fallback={<Fallback />}>
