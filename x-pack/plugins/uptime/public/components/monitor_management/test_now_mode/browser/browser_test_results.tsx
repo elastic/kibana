@@ -74,7 +74,7 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, expectPings, o
                 <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
               )}
 
-            {completedSteps > 0 && (
+            {summaryDoc && completedSteps > 0 && (
               <StepsList
                 data={steps}
                 compactView={true}
