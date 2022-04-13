@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  deleteMetadataStream,
+  deleteAllDocsFromMetadataCurrentIndex,
+  deleteAllDocsFromMetadataUnitedIndex,
+} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -25,6 +30,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('When on the Endpoint Policy List Page', () => {
     before(async () => {
+      // need to ensure there is no data so that CI works
+      await deleteMetadataStream(getService);
+      await deleteAllDocsFromMetadataCurrentIndex(getService);
+      await deleteAllDocsFromMetadataUnitedIndex(getService);
+
       const endpointPackage = await policyTestResources.getEndpointPackage();
       await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       await browser.refresh();
