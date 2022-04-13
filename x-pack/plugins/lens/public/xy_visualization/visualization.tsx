@@ -86,7 +86,7 @@ type ConvertActiveDataFn = (
 
 const updateFrame = (
   state: State | undefined,
-  frame: FramePublicAPI,
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
   convertActiveData?: ConvertActiveDataFn
 ) => {
   if (!frame) {
