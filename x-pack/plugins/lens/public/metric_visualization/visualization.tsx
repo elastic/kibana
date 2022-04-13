@@ -17,7 +17,7 @@ import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/pub
 import { ColorMode, CustomPaletteState } from '../../../../../src/plugins/charts/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
-import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
+import { Visualization, OperationMetadata, DatasourceLayers } from '../types';
 import type { MetricState } from '../../common/types';
 import { layerTypes } from '../../common';
 import { MetricDimensionEditor } from './dimension_editor';
@@ -45,7 +45,7 @@ const getFontSizeAndUnit = (fontSize: string) => {
 const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   attributes?: Partial<Omit<MetricConfig, keyof MetricState>>
 ): Ast | null => {
   if (!state.accessor) {
