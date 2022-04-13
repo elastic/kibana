@@ -7,10 +7,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Observable } from 'rxjs';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart, CoreTheme } from 'kibana/public';
 import { CoreStart, Plugin } from 'src/core/public';
+import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { GlobalSearchPluginStart } from '../../global_search/public';
 import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
@@ -45,6 +47,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
           navigateToUrl: core.application.navigateToUrl,
           basePathUrl: core.http.basePath.prepend('/plugins/globalSearchBar/assets/'),
           darkMode: core.uiSettings.get('theme:darkMode'),
+          theme$: core.theme.theme$,
           trackUiMetric,
         }),
     });
@@ -58,6 +61,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     navigateToUrl,
     basePathUrl,
     darkMode,
+    theme$,
     trackUiMetric,
   }: {
     container: HTMLElement;
@@ -66,19 +70,22 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     navigateToUrl: ApplicationStart['navigateToUrl'];
     basePathUrl: string;
     darkMode: boolean;
+    theme$: Observable<CoreTheme>;
     trackUiMetric: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   }) {
     ReactDOM.render(
-      <I18nProvider>
-        <SearchBar
-          globalSearch={globalSearch}
-          navigateToUrl={navigateToUrl}
-          taggingApi={savedObjectsTagging}
-          basePathUrl={basePathUrl}
-          darkMode={darkMode}
-          trackUiMetric={trackUiMetric}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme$}>
+        <I18nProvider>
+          <SearchBar
+            globalSearch={globalSearch}
+            navigateToUrl={navigateToUrl}
+            taggingApi={savedObjectsTagging}
+            basePathUrl={basePathUrl}
+            darkMode={darkMode}
+            trackUiMetric={trackUiMetric}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       container
     );
 
