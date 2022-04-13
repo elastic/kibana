@@ -32,7 +32,6 @@ import {
 } from '../state_management';
 import { getIndexPatternsObjects, getIndexPatternsIds, getResolvedDateRange } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
-import { getShowUnderlyingDataLabel } from '../../common';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -100,11 +99,15 @@ function getLensTopNavConfig(options: {
   }
 
   if (showOpenInDiscover) {
+    const exploreDataInDiscoverLabel = i18n.translate('xpack.lens.app.exploreDataInDiscover', {
+      defaultMessage: 'Explore data in Discover',
+    });
+
     topNavMenu.push({
-      label: getShowUnderlyingDataLabel(),
+      label: exploreDataInDiscoverLabel,
       run: () => {},
       testId: 'lnsApp_openInDiscover',
-      description: getShowUnderlyingDataLabel(),
+      description: exploreDataInDiscoverLabel,
       disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
       tooltip: tooltips.showUnderlyingDataWarning,
       target: '_blank',
