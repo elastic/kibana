@@ -738,7 +738,7 @@ describe('Create case', () => {
     });
   });
 
-  it('should call `bulkCreateAttachments` with the attachments after the case is created', async () => {
+  it('should call bulkCreateAttachments with the attachments after the case is created', async () => {
     useConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
       connectors: connectorsMock,
@@ -778,8 +778,9 @@ describe('Create case', () => {
     await act(async () => {
       userEvent.click(wrapper.getByTestId('create-case-submit'));
     });
-    expect(bulkCreateAttachments).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments[0] });
-    expect(bulkCreateAttachments).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments[1] });
+
+    expect(bulkCreateAttachments).toHaveBeenCalledTimes(1);
+    expect(bulkCreateAttachments).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments });
   });
 
   it(`should call callbacks in correct order`, async () => {

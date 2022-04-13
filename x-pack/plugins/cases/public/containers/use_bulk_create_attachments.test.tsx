@@ -52,7 +52,7 @@ describe('useBulkCreateAttachments', () => {
   });
 
   it('calls bulkCreateAttachments with correct arguments - case', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'bulkCreateAttachments');
+    const spyOnBulkCreateAttachments = jest.spyOn(api, 'bulkCreateAttachments');
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseBulkCreateAttachments>(() =>
@@ -66,7 +66,11 @@ describe('useBulkCreateAttachments', () => {
         updateCase: updateCaseCallback,
       });
       await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
+      expect(spyOnBulkCreateAttachments).toBeCalledWith(
+        [samplePost],
+        basicCaseId,
+        abortCtrl.signal
+      );
       expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });
@@ -108,8 +112,8 @@ describe('useBulkCreateAttachments', () => {
   });
 
   it('set isError true and shows a toast error when an error occurs', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'bulkCreateAttachments');
-    spyOnPostCase.mockImplementation(() => {
+    const spyOnBulkCreateAttachments = jest.spyOn(api, 'bulkCreateAttachments');
+    spyOnBulkCreateAttachments.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
@@ -137,8 +141,8 @@ describe('useBulkCreateAttachments', () => {
   });
 
   it('throws an error when invoked with throwOnError true', async () => {
-    const spyOnPostCase = jest.spyOn(api, 'bulkCreateAttachments');
-    spyOnPostCase.mockImplementation(() => {
+    const spyOnBulkCreateAttachments = jest.spyOn(api, 'bulkCreateAttachments');
+    spyOnBulkCreateAttachments.mockImplementation(() => {
       throw new Error('This is not possible');
     });
 

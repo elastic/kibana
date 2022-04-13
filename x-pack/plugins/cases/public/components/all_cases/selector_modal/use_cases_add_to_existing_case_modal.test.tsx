@@ -152,7 +152,7 @@ describe('use cases add to existing case modal hook', () => {
     await waitFor(() => {
       expect(mockedPostMessage).toHaveBeenCalledWith({
         caseId: 'test',
-        data: alertComment,
+        data: [alertComment],
         throwOnError: true,
       });
     });
@@ -208,7 +208,7 @@ describe('use cases add to existing case modal hook', () => {
     await waitFor(() => {
       expect(mockedPostMessage).toHaveBeenCalledWith({
         caseId: 'test',
-        data: alertComment,
+        data: [alertComment],
         throwOnError: true,
       });
     });

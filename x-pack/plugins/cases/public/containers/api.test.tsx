@@ -8,7 +8,11 @@
 import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
-import { CASES_URL, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  CASES_URL,
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 
 import {
   deleteCases,
@@ -471,11 +475,14 @@ describe('Case Configuration API', () => {
 
     test('should be called with correct check url, method, signal', async () => {
       await bulkCreateAttachments([data], basicCase.id, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        signal: abortCtrl.signal,
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', basicCase.id),
+        {
+          method: 'POST',
+          body: JSON.stringify([data]),
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('should return correct response', async () => {
