@@ -120,6 +120,49 @@ image::images/scheduled-pack.png[Shows queries in the pack and details about eac
 . View scheduled query results in <<discover,*Discover*>> or the drag-and-drop <<lens,*Lens*>> editor.
 
 [float]
+[[osquery-prebuilt-packs]]
+== Prebuilt Elastic packs
+
+The Osquery Manager integration includes a set of prebuilt Osquery packs that you can optionally load. Once added, you can then activate and schedule the packs. 
+
+You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.
+
+[float]
+[[load-prebuilt-packs]]
+=== Load and activate prebuilt Elastic packs
+
+. Go to *Packs*, and then click *Load Elastic prebuilt packs*.
+
+NOTE: This option is only available if new or updated prebuilt packs are available.
+
+. For each pack that you want to schedule: 
+
+* Enable the option to make the pack *Active*.
+
+* Click the pack name, then *Edit*.
+
+* Update the *Scheduled agent policies* to specify the policies where this pack should run.
+
+. Click *Update pack*.
+
+[float]
+[[copy-prebuilt-packs]]
+=== Copy prebuilt Elastic packs
+
+To modify queries in prebuilt packs, you must first make a copy of the pack.
+
+. Go to *Stack Management* -> *Saved Objects*.
+
+. Search for the Osquery packs you want to modify.
+
+. Select the checkboxes of the packs to export.
+
+. Click *Export x objects*.
+
+. Then click *Import* to import the exported pack. This creates a copy that you can edit.
+
+
+[float]
 [[osquery-manage-query]]
 == Save queries
 
