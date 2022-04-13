@@ -49,7 +49,10 @@ describe('get timeline', () => {
 
   test('should call getTimelineTemplateOrNull if templateTimelineId is given', async () => {
     const templateTimelineId = '123';
-    await server.inject(getTimelineRequest({ template_timeline_id: templateTimelineId }), context);
+    await server.inject(
+      getTimelineRequest({ template_timeline_id: templateTimelineId }),
+      requestContextMock.convertContext(context)
+    );
 
     expect((getTimelineTemplateOrNull as jest.Mock).mock.calls[0][1]).toEqual(templateTimelineId);
   });
@@ -57,13 +60,16 @@ describe('get timeline', () => {
   test('should call getTimelineOrNull if id is given', async () => {
     const id = '456';
 
-    await server.inject(getTimelineRequest({ id }), context);
+    await server.inject(getTimelineRequest({ id }), requestContextMock.convertContext(context));
 
     expect((getTimelineOrNull as jest.Mock).mock.calls[0][1]).toEqual(id);
   });
 
   test('should throw error message if nither templateTimelineId nor id is given', async () => {
-    const res = await server.inject(getTimelineRequest(), context);
+    const res = await server.inject(
+      getTimelineRequest(),
+      requestContextMock.convertContext(context)
+    );
     expect(res.body.message).toEqual('please provide id or template_timeline_id');
   });
 });
