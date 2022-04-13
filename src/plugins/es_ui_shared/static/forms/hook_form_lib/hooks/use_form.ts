@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 
 import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
-import { mapFormFields, unflattenObject, Subject, Subscription } from '../lib';
+import { mapFormFields, unflattenObject, flattenObject, Subject, Subscription } from '../lib';
 
 const DEFAULT_OPTIONS = {
   valueChangeDebounceTime: 500,
@@ -205,7 +205,18 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       if (defaultValueDeserialized.current === undefined) {
         defaultValueDeserialized.current = {} as I;
       }
-      set(defaultValueDeserialized.current!, path, value);
+
+      // We allow "undefined" to be passed to be able to remove a value from the form `defaultValue` object.
+      // When <UseField path="foo" defaultValue="bar" /> mounts it calls `updateDefaultValueAt("foo", "bar")` to
+      // update the form "defaultValue" object. When that component unmounts we want to be able to clean up and
+      // remove its defaultValue on the form.
+      if (value === undefined) {
+        const updated = flattenObject(defaultValueDeserialized.current!);
+        delete updated[path];
+        defaultValueDeserialized.current = unflattenObject<I>(updated);
+      } else {
+        set(defaultValueDeserialized.current!, path, value);
+      }
     },
     []
   );

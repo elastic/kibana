@@ -84,7 +84,7 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
-    '<rootDir>/node_modules/@emotion/jest/serializer',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/emotion.js',
   ],
 
   // The test environment that will be used for testing

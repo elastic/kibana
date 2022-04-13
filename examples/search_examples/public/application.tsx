@@ -39,7 +39,7 @@ const LINKS: ExampleLink[] = [
 
 export const renderApp = (
   { notifications, savedObjects, http, application }: CoreStart,
-  { data, navigation }: AppPluginStartDependencies,
+  { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -53,6 +53,7 @@ export const renderApp = (
                 navigation={navigation}
                 data={data}
                 http={http}
+                unifiedSearch={unifiedSearch}
               />
             </Route>
             <Route path={LINKS[1].path}>
@@ -63,6 +64,7 @@ export const renderApp = (
                 navigation={navigation}
                 notifications={notifications}
                 data={data}
+                unifiedSearch={unifiedSearch}
               />
             </Route>
 

@@ -18,7 +18,7 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { AlertAction } from '../../../../../../alerting/common';
+import { RuleAction } from '../../../../../../alerting/common';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import { FieldValueThreshold } from '../../../components/rules/threshold_input';
@@ -149,7 +149,7 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: AlertAction[];
+  actions: RuleAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
   throttle?: string | null;

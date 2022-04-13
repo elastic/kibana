@@ -12,11 +12,11 @@ import { Status } from '../../../../common/detection_engine/schemas/common/schem
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
   RuleType,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertExecutorOptions,
-  AlertServices,
+  RuleExecutorOptions as AlertingRuleExecutorOptions,
+  RuleExecutorServices,
 } from '../../../../../alerting/server';
 import { TermAggregationBucket } from '../../types';
 import {
@@ -189,9 +189,9 @@ export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
-export type RuleExecutorOptions = AlertExecutorOptions<
+export type RuleExecutorOptions = AlertingRuleExecutorOptions<
   RuleParams,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext
 >;
@@ -203,7 +203,7 @@ export const isAlertExecutor = (
 ): obj is RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   'default'
@@ -214,7 +214,7 @@ export const isAlertExecutor = (
 export type SignalRuleAlertTypeDefinition = RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   'default'
@@ -302,7 +302,7 @@ export interface SearchAfterAndBulkCreateParams {
     maxSignals: number;
   };
   completeRule: CompleteRule<RuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
@@ -362,7 +362,7 @@ export interface ThresholdQueryBucket extends TermAggregationBucket {
   };
 }
 
-export interface ThresholdAlertState extends AlertTypeState {
+export interface ThresholdAlertState extends RuleTypeState {
   initialized: boolean;
   signalHistory: ThresholdSignalHistory;
 }
