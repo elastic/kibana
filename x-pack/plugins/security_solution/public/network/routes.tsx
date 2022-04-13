@@ -20,7 +20,7 @@ export const NetworkRoutes = () => {
   // Application ID and current URL are traced automatically.
   useExecutionContext(executionContext, {
     page: SecurityPageName.network,
-    type: 'application'
+    type: 'application',
   });
 
   return (
