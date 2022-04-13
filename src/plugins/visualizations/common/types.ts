@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectAttributes } from 'kibana/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { AggConfigSerialized, SerializedSearchSourceFields } from 'src/plugins/data/common';
+import type { AggConfigSerialized, SerializedSearchSourceFields } from 'src/plugins/data/common';
+import type { SavedObjectAttributes } from '../../../core/types';
 
 export interface VisParams {
   [key: string]: any;

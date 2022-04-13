@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddablePersistableStateService } from '../../../embeddable/common';
-import { EmbeddableRegistryDefinition } from '../../../embeddable/server';
+import type {
+  EmbeddablePersistableStateService,
+  EmbeddableRegistryDefinition,
+} from '../../../embeddable/common';
 import { CONTROL_GROUP_TYPE } from '../../common';
 import {
   createControlGroupExtract,

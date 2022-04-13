@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
-import { MapEmbeddablePersistableState } from './types';
-import { MapSavedObjectAttributes } from '../map_saved_object_type';
+import type { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/common';
+import type { MapEmbeddablePersistableState } from './types';
+import type { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { extractReferences } from '../migrations/references';
 
 export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {

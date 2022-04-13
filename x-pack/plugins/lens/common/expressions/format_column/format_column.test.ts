@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
+import type { Datatable, DatatableColumn } from 'src/plugins/expressions/common';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 import { formatColumn } from './index';
 

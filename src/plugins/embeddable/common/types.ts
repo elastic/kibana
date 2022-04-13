@@ -8,7 +8,11 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from 'src/core/public';
-import { PersistableStateService, PersistableState } from '../../kibana_utils/common';
+import type {
+  PersistableStateService,
+  PersistableState,
+  PersistableStateDefinition,
+} from '../../kibana_utils/common';
 
 export enum ViewMode {
   EDIT = 'edit',
@@ -68,6 +72,12 @@ export interface PanelState<E extends EmbeddableInput & { id: string } = { id: s
 }
 
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };
+
+export interface EmbeddableRegistryDefinition<
+  P extends EmbeddableStateWithType = EmbeddableStateWithType
+> extends PersistableStateDefinition<P> {
+  id: string;
+}
 
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
 

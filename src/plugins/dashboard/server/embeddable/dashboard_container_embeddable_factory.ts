@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
-import { EmbeddableRegistryDefinition } from '../../../embeddable/server';
+import type {
+  EmbeddablePersistableStateService,
+  EmbeddableRegistryDefinition,
+} from 'src/plugins/embeddable/common';
 import {
   createExtract,
   createInject,

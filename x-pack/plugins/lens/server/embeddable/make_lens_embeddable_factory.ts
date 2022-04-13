@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
+import type { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,

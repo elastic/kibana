@@ -14,7 +14,6 @@ import {
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
-  EmbeddableRegistryDefinition,
 } from './types';
 import {
   getExtractFunction,
@@ -27,7 +26,11 @@ import {
   PersistableStateMigrateFn,
   MigrateFunctionsObject,
 } from '../../kibana_utils/common';
-import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
+import type {
+  EmbeddableStateWithType,
+  CommonEmbeddableStartContract,
+  EmbeddableRegistryDefinition,
+} from '../common/types';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
