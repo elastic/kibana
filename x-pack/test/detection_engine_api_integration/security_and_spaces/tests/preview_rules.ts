@@ -92,8 +92,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('rule_author', () => {
-        const role = ROLES.rule_author;
+      describe('hunter', () => {
+        const role = ROLES.hunter;
 
         beforeEach(async () => {
           await createUserAndRole(getService, role);

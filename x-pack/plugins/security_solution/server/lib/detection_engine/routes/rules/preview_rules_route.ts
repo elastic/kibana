@@ -130,7 +130,7 @@ export const previewRulesRoute = async (
             elasticsearch: {
               index: {
                 [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
-                [`internal.${DEFAULT_PREVIEW_INDEX}`]: ['read'],
+                [`.internal${DEFAULT_PREVIEW_INDEX}-`]: ['read'],
               },
               cluster: [],
             },

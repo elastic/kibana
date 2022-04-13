@@ -3,7 +3,7 @@
     "cluster": [],
     "indices": [
       {
-        "names": [".alerts-security*", ".preview.alerts-security*", ".siem-signals-*"],
+        "names": [".alerts-security*", ".siem-signals-*"],
         "privileges": ["read", "write", "maintenance"]
       },
       {
