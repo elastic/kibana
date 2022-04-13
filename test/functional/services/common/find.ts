@@ -362,14 +362,19 @@ export class FindService extends FtrService {
   public async clickByCssSelector(
     selector: string,
     timeout: number = this.defaultFindTimeout,
-    topOffset?: number
+    topOffset?: number,
+    retries?: number
   ): Promise<void> {
     this.log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(1000, async () => {
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
         // await element.moveMouseTo();
-        await element.click(topOffset);
+        if (typeof retries === 'number') {
+          await element.clickWithRetries(retries, topOffset);
+        } else {
+          await element.click(topOffset);
+        }
       } else {
         throw new Error(`Element with css='${selector}' is not found`);
       }

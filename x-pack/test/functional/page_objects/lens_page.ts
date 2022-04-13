@@ -23,7 +23,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const PageObjects = getPageObjects([
     'common',
     'header',
-    'timePicker',
+    'timePickerFast',
     'common',
     'visualize',
     'dashboard',
@@ -52,10 +52,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * a range that has data in our dataset.
      */
     async goToTimeRange(fromTime?: string, toTime?: string) {
-      await PageObjects.timePicker.ensureHiddenNoDataPopover();
-      fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
-      toTime = toTime || PageObjects.timePicker.defaultEndTime;
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePickerFast.ensureHiddenNoDataPopover();
+      fromTime = fromTime || PageObjects.timePickerFast.defaultStartTime;
+      toTime = toTime || PageObjects.timePickerFast.defaultEndTime;
+      await PageObjects.timePickerFast.setAbsoluteRange(fromTime, toTime);
     },
 
     /**

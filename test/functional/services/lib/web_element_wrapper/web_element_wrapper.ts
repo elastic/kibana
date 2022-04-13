@@ -191,6 +191,19 @@ export class WebElementWrapper {
   }
 
   /**
+   * Clicks on this element, with the specified number of retries.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#click
+   *
+   * @return {Promise<void>}
+   */
+  public async clickWithRetries(retries: number, topOffset?: number) {
+    await this.retryCall(async function click(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary(topOffset);
+      await wrapper._webElement.click();
+    }, retries);
+  }
+
+  /**
    * Focuses this element.
    *
    * @return {Promise<void>}
