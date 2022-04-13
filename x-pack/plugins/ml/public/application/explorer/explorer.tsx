@@ -187,22 +187,23 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const panelsInitialized = useRef<boolean>(false);
 
   useEffect(
+    /**
+     * Preserve collapsible panel state on page load.
+     * TODO Remove when https://github.com/elastic/eui/issues/4736 is resolved.
+     */
     function initTopInfluencersPanelCollapse() {
-      if (
-        panelsInitialized.current ||
-        !collapseFn.current ||
-        !topInfluencersPanelRef.current ||
-        !anomalyExplorerPanelState.topInfluencers.isCollapsed
-      )
+      if (panelsInitialized.current || !collapseFn.current || !topInfluencersPanelRef.current)
         return;
 
       panelsInitialized.current = true;
 
-      setTimeout(() => {
-        if (collapseFn.current) {
-          collapseFn.current();
-        }
-      }, 0);
+      if (anomalyExplorerPanelState.topInfluencers.isCollapsed) {
+        setTimeout(() => {
+          if (collapseFn.current) {
+            collapseFn.current();
+          }
+        }, 0);
+      }
     },
     [
       collapseFn.current,
@@ -451,7 +452,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
       <EuiResizableContainer
         direction={isMobile ? 'vertical' : 'horizontal'}
         onPanelWidthChange={onPanelWidthChange}
-        onToggleCollapsed={onToggleCollapsed}
       >
         {(EuiResizablePanel, EuiResizableButton, actions) => {
           collapseFn.current = () => actions.togglePanel!('topInfluencers', { direction: 'left' });
@@ -471,6 +471,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                 minSize={'200px'}
                 initialSize={20}
                 paddingSize={'s'}
+                onToggleCollapsed={onToggleCollapsed}
               >
                 {noInfluencersConfigured ? (
                   <div className="no-influencers-warning">
