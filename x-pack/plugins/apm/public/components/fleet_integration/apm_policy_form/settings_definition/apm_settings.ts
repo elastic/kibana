@@ -31,7 +31,7 @@ export function getApmSettings(): SettingsRow[] {
             'Host defines the host and port the server is listening on. URL is the unchangeable, publicly reachable server URL for deployments on Elastic Cloud or ECK.',
         }
       ),
-
+      dataTestSubj: 'packagePolicyHostInput',
       required: true,
     },
     {
@@ -44,6 +44,7 @@ export function getApmSettings(): SettingsRow[] {
           defaultMessage: 'URL',
         }
       ),
+      dataTestSubj: 'packagePolicyUrlInput',
       required: true,
     },
     {

@@ -35,6 +35,7 @@ const supportedTypes = new Set([
   'ip_range',
   'date',
   'date_range',
+  'murmur3',
 ]);
 
 const SCALE = 'ratio';
