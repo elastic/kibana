@@ -15,7 +15,7 @@ import {
   SIGNALS_ID,
 } from '@kbn/securitysolution-rules';
 
-import { getFilter } from './find_rules';
+import { enrichFilterWithAlertTypes } from './enrich_filter_with_alert_types';
 
 const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
@@ -37,14 +37,14 @@ describe('find_rules', () => {
   test.each(fullFilterTestCases)(
     'it returns a full filter with an AND if sent down [rule registry enabled: %p]',
     (isRuleRegistryEnabled, expected) => {
-      expect(getFilter('alert.attributes.enabled: true', isRuleRegistryEnabled)).toEqual(expected);
+      expect(enrichFilterWithAlertTypes('alert.attributes.enabled: true', isRuleRegistryEnabled)).toEqual(expected);
     }
   );
 
   test.each(nullFilterTestCases)(
     'it returns existing filter with no AND when not set [rule registry enabled: %p]',
     (isRuleRegistryEnabled, expected) => {
-      expect(getFilter(null, isRuleRegistryEnabled)).toEqual(expected);
+      expect(enrichFilterWithAlertTypes(null, isRuleRegistryEnabled)).toEqual(expected);
     }
   );
 });

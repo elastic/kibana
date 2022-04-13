@@ -23,7 +23,6 @@ import {
 } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { performBulkActionSchema } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -39,9 +38,7 @@ import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
 import { readRules } from '../../rules/read_rules';
-import { patchRules } from '../../rules/patch_rules';
 import {
-  applyBulkActionEditToRule,
   operationAdapterForRulesClient,
   splitBulkEditActions,
   ruleParamsModifier,
@@ -107,7 +104,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
   return Array.from(errorsMap, ([_, normalizedError]) => normalizedError);
 };
 
-const buildBulkResponsePOC = (
+const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
     errors = [],
@@ -115,14 +112,12 @@ const buildBulkResponsePOC = (
     created = [],
     deleted = [],
   }: {
-    //  errors?: Awaited<ReturnType<RulesClient['bulkEdit']>>['errors'];
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
     created?: RuleAlertType[];
     deleted?: RuleAlertType[];
   }
 ) => {
-  // const errors = [...fetchRulesOutcome.errors, ...bulkActionOutcome.errors];
   const succeeded = updated.length + created.length + deleted.length;
   const summary = {
     failed: errors.length,
@@ -134,63 +129,6 @@ const buildBulkResponsePOC = (
     updated: updated.map((rule) => internalRuleToAPIResponse(rule)),
     created: created.map((rule) => internalRuleToAPIResponse(rule)),
     deleted: deleted.map((rule) => internalRuleToAPIResponse(rule)),
-  };
-
-  if (errors.length > 0) {
-    return response.custom({
-      headers: { 'content-type': 'application/json' },
-      body: Buffer.from(
-        JSON.stringify({
-          message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
-          status_code: 500,
-          attributes: {
-            errors: normalizeErrorResponse(errors),
-            results,
-            summary,
-          },
-        })
-      ),
-      statusCode: 500,
-    });
-  }
-
-  return response.ok({
-    body: {
-      success: true,
-      rules_count: summary.total,
-      attributes: { results, summary },
-    },
-  });
-};
-
-const buildBulkResponse = (
-  response: KibanaResponseFactory,
-  fetchRulesOutcome: PromisePoolOutcome<string, RuleAlertType>,
-  bulkActionOutcome: PromisePoolOutcome<RuleAlertType, RuleAlertType | null>
-) => {
-  const errors = [...fetchRulesOutcome.errors, ...bulkActionOutcome.errors];
-  const summary = {
-    failed: errors.length,
-    succeeded: bulkActionOutcome.results.length,
-    total: bulkActionOutcome.results.length + errors.length,
-  };
-
-  // Whether rules will be updated, created or deleted depends on the bulk
-  // action type being processed. However, in order to avoid doing a switch-case
-  // by the action type, we can figure it out indirectly.
-  const results = {
-    // We had a rule, now there's a rule with the same id - the existing rule was modified
-    updated: bulkActionOutcome.results
-      .filter(({ item, result }) => item.id === result?.id)
-      .map(({ result }) => result && internalRuleToAPIResponse(result)),
-    // We had a rule, now there's a rule with a different id - a new rule was created
-    created: bulkActionOutcome.results
-      .filter(({ item, result }) => result != null && result.id !== item.id)
-      .map(({ result }) => result && internalRuleToAPIResponse(result)),
-    // We had a rule, now it's null - the rule was deleted
-    deleted: bulkActionOutcome.results
-      .filter(({ result }) => result == null)
-      .map(({ item }) => internalRuleToAPIResponse(item)),
   };
 
   if (errors.length > 0) {
@@ -377,7 +315,7 @@ export const performBulkActionRoute = (
             },
           });
 
-          return buildBulkResponsePOC(response, { updated: rules, errors });
+          return buildBulkResponse(response, { updated: rules, errors });
         }
 
         const fetchRulesOutcome = await fetchRulesByQueryOrIds({
@@ -524,7 +462,7 @@ export const performBulkActionRoute = (
           throw new AbortError('Bulk action was aborted');
         }
 
-        return buildBulkResponsePOC(response, {
+        return buildBulkResponse(response, {
           updated,
           deleted,
           created,
