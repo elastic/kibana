@@ -159,6 +159,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onSubmit,
   setForm,
 }) => {
+  const dataViewRadioButtonId = 'dataView';
   const { pathname } = useLocation();
   const sourcererPathName = getScopeFromPath(pathname);
 
@@ -168,7 +169,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     indexPattern: dataViewIndexPattern,
     runtimeMappings,
     // selectedPatterns,
-    dataViewId,
+    dataViewId: sourcererDataViewId,
     loading: isLoadingDataViewIndexPattern,
   } = useSourcererDataView(sourcererPathName);
   // // console.log('SELECTED PATTERNS', selectedPatterns);
@@ -192,7 +193,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
-  const [radioIdSelected, setRadioIdSelected] = useState('dataView');
+  const [radioIdSelected, setRadioIdSelected] = useState(dataViewRadioButtonId);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -244,6 +245,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
+  const dataViewId = formDataViewId || initialState.dataViewId;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
@@ -261,7 +263,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   };
 
   useEffect(() => {
-    if (radioIdSelected === 'dataView') {
+    if (radioIdSelected === dataViewRadioButtonId) {
       setIndexPattern(dataViewIndexPattern);
     } else {
       // elasticsearch index patterns
@@ -408,13 +410,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ]
   );
   const DataSource = useMemo(() => {
-    if (radioIdSelected === 'dataView') {
+    if (radioIdSelected === dataViewRadioButtonId) {
       return (
         <UseField
           path="dataViewId"
           component={DataViewSelector}
           componentProps={{
             kibanaDataViews,
+            dataViewId,
           }}
         />
       );
@@ -447,7 +450,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         </EuiAccordion>
       );
     }
-  }, [handleResetIndices, indexModified, kibanaDataViews, radioIdSelected]);
+  }, [handleResetIndices, indexModified, kibanaDataViews, radioIdSelected, dataViewId]);
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -488,7 +491,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   <EuiRadioGroup
                     options={[
                       {
-                        id: 'dataView',
+                        id: dataViewRadioButtonId,
                         label: 'Data View',
                         // labelProps: {
                         //   style: { display: 'flex !important', width: '400px' },

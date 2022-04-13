@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -23,12 +23,17 @@ import { sourcererModel } from '../../../../common/store/sourcerer';
 interface DataViewSelectorProps {
   kibanaDataViews: sourcererModel.SourcererDataView[];
   field: FieldHook;
+  dataViewId: string;
 }
 type Event = React.ChangeEvent<HTMLInputElement>;
 
-export const DataViewSelector = ({ kibanaDataViews = [], field }: DataViewSelectorProps) => {
+export const DataViewSelector = ({
+  kibanaDataViews = [],
+  field,
+  dataViewId,
+}: DataViewSelectorProps) => {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    []
+    dataViewId != null ? [{ label: dataViewId }] : []
   );
   const onChangeIndexPatterns = useCallback(
     (options: Array<EuiComboBoxOptionOption<string>>) => {
@@ -39,6 +44,15 @@ export const DataViewSelector = ({ kibanaDataViews = [], field }: DataViewSelect
     },
     [field]
   );
+
+  // sometimes the form isn't loaded before this component renders
+  // so the state of dataViewId changes from the initial state
+  // in the parent component to the state pulled from the rule form
+  // this makes sure we update the dropdown to display the data view id
+  // stored in the rule params when editing the rule.
+  useEffect(() => {
+    setSelectedOptions([{ label: dataViewId }]);
+  }, [dataViewId]);
 
   // const onChangeIndexPatterns = (options: Array<EuiComboBoxOptionOption<string>>) => {
   //   setSelectedOptions(options);
