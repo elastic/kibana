@@ -356,7 +356,7 @@ export const RulesList: React.FunctionComponent = () => {
           await snoozeRule({ http, id: item.id, snoozeEndTime });
         }}
         unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
-        item={item}
+        rule={item}
         onRuleChanged={() => loadRulesData()}
         isEditable={item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)}
       />
