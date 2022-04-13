@@ -10,29 +10,54 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
+import {
+  getEnvironmentLabel,
+  ENVIRONMENT_NOT_DEFINED,
+  ENVIRONMENT_ALL,
+} from '../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useServiceName } from '../../../hooks/use_service_name';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
+
+function getEnvironmentOptions(environments: Environment[]) {
+  const environmentOptions = environments
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
+    .map((environment) => ({
+      value: environment,
+      label: environment,
+    }));
+
+  return [
+    ENVIRONMENT_ALL,
+    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
+      ? [ENVIRONMENT_NOT_DEFINED]
+      : []),
+    ...environmentOptions,
+  ];
+}
 
 export function EnvironmentSelect({
   environment,
-  environmentOptions,
+  availableEnvironments,
   status,
-  serviceName,
-  start,
-  end,
   onChange,
 }: {
   environment: Environment;
-  environmentOptions: Array<EuiComboBoxOptionOption<string>>;
+  availableEnvironments: Environment[];
   status: FETCH_STATUS;
-  serviceName?: string;
-  start?: string;
-  end?: string;
   onChange: (value: string) => void;
 }) {
   const [searchValue, setSearchValue] = useState('');
+  const serviceName = useServiceName();
+  const { query } = useApmParams('/*');
+
+  const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
+  const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [
     {
@@ -69,6 +94,11 @@ export function EnvironmentSelect({
     [searchValue, start, end, serviceName]
   );
   const terms = data?.terms ?? [];
+
+  const environmentOptions = useMemo(
+    () => getEnvironmentOptions(availableEnvironments),
+    [availableEnvironments]
+  );
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(searchValue === ''

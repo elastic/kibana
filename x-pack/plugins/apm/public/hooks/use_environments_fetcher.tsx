@@ -5,29 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../common/environment_filter_values';
-
-function getEnvironmentOptions(environments: string[]) {
-  const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
-    .map((environment) => ({
-      value: environment,
-      label: environment,
-    }));
-
-  return [
-    ENVIRONMENT_ALL,
-    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
-      ? [ENVIRONMENT_NOT_DEFINED]
-      : []),
-    ...environmentOptions,
-  ];
-}
 
 const INITIAL_DATA = { environments: [] };
 
@@ -57,10 +35,5 @@ export function useEnvironmentsFetcher({
     [start, end, serviceName]
   );
 
-  const environmentOptions = useMemo(
-    () => getEnvironmentOptions(data.environments),
-    [data?.environments]
-  );
-
-  return { environments: data.environments, status, environmentOptions };
+  return { environments: data.environments, status };
 }

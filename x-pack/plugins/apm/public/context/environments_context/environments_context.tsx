@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { Environment } from '../../../common/environment_rt';
 import { useApmParams } from '../../hooks/use_apm_params';
@@ -15,16 +14,11 @@ import { useEnvironmentsFetcher } from '../../hooks/use_environments_fetcher';
 
 export const EnvironmentsContext = React.createContext<{
   environment: Environment;
-  environments: string[];
-  environmentOptions: Array<EuiComboBoxOptionOption<string>>;
-  serviceName?: string;
-  start?: string;
-  end?: string;
+  environments: Environment[];
   status: FETCH_STATUS;
 }>({
   environment: ENVIRONMENT_ALL.value,
   environments: [],
-  environmentOptions: [],
   status: FETCH_STATUS.NOT_INITIATED,
 });
 
@@ -45,7 +39,7 @@ export function EnvironmentsContextProvider({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
-  const { environments, status, environmentOptions } = useEnvironmentsFetcher({
+  const { environments, status } = useEnvironmentsFetcher({
     serviceName,
     start,
     end,
@@ -54,13 +48,9 @@ export function EnvironmentsContextProvider({
   return (
     <EnvironmentsContext.Provider
       value={{
-        environments,
-        environmentOptions,
-        status,
         environment,
-        serviceName,
-        start,
-        end,
+        environments,
+        status,
       }}
     >
       {children}
