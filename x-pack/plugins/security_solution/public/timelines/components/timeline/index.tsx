@@ -74,7 +74,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     savedObjectId,
     timelineType,
     description,
-    sessionViewId,
+    sessionViewConfig,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -84,7 +84,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'savedObjectId',
         'timelineType',
         'description',
-        'sessionViewId',
+        'sessionViewConfig',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -202,7 +202,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
         <TabsContent
           graphEventId={graphEventId}
-          sessionViewId={sessionViewId}
+          sessionViewConfig={sessionViewConfig}
           renderCellValue={renderCellValue}
           rowRenderers={rowRenderers}
           timelineId={timelineId}

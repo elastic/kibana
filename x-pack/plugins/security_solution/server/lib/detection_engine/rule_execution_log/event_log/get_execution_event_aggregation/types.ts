@@ -7,6 +7,9 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+// Shared constants, consider moving to packages
+export const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
+
 type AlertCounts = estypes.AggregationsMultiBucketAggregateBase & {
   buckets: {
     activeAlerts: estypes.AggregationsSingleBucketAggregateBase;

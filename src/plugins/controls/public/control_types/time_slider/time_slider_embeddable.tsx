@@ -151,7 +151,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const min = value ? value[0] : null;
     const max = value ? value[1] : null;
     const hasRange =
-      this.componentState.range!.max !== undefined && this.componentState.range!.min !== undefined;
+      this.componentState.range?.max !== undefined && this.componentState.range?.min !== undefined;
 
     this.getCurrentDataView$().subscribe((dataView) => {
       const range: RangeFilterParams = {};

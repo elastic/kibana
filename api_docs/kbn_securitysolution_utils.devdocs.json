@@ -145,7 +145,7 @@
             "section": "def-server.OperatingSystem",
             "text": "OperatingSystem"
           },
-          "; field: \"file.path.text\" | ",
+          "; field: ",
           {
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "server",
@@ -208,8 +208,16 @@
                     "pluginId": "@kbn/securitysolution-utils",
                     "scope": "server",
                     "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-                    "section": "def-server.AllConditionEntryFields",
-                    "text": "AllConditionEntryFields"
+                    "section": "def-server.TrustedAppConditionEntryField",
+                    "text": "TrustedAppConditionEntryField"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/securitysolution-utils",
+                    "scope": "server",
+                    "docId": "kibKbnSecuritysolutionUtilsPluginApi",
+                    "section": "def-server.BlocklistConditionEntryField",
+                    "text": "BlocklistConditionEntryField"
                   }
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
@@ -425,6 +433,7 @@
         "label": "AllConditionEntryFields",
         "description": [],
         "signature": [
+          "\"file.path.text\" | ",
           {
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "server",

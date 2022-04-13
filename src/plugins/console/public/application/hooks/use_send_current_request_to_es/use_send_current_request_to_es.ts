@@ -21,7 +21,7 @@ import { track } from './track';
 
 export const useSendCurrentRequestToES = () => {
   const {
-    services: { history, settings, notifications, trackUiMetric },
+    services: { history, settings, notifications, trackUiMetric, http },
     theme$,
   } = useServicesContext();
 
@@ -46,12 +46,12 @@ export const useSendCurrentRequestToES = () => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequestToES({ requests });
+      const results = await sendRequestToES({ http, requests });
 
       let saveToHistoryError: undefined | Error;
-      const { historyDisabled } = settings.toJSON();
+      const { isHistoryDisabled } = settings.toJSON();
 
-      if (!historyDisabled) {
+      if (!isHistoryDisabled) {
         results.forEach(({ request: { path, method, data } }) => {
           try {
             history.addToHistory(path, method, data);
@@ -81,7 +81,7 @@ export const useSendCurrentRequestToES = () => {
                   notifications.toasts.remove(toast);
                 },
                 onDisableSavingToHistory: () => {
-                  settings.setHistoryDisabled(true);
+                  settings.setIsHistoryDisabled(true);
                   notifications.toasts.remove(toast);
                 },
               }),
@@ -102,7 +102,7 @@ export const useSendCurrentRequestToES = () => {
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.
-        retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
       }
 
       dispatch({
@@ -129,5 +129,5 @@ export const useSendCurrentRequestToES = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackUiMetric, theme$]);
+  }, [dispatch, http, settings, notifications.toasts, trackUiMetric, history, theme$]);
 };

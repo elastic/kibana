@@ -7,7 +7,7 @@
 
 import { create as createHandlebars, HelperDelegate, HelperOptions } from 'handlebars';
 import { encode, RisonValue } from 'rison-node';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment, { Moment } from 'moment';
 import numeral from '@elastic/numeral';
 import { url } from '../../../../../../src/plugins/kibana_utils/public';

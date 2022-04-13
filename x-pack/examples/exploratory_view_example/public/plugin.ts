@@ -6,9 +6,9 @@
  */
 
 import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { ObservabilityPublicStart } from '../../../plugins/observability/public';
-import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
+import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { ObservabilityPublicStart } from '../../../plugins/observability/public';
+import type { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
 import { mount } from './mount';
 
 export interface SetupDependencies {

@@ -44,8 +44,8 @@ const REQUEST_ACCESS_LABEL = i18n.translate('xpack.uptime.monitorManagement.requ
   defaultMessage: 'Request access',
 });
 
-const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.uptime.monitorManagement.label', {
-  defaultMessage: 'Monitor management',
+export const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.uptime.monitorManagement.label', {
+  defaultMessage: 'Monitor Management',
 });
 
 const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
@@ -55,12 +55,12 @@ const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
   }
 );
 
-const PUBLIC_BETA_DESCRIPTION = i18n.translate(
+export const PUBLIC_BETA_DESCRIPTION = i18n.translate(
   'xpack.uptime.monitorManagement.publicBetaDescription',
   {
     defaultMessage:
       'Monitor management is available only for selected public beta users. With public\n' +
       'beta access, you will be able to add HTTP, TCP, ICMP and Browser checks which will\n' +
-      "run on Elastic's managed synthetics service nodes.",
+      "run on Elastic's managed Synthetics service nodes.",
   }
 );

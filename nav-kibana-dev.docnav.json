@@ -61,8 +61,8 @@
         },
         { "id": "kibDevTutorialCI" },
         { "id": "kibDevTutorialServerEndpoint" },
-        { "id": "kibDevTutorialAdvancedSettings"},
-        { "id": "kibDevSharePluginReadme"}
+        { "id": "kibDevTutorialAdvancedSettings" },
+        { "id": "kibDevSharePluginReadme" }
       ]
     },
     {
@@ -103,7 +103,6 @@
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
         { "id": "kibDataSearchPluginApi" },
-        { "id": "kibDataUiPluginApi" },
         { "id": "kibBfetchPluginApi" },
         { "id": "kibAlertingPluginApi" },
         { "id": "kibTaskManagerPluginApi" },
