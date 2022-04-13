@@ -73,12 +73,13 @@ export class RouteGuard {
   public fullLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
     return this._guard(() => this._mlLicense.isFullLicense(), handler);
   }
+
   public basicLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
     return this._guard(() => this._mlLicense.isMinimumLicense(), handler);
   }
 
   private _guard<P, Q, B>(check: () => boolean, handler: Handler<P, Q, B>) {
-    return (
+    return async (
       context: MLRequestHandlerContext,
       request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
@@ -87,7 +88,8 @@ export class RouteGuard {
         return response.forbidden();
       }
 
-      const client = context.core.elasticsearch.client;
+      const { elasticsearch, savedObjects } = await context.core;
+      const client = elasticsearch.client;
       const mlSavedObjectClient = this._getMlSavedObjectClient(request);
       const internalSavedObjectsClient = this._getInternalSavedObjectClient();
       if (mlSavedObjectClient === null || internalSavedObjectsClient === null) {
@@ -114,7 +116,7 @@ export class RouteGuard {
         mlClient: getMlClient(client, mlSavedObjectService),
         getDataViewsService: getDataViewsServiceFactory(
           this._getDataViews,
-          context.core.savedObjects.client,
+          savedObjects.client,
           client,
           request
         ),
