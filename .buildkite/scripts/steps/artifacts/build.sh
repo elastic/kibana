@@ -13,9 +13,15 @@ echo "--- Extract default i18n messages"
 mkdir -p target/i18n
 node scripts/i18n_extract --output-dir=target/i18n
 
-echo "--- Build and upload dependencies report"
+echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$FULL_VERSION.csv"
+sha512sum "target/dependencies-$FULL_VERSION.csv" > "target/dependencies-$FULL_VERSION.csv.sha512.txt"
+
+echo "--- Upload Kibana Artifacts"
 cd target
-sha512sum "dependencies-$FULL_VERSION.csv" > "dependencies-$FULL_VERSION.csv.sha512.txt"
-buildkite-agent artifact upload "*"
+buildkite-agent artifact upload 'kibana-*'
+buildkite-agent artifact upload "dependencies-$FULL_VERSION.csv"
+buildkite-agent artifact upload "dependencies-$FULL_VERSION.csv.sha512.txt"
+buildkite-agent artifact upload 'i18n/*.json'
 cd -
+
