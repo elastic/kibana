@@ -164,7 +164,7 @@ const LogstashInstructionSteps = () => {
           <>
             <FormattedMessage
               id="xpack.fleet.settings.logstashInstructions.editPipelineStepDescription"
-              defaultMessage="Next, open the elastic-agent-pipeline.config file and insert the following content:"
+              defaultMessage="Next, open the elastic-agent-pipeline.conf file and insert the following content:"
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
