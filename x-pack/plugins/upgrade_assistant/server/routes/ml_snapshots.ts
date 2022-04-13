@@ -151,47 +151,40 @@ export function registerMlSnapshotRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            savedObjects: { client: savedObjectsClient },
-            elasticsearch: { client: esClient },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const { snapshotId, jobId } = request.body;
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          savedObjects: { client: savedObjectsClient },
+          elasticsearch: { client: esClient },
+        } = await core;
+        const { snapshotId, jobId } = request.body;
 
-          const body = await esClient.asCurrentUser.ml.upgradeJobSnapshot({
-            job_id: jobId,
-            snapshot_id: snapshotId,
-          });
+        const body = await esClient.asCurrentUser.ml.upgradeJobSnapshot({
+          job_id: jobId,
+          snapshot_id: snapshotId,
+        });
 
-          const snapshotInfo: MlOperation = {
-            nodeId: body.node,
-            snapshotId,
-            jobId,
-          };
+        const snapshotInfo: MlOperation = {
+          nodeId: body.node,
+          snapshotId,
+          jobId,
+        };
 
-          // Store snapshot in saved object if upgrade not complete
-          if (body.completed !== true) {
-            await createMlOperation(savedObjectsClient, snapshotInfo);
-          }
-
-          return response.ok({
-            body: {
-              ...snapshotInfo,
-              status: body.completed === true ? 'complete' : 'in_progress',
-            },
-          });
-        } catch (error) {
-          return handleEsError({ error, response });
+        // Store snapshot in saved object if upgrade not complete
+        if (body.completed !== true) {
+          await createMlOperation(savedObjectsClient, snapshotInfo);
         }
+
+        return response.ok({
+          body: {
+            ...snapshotInfo,
+            status: body.completed === true ? 'complete' : 'in_progress',
+          },
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 
   // Get the status of the upgrade snapshot task
@@ -205,102 +198,67 @@ export function registerMlSnapshotRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            savedObjects: { client: savedObjectsClient },
-            elasticsearch: { client: esClient },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const { snapshotId, jobId } = request.params;
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          savedObjects: { client: savedObjectsClient },
+          elasticsearch: { client: esClient },
+        } = await core;
+        const { snapshotId, jobId } = request.params;
 
-          // Verify snapshot exists
-          await esClient.asCurrentUser.ml.getModelSnapshots({
-            job_id: jobId,
-            snapshot_id: snapshotId,
+        // Verify snapshot exists
+        await esClient.asCurrentUser.ml.getModelSnapshots({
+          job_id: jobId,
+          snapshot_id: snapshotId,
+        });
+
+        const foundSnapshots = await findMlOperation(savedObjectsClient, snapshotId);
+
+        // If snapshot is *not* found in SO, assume there has not been an upgrade operation started
+        if (typeof foundSnapshots === 'undefined' || foundSnapshots.total === 0) {
+          return response.ok({
+            body: {
+              snapshotId,
+              jobId,
+              nodeId: undefined,
+              status: 'idle',
+            },
           });
+        }
 
-          const foundSnapshots = await findMlOperation(savedObjectsClient, snapshotId);
+        const upgradeStatus = await getModelSnapshotUpgradeStatus(esClient, jobId, snapshotId);
+        // Create snapshotInfo payload to send back in the response
+        const snapshotOp = foundSnapshots.saved_objects[0];
+        const snapshotInfo: MlOperation = {
+          ...snapshotOp.attributes,
+        };
 
-          // If snapshot is *not* found in SO, assume there has not been an upgrade operation started
-          if (typeof foundSnapshots === 'undefined' || foundSnapshots.total === 0) {
+        if (upgradeStatus) {
+          if (
+            upgradeStatus.state === 'loading_old_state' ||
+            upgradeStatus.state === 'saving_new_state'
+          ) {
             return response.ok({
               body: {
-                snapshotId,
-                jobId,
-                nodeId: undefined,
-                status: 'idle',
+                ...snapshotInfo,
+                status: 'in_progress',
               },
             });
-          }
-
-          const upgradeStatus = await getModelSnapshotUpgradeStatus(esClient, jobId, snapshotId);
-          // Create snapshotInfo payload to send back in the response
-          const snapshotOp = foundSnapshots.saved_objects[0];
-          const snapshotInfo: MlOperation = {
-            ...snapshotOp.attributes,
-          };
-
-          if (upgradeStatus) {
-            if (
-              upgradeStatus.state === 'loading_old_state' ||
-              upgradeStatus.state === 'saving_new_state'
-            ) {
-              return response.ok({
-                body: {
-                  ...snapshotInfo,
-                  status: 'in_progress',
-                },
-              });
-            } else if (upgradeStatus.state === 'failed') {
-              return response.customError({
-                statusCode: 500,
-                body: {
-                  message: i18n.translate(
-                    'xpack.upgradeAssistant.ml_snapshots.modelSnapshotUpgradeFailed',
-                    {
-                      defaultMessage:
-                        'The upgrade process for this model snapshot failed. Check the Elasticsearch logs for more details.',
-                    }
-                  ),
-                },
-              });
-            } else {
-              // The task ID was not found; verify the deprecation was resolved
-              const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
-                await verifySnapshotUpgrade(esClient, {
-                  snapshotId,
-                  jobId,
-                });
-
-              // Delete the SO; if it's complete, no need to store it anymore. If there's an error, this will give the user a chance to retry
-              await deleteMlOperation(savedObjectsClient, snapshotOp.id);
-
-              if (isSnapshotDeprecationResolved) {
-                return response.ok({
-                  body: {
-                    ...snapshotInfo,
-                    status: 'complete',
-                  },
-                });
-              }
-
-              return response.customError({
-                statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
-                body: {
-                  message:
-                    upgradeSnapshotError?.body?.error?.reason ||
-                    'The upgrade process for this model snapshot stopped yet the snapshot is not upgraded. Check the Elasticsearch logs for more details.',
-                },
-              });
-            }
+          } else if (upgradeStatus.state === 'failed') {
+            return response.customError({
+              statusCode: 500,
+              body: {
+                message: i18n.translate(
+                  'xpack.upgradeAssistant.ml_snapshots.modelSnapshotUpgradeFailed',
+                  {
+                    defaultMessage:
+                      'The upgrade process for this model snapshot failed. Check the Elasticsearch logs for more details.',
+                  }
+                ),
+              },
+            });
           } else {
-            // No tasks found; verify the deprecation was resolved
+            // The task ID was not found; verify the deprecation was resolved
             const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
               await verifySnapshotUpgrade(esClient, {
                 snapshotId,
@@ -319,23 +277,51 @@ export function registerMlSnapshotRoutes({
               });
             }
 
-            log.error(
-              `Failed to determine status of the ML model upgrade, upgradeStatus is not defined and snapshot upgrade is not completed. snapshotId=${snapshotId} and jobId=${jobId}`
-            );
             return response.customError({
               statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
               body: {
                 message:
                   upgradeSnapshotError?.body?.error?.reason ||
-                  'The upgrade process for this model snapshot completed yet the snapshot is not upgraded. Check the Elasticsearch logs for more details.',
+                  'The upgrade process for this model snapshot stopped yet the snapshot is not upgraded. Check the Elasticsearch logs for more details.',
               },
             });
           }
-        } catch (e) {
-          return handleEsError({ error: e, response });
+        } else {
+          // No tasks found; verify the deprecation was resolved
+          const { isSuccessful: isSnapshotDeprecationResolved, error: upgradeSnapshotError } =
+            await verifySnapshotUpgrade(esClient, {
+              snapshotId,
+              jobId,
+            });
+
+          // Delete the SO; if it's complete, no need to store it anymore. If there's an error, this will give the user a chance to retry
+          await deleteMlOperation(savedObjectsClient, snapshotOp.id);
+
+          if (isSnapshotDeprecationResolved) {
+            return response.ok({
+              body: {
+                ...snapshotInfo,
+                status: 'complete',
+              },
+            });
+          }
+
+          log.error(
+            `Failed to determine status of the ML model upgrade, upgradeStatus is not defined and snapshot upgrade is not completed. snapshotId=${snapshotId} and jobId=${jobId}`
+          );
+          return response.customError({
+            statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode! : 500,
+            body: {
+              message:
+                upgradeSnapshotError?.body?.error?.reason ||
+                'The upgrade process for this model snapshot completed yet the snapshot is not upgraded. Check the Elasticsearch logs for more details.',
+            },
+          });
         }
+      } catch (e) {
+        return handleEsError({ error: e, response });
       }
-    )
+    })
   );
 
   // Get the ml upgrade mode
@@ -344,29 +330,22 @@ export function registerMlSnapshotRoutes({
       path: `${API_BASE_PATH}/ml_upgrade_mode`,
       validate: false,
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client: esClient },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const mlInfo = await esClient.asCurrentUser.ml.info();
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client: esClient },
+        } = await core;
+        const mlInfo = await esClient.asCurrentUser.ml.info();
 
-          return response.ok({
-            body: {
-              mlUpgradeModeEnabled: mlInfo.upgrade_mode,
-            },
-          });
-        } catch (e) {
-          return handleEsError({ error: e, response });
-        }
+        return response.ok({
+          body: {
+            mlUpgradeModeEnabled: mlInfo.upgrade_mode,
+          },
+        });
+      } catch (e) {
+        return handleEsError({ error: e, response });
       }
-    )
+    })
   );
 
   // Delete ML model snapshot
@@ -380,31 +359,24 @@ export function registerMlSnapshotRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const { snapshotId, jobId } = request.params;
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const { snapshotId, jobId } = request.params;
 
-          const deleteSnapshotResponse = await client.asCurrentUser.ml.deleteModelSnapshot({
-            job_id: jobId,
-            snapshot_id: snapshotId,
-          });
+        const deleteSnapshotResponse = await client.asCurrentUser.ml.deleteModelSnapshot({
+          job_id: jobId,
+          snapshot_id: snapshotId,
+        });
 
-          return response.ok({
-            body: deleteSnapshotResponse,
-          });
-        } catch (e) {
-          return handleEsError({ error: e, response });
-        }
+        return response.ok({
+          body: deleteSnapshotResponse,
+        });
+      } catch (e) {
+        return handleEsError({ error: e, response });
       }
-    )
+    })
   );
 }
