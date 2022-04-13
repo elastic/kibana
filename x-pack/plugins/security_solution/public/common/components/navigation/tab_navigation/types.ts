@@ -32,4 +32,5 @@ export interface TabNavigationItemProps {
   disabled: boolean;
   name: string;
   isSelected: boolean;
+  isBeta?: boolean;
 }

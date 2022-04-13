@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
@@ -85,7 +86,7 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         const { license$ } = await plugin.start(coreStart);
 
-        const license = await license$.pipe(take(1)).toPromise();
+        const license = await firstValueFrom(license$);
         expect(license.isAvailable).toBe(true);
         expect(license.uid).toBe('saved');
 
@@ -107,7 +108,7 @@ describe('licensing plugin', () => {
 
         plugin.setup(coreSetup);
         const { refresh, license$ } = await plugin.start(coreStart);
-        const promise = license$.pipe(take(3), toArray()).toPromise();
+        const promise = firstValueFrom(license$.pipe(take(3), toArray()));
 
         await refresh();
         await refresh();
@@ -131,7 +132,7 @@ describe('licensing plugin', () => {
         const { license$, refresh } = await plugin.start(coreStart);
 
         await refresh();
-        const license = await license$.pipe(take(1)).toPromise();
+        const license = await firstValueFrom(license$);
 
         expect(license.uid).toBe('fresh');
 
@@ -157,7 +158,7 @@ describe('licensing plugin', () => {
         const { license$, refresh } = await plugin.start(coreStart);
         await refresh();
 
-        const license = await license$.pipe(take(1)).toPromise();
+        const license = await firstValueFrom(license$);
 
         expect(license.isAvailable).toBe(false);
         expect(license.error).toBe('reason');
@@ -233,7 +234,7 @@ describe('licensing plugin', () => {
 
       expect(coreSetup.http.get).toHaveBeenCalledTimes(1);
 
-      const license = await license$.pipe(take(1)).toPromise();
+      const license = await firstValueFrom(license$);
       expect(license.isAvailable).toBe(true);
 
       await registeredInterceptor!.response!(httpResponse as any, null as any);

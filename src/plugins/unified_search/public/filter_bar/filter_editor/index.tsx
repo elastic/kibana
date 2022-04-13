@@ -44,13 +44,13 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { IIndexPattern, IFieldType } from '../../../../data/common';
+import { DataView, IFieldType } from '../../../../data_views/common';
 import { getIndexPatternFromFilter } from '../../../../data/public';
 import { CodeEditor } from '../../../../kibana_react/public';
 
 export interface Props {
   filter: Filter;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
@@ -58,7 +58,7 @@ export interface Props {
 }
 
 interface State {
-  selectedIndexPattern?: IIndexPattern;
+  selectedIndexPattern?: DataView;
   selectedField?: IFieldType;
   selectedOperator?: Operator;
   params: any;
@@ -432,7 +432,7 @@ class FilterEditorUI extends Component<Props, State> {
     return isFilterValid(indexPattern, field, operator, params);
   }
 
-  private onIndexPatternChange = ([selectedIndexPattern]: IIndexPattern[]) => {
+  private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
     const selectedField = undefined;
     const selectedOperator = undefined;
     const params = undefined;
@@ -513,7 +513,7 @@ class FilterEditorUI extends Component<Props, State> {
   };
 }
 
-function IndexPatternComboBox(props: GenericComboBoxProps<IIndexPattern>) {
+function IndexPatternComboBox(props: GenericComboBoxProps<DataView>) {
   return GenericComboBox(props);
 }
 

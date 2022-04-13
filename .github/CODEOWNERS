@@ -88,7 +88,6 @@
 ### Observability Plugins
 
 # Observability Shared
-/x-pack/plugins/observability/ @elastic/observability-ui
 /x-pack/plugins/observability/public/components/shared/date_picker/ @elastic/uptime
 
 # Unified Observability
@@ -103,6 +102,7 @@
 /x-pack/plugins/observability/public/rules @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/alerts @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
+/x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
 
 # Infra Monitoring
 /x-pack/plugins/infra/ @elastic/infra-monitoring-ui
@@ -394,7 +394,6 @@
 /x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/plugins/security_solution/ @elastic/security-solution
-/x-pack/plugins/metrics_entities/ @elastic/security-solution
 /x-pack/test/detection_engine_api_integration @elastic/security-solution
 /x-pack/test/lists_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution

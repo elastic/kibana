@@ -133,10 +133,6 @@ export class SearchSessionsMgmtAPI {
   ) {}
 
   public async fetchTableData(): Promise<UISession[]> {
-    interface FetchResult {
-      saved_objects: object[];
-    }
-
     const mgmtConfig = this.config.management;
 
     const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
@@ -165,7 +161,7 @@ export class SearchSessionsMgmtAPI {
 
     // fetch the search sessions before timeout triggers
     try {
-      const result = await race<FetchResult | null>(fetch$, timeout$).toPromise();
+      const result = await race(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         const savedObjects = result.saved_objects as Array<
           SavedObject<PersistedSearchSessionSavedObjectAttributes>
