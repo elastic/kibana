@@ -21,11 +21,15 @@ import {
   getNavigateToApp,
   getSavedObjectsClient,
   getSavedObjectsTagging,
-  getSavedObjects,
+  getUiSettings,
   getTheme,
+  getApplication,
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+
+const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
+const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 interface MapItem {
   id: string;
@@ -93,7 +97,7 @@ async function findMaps(searchQuery: string) {
   const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
     type: MAP_SAVED_OBJECT_TYPE,
     search: searchTerm ? `${searchTerm}*` : undefined,
-    perPage: getSavedObjects().settings.getListingLimit(),
+    perPage: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
     page: 1,
     searchFields: ['title^3', 'description'],
     defaultSearchOperator: 'AND',
@@ -129,6 +133,8 @@ export function MapsListView() {
   });
 
   const isReadOnly = !getMapsCapabilities().save;
+  const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   getCoreChrome().docTitle.change(getAppTitle());
   getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
@@ -141,9 +147,9 @@ export function MapsListView() {
       findItems={findMaps}
       deleteItems={isReadOnly ? undefined : deleteMaps}
       tableColumns={tableColumns}
-      listingLimit={getSavedObjects().settings.getListingLimit()}
+      listingLimit={listingLimit}
       initialFilter={''}
-      initialPageSize={getSavedObjects().settings.getPerPage()}
+      initialPageSize={initialPageSize}
       entityName={i18n.translate('xpack.maps.mapListing.entityName', {
         defaultMessage: 'map',
       })}
@@ -157,6 +163,7 @@ export function MapsListView() {
       toastNotifications={getToasts()}
       searchFilters={searchFilters}
       theme={getTheme()}
+      application={getApplication()}
     />
   );
 }

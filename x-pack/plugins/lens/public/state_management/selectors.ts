@@ -162,11 +162,13 @@ export const selectFramePublicAPI = createSelector(
     selectCurrentDatasourceStates,
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
+    selectResolvedDateRange,
   ],
-  (datasourceStates, activeData, datasourceMap) => {
+  (datasourceStates, activeData, datasourceMap, dateRange) => {
     return {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
       activeData,
+      dateRange,
     };
   }
 );

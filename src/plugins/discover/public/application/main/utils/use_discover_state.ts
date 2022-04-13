@@ -141,7 +141,7 @@ export function useDiscoverState({
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
-        refetch$.next();
+        refetch$.next(undefined);
       }
       setState(nextState);
     });
@@ -211,7 +211,7 @@ export function useDiscoverState({
     (_payload, isUpdate?: boolean) => {
       if (isUpdate === false) {
         searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        refetch$.next();
+        refetch$.next(undefined);
       }
     },
     [refetch$, searchSessionManager]
@@ -222,7 +222,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     if (indexPattern) {
-      refetch$.next();
+      refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 

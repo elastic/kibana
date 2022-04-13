@@ -10,12 +10,13 @@ import React from 'react';
 import { debounce } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../../data/common';
+import { IFieldType, UI_SETTINGS } from '../../../../data/common';
+import { DataView } from '../../../../data_views/common';
 import { IDataPluginServices } from '../../../../data/public';
 
 export interface PhraseSuggestorProps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   field: IFieldType;
   timeRangeForSuggestionsOverride?: boolean;
 }

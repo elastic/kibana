@@ -69,7 +69,7 @@ export const kpiDnsQueriesLensAttributes: LensAttributes = {
           'cea37c70-8f91-43bf-b9fe-72d8c049f6a3': {
             columns: {
               '0374e520-eae0-4ac1-bcfe-37565e7fc9e3': {
-                label: 'DNS',
+                label: '',
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,

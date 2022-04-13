@@ -12,7 +12,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { asDuration } from '../../../../observability/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
@@ -97,7 +97,7 @@ export function registerTransactionDurationAlertType({
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async ({ services, params }) => {
-      const config = await config$.pipe(take(1)).toPromise();
+      const config = await firstValueFrom(config$);
       const ruleParams = params;
       const indices = await getApmIndices({
         config,
