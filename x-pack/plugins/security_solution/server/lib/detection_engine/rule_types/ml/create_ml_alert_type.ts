@@ -12,6 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { machineLearningRuleParams, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { mlExecutor } from '../../signals/executors/ml';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable } from '../utils';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
@@ -31,6 +32,13 @@ export const createMlAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        validateMutatedParams: (mutatedOject: unknown) => {
+          const mutatedRuleParams = mutatedOject as MachineLearningRuleParams;
+
+          validateImmutable(mutatedRuleParams.immutable);
+
+          return mutatedRuleParams;
         },
       },
     },

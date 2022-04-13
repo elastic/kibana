@@ -12,6 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable } from '../utils';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
@@ -31,6 +32,13 @@ export const createEqlAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        validateMutatedParams: (mutatedOject: unknown) => {
+          const mutatedRuleParams = mutatedOject as EqlRuleParams;
+
+          validateImmutable(mutatedRuleParams.immutable);
+
+          return mutatedRuleParams;
         },
       },
     },

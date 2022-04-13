@@ -12,6 +12,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable } from '../utils';
 
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
@@ -31,6 +32,13 @@ export const createQueryAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        validateMutatedParams: (mutatedOject: unknown) => {
+          const mutatedRuleParams = mutatedOject as QueryRuleParams;
+
+          validateImmutable(mutatedRuleParams.immutable);
+
+          return mutatedRuleParams;
         },
       },
     },

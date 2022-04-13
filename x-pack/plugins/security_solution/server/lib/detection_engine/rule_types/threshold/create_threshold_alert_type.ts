@@ -13,6 +13,7 @@ import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_sch
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
@@ -32,6 +33,13 @@ export const createThresholdAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        validateMutatedParams: (mutatedOject: unknown) => {
+          const mutatedRuleParams = mutatedOject as ThresholdRuleParams;
+
+          validateImmutable(mutatedRuleParams.immutable);
+
+          return mutatedRuleParams;
         },
       },
     },
