@@ -160,7 +160,7 @@ const getTransformedHits = (
           value: bucket.key[term],
         })),
         cardinality: {
-          field: threshold.cardinality[0].field,
+          field: threshold.cardinality ? threshold.cardinality[0]?.field : undefined,
           value: (bucket.cardinality_count as AggregationsCardinalityAggregate)?.value,
         },
         count: bucket.doc_count,
