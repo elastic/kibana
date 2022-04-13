@@ -344,6 +344,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         alertIdToClose,
         bulkCloseIndex
       );
+
+      handleRuleChange(true);
     }
   }, [
     addOrUpdateExceptionItems,
@@ -353,6 +355,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     shouldBulkCloseAlert,
     alertData,
     signalIndexName,
+    handleRuleChange
   ]);
 
   const isSubmitButtonDisabled = useMemo(

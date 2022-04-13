@@ -173,7 +173,7 @@ export const useFetchOrCreateRuleExceptionList = ({
           setExceptionList(exceptionListToUse);
           setIsLoading(false);
           if (onSuccess) {
-            onSuccess(matchingList == null);
+            onSuccess();
           }
         }
       } catch (error) {
