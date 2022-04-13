@@ -10,11 +10,11 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
 import { monitorManagementListSelector } from '../../../state/selectors';
-import { ServiceLocation } from '../../../../common/runtime_types';
+import { MonitorServiceLocations } from '../../../../common/runtime_types';
 
 interface Props {
-  selectedLocations: ServiceLocation[];
-  setLocations: React.Dispatch<React.SetStateAction<ServiceLocation[]>>;
+  selectedLocations: MonitorServiceLocations;
+  setLocations: React.Dispatch<React.SetStateAction<MonitorServiceLocations>>;
   isInvalid: boolean;
   onBlur?: () => void;
 }
@@ -30,7 +30,11 @@ export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid, o
     const isSelected = !checkboxIdToSelectedMap[optionId];
     const location = locations.find((loc) => loc.id === optionId);
     if (isSelected) {
-      setLocations((prevLocations) => (location ? [...prevLocations, location] : prevLocations));
+      setLocations((prevLocations) =>
+        location
+          ? [...prevLocations, { id: location.id, isServiceManaged: location.isServiceManaged }]
+          : prevLocations
+      );
     } else {
       setLocations((prevLocations) => [...prevLocations].filter((loc) => loc.id !== optionId));
     }

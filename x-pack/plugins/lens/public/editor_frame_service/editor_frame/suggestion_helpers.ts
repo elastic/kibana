@@ -6,7 +6,7 @@
  */
 
 import { Datatable } from 'src/plugins/expressions';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
@@ -289,5 +289,9 @@ export function getTopSuggestionForField(
     field,
     mainPalette,
   });
-  return suggestions.find((s) => s.visualizationId === visualization.activeId) || suggestions[0];
+  return (
+    suggestions.find((s) => s.visualizationId === visualization.activeId) ||
+    suggestions.filter((suggestion) => !suggestion.hide)[0] ||
+    suggestions[0]
+  );
 }

@@ -224,7 +224,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
         </EuiFormRow>
 
         <div className="testScript__searchBar">
-          <this.context.services.data.ui.SearchBar
+          <this.context.services.unifiedSearch.ui.SearchBar
             appName={'indexPatternManagement'}
             showFilterBar={false}
             showDatePicker={false}

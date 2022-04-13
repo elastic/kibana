@@ -12,6 +12,7 @@ import { TimelionPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
+  deprecations: ({ unused }) => [unused('graphiteUrls', { level: 'warning' })],
 };
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
