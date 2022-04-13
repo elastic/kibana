@@ -11,6 +11,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
+    "**/mocks.*",
   ],
 )
 

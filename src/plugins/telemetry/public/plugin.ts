@@ -33,7 +33,7 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { HomePublicPluginSetup } from '../../home/public';
+import type { HomePublicPluginSetup } from '../../home/public';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**
