@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock, coreMock } from 'src/core/server/mocks';
 import { workpads } from '../../../__fixtures__/workpads';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';
@@ -22,7 +23,7 @@ const mockRouteContext = {
     },
   },
   canvas: workpadRouteContextMock.create(),
-} as unknown as MockWorkpadRouteContext;
+} as unknown as AwaitedProperties<MockWorkpadRouteContext>;
 
 const workpad = workpads[0];
 const now = new Date();
@@ -62,7 +63,11 @@ describe('PUT workpad', () => {
 
     mockRouteContext.canvas.workpad.update.mockResolvedValue(true);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(okResponse);
@@ -85,7 +90,11 @@ describe('PUT workpad', () => {
       );
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(404);
   });
@@ -104,7 +113,11 @@ describe('PUT workpad', () => {
       throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(400);
   });
@@ -160,7 +173,11 @@ describe('update assets', () => {
       references: [],
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
 
     expect(mockRouteContext.canvas.workpad.update).toBeCalledWith(id, {

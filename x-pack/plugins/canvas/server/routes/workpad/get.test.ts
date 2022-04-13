@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock, coreMock } from 'src/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__fixtures__/workpads';
 import { CanvasWorkpad } from '../../../types';
 import { getMockedRouterDeps } from '../test_helpers';
@@ -16,7 +17,7 @@ import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 
 const mockRouteContext = {
   canvas: workpadRouteContextMock.create(),
-} as unknown as MockWorkpadRouteContext;
+} as unknown as AwaitedProperties<MockWorkpadRouteContext>;
 
 describe('GET workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -48,7 +49,11 @@ describe('GET workpad', () => {
       references: [],
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`
@@ -83,7 +88,11 @@ describe('GET workpad', () => {
       references: [],
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
     const workpad = response.payload as CanvasWorkpad;
 
     expect(response.status).toBe(200);
@@ -108,7 +117,11 @@ describe('GET workpad', () => {
       throw savedObjectsClient.errors.createGenericNotFoundError(CANVAS_TYPE, id);
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.payload).toMatchInlineSnapshot(`
       Object {
