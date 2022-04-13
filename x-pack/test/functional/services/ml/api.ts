@@ -1135,6 +1135,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return model;
     },
 
+    async deleteTrainedModelES(modelId: string) {
+      log.debug(`Creating trained model with id "${modelId}"`);
+      const { body: model, status } = await esSupertest.delete(`/_ml/trained_models/${modelId}`);
+      this.assertResponseStatusCode(200, status, model);
+
+      log.debug('> Trained model created');
+      return model;
+    },
+
     async createTestTrainedModels(
       modelType: ModelType,
       count: number = 10,

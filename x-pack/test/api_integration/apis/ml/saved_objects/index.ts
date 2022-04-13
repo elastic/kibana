@@ -15,7 +15,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./initialize_jobs'));
     loadTestFile(require.resolve('./initialize_trained_models'));
     loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./sync'));
+    loadTestFile(require.resolve('./sync_jobs'));
+    loadTestFile(require.resolve('./sync_trained_models'));
     loadTestFile(require.resolve('./update_jobs_spaces'));
   });
 }
