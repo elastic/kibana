@@ -77,7 +77,7 @@ describe('AlertsTable', () => {
   };
 
   const tableProps = {
-    ownerPluginId: PLUGIN_ID,
+    pluginId: PLUGIN_ID,
     consumers,
     bulkActions: [],
     deletedEventIds: [],
@@ -125,7 +125,7 @@ describe('AlertsTable', () => {
     });
 
     it('should fail to render when the plugin id owner is not registered', async () => {
-      const props = { ...tableProps, ownerPluginId: 'none' };
+      const props = { ...tableProps, pluginId: 'none' };
       expect(() => {
         render(<AlertsTable {...props} />);
       }).toThrow(

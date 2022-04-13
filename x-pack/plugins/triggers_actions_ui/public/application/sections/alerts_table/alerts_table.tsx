@@ -20,12 +20,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   });
 
   const alertsTableConfigurationRegistry = useKibana().services.alertsTableConfigurationRegistry;
-  if (!alertsTableConfigurationRegistry.has(props.ownerPluginId)) {
+  if (!alertsTableConfigurationRegistry.has(props.pluginId)) {
     throw new Error(
       'This plugin has no registered its alerts table parameters inside TriggersActionsUi'
     );
   }
-  const pluginCustomizations = alertsTableConfigurationRegistry.get(props.ownerPluginId);
+  const pluginCustomizations = alertsTableConfigurationRegistry.get(props.pluginId);
 
   const [visibleColumns, setVisibleColumns] = useState(
     pluginCustomizations.columns.map(({ id }) => id)

@@ -13,4 +13,4 @@ export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 // TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
 export const DEFAULT_HIDDEN_ACTION_TYPES = ['.case'];
 
-export const PLUGIN_ID = 'triggersActionsUi';
+export const PLUGIN_ID = 'triggersActions';

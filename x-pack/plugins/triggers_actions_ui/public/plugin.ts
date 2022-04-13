@@ -52,6 +52,7 @@ import type {
 import { TriggersActionsUiConfigType } from '../common/types';
 import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import { registerAlertsTable } from './application/sections/alerts_table/alerts_page/register_alerts_table';
+import { PLUGIN_ID } from './common/constants';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -136,7 +137,7 @@ export class Plugin
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
-        id: 'triggersActions',
+        id: PLUGIN_ID,
         title: featureTitle,
         description: featureDescription,
         icon: 'watchesApp',
@@ -147,7 +148,7 @@ export class Plugin
     }
 
     plugins.management.sections.section.insightsAndAlerting.registerApp({
-      id: 'triggersActions',
+      id: PLUGIN_ID,
       title: featureTitle,
       order: 0,
       async mount(params: ManagementAppMountParams) {

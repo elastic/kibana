@@ -136,7 +136,7 @@ const AlertsPage: React.FunctionComponent = () => {
   };
 
   const tableProps = {
-    ownerPluginId: PLUGIN_ID,
+    pluginId: PLUGIN_ID,
     consumers,
     bulkActions: [],
     deletedEventIds: [],
