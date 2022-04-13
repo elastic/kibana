@@ -128,11 +128,20 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
   );
 
   useEffect(() => {
+    let needsCleanUp = false;
+
     if (defaultValue !== undefined) {
+      needsCleanUp = true;
       // Update the form "defaultValue" ref object.
       // This allows us to reset the form and put back the defaultValue of each field
       __updateDefaultValueAt(path, defaultValue);
     }
+
+    return () => {
+      if (needsCleanUp) {
+        __updateDefaultValueAt(path, undefined);
+      }
+    };
   }, [path, defaultValue, __updateDefaultValueAt]);
 
   // Children prevails over anything else provided.

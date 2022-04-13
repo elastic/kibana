@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -93,7 +93,7 @@ export function registerTransactionErrorRateAlertType({
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, params: ruleParams }) => {
-        const config = await config$.pipe(take(1)).toPromise();
+        const config = await firstValueFrom(config$);
         const indices = await getApmIndices({
           config,
           savedObjectsClient: services.savedObjectsClient,

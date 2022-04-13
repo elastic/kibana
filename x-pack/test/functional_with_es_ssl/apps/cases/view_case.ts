@@ -19,8 +19,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
-  // Failing: See https://github.com/elastic/kibana/issues/129248
-  describe.skip('View case', () => {
+  describe('View case', () => {
     describe('properties', () => {
       // create the case to test on
       before(async () => {
