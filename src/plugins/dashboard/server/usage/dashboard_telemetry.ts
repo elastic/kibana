@@ -148,7 +148,7 @@ export const collectEmbeddableData = (
   embeddableService: EmbeddablePersistableStateService
 ) => {
   for (const panel of panels) {
-    collectorData.embeddable = embeddableService.telemetry(
+    const panelUsageStats = embeddableService.telemetry(
       {
         ...panel.embeddableConfig,
         id: panel.id || '',
@@ -156,6 +156,13 @@ export const collectEmbeddableData = (
       },
       collectorData.embeddable
     );
+    Object.keys(panelUsageStats).map((key) => {
+      if (collectorData.embeddable[key]) {
+        collectorData.embeddable[key] += panelUsageStats[key];
+      } else {
+        collectorData.embeddable[key] = panelUsageStats[key];
+      }
+    });
   }
 };
 
