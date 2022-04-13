@@ -12,19 +12,16 @@ import { tEnum } from '../../utils/t_enum';
 export enum BandwidthLimitKey {
   DOWNLOAD = 'download',
   UPLOAD = 'upload',
-  LATENCY = 'latency',
 }
 
 export const DEFAULT_BANDWIDTH_LIMIT = {
   [BandwidthLimitKey.DOWNLOAD]: 100,
   [BandwidthLimitKey.UPLOAD]: 30,
-  [BandwidthLimitKey.LATENCY]: 1000,
 };
 
 export const DEFAULT_THROTTLING = {
   [BandwidthLimitKey.DOWNLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.DOWNLOAD],
   [BandwidthLimitKey.UPLOAD]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.UPLOAD],
-  [BandwidthLimitKey.LATENCY]: DEFAULT_BANDWIDTH_LIMIT[BandwidthLimitKey.LATENCY],
 };
 
 export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
@@ -93,7 +90,6 @@ export const isServiceLocationInvalid = (location: ServiceLocation) =>
 export const ThrottlingOptionsCodec = t.interface({
   [BandwidthLimitKey.DOWNLOAD]: t.number,
   [BandwidthLimitKey.UPLOAD]: t.number,
-  [BandwidthLimitKey.LATENCY]: t.number,
 });
 
 export const ServiceLocationsApiResponseCodec = t.interface({
