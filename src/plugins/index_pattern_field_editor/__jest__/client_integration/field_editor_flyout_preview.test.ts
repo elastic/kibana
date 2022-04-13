@@ -33,7 +33,6 @@ describe('Field editor Preview panel', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   let testBed: FieldEditorFlyoutContentTestBed;
@@ -346,9 +345,8 @@ describe('Field editor Preview panel', () => {
         actions: {
           toggleFormRow,
           fields,
-          waitForDocumentsAndPreviewUpdate,
-          getLatestPreviewHttpRequest,
           getRenderedFieldsPreview,
+          waitForDocumentsAndPreviewUpdate,
         },
       } = testBed;
 
@@ -356,10 +354,11 @@ describe('Field editor Preview panel', () => {
       await fields.updateName('myRuntimeField');
       await fields.updateScript('echo("hello")');
       await waitForDocumentsAndPreviewUpdate();
-      const request = getLatestPreviewHttpRequest(server);
 
       // Make sure the payload sent is correct
-      expect(request.requestBody).toEqual({
+      const firstCall = server.post.mock.calls[0] as Array<{ body: any }>;
+      const payload = JSON.parse(firstCall[1]?.body);
+      expect(payload).toEqual({
         context: 'keyword_field',
         document: {
           description: 'First doc - description',
@@ -380,7 +379,7 @@ describe('Field editor Preview panel', () => {
     });
 
     test('should display an updating indicator while fetching the preview', async () => {
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] }, undefined, true);
 
       const {
         exists,
@@ -399,7 +398,7 @@ describe('Field editor Preview panel', () => {
     });
 
     test('should not display the updating indicator when neither the type nor the script has changed', async () => {
-      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] });
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['ok'] }, undefined, true);
 
       const {
         exists,
