@@ -242,7 +242,6 @@ export function Tabs({
   );
 
   const userEditPermission = dataViews.getCanSaveSync();
-
   const getFilterSection = useCallback(
     (type: string) => {
       return (
