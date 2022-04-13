@@ -33,9 +33,10 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (requestContext, request, response) => {
       const { sourceId } = request.params;
+      const soClient = (await requestContext.core).savedObjects.client;
 
       const [source, metricIndicesExist, indexFields] = await Promise.all([
-        libs.sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId),
+        libs.sources.getSourceConfiguration(soClient, sourceId),
         libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
         libs.fields.getFields(requestContext, sourceId, 'METRICS'),
       ]);
@@ -72,10 +73,8 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const patchedSourceConfigurationProperties = request.body;
 
       try {
-        const sourceConfiguration = await sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
+        const soClient = (await requestContext.core).savedObjects.client;
+        const sourceConfiguration = await sources.getSourceConfiguration(soClient, sourceId);
 
         if (sourceConfiguration.origin === 'internal') {
           response.conflict({
@@ -86,13 +85,13 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         const sourceConfigurationExists = sourceConfiguration.origin === 'stored';
         const patchedSourceConfiguration = await (sourceConfigurationExists
           ? sources.updateSourceConfiguration(
-              requestContext.core.savedObjects.client,
+              soClient,
               sourceId,
               // @ts-ignore
               patchedSourceConfigurationProperties
             )
           : sources.createSourceConfiguration(
-              requestContext.core.savedObjects.client,
+              soClient,
               sourceId,
               // @ts-ignore
               patchedSourceConfigurationProperties
@@ -151,10 +150,8 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const { sourceId } = request.params;
 
       const client = createSearchClient(requestContext, framework);
-      const source = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        sourceId
-      );
+      const soClient = (await requestContext.core).savedObjects.client;
+      const source = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
       const results = await hasData(source.configuration.metricAlias, client);
 

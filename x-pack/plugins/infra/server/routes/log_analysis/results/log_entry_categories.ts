@@ -39,10 +39,10 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
       } = request.body;
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const { data: topLogEntryCategories, timing } = await getTopLogEntryCategories(
-          requestContext,
+          { infra: await infraMlContext.infra },
           sourceId,
           startTime,
           endTime,
