@@ -22,7 +22,8 @@ export const deleteSavedQueryRoute = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
       await savedObjectsClient.delete(savedQuerySavedObjectType, request.params.id, {
         refresh: 'wait_for',
