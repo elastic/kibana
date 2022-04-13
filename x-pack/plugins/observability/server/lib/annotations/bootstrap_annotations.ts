@@ -25,7 +25,7 @@ export type ScopedAnnotationsClientFactory = Awaited<
   ReturnType<typeof bootstrapAnnotations>
 >['getScopedAnnotationsClient'];
 
-export type ScopedAnnotationsClient = ReturnType<ScopedAnnotationsClientFactory>;
+export type ScopedAnnotationsClient = Awaited<ReturnType<ScopedAnnotationsClientFactory>>;
 export type AnnotationsAPI = Awaited<ReturnType<typeof bootstrapAnnotations>>;
 
 export async function bootstrapAnnotations({ index, core, context }: Params) {
