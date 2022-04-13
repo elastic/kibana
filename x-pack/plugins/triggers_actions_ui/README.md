@@ -266,7 +266,7 @@ export interface RuleType {
     params?: { validate: (object: any) => any };
   };
   actionGroups: string[];
-  executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
+  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<State | void>;
   requiresAppContext: boolean;
 }
 ```
@@ -1385,7 +1385,7 @@ Then this dependencies will be used to embed Actions form or register your own a
 ```
  import React, { useCallback } from 'react';
  import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
- import { AlertAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
+ import { RuleAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
 
  const ALOWED_BY_PLUGIN_ACTION_TYPES = [
    { id: '.email', name: 'Email', enabled: true },
@@ -1428,7 +1428,7 @@ Then this dependencies will be used to embed Actions form or register your own a
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
           }}
-          setRuleProperty={(_updatedActions: AlertAction[]) => {}}
+          setRuleProperty={(_updatedActions: RuleAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
@@ -1446,12 +1446,12 @@ Then this dependencies will be used to embed Actions form or register your own a
 ActionForm Props definition:
 ```
 interface ActionAccordionFormProps {
-  actions: AlertAction[];
+  actions: RuleAction[];
   defaultActionGroupId: string;
   actionGroups?: ActionGroup[];
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
-  setRuleProperty: (actions: AlertAction[]) => void;
+  setRuleProperty: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: ActionTypeRegistryContract;

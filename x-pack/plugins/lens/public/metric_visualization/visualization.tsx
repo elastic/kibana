@@ -11,22 +11,20 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
+import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import {
-  ColorMode,
-  CustomPaletteState,
-  PaletteOutput,
-} from '../../../../../src/plugins/charts/common';
-import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import { ColorMode, CustomPaletteState } from '../../../../../src/plugins/charts/common';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
-import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
+import { Visualization, OperationMetadata, DatasourceLayers } from '../types';
 import type { MetricState } from '../../common/types';
 import { layerTypes } from '../../common';
-import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
+import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
+import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
+import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
 
 interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
   title: string;
@@ -50,7 +48,7 @@ const getFontSizeAndUnit = (fontSize: string) => {
 const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   attributes?: Partial<Omit<MetricConfig, keyof MetricState>>
 ): Ast | null => {
   if (!state.accessor) {
@@ -87,7 +85,7 @@ const toExpression = (
     xxl: getFontSizeAndUnit(euiThemeVars.euiFontSizeXXL),
   };
 
-  const labelFont = fontSizes[state?.size || 'xl'];
+  const labelFont = fontSizes[state?.size || DEFAULT_TITLE_SIZE];
   const labelToMetricFontSizeMap: Record<string, number> = {
     xs: fontSizes.xs.size * 2,
     s: fontSizes.m.size * 2.5,
@@ -96,7 +94,7 @@ const toExpression = (
     xl: fontSizes.xxl.size * 2.5,
     xxl: fontSizes.xxl.size * 3,
   };
-  const metricFontSize = labelToMetricFontSizeMap[state?.size || 'xl'];
+  const metricFontSize = labelToMetricFontSizeMap[state?.size || DEFAULT_TITLE_SIZE];
 
   return {
     type: 'expression',
@@ -105,7 +103,7 @@ const toExpression = (
         type: 'function',
         function: 'metricVis',
         arguments: {
-          labelPosition: [state?.titlePosition || 'bottom'],
+          labelPosition: [state?.titlePosition || DEFAULT_TITLE_POSITION],
           font: [
             {
               type: 'expression',
@@ -114,7 +112,7 @@ const toExpression = (
                   type: 'function',
                   function: 'font',
                   arguments: {
-                    align: [state?.textAlign || 'center'],
+                    align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
                     size: [metricFontSize],
                     weight: ['600'],
                     lHeight: [metricFontSize * 1.5],
@@ -132,7 +130,7 @@ const toExpression = (
                   type: 'function',
                   function: 'font',
                   arguments: {
-                    align: [state?.textAlign || 'center'],
+                    align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
                     size: [labelFont.size],
                     lHeight: [labelFont.size * 1.5],
                     sizeUnit: [labelFont.sizeUnit],

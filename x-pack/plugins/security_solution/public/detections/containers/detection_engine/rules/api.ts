@@ -6,7 +6,7 @@
  */
 
 import { camelCase } from 'lodash';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { HttpStart } from 'src/core/public';
 
 import {
@@ -360,8 +360,8 @@ export const fetchRuleExecutionEvents = async ({
     query: {
       start: startDate?.utc().toISOString(),
       end: endDate?.utc().toISOString(),
-      query_text: queryText?.trim(),
-      status_filters: statusFilters?.trim(),
+      query_text: queryText,
+      status_filters: statusFilters,
       page,
       per_page: perPage,
       sort_field: sortField,

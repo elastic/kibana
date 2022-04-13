@@ -8,9 +8,10 @@
 
 import { FormatFactory } from '../types';
 import {
-  AxisExtentConfig,
   CommonXYDataLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
+  ExtendedYConfig,
+  YConfig,
 } from '../../common';
 import type {
   IFieldFormat,
@@ -28,7 +29,7 @@ interface FormattedMetric extends Series {
 }
 
 export type GroupsConfiguration = Array<{
-  groupId: string;
+  groupId: 'left' | 'right';
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Series[];
@@ -59,9 +60,9 @@ export function groupAxesByType(
   layers.forEach((layer, index) => {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
+      const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
       const mode =
-        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
-        'auto';
+        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode || 'auto';
       let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
         ?.meta?.params || { id: 'number' };
       if (
@@ -140,18 +141,4 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
-}
-
-export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  const inclusiveZeroError =
-    extent &&
-    hasBarOrArea &&
-    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
-      (extent.upperBound !== undefined && extent.upperBound) < 0);
-  const boundaryError =
-    extent &&
-    extent.lowerBound !== undefined &&
-    extent.upperBound !== undefined &&
-    extent.upperBound <= extent.lowerBound;
-  return { inclusiveZeroError, boundaryError };
 }

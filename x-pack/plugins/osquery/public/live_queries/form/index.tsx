@@ -62,6 +62,7 @@ interface LiveQueryFormProps {
   ecsMappingField?: boolean;
   formType?: FormType;
   enabled?: boolean;
+  hideFullscreen?: true;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -72,6 +73,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ecsMappingField = true,
   formType = 'steps',
   enabled = true,
+  hideFullscreen,
 }) => {
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -145,8 +147,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
       const ecsFieldValue = await ecsFieldRef?.current?.validate();
-
-      if (isValid) {
+      if (isValid && (!ecsMappingField || !!ecsFieldValue)) {
         try {
           await mutateAsync(
             pickBy(
@@ -268,9 +269,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const ecsFieldProps = useMemo(
     () => ({
-      isDisabled: !permissions.writeSavedQueries,
+      isDisabled: !permissions.writeLiveQueries,
     }),
-    [permissions.writeSavedQueries]
+    [permissions.writeLiveQueries]
   );
 
   const isSavedQueryDisabled = useMemo(
@@ -388,9 +389,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const resultsStepContent = useMemo(
     () =>
       actionId ? (
-        <ResultTabs actionId={actionId} endDate={data?.actions[0].expiration} agentIds={agentIds} />
+        <ResultTabs
+          actionId={actionId}
+          endDate={data?.actions[0].expiration}
+          agentIds={agentIds}
+          hideFullscreen={hideFullscreen}
+        />
       ) : null,
-    [actionId, agentIds, data?.actions]
+    [actionId, agentIds, data?.actions, hideFullscreen]
   );
 
   const formSteps: EuiContainedStepProps[] = useMemo(

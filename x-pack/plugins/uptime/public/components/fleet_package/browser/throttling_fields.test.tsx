@@ -43,6 +43,7 @@ describe('<ThrottlingFields />', () => {
     label: 'Test',
     geo: { lat: 1, lon: 2 },
     url: 'https://example.com',
+    isServiceManaged: true,
   };
 
   const WrappedComponent = ({
@@ -213,7 +214,6 @@ describe('<ThrottlingFields />', () => {
     const throttling = {
       [BandwidthLimitKey.DOWNLOAD]: 100,
       [BandwidthLimitKey.UPLOAD]: 50,
-      [BandwidthLimitKey.LATENCY]: 25,
     };
 
     const defaultLocations = [defaultLocation];
@@ -325,54 +325,6 @@ describe('<ThrottlingFields />', () => {
       expect(
         queryByText(
           `You have exceeded the upload limit for Synthetic Nodes. The upload value can't be larger than ${uploadLimit}Mbps.`
-        )
-      ).not.toBeInTheDocument();
-
-      expect(
-        queryByText("You've exceeded the Synthetics Node bandwidth limits")
-      ).not.toBeInTheDocument();
-
-      expect(
-        queryByText(
-          'When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped.'
-        )
-      ).not.toBeInTheDocument();
-    });
-
-    it("shows latency warnings when exceeding the node's latency limits", () => {
-      const { getByLabelText, queryByText } = render(
-        <WrappedComponent
-          policyConfigOverrides={{ throttling, defaultLocations, runsOnService: true }}
-        />
-      );
-
-      const latencyLimit = throttling[BandwidthLimitKey.LATENCY];
-
-      const latency = getByLabelText('Latency') as HTMLInputElement;
-      userEvent.clear(latency);
-      userEvent.type(latency, String(latencyLimit + 1));
-
-      expect(
-        queryByText(
-          `You have exceeded the latency limit for Synthetic Nodes. The latency value can't be larger than ${latencyLimit}ms.`
-        )
-      ).toBeInTheDocument();
-
-      expect(
-        queryByText("You've exceeded the Synthetics Node bandwidth limits")
-      ).toBeInTheDocument();
-
-      expect(
-        queryByText(
-          'When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped.'
-        )
-      ).toBeInTheDocument();
-
-      userEvent.clear(latency);
-      userEvent.type(latency, String(latencyLimit - 1));
-      expect(
-        queryByText(
-          `You have exceeded the latency limit for Synthetic Nodes. The latency value can't be larger than ${latencyLimit}ms.`
         )
       ).not.toBeInTheDocument();
 

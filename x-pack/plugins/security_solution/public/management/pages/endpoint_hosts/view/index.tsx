@@ -69,6 +69,7 @@ import {
   BackToExternalAppButtonProps,
 } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { DevConsole } from './dev_console';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -551,7 +552,9 @@ export const EndpointList = () => {
       );
     } else {
       return (
-        <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
+        </ManagementEmptyStateWrapper>
       );
     }
   }, [

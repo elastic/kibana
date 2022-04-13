@@ -16,12 +16,10 @@ export const plugin = () => new ChartsPlugin();
 export type { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
 export * from './static';
-export * from './services/palettes/types';
 export { lightenColor } from './services/palettes/lighten_color';
 export { useActiveCursor } from './services/active_cursor';
 
 export type {
-  PaletteOutput,
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
@@ -44,3 +42,7 @@ export {
   LabelRotation,
   defaultCountLabel,
 } from '../common';
+
+/** @deprecated **/
+/** Please import directly from @kbn/coloring **/
+export type { SeriesLayer, PaletteRegistry, PaletteOutput, PaletteDefinition } from '@kbn/coloring';

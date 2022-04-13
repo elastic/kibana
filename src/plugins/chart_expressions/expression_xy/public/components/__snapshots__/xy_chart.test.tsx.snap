@@ -5,7 +5,7 @@ exports[`XYChart component annotations should render basic annotation 1`] = `
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591917125,
+        "dataValue": 1647591917140,
         "details": "Annotation",
         "header": "2022-03-18T08:25:17.140Z",
       },
@@ -169,7 +169,7 @@ exports[`XYChart component annotations should render simplified annotation when 
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591917125,
+        "dataValue": 1647591917140,
         "details": "Annotation",
         "header": "2022-03-18T08:25:17.140Z",
       },
@@ -322,127 +322,292 @@ exports[`XYChart component it renders area 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <AreaSeries
-    areaSeriesStyle={
+  <DataLayers
+    areLayersAlreadyFormatted={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "0": Object {
+          "a": false,
+          "b": false,
+          "c": false,
+          "d": false,
         },
       }
     }
-    color={[Function]}
-    data={
+    chartHasMoreThanOneBarSeries={false}
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    layers={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "area",
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+          "yScaleType": "linear",
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
+    paletteService={
       Object {
-        "endValue": undefined,
-        "type": "none",
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <AreaSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "I",
+                ],
+                Array [
+                  "J",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "I",
+                },
+                Object {
+                  "type": "return",
+                  "value": "J",
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": 0,
+            },
+            Object {
+              "accessor": "b",
+              "layer": 0,
+            },
+          ],
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
-      Object {
-        "endValue": undefined,
-        "type": "none",
-      }
-    }
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "b",
-      ]
-    }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -556,139 +721,292 @@ exports[`XYChart component it renders bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <BarSeries
-    areaSeriesStyle={
+  <DataLayers
+    areLayersAlreadyFormatted={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "0": Object {
+          "a": false,
+          "b": false,
+          "c": false,
+          "d": false,
         },
       }
     }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+    chartHasMoreThanOneBarSeries={true}
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
-      }
-    }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+    layers={
+      Array [
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar",
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+          "yScaleType": "linear",
         },
+      ]
+    }
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "b",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "I",
+                ],
+                Array [
+                  "J",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "I",
+                },
+                Object {
+                  "type": "return",
+                  "value": "J",
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": 0,
+            },
+            Object {
+              "accessor": "b",
+              "layer": 0,
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -802,139 +1120,292 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <BarSeries
-    areaSeriesStyle={
+  <DataLayers
+    areLayersAlreadyFormatted={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "0": Object {
+          "a": false,
+          "b": false,
+          "c": false,
+          "d": false,
         },
       }
     }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+    chartHasMoreThanOneBarSeries={true}
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
-      }
-    }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+    layers={
+      Array [
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar_horizontal",
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+          "yScaleType": "linear",
         },
+      ]
+    }
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "b",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "I",
+                ],
+                Array [
+                  "J",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "I",
+                },
+                Object {
+                  "type": "return",
+                  "value": "J",
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "bottom",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": 0,
+            },
+            Object {
+              "accessor": "b",
+              "layer": 0,
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -1048,127 +1519,292 @@ exports[`XYChart component it renders line 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <LineSeries
-    areaSeriesStyle={
+  <DataLayers
+    areLayersAlreadyFormatted={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "0": Object {
+          "a": false,
+          "b": false,
+          "c": false,
+          "d": false,
         },
       }
     }
-    color={[Function]}
-    data={
+    chartHasMoreThanOneBarSeries={false}
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    layers={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "line",
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+          "yScaleType": "linear",
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
+    paletteService={
       Object {
-        "endValue": undefined,
-        "type": "none",
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <LineSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "I",
+                ],
+                Array [
+                  "J",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "I",
+                },
+                Object {
+                  "type": "return",
+                  "value": "J",
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": 0,
+            },
+            Object {
+              "accessor": "b",
+              "layer": 0,
+            },
+          ],
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
-      Object {
-        "endValue": undefined,
-        "type": "none",
-      }
-    }
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "b",
-      ]
-    }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -1282,135 +1918,292 @@ exports[`XYChart component it renders stacked area 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <AreaSeries
-    areaSeriesStyle={
+  <DataLayers
+    areLayersAlreadyFormatted={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "0": Object {
+          "a": false,
+          "b": false,
+          "c": false,
+          "d": false,
         },
       }
     }
-    color={[Function]}
-    data={
+    chartHasMoreThanOneBarSeries={false}
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    layers={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "area_stacked",
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+          "yScaleType": "linear",
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
+    paletteService={
       Object {
-        "endValue": undefined,
-        "type": "none",
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
+    shouldShowValueLabels={false}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <AreaSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "I",
+                ],
+                Array [
+                  "J",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "I",
+                },
+                Object {
+                  "type": "return",
+                  "value": "J",
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": 0,
+            },
+            Object {
+              "accessor": "b",
+              "layer": 0,
+            },
+          ],
         },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
       ]
     }
-    enableHistogramMode={false}
-    fit={
-      Object {
-        "endValue": undefined,
-        "type": "none",
-      }
-    }
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "b",
-      ]
-    }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -1524,147 +2317,292 @@ exports[`XYChart component it renders stacked bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <BarSeries
-    areaSeriesStyle={
+  <DataLayers
+    areLayersAlreadyFormatted={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "0": Object {
+          "a": false,
+          "b": false,
+          "c": false,
+          "d": false,
         },
       }
     }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+    chartHasMoreThanOneBarSeries={true}
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
-      }
-    }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+    layers={
+      Array [
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar_stacked",
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+          "yScaleType": "linear",
         },
+      ]
+    }
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
+    shouldShowValueLabels={false}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "b",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "I",
+                ],
+                Array [
+                  "J",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "I",
+                },
+                Object {
+                  "type": "return",
+                  "value": "J",
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": 0,
+            },
+            Object {
+              "accessor": "b",
+              "layer": 0,
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -1778,147 +2716,292 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <BarSeries
-    areaSeriesStyle={
+  <DataLayers
+    areLayersAlreadyFormatted={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "0": Object {
+          "a": false,
+          "b": false,
+          "c": false,
+          "d": false,
         },
       }
     }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+    chartHasMoreThanOneBarSeries={true}
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
-      }
-    }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+    layers={
+      Array [
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar_horizontal_stacked",
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": "I",
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": "J",
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+          "yScaleType": "linear",
         },
+      ]
+    }
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
+    shouldShowValueLabels={false}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "b",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "I",
+                ],
+                Array [
+                  "J",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": "I",
+                },
+                Object {
+                  "type": "return",
+                  "value": "J",
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "bottom",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": 0,
+            },
+            Object {
+              "accessor": "b",
+              "layer": 0,
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
   />
 </Chart>
 `;

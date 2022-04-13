@@ -14,6 +14,7 @@ import { Writer } from './writer';
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
 import { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';
 import { createStripAnsiSerializer } from '../serializers/strip_ansi_serializer';
+import { lastValueFrom } from 'rxjs';
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
@@ -95,6 +96,24 @@ describe('#indent()', () => {
       ]
     `);
   });
+
+  it('resets the indent synchrounsly if the block does not return a promise', () => {
+    const log = new ToolingLog();
+    const writer = new ToolingLogCollectingWriter();
+    log.setWriters([writer]);
+
+    log.info('foo');
+    log.indent(4, () => log.error('bar'));
+    log.info('baz');
+
+    expect(writer.messages).toMatchInlineSnapshot(`
+      Array [
+        " info foo",
+        "   │ERROR bar",
+        " info baz",
+      ]
+    `);
+  });
 });
 
 (['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'] as const).forEach(
@@ -128,8 +147,8 @@ describe('#getWritten$()', () => {
     const log = new ToolingLog();
     log.setWriters(writers);
 
-    const done$ = new Rx.Subject();
-    const promise = log.getWritten$().pipe(takeUntil(done$), toArray()).toPromise();
+    const done$ = new Rx.Subject<void>();
+    const promise = lastValueFrom(log.getWritten$().pipe(takeUntil(done$), toArray()));
 
     log.debug('foo');
     log.info('bar');

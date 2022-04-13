@@ -71,7 +71,7 @@ export type {
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,
-  YConfig,
+  ExtendedYConfig,
   XYRender,
   LayerType,
   YAxisMode,
@@ -85,7 +85,7 @@ export type {
   XYChartProps,
   LegendConfig,
   IconPosition,
-  YConfigResult,
+  ExtendedYConfigResult,
   DataLayerArgs,
   LensMultiTable,
   ValueLabelMode,

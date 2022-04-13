@@ -30,7 +30,7 @@ export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
       ]
     : [];
 
-export const filterHostExternalAlertData: Filter[] = [
+export const hostNameExistsFilter: Filter[] = [
   {
     query: {
       bool: {

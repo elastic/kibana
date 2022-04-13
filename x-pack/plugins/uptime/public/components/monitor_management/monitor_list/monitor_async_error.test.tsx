@@ -54,6 +54,7 @@ describe('<MonitorAsyncError />', () => {
             lon: 0,
           },
           url: '',
+          isServiceManaged: true,
         },
         {
           id: 'us_north',
@@ -63,6 +64,7 @@ describe('<MonitorAsyncError />', () => {
             lon: 0,
           },
           url: '',
+          isServiceManaged: true,
         },
       ],
       error: {

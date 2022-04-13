@@ -7,9 +7,9 @@
 
 import uuid from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { AlertServices } from '../../../../alerting/server';
+import { RuleExecutorServices } from '../../../../alerting/server';
 import {
-  AlertServicesMock,
+  RuleExecutorServicesMock,
   alertsMock,
   AlertInstanceMock,
 } from '../../../../alerting/server/mocks';
@@ -146,7 +146,7 @@ describe('alertType', () => {
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
       };
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
@@ -175,7 +175,7 @@ describe('alertType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
       };
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const newestDocumentTimestamp = Date.now();
 
@@ -220,7 +220,7 @@ describe('alertType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
       };
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const previousTimestamp = Date.now();
       const newestDocumentTimestamp = previousTimestamp + 1000;
@@ -268,7 +268,7 @@ describe('alertType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
       };
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const oldestDocumentTimestamp = Date.now();
 
@@ -310,7 +310,7 @@ describe('alertType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
       };
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const oldestDocumentTimestamp = Date.now();
 
@@ -381,7 +381,7 @@ describe('alertType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
       };
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const oldestDocumentTimestamp = Date.now();
 
@@ -426,7 +426,7 @@ describe('alertType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
       };
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const oldestDocumentTimestamp = Date.now();
 
@@ -524,7 +524,7 @@ describe('alertType', () => {
     it('alert executor handles no documents returned by ES', async () => {
       const params = defaultParams;
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
@@ -540,7 +540,7 @@ describe('alertType', () => {
 
     it('alert executor throws an error when index does not have time field', async () => {
       const params = defaultParams;
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
@@ -555,7 +555,7 @@ describe('alertType', () => {
 
     it('alert executor schedule actions when condition met', async () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
-      const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
@@ -620,7 +620,7 @@ async function invokeExecutor({
   state,
 }: {
   params: OnlySearchSourceAlertParams | OnlyEsQueryAlertParams;
-  alertServices: AlertServicesMock;
+  alertServices: RuleExecutorServicesMock;
   state?: EsQueryAlertState;
 }) {
   return await alertType.executor({
@@ -628,7 +628,7 @@ async function invokeExecutor({
     executionId: uuid.v4(),
     startedAt: new Date(),
     previousStartedAt: new Date(),
-    services: alertServices as unknown as AlertServices<
+    services: alertServices as unknown as RuleExecutorServices<
       EsQueryAlertState,
       ActionContext,
       typeof ActionGroupId

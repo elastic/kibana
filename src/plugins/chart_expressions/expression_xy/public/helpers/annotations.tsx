@@ -9,19 +9,27 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import classnames from 'classnames';
-import type { IconPosition, YAxisMode, YConfig } from '../../common/types';
+import type {
+  IconPosition,
+  YAxisMode,
+  ExtendedYConfig,
+  CollectiveConfig,
+} from '../../common/types';
 import { getBaseIconPlacement } from '../components';
-import { hasIcon } from './icon';
-import { annotationsIconSet } from './annotations_icon_set';
+import { hasIcon, iconSet } from './icon';
 
 export const LINES_MARKER_SIZE = 20;
 
-// Note: it does not take into consideration whether the reference line is in view or not
+type PartialExtendedYConfig = Pick<
+  ExtendedYConfig,
+  'axisMode' | 'icon' | 'iconPosition' | 'textVisibility'
+>;
 
+type PartialCollectiveConfig = Pick<CollectiveConfig, 'axisMode' | 'icon' | 'textVisibility'>;
+
+// Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
-  visualConfigs: Array<
-    Pick<YConfig, 'axisMode' | 'icon' | 'iconPosition' | 'textVisibility'> | undefined
-  >,
+  visualConfigs: Array<PartialExtendedYConfig | PartialCollectiveConfig | undefined>,
   axesMap: Record<'left' | 'right', unknown>
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
@@ -31,7 +39,9 @@ export const getLinesCausedPaddings = (
     if (!config) {
       return;
     }
-    const { axisMode, icon, iconPosition, textVisibility } = config;
+    const { axisMode, icon, textVisibility } = config;
+    const iconPosition = (config as PartialExtendedYConfig).iconPosition ?? undefined;
+
     if (axisMode && (hasIcon(icon) || textVisibility)) {
       const placement = getBaseIconPlacement(iconPosition, axesMap, axisMode);
       paddings[placement] = Math.max(
@@ -48,6 +58,7 @@ export const getLinesCausedPaddings = (
       paddings[placement] = LINES_MARKER_SIZE;
     }
   });
+
   return paddings;
 };
 
@@ -138,7 +149,7 @@ export const AnnotationIcon = ({
   if (isNumericalString(type)) {
     return <NumberIcon number={Number(type)} />;
   }
-  const iconConfig = annotationsIconSet.find((i) => i.value === type);
+  const iconConfig = iconSet.find((i) => i.value === type);
   if (!iconConfig) {
     return null;
   }

@@ -8,8 +8,8 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
+import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable } from '../../../../expressions';
-import { PaletteOutput } from '../../../../charts/common';
 import { EventAnnotationOutput } from '../../../../event_annotation/common';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import {
@@ -40,6 +40,8 @@ import {
   ANNOTATION_LAYER,
   EndValues,
   EXTENDED_ANNOTATION_LAYER,
+  EXTENDED_Y_CONFIG,
+  AvailableReferenceLineIcons,
 } from '../constants';
 
 export type EndValue = $Values<typeof EndValues>;
@@ -55,6 +57,7 @@ export type IconPosition = $Values<typeof IconPositions>;
 export type ValueLabelMode = $Values<typeof ValueLabelModes>;
 export type AxisExtentMode = $Values<typeof AxisExtentModes>;
 export type FittingFunction = $Values<typeof FittingFunctions>;
+export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
 
 export interface AxesSettingsConfig {
   x: boolean;
@@ -73,16 +76,19 @@ export interface AxisConfig {
   hide?: boolean;
 }
 
-export interface YConfig {
-  forAccessor: string;
-  axisMode?: YAxisMode;
-  color?: string;
-  icon?: string;
+export interface ExtendedYConfig extends YConfig {
+  icon?: AvailableReferenceLineIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
+}
+
+export interface YConfig {
+  forAccessor: string;
+  axisMode?: YAxisMode;
+  color?: string;
 }
 
 export interface DataLayerArgs {
@@ -175,8 +181,6 @@ export interface LabelsOrientationConfig {
 
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -204,8 +208,6 @@ export interface XYArgs {
 }
 
 export interface LayeredXYArgs {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -215,7 +217,7 @@ export interface LayeredXYArgs {
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
-  layers: XYExtendedLayerConfigResult[];
+  layers?: XYExtendedLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -229,8 +231,6 @@ export interface LayeredXYArgs {
 }
 
 export interface XYProps {
-  title?: string;
-  description?: string;
   xTitle: string;
   yTitle: string;
   yRightTitle: string;
@@ -281,13 +281,13 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
 export interface ReferenceLineLayerArgs {
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: YConfigResult[];
+  yConfig?: ExtendedYConfigResult[];
 }
 
 export interface ExtendedReferenceLineLayerArgs {
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: YConfigResult[];
+  yConfig?: ExtendedYConfigResult[];
   table?: Datatable;
 }
 
@@ -339,6 +339,7 @@ export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette
 };
 
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
+export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
 
 export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
   type: typeof AXIS_TITLES_VISIBILITY_CONFIG;

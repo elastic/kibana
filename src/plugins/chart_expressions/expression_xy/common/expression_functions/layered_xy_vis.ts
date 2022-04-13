@@ -37,65 +37,58 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
   name: LAYERED_XY_VIS,
   type: 'render',
   inputTypes: ['datatable'],
-  help: i18n.translate('expressionXY.xyVis.help', {
+  help: i18n.translate('expressionXY.layeredXyVis.help', {
     defaultMessage: 'An X/Y chart',
   }),
   args: {
-    title: {
-      types: ['string'],
-      help: 'The chart title.',
-    },
-    description: {
-      types: ['string'],
-      help: '',
-    },
     xTitle: {
       types: ['string'],
-      help: i18n.translate('expressionXY.xyVis.xTitle.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.xTitle.help', {
         defaultMessage: 'X axis title',
       }),
     },
     yTitle: {
       types: ['string'],
-      help: i18n.translate('expressionXY.xyVis.yLeftTitle.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.yLeftTitle.help', {
         defaultMessage: 'Y left axis title',
       }),
     },
     yRightTitle: {
       types: ['string'],
-      help: i18n.translate('expressionXY.xyVis.yRightTitle.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.yRightTitle.help', {
         defaultMessage: 'Y right axis title',
       }),
     },
     yLeftExtent: {
       types: [AXIS_EXTENT_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.yLeftExtent.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.yLeftExtent.help', {
         defaultMessage: 'Y left axis extents',
       }),
     },
     yRightExtent: {
       types: [AXIS_EXTENT_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.yRightExtent.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.yRightExtent.help', {
         defaultMessage: 'Y right axis extents',
       }),
     },
     legend: {
       types: [LEGEND_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.legend.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.legend.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
     },
     fittingFunction: {
       types: ['string'],
       options: [...Object.values(FittingFunctions)],
-      help: i18n.translate('expressionXY.xyVis.fittingFunction.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
       }),
+      strict: true,
     },
     endValue: {
       types: ['string'],
       options: [...Object.values(EndValues)],
-      help: i18n.translate('expressionXY.xyVis.endValue.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.endValue.help', {
         defaultMessage: 'End value',
       }),
     },
@@ -107,31 +100,32 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     valueLabels: {
       types: ['string'],
       options: [...Object.values(ValueLabelModes)],
-      help: i18n.translate('expressionXY.xyVis.valueLabels.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.valueLabels.help', {
         defaultMessage: 'Value labels mode',
       }),
+      strict: true,
     },
     tickLabelsVisibilitySettings: {
       types: [TICK_LABELS_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.tickLabelsVisibilitySettings.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.tickLabelsVisibilitySettings.help', {
         defaultMessage: 'Show x and y axes tick labels',
       }),
     },
     labelsOrientation: {
       types: [LABELS_ORIENTATION_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.labelsOrientation.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.labelsOrientation.help', {
         defaultMessage: 'Defines the rotation of the axis labels',
       }),
     },
     gridlinesVisibilitySettings: {
       types: [GRID_LINES_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.gridlinesVisibilitySettings.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.gridlinesVisibilitySettings.help', {
         defaultMessage: 'Show x and y axes gridlines',
       }),
     },
     axisTitlesVisibilitySettings: {
       types: [AXIS_TITLES_VISIBILITY_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.axisTitlesVisibilitySettings.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.axisTitlesVisibilitySettings.help', {
         defaultMessage: 'Show x and y axes titles',
       }),
     },
@@ -145,40 +139,41 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     curveType: {
       types: ['string'],
       options: [...Object.values(XYCurveTypes)],
-      help: i18n.translate('expressionXY.xyVis.curveType.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.curveType.help', {
         defaultMessage: 'Define how curve type is rendered for a line chart',
       }),
+      strict: true,
     },
     fillOpacity: {
       types: ['number'],
-      help: i18n.translate('expressionXY.xyVis.fillOpacity.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.fillOpacity.help', {
         defaultMessage: 'Define the area chart fill opacity',
       }),
     },
     hideEndzones: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('expressionXY.xyVis.hideEndzones.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.hideEndzones.help', {
         defaultMessage: 'Hide endzone markers for partial data',
       }),
     },
     valuesInLegend: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('expressionXY.xyVis.valuesInLegend.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.valuesInLegend.help', {
         defaultMessage: 'Show values in legend',
       }),
     },
     ariaLabel: {
       types: ['string'],
-      help: i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+      help: i18n.translate('expressionXY.layeredXyVis.ariaLabel.help', {
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
       required: false,
     },
   },
   fn(data, args, handlers) {
-    const layers = args.layers.filter<XYExtendedLayerConfigResult>(
+    const layers = (args.layers ?? []).filter<XYExtendedLayerConfigResult>(
       (layer): layer is XYExtendedLayerConfigResult => layer !== undefined
     );
 

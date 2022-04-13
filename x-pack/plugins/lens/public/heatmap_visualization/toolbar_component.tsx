@@ -62,11 +62,11 @@ export const HeatmapToolbar = memo(
               buttonDataTestSubj="lnsVisualOptionsButton"
             >
               <ValueLabelsSettings
-                valueLabels={state?.gridConfig.isCellLabelVisible ? 'inside' : 'hide'}
+                valueLabels={state?.gridConfig.isCellLabelVisible ? 'show' : 'hide'}
                 onValueLabelChange={(newMode) => {
                   setState({
                     ...state,
-                    gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'inside' },
+                    gridConfig: { ...state.gridConfig, isCellLabelVisible: newMode === 'show' },
                   });
                 }}
               />

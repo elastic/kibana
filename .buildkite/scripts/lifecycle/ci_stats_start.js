@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-unresolved
 const { CiStats } = require('kibana-buildkite-library');
 
 (async () => {

@@ -205,7 +205,7 @@ export function sampleArgsWithReferenceLine(value: number = 150) {
         type: 'referenceLineLayer',
         layerType: LayerTypes.REFERENCELINE,
         accessors: ['referenceLine-a'],
-        yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'yConfig' }],
+        yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'extendedYConfig' }],
         table: data,
       },
     ],

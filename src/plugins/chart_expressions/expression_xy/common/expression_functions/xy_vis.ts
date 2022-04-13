@@ -8,7 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
-import { XYArgs, XYLayerConfigResult, XYRender } from '../types';
+import {
+  AxisExtentConfigResult,
+  DataLayerConfigResult,
+  XYArgs,
+  XYLayerConfigResult,
+  XYRender,
+} from '../types';
 import {
   XY_VIS,
   DATA_LAYER,
@@ -26,6 +32,7 @@ import {
   EndValues,
   ANNOTATION_LAYER,
   LayerTypes,
+  AxisExtentModes,
 } from '../constants';
 import {
   Dimension,
@@ -33,6 +40,49 @@ import {
   validateAccessor,
 } from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
+
+const errors = {
+  extendBoundsAreInvalidError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extendBoundsAreInvalidError', {
+      defaultMessage:
+        'For area and bar modes, and custom extent mode, the lower bound should be less or greater than 0 and the upper bound - be greater or equal than 0',
+    }),
+  notUsedFillOpacityError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
+      defaultMessage: '`fillOpacity` argument is applicable only for area charts.',
+    }),
+  valueLabelsForNotBarsOrHistogramBarsChartsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
+      defaultMessage:
+        '`valueLabels` argument is applicable only for bar charts, which are not histograms.',
+    }),
+  dataBoundsForNotLineChartError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
+      defaultMessage: 'Only line charts can be fit to the data bounds',
+    }),
+};
+
+const validateExtent = (
+  extent: AxisExtentConfigResult,
+  hasBarOrArea: boolean,
+  dataLayers: DataLayerConfigResult[]
+) => {
+  const isValidLowerBound =
+    extent.lowerBound === undefined || (extent.lowerBound !== undefined && extent.lowerBound <= 0);
+  const isValidUpperBound =
+    extent.upperBound === undefined || (extent.upperBound !== undefined && extent.upperBound >= 0);
+
+  const areValidBounds = isValidLowerBound && isValidUpperBound;
+
+  if (hasBarOrArea && extent.mode === AxisExtentModes.CUSTOM && !areValidBounds) {
+    throw new Error(errors.extendBoundsAreInvalidError());
+  }
+
+  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType.includes('line'));
+  if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
+    throw new Error(errors.dataBoundsForNotLineChartError());
+  }
+};
 
 export const xyVisFunction: ExpressionFunctionDefinition<
   typeof XY_VIS,
@@ -47,14 +97,6 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     defaultMessage: 'An X/Y chart',
   }),
   args: {
-    title: {
-      types: ['string'],
-      help: 'The chart title.',
-    },
-    description: {
-      types: ['string'],
-      help: '',
-    },
     xTitle: {
       types: ['string'],
       help: i18n.translate('expressionXY.xyVis.xTitle.help', {
@@ -78,18 +120,21 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.yLeftExtent.help', {
         defaultMessage: 'Y left axis extents',
       }),
+      default: `{${AXIS_EXTENT_CONFIG}}`,
     },
     yRightExtent: {
       types: [AXIS_EXTENT_CONFIG],
       help: i18n.translate('expressionXY.xyVis.yRightExtent.help', {
         defaultMessage: 'Y right axis extents',
       }),
+      default: `{${AXIS_EXTENT_CONFIG}}`,
     },
     legend: {
       types: [LEGEND_CONFIG],
       help: i18n.translate('expressionXY.xyVis.legend.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
+      default: `{${LEGEND_CONFIG}}`,
     },
     fittingFunction: {
       types: ['string'],
@@ -97,6 +142,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.fittingFunction.help', {
         defaultMessage: 'Define how missing values are treated',
       }),
+      strict: true,
     },
     endValue: {
       types: ['string'],
@@ -104,6 +150,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.endValue.help', {
         defaultMessage: 'End value',
       }),
+      strict: true,
     },
     emphasizeFitting: {
       types: ['boolean'],
@@ -116,6 +163,8 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.valueLabels.help', {
         defaultMessage: 'Value labels mode',
       }),
+      strict: true,
+      default: ValueLabelModes.HIDE,
     },
     tickLabelsVisibilitySettings: {
       types: [TICK_LABELS_CONFIG],
@@ -194,7 +243,6 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.ariaLabel.help', {
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
-      required: false,
     },
     splitColumnAccessor: {
       types: ['vis_dimension', 'string'],
@@ -212,6 +260,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
   fn(data, args, handlers) {
     validateAccessor(args.splitRowAccessor, data.columns);
     validateAccessor(args.splitColumnAccessor, data.columns);
+
     const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
     const inputLayers: Array<XYLayerConfigResult | undefined> = [
       ...dataLayers,
@@ -233,9 +282,27 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }, []);
 
       const logTable = prepareLogTable(data, layerDimensions, true);
-
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
+
+    const hasBar = dataLayers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
+    const hasArea = dataLayers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
+
+    validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
+    validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
+
+    if (!hasArea && args.fillOpacity !== undefined) {
+      throw new Error(errors.notUsedFillOpacityError());
+    }
+
+    const hasNotHistogramBars =
+      dataLayers.filter(({ seriesType, isHistogram }) => seriesType.includes('bar') && !isHistogram)
+        .length > 0;
+
+    if ((!hasBar || !hasNotHistogramBars) && args.valueLabels !== ValueLabelModes.HIDE) {
+      throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
+    }
+
     return {
       type: 'render',
       as: XY_VIS_RENDERER,

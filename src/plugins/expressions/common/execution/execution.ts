@@ -281,8 +281,8 @@ export class Execution<
       this.context.inspectorAdapters.requests?.reset();
     }
 
-    if (isObservable<Input>(input)) {
-      input.subscribe(this.input$);
+    if (isObservable(input)) {
+      (input as Observable<Input>).subscribe(this.input$);
     } else if (isPromise(input)) {
       from(input).subscribe(this.input$);
     } else {
@@ -487,10 +487,6 @@ export class Execution<
 
         if (!required || name in dealiasedArgAsts) {
           continue;
-        }
-
-        if (!aliases?.length) {
-          throw new Error(`${fnDef.name} requires an argument`);
         }
 
         // use an alias if _ is the missing arg

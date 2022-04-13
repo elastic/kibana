@@ -15,7 +15,7 @@ import {
   sampleDocWithSortId,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -51,7 +51,7 @@ import { CommonAlertFieldsLatest } from '../../../../../rule_registry/common/sch
 const buildRuleMessage = mockBuildRuleMessage;
 
 describe('searchAfterAndBulkCreate', () => {
-  let mockService: AlertServicesMock;
+  let mockService: RuleExecutorServicesMock;
   let mockPersistenceServices: jest.Mocked<PersistenceServices>;
   let buildReasonMessage: BuildReasonMessage;
   let bulkCreate: BulkCreate;
@@ -84,7 +84,7 @@ describe('searchAfterAndBulkCreate', () => {
     listClient = listMock.getListClient();
     listClient.searchListItemByValues = jest.fn().mockResolvedValue([]);
     inputIndexPattern = ['auditbeat-*'];
-    mockService = alertsMock.createAlertServices();
+    mockService = alertsMock.createRuleExecutorServices();
     tuple = getRuleRangeTuples({
       logger: mockLogger,
       previousStartedAt: new Date(),

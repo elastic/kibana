@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { scan } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
@@ -45,7 +45,7 @@ const run = async (
 ) => {
   const execution = createExecution(expression, context);
   execution.start(input);
-  return await execution.result.toPromise();
+  return await lastValueFrom(execution.result);
 };
 
 let testScheduler: TestScheduler;
@@ -84,7 +84,7 @@ describe('Execution', () => {
     /* eslint-enable no-console */
 
     execution.start(123);
-    const { result } = await execution.result.toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toBe(123);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -102,7 +102,7 @@ describe('Execution', () => {
       value: -1,
     });
 
-    const { result } = await execution.result.toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toEqual({
       type: 'num',
@@ -117,7 +117,7 @@ describe('Execution', () => {
       value: 0,
     });
 
-    const { result } = await execution.result.toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toEqual({
       type: 'num',
@@ -131,7 +131,7 @@ describe('Execution', () => {
 
       // Below 1 is cast to { type: 'num', value: 1 }.
       execution.start(1);
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -143,7 +143,7 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       execution.start(Promise.resolve(1));
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -155,7 +155,7 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       execution.start(of(1));
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -372,7 +372,7 @@ describe('Execution', () => {
         value: 0,
       });
 
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -460,7 +460,7 @@ describe('Execution', () => {
       const execution = await createExecution('error "foo"');
       execution.start(null);
 
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toMatchObject({
         type: 'error',
@@ -709,12 +709,12 @@ describe('Execution', () => {
       };
       const executor = createUnitTestExecutor();
       executor.registerFunction(requiredArg);
-      const { result } = await executor.run('requiredArg', null, {}).toPromise();
+      const { result } = await lastValueFrom(executor.run('requiredArg', null, {}));
 
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: '[requiredArg] > requiredArg requires an argument',
+          message: '[requiredArg] > requiredArg requires an "arg" argument',
         },
       });
     });
@@ -758,7 +758,7 @@ describe('Execution', () => {
     });
 
     it('errors when argument is invalid', async () => {
-      const { result } = await executor.run('validateArg arg="invalid"', null).toPromise();
+      const { result } = await lastValueFrom(executor.run('validateArg arg="invalid"', null));
 
       expect(result).toMatchObject({
         type: 'error',
@@ -770,9 +770,9 @@ describe('Execution', () => {
     });
 
     it('errors when at least one value is invalid', async () => {
-      const { result } = await executor
-        .run('validateArg arg="valid" arg="invalid"', null)
-        .toPromise();
+      const { result } = await lastValueFrom(
+        executor.run('validateArg arg="valid" arg="invalid"', null)
+      );
 
       expect(result).toMatchObject({
         type: 'error',
@@ -784,7 +784,7 @@ describe('Execution', () => {
     });
 
     it('does not error when argument is valid', async () => {
-      const { result } = await executor.run('validateArg arg="valid"', null).toPromise();
+      const { result } = await lastValueFrom(executor.run('validateArg arg="valid"', null));
 
       expect(result).toBe('something');
     });
@@ -794,7 +794,7 @@ describe('Execution', () => {
     test('can execute expression in debug mode', async () => {
       const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
       execution.start(-1);
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -809,7 +809,7 @@ describe('Execution', () => {
         true
       );
       execution.start(0);
-      const { result } = await execution.result.toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',

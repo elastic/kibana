@@ -10,17 +10,16 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import {
-  FilterItem,
-  getDisplayValueFromFilter,
-} from '../../../../../../../src/plugins/data/public';
-import { Filter, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { getDisplayValueFromFilter } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/common';
+import { DataView } from '../../../../../../../src/plugins/data_views/public';
+import { FilterItem } from '../../../../../../../src/plugins/unified_search/public';
 
 const FilterItemComponent = injectI18n(FilterItem);
 
 interface ReadOnlyFilterItemsProps {
   filters: Filter[];
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
 }
 
 const noOp = () => {};

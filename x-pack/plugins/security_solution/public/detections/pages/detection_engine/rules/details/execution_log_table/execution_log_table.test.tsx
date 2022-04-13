@@ -85,6 +85,7 @@ jest.mock('../../../../../../common/lib/kibana', () => {
 
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 mockUseSourcererDataView.mockReturnValue({
+  indexPattern: { fields: [] },
   missingPatterns: {},
   selectedPatterns: {},
   scopeSelectedPatterns: {},

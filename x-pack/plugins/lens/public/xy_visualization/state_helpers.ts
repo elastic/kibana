@@ -9,7 +9,7 @@ import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
 import type {
   SeriesType,
-  YConfig,
+  ExtendedYConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   visualizationTypes,
@@ -61,7 +61,8 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
     return null;
   }
   return (
-    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
+    layer?.yConfig?.find((yConfig: ExtendedYConfig) => yConfig.forAccessor === accessor)?.color ||
+    null
   );
 };
 

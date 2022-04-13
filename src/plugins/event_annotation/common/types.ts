@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { $Values } from '@kbn/utility-types';
+import { AvailableAnnotationIcons } from './constants';
+
 export type LineStyle = 'solid' | 'dashed' | 'dotted';
 export type AnnotationType = 'manual';
 export type KeyType = 'point_in_time';
+export type AvailableAnnotationIcon = $Values<typeof AvailableAnnotationIcons>;
 
 export interface StyleProps {
   label: string;
   color?: string;
-  icon?: string;
+  icon?: AvailableAnnotationIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
   textVisibility?: boolean;

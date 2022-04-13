@@ -14,10 +14,8 @@ import { CollectConfigContainer } from './collect_config_container';
 import { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
 import { txtGoToDiscover } from './i18n';
-import {
-  ApplyGlobalFilterActionContext,
-  APPLY_FILTER_TRIGGER,
-} from '../../../../../../src/plugins/data/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/data/public';
+import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/unified_search/public';
 
 const isOutputWithIndexPatterns = (
   output: unknown

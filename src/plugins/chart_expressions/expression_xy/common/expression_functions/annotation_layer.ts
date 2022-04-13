@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { LayerTypes, ANNOTATION_LAYER } from '../constants';
 import { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../types';
@@ -21,16 +22,22 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
     aliases: [],
     type: ANNOTATION_LAYER,
     inputTypes: ['datatable'],
-    help: 'Annotation layer in lens',
+    help: i18n.translate('expressionXY.annotationLayer.help', {
+      defaultMessage: `Configure an annotation layer in the xy chart`,
+    }),
     args: {
       hide: {
         types: ['boolean'],
         default: false,
-        help: 'Show details',
+        help: i18n.translate('expressionXY.annotationLayer.hide.help', {
+          defaultMessage: 'Show / hide details',
+        }),
       },
       annotations: {
         types: ['manual_event_annotation'],
-        help: '',
+        help: i18n.translate('expressionXY.annotationLayer.annotations.help', {
+          defaultMessage: 'Annotationss',
+        }),
         multi: true,
       },
     },
@@ -38,6 +45,7 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
       return {
         type: ANNOTATION_LAYER,
         ...args,
+        annotations: args.annotations ?? [],
         layerType: LayerTypes.ANNOTATIONS,
         table: input,
       };

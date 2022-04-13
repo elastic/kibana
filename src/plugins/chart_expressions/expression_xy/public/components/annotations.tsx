@@ -26,7 +26,8 @@ import type {
   AnnotationLayerArgs,
   ExtendedAnnotationLayerArgs,
   CommonXYAnnotationLayerConfigResult,
-} from '../../common/types';
+  CollectiveConfig,
+} from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
@@ -45,12 +46,6 @@ export interface AnnotationsProps {
   hide?: boolean;
   minInterval?: number;
   isBarChart?: boolean;
-}
-
-interface CollectiveConfig extends EventAnnotationArgs {
-  roundedTimestamp: number;
-  axisMode: 'bottom';
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }
 
 const groupVisibleConfigsByInterval = (
@@ -174,7 +169,12 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
-        const strokeWidth = annotation.lineWidth || 1;
+        const strokeWidth = hide ? 1 : annotation.lineWidth || 1;
+        const dataValue = isGrouped
+          ? moment(
+              isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
+            ).valueOf()
+          : moment(exactTimestamp).valueOf();
         return (
           <LineAnnotation
             id={id}
@@ -206,9 +206,7 @@ export const Annotations = ({
             markerPosition={markerPosition}
             dataValues={[
               {
-                dataValue: moment(
-                  isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
-                ).valueOf(),
+                dataValue,
                 header,
                 details: annotation.label,
               },

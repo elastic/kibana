@@ -16,6 +16,7 @@ export interface CoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [analytics](./kibana-plugin-core-public.corestart.analytics.md) | AnalyticsServiceStart | [AnalyticsServiceStart](./kibana-plugin-core-public.analyticsservicestart.md) |
 |  [application](./kibana-plugin-core-public.corestart.application.md) | ApplicationStart | [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |
 |  [chrome](./kibana-plugin-core-public.corestart.chrome.md) | ChromeStart | [ChromeStart](./kibana-plugin-core-public.chromestart.md) |
 |  [deprecations](./kibana-plugin-core-public.corestart.deprecations.md) | DeprecationsServiceStart | [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) |

@@ -8,9 +8,42 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { LEGEND_CONFIG } from '../constants';
 import { LegendConfig, LegendConfigResult } from '../types';
+
+const errors = {
+  positionUsageWithIsInsideError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.legendConfig.errors.positionUsageWithIsInsideError',
+      {
+        defaultMessage:
+          '`position` argument is not applied if `isInside = true`. Please, use `horizontalAlignment` and `verticalAlignment` arguments instead.',
+      }
+    ),
+  alignmentUsageWithFalsyIsInsideError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.legendConfig.errors.alignmentUsageWithFalsyIsInsideError',
+      {
+        defaultMessage:
+          '`horizontalAlignment` and `verticalAlignment` arguments are not applied if `isInside = false`. Please, use the `position` argument instead.',
+      }
+    ),
+  floatingColumnsWithFalsyIsInsideError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.legendConfig.errors.floatingColumnsWithFalsyIsInsideError',
+      {
+        defaultMessage: '`floatingColumns` arguments are not applied if `isInside = false`.',
+      }
+    ),
+  legendSizeWithFalsyIsInsideError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.legendConfig.errors.legendSizeWithFalsyIsInsideError',
+      {
+        defaultMessage: '`legendSize` argument is not applied if `isInside = false`.',
+      }
+    ),
+};
 
 export const legendConfigFunction: ExpressionFunctionDefinition<
   typeof LEGEND_CONFIG,
@@ -31,6 +64,7 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.legendConfig.isVisible.help', {
         defaultMessage: 'Specifies whether or not the legend is visible.',
       }),
+      default: true,
     },
     position: {
       types: ['string'],
@@ -38,6 +72,7 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.legendConfig.position.help', {
         defaultMessage: 'Specifies the legend position.',
       }),
+      strict: true,
     },
     showSingleSeries: {
       types: ['boolean'],
@@ -58,6 +93,7 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
         defaultMessage:
           'Specifies the horizontal alignment of the legend when it is displayed inside chart.',
       }),
+      strict: true,
     },
     verticalAlignment: {
       types: ['string'],
@@ -66,6 +102,7 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
         defaultMessage:
           'Specifies the vertical alignment of the legend when it is displayed inside chart.',
       }),
+      strict: true,
     },
     floatingColumns: {
       types: ['number'],
@@ -94,6 +131,26 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
+    if (args.isInside) {
+      if (args.position) {
+        throw new Error(errors.positionUsageWithIsInsideError());
+      }
+
+      if (args.legendSize !== undefined) {
+        throw new Error(errors.legendSizeWithFalsyIsInsideError());
+      }
+    }
+
+    if (!args.isInside) {
+      if (args.verticalAlignment || args.horizontalAlignment) {
+        throw new Error(errors.alignmentUsageWithFalsyIsInsideError());
+      }
+
+      if (args.floatingColumns !== undefined) {
+        throw new Error(errors.floatingColumnsWithFalsyIsInsideError());
+      }
+    }
+
     return {
       type: LEGEND_CONFIG,
       ...args,

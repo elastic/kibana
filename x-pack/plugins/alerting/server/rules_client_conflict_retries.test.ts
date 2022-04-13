@@ -294,14 +294,13 @@ function setupRawAlertMocks(
   encryptedSavedObjects.getDecryptedAsInternalUser.mockReset();
 
   // splitting this out as it's easier to set a breakpoint :-)
-  // eslint-disable-next-line prettier/prettier
-  unsecuredSavedObjectsClient.get.mockImplementation(async () =>
-    cloneDeep(rawAlert)
-  );
+  unsecuredSavedObjectsClient.get.mockImplementation(async () => {
+    return cloneDeep(rawAlert);
+  });
 
-  encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () =>
-    cloneDeep(decryptedRawAlert)
-  );
+  encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () => {
+    return cloneDeep(decryptedRawAlert);
+  });
 }
 
 // setup for each test
