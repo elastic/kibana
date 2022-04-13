@@ -11,8 +11,18 @@ import {
   EuiBasicTableColumn,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
+  euiPaletteColorBlind,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  PartitionLayout,
+  Chart,
+  Partition,
+  Datum,
+  Settings,
+} from '@elastic/charts';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
@@ -21,6 +31,7 @@ import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values
 import { StorageExplorerItem } from '../../../../../common/storage_explorer_types';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { asPercent } from '../../../../../common/utils/formatters';
+import { useChartTheme } from '../../../../../../observability/public';
 
 export function StorageExplorer() {
   const rangeFrom = 'now/d';
@@ -28,6 +39,12 @@ export function StorageExplorer() {
   const environment = ENVIRONMENT_ALL.value;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const chartTheme = useChartTheme();
+  const groupedPalette = euiPaletteColorBlind({
+    rotations: 3,
+    order: 'group',
+    sortBy: 'natural',
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -48,31 +65,6 @@ export function StorageExplorer() {
 
   const items: StorageExplorerItem[] = data?.serviceStats ?? [];
 
-  // const items = [
-  //   {
-  //     service: 'CartService',
-  //     environments: ['Prod', 'Test'],
-  //     size: '95 GB',
-  //     calls: '8293',
-  //     sampling: '10%',
-  //     transactions: '928372',
-  //     spans: '726',
-  //     errors: '124',
-  //     metrics: '325',
-  //   },
-  //   {
-  //     service: 'CheckoutService',
-  //     environments: ['Prod'],
-  //     size: '32 GB',
-  //     calls: '2732',
-  //     sampling: '12%',
-  //     transactions: '7857',
-  //     spans: '456',
-  //     errors: '223',
-  //     metrics: '564',
-  //   },
-  // ];
-
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
     {
       field: 'service',
@@ -89,7 +81,7 @@ export function StorageExplorer() {
       name: i18n.translate(
         'xpack.apm.settings.storageExplorer.table.environmentColumnName',
         {
-          defaultMessage: 'Env',
+          defaultMessage: 'Environment',
         }
       ),
       render: (test, { environments }) => (
@@ -220,18 +212,50 @@ export function StorageExplorer() {
   }
 
   return (
-    <EuiInMemoryTable
-      tableCaption={i18n.translate(
-        'xpack.apm.settings.storageExplorer.tableCaption',
-        {
-          defaultMessage: 'Storage explorer',
-        }
-      )}
-      items={items ?? []}
-      columns={columns}
-      pagination={true}
-      search={search}
-      sorting={true}
-    />
+    <>
+      <EuiTitle size="s">
+        <h2>
+          {i18n.translate('xpack.apm.settings.storageExplorer.title', {
+            defaultMessage: 'Storage explorer',
+          })}
+        </h2>
+      </EuiTitle>
+
+      <Chart size={{ height: 240 }}>
+        <Settings theme={chartTheme} showLegend legendMaxDepth={1} />
+        <Partition
+          id="treemap"
+          data={items}
+          layout={PartitionLayout.treemap}
+          valueAccessor={(d) => parseInt(d.size, 10)}
+          valueGetter="percent"
+          topGroove={0}
+          layers={[
+            {
+              groupByRollup: (d: Datum) => d.service,
+              shape: {
+                fillColor: (d) =>
+                  groupedPalette[d.parent.sortIndex * 3 + d.sortIndex],
+              },
+            },
+          ]}
+        />
+      </Chart>
+      <EuiSpacer size="m" />
+
+      <EuiInMemoryTable
+        tableCaption={i18n.translate(
+          'xpack.apm.settings.storageExplorer.tableCaption',
+          {
+            defaultMessage: 'Storage explorer',
+          }
+        )}
+        items={items ?? []}
+        columns={columns}
+        pagination={true}
+        search={search}
+        sorting={true}
+      />
+    </>
   );
 }
