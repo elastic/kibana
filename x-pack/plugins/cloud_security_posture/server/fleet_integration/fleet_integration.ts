@@ -30,6 +30,7 @@ import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../common/schemas
 const isCspPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
 ): boolean => {
+  // TODO: check for CSP package type and not specific package
   return packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME;
 };
 
@@ -60,12 +61,12 @@ export const getPackagePolicyCreateCallback = (
 
     const cspRules = generateRulesFromTemplates(
       packagePolicy.policy_id,
-      //   newPackagePolicy.policy_id,
       existingRuleTemplates.saved_objects
     );
 
     try {
       await savedObjectsClient.bulkCreate(cspRules);
+      logger.info(`Generated CSP rules for package ${packagePolicy.policy_id}`);
     } catch (e) {
       logger.error('failed to generate rules out of template, Error: ', e);
     }
@@ -78,24 +79,31 @@ export const getPackagePolicyCreateCallback = (
  * Callback to handle deletion of PackagePolicies in Fleet
  */
 export const getPackagePolicyDeleteCallback = (
-  client: ISavedObjectsRepository
+  soClient: ISavedObjectsRepository,
+  logger: Logger
 ): PostPackagePolicyDeleteCallback => {
-  return async (deletePackagePolicy): Promise<void> => {
-    const { saved_objects: SavedObjects }: SavedObjectsFindResponse<CspRuleSchema> =
-      await client.find({
-        type: cspRuleAssetSavedObjectType,
-      });
+  return async (deletedPackagePolicies): Promise<void> => {
+    deletedPackagePolicies.map(async (deletedPackagePolicy) => {
+      if (isCspPackagePolicy(deletedPackagePolicy)) {
+        try {
+          const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleSchema> =
+            await soClient.find({
+              type: cspRuleAssetSavedObjectType,
+            });
+          // Get attached rules per package policy
 
-    for (const policy of deletePackagePolicy) {
-      if (isCspPackagePolicy(policy)) {
-        // Get attached rules per package policy
-        SavedObjects.filter((rule) => rule.attributes.package_policy_id === policy.policy_id).map(
-          (rule) => client.delete(cspRuleAssetSavedObjectType, rule.id)
-        );
+          cspRules
+            .filter((rule) => rule.attributes.package_policy_id === deletedPackagePolicy.policy_id)
+            .map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id));
+
+          // await Promise.all(cspRules);
+        } catch (e) {
+          logger.error(
+            `Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`
+          );
+        }
       }
-    }
-
-    await Promise.all(SavedObjects);
+    });
   };
 };
 
@@ -103,7 +111,7 @@ const generateRulesFromTemplates = (
   packagePolicyID: string,
   cspRuleTemplates: Array<SavedObjectsFindResult<CloudSecurityPostureRuleTemplateSchema>>
 ): Array<SavedObjectsBulkCreateObject<CspRuleSchema>> => {
-  const CIS_BENCHMARK_RULES: Array<SavedObjectsBulkCreateObject<CspRuleSchema>> = [];
+  const concreteRules: Array<SavedObjectsBulkCreateObject<CspRuleSchema>> = [];
 
   for (const ruleTemplate of cspRuleTemplates) {
     const ruleAttributes = {} as any;
@@ -111,11 +119,11 @@ const generateRulesFromTemplates = (
     ruleAttributes.package_policy_id = packagePolicyID;
     Object.assign(ruleAttributes, ruleTemplate.attributes);
 
-    CIS_BENCHMARK_RULES.push({
+    concreteRules.push({
       attributes: ruleAttributes,
       type: cspRuleAssetSavedObjectType,
     });
   }
 
-  return CIS_BENCHMARK_RULES;
+  return concreteRules;
 };
