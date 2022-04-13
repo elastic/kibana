@@ -12,76 +12,55 @@ import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
 export interface DashboardCollectorData {
   panels: number;
-  panelsByValue: {
-    total: number;
-    by_type: {
-      [key: string]: number;
+  by_type: {
+    [key: string]: {
+      total: number;
+      by_reference: number;
+      by_value: number;
+      details: {
+        [key: string]: number;
+      };
     };
-  };
-  panelsByReference: {
-    total: number;
-    by_type: {
-      [key: string]: number;
-    };
-  };
-  embeddable: {
-    [key: string]: number;
   };
 }
 
-export const getEmptyTelemetryData = (): DashboardCollectorData => ({
-  panels: 0,
-  panelsByValue: {
-    total: 0,
-    by_type: {},
-  },
-  panelsByReference: {
-    total: 0,
-    by_type: {},
-  },
-  embeddable: {},
+export const getEmptyDashboardData = (): DashboardCollectorData => ({ panels: 0, by_type: {} });
+
+export const getEmptyPanelTypeData = () => ({
+  total: 0,
+  by_reference: 0,
+  by_value: 0,
+  details: {},
 });
 
-type DashboardCollectorFunction = (
-  panels: SavedDashboardPanel730ToLatest[],
-  collectorData: DashboardCollectorData
-) => void;
-
-export const collectPanelsByType: DashboardCollectorFunction = (panels, collectorData) => {
-  let saveMethodKey: keyof DashboardCollectorData;
-  for (const panel of panels) {
-    const type = panel.type;
-    if (panel.id === undefined) {
-      saveMethodKey = 'panelsByValue';
-    } else {
-      saveMethodKey = 'panelsByReference';
-    }
-    if (!collectorData[saveMethodKey].by_type[type]) {
-      collectorData[saveMethodKey].by_type[type] = 0;
-    }
-    collectorData[saveMethodKey].total += 1;
-    collectorData[saveMethodKey].by_type[type] += 1;
-  }
-};
-
-export const collectForPanels: DashboardCollectorFunction = (panels, collectorData) => {
-  collectorData.panels += panels.length;
-  collectPanelsByType(panels, collectorData);
-};
-
-export const collectEmbeddableData = (
+export const collectPanelsByType = (
   panels: SavedDashboardPanel730ToLatest[],
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {
+  collectorData.panels += panels.length;
+
   for (const panel of panels) {
-    collectorData.embeddable = embeddableService.telemetry(
+    const type = panel.type;
+    if (!collectorData.by_type[type]) {
+      collectorData.by_type[type] = getEmptyPanelTypeData();
+    }
+    collectorData.by_type[type].total += 1;
+    if (panel.id === undefined) {
+      collectorData.by_type[type].by_value += 1;
+    } else {
+      collectorData.by_type[type].by_reference += 1;
+    }
+    // the following "details" need a follow-up that will actually properly consolidate
+    // the data from all embeddables - right now, the only data that is kept is the
+    // telemetry for the **final** embeddable of that type
+    collectorData.by_type[type].details = embeddableService.telemetry(
       {
         ...panel.embeddableConfig,
         id: panel.id || '',
         type: panel.type,
       },
-      collectorData.embeddable
+      collectorData.by_type[type].details
     );
   }
 };
@@ -90,7 +69,7 @@ export async function collectDashboardTelemetry(
   savedObjectClient: Pick<ISavedObjectsRepository, 'find'>,
   embeddableService: EmbeddablePersistableStateService
 ) {
-  const collectorData = getEmptyTelemetryData();
+  const collectorData = getEmptyDashboardData();
   const dashboards = await savedObjectClient.find<SavedObjectAttributes>({
     type: 'dashboard',
   });
@@ -104,8 +83,7 @@ export async function collectDashboardTelemetry(
       attributes.panelsJSON as string
     ) as unknown as SavedDashboardPanel730ToLatest[];
 
-    collectForPanels(panels, collectorData);
-    collectEmbeddableData(panels, collectorData, embeddableService);
+    collectPanelsByType(panels, collectorData, embeddableService);
   }
 
   return collectorData;
