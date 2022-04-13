@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiFieldText,
   EuiComboBox,
+  EuiSelect,
 } from '@elastic/eui';
 import { CustomizablePalette, PaletteRegistry, FIXED_PROGRESSION } from '@kbn/coloring';
 import { VisualizationDimensionEditorProps } from '../../types';
@@ -128,6 +129,28 @@ export function TableDimensionEditor(
 
   return (
     <>
+      {props.groupId === 'rows' && (
+        <EuiFormRow label={<>Collapse by </>} display="columnCompressed" fullWidth>
+          <EuiSelect
+            compressed
+            data-test-subj="indexPattern-terms-orderBy"
+            options={[
+              { text: 'none', value: '' },
+              { text: 'sum', value: 'sum' },
+              { text: 'min', value: 'min' },
+              { text: 'max', value: 'max' },
+              { text: 'avg', value: 'avg' },
+            ]}
+            value={column.collapseFn}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              setState({
+                ...state,
+                columns: updateColumnWith(state, accessor, { collapseFn: e.target.value }),
+              });
+            }}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth

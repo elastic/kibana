@@ -418,25 +418,7 @@ export function LayerPanel(
             )}
           </header>
 
-          {[
-            ...groups,
-            {
-              groupLabel: 'collapse',
-              groupId: 'collapse',
-              accessors: layerDatasource
-                .getPublicAPI({
-                  state: layerDatasourceState,
-                  layerId,
-                })
-                .getTableSpec()
-                .filter(
-                  (c) => !groups.some((g) => g.accessors.some((a) => a.columnId === c.columnId))
-                )
-                .map((c) => ({ columnId: c.columnId })),
-              supportsMoreColumns: true,
-              filterOperations: (o) => o.isBucketed,
-            } as VisualizationDimensionGroupConfig,
-          ].map((group, groupIndex) => {
+          {groups.map((group, groupIndex) => {
             let isMissing = false;
 
             if (!isEmptyLayer) {

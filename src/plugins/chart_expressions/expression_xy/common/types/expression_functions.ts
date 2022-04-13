@@ -83,6 +83,7 @@ export interface YConfig {
 
 export interface ValidLayer extends DataLayerConfigResult {
   xAccessor: NonNullable<DataLayerConfigResult['xAccessor']>;
+  collapseFn?: string;
 }
 
 export interface DataLayerArgs {

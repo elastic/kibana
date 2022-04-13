@@ -45,6 +45,7 @@ export interface ColumnState {
   colorMode?: 'none' | 'cell' | 'text';
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
+  collapseFn?: string;
 }
 
 export type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };

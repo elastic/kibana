@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSelect, htmlIdGenerator } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState, XYDataLayerConfig } from '../types';
@@ -93,13 +93,34 @@ export function DimensionEditor(
   if (props.groupId === 'breakdown') {
     return (
       <>
-        <PalettePicker
-          palettes={props.paletteService}
-          activePalette={localLayer?.palette}
-          setPalette={(newPalette) => {
-            setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
-          }}
-        />
+        <EuiFormRow label={<>Collapse by </>} display="columnCompressed" fullWidth>
+          <EuiSelect
+            compressed
+            data-test-subj="indexPattern-terms-orderBy"
+            options={[
+              { text: 'none', value: '' },
+              { text: 'sum', value: 'sum' },
+              { text: 'min', value: 'min' },
+              { text: 'max', value: 'max' },
+              { text: 'avg', value: 'avg' },
+            ]}
+            value={layer.collapseFn}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              setLocalState(
+                updateLayer(localState, { ...layer, collapseFn: e.target.value }, index)
+              );
+            }}
+          />
+        </EuiFormRow>
+        {!layer.collapseFn && (
+          <PalettePicker
+            palettes={props.paletteService}
+            activePalette={localLayer?.palette}
+            setPalette={(newPalette) => {
+              setState(updateLayer(localState, { ...localLayer, palette: newPalette }, index));
+            }}
+          />
+        )}
       </>
     );
   }

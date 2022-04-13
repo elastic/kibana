@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { CollapseExpressionFunction } from './types';
 
 export interface CollapseArgs {
+  table: string;
   by?: string[];
   metric?: string[];
   fn: 'sum' | 'avg' | 'min' | 'max';
@@ -47,15 +48,20 @@ export interface CollapseArgs {
  */
 export const collapse: CollapseExpressionFunction = {
   name: 'lens_collapse',
-  type: 'datatable',
+  type: 'lens_multitable',
 
-  inputTypes: ['datatable'],
+  inputTypes: ['lens_multitable'],
 
   help: i18n.translate('xpack.lens.functions.counterRate.help', {
     defaultMessage: 'Calculates the counter rate of a column in a data table',
   }),
 
   args: {
+    table: {
+      help: '',
+      types: ['string'],
+      required: true,
+    },
     by: {
       help: i18n.translate('xpack.lens.functions.counterRate.args.byHelpText', {
         defaultMessage: 'Column to split the counter rate calculation by',

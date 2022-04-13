@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter';
+import { Ast, AstFunction } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
@@ -203,7 +203,10 @@ export const getDatatableVisualization = ({
             )
             .map((accessor) => ({
               columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
+              triggerIcon:
+                columnMap[accessor].hidden || columnMap[accessor].collapseFn
+                  ? 'invisible'
+                  : undefined,
             })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
@@ -349,58 +352,85 @@ export const getDatatableVisualization = ({
     return {
       type: 'expression',
       chain: [
+        ...columns
+          .filter((c) => c.collapseFn)
+          .map((c) => {
+            return {
+              type: 'function',
+              function: 'lens_collapse',
+              arguments: {
+                table: [state.layerId],
+                by: columns
+                  .filter(
+                    (col) =>
+                      col.columnId !== c.columnId &&
+                      datasource!.getOperationForColumnId(col.columnId)?.isBucketed
+                  )
+                  .map((col) => col.columnId),
+                metric: columns
+                  .filter((col) => !datasource!.getOperationForColumnId(col.columnId)?.isBucketed)
+                  .map((col) => col.columnId),
+                fn: [c.collapseFn!],
+              },
+            } as AstFunction;
+          }),
         {
           type: 'function',
           function: 'lens_datatable',
           arguments: {
             title: [title || ''],
             description: [description || ''],
-            columns: columns.map((column) => {
-              const paletteParams = {
-                ...column.palette?.params,
-                // rewrite colors and stops as two distinct arguments
-                colors: (column.palette?.params?.stops || []).map(({ color }) => color),
-                stops:
-                  column.palette?.params?.name === 'custom'
-                    ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
-                    : [],
-                reverse: false, // managed at UI level
-              };
-              const sortingHint = datasource!.getOperationForColumnId(column.columnId)!.sortingHint;
+            columns: columns
+              .filter((c) => !c.collapseFn)
+              .map((column) => {
+                const paletteParams = {
+                  ...column.palette?.params,
+                  // rewrite colors and stops as two distinct arguments
+                  colors: (column.palette?.params?.stops || []).map(({ color }) => color),
+                  stops:
+                    column.palette?.params?.name === 'custom'
+                      ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                      : [],
+                  reverse: false, // managed at UI level
+                };
+                const sortingHint = datasource!.getOperationForColumnId(
+                  column.columnId
+                )!.sortingHint;
 
-              const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+                const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
 
-              const canColor =
-                datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
+                const canColor =
+                  datasource!.getOperationForColumnId(column.columnId)?.dataType === 'number';
 
-              return {
-                type: 'expression',
-                chain: [
-                  {
-                    type: 'function',
-                    function: 'lens_datatable_column',
-                    arguments: {
-                      columnId: [column.columnId],
-                      hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
-                      width: typeof column.width === 'undefined' ? [] : [column.width],
-                      isTransposed:
-                        typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
-                      transposable: [
-                        !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
-                      ],
-                      alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
-                      colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
-                      palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
-                      summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
-                      summaryLabel: hasNoSummaryRow
-                        ? []
-                        : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
-                      sortingHint: sortingHint ? [sortingHint] : [],
+                return {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'lens_datatable_column',
+                      arguments: {
+                        columnId: [column.columnId],
+                        hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
+                        width: typeof column.width === 'undefined' ? [] : [column.width],
+                        isTransposed:
+                          typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
+                        transposable: [
+                          !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
+                        ],
+                        alignment:
+                          typeof column.alignment === 'undefined' ? [] : [column.alignment],
+                        colorMode: [canColor && column.colorMode ? column.colorMode : 'none'],
+                        palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
+                        summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
+                        summaryLabel: hasNoSummaryRow
+                          ? []
+                          : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                        sortingHint: sortingHint ? [sortingHint] : [],
+                      },
                     },
-                  },
-                ],
-              };
-            }),
+                  ],
+                };
+              }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
             fitRowToContent: [state.rowHeight === 'auto'],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import { Ast, AstFunction } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
@@ -195,6 +195,20 @@ export const buildExpression = (
   return {
     type: 'expression',
     chain: [
+      ...validDataLayers
+        .filter((l) => l.collapseFn)
+        .map((layer) => {
+          return {
+            type: 'function',
+            function: 'lens_collapse',
+            arguments: {
+              table: [layer.layerId],
+              by: layer.xAccessor ? [layer.xAccessor] : [],
+              metric: layer.accessors,
+              fn: [layer.collapseFn!],
+            },
+          } as AstFunction;
+        }),
       {
         type: 'function',
         function: 'xyVis',
@@ -472,7 +486,7 @@ const dataLayerToExpression = (
           ],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],
-          splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+          splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
             : [],

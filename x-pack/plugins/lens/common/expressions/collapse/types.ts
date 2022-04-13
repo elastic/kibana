@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
+import { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
+import { LensMultiTable } from '../../types';
 import { CollapseArgs } from './index';
 
 export type CollapseExpressionFunction = ExpressionFunctionDefinition<
   'lens_collapse',
-  Datatable,
+  LensMultiTable,
   CollapseArgs,
-  Datatable | Promise<Datatable>
+  LensMultiTable | Promise<LensMultiTable>
 >;

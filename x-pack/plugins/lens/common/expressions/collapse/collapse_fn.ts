@@ -19,7 +19,7 @@ function getValueAsNumberArray(value: unknown) {
   }
 }
 
-export const collapseFn: CollapseExpressionFunction['fn'] = (input, { by, metric, fn }) => {
+export const collapseFn: CollapseExpressionFunction['fn'] = (input, { table, by, metric, fn }) => {
   const accumulators: Record<string, Partial<Record<string, number>>> = {};
   const valueCounter: Record<string, Partial<Record<string, number>>> = {};
   metric?.forEach((m) => {
@@ -27,7 +27,7 @@ export const collapseFn: CollapseExpressionFunction['fn'] = (input, { by, metric
     valueCounter[m] = {};
   });
   const setMarker: Partial<Record<string, boolean>> = {};
-  input.rows.forEach((row) => {
+  input.tables[table].rows.forEach((row) => {
     const bucketIdentifier = getBucketIdentifier(row, by);
 
     metric?.forEach((m) => {
@@ -83,19 +83,27 @@ export const collapseFn: CollapseExpressionFunction['fn'] = (input, { by, metric
 
   return {
     ...input,
-    columns: input.columns.filter((c) => by?.indexOf(c.id) !== -1 && metric?.indexOf(c.id) !== -1),
-    rows: input.rows
-      .map((row) => {
-        const bucketIdentifier = getBucketIdentifier(row, by);
-        if (setMarker[bucketIdentifier]) return undefined;
-        setMarker[bucketIdentifier] = true;
-        const newRow = { ...row };
-        metric?.forEach((m) => {
-          newRow[m] = accumulators[m][bucketIdentifier];
-        });
+    tables: {
+      ...input.tables,
+      [table]: {
+        ...input.tables[table],
+        columns: input.tables[table].columns.filter(
+          (c) => by?.indexOf(c.id) !== -1 || metric?.indexOf(c.id) !== -1
+        ),
+        rows: input.tables[table].rows
+          .map((row) => {
+            const bucketIdentifier = getBucketIdentifier(row, by);
+            if (setMarker[bucketIdentifier]) return undefined;
+            setMarker[bucketIdentifier] = true;
+            const newRow = { ...row };
+            metric?.forEach((m) => {
+              newRow[m] = accumulators[m][bucketIdentifier];
+            });
 
-        return newRow;
-      })
-      .filter(Boolean) as DatatableRow[],
+            return newRow;
+          })
+          .filter(Boolean) as DatatableRow[],
+      },
+    },
   };
 };
