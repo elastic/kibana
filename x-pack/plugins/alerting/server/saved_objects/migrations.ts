@@ -85,6 +85,7 @@ export const isSecuritySolutionLegacyNotification = (
 
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  searchSourceMigrations: MigrateFunctionsObject,
   isPreconfigured: (connectorId: string) => boolean
 ): SavedObjectMigrationMap {
   const migrationWhenRBACWasIntroduced = createEsoMigration(
@@ -162,18 +163,21 @@ export function getMigrations(
     pipeMigrations(addMappedParams, addSearchType)
   );
 
-  return {
-    '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
-    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
-    '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
-    '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
-    '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
-    '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
-    '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
-    '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
-    '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
-    '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
-  };
+  return mergeSavedObjectMigrationMaps(
+    {
+      '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
+      '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
+      '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
+      '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
+      '7.14.1': executeMigrationWithErrorHandling(migrationSecurityRules714, '7.14.1'),
+      '7.15.0': executeMigrationWithErrorHandling(migrationSecurityRules715, '7.15.0'),
+      '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
+      '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
+      '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
+      '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
+    },
+    getEsQueryAlertSearchSourceMigrations(searchSourceMigrations)
+  );
 }
 
 function executeMigrationWithErrorHandling(
@@ -900,17 +904,25 @@ function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {
 /**
  * This creates a migration map that applies search source migrations to legacy es query rules
  */
-const getEsQueryAlertSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
-  mapValues<MigrateFunctionsObject, MigrateFunction>(
+function getEsQueryAlertSearchSourceMigrations(
+  searchSourceMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject {
+  return mapValues<MigrateFunctionsObject, MigrateFunction>(
     searchSourceMigrations,
-    (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
+    (
+        migrateSerializedSearchSourceFields: MigrateFunction<SerializedSearchSourceFields>
+      ): MigrateFunction =>
       (state) => {
-        const _state = state as unknown as { attributes: RawRule };
+        const _state = state as { attributes: RawRule };
 
         const serializedSearchSource = _state.attributes.params
           .searchConfiguration as SerializedSearchSourceFields;
 
-        if (!serializedSearchSource) return _state;
+        const isNotSerializedSearchSource =
+          typeof serializedSearchSource !== 'object' ||
+          serializedSearchSource === null ||
+          Array.isArray(serializedSearchSource);
+        if (isNotSerializedSearchSource) return _state;
 
         return {
           ..._state,
@@ -918,20 +930,10 @@ const getEsQueryAlertSearchSourceMigrations = (searchSourceMigrations: MigrateFu
             ..._state.attributes,
             params: {
               ..._state.attributes.params,
-              searchConfiguration: migrate(serializedSearchSource),
+              searchConfiguration: migrateSerializedSearchSourceFields(serializedSearchSource),
             },
           },
         };
       }
   );
-
-export const getAllMigrations = (
-  searchSourceMigrations: MigrateFunctionsObject,
-  alertingSavedObjectTypeMigrations: SavedObjectMigrationMap
-): SavedObjectMigrationMap =>
-  mergeSavedObjectMigrationMaps(
-    alertingSavedObjectTypeMigrations,
-    getEsQueryAlertSearchSourceMigrations(
-      searchSourceMigrations
-    ) as unknown as SavedObjectMigrationMap
-  );
+}

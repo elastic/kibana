@@ -2470,6 +2470,31 @@ describe('migration visualization', () => {
     });
   });
 
+  it('should not apply search source migrations within visualization when searchSourceJSON is not an object', () => {
+    const visualizationDoc = {
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
+        },
+      },
+    } as SavedObjectUnsanitizedDoc;
+
+    const versionToTest = '1.2.4';
+    const visMigrations = getAllMigrations({
+      [versionToTest]: (state) => ({ ...state, migrated: true }),
+    });
+
+    expect(
+      visMigrations[versionToTest](visualizationDoc, {} as SavedObjectMigrationContext)
+    ).toEqual({
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
+        },
+      },
+    });
+  });
+
   describe('8.1.0 pie - labels and addLegend migration', () => {
     const getDoc = (addLegend: boolean, lastLevel: boolean = false) => ({
       attributes: {

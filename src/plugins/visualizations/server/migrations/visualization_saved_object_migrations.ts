@@ -1215,16 +1215,24 @@ const visualizationSavedObjectTypeMigrations = {
 /**
  * This creates a migration map that applies search source migrations to legacy visualization SOs
  */
-const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+const getVisualizationSearchSourceMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
   mapValues<MigrateFunctionsObject, MigrateFunction>(
     searchSourceMigrations,
     (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
       (state) => {
-        const _state = state as unknown as { attributes: VisualizationSavedObjectAttributes };
+        const _state = state as { attributes: VisualizationSavedObjectAttributes };
 
-        const parsedSearchSourceJSON = _state.attributes.kibanaSavedObjectMeta.searchSourceJSON;
+        const parsedSearchSourceJSON = JSON.parse(
+          _state.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
 
-        if (!parsedSearchSourceJSON) return _state;
+        const isNotSerializedSearchSource =
+          typeof parsedSearchSourceJSON !== 'object' ||
+          parsedSearchSourceJSON === null ||
+          Array.isArray(parsedSearchSourceJSON);
+        if (isNotSerializedSearchSource) return _state;
 
         return {
           ..._state,
@@ -1232,7 +1240,7 @@ const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateF
             ..._state.attributes,
             kibanaSavedObjectMeta: {
               ..._state.attributes.kibanaSavedObjectMeta,
-              searchSourceJSON: JSON.stringify(migrate(JSON.parse(parsedSearchSourceJSON))),
+              searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
             },
           },
         };
@@ -1244,7 +1252,5 @@ export const getAllMigrations = (
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     visualizationSavedObjectTypeMigrations,
-    getVisualizationSearchSourceMigrations(
-      searchSourceMigrations
-    ) as unknown as SavedObjectMigrationMap
+    getVisualizationSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
   );

@@ -135,16 +135,23 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) =
 /**
  * This creates a migration map that applies search source migrations
  */
-const getSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+const getSearchSourceMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
   mapValues<MigrateFunctionsObject, MigrateFunction>(
     searchSourceMigrations,
     (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
       (state) => {
-        const _state = state as unknown as { attributes: SavedSearchMigrationAttributes };
+        const _state = state as { attributes: SavedSearchMigrationAttributes };
 
-        const parsedSearchSourceJSON = _state.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-
-        if (!parsedSearchSourceJSON) return _state;
+        const parsedSearchSourceJSON = JSON.parse(
+          _state.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        const isNotSerializedSearchSource =
+          typeof parsedSearchSourceJSON !== 'object' ||
+          parsedSearchSourceJSON === null ||
+          Array.isArray(parsedSearchSourceJSON);
+        if (isNotSerializedSearchSource) return _state;
 
         return {
           ..._state,
@@ -152,7 +159,7 @@ const getSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObjec
             ..._state.attributes,
             kibanaSavedObjectMeta: {
               ..._state.attributes.kibanaSavedObjectMeta,
-              searchSourceJSON: JSON.stringify(migrate(JSON.parse(parsedSearchSourceJSON))),
+              searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
             },
           },
         };
@@ -171,6 +178,6 @@ export const getAllMigrations = (
 ): SavedObjectMigrationMap => {
   return mergeSavedObjectMigrationMaps(
     searchMigrations,
-    getSearchSourceMigrations(searchSourceMigrations) as unknown as SavedObjectMigrationMap
+    getSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
   );
 };

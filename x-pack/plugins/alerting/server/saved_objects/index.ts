@@ -14,7 +14,7 @@ import type {
 } from 'kibana/server';
 import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import mappings from './mappings.json';
-import { getAllMigrations, getMigrations } from './migrations';
+import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';
@@ -61,10 +61,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
-    migrations: getAllMigrations(
-      getSearchSourceMigrations(),
-      getMigrations(encryptedSavedObjects, isPreconfigured)
-    ),
+    migrations: getMigrations(encryptedSavedObjects, getSearchSourceMigrations(), isPreconfigured),
     mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
     management: {
       displayName: 'rule',
