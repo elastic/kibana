@@ -145,11 +145,4 @@ describe('Saved query management list component', () => {
         .text()
     ).toBe('Replace with selected filter set');
   });
-
-  it('should render the modal on delete', async () => {
-    const component = mount(wrapSavedQueriesListComponentInContext(props));
-    await flushEffect(component);
-    component.find('[data-test-subj="delete-saved-query-Test-button"]').first().simulate('click');
-    expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
-  });
 });
