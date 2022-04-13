@@ -6,18 +6,15 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from 'kibana/public';
-import { first } from 'rxjs/operators';
 import './types';
+import { firstValueFrom } from 'rxjs';
 
 export class ApplicationUsageTest implements Plugin {
   public setup(core: CoreSetup) {}
 
   public start(core: CoreStart) {
-    core.application.applications$
-      .pipe(first())
-      .toPromise()
-      .then((applications) => {
-        window.__applicationIds__ = [...applications.keys()];
-      });
+    firstValueFrom(core.application.applications$).then((applications) => {
+      window.__applicationIds__ = [...applications.keys()];
+    });
   }
 }

@@ -27,4 +27,3 @@ export * from './use_platform';
 export * from './use_agent_policy_refresh';
 export * from './use_package_installations';
 export * from './use_agent_enrollment_flyout_data';
-export * from './use_get_agent_incoming_data';
