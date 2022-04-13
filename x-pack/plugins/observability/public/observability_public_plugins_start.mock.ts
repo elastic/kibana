@@ -36,6 +36,12 @@ const triggersActionsUiStartMock = {
   createStart() {
     return {
       getAddAlertFlyout: jest.fn(),
+      ruleTypeRegistry: {
+        has: jest.fn(),
+        register: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+      },
     };
   },
 };
