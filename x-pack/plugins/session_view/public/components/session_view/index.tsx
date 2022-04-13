@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
@@ -71,6 +71,11 @@ export const SessionView = ({
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
 
   const styles = useStyles({ height, isFullScreen });
+
+  // to give an indication to the user that there may be more search results if they turn on verbose mode.
+  const showVerboseSearchTooltip = useMemo(() => {
+    return !!(!displayOptions?.verboseMode && searchQuery && searchResults?.length === 0);
+  }, [displayOptions?.verboseMode, searchResults, searchQuery]);
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
@@ -194,6 +199,7 @@ export const SessionView = ({
               <SessionViewDisplayOptions
                 displayOptions={displayOptions!}
                 onChange={handleOptionChange}
+                showVerboseSearchTooltip={showVerboseSearchTooltip}
               />
             </EuiFlexItem>
 
@@ -273,8 +279,8 @@ export const SessionView = ({
                       setSearchResults={setSearchResults}
                       updatedAlertsStatus={updatedAlertsStatus}
                       onShowAlertDetails={onShowAlertDetails}
-                      timeStampOn={displayOptions?.timestamp}
-                      verboseModeOn={displayOptions?.verboseMode}
+                      showTimestamp={displayOptions?.timestamp}
+                      verboseMode={displayOptions?.verboseMode}
                     />
                   </div>
                 )}

@@ -32,6 +32,7 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
+import { lastValueFrom } from 'rxjs';
 import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
@@ -306,9 +307,9 @@ export const SearchExamplesApp = ({
       const abortController = new AbortController();
       setAbortController(abortController);
       setIsLoading(true);
-      const { rawResponse: res } = await searchSource
-        .fetch$({ abortSignal: abortController.signal })
-        .toPromise();
+      const { rawResponse: res } = await lastValueFrom(
+        searchSource.fetch$({ abortSignal: abortController.signal })
+      );
       setRawResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;

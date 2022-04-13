@@ -22,7 +22,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -47,7 +46,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -69,7 +67,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -108,7 +105,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -131,7 +127,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -159,7 +154,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -180,7 +174,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -205,7 +198,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -241,7 +233,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -264,7 +255,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -290,7 +280,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -315,7 +304,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -336,7 +324,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -360,7 +347,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -382,7 +368,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -411,7 +396,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -434,7 +418,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -460,7 +443,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -485,7 +467,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -506,7 +487,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -530,7 +510,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -552,7 +531,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -586,7 +564,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -609,7 +586,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -635,7 +611,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -660,7 +635,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -681,7 +655,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -705,7 +678,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -727,7 +699,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -756,7 +727,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -779,7 +749,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -805,7 +774,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -830,7 +798,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -851,7 +818,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -875,7 +841,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -897,7 +862,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -929,7 +893,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -965,7 +928,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -990,7 +952,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -1012,7 +973,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -1041,7 +1001,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -1066,7 +1025,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -1088,7 +1046,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -1122,7 +1079,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -1147,7 +1103,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -1169,7 +1124,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -1198,7 +1152,6 @@ Array [
                     globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -1223,7 +1176,6 @@ Array [
                   globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -1245,7 +1197,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }

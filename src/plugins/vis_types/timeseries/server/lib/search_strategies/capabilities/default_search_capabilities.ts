@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import {
   convertIntervalToUnit,
   parseInterval,
