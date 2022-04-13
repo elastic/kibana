@@ -99,9 +99,15 @@ export const IconSelect = ({
 
   return (
     <EuiComboBox
+      data-test-subj="lns-icon-select"
       isClearable={false}
       options={customIconSet}
-      selectedOptions={[selectedIcon]}
+      selectedOptions={[
+        {
+          label: selectedIcon.label,
+          value: selectedIcon.value,
+        },
+      ]}
       onChange={(selection) => {
         onChange(selection[0].value!);
       }}

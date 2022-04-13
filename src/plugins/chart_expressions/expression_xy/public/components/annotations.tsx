@@ -19,15 +19,7 @@ import {
   RectAnnotation,
 } from '@elastic/charts';
 import moment from 'moment';
-import {
-  EuiDatePicker,
-  EuiFormRow,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiButtonGroup,
-  EuiFormLabel,
-  EuiFormControlLayout,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type {
   ManualPointEventAnnotationArgs,
   ManualRangeEventAnnotationOutput,
@@ -172,6 +164,9 @@ export const getAnnotationsGroupedByInterval = (
     return collectiveConfig;
   });
 };
+
+// todo: remove when closed https://github.com/elastic/elastic-charts/issues/1647
+RectAnnotation.displayName = 'RectAnnotation';
 
 export const Annotations = ({
   groupedLineAnnotations,

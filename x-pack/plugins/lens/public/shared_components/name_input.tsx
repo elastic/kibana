@@ -36,7 +36,7 @@ export const NameInput = ({
     >
       <EuiFieldText
         compressed
-        data-test-subj="indexPattern-label-edit"
+        data-test-subj="column-label-edit"
         value={inputValue}
         onChange={(e) => {
           handleInputChange(e.target.value);

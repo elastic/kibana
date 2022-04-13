@@ -121,6 +121,7 @@ export const AnnotationsPanel = (
         {isRange ? (
           <>
             <ConfigPanelRangeDatePicker
+              dataTestSubj="lns-xyAnnotation-fromTime"
               prependLabel={i18n.translate('xpack.lens.xyChart.annotationDate.from', {
                 defaultMessage: 'From',
               })}
@@ -153,6 +154,7 @@ export const AnnotationsPanel = (
               })}
             />
             <ConfigPanelRangeDatePicker
+              dataTestSubj="lns-xyAnnotation-toTime"
               prependLabel={i18n.translate('xpack.lens.xyChart.annotationDate.to', {
                 defaultMessage: 'To',
               })}
@@ -184,6 +186,7 @@ export const AnnotationsPanel = (
           </>
         ) : (
           <ConfigPanelRangeDatePicker
+            dataTestSubj="lns-xyAnnotation-time"
             label={i18n.translate('xpack.lens.xyChart.annotationDate', {
               defaultMessage: 'Annotation date',
             })}
@@ -259,7 +262,7 @@ export const AnnotationsPanel = (
               legend={i18n.translate('xpack.lens.xyChart.fillStyle', {
                 defaultMessage: 'Fill',
               })}
-              data-test-subj="lns-xyChart-fillStyle"
+              data-test-subj="lns-xyAnnotation-fillStyle"
               name="fillStyle"
               buttonSize="compressed"
               options={[
@@ -329,6 +332,7 @@ const ConfigPanelApplyAsRangeSwitch = ({
   return (
     <EuiFormRow display="columnCompressed" className="lnsRowCompressedMargin">
       <EuiSwitch
+        data-test-subj="lns-xyAnnotation-rangeSwitch"
         label={i18n.translate('xpack.lens.xyChart.applyAsRange', {
           defaultMessage: 'Apply as range',
         })}
@@ -380,11 +384,13 @@ const ConfigPanelRangeDatePicker = ({
   label,
   prependLabel,
   onChange,
+  dataTestSubj = 'lnsXY_annotation_date_picker',
 }: {
   value: moment.Moment;
   prependLabel?: string;
   label?: string;
   onChange: (val: moment.Moment | null) => void;
+  dataTestSubj?: string;
 }) => {
   return (
     <EuiFormRow display="rowCompressed" fullWidth label={label} className="lnsRowCompressedMargin">
@@ -401,7 +407,7 @@ const ConfigPanelRangeDatePicker = ({
             selected={value}
             onChange={onChange}
             dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-            data-test-subj="lnsXY_annotation_date_picker"
+            data-test-subj={dataTestSubj}
           />
         </EuiFormControlLayout>
       ) : (
@@ -411,7 +417,7 @@ const ConfigPanelRangeDatePicker = ({
           selected={value}
           onChange={onChange}
           dateFormat="MMM D, YYYY @ HH:mm:ss.SSS"
-          data-test-subj="lnsXY_annotation_date_picker"
+          data-test-subj={dataTestSubj}
         />
       )}
     </EuiFormRow>
