@@ -173,7 +173,7 @@ export function createSearchBar({ core, storage, data, usageCollection }: Statef
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
           screenTitle={props.screenTitle}
-          dataViews={props.dataViews}
+          indexPatterns={props.indexPatterns}
           indicateNoData={props.indicateNoData}
           timeHistory={data.query.timefilter.history}
           dateRangeFrom={timeRange.from}

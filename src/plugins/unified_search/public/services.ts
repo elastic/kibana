@@ -13,6 +13,8 @@ import { AutocompleteStart } from '../public';
 
 export const [getDataViews, setDataViews] = createGetterSetter<DataViewsContract>('IndexPatterns');
 
+export const [getIndexPatterns, setIndexPatterns] = [getDataViews, setDataViews];
+
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
