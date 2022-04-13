@@ -88,12 +88,14 @@ const serviceMapRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
 
     notifyFeatureUsage({
-      licensingPlugin: context.licensing,
+      licensingPlugin: licensingContext,
       featureName: 'serviceMaps',
     });
 
@@ -107,7 +109,7 @@ const serviceMapRoute = createApmServerRoute({
       },
     } = params;
 
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     const [setup, serviceGroup] = await Promise.all([
       setupRequest(resources),
       serviceGroupId
@@ -164,7 +166,9 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);
@@ -226,7 +230,8 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);

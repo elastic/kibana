@@ -99,7 +99,7 @@ export const defineGetComplianceDashboardRoute = (
     },
     async (context, _, response) => {
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const latestCyclesIds = await getLatestCyclesIds(esClient);
         const query: QueryDslQueryContainer = {
           bool: {

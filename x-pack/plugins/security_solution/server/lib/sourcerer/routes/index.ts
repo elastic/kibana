@@ -37,7 +37,8 @@ export const createSourcererDataViewRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const siemClient = context.securitySolution?.getAppClient();
+      const coreContext = await context.core;
+      const siemClient = (await context.securitySolution)?.getAppClient();
       const dataViewId = siemClient.getSourcererDataViewId();
 
       try {
@@ -49,8 +50,8 @@ export const createSourcererDataViewRoute = (
         ] = await getStartServices();
 
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser,
+          coreContext.savedObjects.client,
+          coreContext.elasticsearch.client.asCurrentUser,
           request,
           true
         );
@@ -106,7 +107,7 @@ export const createSourcererDataViewRoute = (
 
         const defaultDataView = await buildSourcererDataView(
           siemDataView,
-          context.core.elasticsearch.client.asCurrentUser
+          coreContext.elasticsearch.client.asCurrentUser
         );
         return response.ok({
           body: {
@@ -146,6 +147,7 @@ export const getSourcererDataViewRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const coreContext = await context.core;
       const { dataViewId } = request.query;
       try {
         const [
@@ -156,8 +158,8 @@ export const getSourcererDataViewRoute = (
         ] = await getStartServices();
 
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser,
+          coreContext.savedObjects.client,
+          coreContext.elasticsearch.client.asCurrentUser,
           request,
           true
         );
@@ -166,7 +168,7 @@ export const getSourcererDataViewRoute = (
         const kibanaDataView = siemDataView
           ? await buildSourcererDataView(
               siemDataView,
-              context.core.elasticsearch.client.asCurrentUser
+              coreContext.elasticsearch.client.asCurrentUser
             )
           : {};
 

@@ -27,7 +27,8 @@ const suggestionsRoute = createApmServerRoute({
       config: setup.config,
       kuery: '',
     });
-    const size = await context.core.uiSettings.client.get<number>(
+    const coreContext = await context.core;
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const suggestions = await getSuggestions({
