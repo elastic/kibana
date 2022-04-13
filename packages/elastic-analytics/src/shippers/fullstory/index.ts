@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { IShipper } from './types';
-
-export { FullStoryShipper } from './fullstory';
-export type { FullStorySnippetConfig, FullStoryShipperConfig } from './fullstory';
+export { FullStoryShipper } from './fullstory_shipper';
+export type { FullStoryShipperConfig } from './fullstory_shipper';
+export type { FullStorySnippetConfig } from './load_snippet';
