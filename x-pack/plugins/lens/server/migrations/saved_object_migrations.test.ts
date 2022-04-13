@@ -24,6 +24,7 @@ import {
 } from './types';
 import { layerTypes, MetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
+import { XYState } from '../../public';
 
 describe('Lens migrations', () => {
   const migrations = getAllMigrations({}, {});
@@ -2111,6 +2112,54 @@ describe('Lens migrations', () => {
       expect(visState.textAlign).toBe('right');
       expect(visState.titlePosition).toBe('top');
       expect(visState.size).toBe('s');
+    });
+  });
+
+  describe('8.3.0 valueLabels in XY', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: {
+            valueLabels: 'inside',
+          },
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('migrates valueLabels from `inside` to `show`', () => {
+      const result = migrations['8.3.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const visState = result.attributes.state.visualization as XYState;
+      expect(visState.valueLabels).toBe('show');
+    });
+
+    it("doesn't migrate valueLabels with `hide` value", () => {
+      const result = migrations['8.3.0'](
+        {
+          ...example,
+          attributes: {
+            ...example.attributes,
+            state: {
+              ...example.attributes.state,
+              visualization: {
+                ...(example.attributes.state.visualization as Record<string, unknown>),
+                valueLabels: 'hide',
+              },
+            },
+          },
+        },
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
+      const visState = result.attributes.state.visualization as XYState;
+      expect(visState.valueLabels).toBe('hide');
     });
   });
 });
