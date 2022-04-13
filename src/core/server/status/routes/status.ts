@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, ReplaySubject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Observable, combineLatest, ReplaySubject, firstValueFrom } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../http';
@@ -92,7 +91,7 @@ export const registerStatusRoute = ({
     async (context, req, res) => {
       const { version, buildSha, buildNum } = config.packageInfo;
       const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
-      const [overall, coreOverall, core, plugins] = await combinedStatus$.pipe(first()).toPromise();
+      const [overall, coreOverall, core, plugins] = await firstValueFrom(combinedStatus$);
 
       const { v8format = true, v7format = false } = req.query ?? {};
 
@@ -113,7 +112,7 @@ export const registerStatusRoute = ({
         });
       }
 
-      const lastMetrics = await metrics.getOpsMetrics$().pipe(first()).toPromise();
+      const lastMetrics = await firstValueFrom(metrics.getOpsMetrics$());
 
       const body: StatusHttpBody = {
         name: config.serverName,
