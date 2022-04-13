@@ -389,7 +389,9 @@ export class LensPlugin {
     };
   }
 
-  private async initParts(
+  private initPartsPromise?: Promise<void>;
+
+  private initParts(
     core: CoreSetup<LensPluginStartDependencies, void>,
     data: DataPublicPluginSetup,
     charts: ChartsPluginSetup,
@@ -399,53 +401,59 @@ export class LensPlugin {
     eventAnnotation: EventAnnotationPluginSetup,
     uiActions: UiActionsSetup
   ) {
-    const {
-      DatatableVisualization,
-      EditorFrameService,
-      IndexPatternDatasource,
-      XyVisualization,
-      MetricVisualization,
-      PieVisualization,
-      HeatmapVisualization,
-      GaugeVisualization,
-    } = await import('./async_services');
-    this.datatableVisualization = new DatatableVisualization();
-    this.editorFrameService = new EditorFrameService();
-    this.indexpatternDatasource = new IndexPatternDatasource();
-    this.xyVisualization = new XyVisualization();
-    this.metricVisualization = new MetricVisualization();
-    this.pieVisualization = new PieVisualization();
-    this.heatmapVisualization = new HeatmapVisualization();
-    this.gaugeVisualization = new GaugeVisualization();
+    if (!this.initPartsPromise) {
+      this.initPartsPromise = (async () => {
+        const {
+          DatatableVisualization,
+          EditorFrameService,
+          IndexPatternDatasource,
+          XyVisualization,
+          MetricVisualization,
+          PieVisualization,
+          HeatmapVisualization,
+          GaugeVisualization,
+        } = await import('./async_services');
+        this.datatableVisualization = new DatatableVisualization();
+        this.editorFrameService = new EditorFrameService();
+        this.indexpatternDatasource = new IndexPatternDatasource();
+        this.xyVisualization = new XyVisualization();
+        this.metricVisualization = new MetricVisualization();
+        this.pieVisualization = new PieVisualization();
+        this.heatmapVisualization = new HeatmapVisualization();
+        this.gaugeVisualization = new GaugeVisualization();
 
-    const editorFrameSetupInterface = this.editorFrameService.setup();
+        const editorFrameSetupInterface = this.editorFrameService.setup();
 
-    const dependencies: IndexPatternDatasourceSetupPlugins &
-      XyVisualizationPluginSetupPlugins &
-      DatatableVisualizationPluginSetupPlugins &
-      MetricVisualizationPluginSetupPlugins &
-      PieVisualizationPluginSetupPlugins = {
-      expressions,
-      data,
-      fieldFormats,
-      charts,
-      editorFrame: editorFrameSetupInterface,
-      formatFactory,
-      eventAnnotation,
-      uiActions,
-    };
-    this.indexpatternDatasource.setup(core, dependencies);
-    this.xyVisualization.setup(core, dependencies);
-    this.datatableVisualization.setup(core, dependencies);
-    this.metricVisualization.setup(core, dependencies);
-    this.pieVisualization.setup(core, dependencies);
-    this.heatmapVisualization.setup(core, dependencies);
-    this.gaugeVisualization.setup(core, dependencies);
+        const dependencies: IndexPatternDatasourceSetupPlugins &
+          XyVisualizationPluginSetupPlugins &
+          DatatableVisualizationPluginSetupPlugins &
+          MetricVisualizationPluginSetupPlugins &
+          PieVisualizationPluginSetupPlugins = {
+          expressions,
+          data,
+          fieldFormats,
+          charts,
+          editorFrame: editorFrameSetupInterface,
+          formatFactory,
+          eventAnnotation,
+          uiActions,
+        };
+        this.indexpatternDatasource.setup(core, dependencies);
+        this.xyVisualization.setup(core, dependencies);
+        this.datatableVisualization.setup(core, dependencies);
+        this.metricVisualization.setup(core, dependencies);
+        this.pieVisualization.setup(core, dependencies);
+        this.heatmapVisualization.setup(core, dependencies);
+        this.gaugeVisualization.setup(core, dependencies);
 
-    this.queuedVisualizations.forEach((queuedVis) => {
-      editorFrameSetupInterface.registerVisualization(queuedVis);
-    });
-    this.editorFrameSetup = editorFrameSetupInterface;
+        this.queuedVisualizations.forEach((queuedVis) => {
+          editorFrameSetupInterface.registerVisualization(queuedVis);
+        });
+        this.editorFrameSetup = editorFrameSetupInterface;
+      })();
+    }
+
+    return this.initPartsPromise;
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
