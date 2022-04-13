@@ -8,7 +8,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { useExecutionContext } from 'src/plugins/kibana_react/public';
+import { useExecutionContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { ALERTS_PATH, SecurityPageName } from '../../../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import * as i18n from './translations';
