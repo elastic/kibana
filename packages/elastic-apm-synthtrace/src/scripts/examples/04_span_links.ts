@@ -6,59 +6,64 @@
  * Side Public License, v 1.
  */
 
+import uuid from 'uuid';
 import { apm, timerange } from '../../index';
-import { apmEventsToElasticsearchOutput } from '../../lib/apm/utils/apm_events_to_elasticsearch_output';
 import { Scenario } from '../scenario';
-import { getCommonServices } from '../utils/get_common_services';
-import { getApmWriteTargets } from '../../lib/apm/utils/get_apm_write_targets';
 
-const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
-  const { client } = getCommonServices({ target, logLevel });
-  const writeTargets = await getApmWriteTargets({ client });
+function generateExternalSpanLinks() {
+  // randomly creates external span links 0 - 10
+  return Array(Math.floor(Math.random() * 11))
+    .fill(0)
+    .map(() => ({ span: { id: uuid.v4() }, trance: { id: uuid() } }));
+}
+function generateEventsSpanLinks() {
+  const range = timerange(
+    new Date('2022-04-12T19:00:00.000Z'),
+    new Date('2022-04-12T19:05:00.000Z')
+  );
+  const instanceGo = apm.service('synth-go', 'production', 'go').instance('instance-a');
+  const events = range
+    .interval('1m')
+    .rate(1)
+    .spans((timestamp) => {
+      return instanceGo
+        .transaction('Sender')
+        .timestamp(timestamp)
+        .duration(1000)
+        .success()
+        .children(
+          instanceGo
+            .span('external', 'custom')
+            .timestamp(timestamp + 50)
+            .duration(100)
+            .success()
+        )
+        .serialize();
+    });
 
+  return events;
+}
+
+const scenario: Scenario = async () => {
   return {
     generate: ({ from, to }) => {
-      const range = timerange(from, to);
+      const externalSpanLinks = generateExternalSpanLinks();
+      const eventsSpanLinks = generateEventsSpanLinks();
 
-      const instanceGo = apm.service('synth-go', 'production', 'go').instance('instance-a');
-
-      const events = range
-        .interval('1m')
-        .rate(1)
-        .flatMap((timestamp) => {
-          return instanceGo
-            .transaction('Sender')
-            .timestamp(timestamp)
-            .duration(1000)
-            .success()
-            .children(
-              instanceGo
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
-                .timestamp(timestamp + 50)
-                .duration(900)
-                .destination('elasticsearch')
-                .success()
-            )
-            .serialize();
-        });
-
-      // Use the previous created events to links the new span created below
-      const spansToLink = events
+      const spanLinks = eventsSpanLinks
+        .toArray()
         .map((event) => {
           const spanId = event['span.id'];
           return spanId ? { span: { id: spanId }, trace: { id: event['trace.id'] } } : undefined;
         })
         .filter((_) => _) as Array<{ span: { id: string }; trace?: { id: string } }>;
 
-      // Create only one transaction that will link all spans
-      const consumerRange = timerange(to, new Date(to + 1 * 60000).getTime());
-
+      const consumerRange = timerange(from, to);
       const instanceJava = apm.service('synth-java', 'production', 'java').instance('instance-b');
-
-      const linkEvents = consumerRange
+      const events = consumerRange
         .interval('1m')
         .rate(1)
-        .flatMap((timestamp) => {
+        .spans((timestamp) => {
           return instanceJava
             .transaction('Consumer')
             .timestamp(timestamp)
@@ -67,7 +72,7 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
             .children(
               instanceJava
                 .span('Span links', 'external')
-                .linkSpans(spansToLink)
+                .defaults({ 'span.links': [...externalSpanLinks, ...spanLinks] })
                 .timestamp(timestamp + 50)
                 .duration(900)
                 .destination('elasticsearch')
@@ -75,7 +80,8 @@ const scenario: Scenario = async ({ target, logLevel, scenarioOpts }) => {
             )
             .serialize();
         });
-      return apmEventsToElasticsearchOutput({ events: [...events, ...linkEvents], writeTargets });
+
+      return events.concat(eventsSpanLinks);
     },
   };
 };
