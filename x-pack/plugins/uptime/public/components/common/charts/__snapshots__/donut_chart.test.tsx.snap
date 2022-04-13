@@ -234,6 +234,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
               },
             },
             "goal": Object {
+              "arcBoxSamplePitch": 0.08726646259971647,
+              "barThicknessMinSizeRatio": 0.1,
+              "baselineArcThickness": 32,
+              "baselineBarThickness": 32,
+              "capturePad": 16,
               "majorCenterLabel": Object {
                 "fill": "black",
                 "fontFamily": "sans-serif",
@@ -244,7 +249,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "fontFamily": "sans-serif",
                 "fontStyle": "normal",
               },
+              "marginRatio": 0.05,
+              "maxBulletSize": 500,
+              "maxCentralFontSize": 38,
+              "maxCircularSize": 360,
               "maxFontSize": 64,
+              "maxLabelFontSize": 32,
+              "maxTickFontSize": 24,
               "minFontSize": 8,
               "minorCenterLabel": Object {
                 "fill": "black",

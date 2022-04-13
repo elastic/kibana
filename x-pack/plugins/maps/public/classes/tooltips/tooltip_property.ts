@@ -16,7 +16,7 @@ import type { TooltipFeature } from '../../../../../plugins/maps/common/descript
 export interface ITooltipProperty {
   getPropertyKey(): string;
   getPropertyName(): string | ReactNode;
-  getHtmlDisplayValue(): string;
+  getHtmlDisplayValue(): ReactNode;
   getRawValue(): string | string[] | undefined;
   isFilterable(): boolean;
   getESFilters(): Promise<Filter[]>;

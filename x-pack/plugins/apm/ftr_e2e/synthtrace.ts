@@ -9,7 +9,7 @@ import { EntityIterable } from '@elastic/apm-synthtrace';
 export const synthtrace = {
   index: (events: EntityIterable) =>
     new Promise((resolve) => {
-      cy.task('synthtrace:index', events).then(resolve);
+      cy.task('synthtrace:index', events.toArray()).then(resolve);
     }),
   clean: () =>
     new Promise((resolve) => {

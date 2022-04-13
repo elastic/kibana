@@ -37,8 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       transactionType?: string;
       environment?: string;
       kuery?: string;
-      comparisonStart?: string;
-      comparisonEnd?: string;
+      offset?: string;
       transactionNames?: string;
       latencyAggregationType?: LatencyAggregationType;
       numBuckets?: number;
@@ -188,8 +187,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: moment(end).subtract(7, 'minutes').toISOString(),
                 end: new Date(end).toISOString(),
-                comparisonStart: new Date(start).toISOString(),
-                comparisonEnd: moment(start).add(7, 'minutes').toISOString(),
+                offset: '8m',
               },
             });
           });

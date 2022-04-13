@@ -123,6 +123,7 @@ const basicTimeline: TimelineModel = {
   savedObjectId: null,
   selectAll: false,
   selectedEventIds: {},
+  sessionViewConfig: null,
   show: true,
   showCheckboxes: false,
   sort: [

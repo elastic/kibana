@@ -314,6 +314,7 @@ export enum TimelineId {
   usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  hostsPageSessions = 'hosts-page-sessions',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
@@ -321,16 +322,19 @@ export enum TimelineId {
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  rulePreview = 'rule-preview',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.hostsPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.hostsPageSessions),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
+  runtimeTypes.literal(TimelineId.rulePreview),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
@@ -464,6 +468,7 @@ export enum TimelineTabs {
   graph = 'graph',
   notes = 'notes',
   pinned = 'pinned',
+  session = 'session',
   eql = 'eql',
 }
 

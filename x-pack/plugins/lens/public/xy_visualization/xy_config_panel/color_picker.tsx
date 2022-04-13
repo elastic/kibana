@@ -8,10 +8,10 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State } from '../types';
+import { State, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
 import {
@@ -67,6 +67,7 @@ export const ColorPicker = ({
       return defaultAnnotationColor;
     }
 
+    const dataLayer: XYDataLayerConfig = layer;
     const sortedAccessors: string[] = getSortedAccessors(
       frame.datasourceLayers[layer.layerId] ?? layer.accessors,
       layer
@@ -81,8 +82,8 @@ export const ColorPicker = ({
       colorAssignments,
       frame,
       {
-        ...layer,
-        accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+        ...dataLayer,
+        accessors: sortedAccessors.filter((sorted) => dataLayer.accessors.includes(sorted)),
       },
       paletteService
     );

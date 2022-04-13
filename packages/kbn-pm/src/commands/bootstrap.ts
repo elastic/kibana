@@ -17,12 +17,7 @@ import { ICommand } from './';
 import { readYarnLock } from '../utils/yarn_lock';
 import { sortPackageJson } from '../utils/sort_package_json';
 import { validateDependencies } from '../utils/validate_dependencies';
-import {
-  ensureYarnIntegrityFileExists,
-  installBazelTools,
-  runBazel,
-  yarnIntegrityFileExists,
-} from '../utils/bazel';
+import { installBazelTools, removeYarnIntegrityFileIfExists, runBazel } from '../utils/bazel';
 import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
 
 export const BootstrapCommand: ICommand = {
@@ -54,16 +49,8 @@ export const BootstrapCommand: ICommand = {
       }
     };
 
-    // Force install is set in case a flag is passed or
-    // if the `.yarn-integrity` file is not found which
-    // will be indicated by the return of yarnIntegrityFileExists.
-    const forceInstall =
-      (!!options && options['force-install'] === true) ||
-      !(await yarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules')));
-
-    // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
-    // for bazel to know it has to re-install the node_modules after a reset or a clean
-    await ensureYarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules'));
+    // Force install is set in case a flag is passed into yarn kbn bootstrap
+    const forceInstall = !!options && options['force-install'] === true;
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
@@ -83,7 +70,9 @@ export const BootstrapCommand: ICommand = {
 
     if (forceInstall) {
       await time('force install dependencies', async () => {
-        await runBazel(['run', '@nodejs//:yarn'], runOffline, {
+        await removeYarnIntegrityFileIfExists(resolve(kibanaProjectPath, 'node_modules'));
+        await runBazel(['clean', '--expunge']);
+        await runBazel(['run', '@yarn//:yarn'], runOffline, {
           env: {
             SASS_BINARY_SITE:
               'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',

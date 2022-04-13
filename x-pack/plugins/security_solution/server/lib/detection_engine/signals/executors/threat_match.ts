@@ -10,7 +10,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { getInputIndex } from '../get_input_output_index';
@@ -42,7 +42,7 @@ export const threatMatchExecutor = async ({
   tuple: RuleRangeTuple;
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
   logger: Logger;

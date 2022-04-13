@@ -29,7 +29,7 @@ const DefaultQueryParams: TimeSeriesQuery = {
 };
 
 describe('timeSeriesQuery', () => {
-  const esClient = alertsMock.createAlertServices().scopedClusterClient.asCurrentUser;
+  const esClient = alertsMock.createRuleExecutorServices().scopedClusterClient.asCurrentUser;
   const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   const params = {
     logger,
