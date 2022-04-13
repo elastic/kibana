@@ -17,6 +17,7 @@ import * as pluginContext from '../../hooks/use_plugin_context';
 import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AppMountParameters } from 'kibana/public';
+import { ALERTS_FEATURE_ID } from '../../../../alerting/common';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -57,11 +58,12 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   kibanaFeatures: [],
 }));
 
+const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
+const { useLoadRuleTypes } = jest.requireMock('../../../../triggers_actions_ui/public');
+
 describe('empty RulesPage', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
-    const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
-    const { useLoadRuleTypes } = jest.requireMock('../../../../triggers_actions_ui/public');
     const rulesState: RuleState = {
       isLoading: false,
       data: [],
@@ -1513,7 +1515,59 @@ describe('empty RulesPage', () => {
   });
 });
 
-describe('empty RulesPage with show only capability', () => {});
+describe('empty RulesPage with show only capability', () => {
+  let wrapper: ReactWrapper<any>;
+  async function setup() {
+    const rulesState: RuleState = {
+      isLoading: false,
+      data: [],
+      error: null,
+      totalItemCount: 0,
+    };
+    const ruleTypes = [
+      {
+        id: 'test_rule_type',
+        name: 'some rule type',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
+        producer: ALERTS_FEATURE_ID,
+        minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: false },
+        },
+        ruleTaskTimeout: '1m',
+      },
+    ];
+    useFetchRules.mockReturnValue({ rulesState, noData: true });
+    useLoadRuleTypes.mockReturnValue({ ruleTypes });
+
+    wrapper = mountWithIntl(<RulesPage />);
+  }
+
+  it('renders no permission screen', async () => {
+    await setup();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="noPermissionPrompt"]').exists()).toBeTruthy();
+  });
+
+  it('does not render no data screen', async () => {
+    await setup();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    expect(wrapper.find('[data-test-subj="createFirstRuleEmptyPrompt"]').exists()).toBeFalsy();
+  });
+});
 
 describe('rulesPage with items', () => {});
 
