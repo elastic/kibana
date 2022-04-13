@@ -30,7 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { catchError, map, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
@@ -693,9 +693,8 @@ function doSearch(
   const startTs = performance.now();
 
   // Submit the search request using the `data.search` service.
-  return data.search
-    .search(req, { sessionId })
-    .pipe(
+  return lastValueFrom(
+    data.search.search(req, { sessionId }).pipe(
       tap((res) => {
         if (isCompleteResponse(res)) {
           const avgResult: number | undefined = res.rawResponse.aggregations
@@ -724,7 +723,7 @@ function doSearch(
         return of({ request: req, response: e });
       })
     )
-    .toPromise();
+  );
 }
 
 function getNumeric(fields?: DataViewField[]) {

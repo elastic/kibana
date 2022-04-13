@@ -261,6 +261,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   tuple,
                   wrapHits,
                   wrapSequences,
+                  ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
                 },
               });
 
