@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
@@ -18,6 +18,7 @@ import { buildRuleMessageFactory } from '../rule_messages';
 import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { createRuleDataClientMock } from '../../../../../../rule_registry/server/rule_data_client/rule_data_client.mock';
 
 describe('threshold_executor', () => {
   const version = '8.0.0';
@@ -49,6 +50,7 @@ describe('threshold_executor', () => {
 
   describe('thresholdExecutor', () => {
     it('should set a warning when exception list for threshold rule contains value list exceptions', async () => {
+      const ruleDataClientMock = createRuleDataClientMock();
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
       const response = await thresholdExecutor({
         completeRule: thresholdCompleteRule,
@@ -69,6 +71,7 @@ describe('threshold_executor', () => {
           createdItems: [],
         })),
         wrapHits: jest.fn(),
+        ruleDataReader: ruleDataClientMock.getReader({ namespace: 'default' }),
       });
       expect(response.warningMessages.length).toEqual(1);
     });

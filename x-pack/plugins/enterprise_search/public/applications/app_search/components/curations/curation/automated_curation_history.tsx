@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EntSearchLogStream } from '../../../../shared/log_stream';
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName }) => {
+  const [endTimestamp, setEndTimestamp] = useState(Date.now());
   const filters = [
     `appsearch.adaptive_relevance.query: ${query}`,
     'event.kind: event',
@@ -31,14 +33,28 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
     <DataPanel
       iconType="tableDensityNormal"
       title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curation.detail.historyTableTitle',
-            {
-              defaultMessage: 'Adaptive relevance changes',
-            }
-          )}
-        </h2>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem component="h2">
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.curation.detail.historyTableTitle',
+              { defaultMessage: 'Adaptive relevance changes' }
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="refresh"
+              size="xs"
+              onClick={() => setEndTimestamp(Date.now())}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engines.apiLogs.newEventsButtonLabel',
+                {
+                  defaultMessage: 'Refresh',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       subtitle={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.curation.detail.historyTableDescription',
@@ -51,6 +67,7 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
     >
       <EntSearchLogStream
         hoursAgo={720}
+        endTimestamp={endTimestamp}
         query={filters.join(' and ')}
         columns={[{ type: 'timestamp' }, { type: 'message' }]}
       />

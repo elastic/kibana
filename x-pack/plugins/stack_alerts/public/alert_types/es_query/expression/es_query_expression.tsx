@@ -6,6 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -147,8 +148,8 @@ export const EsQueryExpression = ({
         const timeWindow = parseDuration(window);
         const parsedQuery = JSON.parse(esQuery);
         const now = Date.now();
-        const { rawResponse } = await data.search
-          .search({
+        const { rawResponse } = await firstValueFrom(
+          data.search.search({
             params: buildSortedEventsQuery({
               index,
               from: new Date(now - timeWindow).toISOString(),
@@ -160,7 +161,7 @@ export const EsQueryExpression = ({
               track_total_hits: true,
             }),
           })
-          .toPromise();
+        );
 
         const hits = rawResponse.hits;
         setTestQueryResult(

@@ -16,6 +16,7 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
   const find = getService('find');
   const header = getPageObject('header');
   const retry = getService('retry');
+  const config = getService('config');
 
   return {
     /**
@@ -25,8 +26,27 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
      */
     async goToFirstListedCase() {
       await testSubjects.existOrFail('cases-table');
+      await testSubjects.existOrFail('case-details-link', {
+        timeout: config.get('timeouts.waitFor'),
+      });
       await testSubjects.click('case-details-link');
-      await testSubjects.existOrFail('case-view-title');
+      await testSubjects.existOrFail('case-view-title', {
+        timeout: config.get('timeouts.waitFor'),
+      });
+    },
+
+    async deleteFirstListedCase() {
+      await testSubjects.existOrFail('action-delete', {
+        timeout: config.get('timeouts.waitFor'),
+      });
+      await testSubjects.click('action-delete');
+      await testSubjects.existOrFail('confirmModalConfirmButton', {
+        timeout: config.get('timeouts.waitFor'),
+      });
+      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('euiToastHeader', {
+        timeout: config.get('timeouts.waitFor'),
+      });
     },
 
     async bulkDeleteAllCases() {
@@ -55,8 +75,8 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
-      await retry.tryForTime(2000, async () => {
-        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+      await retry.tryForTime(3000, async () => {
+        const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
         expect(rows.length).equal(nrRows);
       });
     },
@@ -66,6 +86,7 @@ export function CasesTableServiceProvider({ getService, getPageObject }: FtrProv
         this.refreshTable();
         return await testSubjects.exists('case-details-link');
       });
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForCasesToBeDeleted() {
