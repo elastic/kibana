@@ -137,7 +137,10 @@ describe('sourcerer route', () => {
       });
       test('returns sourcerer formatted Data Views when SIEM Data View does NOT exist', async () => {
         createSourcererDataViewRoute(server.router, getStartServicesNotSiem);
-        const response = await server.inject(getSourcererRequest(mockPatternList), context);
+        const response = await server.inject(
+          getSourcererRequest(mockPatternList),
+          requestContextMock.convertContext(context)
+        );
         expect(response.status).toEqual(200);
         expect(response.body).toEqual(mockDataViewsTransformed);
       });
@@ -163,7 +166,10 @@ describe('sourcerer route', () => {
           },
         ] as unknown) as StartServicesAccessor<StartPlugins>;
         createSourcererDataViewRoute(server.router, getStartServicesSpecial);
-        const response = await server.inject(getSourcererRequest(mockPatternList), context);
+        const response = await server.inject(
+          getSourcererRequest(mockPatternList),
+          requestContextMock.convertContext(context)
+        );
         expect(response.status).toEqual(200);
         expect(response.body).toEqual(mockDataViewsTransformed);
       });
@@ -192,14 +198,20 @@ describe('sourcerer route', () => {
           },
         ] as unknown) as StartServicesAccessor<StartPlugins>;
         createSourcererDataViewRoute(server.router, getStartServicesSpecial);
-        await server.inject(getSourcererRequest(mockPatternList), context);
+        await server.inject(
+          getSourcererRequest(mockPatternList),
+          requestContextMock.convertContext(context)
+        );
         expect(mockCreateAndSave).toHaveBeenCalled();
         expect(mockCreateAndSave.mock.calls[0][1]).toEqual(true);
       });
 
       test('returns sourcerer formatted Data Views when SIEM Data View exists', async () => {
         createSourcererDataViewRoute(server.router, getStartServices);
-        const response = await server.inject(getSourcererRequest(mockPatternList), context);
+        const response = await server.inject(
+          getSourcererRequest(mockPatternList),
+          requestContextMock.convertContext(context)
+        );
         expect(response.status).toEqual(200);
         expect(response.body).toEqual(mockDataViewsTransformed);
       });
@@ -207,7 +219,10 @@ describe('sourcerer route', () => {
       test('returns sourcerer formatted Data Views when SIEM Data View exists and patternList input is changed', async () => {
         createSourcererDataViewRoute(server.router, getStartServices);
         mockPatternList.shift();
-        const response = await server.inject(getSourcererRequest(mockPatternList), context);
+        const response = await server.inject(
+          getSourcererRequest(mockPatternList),
+          requestContextMock.convertContext(context)
+        );
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
           defaultDataView: {
