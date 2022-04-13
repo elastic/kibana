@@ -53,7 +53,7 @@ describe('EditOutputFlyout', () => {
     // Does not show logstash SSL inputs
     expect(utils.queryByLabelText('Client SSL certificate key')).toBeNull();
     expect(utils.queryByLabelText('Client SSL certificate')).toBeNull();
-    expect(utils.queryByLabelText('Server SSL certificate authorities')).toBeNull();
+    expect(utils.queryByLabelText('Server SSL certificate authorities (optional)')).toBeNull();
   });
 
   it('should render the flyout if the output provided is a logstash output', async () => {
@@ -68,7 +68,7 @@ describe('EditOutputFlyout', () => {
     // Show logstash SSL inputs
     expect(utils.queryByLabelText('Client SSL certificate key')).not.toBeNull();
     expect(utils.queryByLabelText('Client SSL certificate')).not.toBeNull();
-    expect(utils.queryByLabelText('Server SSL certificate authorities')).not.toBeNull();
+    expect(utils.queryByLabelText('Server SSL certificate authorities (optional)')).not.toBeNull();
   });
 
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
