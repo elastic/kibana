@@ -16,11 +16,8 @@ import { HostsKpiUniqueIpsStrategyResponse } from './unique_ips';
 
 export enum HostsKpiQueries {
   kpiAuthentications = 'hostsKpiAuthentications',
-  kpiAuthenticationsEntities = 'hostsKpiAuthenticationsEntities',
   kpiHosts = 'hostsKpiHosts',
-  kpiHostsEntities = 'hostsKpiHostsEntities',
   kpiUniqueIps = 'hostsKpiUniqueIps',
-  kpiUniqueIpsEntities = 'hostsKpiUniqueIpsEntities',
 }
 
 export type HostsKpiStrategyResponse =

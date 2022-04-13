@@ -67,6 +67,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
       fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
+      fieldTypeHelp: `${ELASTICSEARCH_DOCS}mapping-types.html`,
+      dateFieldTypeDocs: `${ELASTICSEARCH_DOCS}date.html`,
+      dateFormatsDocs: `${ELASTICSEARCH_DOCS}mapping-date-format.html`,
       documentExplorer: `${KIBANA_DOCS}document-explorer.html`,
     },
     filebeat: {
@@ -325,10 +328,12 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
+      ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
     },
     securitySolution: {
       trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
       eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
+      blocklist: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/blocklist.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

@@ -56,7 +56,7 @@ describe('Legend Settings', () => {
   });
 
   it('should have default the max lines input to 1 when no value is given', () => {
-    const component = shallow(<LegendSettingsPopover {...props} />);
+    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate />);
     expect(component.find(MaxLinesInput).prop('value')).toEqual(1);
   });
 
@@ -74,9 +74,9 @@ describe('Legend Settings', () => {
     ).toEqual(false);
   });
 
-  it('should have disabled the max lines input when truncate is set to false', () => {
+  it('should hide the max lines input when truncate is set to false', () => {
     const component = shallow(<LegendSettingsPopover {...props} shouldTruncate={false} />);
-    expect(component.find(MaxLinesInput).prop('isDisabled')).toEqual(true);
+    expect(component.exists(MaxLinesInput)).toEqual(false);
   });
 
   it('should have called the onTruncateLegendChange function on truncate switch change', () => {
@@ -115,12 +115,10 @@ describe('Legend Settings', () => {
     expect(nestedProps.onNestedLegendChange).toHaveBeenCalled();
   });
 
-  it('should disable switch group on hide mode', () => {
+  it('should hide switch group on hide mode', () => {
     const component = shallow(
       <LegendSettingsPopover {...props} mode="hide" renderNestedLegendSwitch />
     );
-    expect(component.find('[data-test-subj="lens-legend-nested-switch"]').prop('disabled')).toEqual(
-      true
-    );
+    expect(component.exists('[data-test-subj="lens-legend-nested-switch"]')).toEqual(false);
   });
 });

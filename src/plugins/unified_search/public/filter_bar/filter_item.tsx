@@ -20,7 +20,7 @@ import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { IIndexPattern } from '../../../data/common';
+import { DataView } from '../../../data_views/public';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '../../../data/public';
 import { getIndexPatterns } from '../services';
 
@@ -29,7 +29,7 @@ type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter
 export interface FilterItemProps {
   id: string;
   filter: Filter;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
