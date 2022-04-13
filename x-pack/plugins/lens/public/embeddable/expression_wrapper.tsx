@@ -39,13 +39,13 @@ export interface ExpressionWrapperProps {
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncTooltips?: boolean;
-  hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   style?: React.CSSProperties;
   className?: string;
   canEdit: boolean;
   onRuntimeError: () => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
+  uiState: unknown;
 }
 
 interface VisualizationErrorProps {
@@ -112,7 +112,6 @@ export function ExpressionWrapper({
   renderMode,
   syncColors,
   syncTooltips,
-  hasCompatibleActions,
   style,
   className,
   errors,
@@ -120,6 +119,7 @@ export function ExpressionWrapper({
   onRuntimeError,
   executionContext,
   lensInspector,
+  uiState,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -160,7 +160,7 @@ export function ExpressionWrapper({
               );
             }}
             onEvent={handleEvent}
-            hasCompatibleActions={hasCompatibleActions}
+            uiState={uiState}
           />
         </div>
       )}

@@ -87,6 +87,10 @@ export interface LensUnwrapResult {
   metaInfo?: LensUnwrapMetaInfo;
 }
 
+export interface LensEmbeddableUiState {
+  hasCompatibleActions?(event: ExpressionRendererEvent): Promise<boolean>;
+}
+
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
@@ -511,6 +515,7 @@ export class Embeddable
       : child;
 
     const input = this.getInput();
+    const uiState = { hasCompatibleActions: this.hasCompatibleActions };
 
     render(
       <KibanaThemeProvider theme$={this.deps.theme.theme$}>
@@ -533,7 +538,6 @@ export class Embeddable
           renderMode={input.renderMode}
           syncColors={input.syncColors}
           syncTooltips={input.syncTooltips}
-          hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}
           executionContext={executionContext}
@@ -541,6 +545,7 @@ export class Embeddable
           onRuntimeError={() => {
             this.logError('runtime');
           }}
+          uiState={uiState}
         />
       </KibanaThemeProvider>,
       domNode

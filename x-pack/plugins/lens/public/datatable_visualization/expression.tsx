@@ -16,6 +16,7 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DatatableComponent } from './components/table_basic';
 
+import type { LensEmbeddableUiState } from '../embeddable';
 import type { ILensInterpreterRenderHandlers } from '../types';
 import type { FormatFactory } from '../../common';
 import type { DatatableProps } from '../../common/expressions';
@@ -40,7 +41,8 @@ export const getDatatableRenderer = (dependencies: {
     handlers: ILensInterpreterRenderHandlers
   ) => {
     const resolvedGetType = await dependencies.getType;
-    const { hasCompatibleActions, isInteractive } = handlers;
+    const { isInteractive, uiState } = handlers;
+    const { hasCompatibleActions } = (uiState ?? {}) as LensEmbeddableUiState;
 
     // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
