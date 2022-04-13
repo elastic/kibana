@@ -30,10 +30,15 @@ export const useStyles = () => {
       paddingLeft: euiTheme.size.xs,
     };
 
+    const showMore: CSSObject = {
+      color: euiTheme.colors.primary,
+    };
+
     return {
       description,
       descriptionSemibold,
       executableAction,
+      showMore,
     };
   }, [euiTheme]);
 

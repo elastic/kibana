@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DetailPanelProcess } from '../../types';
@@ -15,6 +15,7 @@ import { DetailPanelListItem } from '../detail_panel_list_item';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getProcessExecutableCopyText, formatProcessArgs, getIsInterativeString } from './helpers';
 import { useStyles } from './styles';
+import { MAX_EXEC_DETAILSPANEL } from '../../../common/constants';
 
 interface DetailPanelProcessTabDeps {
   processDetail: DetailPanelProcess;
@@ -226,6 +227,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
   const isInteractive = getIsInterativeString(tty);
   const processArgs = formatProcessArgs(args);
 
+  const [showAll, setShowAll] = useState(false);
+  const toggleShowAll = () => {
+    setShowAll(!showAll);
+  };
+
   return (
     <>
       <DetailPanelDescriptionList
@@ -255,19 +261,26 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
                 textToCopy={getProcessExecutableCopyText(executable)}
                 display="block"
               >
-                {executable.map((execTuple, idx) => {
-                  const [exec, eventAction] = execTuple;
-                  return (
-                    <div key={`executable-${idx}`} css={styles.description}>
-                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                        {dataOrDash(exec)}
-                      </EuiTextColor>
-                      <EuiTextColor color="subdued" css={styles.executableAction}>
-                        {eventAction}
-                      </EuiTextColor>
-                    </div>
-                  );
-                })}
+                {executable
+                  .slice(0, showAll ? executable.length : MAX_EXEC_DETAILSPANEL)
+                  .map((execTuple, idx) => {
+                    const [exec, eventAction] = execTuple;
+                    return (
+                      <div key={`executable-${idx}`} css={styles.description}>
+                        <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                          {dataOrDash(exec)}
+                        </EuiTextColor>
+                        <EuiTextColor color="subdued" css={styles.executableAction}>
+                          {eventAction}
+                        </EuiTextColor>
+                      </div>
+                    );
+                  })}
+                {executable.length > MAX_EXEC_DETAILSPANEL && (
+                  <button onClick={toggleShowAll} css={styles.showMore}>
+                    {!showAll ? 'Show more' : 'Show Less'}
+                  </button>
+                )}
               </DetailPanelCopy>
             ),
           },

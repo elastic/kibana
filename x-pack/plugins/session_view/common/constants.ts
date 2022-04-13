@@ -55,3 +55,5 @@ export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 
 export const DEBOUNCE_TIMEOUT = 500;
+
+export const MAX_EXEC_DETAILSPANEL = 5;
