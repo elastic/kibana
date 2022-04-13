@@ -22,18 +22,14 @@ const buildStylesheet = (maxHeight: number) => {
     return [
       `
     .dscTruncateByHeight {
-      overflow: hidden;
       max-height: none;
-      display: inline-block;
     }`,
     ];
   }
   return [
     `
     .dscTruncateByHeight {
-      overflow: hidden;
       max-height: ${maxHeight}px !important;
-      display: inline-block;
     }
     .dscTruncateByHeight:before {
       top: ${maxHeight - TRUNCATE_GRADIENT_HEIGHT}px;
