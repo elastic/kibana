@@ -9,13 +9,15 @@ import { RuleRegistrySearchRequestPagination } from '../../../../../../rule_regi
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  alertsCount: number;
 };
 
-export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationProps) {
+export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }: PaginationProps) {
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
     pageSize,
   });
+  const [flyoutAlertIndex, setFlyoutAlertIndex] = useState<number>(-1);
   const onChangePageSize = useCallback(
     (_pageSize) => {
       setPagination((state) => ({
@@ -34,5 +36,44 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
     },
     [setPagination, onPageChange, pagination.pageSize]
   );
-  return { pagination, onChangePageSize, onChangePageIndex };
+
+  const paginateRow = useCallback(
+    (newFlyoutAlertIndex: number) => {
+      const lastPage = Math.floor(alertsCount / pagination.pageSize) - 1;
+      if (newFlyoutAlertIndex < 0) {
+        setFlyoutAlertIndex(pagination.pageSize - 1);
+        onChangePageIndex(lastPage);
+        return;
+      }
+
+      if (newFlyoutAlertIndex >= pagination.pageSize) {
+        setFlyoutAlertIndex(0);
+        onChangePageIndex(
+          pagination.pageIndex === lastPage ? 0 : Math.min(pagination.pageIndex + 1, lastPage)
+        );
+        return;
+      }
+
+      setFlyoutAlertIndex(newFlyoutAlertIndex);
+    },
+    [pagination, alertsCount, onChangePageIndex]
+  );
+  const onPaginateRowNext = useCallback(
+    () => paginateRow(flyoutAlertIndex + 1),
+    [paginateRow, flyoutAlertIndex]
+  );
+  const onPaginateRowPrevious = useCallback(
+    () => paginateRow(flyoutAlertIndex - 1),
+    [paginateRow, flyoutAlertIndex]
+  );
+
+  return {
+    pagination,
+    onChangePageSize,
+    onChangePageIndex,
+    onPaginateRowNext,
+    onPaginateRowPrevious,
+    flyoutAlertIndex,
+    setFlyoutAlertIndex,
+  };
 }

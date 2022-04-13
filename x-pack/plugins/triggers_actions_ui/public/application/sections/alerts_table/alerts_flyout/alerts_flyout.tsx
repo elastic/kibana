@@ -20,7 +20,7 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
-import { AlertsFlyoutProps, AlertsField } from '../../../../types';
+import { AlertsField, AlertsData } from '../../../../types';
 
 const REASON_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.reason',
@@ -42,6 +42,12 @@ const PREVIOUS_LABEL = i18n.translate(
   }
 );
 
+interface AlertsFlyoutProps {
+  alert: AlertsData;
+  onClose: () => void;
+  onPaginateNext: () => void;
+  onPaginatePrevious: () => void;
+}
 export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
   onClose,

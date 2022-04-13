@@ -409,13 +409,6 @@ export interface AlertsTableProps {
   'data-test-subj': string;
 }
 
-export interface AlertsFlyoutProps {
-  alert: AlertsData;
-  onClose: () => void;
-  onPaginateNext: () => void;
-  onPaginatePrevious: () => void;
-}
-
 export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
   alert: AlertsData;
   field: AlertsField;
