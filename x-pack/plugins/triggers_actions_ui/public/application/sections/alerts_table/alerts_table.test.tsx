@@ -12,6 +12,8 @@ import { AlertsTable } from './alerts_table';
 import { AlertsData } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 jest.mock('../../../../../../../src/plugins/data/public/');
 jest.mock('../../../common/lib/kibana');
 
@@ -27,10 +29,12 @@ const columns = [
 ];
 
 const hookUseKibanaMock = useKibana as jest.Mock;
-hookUseKibanaMock().services.alertsTableTypeRegistry.has.mockImplementation((plugin: string) => {
+const alertsTableConfigurationRegistryMock =
+  hookUseKibanaMock().services.alertsTableConfigurationRegistry;
+alertsTableConfigurationRegistryMock.has.mockImplementation((plugin: string) => {
   return plugin === PLUGIN_ID;
 });
-hookUseKibanaMock().services.alertsTableTypeRegistry.get.mockImplementation((plugin: string) => {
+alertsTableConfigurationRegistryMock.get.mockImplementation((plugin: string) => {
   if (plugin === PLUGIN_ID) {
     return { columns };
   }
@@ -56,6 +60,7 @@ describe('AlertsTable', () => {
       field2: ['four'],
     },
   ];
+
   const fetchAlertsData = {
     activePage: 0,
     alerts,
@@ -68,6 +73,7 @@ describe('AlertsTable', () => {
     onSortChange: jest.fn(),
     refresh: jest.fn(),
   };
+
   const useFetchAlertsData = () => {
     return fetchAlertsData;
   };
@@ -90,31 +96,51 @@ describe('AlertsTable', () => {
     'data-test-subj': 'testTable',
   };
 
-  it('should support sorting', async () => {
-    const wrapper = mountWithIntl(<AlertsTable {...tableProps} />);
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('.euiDataGridHeaderCell__button').first().simulate('click');
-    wrapper.update();
-    wrapper
-      .find(`[data-test-subj="dataGridHeaderCellActionGroup-${columns[0].id}"]`)
-      .first()
-      .simulate('click');
-    wrapper.find(`.euiListGroupItem__label[title="Sort A-Z"]`).simulate('click');
-    expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
-      { direction: 'asc', id: 'kibana.alert.rule.name' },
-    ]);
+  beforeEach(() => {
+    alertsTableConfigurationRegistryMock.get.mockClear();
+    alertsTableConfigurationRegistryMock.has.mockClear();
   });
 
-  it('should support pagination', async () => {
-    const wrapper = mountWithIntl(<AlertsTable {...tableProps} />);
-    await act(async () => {
-      await nextTick();
+  describe('Alerts table UI', () => {
+    it('should support sorting', async () => {
+      const wrapper = mountWithIntl(<AlertsTable {...tableProps} />);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('.euiDataGridHeaderCell__button').first().simulate('click');
       wrapper.update();
+      wrapper
+        .find(`[data-test-subj="dataGridHeaderCellActionGroup-${columns[0].id}"]`)
+        .first()
+        .simulate('click');
+      wrapper.find(`.euiListGroupItem__label[title="Sort A-Z"]`).simulate('click');
+      expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
+        { direction: 'asc', id: 'kibana.alert.rule.name' },
+      ]);
     });
-    wrapper.find('.euiPagination__item EuiButtonEmpty').at(1).simulate('click');
-    expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+
+    it('should support pagination', async () => {
+      const renderResult = render(<AlertsTable {...tableProps} />);
+      userEvent.click(renderResult.getByTestId('pagination-button-1'));
+      expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+    });
+  });
+
+  describe('Alerts table configuration registry', () => {
+    it('should read the configuration from the regsitry', async () => {
+      render(<AlertsTable {...tableProps} />);
+      expect(alertsTableConfigurationRegistryMock.has).toHaveBeenCalledWith(PLUGIN_ID);
+      expect(alertsTableConfigurationRegistryMock.get).toHaveBeenCalledWith(PLUGIN_ID);
+    });
+
+    it('should fail to render when the plugin id owner is not registered', async () => {
+      const props = { ...tableProps, ownerPluginId: 'none' };
+      expect(() => {
+        render(<AlertsTable {...props} />);
+      }).toThrow(
+        'This plugin has no registered its alerts table parameters inside TriggersActionsUi'
+      );
+    });
   });
 });
