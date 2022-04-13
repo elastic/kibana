@@ -90,7 +90,7 @@ export const LegendSizeSettings = ({
         tooltipContent={
           isDisabled
             ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                defaultMessage: 'Requires legend to be shown',
+                defaultMessage: 'Requires legend to be shown and position to be outside',
               })
             : i18n.translate('xpack.lens.legendSizeSetting.legendVertical', {
                 defaultMessage: 'Requires legend to be right or left aligned',

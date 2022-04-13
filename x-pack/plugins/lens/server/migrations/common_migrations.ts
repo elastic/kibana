@@ -27,6 +27,9 @@ import {
   VisState820,
   CustomVisualizationMigrations,
   LensDocShape810,
+  LensDocShape820,
+  XYVisualizationStatePre820,
+  XYVisualizationState820,
 } from './types';
 import { DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
@@ -194,9 +197,7 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715): LensD
   return newAttributes as LensDocShape810;
 };
 
-export const commonSetLastValueShowArrayValues = (
-  attributes: LensDocShape810
-): LensDocShape810<VisState820> => {
+export const commonSetLastValueShowArrayValues = (attributes: LensDocShape810): LensDocShape810 => {
   const newAttributes = cloneDeep(attributes);
   for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
     for (const column of Object.values(layer.columns)) {
@@ -215,19 +216,19 @@ export const commonEnhanceTableRowHeight = (
   attributes: LensDocShape810<VisState810>
 ): LensDocShape810<VisState820> => {
   if (attributes.visualizationType !== 'lnsDatatable') {
-    return attributes;
+    return attributes as LensDocShape810<VisState820>;
   }
   const visState810 = attributes.state.visualization as VisState810;
   const newAttributes = cloneDeep(attributes);
   const vizState = newAttributes.state.visualization as VisState820;
   vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
   vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
-  return newAttributes;
+  return newAttributes as LensDocShape810<VisState820>;
 };
 
 export const commonSetIncludeEmptyRowsDateHistogram = (
   attributes: LensDocShape810
-): LensDocShape810<VisState820> => {
+): LensDocShape810 => {
   const newAttributes = cloneDeep(attributes);
   for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
     for (const column of Object.values(layer.columns)) {
@@ -327,4 +328,22 @@ export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): L
       })
     );
   return newAttributes as LensDocShape810;
+};
+
+export const commonFixValueLabelsInXY = (
+  attributes: LensDocShape820<XYVisualizationStatePre820>
+): LensDocShape820<XYVisualizationState820> => {
+  const newAttributes: LensDocShape820<XYVisualizationStatePre820> = cloneDeep(attributes);
+  const { visualization } = newAttributes.state;
+  const { valueLabels } = visualization;
+  return {
+    ...newAttributes,
+    state: {
+      ...newAttributes.state,
+      visualization: {
+        ...visualization,
+        valueLabels: valueLabels && valueLabels !== 'hide' ? 'show' : valueLabels,
+      },
+    },
+  };
 };

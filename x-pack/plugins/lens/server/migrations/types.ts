@@ -10,7 +10,7 @@ import { Filter } from '@kbn/es-query';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from 'src/plugins/data/public';
 import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
-import type { LayerType, PersistableFilter } from '../../common';
+import type { LayerType, PersistableFilter, ValueLabelConfig } from '../../common';
 
 export type CustomVisualizationMigrations = Record<string, () => MigrateFunctionsObject>;
 
@@ -204,7 +204,7 @@ export type LensDocShape810<VisualizationState = unknown> = Omit<
   'filters' | 'state'
 > & {
   filters: Filter[];
-  state: Omit<LensDocShape715['state'], 'datasourceStates'> & {
+  state: Omit<LensDocShape715<VisualizationState>['state'], 'datasourceStates'> & {
     datasourceStates: {
       indexpattern: Omit<LensDocShape715['state']['datasourceStates']['indexpattern'], 'layers'> & {
         layers: Record<
@@ -257,4 +257,14 @@ export interface VisState810 {
 export interface VisState820 {
   rowHeight: 'auto' | 'single' | 'custom';
   rowHeightLines: number;
+}
+
+export type LensDocShape820<VisualizationState = unknown> = LensDocShape810<VisualizationState>;
+
+export interface XYVisualizationStatePre820 {
+  valueLabels: 'hide' | 'inside' | 'outside';
+}
+
+export interface XYVisualizationState820 {
+  valueLabels: ValueLabelConfig;
 }

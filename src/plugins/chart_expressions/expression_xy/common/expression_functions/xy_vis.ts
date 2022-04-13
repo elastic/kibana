@@ -8,7 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
-import { AxisExtentConfigResult, XYArgs, XYLayerConfigResult, XYRender } from '../types';
+import {
+  AxisExtentConfigResult,
+  DataLayerConfigResult,
+  XYArgs,
+  XYLayerConfigResult,
+  XYRender,
+} from '../types';
 import {
   XY_VIS,
   DATA_LAYER,
@@ -46,9 +52,17 @@ const errors = {
       defaultMessage:
         '`valueLabels` argument is applicable only for bar charts, which are not histograms.',
     }),
+  dataBoundsForNotLineChartError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
+      defaultMessage: 'Only line charts can be fit to the data bounds',
+    }),
 };
 
-const validateExtent = (extent: AxisExtentConfigResult, hasBarOrArea: boolean) => {
+const validateExtent = (
+  extent: AxisExtentConfigResult,
+  hasBarOrArea: boolean,
+  dataLayers: DataLayerConfigResult[]
+) => {
   const isValidLowerBound =
     extent.lowerBound === undefined || (extent.lowerBound !== undefined && extent.lowerBound <= 0);
   const isValidUpperBound =
@@ -58,6 +72,11 @@ const validateExtent = (extent: AxisExtentConfigResult, hasBarOrArea: boolean) =
 
   if (hasBarOrArea && extent.mode === AxisExtentModes.CUSTOM && !areValidBounds) {
     throw new Error(errors.extendBoundsAreInvalidError());
+  }
+
+  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType.includes('line'));
+  if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
+    throw new Error(errors.dataBoundsForNotLineChartError());
   }
 };
 
@@ -244,16 +263,14 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }, []);
 
       const logTable = prepareLogTable(data, layerDimensions, true);
-
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
     const hasBar = dataLayers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
-
     const hasArea = dataLayers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
 
-    validateExtent(args.yLeftExtent, hasBar || hasArea);
-    validateExtent(args.yRightExtent, hasBar || hasArea);
+    validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
+    validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
 
     if (!hasArea && args.fillOpacity !== undefined) {
       throw new Error(errors.notUsedFillOpacityError());

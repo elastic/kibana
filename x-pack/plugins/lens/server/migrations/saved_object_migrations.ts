@@ -15,7 +15,7 @@ import {
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from 'src/plugins/data/public';
+import { Query } from '../../../../../src/plugins/data/public';
 import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
 import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
@@ -30,6 +30,11 @@ import {
   VisState716,
   CustomVisualizationMigrations,
   LensDocShape810,
+  LensDocShape820,
+  XYVisualizationStatePre820,
+  XYVisualizationState820,
+  VisState810,
+  VisState820,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -44,6 +49,7 @@ import {
   commonSetLastValueShowArrayValues,
   commonEnhanceTableRowHeight,
   commonSetIncludeEmptyRowsDateHistogram,
+  commonFixValueLabelsInXY,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -474,7 +480,10 @@ const setLastValueShowArrayValues: SavedObjectMigrationFn<LensDocShape810, LensD
   return { ...doc, attributes: commonSetLastValueShowArrayValues(doc.attributes) };
 };
 
-const enhanceTableRowHeight: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (doc) => {
+const enhanceTableRowHeight: SavedObjectMigrationFn<
+  LensDocShape810<VisState810>,
+  LensDocShape810<VisState820>
+> = (doc) => {
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonEnhanceTableRowHeight(newDoc.attributes) };
 };
@@ -483,6 +492,18 @@ const setIncludeEmptyRowsDateHistogram: SavedObjectMigrationFn<LensDocShape810, 
   doc
 ) => {
   return { ...doc, attributes: commonSetIncludeEmptyRowsDateHistogram(doc.attributes) };
+};
+
+const fixValueLabelsInXY: SavedObjectMigrationFn<
+  LensDocShape820<XYVisualizationStatePre820>,
+  LensDocShape820<XYVisualizationState820 | unknown>
+> = (doc) => {
+  if (doc.attributes.visualizationType !== 'lnsXY') {
+    return doc;
+  }
+
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
 };
 
 const lensMigrations: SavedObjectMigrationMap = {
@@ -502,7 +523,8 @@ const lensMigrations: SavedObjectMigrationMap = {
   '8.2.0': flow(
     setLastValueShowArrayValues,
     setIncludeEmptyRowsDateHistogram,
-    enhanceTableRowHeight
+    enhanceTableRowHeight,
+    fixValueLabelsInXY
   ),
 };
 

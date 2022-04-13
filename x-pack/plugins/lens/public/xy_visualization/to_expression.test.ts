@@ -347,7 +347,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'inside',
+        valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -371,7 +371,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'inside',
+        valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
           {

@@ -232,7 +232,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
         legendSize={legendSize}
         onLegendSizeChange={onLegendSizeChange}
         isVerticalLegend={!position || position === Position.Left || position === Position.Right}
-        isDisabled={mode === 'hide'}
+        isDisabled={mode === 'hide' || location === 'inside'}
       />
       {location && (
         <ColumnsNumberSetting

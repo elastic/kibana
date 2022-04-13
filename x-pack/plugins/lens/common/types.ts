@@ -60,8 +60,7 @@ export type CustomPaletteParamsConfig = CustomPaletteParams & {
 
 export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
-// Shared by XY Chart and Heatmap as for now
-export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
+export type ValueLabelConfig = 'hide' | 'show';
 
 export type PieChartType = $Values<typeof PieChartTypes>;
 export type CategoryDisplayType = $Values<typeof CategoryDisplay>;
