@@ -7,6 +7,9 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { DocLinks } from '@kbn/doc-links';
+import { EuiLink } from '@elastic/eui';
 
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
@@ -48,7 +51,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
   flyoutCreateSubmitSuccess: ({ name }) =>
     i18n.translate('xpack.securitySolution.blocklist.flyoutCreateSubmitSuccess', {
-      defaultMessage: '"{name}" has been added to your blocklist.', // FIXME: match this to design (needs count of items)
+      defaultMessage: '"{name}" has been added to your blocklist.',
       values: { name },
     }),
   flyoutEditSubmitSuccess: ({ name }) =>
@@ -56,28 +59,23 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: '"{name}" has been updated.',
       values: { name },
     }),
-  flyoutDowngradedLicenseDocsInfo: () => {
-    return 'tbd...';
-    // FIXME: define docs link for license downgrade message. sample code below
-
-    // const { docLinks } = useKibana().services;
-    // return (
-    //   <FormattedMessage
-    //     id="some-id-1"
-    //     defaultMessage="For more information, see our {link}."
-    //     value={{
-    //       link: (
-    //         <EuiLink target="_blank" href={`${docLinks.links.securitySolution.eventFilters}`}>
-    //           {' '}
-    //           <FormattedMessage
-    //             id="dome-id-2"
-    //             defaultMessage="Event filters documentation"
-    //           />{' '}
-    //         </EuiLink>
-    //       ),
-    //     }}
-    //   />
-    // );
+  flyoutDowngradedLicenseDocsInfo: (
+    securitySolutionDocsLinks: DocLinks['securitySolution']
+  ): React.ReactNode => {
+    return (
+      <>
+        <FormattedMessage
+          id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsInfo"
+          defaultMessage="For more information, see our "
+        />
+        <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
+          <FormattedMessage
+            id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsLink"
+            defaultMessage="Blocklist documentation"
+          />
+        </EuiLink>
+      </>
+    );
   },
   deleteActionSuccess: (itemName) =>
     i18n.translate('xpack.securitySolution.blocklist.deleteSuccess', {
@@ -85,15 +83,15 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       values: { itemName },
     }),
   emptyStateTitle: i18n.translate('xpack.securitySolution.blocklist.emptyStateTitle', {
-    defaultMessage: 'Add your first blocklist',
+    defaultMessage: 'Add your first blocklist entry',
   }),
-  emptyStateInfo: i18n.translate(
-    'xpack.securitySolution.blocklist.emptyStateInfo',
-    { defaultMessage: 'Add a blocklist to prevent execution on the endpoint' } // FIXME: need wording here form PM
-  ),
+  emptyStateInfo: i18n.translate('xpack.securitySolution.blocklist.emptyStateInfo', {
+    defaultMessage:
+      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
+  }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
-    { defaultMessage: 'Add blocklist' }
+    { defaultMessage: 'Add blocklist entry' }
   ),
   searchPlaceholderInfo: i18n.translate('xpack.securitySolution.blocklist.searchPlaceholderInfo', {
     defaultMessage: 'Search on the fields below: name, description, value',

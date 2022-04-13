@@ -76,8 +76,8 @@ describe('ServerMetricsCollector', () => {
 
   it('collect disconnects requests infos', async () => {
     const never = new Promise((resolve) => undefined);
-    const disconnectRequested$ = new Subject(); // Controls the number of requests in the /disconnect endpoint
-    const disconnectAborted$ = new Subject(); // Controls the abort event in the /disconnect endpoint
+    const disconnectRequested$ = new Subject<void>(); // Controls the number of requests in the /disconnect endpoint
+    const disconnectAborted$ = new Subject<void>(); // Controls the abort event in the /disconnect endpoint
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
       return res.ok({ body: '' });

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CommonFields, ConfigKey } from '../types';
+import { CommonFields, ConfigKey, DataStream } from '../types';
 import { NewPackagePolicyInput } from '../../../../../fleet/common';
 import { defaultValues as commonDefaultValues } from './default_values';
 import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
+import { defaultConfig } from '../contexts';
 
 // TO DO: create a standard input format that all fields resolve to
 export type Normalizer = (fields: NewPackagePolicyInput['vars']) => unknown;
@@ -64,6 +65,7 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.LOCATIONS]: getCommonNormalizer(ConfigKey.LOCATIONS),
   [ConfigKey.SCHEDULE]: (fields) => {
     const value = fields?.[ConfigKey.SCHEDULE]?.value;
+    const type = fields?.[ConfigKey.MONITOR_TYPE]?.value as DataStream;
     if (value) {
       const fullString = JSON.parse(fields?.[ConfigKey.SCHEDULE]?.value);
       const fullSchedule = fullString.replace('@every ', '');
@@ -74,7 +76,7 @@ export const commonNormalizers: CommonNormalizerMap = {
         number,
       };
     } else {
-      return commonDefaultValues[ConfigKey.SCHEDULE];
+      return defaultConfig[type][ConfigKey.SCHEDULE];
     }
   },
   [ConfigKey.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKey.APM_SERVICE_NAME),
