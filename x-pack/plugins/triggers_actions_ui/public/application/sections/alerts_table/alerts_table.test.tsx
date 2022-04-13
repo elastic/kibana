@@ -5,8 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
 import { AlertsData } from '../../../types';
@@ -103,18 +101,10 @@ describe('AlertsTable', () => {
 
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
-      const wrapper = mountWithIntl(<AlertsTable {...tableProps} />);
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-      wrapper.find('.euiDataGridHeaderCell__button').first().simulate('click');
-      wrapper.update();
-      wrapper
-        .find(`[data-test-subj="dataGridHeaderCellActionGroup-${columns[0].id}"]`)
-        .first()
-        .simulate('click');
-      wrapper.find(`.euiListGroupItem__label[title="Sort A-Z"]`).simulate('click');
+      const renderResult = render(<AlertsTable {...tableProps} />);
+      userEvent.click(renderResult.container.querySelector('.euiDataGridHeaderCell__button')!);
+      userEvent.click(renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`));
+      userEvent.click(renderResult.getByTitle('Sort A-Z'));
       expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
       ]);
