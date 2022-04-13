@@ -12,5 +12,5 @@
   "requiredPlugins": ["dataViews", "data", "uiActions"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "data"],
   "serviceFolders": ["autocomplete"],
-  "configPath": ["unifiedSearch"],
+  "configPath": ["unifiedSearch"]
 }
