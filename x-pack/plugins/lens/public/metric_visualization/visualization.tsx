@@ -21,7 +21,7 @@ import {
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { getSuggestions } from './metric_suggestions';
 import { LensIconChartMetric } from '../assets/chart_metric';
-import { Visualization, OperationMetadata, DatasourcePublicAPI } from '../types';
+import { Visualization, OperationMetadata, DatasourceLayers } from '../types';
 import type { MetricState } from '../../common/types';
 import { layerTypes } from '../../common';
 import { CUSTOM_PALETTE, shiftPalette } from '../shared_components';
@@ -50,7 +50,7 @@ const getFontSizeAndUnit = (fontSize: string) => {
 const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   attributes?: Partial<Omit<MetricConfig, keyof MetricState>>
 ): Ast | null => {
   if (!state.accessor) {

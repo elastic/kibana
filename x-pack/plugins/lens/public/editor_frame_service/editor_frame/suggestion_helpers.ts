@@ -13,11 +13,11 @@ import {
   Datasource,
   TableSuggestion,
   DatasourceSuggestion,
-  DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
   VisualizeEditorContext,
   Suggestion,
+  DatasourceLayers,
 } from '../../types';
 import { DragDropIdentifier } from '../../drag_drop';
 import { LayerType, layerTypes } from '../../../common';
@@ -261,7 +261,7 @@ export function switchToSuggestion(
 }
 
 export function getTopSuggestionForField(
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   visualization: VisualizationState,
   datasourceStates: DatasourceStates,
   visualizationMap: Record<string, Visualization<unknown>>,

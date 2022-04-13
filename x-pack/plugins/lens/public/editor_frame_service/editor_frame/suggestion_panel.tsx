@@ -30,9 +30,9 @@ import {
   Datasource,
   Visualization,
   FramePublicAPI,
-  DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
+  DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import {
@@ -474,7 +474,9 @@ function getPreviewExpression(
     return null;
   }
 
-  const suggestionFrameApi: FramePublicAPI = { datasourceLayers: { ...frame.datasourceLayers } };
+  const suggestionFrameApi: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'> = {
+    datasourceLayers: { ...frame.datasourceLayers },
+  };
 
   // use current frame api and patch apis for changed datasource layers
   if (
@@ -484,7 +486,7 @@ function getPreviewExpression(
   ) {
     const datasource = datasources[visualizableState.datasourceId];
     const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: Record<string, DatasourcePublicAPI> = pick(
+    const updatedLayerApis: DatasourceLayers = pick(
       frame.datasourceLayers,
       visualizableState.keptLayerIds
     );
