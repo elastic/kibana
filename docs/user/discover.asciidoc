@@ -150,7 +150,7 @@ String str = doc['customer_first_name.keyword'].value;
 char ch1 = str.charAt(0);
 emit(doc['customer_last_name.keyword'].value + ", " + ch1);
 ```
-. Remove `customer_first_name` and `customer_last_name` from the document table and add `customer` in their place.
+. Remove `customer_first_name` and `customer_last_name` from the document table, and then add `customer`.
 +
 [role="screenshot"]
 image:images/customer.png[Customer last name, first initial in the document table]
