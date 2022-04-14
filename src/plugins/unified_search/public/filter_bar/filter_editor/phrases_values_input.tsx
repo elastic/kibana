@@ -17,6 +17,7 @@ import { withKibana } from '../../../../kibana_react/public';
 interface Props extends PhraseSuggestorProps {
   values?: string[];
   onChange: (values: string[]) => void;
+  onParamsUpdate: (value: string) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
 }
@@ -40,11 +41,14 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
             id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',
           })}
+          delimiter=","
           options={options}
           getLabel={(option) => option}
           selectedOptions={values || []}
           onSearchChange={this.onSearchChange}
-          onCreateOption={(option: string) => onChange([...(values || []), option])}
+          onCreateOption={(option: string) => {
+            this.props.onParamsUpdate(option.trim());
+          }}
           onChange={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"

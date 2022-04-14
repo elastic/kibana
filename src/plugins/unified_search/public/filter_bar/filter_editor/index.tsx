@@ -371,6 +371,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
+            onParamsUpdate={this.onParamsUpdate}
             timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
             fullWidth
           />
@@ -467,6 +468,10 @@ class FilterEditorUI extends Component<Props, State> {
 
   private onParamsChange = (params: any) => {
     this.setState({ params });
+  };
+
+  private onParamsUpdate = (value: string) => {
+    this.setState((prevState) => ({ params: [value, ...(prevState.params || [])] }));
   };
 
   private onQueryDslChange = (queryDsl: string) => {
