@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
+import { validateAccessor } from '../../../../visualizations/common/utils';
 import { DataLayerArgs, DataLayerConfigResult } from '../types';
 import {
   DATA_LAYER,
@@ -17,6 +18,7 @@ import {
   YScaleTypes,
   Y_CONFIG,
 } from '../constants';
+import { validateMarkSizeForChartType } from './validate';
 
 export const dataLayerFunction: ExpressionFunctionDefinition<
   typeof DATA_LAYER,
@@ -83,6 +85,12 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'The column to split by',
       }),
     },
+    markSizeAccessor: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.dataLayer.markSizeAccessor.help', {
+        defaultMessage: 'Mark size accessor',
+      }),
+    },
     accessors: {
       types: ['string'],
       help: i18n.translate('expressionXY.dataLayer.accessors.help', {
@@ -112,6 +120,9 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
     },
   },
   fn(table, args) {
+    validateAccessor(args.markSizeAccessor, table.columns);
+    validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
+
     return {
       type: DATA_LAYER,
       ...args,

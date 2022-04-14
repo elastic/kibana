@@ -171,6 +171,12 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       }),
       required: false,
     },
+    markSizeRatio: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.layeredXyVis.markSizeRatio.help', {
+        defaultMessage: 'Specifies the ratio of the dots at the line and area charts',
+      }),
+    },
   },
   fn(data, args, handlers) {
     const layers = (args.layers ?? []).filter<XYExtendedLayerConfigResult>(

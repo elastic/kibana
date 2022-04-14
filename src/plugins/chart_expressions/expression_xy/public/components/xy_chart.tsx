@@ -525,6 +525,7 @@ export function XYChart({
               shouldRotate
             ),
           },
+          markSizeRatio: args.markSizeRatio ?? 1,
         }}
         baseTheme={chartBaseTheme}
         tooltip={{

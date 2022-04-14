@@ -163,9 +163,14 @@ const getSeriesName: GetSeriesNameFn = (
   return layer.splitAccessor ? data.seriesKeys[0] : columnToLabelMap[data.seriesKeys[0]] ?? null;
 };
 
-const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
-  visible: !xAccessor,
+const getPointConfig = (
+  xAccessor: string | undefined,
+  markSizeAccessor: string | undefined,
+  emphasizeFitting?: boolean
+) => ({
+  visible: !xAccessor || markSizeAccessor !== undefined,
   radius: xAccessor && !emphasizeFitting ? 5 : 0,
+  fill: markSizeAccessor ? ColorVariant.Series : undefined,
 });
 
 const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
@@ -219,7 +224,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   emphasizeFitting,
   fillOpacity,
 }): SeriesSpec => {
-  const { table } = layer;
+  const { table, markSizeAccessor } = layer;
   const isStacked = layer.seriesType.includes('stacked');
   const isPercentage = layer.seriesType.includes('percentage');
   const isBarChart = layer.seriesType.includes('bar');
@@ -231,6 +236,8 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   const formatter = table?.columns.find((column) => column.id === accessor)?.meta?.params;
   const splitHint = table?.columns.find((col) => col.id === layer.splitAccessor)?.meta?.params;
   const splitFormatter = formatFactory(splitHint);
+
+  const markSizeColumn = table?.columns.find((col) => col.id === markSizeAccessor);
 
   // what if row values are not primitive? That is the case of, for instance, Ranges
   // remaps them to their serialized version with the formatHint metadata
@@ -261,12 +268,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       });
     });
   }
+
   return {
     splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
     stackAccessors: isStacked ? [layer.xAccessor as string] : [],
     id: layer.splitAccessor ? `${layer.splitAccessor}-${accessor}` : `${accessor}`,
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
+    markSizeAccessor: markSizeColumn ? markSizeColumn.id : undefined,
     data: rows,
     xScaleType: layer.xAccessor ? layer.xScaleType : 'ordinal',
     yScaleType:
@@ -288,14 +297,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     stackMode: isPercentage ? StackMode.Percentage : undefined,
     timeZone,
     areaSeriesStyle: {
-      point: getPointConfig(layer.xAccessor, emphasizeFitting),
+      point: getPointConfig(layer.xAccessor, markSizeColumn?.id, emphasizeFitting),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
         fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
       }),
     },
     lineSeriesStyle: {
-      point: getPointConfig(layer.xAccessor, emphasizeFitting),
+      point: getPointConfig(layer.xAccessor, markSizeColumn?.id, emphasizeFitting),
       ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
     },
     name(d) {

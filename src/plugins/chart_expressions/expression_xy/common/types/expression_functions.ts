@@ -96,6 +96,7 @@ export interface DataLayerArgs {
   xAccessor?: string;
   hide?: boolean;
   splitAccessor?: string;
+  markSizeAccessor?: string;
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
@@ -115,6 +116,7 @@ export interface ExtendedDataLayerArgs {
   xAccessor?: string;
   hide?: boolean;
   splitAccessor?: string;
+  markSizeAccessor?: string;
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
@@ -202,6 +204,7 @@ export interface XYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  markSizeRatio?: number;
 }
 
 export interface LayeredXYArgs {
@@ -225,6 +228,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  markSizeRatio?: number;
 }
 
 export interface XYProps {
@@ -248,6 +252,7 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  markSizeRatio?: number;
 }
 
 export interface AnnotationLayerArgs {

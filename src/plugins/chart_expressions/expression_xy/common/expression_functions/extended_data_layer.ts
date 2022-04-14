@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
+import { validateAccessor } from '../../../../visualizations/common/utils';
 import { ExtendedDataLayerArgs, ExtendedDataLayerConfigResult } from '../types';
 import {
   EXTENDED_DATA_LAYER,
@@ -17,6 +18,7 @@ import {
   YScaleTypes,
   Y_CONFIG,
 } from '../constants';
+import { validateMarkSizeForChartType } from './validate';
 
 export const extendedDataLayerFunction: ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
@@ -83,6 +85,12 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'The column to split by',
       }),
     },
+    markSizeAccessor: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.extendedDataLayer.markSizeAccessor.help', {
+        defaultMessage: 'Mark size accessor',
+      }),
+    },
     accessors: {
       types: ['string'],
       help: i18n.translate('expressionXY.extendedDataLayer.accessors.help', {
@@ -118,12 +126,17 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
     },
   },
   fn(input, args) {
+    const table = args.table ?? input;
+
+    validateAccessor(args.markSizeAccessor, table.columns);
+    validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
+
     return {
       type: EXTENDED_DATA_LAYER,
       ...args,
       accessors: args.accessors ?? [],
       layerType: LayerTypes.DATA,
-      table: args.table ?? input,
+      table,
     };
   },
 };

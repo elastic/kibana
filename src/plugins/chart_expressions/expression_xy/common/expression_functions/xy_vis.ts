@@ -243,6 +243,12 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
     },
+    markSizeRatio: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.xyVis.markSizeRatio.help', {
+        defaultMessage: 'Specifies the ratio of the dots at the line and area charts',
+      }),
+    },
   },
   fn(data, args, handlers) {
     const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
