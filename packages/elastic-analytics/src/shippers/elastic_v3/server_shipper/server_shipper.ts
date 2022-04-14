@@ -16,6 +16,11 @@ import {
   merge,
   from,
   firstValueFrom,
+  timer,
+  retryWhen,
+  tap,
+  delayWhen,
+  takeWhile,
 } from 'rxjs';
 import type { IShipper } from '../../types';
 import type { Event, EventContext, TelemetryCounter } from '../../../events';
@@ -24,8 +29,9 @@ import type { ElasticV3ShipperOptions } from '../types';
 import type { AnalyticsClientInitContext } from '../../../analytics_client';
 import { buildUrl, createTelemetryCounterHelper, eventsToNDJSON } from '../common';
 
-const SECONDS = 1000;
-const MINUTES = 60 * SECONDS;
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
 const KIB = 1024;
 
 export class ElasticV3ServerShipper implements IShipper {
@@ -46,11 +52,21 @@ export class ElasticV3ServerShipper implements IShipper {
   private licenseId?: string;
   private isOptedIn?: boolean;
 
+  /**
+   * Specifies when it went offline:
+   * - `undefined` means it doesn't know yet whether it is online or offline
+   * - `null` means it's online
+   * - `number` means it's offline since that time
+   * @private
+   */
+  private firstTimeOffline?: number | null;
+
   constructor(
     private readonly options: ElasticV3ShipperOptions,
     private readonly initContext: AnalyticsClientInitContext
   ) {
     this.setInternalSubscriber();
+    this.checkConnectivity();
   }
 
   public extendContext(newContext: EventContext) {
@@ -71,7 +87,10 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   public reportEvents(events: Event[]) {
-    if (this.isOptedIn === false) {
+    if (
+      this.isOptedIn === false ||
+      (this.firstTimeOffline && Date.now() - this.firstTimeOffline > 24 * HOUR)
+    ) {
       return;
     }
 
@@ -94,6 +113,53 @@ export class ElasticV3ServerShipper implements IShipper {
     this.shutdown$.complete();
   }
 
+  /**
+   * Checks the server has connectivity to the remote endpoint.
+   * The frequency of the connectivity tests will back off, starting with 1 minute, and multiplying by 2
+   * until it reaches 1 hour. Then, it’ll keep the 1h frequency until it reaches 24h without connectivity.
+   * At that point, it clears the queue and stops accepting events in the queue.
+   * The connectivity checks will continue to happen every 1 hour just in case it regains it at any point.
+   * @private
+   */
+  private checkConnectivity() {
+    let backoff = 1 * MINUTE;
+    timer(0, 1 * MINUTE)
+      .pipe(
+        takeWhile(() => this.shutdown$.isStopped === false),
+        filter(() => this.isOptedIn === true && this.firstTimeOffline !== null),
+        exhaustMap(async () => {
+          const { ok } = await fetch(buildUrl(this.initContext.sendTo, this.options.channelName), {
+            method: 'OPTIONS',
+          });
+
+          if (!ok) {
+            throw new Error('Failed to connect to Elastic');
+          }
+
+          this.firstTimeOffline = null;
+          backoff = 1 * MINUTE;
+        }),
+        retryWhen((errors) =>
+          errors.pipe(
+            takeWhile(() => this.shutdown$.isStopped === false),
+            tap(() => {
+              if (!this.firstTimeOffline) {
+                this.firstTimeOffline = Date.now();
+              } else if (Date.now() - this.firstTimeOffline > 24 * HOUR) {
+                this.internalQueue.length = 0;
+              }
+              backoff = backoff * 2;
+              if (backoff > 1 * HOUR) {
+                backoff = 1 * HOUR;
+              }
+            }),
+            delayWhen(() => timer(backoff))
+          )
+        )
+      )
+      .subscribe();
+  }
+
   private setInternalSubscriber() {
     // Check the status of the queues every 1 second.
     const subscription = merge(
@@ -102,8 +168,8 @@ export class ElasticV3ServerShipper implements IShipper {
       from(firstValueFrom(this.shutdown$, { defaultValue: true }))
     )
       .pipe(
-        // Only move ahead if it's opted-in.
-        filter(() => this.isOptedIn === true),
+        // Only move ahead if it's opted-in and online.
+        filter(() => this.isOptedIn === true && this.firstTimeOffline === null),
 
         // Send the events now if (validations sorted from cheapest to most CPU expensive):
         // - We are shutting down.
@@ -115,8 +181,8 @@ export class ElasticV3ServerShipper implements IShipper {
           () =>
             (this.internalQueue.length > 0 &&
               (this.shutdown$.isStopped ||
-                Date.now() - this.lastBatchSent$.value >= 10 * MINUTES)) ||
-            (Date.now() - this.lastBatchSent$.value >= 10 * SECONDS &&
+                Date.now() - this.lastBatchSent$.value >= 10 * MINUTE)) ||
+            (Date.now() - this.lastBatchSent$.value >= 10 * SECOND &&
               (this.internalQueue.length === 1000 ||
                 this.getQueueByteSize(this.internalQueue) >= 10 * KIB))
         ),
@@ -168,6 +234,7 @@ export class ElasticV3ServerShipper implements IShipper {
       this.reportTelemetryCounters(events, { code });
     } catch (error) {
       this.reportTelemetryCounters(events, { code: error.code, error });
+      this.firstTimeOffline = undefined;
     }
   }
 

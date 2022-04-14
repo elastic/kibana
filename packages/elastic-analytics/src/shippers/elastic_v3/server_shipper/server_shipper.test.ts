@@ -47,6 +47,8 @@ describe('ElasticV3ServerShipper', () => {
       { version: '1.2.3', channelName: 'test-channel', debug: true },
       initContext
     );
+    // eslint-disable-next-line dot-notation
+    shipper['firstTimeOffline'] = null;
   });
 
   afterEach(() => {
@@ -196,6 +198,8 @@ describe('ElasticV3ServerShipper', () => {
         { version: '1.2.3', channelName: 'test-channel' },
         initContext
       );
+      // eslint-disable-next-line dot-notation
+      shipper['firstTimeOffline'] = null;
       shipper.reportEvents(events);
       shipper.optIn(true);
       setLastBatchSent(Date.now() - 10 * MINUTES);
@@ -212,6 +216,58 @@ describe('ElasticV3ServerShipper', () => {
           method: 'POST',
         }
       );
+    })
+  );
+
+  test(
+    'sends when the queue overflows the 10kB leaky bucket one batch every 10s',
+    fakeSchedulers(async (advance) => {
+      expect.assertions(2 * 9 + 2);
+
+      shipper.reportEvents(new Array(1000).fill(events[0]));
+      shipper.optIn(true);
+
+      // Due to the size of the test events, it matches 9 rounds.
+      for (let i = 0; i < 9; i++) {
+        const counter = firstValueFrom(shipper.telemetryCounter$);
+        setLastBatchSent(Date.now() - 10 * SECONDS);
+        advance(10 * SECONDS);
+        expect(fetchMock).toHaveBeenNthCalledWith(
+          i + 1,
+          'https://telemetry-staging.elastic.co/v3/send/test-channel',
+          {
+            body: new Array(103)
+              .fill(
+                '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n'
+              )
+              .join(''),
+            headers: {
+              'content-type': 'application/x-njson',
+              'x-elastic-cluster-id': 'UNKNOWN',
+              'x-elastic-stack-version': '1.2.3',
+            },
+            method: 'POST',
+            query: { debug: true },
+          }
+        );
+        await expect(counter).resolves.toMatchInlineSnapshot(`
+          Object {
+            "code": "200",
+            "count": 103,
+            "event_type": "test-event-type",
+            "source": "elastic_v3_server",
+            "type": "succeeded",
+          }
+        `);
+        await nextTick();
+      }
+      // eslint-disable-next-line dot-notation
+      expect(shipper['internalQueue'].length).toBe(1000 - 9 * 103); // 73
+
+      // If we call it again, it should not enqueue all the events (only the ones to fill the queue):
+      shipper.reportEvents(new Array(1000).fill(events[0]));
+      // eslint-disable-next-line dot-notation
+      expect(shipper['internalQueue'].length).toBe(1000);
     })
   );
 
@@ -288,49 +344,96 @@ describe('ElasticV3ServerShipper', () => {
   );
 
   test(
-    'sends when the queue overflows the 10kB leaky bucket one batch every 10s',
+    'connectivity check is run after report failure',
     fakeSchedulers(async (advance) => {
-      expect.assertions(2 * 9 + 1);
-
-      shipper.reportEvents(new Array(1000).fill(events[0]));
+      fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'));
+      shipper.reportEvents(events);
       shipper.optIn(true);
+      const counter = firstValueFrom(shipper.telemetryCounter$);
+      setLastBatchSent(Date.now() - 10 * MINUTES);
+      advance(10 * MINUTES);
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        1,
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        {
+          body: '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n',
+          headers: {
+            'content-type': 'application/x-njson',
+            'x-elastic-cluster-id': 'UNKNOWN',
+            'x-elastic-stack-version': '1.2.3',
+          },
+          method: 'POST',
+          query: { debug: true },
+        }
+      );
+      await expect(counter).resolves.toMatchInlineSnapshot(`
+        Object {
+          "code": "Failed to fetch",
+          "count": 1,
+          "event_type": "test-event-type",
+          "source": "elastic_v3_server",
+          "type": "failed",
+        }
+      `);
+      fetchMock.mockRejectedValueOnce(new Error('Failed to fetch'));
+      advance(1 * MINUTES);
+      await nextTick();
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        2,
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        { method: 'OPTIONS' }
+      );
+      fetchMock.mockResolvedValueOnce({ ok: false });
+      advance(2 * MINUTES);
+      await nextTick();
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        3,
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        { method: 'OPTIONS' }
+      );
 
-      // Due to the size of the test events, it matches 9 rounds.
-      for (let i = 0; i < 9; i++) {
-        const counter = firstValueFrom(shipper.telemetryCounter$);
-        setLastBatchSent(Date.now() - 10 * SECONDS);
-        advance(10 * SECONDS);
-        expect(fetchMock).toHaveBeenNthCalledWith(
-          i + 1,
-          'https://telemetry-staging.elastic.co/v3/send/test-channel',
-          {
-            body: new Array(103)
-              .fill(
-                '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n'
-              )
-              .join(''),
-            headers: {
-              'content-type': 'application/x-njson',
-              'x-elastic-cluster-id': 'UNKNOWN',
-              'x-elastic-stack-version': '1.2.3',
-            },
-            method: 'POST',
-            query: { debug: true },
-          }
-        );
-        await expect(counter).resolves.toMatchInlineSnapshot(`
-          Object {
-            "code": "200",
-            "count": 103,
-            "event_type": "test-event-type",
-            "source": "elastic_v3_server",
-            "type": "succeeded",
-          }
-        `);
-        await nextTick();
-      }
+      // let's see the effect of after 24 hours:
+      shipper.reportEvents(events);
       // eslint-disable-next-line dot-notation
-      expect(shipper['internalQueue'].length).toBe(1000 - 9 * 103); // 73
+      expect(shipper['internalQueue'].length).toBe(1);
+      // eslint-disable-next-line dot-notation
+      shipper['firstTimeOffline'] = 100;
+
+      fetchMock.mockResolvedValueOnce({ ok: false });
+      advance(4 * MINUTES);
+      await nextTick();
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        4,
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        { method: 'OPTIONS' }
+      );
+      // eslint-disable-next-line dot-notation
+      expect(shipper['internalQueue'].length).toBe(0);
+
+      // New events are not added to the queue because it's been offline for 24 hours.
+      shipper.reportEvents(events);
+      // eslint-disable-next-line dot-notation
+      expect(shipper['internalQueue'].length).toBe(0);
+
+      // Regains connection
+      fetchMock.mockResolvedValueOnce({ ok: true });
+      advance(8 * MINUTES);
+      await nextTick();
+      expect(fetchMock).toHaveBeenNthCalledWith(
+        5,
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        { method: 'OPTIONS' }
+      );
+      // eslint-disable-next-line dot-notation
+      expect(shipper['firstTimeOffline']).toBe(null);
+
+      advance(16 * MINUTES);
+      await nextTick();
+      expect(fetchMock).not.toHaveBeenNthCalledWith(
+        6,
+        'https://telemetry-staging.elastic.co/v3/send/test-channel',
+        { method: 'OPTIONS' }
+      );
     })
   );
 });
