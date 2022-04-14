@@ -7,8 +7,8 @@
 import {
   apm,
   createLogger,
-  LogLevel,
   EntityArrayIterable,
+  LogLevel,
 } from '@elastic/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 

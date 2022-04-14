@@ -22,7 +22,9 @@ export interface EntityIterable<TFields extends Fields = ApmFields>
   merge(...iterables: Array<EntityIterable<TFields>>): EntityStreams<TFields>;
 }
 
-export class EntityArrayIterable<TFields extends Fields> implements EntityIterable<TFields> {
+export class EntityArrayIterable<TFields extends Fields = ApmFields>
+  implements EntityIterable<TFields>
+{
   constructor(private fields: TFields[]) {
     const timestamps = fields.filter((f) => f['@timestamp']).map((f) => f['@timestamp']!);
     this._order = timestamps.length > 1 ? (timestamps[0] > timestamps[1] ? 'desc' : 'asc') : 'asc';
