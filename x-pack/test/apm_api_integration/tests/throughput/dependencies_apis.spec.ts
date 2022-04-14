@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoProdInstance
                   .transaction('GET /api/product/list')
                   .duration(1000)
@@ -130,12 +130,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                       .success()
                       .timestamp(timestamp)
                   )
-                  .serialize()
               ),
             timerange(start, end)
               .interval('1m')
               .rate(JAVA_PROD_RATE)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceJavaInstance
                   .transaction('POST /api/product/buy')
                   .duration(1000)
@@ -153,7 +152,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                       .success()
                       .timestamp(timestamp)
                   )
-                  .serialize()
               ),
           ]);
         });
