@@ -6,7 +6,6 @@
  */
 
 import os from 'os';
-import type { Logger } from 'src/core/server';
 import type { CloudSetup } from '../../../cloud/server';
 
 const MIN_CLOUD_OS_MEM_GB: number = 2;
