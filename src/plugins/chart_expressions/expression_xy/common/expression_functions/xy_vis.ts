@@ -48,10 +48,13 @@ const errors = {
       defaultMessage: '`fillOpacity` argument is applicable only for area charts.',
     }),
   valueLabelsForNotBarsOrHistogramBarsChartsError: () =>
-    i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
-      defaultMessage:
-        '`valueLabels` argument is applicable only for bar charts, which are not histograms.',
-    }),
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarsOrHistogramBarsChartsError',
+      {
+        defaultMessage:
+          '`valueLabels` argument is applicable only for bar charts, which are not histograms.',
+      }
+    ),
   dataBoundsForNotLineChartError: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
       defaultMessage: 'Only line charts can be fit to the data bounds',

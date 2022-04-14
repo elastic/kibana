@@ -59,11 +59,11 @@ import { getLegendAction } from './legend_action';
 import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common/types';
-
-import './xy_chart.scss';
 import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
 import { SeriesTypes, ValueLabelModes } from '../../common/constants';
 import { DataLayers } from './data_layers';
+
+import './xy_chart.scss';
 
 declare global {
   interface Window {
