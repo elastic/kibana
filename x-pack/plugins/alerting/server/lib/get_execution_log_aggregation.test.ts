@@ -211,7 +211,7 @@ describe('getExecutionLogAggregation', () => {
                       field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
                     },
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     max: {
                       field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
                     },
@@ -298,7 +298,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -383,7 +383,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -532,7 +532,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -620,7 +620,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -769,7 +769,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 0.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 0.0,
                   },
                   outcomeAndMessage: {
@@ -849,7 +849,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -998,7 +998,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -1083,7 +1083,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {

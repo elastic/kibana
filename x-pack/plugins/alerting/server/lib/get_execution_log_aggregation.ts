@@ -59,7 +59,7 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     esSearchDuration: estypes.AggregationsMaxAggregate;
     totalSearchDuration: estypes.AggregationsMaxAggregate;
     numTriggeredActions: estypes.AggregationsMaxAggregate;
-    numScheduledActions: estypes.AggregationsMaxAggregate;
+    numGeneratedActions: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
   };
   alertCounts: IAlertCounts;
@@ -90,7 +90,7 @@ const ExecutionLogSortFields: Record<string, string> = {
   es_search_duration: 'ruleExecution>esSearchDuration',
   schedule_delay: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
-  num_generated_actions: 'ruleExecution>numScheduledActions',
+  num_generated_actions: 'ruleExecution>numGeneratedActions',
 };
 
 export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
@@ -204,7 +204,7 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                     field: NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
                   },
                 },
-                numScheduledActions: {
+                numGeneratedActions: {
                   max: {
                     field: NUMBER_OF_GENERATED_ACTIONS_FIELD,
                   },
@@ -285,7 +285,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     num_new_alerts: bucket?.alertCounts?.buckets?.newAlerts?.doc_count ?? 0,
     num_recovered_alerts: bucket?.alertCounts?.buckets?.recoveredAlerts?.doc_count ?? 0,
     num_triggered_actions: bucket?.ruleExecution?.numTriggeredActions?.value ?? 0,
-    num_generated_actions: bucket?.ruleExecution?.numScheduledActions?.value ?? 0,
+    num_generated_actions: bucket?.ruleExecution?.numGeneratedActions?.value ?? 0,
     num_succeeded_actions: actionExecutionSuccess,
     num_errored_actions: actionExecutionError,
     total_search_duration_ms: bucket?.ruleExecution?.totalSearchDuration?.value ?? 0,

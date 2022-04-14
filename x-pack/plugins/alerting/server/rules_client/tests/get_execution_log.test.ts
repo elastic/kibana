@@ -131,7 +131,7 @@ const aggregateResults = {
               numTriggeredActions: {
                 value: 5.0,
               },
-              numScheduledActions: {
+              numGeneratedActions: {
                 value: 5.0,
               },
               outcomeAndMessage: {
@@ -216,7 +216,7 @@ const aggregateResults = {
               numTriggeredActions: {
                 value: 5.0,
               },
-              numScheduledActions: {
+              numGeneratedActions: {
                 value: 5.0,
               },
               outcomeAndMessage: {
