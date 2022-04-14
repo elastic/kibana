@@ -7,7 +7,9 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { StartServicesAccessor } from 'kibana/server';
 import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import type { StartPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -19,7 +21,10 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import {
+  DEFAULT_PREVIEW_INDEX,
+  DETECTION_ENGINE_RULES_PREVIEW,
+} from '../../../../../common/constants';
 import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
 import {
   previewRulesSchema,
@@ -59,7 +64,8 @@ export const previewRulesRoute = async (
   security: SetupPlugins['security'],
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient
+  previewRuleDataClient: IRuleDataClient,
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
     {
@@ -78,6 +84,7 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
+        const [, { security: securityService }] = await getStartServices();
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
 
@@ -115,6 +122,34 @@ export const previewRulesRoute = async (
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
         let isAborted = false;
+
+        const { hasAllRequested } = await securityService.authz
+          .checkPrivilegesWithRequest(request)
+          .atSpace(spaceId, {
+            elasticsearch: {
+              index: {
+                [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
+                [`.internal${DEFAULT_PREVIEW_INDEX}-`]: ['read'],
+              },
+              cluster: [],
+            },
+          });
+
+        if (!hasAllRequested) {
+          return response.ok({
+            body: {
+              logs: [
+                {
+                  errors: [
+                    'Missing "read" privileges for the ".preview.alerts-security.alerts" or ".internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
+                  ],
+                  warnings: [],
+                  duration: 0,
+                },
+              ],
+            },
+          });
+        }
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
