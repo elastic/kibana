@@ -31,7 +31,7 @@ export class NavigationPublicPlugin
   }
 
   public start(
-    { i18n }: CoreStart,
+    core: CoreStart,
     { unifiedSearch }: NavigationPluginStartDependencies
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
