@@ -17,10 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('show underlying data', () => {
-    before(async () => {
-      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
-    });
-
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -43,6 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
+      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
@@ -70,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
+      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       expect(await queryBar.getQueryString()).be.eql('');
@@ -106,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
+      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       // check the query
@@ -142,6 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
+      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       // check the columns
@@ -177,6 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
+      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
 
