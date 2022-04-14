@@ -12,6 +12,7 @@ export * from './kpi';
 
 export const enum UserRiskScoreQueryId {
   USERS_BY_RISK = 'UsersByRisk',
+  USER_DETAILS_RISK_SCORE = 'UserDetailsRiskScore',
 }
 
 export const enum HostRiskScoreQueryId {

@@ -52,3 +52,17 @@ export const NAVIGATION_ALERTS_TITLE = i18n.translate(
     defaultMessage: 'External alerts',
   }
 );
+
+export const USER_RISK_SCORE_OVER_TIME = i18n.translate(
+  'xpack.securitySolution.users.navigation.userScoreOverTimeTitle',
+  {
+    defaultMessage: 'User risk score over time',
+  }
+);
+
+export const VIEW_DASHBOARD_BUTTON = i18n.translate(
+  'xpack.securitySolution.hosts.navigaton.hostRisk.viewDashboardButtonLabel',
+  {
+    defaultMessage: 'View source dashboard',
+  }
+);
