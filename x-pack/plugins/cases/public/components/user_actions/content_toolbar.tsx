@@ -16,6 +16,7 @@ export interface UserActionContentToolbarProps {
   id: string;
   editLabel: string;
   deleteLabel?: string;
+  deleteConfirmLabel?: string;
   quoteLabel: string;
   isLoading: boolean;
   onEdit: (id: string) => void;
@@ -29,6 +30,7 @@ const UserActionContentToolbarComponent = ({
   id,
   editLabel,
   deleteLabel,
+  deleteConfirmLabel,
   quoteLabel,
   isLoading,
   onEdit,
@@ -46,6 +48,7 @@ const UserActionContentToolbarComponent = ({
         editLabel={editLabel}
         quoteLabel={quoteLabel}
         deleteLabel={deleteLabel}
+        deleteConfirmLabel={deleteConfirmLabel}
         isLoading={isLoading}
         onEdit={onEdit}
         onQuote={onQuote}

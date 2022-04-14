@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { memo, useMemo, useCallback, useState } from 'react';
+import { EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
 
 import { PropertyActions } from '../property_actions';
 import { useLensOpenVisualization } from '../markdown_editor/plugins/lens/use_lens_open_visualization';
+import { CANCEL_BUTTON, CONFIRM_BUTTON } from './translations';
 
 interface UserActionPropertyActionsProps {
   id: string;
   editLabel: string;
   deleteLabel?: string;
+  deleteConfirmLabel?: string;
   quoteLabel: string;
   isLoading: boolean;
   onEdit: (id: string) => void;
@@ -29,6 +31,7 @@ const UserActionPropertyActionsComponent = ({
   editLabel,
   quoteLabel,
   deleteLabel,
+  deleteConfirmLabel,
   isLoading,
   onEdit,
   onDelete,
@@ -39,7 +42,22 @@ const UserActionPropertyActionsComponent = ({
   const { canUseEditor, actionConfig } = useLensOpenVisualization({ comment: commentMarkdown });
   const onEditClick = useCallback(() => onEdit(id), [id, onEdit]);
   const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
-  const onDeleteClick = useCallback(() => (onDelete ? onDelete(id) : null), [id, onDelete]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const onDeleteConfirmClick = useCallback(() => {
+    if (onDelete) {
+      onDelete(id);
+    }
+    setShowDeleteConfirm(false);
+  }, [id, onDelete]);
+
+  const onDeleteClick = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const onDeleteCancelClick = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, []);
 
   const propertyActions = useMemo(
     () =>
@@ -90,6 +108,19 @@ const UserActionPropertyActionsComponent = ({
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="user-action-title-loading" />}
       {!isLoading && <PropertyActions propertyActions={propertyActions} />}
+      {showDeleteConfirm ? (
+        <EuiConfirmModal
+          title={deleteLabel}
+          onCancel={onDeleteCancelClick}
+          onConfirm={onDeleteConfirmClick}
+          cancelButtonText={CANCEL_BUTTON}
+          confirmButtonText={CONFIRM_BUTTON}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          {deleteConfirmLabel ? deleteConfirmLabel : ''}
+        </EuiConfirmModal>
+      ) : null}
     </>
   );
 };
