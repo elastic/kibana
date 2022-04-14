@@ -92,7 +92,7 @@ export const createUserAttachmentUserActionBuilder = ({
           isLoading={isLoading}
           onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
           onQuote={handleManageQuote.bind(null, comment.comment)}
-          onDelete={handleDeleteComment.bind(null, comment.comment)}
+          onDelete={handleDeleteComment.bind(null, comment.id)}
           userCanCrud={userCanCrud}
         />
       ),
