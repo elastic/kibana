@@ -198,7 +198,11 @@ describe('ExpressionRenderHandler', () => {
 
         uiActions = uiActionsPluginMock.createStartContract();
         trigger = { exec: jest.fn() } as unknown as typeof trigger;
-        handler = new ExpressionRenderHandler(element);
+        handler = new ExpressionRenderHandler(element, {
+          getExtraActionContext: () => ({
+            extra: 'data',
+          }),
+        });
         handler.render({ type: 'render', as: 'test' });
         const renderer = getRenderersRegistry().get('test') as jest.Mocked<ExpressionRenderer>;
         [[, , handlers]] = renderer?.render.mock.calls;
@@ -230,6 +234,13 @@ describe('ExpressionRenderHandler', () => {
         expect(uiActions.getTrigger).toHaveBeenCalledTimes(1);
         expect(uiActions.getTrigger).toHaveBeenCalledWith('click');
         expect(trigger.exec).toHaveBeenCalledWith(expect.objectContaining({ something: 'kibana' }));
+      });
+
+      it('should merge an additional context', () => {
+        uiActions.hasTrigger.mockReturnValueOnce(true);
+        handlers.event({ name: 'click' });
+
+        expect(trigger.exec).toHaveBeenCalledWith(expect.objectContaining({ extra: 'data' }));
       });
     });
   });

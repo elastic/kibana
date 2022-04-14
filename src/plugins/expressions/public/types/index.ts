@@ -13,9 +13,9 @@ import {
   IInterpreterRenderHandlers,
   ExpressionValue,
   ExpressionsService,
-  RenderMode,
   IInterpreterRenderEvent,
 } from '../../common';
+import type { ExpressionRenderHandlerParams } from '../render';
 /**
  * @deprecated
  *
@@ -32,7 +32,7 @@ export interface ExpressionInterpreter {
   interpretAst: ExpressionsService['run'];
 }
 
-export interface IExpressionLoaderParams {
+export interface IExpressionLoaderParams extends ExpressionRenderHandlerParams {
   searchContext?: SerializableRecord;
   context?: ExpressionValue;
   variables?: Record<string, unknown>;
@@ -43,12 +43,7 @@ export interface IExpressionLoaderParams {
   customRenderers?: [];
   uiState?: unknown;
   inspectorAdapters?: Adapters;
-  interactive?: boolean;
-  onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
-  renderMode?: RenderMode;
-  syncColors?: boolean;
-  syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 
   /**

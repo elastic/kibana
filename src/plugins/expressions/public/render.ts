@@ -30,6 +30,11 @@ import { getRenderersRegistry, getUiActions } from './services';
 export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 
 export interface ExpressionRenderHandlerParams {
+  /**
+   * Get additionl contextual data for the UI Action trigger.
+   * @param event The original event.
+   */
+  getExtraActionContext?(event: ExpressionRendererEvent): unknown;
   onRenderError?: RenderErrorHandlerFnType;
   renderMode?: RenderMode;
   syncColors?: boolean;
@@ -52,10 +57,12 @@ export class ExpressionRenderHandler {
   private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
+  private getExtraActionContext?(event: ExpressionRendererEvent): unknown;
 
   constructor(
     element: HTMLElement,
     {
+      getExtraActionContext,
       onRenderError,
       renderMode,
       syncColors,
@@ -68,6 +75,7 @@ export class ExpressionRenderHandler {
     this.eventsSubject = new Rx.Subject();
     this.events$ = this.eventsSubject.asObservable();
 
+    this.getExtraActionContext = getExtraActionContext;
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
     this.renderSubject = new Rx.BehaviorSubject<number | null>(null);
@@ -175,8 +183,11 @@ export class ExpressionRenderHandler {
       return;
     }
 
+    const extraContext = this.getExtraActionContext?.(event);
+
     uiActions.getTrigger(data.name).exec({
       ...(data.data && typeof data.data === 'object' ? data.data : {}),
+      ...(extraContext && typeof extraContext === 'object' ? extraContext : {}),
     });
   }
 }
