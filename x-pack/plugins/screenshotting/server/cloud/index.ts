@@ -24,5 +24,7 @@ export function systemHasInsufficientMemory(logger: Logger, cloud?: CloudSetup):
       Boolean(cloud?.isCloudEnabled) && os.totalmem() < MIN_CLOUD_OS_MEM_BYTES
     }`
   );
-  return Boolean(cloud?.isCloudEnabled) && os.totalmem() < MIN_CLOUD_OS_MEM_BYTES;
+  return (
+    Boolean(cloud?.isCloudEnabled || cloud?.deploymentId) && os.totalmem() < MIN_CLOUD_OS_MEM_BYTES
+  );
 }
