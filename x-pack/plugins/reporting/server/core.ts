@@ -367,7 +367,6 @@ export class ReportingCore {
       switchMap(({ screenshotting }) => {
         return screenshotting.getScreenshots({
           ...options,
-          layout: options.layout,
           urls: options.urls.map((url) =>
             typeof url === 'string'
               ? url
