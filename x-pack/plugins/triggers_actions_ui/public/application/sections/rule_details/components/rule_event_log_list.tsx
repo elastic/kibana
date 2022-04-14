@@ -148,7 +148,7 @@ const columns = [
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActions',
       {
-        defaultMessage: 'Scheduled actions',
+        defaultMessage: 'Generated actions',
       }
     ),
     isSortable: getIsColumnSortable('num_scheduled_actions'),
