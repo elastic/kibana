@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './search_bar.scss';
 
 import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -27,7 +28,7 @@ import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
-import { FilterBar, FilterBadgesWrapper } from '../filter_bar';
+import { FilterBar, FilterItems } from '../filter_bar';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -443,7 +444,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           filterBar={
             this.shouldShowDatePickerAsBadge() ? (
-              <FilterBadgesWrapper
+              <FilterItems
                 filters={this.props.filters!}
                 onFiltersUpdated={this.props.onFiltersUpdated}
                 indexPatterns={this.props.indexPatterns!}
@@ -457,14 +458,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     let filterBar;
     if (this.shouldRenderFilterBar()) {
-      const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
-        'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
-      });
+      const filterGroupClasses = classNames('globalFilterGroup__wrapper');
 
       filterBar = (
         <div id="globalFilterGroup" className={filterGroupClasses}>
           <FilterBar
-            className="globalFilterGroup__filterBar"
             filters={this.props.filters!}
             onFiltersUpdated={this.props.onFiltersUpdated}
             indexPatterns={this.props.indexPatterns!}

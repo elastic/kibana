@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React, { useRef } from 'react';
+import { css } from '@emotion/react';
 import { EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
-import React, { useRef } from 'react';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -24,7 +25,7 @@ export interface Props {
   timeRangeForSuggestionsOverride?: boolean;
 }
 
-const FilterBadgesWrapperUI = React.memo(function FilterBadgesWrapperUI(props: Props) {
+const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
@@ -40,7 +41,13 @@ const FilterBadgesWrapperUI = React.memo(function FilterBadgesWrapperUI(props: P
 
   function renderItems() {
     return props.filters.map((filter, i) => (
-      <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
+      <EuiFlexItem
+        key={i}
+        grow={false}
+        css={css`
+          max-width: 100%;
+        `}
+      >
         <FilterItem
           id={`${i}`}
           intl={props.intl}
@@ -73,7 +80,7 @@ const FilterBadgesWrapperUI = React.memo(function FilterBadgesWrapperUI(props: P
   return <>{renderItems()}</>;
 });
 
-const FilterBadgesWrapper = injectI18n(FilterBadgesWrapperUI);
+const FilterItems = injectI18n(FilterItemsUI);
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default FilterBadgesWrapper;
+export default FilterItems;

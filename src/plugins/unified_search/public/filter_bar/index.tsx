@@ -17,12 +17,10 @@ export const FilterBar = (props: React.ComponentProps<typeof LazyFilterBar>) => 
   </React.Suspense>
 );
 
-const LazyFilterBadgesWrapper = React.lazy(() => import('./filter_badges_wrapper'));
-export const FilterBadgesWrapper = (
-  props: React.ComponentProps<typeof LazyFilterBadgesWrapper>
-) => (
+const LazyFilterItems = React.lazy(() => import('./filter_item/filter_items'));
+export const FilterItems = (props: React.ComponentProps<typeof LazyFilterItems>) => (
   <React.Suspense fallback={<Fallback />}>
-    <LazyFilterBadgesWrapper {...props} />
+    <LazyFilterItems {...props} />
   </React.Suspense>
 );
 
@@ -33,7 +31,7 @@ export const FilterLabel = (props: React.ComponentProps<typeof LazyFilterLabel>)
   </React.Suspense>
 );
 
-const LazyFilterItem = React.lazy(() => import('./filter_item'));
+const LazyFilterItem = React.lazy(() => import('./filter_item/filter_item'));
 export const FilterItem = (props: React.ComponentProps<typeof LazyFilterItem>) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFilterItem {...props} />

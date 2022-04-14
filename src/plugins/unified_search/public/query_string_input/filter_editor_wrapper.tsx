@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
+import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 

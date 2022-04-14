@@ -69,9 +69,6 @@ const SearchOrFilterContainer = styled.div`
         margin-right: 0px;
       }
     }
-    .globalFilterGroup__wrapper.globalFilterGroup__wrapper-isVisible {
-      height: auto !important;
-    }
   }
 `;
 

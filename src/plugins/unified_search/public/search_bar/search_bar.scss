@@ -9,20 +9,8 @@
   border-bottom: none;
 }
 
-.globalFilterGroup__filterBar:not(:empty) {
-  margin-top: $euiSizeXS;
-}
-
 .globalFilterGroup__wrapper {
   line-height: 1; // Override kuiLocalNav & kuiLocalNavRow
   overflow: hidden;
   transition: height $euiAnimSpeedNormal $euiAnimSlightResistance;
-}
-
-.globalFilterGroup__filterFlexItem {
-  overflow: hidden;
-}
-
-.globalFilterBar__flexItem {
-  max-width: calc(100% - #{$euiSizeXS}); // Width minus margin around each flex itm
 }

@@ -6,52 +6,45 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
-import classNames from 'classnames';
 import React, { useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import FilterBadgesWrapper from './filter_badges_wrapper';
+import FilterItems from './filter_item/filter_items';
+
+import { FilterBarStyles } from './filter_bar.styles';
 
 export interface Props {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
-  className: string;
+  className?: string;
   indexPatterns: DataView[];
   intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
+  const euiTheme = useEuiTheme();
+  const styles = FilterBarStyles(euiTheme);
   const groupRef = useRef<HTMLDivElement>(null);
-  const classes = classNames('globalFilterBar', props.className);
 
   return (
     <EuiFlexGroup
-      className="globalFilterGroup"
-      gutterSize="none"
-      alignItems="flexStart"
+      css={styles.group}
+      ref={groupRef}
+      wrap={true}
       responsive={false}
+      gutterSize="none" // We use `gap` in the styles instead for better truncation of badges
+      alignItems="center"
+      tabIndex={-1}
     >
-      <EuiFlexItem className="globalFilterGroup__filterFlexItem">
-        <EuiFlexGroup
-          ref={groupRef}
-          className={classes}
-          wrap={true}
-          responsive={false}
-          gutterSize="xs"
-          alignItems="center"
-          tabIndex={-1}
-        >
-          <FilterBadgesWrapper
-            filters={props.filters!}
-            onFiltersUpdated={props.onFiltersUpdated}
-            indexPatterns={props.indexPatterns!}
-            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-          />
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      <FilterItems
+        filters={props.filters!}
+        onFiltersUpdated={props.onFiltersUpdated}
+        indexPatterns={props.indexPatterns!}
+        timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+      />
     </EuiFlexGroup>
   );
 });

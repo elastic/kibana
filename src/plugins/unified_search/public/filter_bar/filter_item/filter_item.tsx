@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './filter_item.scss';
+
 import { EuiContextMenu, EuiPopover, EuiPopoverProps } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
@@ -20,9 +22,9 @@ import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { FilterEditor } from './filter_editor';
-import { FilterView } from './filter_view';
-import { getIndexPatterns } from '../services';
+import { FilterEditor } from '../filter_editor';
+import { FilterView } from '../filter_view';
+import { getIndexPatterns } from '../../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
 
