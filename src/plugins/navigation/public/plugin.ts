@@ -38,7 +38,7 @@ export class NavigationPublicPlugin
 
     return {
       ui: {
-        TopNavMenu: createTopNav(unifiedSearch, extensions, i18n),
+        TopNavMenu: createTopNav(unifiedSearch, extensions),
       },
     };
   }
