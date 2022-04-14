@@ -33,7 +33,6 @@ function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClien
   return {
     getDecryptedAsInternalUser: jest.fn(),
     createPointInTimeFinderAsInternalUser: jest.fn(),
-    bulkGetDecryptedAsInternalUser: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsClient>;
 }
 
