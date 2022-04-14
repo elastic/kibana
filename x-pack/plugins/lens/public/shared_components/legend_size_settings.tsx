@@ -67,11 +67,27 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option) => onLegendSizeChange(Number(option) || undefined),
+    (option) => onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : Number(option)),
     [onLegendSizeChange]
   );
 
   if (!isVerticalLegend) return null;
+
+  const options =
+    legendSize?.toString() !== LegendSizes.AUTO
+      ? legendSizeOptions
+      : [
+          {
+            value: LegendSizes.AUTO.toString(),
+            inputDisplay: i18n.translate(
+              'xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto',
+              {
+                defaultMessage: 'Auto',
+              }
+            ),
+          },
+          ...legendSizeOptions,
+        ];
 
   return (
     <EuiFormRow
@@ -83,8 +99,8 @@ export const LegendSizeSettings = ({
     >
       <EuiSuperSelect
         compressed
-        valueOfSelected={legendSize?.toString() ?? DEFAULT_LEGEND_SIZE}
-        options={legendSizeOptions}
+        valueOfSelected={legendSize?.toString() || DEFAULT_LEGEND_SIZE}
+        options={options}
         onChange={onLegendSizeOptionChange}
       />
     </EuiFormRow>
