@@ -145,9 +145,9 @@ export function telemetryTaskRunner(
                   avg_total_search_duration_by_type_per_day:
                     dailyExecutionCounts.avgTotalSearchDurationByType,
                   percentile_num_generated_actions_per_day:
-                    dailyExecutionCounts.scheduledActionsPercentiles,
+                    dailyExecutionCounts.generatedActionsPercentiles,
                   percentile_num_generated_actions_by_type_per_day:
-                    dailyExecutionCounts.scheduledActionsPercentilesByType,
+                    dailyExecutionCounts.generatedActionsPercentilesByType,
                 },
                 runAt: getNextMidnight(),
               };
