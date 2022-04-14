@@ -11,6 +11,7 @@ import { encode, RisonValue } from 'rison-node';
 import styled from 'styled-components';
 import type { Query } from '@kbn/es-query';
 import { TimeHistory } from '../../../../../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { SearchBar } from '../../../../../../../../../src/plugins/unified_search/public';
 import { Storage } from '../../../../../../../../../src/plugins/kibana_utils/public';
 import { urlFromQueryParams } from '../url_from_query_params';
@@ -39,15 +40,16 @@ export const AdminSearchBar = memo(() => {
       history.push(
         urlFromQueryParams({
           ...queryParams,
-          // ensure we reset the page back to the first one, so that user id not (possibly) being left on an invalid page
-          page_index: '0',
+          // if query is changed, reset back to first page
+          // so that user is not (possibly) being left on an invalid page
+          page_index: params.query?.query === searchBarQuery.query ? queryParams.page_index : '0',
           ...(params.query?.query.trim()
             ? { admin_query: encode(params.query as unknown as RisonValue) }
             : {}),
         })
       );
     },
-    [history, queryParams]
+    [history, queryParams, searchBarQuery.query]
   );
 
   const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
@@ -59,7 +61,7 @@ export const AdminSearchBar = memo(() => {
           <SearchBar
             dataTestSubj="adminSearchBar"
             query={searchBarQuery}
-            indexPatterns={clonedIndexPatterns}
+            indexPatterns={clonedIndexPatterns as DataView[]}
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
             fillSubmitButton={true}

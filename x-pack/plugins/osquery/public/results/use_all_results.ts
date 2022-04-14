@@ -8,6 +8,7 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
+import { firstValueFrom } from 'rxjs';
 import {
   createFilter,
   generateTablePaginationOptions,
@@ -61,8 +62,8 @@ export const useAllResults = ({
   return useQuery(
     ['allActionResults', { actionId, activePage, limit, sort }],
     async () => {
-      const responseData = await data.search
-        .search<ResultsRequestOptions, ResultsStrategyResponse>(
+      const responseData = await firstValueFrom(
+        data.search.search<ResultsRequestOptions, ResultsStrategyResponse>(
           {
             actionId,
             factoryQueryType: OsqueryQueries.results,
@@ -74,7 +75,7 @@ export const useAllResults = ({
             strategy: 'osquerySearchStrategy',
           }
         )
-        .toPromise();
+      );
 
       if (!responseData?.edges?.length && responseData.totalCount) {
         throw new Error('Empty edges while positive totalCount');

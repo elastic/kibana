@@ -25,10 +25,6 @@ import {
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../src/plugins/data/public';
-import {
-  TransformChangesIfTheyExist,
-  useTransforms,
-} from '../../../transforms/containers/use_transforms';
 import { getInspectResponse } from '../../../helpers';
 import { inputsModel } from '../../store';
 import { useKibana } from '../../lib/kibana';
@@ -39,7 +35,6 @@ type UseSearchStrategyRequestArgs = RequestBasicOptions & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
   factoryQueryType: FactoryQueryTypes;
-  getTransformChangesIfTheyExist: TransformChangesIfTheyExist;
 };
 
 const search = <ResponseType extends IKibanaSearchResponse>({
@@ -49,26 +44,14 @@ const search = <ResponseType extends IKibanaSearchResponse>({
   defaultIndex,
   filterQuery,
   timerange,
-  getTransformChangesIfTheyExist,
   ...requestProps
 }: UseSearchStrategyRequestArgs): Observable<ResponseType> => {
-  const {
-    indices: transformIndices,
-    factoryQueryType: transformFactoryQueryType,
-    timerange: transformTimerange,
-  } = getTransformChangesIfTheyExist({
-    factoryQueryType,
-    indices: defaultIndex,
-    filterQuery,
-    timerange,
-  });
-
   return data.search.search<RequestBasicOptions, ResponseType>(
     {
       ...requestProps,
-      factoryQueryType: transformFactoryQueryType,
-      defaultIndex: transformIndices,
-      timerange: transformTimerange,
+      factoryQueryType,
+      defaultIndex,
+      timerange,
       filterQuery,
     },
     {
@@ -114,7 +97,6 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   abort?: boolean;
 }) => {
   const abortCtrl = useRef(new AbortController());
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const refetch = useRef<inputsModel.Refetch>(noop);
   const { data } = useKibana().services;
@@ -141,7 +123,6 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
           ...props,
           data,
           factoryQueryType,
-          getTransformChangesIfTheyExist,
           signal: abortCtrl.current.signal,
         } as never); // This typescast is required because every StrategyRequestType instance has different fields.
       };
@@ -151,7 +132,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
 
       refetch.current = asyncSearch;
     },
-    [data, start, factoryQueryType, getTransformChangesIfTheyExist]
+    [data, start, factoryQueryType]
   );
 
   useEffect(() => {

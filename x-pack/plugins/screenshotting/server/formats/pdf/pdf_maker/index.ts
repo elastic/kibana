@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from 'src/core/server';
 import { PdfMaker } from './pdfmaker';
 import type { Layout } from '../../../layouts';
 import { getTracker } from './tracker';
@@ -14,6 +14,7 @@ import type { CaptureResult } from '../../../screenshots';
 interface PngsToPdfArgs {
   results: CaptureResult['results'];
   layout: Layout;
+  packageInfo: PackageInfo;
   logger: Logger;
   logo?: string;
   title?: string;
@@ -24,9 +25,10 @@ export async function pngsToPdf({
   layout,
   logo,
   title,
+  packageInfo,
   logger,
 }: PngsToPdfArgs): Promise<{ buffer: Buffer; pages: number }> {
-  const pdfMaker = new PdfMaker(layout, logo, logger);
+  const pdfMaker = new PdfMaker(layout, logo, packageInfo, logger);
   const tracker = getTracker();
   if (title) {
     pdfMaker.setTitle(title);

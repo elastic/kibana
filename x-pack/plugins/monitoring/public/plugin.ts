@@ -109,6 +109,7 @@ export class MonitoringPlugin
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
+          dataViews: pluginsStart.dataViews,
         };
 
         Legacy.init({
@@ -122,6 +123,7 @@ export class MonitoringPlugin
           triggersActionsUi: deps.triggersActionsUi,
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
+          dataViews: deps.dataViews,
         });
 
         const config = Object.fromEntries(externalConfig);

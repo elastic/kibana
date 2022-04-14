@@ -29,7 +29,6 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
 import * as i18n from './translations';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 export interface AuthenticationArgs {
@@ -73,7 +72,6 @@ export const useAuthentications = ({
   const [loading, setLoading] = useState(false);
   const [authenticationsRequest, setAuthenticationsRequest] =
     useState<UserAuthenticationsRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
@@ -162,26 +160,19 @@ export const useAuthentications = ({
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        docValueFields: docValueFields ?? [],
         factoryQueryType: UsersQueries.authentications,
-        indices: indexNames,
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
+        stackByField,
+        pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-      });
-
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        docValueFields: docValueFields ?? [],
-        factoryQueryType,
-        filterQuery: createFilter(filterQuery),
-        stackByField,
-        pagination: generateTablePaginationOptions(activePage, limit),
-        timerange,
         sort: {} as SortField,
       };
       if (!deepEqual(prevRequest, myRequest)) {
@@ -198,7 +189,6 @@ export const useAuthentications = ({
     stackByField,
     limit,
     startDate,
-    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {

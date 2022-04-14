@@ -39,7 +39,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
   AnomalyChartsEmbeddableOutput
 > {
   private node?: HTMLElement;
-  private reload$ = new Subject();
+  private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   constructor(

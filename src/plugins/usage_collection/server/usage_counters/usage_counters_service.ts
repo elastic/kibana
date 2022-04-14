@@ -49,16 +49,16 @@ export interface UsageCountersServiceStartDeps {
 }
 
 export class UsageCountersService {
-  private readonly stop$ = new Rx.Subject();
+  private readonly stop$ = new Rx.Subject<void>();
   private readonly retryCount: number;
   private readonly bufferDurationMs: number;
 
   private readonly counterSets = new Map<string, UsageCounter>();
   private readonly source$ = new Rx.Subject<CounterMetric>();
   private readonly counter$ = this.source$.pipe(rxOp.multicast(new Rx.Subject()), rxOp.refCount());
-  private readonly flushCache$ = new Rx.Subject<CounterMetric>();
+  private readonly flushCache$ = new Rx.Subject<void>();
 
-  private readonly stopCaching$ = new Rx.Subject();
+  private readonly stopCaching$ = new Rx.Subject<void>();
 
   private readonly logger: Logger;
 
