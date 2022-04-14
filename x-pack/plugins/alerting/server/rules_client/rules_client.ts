@@ -1496,7 +1496,7 @@ export class RulesClient {
       await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser<RawRule>({
         filter,
         type: 'alert',
-        perPage: 1000,
+        perPage: 100,
         ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
       });
 

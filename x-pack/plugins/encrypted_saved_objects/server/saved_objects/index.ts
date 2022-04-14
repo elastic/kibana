@@ -117,21 +117,26 @@ export function setupSavedObjects({
 
         async function* encryptedFinder() {
           for await (const res of finderAsyncGenerator) {
-            const encryptedSavedObjects = await pMap(res.saved_objects, async (savedObject) => ({
-              ...savedObject,
-              attributes: (await service.decryptAttributes(
-                {
-                  type: savedObject.type,
-                  id: savedObject.id,
-                  namespace: getDescriptorNamespace(
-                    typeRegistry,
-                    savedObject.type,
-                    findOptions.namespaces
-                  ),
-                },
-                savedObject.attributes as Record<string, unknown>
-              )) as T,
-            }));
+            const encryptedSavedObjects = await pMap(
+              res.saved_objects,
+              async (savedObject) => ({
+                ...savedObject,
+                attributes: (await service.decryptAttributes(
+                  {
+                    type: savedObject.type,
+                    id: savedObject.id,
+                    namespace: getDescriptorNamespace(
+                      typeRegistry,
+                      savedObject.type,
+                      findOptions.namespaces
+                    ),
+                  },
+                  savedObject.attributes as Record<string, unknown>
+                )) as T,
+              }),
+              { concurrency: 50 }
+            );
+
             yield { ...res, saved_objects: encryptedSavedObjects };
           }
         }
