@@ -103,15 +103,15 @@ Alternative option is using `createPointInTimeFinderAsInternalUser` API method, 
 Its interface matches interface of the corresponding Saved Objects API `createPointInTimeFinder` method:
 
 ```typescript
-      const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser({
-        filter,
-        type: 'my-saved-object-type',
-        perPage: 1000,
-      });
+const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser({
+  filter,
+  type: 'my-saved-object-type',
+  perPage: 1000,
+});
 
-      for await (const response of finder.find()) {
-        // process response
-      }
+for await (const response of finder.find()) {
+  // process response
+}
 ```
 
 ### Defining migrations
