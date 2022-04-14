@@ -7,12 +7,12 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { firstValueFrom } from 'rxjs';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 import type { AnalyticsClientInitContext } from '../../../analytics_client';
 import type { Event } from '../../../events';
 import { fetchMock } from './server_shipper.test.mocks';
 import { ElasticV3ServerShipper } from './server_shipper';
-import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { firstValueFrom } from 'rxjs';
 
 const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;
@@ -27,6 +27,8 @@ describe('ElasticV3ServerShipper', () => {
     },
   ];
 
+  const nextTick = () => new Promise((resolve) => setImmediate(resolve));
+
   const initContext: AnalyticsClientInitContext = {
     sendTo: 'staging',
     isDev: true,
@@ -34,6 +36,9 @@ describe('ElasticV3ServerShipper', () => {
   };
 
   let shipper: ElasticV3ServerShipper;
+
+  // eslint-disable-next-line dot-notation
+  const setLastBatchSent = (ms: number) => shipper['lastBatchSent$'].next(ms);
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -46,7 +51,6 @@ describe('ElasticV3ServerShipper', () => {
 
   afterEach(() => {
     shipper.shutdown();
-    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
@@ -117,6 +121,7 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
+      setLastBatchSent(Date.now() - 10 * MINUTES);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -144,11 +149,12 @@ describe('ElasticV3ServerShipper', () => {
   );
 
   test(
-    'calls to reportEvents do not call `fetch` after 1s when optIn value is set to false',
+    'calls to reportEvents do not call `fetch` after 10 minutes when optIn value is set to false',
     fakeSchedulers((advance) => {
       shipper.reportEvents(events);
       shipper.optIn(false);
-      advance(1000);
+      setLastBatchSent(Date.now() - 10 * MINUTES);
+      advance(10 * MINUTES);
       expect(fetchMock).not.toHaveBeenCalled();
     })
   );
@@ -158,6 +164,7 @@ describe('ElasticV3ServerShipper', () => {
     shipper.optIn(true);
     const counter = firstValueFrom(shipper.telemetryCounter$);
     shipper.shutdown();
+    await nextTick(); // We are handling the shutdown in a promise, so we need to wait for the next tick.
     expect(fetchMock).toHaveBeenCalledWith(
       'https://telemetry-staging.elastic.co/v3/send/test-channel',
       {
@@ -191,7 +198,8 @@ describe('ElasticV3ServerShipper', () => {
       );
       shipper.reportEvents(events);
       shipper.optIn(true);
-      advance(1000);
+      setLastBatchSent(Date.now() - 10 * MINUTES);
+      advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -214,7 +222,8 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
-      advance(1000);
+      setLastBatchSent(Date.now() - 10 * MINUTES);
+      advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -243,7 +252,7 @@ describe('ElasticV3ServerShipper', () => {
   test(
     'handles when the fetch request fails (request completes but not OK response)',
     fakeSchedulers(async (advance) => {
-      fetchMock.mockResolvedValue({
+      fetchMock.mockResolvedValueOnce({
         ok: false,
         status: 400,
         text: () => Promise.resolve('{"status": "not ok"}'),
@@ -251,7 +260,8 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
-      advance(1000);
+      setLastBatchSent(Date.now() - 10 * MINUTES);
+      advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -274,6 +284,53 @@ describe('ElasticV3ServerShipper', () => {
           "type": "failed",
         }
       `);
+    })
+  );
+
+  test(
+    'sends when the queue overflows the 10kB leaky bucket one batch every 10s',
+    fakeSchedulers(async (advance) => {
+      expect.assertions(2 * 9 + 1);
+
+      shipper.reportEvents(new Array(1000).fill(events[0]));
+      shipper.optIn(true);
+
+      // Due to the size of the test events, it matches 9 rounds.
+      for (let i = 0; i < 9; i++) {
+        const counter = firstValueFrom(shipper.telemetryCounter$);
+        setLastBatchSent(Date.now() - 10 * SECONDS);
+        advance(10 * SECONDS);
+        expect(fetchMock).toHaveBeenNthCalledWith(
+          i + 1,
+          'https://telemetry-staging.elastic.co/v3/send/test-channel',
+          {
+            body: new Array(103)
+              .fill(
+                '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"test-event-type","context":{},"properties":{}}\n'
+              )
+              .join(''),
+            headers: {
+              'content-type': 'application/x-njson',
+              'x-elastic-cluster-id': 'UNKNOWN',
+              'x-elastic-stack-version': '1.2.3',
+            },
+            method: 'POST',
+            query: { debug: true },
+          }
+        );
+        await expect(counter).resolves.toMatchInlineSnapshot(`
+          Object {
+            "code": "200",
+            "count": 103,
+            "event_type": "test-event-type",
+            "source": "elastic_v3_server",
+            "type": "succeeded",
+          }
+        `);
+        await nextTick();
+      }
+      // eslint-disable-next-line dot-notation
+      expect(shipper['internalQueue'].length).toBe(1000 - 9 * 103); // 73
     })
   );
 });

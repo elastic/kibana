@@ -7,7 +7,16 @@
  */
 
 import fetch from 'node-fetch';
-import { BehaviorSubject, filter, Subject, interval, exhaustMap, merge } from 'rxjs';
+import {
+  BehaviorSubject,
+  filter,
+  Subject,
+  interval,
+  exhaustMap,
+  merge,
+  from,
+  firstValueFrom,
+} from 'rxjs';
 import type { IShipper } from '../../types';
 import type { Event, EventContext, TelemetryCounter } from '../../../events';
 import { TelemetryCounterType } from '../../../events';
@@ -82,43 +91,45 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   public shutdown() {
-    // We need to emit first to trigger anything that depends on the shutdown event...
-    this.shutdown$.next();
-    // ... and complete for anything that validates this.shutdown$.closed
     this.shutdown$.complete();
   }
 
   private setInternalSubscriber() {
     // Check the status of the queues every 1 second.
-    const subscription = merge(interval(1000), this.shutdown$)
+    const subscription = merge(
+      interval(1000),
+      // Using a promise because complete does not emit through the pipe.
+      from(firstValueFrom(this.shutdown$, { defaultValue: true }))
+    )
       .pipe(
         // Only move ahead if it's opted-in.
         filter(() => this.isOptedIn === true),
 
-        // Send the events now if:
+        // Send the events now if (validations sorted from cheapest to most CPU expensive):
+        // - We are shutting down.
+        // - There are some events in the queue, and we didn't send anything in the last 10 minutes.
         // - The last time we sent was more than 10 seconds ago and:
         //   - We reached the minimum batch size of 10kB per request in our leaky bucket.
         //   - The queue is full (meaning we'll never get to 10kB because the events are very small).
-        // - There are some events in the queue, and we didn't send anything in the last 10 minutes.
-        // - We are shutting down.
         filter(
           () =>
-            (this.lastBatchSent$.value - Date.now() > 10 * SECONDS &&
-              (this.internalQueue.length === 1000 ||
-                this.getQueueByteSize(this.internalQueue) < 10 * KIB)) ||
             (this.internalQueue.length > 0 &&
-              this.lastBatchSent$.value - Date.now() < 10 * MINUTES) ||
-            this.shutdown$.closed
+              (this.shutdown$.isStopped ||
+                Date.now() - this.lastBatchSent$.value >= 10 * MINUTES)) ||
+            (Date.now() - this.lastBatchSent$.value >= 10 * SECONDS &&
+              (this.internalQueue.length === 1000 ||
+                this.getQueueByteSize(this.internalQueue) >= 10 * KIB))
         ),
 
         // Send the events
         exhaustMap(async () => {
+          this.lastBatchSent$.next(Date.now());
           const eventsToSend = this.getEventsToSend();
           await this.sendEvents(eventsToSend);
         })
       )
       .subscribe(() => {
-        if (this.shutdown$.closed) {
+        if (this.shutdown$.isStopped) {
           subscription.unsubscribe();
         }
       });
