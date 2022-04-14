@@ -3276,13 +3276,14 @@ describe('RulesPage with items and show only capability', () => {
         },
       },
     ];
-
     const rulesState = {
       isLoading: false,
       data: mockedRulesData,
       error: null,
       totalItemCount: 3,
     };
+    useFetchRules.mockReturnValue({ rulesState });
+
     const mockedRuleTypeIndex = new Map(
       Object.entries({
         '1': {
@@ -3319,7 +3320,6 @@ describe('RulesPage with items and show only capability', () => {
         ruleTaskTimeout: '1m',
       },
     ];
-    useFetchRules.mockReturnValue({ rulesState });
     useLoadRuleTypes.mockReturnValue({ ruleTypes, ruleTypeIndex: mockedRuleTypeIndex });
 
     wrapper = mountWithIntl(<RulesPage />);
@@ -3330,5 +3330,3 @@ describe('RulesPage with items and show only capability', () => {
     expect(wrapper.find('[data-test-subj="createRuleButton"]')).toHaveLength(0);
   });
 });
-
-describe('RulesPage with disabled items', () => {});
