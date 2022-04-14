@@ -12,7 +12,6 @@ import * as i18n from './translations';
 import { Case } from './types';
 
 interface CommentDeleteState {
-  isLoadingIds: string[];
   isError: boolean;
 }
 interface CommentDelete {
@@ -29,20 +28,17 @@ const dataFetchReducer = (state: CommentDeleteState, action: Action): CommentDel
     case 'FETCH_INIT':
       return {
         ...state,
-        isLoadingIds: [...state.isLoadingIds, action.payload],
         isError: false,
       };
 
     case 'FETCH_SUCCESS':
       return {
         ...state,
-        isLoadingIds: state.isLoadingIds.filter((id) => action.payload.commentId !== id),
         isError: false,
       };
     case 'FETCH_FAILURE':
       return {
         ...state,
-        isLoadingIds: state.isLoadingIds.filter((id) => action.payload !== id),
         isError: true,
       };
     default:
@@ -63,7 +59,6 @@ export interface UseDeleteComment extends CommentDeleteState {
 
 export const useDeleteComment = (): UseDeleteComment => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoadingIds: [],
     isError: false,
   });
   const toasts = useToasts();
