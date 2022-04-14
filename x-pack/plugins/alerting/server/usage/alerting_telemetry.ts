@@ -49,7 +49,7 @@ const ruleTypeMetric = {
 
 const scheduledActionsPercentilesAgg = {
   percentiles: {
-    field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+    field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
     percents: [50, 90, 99],
   },
 };

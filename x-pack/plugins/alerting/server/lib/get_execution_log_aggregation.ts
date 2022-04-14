@@ -26,8 +26,8 @@ const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_
 const TOTAL_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
 const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
-const NUMBER_OF_SCHEDULED_ACTIONS_FIELD =
-  'kibana.alert.rule.execution.metrics.number_of_scheduled_actions';
+const NUMBER_OF_GENERATED_ACTIONS_FIELD =
+  'kibana.alert.rule.execution.metrics.number_of_generated_actions';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
@@ -206,7 +206,7 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                 },
                 numScheduledActions: {
                   max: {
-                    field: NUMBER_OF_SCHEDULED_ACTIONS_FIELD,
+                    field: NUMBER_OF_GENERATED_ACTIONS_FIELD,
                   },
                 },
                 executionDuration: {

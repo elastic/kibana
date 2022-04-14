@@ -213,7 +213,7 @@ describe('getExecutionLogAggregation', () => {
                   },
                   numScheduledActions: {
                     max: {
-                      field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
                     },
                   },
                   executionDuration: { max: { field: 'event.duration' } },

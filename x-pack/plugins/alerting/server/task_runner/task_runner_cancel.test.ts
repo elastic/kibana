@@ -333,7 +333,7 @@ describe('Task Runner Cancel', () => {
               metrics: {
                 number_of_searches: 3,
                 number_of_triggered_actions: 0,
-                number_of_scheduled_actions: 0,
+                number_of_generated_actions: 0,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },
@@ -617,7 +617,7 @@ describe('Task Runner Cancel', () => {
               metrics: {
                 number_of_searches: 3,
                 number_of_triggered_actions: 0,
-                number_of_scheduled_actions: 0,
+                number_of_generated_actions: 0,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },
@@ -896,7 +896,7 @@ describe('Task Runner Cancel', () => {
               metrics: {
                 number_of_searches: 3,
                 number_of_triggered_actions: 1,
-                number_of_scheduled_actions: 1,
+                number_of_generated_actions: 1,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },
