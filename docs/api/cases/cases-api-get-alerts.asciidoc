@@ -46,7 +46,7 @@ GET api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/alerts
 --------------------------------------------------
 // KIBANA
 
-The API returns a JSON array listing the alert comments. For example:
+The API returns a JSON array listing the alerts. For example:
 
 [source,json]
 --------------------------------------------------
