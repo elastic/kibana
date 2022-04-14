@@ -2,9 +2,10 @@
 == Explore your documents
 
 
-*Discover* displays your your documents in table format, so you can
-best show off your data.
-Use the document table to resize columns, set row height, perform multi-column sorting, compare data, and more.
+*Discover* displays your documents in table format, so you can
+best explore your data.
+Use the document table to resize columns, set row height,
+perform multi-column sorting, compare data, and more.
 
 ++++
 <script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
@@ -81,7 +82,8 @@ For example, to sort by `geo.country_iso_code` then `order_date`, make sure `geo
 [[document-explorer-compare-data]]
 === Compare data
 
-Narrow your results to a subset documents.
+Narrow your results to a subset of documents to easily
+compare the data of interest.
 
 . Select the documents you want to compare.
 
@@ -118,7 +120,7 @@ to:
 
 . To navigate to the next and previous documents, click the < and > arrows at the top of the view.
 
-. For direct access to the document, click **Single document**.
+. To create a view of the document that you can bookmark and share, click **Single document**.
 +
 [role="screenshot"]
 image::images/discover-view-single-document.png[Discover single document view]
@@ -130,7 +132,7 @@ you can create <<external-plugin-development, your own plugin>>.
 +
 Documents are displayed using the same set of columns as the *Discover* view from which
 the context was opened. The filters you applied are also carried over. Pinned
-filters remain active, while normal filters are copied in a disabled state.
+filters remain active, while other filters are copied in a disabled state.
 +
 [role="screenshot"]
 image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
@@ -152,4 +154,4 @@ By default, the document table displays 100 rows per page. To change this number
 click *Rows per page*.
 
 [role="screenshot"]
-image::images/document-table-rows-per-page.png[Menu with options for setting the number of rows in the document table]
+image::images/document-table-rows-per-page.png["Menu with options for setting the number of rows in the document table", width=50%]

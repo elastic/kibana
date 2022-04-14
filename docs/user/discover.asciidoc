@@ -80,7 +80,7 @@ click and drag the mouse over the chart.
 
 **Discover** includes a table
 that shows all the documents that match your search.
-By default, the document table includes columns for the time field and the document `_source`.
+By default, the document table includes a column for the time field and a column that lists all other fields in the document.
 You’ll modify the document table to display your fields of interest.
 
 . Scan through the list of **Available fields** until you find the `manufacturer` field.
@@ -223,15 +223,13 @@ to show document details.
 image:images/document-table-expanded.png[Table view with document expanded]
 
 . Scan through the fields and their values. If you find a field of interest,
-click 
+click
 image:images/actions-icon.png[three dots icon next to data view dropdown] in the *Actions* column for filters and other controls.
 
 . To view documents that occurred before or after the event you are looking at, click
 **Surrounding documents**.
 
-. For direct access to a particular document, click **Single document**.
-+
-You can bookmark this document and share the link.
+. To create a view of the document that you can bookmark and share, click **Single document**.
 
 
 [float]
