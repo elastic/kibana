@@ -12,8 +12,8 @@ Resize columns, set row height, perform multi-column sorting, compare data, and 
 <img
 style="width: 100%; margin: auto; display: block;"
 class="vidyard-player-embed"
-src="https://play.vidyard.com/BgbLpBo3qvPZvtXrwZoNuD.jpg"
-data-uuid="BgbLpBo3qvPZvtXrwZoNuD"
+src="https://play.vidyard.com/KbZQP6Y7msjevAm1JGbKeG.jpg"
+data-uuid="KbZQP6Y7msjevAm1JGbKeG"
 data-v="4"
 data-type="inline"
 />
@@ -55,6 +55,11 @@ image::images/document-explorer-row-height.png[Row height settings for the docum
 Sort your data by one or more fields, in ascending or descending order.
 The default sort is based on the time field, from new to old.
 
+To add or remove a sort on a single field, click the
+column header, and then select the sort order.
+
+To sort by multiple fields:
+
 . In the document table, click the *field sorted* option.
 +
 [role="screenshot"]
@@ -70,6 +75,7 @@ image::images/document-explorer-multi-field.png[Multi field sort in the document
 . To change the sort order, select a field in the pop-up, and then drag it to the new location.
 +
 For example, to sort by `geo.country_iso_code` then `order_date`, make sure `geo.country_iso_code` appears first.
+
 
 [float]
 [[document-explorer-compare-data]]
@@ -99,7 +105,7 @@ The **JSON** (JavaScript Object Notation) view allows you to look at how {es} re
 +
 [role="screenshot"]
 image::images/document-explorer-expand.png[Expanded view of the document table]
-
++
 . In the *Table* view, scan through the fields and their values, or search for a field by name.
 
 . When you find a field of interest,
@@ -109,6 +115,8 @@ to:
 .. Filter the results to include or exclude specific fields or values
 .. Toggle the field in or out the document table
 .. Pin the field so it stays at the top
+
+. To navigate to the next and previous documents, click the < and > arrows at the top of the view.
 
 . For direct access to the document, click **Single document**.
 +
@@ -127,6 +135,7 @@ filters remain active, while normal filters are copied in a disabled state.
 [role="screenshot"]
 image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
 
+
 [float]
 [[document-explorer-full-screen]]
 === View documents in fullscreen
@@ -134,3 +143,13 @@ image::images/discover-context.png[Image showing context view feature, with anch
 To view as much data as possible and eliminate distractions, click the fullscreen icon
 image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode]
 in the document table.
+
+[float]
+[[document-explorer-configure-table]]
+=== Configure the number of documents displayed
+
+By default, the document table displays 100 rows per page. To change this number,
+click *Rows per page*.
+
+[role="screenshot"]
+image::images/document-table-rows-per-page.png[Menu with options for setting the number of rows in the document table]
