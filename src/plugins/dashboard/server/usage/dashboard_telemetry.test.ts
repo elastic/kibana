@@ -7,12 +7,9 @@
  */
 
 import { SavedDashboardPanel730ToLatest } from '../../common';
-import {
-  collectDashboardInfo,
-  getEmptyTelemetryData,
-  collectByValueVisualizationInfo,
-  collectByValueLensInfo,
-} from './dashboard_telemetry';
+import { getEmptyDashboardData, collectPanelsByType } from './dashboard_telemetry';
+import { EmbeddableStateWithType } from '../../../embeddable/common';
+import { createEmbeddablePersistableStateServiceMock } from '../../../embeddable/common/mocks';
 
 const visualizationType1ByValue = {
   embeddableConfig: {
@@ -31,6 +28,7 @@ const visualizationType2ByValue = {
   },
   type: 'visualization',
 } as unknown as SavedDashboardPanel730ToLatest;
+
 const visualizationType2ByReference = {
   ...visualizationType2ByValue,
   id: '11111',
@@ -44,6 +42,7 @@ const lensTypeAByValue = {
     },
   },
 } as unknown as SavedDashboardPanel730ToLatest;
+
 const lensTypeAByReference = {
   ...lensTypeAByValue,
   id: '22222',
@@ -93,91 +92,97 @@ const lensXYSeriesB = {
   },
 } as unknown as SavedDashboardPanel730ToLatest;
 
+const embeddablePersistableStateService = createEmbeddablePersistableStateServiceMock();
+
 describe('dashboard telemetry', () => {
+  beforeAll(() => {
+    embeddablePersistableStateService.extract.mockImplementationOnce((state) => {
+      const { HARDCODED_ID, ...restOfState } = state as unknown as Record<string, unknown>;
+      return {
+        state: restOfState as EmbeddableStateWithType,
+        references: [{ id: HARDCODED_ID as string, name: 'refName', type: 'type' }],
+      };
+    });
+
+    embeddablePersistableStateService.inject.mockImplementationOnce((state, references) => {
+      const ref = references.find((r) => r.name === 'refName');
+      return {
+        ...state,
+        HARDCODED_ID: ref!.id,
+      };
+    });
+  });
+
   it('collects information about dashboard panels', () => {
     const panels = [
       visualizationType1ByValue,
       visualizationType2ByValue,
       visualizationType2ByReference,
     ];
-    const collectorData = getEmptyTelemetryData();
+    const collectorData = getEmptyDashboardData();
+    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
 
-    collectDashboardInfo(panels, collectorData);
-
-    expect(collectorData.panels).toBe(panels.length);
-    expect(collectorData.panelsByValue).toBe(2);
+    expect(collectorData.panels.total).toBe(panels.length);
+    expect(collectorData.panels.by_value).toBe(2);
+    expect(collectorData.panels.by_reference).toBe(1);
   });
 
-  describe('visualizations', () => {
-    it('collects information about by value visualizations', () => {
-      const panels = [
-        visualizationType1ByValue,
-        visualizationType1ByValue,
-        visualizationType2ByValue,
-        visualizationType2ByReference,
-      ];
+  it('collects information about visualizations', () => {
+    const panels = [
+      visualizationType1ByValue,
+      visualizationType1ByValue,
+      visualizationType2ByValue,
+      visualizationType2ByReference,
+    ];
 
-      const collectorData = getEmptyTelemetryData();
+    const collectorData = getEmptyDashboardData();
+    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
 
-      collectByValueVisualizationInfo(panels, collectorData);
-
-      expect(collectorData.visualizationByValue.type1).toBe(2);
-      expect(collectorData.visualizationByValue.type2).toBe(1);
-    });
-
-    it('handles misshapen visualization panels without errors', () => {
-      const badVisualizationPanel = {
-        embeddableConfig: {},
-        type: 'visualization',
-      } as unknown as SavedDashboardPanel730ToLatest;
-
-      const panels = [badVisualizationPanel, visualizationType1ByValue];
-
-      const collectorData = getEmptyTelemetryData();
-
-      collectByValueVisualizationInfo(panels, collectorData);
-
-      expect(Object.keys(collectorData.visualizationByValue)).toHaveLength(1);
-    });
+    expect(collectorData.panels.by_type.visualization.total).toBe(panels.length);
+    expect(collectorData.panels.by_type.visualization.by_value).toBe(3);
+    expect(collectorData.panels.by_type.visualization.by_reference).toBe(1);
   });
 
-  describe('lens', () => {
-    it('collects information about by value lens', () => {
-      const panels = [
-        lensTypeAByValue,
-        lensTypeAByValue,
-        lensTypeAByValue,
-        lensTypeAByReference,
-        lensXYSeriesA,
-        lensXYSeriesA,
-        lensXYSeriesB,
-      ];
+  it('collects information about lens', () => {
+    const panels = [
+      lensTypeAByValue,
+      lensTypeAByValue,
+      lensTypeAByValue,
+      lensTypeAByReference,
+      lensXYSeriesA,
+      lensXYSeriesA,
+      lensXYSeriesB,
+    ];
 
-      const collectorData = getEmptyTelemetryData();
+    const collectorData = getEmptyDashboardData();
+    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
 
-      collectByValueLensInfo(panels, collectorData);
+    expect(collectorData.panels.by_type.lens.total).toBe(panels.length);
+    expect(collectorData.panels.by_type.lens.by_value).toBe(6);
+    expect(collectorData.panels.by_type.lens.by_reference).toBe(1);
+  });
 
-      expect(collectorData.lensByValue.a).toBe(3);
-      expect(collectorData.lensByValue.seriesA).toBe(2);
-      expect(collectorData.lensByValue.seriesB).toBe(1);
-      expect(collectorData.lensByValue.formula).toBe(1);
-    });
+  it('collects information about a mix of panel types', () => {
+    const panels = [
+      visualizationType1ByValue,
+      visualizationType1ByValue,
+      visualizationType2ByReference,
+      lensTypeAByValue,
+      lensTypeAByValue,
+      lensTypeAByValue,
+      lensTypeAByReference,
+      lensXYSeriesA,
+    ];
 
-    it('handles misshapen lens panels', () => {
-      const badPanel = {
-        type: 'lens',
-        embeddableConfig: {
-          oops: 'no visualization type',
-        },
-      } as unknown as SavedDashboardPanel730ToLatest;
+    const collectorData = getEmptyDashboardData();
+    collectPanelsByType(panels, collectorData, embeddablePersistableStateService);
 
-      const panels = [badPanel, lensTypeAByValue];
-
-      const collectorData = getEmptyTelemetryData();
-
-      collectByValueLensInfo(panels, collectorData);
-
-      expect(collectorData.lensByValue.a).toBe(1);
-    });
+    expect(collectorData.panels.total).toBe(panels.length);
+    expect(collectorData.panels.by_type.lens.total).toBe(5);
+    expect(collectorData.panels.by_type.lens.by_value).toBe(4);
+    expect(collectorData.panels.by_type.lens.by_reference).toBe(1);
+    expect(collectorData.panels.by_type.visualization.total).toBe(3);
+    expect(collectorData.panels.by_type.visualization.by_value).toBe(2);
+    expect(collectorData.panels.by_type.visualization.by_reference).toBe(1);
   });
 });

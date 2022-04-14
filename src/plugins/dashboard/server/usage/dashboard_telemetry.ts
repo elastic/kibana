@@ -11,20 +11,31 @@ import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
 export interface DashboardCollectorData {
-  panels: number;
-  by_type: {
-    [key: string]: {
-      total: number;
-      by_reference: number;
-      by_value: number;
-      details: {
-        [key: string]: number;
+  panels: {
+    total: number;
+    by_reference: number;
+    by_value: number;
+    by_type: {
+      [key: string]: {
+        total: number;
+        by_reference: number;
+        by_value: number;
+        details: {
+          [key: string]: number;
+        };
       };
     };
   };
 }
 
-export const getEmptyDashboardData = (): DashboardCollectorData => ({ panels: 0, by_type: {} });
+export const getEmptyDashboardData = (): DashboardCollectorData => ({
+  panels: {
+    total: 0,
+    by_reference: 0,
+    by_value: 0,
+    by_type: {},
+  },
+});
 
 export const getEmptyPanelTypeData = () => ({
   total: 0,
@@ -38,29 +49,31 @@ export const collectPanelsByType = (
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {
-  collectorData.panels += panels.length;
+  collectorData.panels.total += panels.length;
 
   for (const panel of panels) {
     const type = panel.type;
-    if (!collectorData.by_type[type]) {
-      collectorData.by_type[type] = getEmptyPanelTypeData();
+    if (!collectorData.panels.by_type[type]) {
+      collectorData.panels.by_type[type] = getEmptyPanelTypeData();
     }
-    collectorData.by_type[type].total += 1;
+    collectorData.panels.by_type[type].total += 1;
     if (panel.id === undefined) {
-      collectorData.by_type[type].by_value += 1;
+      collectorData.panels.by_value += 1;
+      collectorData.panels.by_type[type].by_value += 1;
     } else {
-      collectorData.by_type[type].by_reference += 1;
+      collectorData.panels.by_reference += 1;
+      collectorData.panels.by_type[type].by_reference += 1;
     }
     // the following "details" need a follow-up that will actually properly consolidate
     // the data from all embeddables - right now, the only data that is kept is the
     // telemetry for the **final** embeddable of that type
-    collectorData.by_type[type].details = embeddableService.telemetry(
+    collectorData.panels.by_type[type].details = embeddableService.telemetry(
       {
         ...panel.embeddableConfig,
         id: panel.id || '',
         type: panel.type,
       },
-      collectorData.by_type[type].details
+      collectorData.panels.by_type[type].details
     );
   }
 };
