@@ -8,7 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
-import { XYArgs, XYLayerConfigResult, XYRender } from '../types';
+import {
+  XYArgs,
+  XYLayerConfigResult,
+  DataLayerConfigResult,
+  XYRender,
+  AxisConfigResult,
+} from '../types';
 import {
   XY_VIS,
   DATA_LAYER,
@@ -27,9 +33,29 @@ import {
   ANNOTATION_LAYER,
   LayerTypes,
   AXIS_CONFIG,
+  AxisModes,
 } from '../constants';
 import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
+
+function validateLayerMode(layers: DataLayerConfigResult[], axes: AxisConfigResult[]) {
+  const isError = layers.some(
+    (layer) =>
+      layer.isPercentage &&
+      axes.some(
+        (axis) =>
+          axis.mode !== AxisModes.PERCENTAGE &&
+          layer.yConfig?.some((config) => config.axisId === axis.id)
+      )
+  );
+  if (isError) {
+    throw new Error(
+      i18n.translate('expressionXY.xyVis.errors.conflictAxisModeError', {
+        defaultMessage: 'Layer has percentage mode but related axes has another one',
+      })
+    );
+  }
+}
 
 export const xyVisFunction: ExpressionFunctionDefinition<
   typeof XY_VIS,
@@ -190,10 +216,16 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
     },
+    xAxisConfig: {
+      types: [AXIS_CONFIG],
+      help: i18n.translate('expressionXY.xyVis.xAxisConfig.help', {
+        defaultMessage: 'Specifies the configs for x-axis',
+      }),
+    },
     axes: {
       types: [AXIS_CONFIG],
       help: i18n.translate('expressionXY.xyVis.axes.help', {
-        defaultMessage: 'Specifies the configs for axes',
+        defaultMessage: 'Specifies the configs for y-axes',
       }),
       multi: true,
     },
@@ -209,6 +241,8 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     const layers: XYLayerConfigResult[] = inputLayers.filter(
       (layer): layer is XYLayerConfigResult => layer !== undefined
     );
+
+    validateLayerMode(dataLayers, args.axes || []);
 
     if (handlers.inspectorAdapters.tables) {
       const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {

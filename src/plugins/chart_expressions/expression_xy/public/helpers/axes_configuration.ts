@@ -10,11 +10,13 @@ import { Position } from '@elastic/charts';
 import { FormatFactory } from '../types';
 import {
   AxisConfig,
+  AxisMode,
   YConfigResult,
   AxisExtentConfig,
   CommonXYDataLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
 } from '../../common';
+import { AxisModes } from '../../common/constants';
 import type {
   IFieldFormat,
   SerializedFieldFormat,
@@ -35,13 +37,11 @@ interface AxesSeries {
   [key: string]: FormattedMetric[];
 }
 
-export interface AxisConfiguration {
+export interface AxisConfiguration extends Omit<AxisConfig, 'id'> {
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Series[];
-  title?: string;
-  hide?: boolean;
 }
 
 export type GroupsConfiguration = AxisConfiguration[];
@@ -75,7 +75,7 @@ export function groupAxesByType(
         ?.meta?.params || { id: 'number' };
       if (
         isDataLayer(layer) &&
-        layer.seriesType.includes('percentage') &&
+        (layer.isPercentage || axisConfigById?.mode === AxisModes.PERCENTAGE) &&
         formatter.id !== 'percent'
       ) {
         formatter = {
@@ -137,7 +137,7 @@ export function groupAxesByType(
   return series;
 }
 
-function getPosition(position: Position, shouldRotate: boolean) {
+export function getAxisPosition(position: Position, shouldRotate: boolean) {
   if (shouldRotate) {
     switch (position) {
       case Position.Bottom: {
@@ -172,11 +172,10 @@ export function getAxesConfiguration(
     if (series[axis.id] && series[axis.id].length > 0) {
       axisGroups.push({
         groupId: `axis-${axis.id}`,
-        position: getPosition(axis.position || Position.Left, shouldRotate),
+        position: getAxisPosition(axis.position || Position.Left, shouldRotate),
         formatter: formatFactory?.(series[axis.id][0].fieldFormat),
         series: series[axis.id].map(({ fieldFormat, ...currentSeries }) => currentSeries),
-        title: axis.title,
-        hide: axis.hide,
+        ...axis,
       });
     }
   });

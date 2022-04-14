@@ -114,3 +114,10 @@ export const ValueLabelModes = {
   INSIDE: 'inside',
   OUTSIDE: 'outside',
 } as const;
+
+export const AxisModes = {
+  NORMAL: 'normal',
+  PERCENTAGE: 'percentage',
+  WIGGLE: 'wiggle',
+  SILHOUETTE: 'silhouette',
+} as const;

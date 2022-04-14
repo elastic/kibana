@@ -24,6 +24,7 @@ import {
   XScaleTypes,
   XYCurveTypes,
   YScaleTypes,
+  AxisModes,
   REFERENCE_LINE_LAYER,
   Y_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
@@ -48,6 +49,7 @@ export type FillStyle = $Values<typeof FillStyles>;
 export type SeriesType = $Values<typeof SeriesTypes>;
 export type YScaleType = $Values<typeof YScaleTypes>;
 export type XScaleType = $Values<typeof XScaleTypes>;
+export type AxisMode = $Values<typeof AxisModes>;
 export type XYCurveType = $Values<typeof XYCurveTypes>;
 export type IconPosition = $Values<typeof IconPositions>;
 export type ValueLabelMode = $Values<typeof ValueLabelModes>;
@@ -71,6 +73,15 @@ export interface AxisConfig {
   hide?: boolean;
   id: string;
   position?: Position;
+  mode?: AxisMode;
+  boundsMargin?: number;
+  labelColor?: string;
+  showOverlappingLabels?: boolean;
+  showDuplicates?: boolean;
+  labelsOrientation?: number;
+  truncate?: number;
+  showLabels?: boolean;
+  showTitle?: boolean;
 }
 
 export interface YConfig {
@@ -95,9 +106,11 @@ export interface DataLayerArgs {
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
+  isPercentage: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
   yConfig?: YConfigResult[];
+  xAxisId?: string;
 }
 
 export interface ValidLayer extends DataLayerConfigResult {
@@ -114,6 +127,7 @@ export interface ExtendedDataLayerArgs {
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
+  isPercentage: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
   // palette will always be set on the expression
@@ -198,6 +212,7 @@ export interface XYArgs {
   valuesInLegend?: boolean;
   ariaLabel?: string;
   axes?: AxisConfigResult[];
+  xAxisConfig?: AxisConfigResult;
 }
 
 export interface LayeredXYArgs {
@@ -246,6 +261,7 @@ export interface XYProps {
   valuesInLegend?: boolean;
   ariaLabel?: string;
   axes?: AxisConfigResult[];
+  xAxisConfig?: AxisConfigResult;
 }
 
 export interface AnnotationLayerArgs {

@@ -238,6 +238,7 @@ describe('axes_configuration', () => {
     xScaleType: 'ordinal',
     yScaleType: 'linear',
     isHistogram: false,
+    isPercentage: false,
     palette: { type: 'palette', name: 'default' },
     table: tables.first,
   };

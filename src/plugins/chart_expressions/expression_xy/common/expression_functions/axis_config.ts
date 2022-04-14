@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
 import { AxisConfig, AxisConfigResult } from '../types';
-import { AXIS_CONFIG } from '../constants';
+import { AXIS_CONFIG, AxisModes } from '../constants';
 
 export const axisConfigFunction: ExpressionFunctionDefinition<
   typeof AXIS_CONFIG,
@@ -49,6 +49,64 @@ export const axisConfigFunction: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: i18n.translate('expressionXY.axisConfig.boolean.help', {
         defaultMessage: 'Hide the specified axis',
+      }),
+    },
+    mode: {
+      types: ['string'],
+      options: [...Object.values(AxisModes)],
+      help: i18n.translate('expressionXY.axisConfig.mode.help', {
+        defaultMessage: 'Scale mode. Can be normal, percentage, wiggle or silhouette',
+      }),
+    },
+    boundsMargin: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.axisConfig.boundsMargin.help', {
+        defaultMessage: 'Margin of bounds',
+      }),
+    },
+    labelColor: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.axisConfig.labelColor.help', {
+        defaultMessage: 'Color of the axis labels',
+      }),
+    },
+    showOverlappingLabels: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showOverlappingLabels.help', {
+        defaultMessage: 'Show overlapping labels',
+      }),
+    },
+    showDuplicates: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showDuplicates.help', {
+        defaultMessage: 'Show duplicated ticks',
+      }),
+    },
+    labelsOrientation: {
+      types: ['number'],
+      options: [0, -90, -45],
+      help: i18n.translate('expressionXY.axisConfig.labelsOrientation.help', {
+        defaultMessage: 'Specifies the labels orientation of the axis.',
+      }),
+    },
+    showLabels: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showLabels.help', {
+        defaultMessage: 'Show labels',
+      }),
+      default: true,
+    },
+    showTitle: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showTitle.help', {
+        defaultMessage: 'Show title of the axis',
+      }),
+      default: true,
+    },
+    truncate: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.axisConfig.truncate.help', {
+        defaultMessage: 'The number of symbols before truncating',
       }),
     },
   },

@@ -24,7 +24,7 @@ import {
   ValueLabelMode,
   XYCurveType,
 } from '../../common';
-import { SeriesTypes } from '../../common/constants';
+import { SeriesTypes, AxisModes } from '../../common/constants';
 import {
   getColorAssignments,
   getFitOptions,
@@ -88,8 +88,6 @@ export const DataLayers: FC<Props> = ({
             xScaleType
           );
 
-          const isPercentage = seriesType.includes('percentage');
-
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
           const rows = formattedTable.rows.filter(
@@ -113,6 +111,11 @@ export const DataLayers: FC<Props> = ({
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
             axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
           );
+
+          let isPercentage = layer.isPercentage;
+          if (yAxis?.mode) {
+            isPercentage = yAxis?.mode === AxisModes.PERCENTAGE;
+          }
 
           const seriesProps = getSeriesProps({
             layer,

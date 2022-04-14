@@ -54,6 +54,13 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       required: true,
       strict: true,
     },
+    isPercentage: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionXY.dataLayer.isPercentage.help', {
+        defaultMessage: 'Whether to layout the chart has percentage mode.',
+      }),
+    },
     xScaleType: {
       options: [...Object.values(XScaleTypes)],
       help: i18n.translate('expressionXY.dataLayer.xScaleType.help', {
@@ -109,6 +116,12 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Palette',
       }),
       default: '{palette}',
+    },
+    xAxisId: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.dataLayer.xAxisId.help', {
+        defaultMessage: 'Id of x-axis',
+      }),
     },
   },
   fn(table, args) {

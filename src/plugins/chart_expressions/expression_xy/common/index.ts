@@ -39,6 +39,7 @@ export type {
   SeriesType,
   YScaleType,
   XScaleType,
+  AxisMode,
   AxisConfig,
   ValidLayer,
   XYLayerArgs,

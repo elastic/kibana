@@ -43,6 +43,7 @@ import {
   getAnnotationsLayers,
   getDataLayers,
   AxisConfiguration,
+  getAxisPosition,
   getAreAlreadyFormattedLayersInfo,
   getFilteredLayers,
   getReferenceLayers,
@@ -144,6 +145,7 @@ export function XYChart({
     yRightExtent,
     valuesInLegend,
     axes,
+    xAxisConfig,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -269,36 +271,37 @@ export function XYChart({
 
   const linesPaddings = getLinesCausedPaddings(visualConfigs, yAxesMap);
 
-  const getYAxesStyle = (groupId: 'left' | 'right') => {
+  const getYAxesStyle = (axis: AxisConfiguration) => {
     const tickVisible =
-      groupId === 'right'
+      axis.showLabels ?? axis.groupId === 'right'
         ? tickLabelsVisibilitySettings?.yRight
         : tickLabelsVisibilitySettings?.yLeft;
 
     const style = {
       tickLabel: {
+        fill: axis.labelColor,
         visible: tickVisible,
         rotation:
-          groupId === 'right'
+          axis.labelsOrientation ?? axis.groupId === 'right'
             ? args.labelsOrientation?.yRight || 0
             : args.labelsOrientation?.yLeft || 0,
         padding:
-          linesPaddings[groupId] != null
+          linesPaddings[axis.position] != null
             ? {
-                inner: linesPaddings[groupId],
+                inner: linesPaddings[axis.position],
               }
             : undefined,
       },
       axisTitle: {
         visible:
-          groupId === 'right'
+          axis.showTitle ?? axis.groupId === 'right'
             ? axisTitlesVisibilitySettings?.yRight
             : axisTitlesVisibilitySettings?.yLeft,
         // if labels are not visible add the padding to the title
         padding:
-          !tickVisible && linesPaddings[groupId] != null
+          !tickVisible && linesPaddings[axis.position] != null
             ? {
-                inner: linesPaddings[groupId],
+                inner: linesPaddings[axis.position],
               }
             : undefined,
       },
@@ -319,6 +322,7 @@ export function XYChart({
       })
     );
     const fit = !hasBarOrArea && extent.mode === 'dataBounds';
+    const padding = axis.boundsMargin || undefined;
     let min: number = NaN;
     let max: number = NaN;
 
@@ -358,7 +362,7 @@ export function XYChart({
       }
     }
 
-    return { fit, min, max };
+    return { fit, min, max, padding };
   };
 
   const shouldShowValueLabels =
@@ -471,6 +475,8 @@ export function XYChart({
   const shouldUseNewTimeAxis =
     isTimeViz && isHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate;
 
+  const defaultXAxisPosition = shouldRotate ? Position.Left : Position.Bottom;
+
   const gridLineStyle = {
     visible: gridlinesVisibilitySettings?.x,
     strokeWidth: 1,
@@ -480,26 +486,29 @@ export function XYChart({
         ...MULTILAYER_TIME_AXIS_STYLE,
         tickLabel: {
           ...MULTILAYER_TIME_AXIS_STYLE.tickLabel,
-          visible: Boolean(tickLabelsVisibilitySettings?.x),
+          visible: Boolean(xAxisConfig?.showLabels ?? tickLabelsVisibilitySettings?.x),
+          fill: xAxisConfig?.labelColor,
         },
         tickLine: {
           ...MULTILAYER_TIME_AXIS_STYLE.tickLine,
-          visible: Boolean(tickLabelsVisibilitySettings?.x),
+          visible: Boolean(xAxisConfig?.showLabels ?? tickLabelsVisibilitySettings?.x),
         },
         axisTitle: {
-          visible: axisTitlesVisibilitySettings.x,
+          visible: xAxisConfig?.showTitle ?? axisTitlesVisibilitySettings.x,
         },
       }
     : {
         tickLabel: {
-          visible: tickLabelsVisibilitySettings?.x,
-          rotation: labelsOrientation?.x,
+          visible: xAxisConfig?.showLabels ?? tickLabelsVisibilitySettings?.x,
+          rotation: xAxisConfig?.labelsOrientation ?? labelsOrientation?.x,
           padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
+          fill: xAxisConfig?.labelColor,
         },
         axisTitle: {
-          visible: axisTitlesVisibilitySettings.x,
+          visible: xAxisConfig?.showTitle ?? axisTitlesVisibilitySettings.x,
           padding:
-            !tickLabelsVisibilitySettings?.x && linesPaddings.bottom != null
+            !(xAxisConfig?.showLabels ?? tickLabelsVisibilitySettings?.x) &&
+            linesPaddings.bottom != null
               ? { inner: linesPaddings.bottom }
               : undefined,
         },
@@ -562,12 +571,24 @@ export function XYChart({
 
       <Axis
         id="x"
-        position={shouldRotate ? Position.Left : Position.Bottom}
+        position={
+          xAxisConfig?.position
+            ? getAxisPosition(xAxisConfig?.position, shouldRotate)
+            : defaultXAxisPosition
+        }
         title={xTitle}
         gridLine={gridLineStyle}
-        hide={dataLayers[0]?.hide || !dataLayers[0]?.xAccessor}
-        tickFormat={(d) => safeXAccessorLabelRenderer(d)}
+        hide={xAxisConfig?.hide || dataLayers[0]?.hide || !dataLayers[0]?.xAccessor}
+        tickFormat={(d) => {
+          let value = safeXAccessorLabelRenderer(d) || '';
+          if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
+            value = `${value.slice(0, xAxisConfig.truncate)}...`;
+          }
+          return value;
+        }}
         style={xAxisStyle}
+        showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
+        showDuplicatedTicks={xAxisConfig?.showDuplicates}
         timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
       />
 
@@ -586,9 +607,17 @@ export function XYChart({
                   : gridlinesVisibilitySettings?.yLeft,
             }}
             hide={axis.hide || dataLayers[0]?.hide}
-            tickFormat={(d) => axis.formatter?.convert(d) || ''}
-            style={getYAxesStyle(axis.groupId as 'left' | 'right')}
+            tickFormat={(d) => {
+              let value = axis.formatter?.convert(d) || '';
+              if (axis.truncate && value.length > axis.truncate) {
+                value = `${value.slice(0, axis.truncate)}...`;
+              }
+              return value;
+            }}
+            style={getYAxesStyle(axis)}
             domain={getYAxisDomain(axis)}
+            showOverlappingLabels={axis.showOverlappingLabels}
+            showDuplicatedTicks={axis.showDuplicates}
             ticks={5}
           />
         );

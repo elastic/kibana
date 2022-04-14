@@ -62,6 +62,13 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
       default: XScaleTypes.ORDINAL,
       strict: true,
     },
+    isPercentage: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionXY.dataLayer.isPercentage.help', {
+        defaultMessage: 'Whether to layout the chart has percentage mode',
+      }),
+    },
     isHistogram: {
       types: ['boolean'],
       default: false,

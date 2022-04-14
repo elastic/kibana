@@ -534,6 +534,7 @@ const dataLayerToExpression = (
           ],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],
+          isPercentage: layer.seriesType.includes('percentage') ? [true] : [],
           splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig, axes))
