@@ -29,6 +29,7 @@ const buildStylesheet = (maxHeight: number) => {
   return [
     `
     .dscTruncateByHeight {
+      overflow: hidden;
       max-height: ${maxHeight}px !important;
     }
     .dscTruncateByHeight:before {
