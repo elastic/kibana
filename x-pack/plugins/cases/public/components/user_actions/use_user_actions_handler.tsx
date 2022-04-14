@@ -30,6 +30,7 @@ export type UseUserActionsHandler = Pick<
   | 'handleOutlineComment'
   | 'handleSaveComment'
   | 'handleManageQuote'
+  | 'handleDeleteComment'
 > & { handleUpdate: (updatedCase: Case) => void };
 
 const isAddCommentRef = (
@@ -79,6 +80,11 @@ export const useUserActionsHandler = ({
     },
     [caseId, fetchUserActions, patchComment, updateCase]
   );
+
+  const handleDeleteComment = useCallback((id: string) => {
+    console.log('DELETE ME!');
+    // TODO call API
+  }, []);
 
   const handleOutlineComment = useCallback(
     (id: string) => {
@@ -160,6 +166,7 @@ export const useUserActionsHandler = ({
     handleManageMarkdownEditId,
     handleOutlineComment,
     handleSaveComment,
+    handleDeleteComment,
     handleManageQuote,
     handleUpdate,
   };

@@ -14,9 +14,11 @@ import { useLensOpenVisualization } from '../markdown_editor/plugins/lens/use_le
 interface UserActionPropertyActionsProps {
   id: string;
   editLabel: string;
+  deleteLabel?: string;
   quoteLabel: string;
   isLoading: boolean;
   onEdit: (id: string) => void;
+  onDelete?: (id: string) => void;
   onQuote: (id: string) => void;
   userCanCrud: boolean;
   commentMarkdown: string;
@@ -26,8 +28,10 @@ const UserActionPropertyActionsComponent = ({
   id,
   editLabel,
   quoteLabel,
+  deleteLabel,
   isLoading,
   onEdit,
+  onDelete,
   onQuote,
   userCanCrud,
   commentMarkdown,
@@ -35,6 +39,7 @@ const UserActionPropertyActionsComponent = ({
   const { canUseEditor, actionConfig } = useLensOpenVisualization({ comment: commentMarkdown });
   const onEditClick = useCallback(() => onEdit(id), [id, onEdit]);
   const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
+  const onDeleteClick = useCallback(() => (onDelete ? onDelete(id) : null), [id, onDelete]);
 
   const propertyActions = useMemo(
     () =>
@@ -46,6 +51,15 @@ const UserActionPropertyActionsComponent = ({
                 label: editLabel,
                 onClick: onEditClick,
               },
+              ...(deleteLabel
+                ? [
+                    {
+                      iconType: 'trash',
+                      label: deleteLabel,
+                      onClick: onDeleteClick,
+                    },
+                  ]
+                : []),
               {
                 iconType: 'quote',
                 label: quoteLabel,
@@ -55,7 +69,17 @@ const UserActionPropertyActionsComponent = ({
           : [],
         canUseEditor && actionConfig ? [actionConfig] : [],
       ].flat(),
-    [userCanCrud, editLabel, onEditClick, quoteLabel, onQuoteClick, canUseEditor, actionConfig]
+    [
+      userCanCrud,
+      editLabel,
+      onEditClick,
+      deleteLabel,
+      onDeleteClick,
+      quoteLabel,
+      onQuoteClick,
+      canUseEditor,
+      actionConfig,
+    ]
   );
 
   if (!propertyActions.length) {
