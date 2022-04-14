@@ -624,7 +624,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
         <EuiResizableContainer
           direction={isMobile ? 'vertical' : 'horizontal'}
           onPanelWidthChange={onPanelWidthChange}
-          style={{ margin: '0 -8px' }}
         >
           {(EuiResizablePanel, EuiResizableButton, actions) => {
             collapseFn.current = () =>
