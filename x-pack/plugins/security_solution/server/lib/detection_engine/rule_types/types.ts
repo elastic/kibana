@@ -18,7 +18,11 @@ import {
   WithoutReservedActionGroups,
 } from '../../../../../alerting/common';
 import { ListClient } from '../../../../../lists/server';
-import { PersistenceServices, IRuleDataClient } from '../../../../../rule_registry/server';
+import {
+  PersistenceServices,
+  IRuleDataClient,
+  IRuleDataReader,
+} from '../../../../../rule_registry/server';
 import { ConfigType } from '../../../config';
 import { SetupPlugins } from '../../../plugin';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
@@ -61,6 +65,7 @@ export interface RunOpts<TParams extends RuleParams> {
   };
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  ruleDataReader: IRuleDataReader;
 }
 
 export type SecurityAlertType<

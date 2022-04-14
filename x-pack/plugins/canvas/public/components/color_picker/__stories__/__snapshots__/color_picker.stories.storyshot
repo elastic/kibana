@@ -212,6 +212,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
             className="euiFormControlLayout__childrenWrapper"
           >
             <input
+              aria-invalid={false}
               className="euiFieldText"
               onChange={[Function]}
               placeholder="Color code"
@@ -507,6 +508,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -772,6 +774,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -961,6 +964,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"

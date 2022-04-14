@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { takeUntil, first } from 'rxjs/operators';
+import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
@@ -100,7 +100,7 @@ export class CoreUsageDataService
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
     this.configService = core.configService;
-    this.stop$ = new Subject();
+    this.stop$ = new Subject<void>();
   }
 
   private async getSavedObjectUsageData(
@@ -383,7 +383,7 @@ export class CoreUsageDataService
   private async getNonDefaultKibanaConfigs(
     exposedConfigsToUsage: ExposedConfigsToUsage
   ): Promise<ConfigUsageData> {
-    const config = await this.configService.getConfig$().pipe(first()).toPromise();
+    const config = await firstValueFrom(this.configService.getConfig$());
     const nonDefaultConfigs = config.toRaw();
     const usedPaths = await this.configService.getUsedPaths();
     const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];
