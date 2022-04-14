@@ -30,9 +30,9 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
   });
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <ToolbarPopover
             handleClose={() => {
               setSubtitleMode(inputValue.labelMinor ? 'custom' : 'none');

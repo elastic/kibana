@@ -14,7 +14,7 @@ import type { CspFinding } from './types';
 
 const chance = new Chance();
 
-const getFakeFindings = (): CspFinding & { id: string } => ({
+const getFakeFindings = (name: string): CspFinding & { id: string } => ({
   id: chance.word(),
   result: {
     evaluation: chance.weighted(['passed', 'failed'], [0.5, 0.5]),
@@ -23,7 +23,7 @@ const getFakeFindings = (): CspFinding & { id: string } => ({
     },
   },
   rule: {
-    name: chance.word(),
+    name,
     description: chance.paragraph(),
     impact: chance.word(),
     remediation: chance.word(),
@@ -54,8 +54,7 @@ const getFakeFindings = (): CspFinding & { id: string } => ({
 
 type TableProps = PropsOf<typeof FindingsTable>;
 
-// FLAKY: https://github.com/elastic/kibana/issues/126664
-describe.skip('<FindingsTable />', () => {
+describe('<FindingsTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
       status: 'success',
@@ -73,7 +72,8 @@ describe.skip('<FindingsTable />', () => {
   });
 
   it('renders the table with provided items', () => {
-    const data = Array.from({ length: 10 }, getFakeFindings);
+    const names = chance.unique(chance.sentence, 10);
+    const data = names.map(getFakeFindings);
 
     const props: TableProps = {
       status: 'success',

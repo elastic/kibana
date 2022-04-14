@@ -16,14 +16,15 @@ these APIs:
 * <<cases-api-get-case>>
 * <<cases-api-get-status>>
 * <<cases-api-get-comments>>
-* {security-guide}/cases-get-connector.html[Get current connector]
+* <<cases-get-configuration>>
 * <<cases-api-get-reporters>>
 * <<cases-api-get-tag>>
 * {security-guide}/cases-api-push.html[Push case]
-* {security-guide}/assign-connector.html[Set default Elastic Security UI connector]
+* <<cases-api-set-configuration>>
 * {security-guide}/case-api-update-connector.html[Update case configurations]
 * <<cases-api-update>>
 * <<cases-api-update-comment>>
+* <<cases-api-update-configuration>>
 
 //ADD
 include::cases/cases-api-add-comment.asciidoc[leveloffset=+1]
@@ -40,8 +41,12 @@ include::cases/cases-api-get-case-activity.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-status.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-comments.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-configuration.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-reporters.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-tags.asciidoc[leveloffset=+1]
+//SET
+include::cases/cases-api-set-configuration.asciidoc[leveloffset=+1]
 //UPDATE
 include::cases/cases-api-update.asciidoc[leveloffset=+1]
 include::cases/cases-api-update-comment.asciidoc[leveloffset=+1]
+include::cases/cases-api-update-configuration.asciidoc[leveloffset=+1]

@@ -7,21 +7,20 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-import { monitorManagementListSelector, selectDynamicSettings } from '../../../state/selectors';
+import { monitorManagementListSelector } from '../../../state/selectors';
 import { useEsSearch } from '../../../../../observability/public';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 import { getInlineErrorFilters } from './use_inline_errors';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
 export function useInlineErrorsCount() {
   const monitorList = useSelector(monitorManagementListSelector);
-
-  const { settings } = useSelector(selectDynamicSettings);
 
   const { lastRefresh } = useUptimeRefreshContext();
 
   const { data, loading } = useEsSearch(
     {
-      index: settings?.heartbeatIndices,
+      index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
         query: {
@@ -36,7 +35,7 @@ export function useInlineErrorsCount() {
         },
       },
     },
-    [settings?.heartbeatIndices, monitorList, lastRefresh],
+    [monitorList, lastRefresh],
     { name: 'getInvalidMonitorsCount' }
   );
 
