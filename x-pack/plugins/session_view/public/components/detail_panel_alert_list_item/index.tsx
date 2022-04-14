@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
 import { dataOrDash } from '../../utils/data_or_dash';
@@ -28,7 +28,7 @@ export const ALERT_LIST_ITEM_TIMESTAMP_TEST_ID = 'sessionView:detailPanelAlertLi
 interface DetailPanelAlertsListItemDeps {
   event: ProcessEvent;
   onShowAlertDetails: (alertId: string) => void;
-  onProcessSelected: (process: Process) => void;
+  onJumpToEvent: (event: ProcessEvent) => void;
   isInvestigated?: boolean;
   minimal?: boolean;
 }
@@ -38,7 +38,7 @@ interface DetailPanelAlertsListItemDeps {
  */
 export const DetailPanelAlertListItem = ({
   event,
-  onProcessSelected,
+  onJumpToEvent,
   onShowAlertDetails,
   isInvestigated,
   minimal,
@@ -50,8 +50,10 @@ export const DetailPanelAlertListItem = ({
   }
 
   const timestamp = event['@timestamp'];
-  const rule = { ...event.kibana?.alert?.rule, uuid: '', name: '' };
-  const { uuid, name } = rule;
+  const rule = event.kibana?.alert?.rule;
+  const uuid = rule?.uuid || '';
+  const name = rule?.name || '';
+
   const { args } = event.process ?? {};
 
   const forceState = !isInvestigated ? 'open' : undefined;
@@ -69,7 +71,7 @@ export const DetailPanelAlertListItem = ({
           <DetailPanelAlertActions
             css={styles.minimalContextMenu}
             event={event}
-            onProcessSelected={onProcessSelected}
+            onJumpToEvent={onJumpToEvent}
             onShowAlertDetails={onShowAlertDetails}
           />
         </EuiFlexItem>
@@ -91,8 +93,8 @@ export const DetailPanelAlertListItem = ({
       data-test-subj={ALERT_LIST_ITEM_TEST_ID}
       arrowDisplay={isInvestigated ? 'right' : 'none'}
       buttonContent={
-        <EuiText css={styles.alertTitle} size="s">
-          <p>
+        <EuiText css={styles.alertTitleContainer} size="s">
+          <p css={styles.alertTitle}>
             <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
             {dataOrDash(name)}
           </p>
@@ -104,7 +106,7 @@ export const DetailPanelAlertListItem = ({
       extraAction={
         <DetailPanelAlertActions
           event={event}
-          onProcessSelected={onProcessSelected}
+          onJumpToEvent={onJumpToEvent}
           onShowAlertDetails={onShowAlertDetails}
         />
       }

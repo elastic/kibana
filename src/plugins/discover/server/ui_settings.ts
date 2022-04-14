@@ -286,5 +286,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
   },
 });

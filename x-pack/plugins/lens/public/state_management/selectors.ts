@@ -6,9 +6,8 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectReference } from 'kibana/server';
 import { FilterManager } from 'src/plugins/data/public';
+import { SavedObjectReference } from 'kibana/public';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -160,14 +159,16 @@ export const selectDatasourceLayers = createSelector(
 
 export const selectFramePublicAPI = createSelector(
   [
-    selectDatasourceStates,
+    selectCurrentDatasourceStates,
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
+    selectResolvedDateRange,
   ],
-  (datasourceStates, activeData, datasourceMap) => {
+  (datasourceStates, activeData, datasourceMap, dateRange) => {
     return {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
       activeData,
+      dateRange,
     };
   }
 );

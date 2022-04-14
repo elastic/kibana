@@ -281,19 +281,20 @@ export const cellActions: TGridCellAction[] = [
     header,
     timelineId,
     pageSize,
+    closeCellPopover,
   }: {
     data: TimelineNonEcsData[][];
     ecsData: Ecs[];
     header?: ColumnHeaderOptions;
     timelineId: string;
     pageSize: number;
+    closeCellPopover?: () => void;
   }) => {
     if (header !== undefined) {
       return function FieldValue({
         rowIndex,
         columnId,
         Component,
-        closePopover,
       }: EuiDataGridColumnCellActionProps) {
         const {
           pageRowIndex,
@@ -331,7 +332,7 @@ export const cellActions: TGridCellAction[] = [
             truncate={false}
             title={title}
             linkValue={linkValue}
-            onClick={closePopover}
+            onClick={closeCellPopover}
           />
         ) : (
           // data grid expects each cell action always return an element, it crashes if returns null

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { sortProcesses } from '../../../common/utils/sort_processes';
 import {
-  EventKind,
   AlertStatusEventEntityIdMap,
+  EventKind,
   Process,
   ProcessEvent,
   ProcessMap,
@@ -55,7 +56,7 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
       processMap[id] = process;
     }
 
-    if (event.event?.kind === EventKind.signal) {
+    if (event.kibana?.alert) {
       process.addAlert(event);
     } else if (event.event?.kind === EventKind.event) {
       process.addEvent(event);
@@ -137,13 +138,25 @@ export const buildProcessTree = (
 // this funtion also returns a list of process results which is used by session_view_search_bar to drive
 // result navigation UX
 // FYI: this function mutates properties of models contained in processMap
-export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | undefined) => {
+export const searchProcessTree = (
+  processMap: ProcessMap,
+  searchQuery: string | undefined,
+  verboseMode: boolean
+) => {
   const results = [];
 
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];
 
     if (searchQuery) {
+      const details = process.getDetails();
+      const entryLeader = details?.process?.entry_leader;
+
+      // if this is the entry leader process OR verbose mode is OFF and is a verbose process, don't match.
+      if (entryLeader?.entity_id === process.id || (!verboseMode && process.isVerbose())) {
+        continue;
+      }
+
       const event = process.getDetails();
       const { working_directory: workingDirectory, args } = event.process || {};
 
@@ -162,19 +175,19 @@ export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | 
     }
   }
 
-  return results;
+  return results.sort(sortProcesses);
 };
 
 // Iterate over all processes in processMap, and mark each process (and it's ancestors) for auto expansion if:
 // a) the process was "user entered" (aka an interactive group leader)
-// b) matches the plain text search above
+// b) we are jumping to a specific process
 // Returns the processMap with it's processes autoExpand bool set to true or false
 // process.autoExpand is read by process_tree_node to determine whether to auto expand it's child processes.
-export const autoExpandProcessTree = (processMap: ProcessMap) => {
+export const autoExpandProcessTree = (processMap: ProcessMap, jumpToEntityId?: string) => {
   for (const processId of Object.keys(processMap)) {
     const process = processMap[processId];
 
-    if (process.searchMatched || process.isUserEntered()) {
+    if (process.isUserEntered() || jumpToEntityId === process.id || process.hasAlerts()) {
       let { parent } = process;
       const parentIdSet = new Set<string>();
 
