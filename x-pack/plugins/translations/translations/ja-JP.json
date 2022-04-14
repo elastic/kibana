@@ -1113,7 +1113,6 @@
     "console.notification.error.historyQuotaReachedMessage": "リクエスト履歴が満杯です。コンソール履歴を消去するか、新しいリクエストの保存を無効にしてください。",
     "console.notification.error.noRequestSelectedTitle": "リクエストを選択していません。リクエストの中にカーソルを置いて選択します。",
     "console.notification.error.unknownErrorTitle": "不明なリクエストエラー",
-    "console.outputCannotPreviewBinaryData": "バイナリデータをプレビューできません。",
     "console.outputTextarea": "開発ツールコンソール出力",
     "console.pageHeading": "コンソール",
     "console.requestInProgressBadgeText": "リクエストが進行中",
