@@ -22,6 +22,7 @@ Apart from the actual screenshotting functionality, it also provides a way for s
 Here is an example of how you can take a screenshot of a Kibana URL.
 
 ```typescript
+import { lastValueFrom } from 'rxjs';
 import type { CoreSetup, Plugin } from 'src/core/server';
 import type { ScreenshottingStart } from 'x-pack/plugins/screenshotting/server';
 
@@ -45,12 +46,12 @@ class ExamplePlugin implements Plugin<void, void, void, StartDeps> {
       },
       async (context, request, response) => {
         const [, { screenshotting }] = await getStartServices();
-        const { metrics, results } = await screenshotting
-          .getScreenshots({
+        const { metrics, results } = await lastValueFrom(
+          screenshotting.getScreenshots({
             request,
             urls: [`http://localhost/app/canvas#/workpad/workpad-${request.query.id}`],
           })
-          .toPromise();
+        );
 
         return response.ok({
           body: JSON.stringify({
@@ -89,10 +90,10 @@ Option | Required | Default | Description
 `request` | no | _none_ | Kibana Request reference to extract headers from.
 `timeouts` | no | _none_ | Timeouts for each phase of the screenshot.
 `timeouts.loadDelay` | no | `3000` | The amount of time in milliseconds before taking a screenshot when visualizations are not evented. All visualizations that ship with Kibana are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value.
-`timeouts.openUrl` | no | `60000` | The timeout in milliseconds to allow the Chromium browser to wait for the "Loading…​" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the result structure contains an error message.
+`timeouts.openUrl` | no | `60000` | The timeout in milliseconds to allow the Chromium browser to wait for the "Loading…" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the result structure contains an error message.
 `timeouts.renderComplete` | no | `30000` | The timeout in milliseconds to allow the Chromium browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the result structure contains an error message.
 `timeouts.waitForElements` | no | `30000` | The timeout in milliseconds to allow the Chromium browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the result structure contains an error message.
-`urls` | no | `[]` | The list or URL to take screenshots of. Every item can either be a string or a tuple containing a URL and a context. The contextual data can be gathered using the screenshot mode plugin.
+`urls` | no | `[]` | The list or URL to take screenshots of. Every item can either be a string or a tuple containing a URL and a context. The contextual data can be gathered using the screenshot mode plugin. Mutually exclusive with the `expression` parameter.
 
 #### `diagnose(flags?: string[]): Observable`
 Runs browser diagnostics.

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from 'src/core/server';
 import type { ScreenshottingStart } from '../../../plugins/screenshotting/server';
@@ -29,12 +30,12 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
       },
       async (context, request, response) => {
         const [, { screenshotting }] = await getStartServices();
-        const { metrics, results } = await screenshotting
-          .getScreenshots({
+        const { metrics, results } = await lastValueFrom(
+          screenshotting.getScreenshots({
             request,
             expression: request.query.expression,
           })
-          .toPromise();
+        );
 
         return response.ok({
           body: JSON.stringify({
