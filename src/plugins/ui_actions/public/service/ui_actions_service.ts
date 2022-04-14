@@ -60,6 +60,10 @@ export class UiActionsService {
     return trigger.contract;
   };
 
+  public readonly hasTrigger = (triggerId: string): boolean => {
+    return this.triggers.has(triggerId);
+  };
+
   public readonly registerAction = <A extends ActionDefinition>(
     definition: A
   ): Action<ActionContext<A>> => {
