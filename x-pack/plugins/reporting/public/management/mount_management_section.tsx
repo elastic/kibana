@@ -34,6 +34,7 @@ export async function mountManagementSection(
           http: coreSetup.http,
           application: coreStart.application,
           uiSettings: coreStart.uiSettings,
+          docLinks: coreStart.docLinks,
         }}
       >
         <InternalApiClientProvider apiClient={apiClient}>

@@ -15,13 +15,13 @@ export const i18nTexts = {
     insufficientMemoryError: (helpUrl: string) => (
       <FormattedMessage
         id="xpack.reporting.listing.infoPanel.callout.cloud.insufficientMemoryError"
-        defaultMessage="This report cannot be generated because Kibana does not have sufficient memory. See {helpUrl} for further information."
+        defaultMessage="This report cannot be generated. {link}."
         values={{
-          helpUrl: (
+          link: (
             <EuiLink href={helpUrl}>
               {i18n.translate(
                 'xpack.reporting.listing.infoPanel.callout.cloud.insufficientMemoryError.urlLink',
-                { defaultMessage: 'this documentation' }
+                { defaultMessage: 'See minimum RAM requirements' }
               )}
             </EuiLink>
           ),

@@ -43,7 +43,7 @@ const createDateFormatter = (format: string, tz: string) => (date: string) => {
 
 export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   const {
-    services: { uiSettings },
+    services: { uiSettings, docLinks },
   } = useKibana();
 
   const timezone =
@@ -195,20 +195,23 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
      * should only occur on cloud.
      */
     info.error_code === VisualReportingSoftDisabledError.code
-      ? i18nTexts.cloud.insufficientMemoryError('#')
+      ? i18nTexts.cloud.insufficientMemoryError(docLinks.links.reporting.cloudMinimumRequirements)
       : info.getError();
 
   return (
     <>
       {Boolean(errored) && (
-        <EuiCallOut
-          title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
-            defaultMessage: 'Report failed',
-          })}
-          color="danger"
-        >
-          {errored}
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
+              defaultMessage: 'Report failed',
+            })}
+            color="danger"
+          >
+            {errored}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
       )}
       {Boolean(warnings) && (
         <>
