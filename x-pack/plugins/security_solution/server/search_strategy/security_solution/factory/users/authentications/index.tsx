@@ -24,11 +24,7 @@ import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/q
 
 import { buildQueryEntities as buildAuthenticationQueryEntities } from './dsl/query_entities.dsl';
 
-import {
-  formatAuthenticationData,
-  getHits,
-  getHitsEntities,
-} from './helpers';
+import { formatAuthenticationData, getHits, getHitsEntities } from './helpers';
 
 export const authentications: SecuritySolutionFactory<UsersQueries.authentications> = {
   buildDsl: (options: UserAuthenticationsRequestOptions) => {
@@ -86,7 +82,7 @@ export const authenticationsEntities: SecuritySolutionFactory<UsersQueries.authe
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHitsEntities(response);
-    console.log(hits)
+    console.log(hits);
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
       formatAuthenticationData(hit, auditdFieldsMap)
     );

@@ -79,18 +79,10 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                     _id: 'inT0934BjUd1_U2597Vf',
                     _score: null,
                     fields: {
-                      'user.name': [
-                        'jose52'
-                      ],
-                      '@timestamp': [
-                        '2022-04-13T17:16:34.540Z'
-                      ],
-                      'user.id': [
-                        '17'
-                      ],
-                      'user.email': [
-                        'jose52@barrett.com'
-                      ],
+                      'user.name': ['jose52'],
+                      '@timestamp': ['2022-04-13T17:16:34.540Z'],
+                      'user.id': ['17'],
+                      'user.email': ['jose52@barrett.com'],
                       'user.domain': ['ENDPOINT-W-8-03'],
                     },
                     sort: [1644837532000],

@@ -14,13 +14,13 @@ import { authenticationsLastSuccessFields } from '../helpers';
 
 export const auditdFieldsMap: Readonly<Record<string, unknown>> = {
   latest: '@timestamp',
-  'lastSuccess': {
-    'timestamp': '@timestamp',
+  lastSuccess: {
+    timestamp: '@timestamp',
     ...sourceFieldsMap,
     ...hostFieldsMap,
   },
-  'lastFailure': {
-    'timestamp': '@timestamp',
+  lastFailure: {
+    timestamp: '@timestamp',
     ...sourceFieldsMap,
     ...hostFieldsMap,
   },
@@ -113,7 +113,13 @@ export const buildQuery = ({
       },
       size: 0,
       _source: false,
-      fields: [...esFields, ...(docValueFields && !isEmpty(docValueFields) ? docValueFields : []), 'host*', 'source*', '@timestamp'],
+      fields: [
+        ...esFields,
+        ...(docValueFields && !isEmpty(docValueFields) ? docValueFields : []),
+        'host*',
+        'source*',
+        '@timestamp',
+      ],
     },
     track_total_hits: false,
   };

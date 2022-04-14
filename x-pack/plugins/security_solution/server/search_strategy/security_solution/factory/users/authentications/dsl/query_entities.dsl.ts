@@ -73,7 +73,7 @@ export const buildQueryEntities = ({
       },
       size: 0,
       _source: false,
-      fields: [...(docValueFields && !isEmpty(docValueFields) ? docValueFields : []) ]
+      fields: [...(docValueFields && !isEmpty(docValueFields) ? docValueFields : [])],
     },
     track_total_hits: false,
   };
