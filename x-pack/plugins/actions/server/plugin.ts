@@ -551,7 +551,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { taskManager, encryptedSavedObjects }] =
         await core.getStartServices();
-      const scopedClusterClient = (await context.core).elasticsearch.client;
+      const coreContext = await context.core;
 
       return {
         getActionsClient: () => {
@@ -568,7 +568,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
-            scopedClusterClient,
+            scopedClusterClient: coreContext.elasticsearch.client,
             preconfiguredActions,
             request,
             authorization: instantiateAuthorization(request),
