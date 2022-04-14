@@ -17,8 +17,10 @@ import {
   IntervalSchedule,
   RuleExecutionState,
   RuleMonitoring,
+  RuleTaskParams,
   RuleTaskState,
   SanitizedRule,
+  RawAlertInstanceMeta,
 } from '../../common';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
 import { Alert } from '../alert';
@@ -40,8 +42,21 @@ export interface RuleTaskRunResult {
   schedule: IntervalSchedule | undefined;
 }
 
-export interface RuleTaskInstance extends ConcreteTaskInstance {
-  state: RuleTaskState;
+export type RuleTaskInstance = ConcreteTaskInstance<RuleTaskState, RuleTaskParams>;
+export type RawRuleTaskInstance = ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams>;
+
+export interface RuleTaskContext<
+  TaskInstance extends ConcreteTaskInstance<unknown, unknown> = RuleTaskInstance
+> {
+  taskInstance: TaskInstance;
+}
+export interface EphemeralRuleTaskContext<
+  Params extends RuleTypeParams,
+  TaskInstance extends ConcreteTaskInstance<unknown, unknown> = RuleTaskInstance
+> extends RuleTaskContext<TaskInstance> {
+  ephemeralRule: SanitizedRule<Params>;
+  updateEphemeralRule: (rule: SanitizedRule<Params>) => void;
+  apiKey: string;
 }
 
 export interface TrackAlertDurationsParams<
@@ -145,6 +160,7 @@ export interface CreateExecutionHandlerOptions<
   ruleParams: RuleTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
+  isEphemeralRule: boolean;
 }
 
 export interface ExecutionHandlerOptions<ActionGroupIds extends string> {

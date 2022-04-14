@@ -23,7 +23,7 @@ import {
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, InitialRule, InitialRuleReducer } from './rule_reducer';
-import { createRule, loadRuleTypes } from '../../lib/rule_api';
+import { createRule, simulateRule, loadRuleTypes } from '../../lib/rule_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmRuleSave } from './confirm_rule_save';
 import { ConfirmRuleClose } from './confirm_rule_close';
@@ -36,6 +36,7 @@ import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { getInitialInterval } from './get_initial_interval';
+import { RuleSimulationResult } from '../../lib/rule_api/simulate';
 
 const RuleAdd = ({
   consumer,
@@ -74,6 +75,10 @@ const RuleAdd = ({
   const [config, setConfig] = useState<TriggersActionsUiConfig>({});
   const [initialRuleParams, setInitialRuleParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isSimulating, setIsSimulating] = useState<boolean>(false);
+  const [lastRuleSimulationResult, setLastRuleSimulationResult] = useState<
+    RuleSimulationResult | undefined
+  >();
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
   const [isConfirmRuleCloseModalOpen, setIsConfirmRuleCloseModalOpen] = useState<boolean>(false);
   const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | undefined>(
@@ -225,6 +230,24 @@ const RuleAdd = ({
     }
   }
 
+  async function onSimulateRule(): Promise<RuleSimulationResult | undefined> {
+    try {
+      const simulationResult = await simulateRule({ http, rule: rule as RuleUpdates });
+      setLastRuleSimulationResult(simulationResult);
+      return simulationResult;
+    } catch (errorRes) {
+      toasts.addDanger(
+        errorRes.body?.message ??
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleAdd.simulateFailureNotificationText',
+            {
+              defaultMessage: 'Cannot simulate rule.',
+            }
+          )
+      );
+    }
+  }
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -267,6 +290,8 @@ const RuleAdd = ({
             </EuiFlyoutBody>
             <RuleAddFooter
               isSaving={isSaving}
+              isSimulating={isSimulating}
+              lastRuleSimulationResult={lastRuleSimulationResult}
               isFormLoading={isLoading}
               onSave={async () => {
                 setIsSaving(true);
@@ -286,6 +311,23 @@ const RuleAdd = ({
                   setIsConfirmRuleSaveModalOpen(true);
                 } else {
                   await saveRuleAndCloseFlyout();
+                }
+              }}
+              onSimulate={async () => {
+                setIsSimulating(true);
+                if (isLoading || !isValidRule(rule, ruleErrors, ruleActionsErrors)) {
+                  setRule(
+                    getRuleWithInvalidatedFields(
+                      rule as Rule,
+                      ruleParamsErrors,
+                      ruleBaseErrors,
+                      ruleActionsErrors
+                    )
+                  );
+                  setIsSimulating(false);
+                } else {
+                  await onSimulateRule();
+                  setIsSimulating(false);
                 }
               }}
               onCancel={checkForChangesAndCloseFlyout}

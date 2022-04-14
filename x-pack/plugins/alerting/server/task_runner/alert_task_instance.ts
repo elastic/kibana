@@ -11,25 +11,21 @@ import { fold } from 'fp-ts/lib/Either';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
 import {
   SanitizedRule,
-  RuleTaskState,
   ruleParamsSchema,
   ruleStateSchema,
-  RuleTaskParams,
   RuleTypeParams,
+  RawAlertInstanceMeta,
+  RuleTaskParams,
 } from '../../common';
-
-export interface AlertTaskInstance extends ConcreteTaskInstance {
-  state: RuleTaskState;
-  params: RuleTaskParams;
-}
+import { RuleTaskInstance } from './types';
 
 const enumerateErrorFields = (e: t.Errors) =>
   `${e.map(({ context }) => context.map(({ key }) => key).join('.'))}`;
 
 export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
-  taskInstance: ConcreteTaskInstance,
+  taskInstance: ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams>,
   alert?: SanitizedRule<Params>
-): AlertTaskInstance {
+): RuleTaskInstance {
   return {
     ...taskInstance,
     params: pipe(

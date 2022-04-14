@@ -15,6 +15,7 @@ const createRulesClientMock = () => {
   const mocked: RulesClientMock = {
     aggregate: jest.fn(),
     create: jest.fn(),
+    simulate: jest.fn(),
     get: jest.fn(),
     resolve: jest.fn(),
     getAlertState: jest.fn(),

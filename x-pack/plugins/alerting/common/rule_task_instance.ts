@@ -42,11 +42,14 @@ export const ruleParamsSchema = t.intersection([
   t.partial({
     spaceId: t.string,
   }),
+  t.partial({
+    consumer: t.string,
+  }),
 ]);
 export type RuleTaskParams = t.TypeOf<typeof ruleParamsSchema>;
 
-export interface RuleExecutionRunResult {
-  state: RuleExecutionState;
+export interface RuleExecutionRunResult<State = RuleExecutionState> {
+  state: State;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }

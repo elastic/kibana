@@ -9,6 +9,7 @@ export { alertingFrameworkHealth } from './health';
 export { mapFiltersToKql } from './map_filters_to_kql';
 export { loadRuleAggregations } from './aggregate';
 export { createRule } from './create';
+export { simulateRule } from './simulate';
 export { deleteRules } from './delete';
 export { disableRule, disableRules } from './disable';
 export { enableRule, enableRules } from './enable';

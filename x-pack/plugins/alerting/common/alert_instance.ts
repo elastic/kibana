@@ -20,6 +20,8 @@ const metaSchema = t.partial({
   ]),
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
+// schema as returned by Task Manager
+export type RawAlertInstanceMeta = t.InputOf<typeof metaSchema>;
 
 const stateSchema = t.record(t.string, t.unknown);
 export type AlertInstanceState = t.TypeOf<typeof stateSchema>;

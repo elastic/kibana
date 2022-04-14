@@ -18,7 +18,10 @@ export type {
   EphemeralTask,
   TaskRunCreatorFunction,
   RunContext,
+  SuccessfulRunResult,
+  FailedRunResult,
 } from './task';
+export type { Middleware } from './lib/middleware';
 
 export { TaskStatus } from './task';
 

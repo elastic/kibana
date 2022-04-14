@@ -117,7 +117,7 @@ export const configSchema = schema.object(
       }),
     }),
     ephemeral_tasks: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      enabled: schema.boolean({ defaultValue: true }),
       /* How many requests can Task Manager buffer before it rejects new requests. */
       request_capacity: schema.number({
         // a nice round contrived number, feel free to change as we learn how it behaves

@@ -11,10 +11,12 @@ import {
   RuleExecutionStatusWarningReasons,
   RuleTypeParams,
   RecoveredActionGroup,
+  RawAlertInstanceMeta,
+  RuleTaskParams,
 } from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { TaskStatus } from '../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 interface GeneratorParams {
@@ -167,7 +169,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   monitoring: getDefaultRuleMonitoring(),
 };
 
-export const mockTaskInstance = () => ({
+export const mockTaskInstance = (): ConcreteTaskInstance<RawAlertInstanceMeta, RuleTaskParams> => ({
   id: '',
   attempts: 0,
   status: TaskStatus.Running,

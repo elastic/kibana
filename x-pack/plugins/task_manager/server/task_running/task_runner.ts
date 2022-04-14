@@ -107,7 +107,7 @@ type Opts = {
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   eventLoopDelayConfig: EventLoopDelayConfig;
-} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
+} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning' | 'afterRun'>;
 
 export enum TaskRunResult {
   // Task completed successfully
@@ -149,6 +149,7 @@ export class TaskManagerRunner implements TaskRunner {
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
   private beforeMarkRunning: Middleware['beforeMarkRunning'];
+  private afterRun: Middleware['afterRun'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
@@ -173,6 +174,7 @@ export class TaskManagerRunner implements TaskRunner {
     store,
     beforeRun,
     beforeMarkRunning,
+    afterRun,
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
@@ -185,6 +187,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.bufferedTaskStore = store;
     this.beforeRun = beforeRun;
     this.beforeMarkRunning = beforeMarkRunning;
+    this.afterRun = afterRun;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
@@ -314,6 +317,7 @@ export class TaskManagerRunner implements TaskRunner {
       const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
         this.processResult(validatedResult, stopTaskTimer())
       );
+      this.afterRun({ context: modifiedContext, result: processedResult });
       if (apmTrans) apmTrans.end('success');
       return processedResult;
     } catch (err) {
@@ -326,6 +330,7 @@ export class TaskManagerRunner implements TaskRunner {
           stopTaskTimer()
         )
       );
+      this.afterRun({ context: modifiedContext, result: processedResult });
       if (apmTrans) apmTrans.end('failure');
       return processedResult;
     }

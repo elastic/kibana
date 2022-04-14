@@ -18,19 +18,27 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHealthContext } from '../../context/health_context';
+import { RuleSimulationResult } from '../../lib/rule_api/simulate';
+import { RuleSimulationButton } from './rule_simulation_button';
 
 interface RuleAddFooterProps {
   isSaving: boolean;
+  isSimulating: boolean;
   isFormLoading: boolean;
+  lastRuleSimulationResult: RuleSimulationResult | undefined;
   onSave: () => void;
+  onSimulate: () => void;
   onCancel: () => void;
 }
 
 export const RuleAddFooter = ({
   isSaving,
+  isSimulating,
   onSave,
+  onSimulate,
   onCancel,
   isFormLoading,
+  lastRuleSimulationResult,
 }: RuleAddFooterProps) => {
   const { loadingHealthCheck } = useHealthContext();
 
@@ -53,21 +61,34 @@ export const RuleAddFooter = ({
           <></>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            color="success"
-            data-test-subj="saveRuleButton"
-            type="submit"
-            iconType="check"
-            isDisabled={loadingHealthCheck}
-            isLoading={isSaving}
-            onClick={onSave}
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleAddFooter.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <RuleSimulationButton
+                isSaving={isSaving}
+                isSimulating={isSimulating}
+                isFormLoading={isFormLoading}
+                lastRuleSimulationResult={lastRuleSimulationResult}
+                onSimulate={onSimulate}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="success"
+                data-test-subj="saveRuleButton"
+                type="submit"
+                iconType="check"
+                isDisabled={loadingHealthCheck}
+                isLoading={isSaving}
+                onClick={onSave}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleAddFooter.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

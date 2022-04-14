@@ -17,7 +17,6 @@ import type {
   ElasticsearchServiceStart,
   UiSettingsServiceStart,
 } from '../../../../../src/core/server';
-import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import {
@@ -34,6 +33,10 @@ import { RulesClient } from '../rules_client';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { InMemoryMetrics } from '../monitoring';
+import { EphemeralRuleProvider } from './ephemeral_rule_provider';
+import { ConcreteRuleProvider } from './rule_provider';
+import { EphemeralRuleTaskContext, RawRuleTaskInstance, RuleTaskContext } from './types';
+import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -87,13 +90,15 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext,
+    { taskInstance }: RuleTaskContext<RawRuleTaskInstance>,
     inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
 
+    const validatedTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    const context = this.taskRunnerContext!;
     return new TaskRunner<
       Params,
       ExtractedParams,
@@ -102,6 +107,68 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
+    >(
+      ruleType,
+      validatedTaskInstance,
+      new ConcreteRuleProvider(ruleType, validatedTaskInstance, context),
+      context,
+      inMemoryMetrics
+    );
+  }
+
+  public createEphemeral<
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams,
+    State extends RuleTypeState,
+    InstanceState extends AlertInstanceState,
+    InstanceContext extends AlertInstanceContext,
+    ActionGroupIds extends string,
+    RecoveryActionGroupId extends string
+  >(
+    ruleType: NormalizedRuleType<
+      Params,
+      ExtractedParams,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >,
+    {
+      taskInstance,
+      ephemeralRule,
+      apiKey,
+      updateEphemeralRule,
+    }: EphemeralRuleTaskContext<Params, RawRuleTaskInstance>,
+    inMemoryMetrics: InMemoryMetrics
+  ) {
+    if (!this.isInitialized) {
+      throw new Error('TaskRunnerFactory not initialized');
+    }
+
+    const validatedTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    const context = this.taskRunnerContext!;
+    return new TaskRunner<
+      Params,
+      ExtractedParams,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >(
+      ruleType,
+      validatedTaskInstance,
+      new EphemeralRuleProvider(
+        ruleType,
+        validatedTaskInstance,
+        context,
+        ephemeralRule,
+        updateEphemeralRule,
+        apiKey
+      ),
+      context,
+      inMemoryMetrics
+    );
   }
 }

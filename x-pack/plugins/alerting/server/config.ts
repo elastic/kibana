@@ -30,7 +30,7 @@ const rulesSchema = schema.object({
   }),
 });
 
-export const DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT = 10;
+export const DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT = 0;
 export const configSchema = schema.object({
   healthCheck: schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '60m' }),

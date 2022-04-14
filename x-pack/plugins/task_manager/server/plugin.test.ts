@@ -115,6 +115,7 @@ describe('TaskManagerPlugin', () => {
         setupApi.addMiddleware({
           beforeSave: async (saveOpts) => saveOpts,
           beforeRun: async (runOpts) => runOpts,
+          afterRun: async (runOpts) => runOpts,
           beforeMarkRunning: async (runOpts) => runOpts,
         })
       ).toThrowErrorMatchingInlineSnapshot(

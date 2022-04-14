@@ -6,13 +6,11 @@
  */
 import apm from 'elastic-apm-node';
 import { cloneDeep, mapValues, omit, pickBy, set, without } from 'lodash';
-import type { Request } from '@hapi/hapi';
 import { UsageCounter } from 'src/plugins/usage_collection/server';
 import uuid from 'uuid';
-import { addSpaceIdToPath } from '../../../spaces/server';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
+import { throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
@@ -22,38 +20,27 @@ import {
   executionStatusFromError,
   executionStatusFromState,
   getRecoveredAlerts,
-  ruleExecutionStatusToRaw,
   validateRuleTypeParams,
 } from '../lib';
 import {
-  Rule,
-  RuleExecutionStatus,
-  RuleExecutionStatusErrorReasons,
   IntervalSchedule,
   RawAlertInstance,
   RawRule,
-  RawRuleExecutionStatus,
   RuleExecutionRunResult,
   RuleExecutionState,
   RuleMonitoring,
   RuleMonitoringHistory,
   RuleTaskState,
   RuleTypeRegistry,
-  SanitizedRule,
 } from '../types';
-import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
+import { asErr, map, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
-import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { partiallyUpdateAlert } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  RuleTypeParams,
-  RuleTypeState,
-  MONITORING_HISTORY_LIMIT,
   parseDuration,
   WithoutReservedActionGroups,
 } from '../../common';
@@ -74,6 +61,15 @@ import {
   ScheduleActionsForRecoveredAlertsParams,
   TrackAlertDurationsParams,
 } from './types';
+import { RuleProvider } from './rule_provider';
+import {
+  Rule,
+  RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
+} from '../../common/rule';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -120,6 +116,16 @@ export class TaskRunner<
   private searchAbortController: AbortController;
   private cancelled: boolean;
 
+  private ruleProvider: RuleProvider<
+    Params,
+    ExtractedParams,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
+
   constructor(
     ruleType: NormalizedRuleType<
       Params,
@@ -130,7 +136,16 @@ export class TaskRunner<
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    taskInstance: ConcreteTaskInstance,
+    taskInstance: RuleTaskInstance,
+    ruleProvider: RuleProvider<
+      Params,
+      ExtractedParams,
+      State,
+      InstanceState,
+      InstanceContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >,
     context: TaskRunnerContext,
     inMemoryMetrics: InMemoryMetrics
   ) {
@@ -140,58 +155,13 @@ export class TaskRunner<
     this.ruleType = ruleType;
     this.ruleName = null;
     this.ruleConsumer = null;
-    this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    this.taskInstance = taskInstance;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
-  }
-
-  private async getDecryptedAttributes(
-    ruleId: string,
-    spaceId: string
-  ): Promise<{ apiKey: string | null; enabled: boolean; consumer: string }> {
-    const namespace = this.context.spaceIdToNamespace(spaceId);
-    // Only fetch encrypted attributes here, we'll create a saved objects client
-    // scoped with the API key to fetch the remaining data.
-    const {
-      attributes: { apiKey, enabled, consumer },
-    } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
-      'alert',
-      ruleId,
-      { namespace }
-    );
-
-    return { apiKey, enabled, consumer };
-  }
-
-  private getFakeKibanaRequest(spaceId: string, apiKey: RawRule['apiKey']) {
-    const requestHeaders: Record<string, string> = {};
-
-    if (apiKey) {
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
-    }
-
-    const path = addSpaceIdToPath('/', spaceId);
-
-    const fakeRequest = KibanaRequest.from({
-      headers: requestHeaders,
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    } as unknown as Request);
-
-    this.context.basePathService.set(fakeRequest, path);
-
-    return fakeRequest;
+    this.ruleProvider = ruleProvider;
   }
 
   private getExecutionHandler(
@@ -231,25 +201,8 @@ export class TaskRunner<
       ruleParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
+      isEphemeralRule: this.ruleProvider.isEphemeralRule(),
     });
-  }
-
-  private async updateRuleSavedObject(
-    ruleId: string,
-    namespace: string | undefined,
-    attributes: { executionStatus?: RawRuleExecutionStatus; monitoring?: RuleMonitoring }
-  ) {
-    const client = this.context.internalSavedObjectsRepository;
-
-    try {
-      await partiallyUpdateAlert(client, ruleId, attributes, {
-        ignore404: true,
-        namespace,
-        refresh: false,
-      });
-    } catch (err) {
-      this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
-    }
   }
 
   private isRuleSnoozed(rule: SanitizedRule<Params>): boolean {
@@ -581,9 +534,9 @@ export class TaskRunner<
     apiKey: RawRule['apiKey'],
     rule: SanitizedRule<Params>,
     event: Event
-  ) {
+  ): Promise<RuleExecutionState> {
     const {
-      params: { alertId: ruleId, spaceId },
+      params: { alertId: ruleId, spaceId = 'default' },
     } = this.taskInstance;
 
     // Validate
@@ -600,85 +553,6 @@ export class TaskRunner<
       fakeRequest
     );
     return this.executeAlerts(fakeRequest, rule, validatedParams, executionHandler, spaceId, event);
-  }
-
-  private async loadRuleAttributesAndRun(
-    event: Event
-  ): Promise<Resultable<RuleExecutionRunResult, Error>> {
-    const {
-      params: { alertId: ruleId, spaceId },
-    } = this.taskInstance;
-    let enabled: boolean;
-    let apiKey: string | null;
-    let consumer: string;
-    try {
-      const decryptedAttributes = await this.getDecryptedAttributes(ruleId, spaceId);
-      apiKey = decryptedAttributes.apiKey;
-      enabled = decryptedAttributes.enabled;
-      consumer = decryptedAttributes.consumer;
-    } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
-    }
-
-    this.ruleConsumer = consumer;
-
-    if (!enabled) {
-      throw new ErrorWithReason(
-        RuleExecutionStatusErrorReasons.Disabled,
-        new Error(`Rule failed to execute because rule ran after it was disabled.`)
-      );
-    }
-
-    const fakeRequest = this.getFakeKibanaRequest(spaceId, apiKey);
-
-    // Get rules client with space level permissions
-    const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
-
-    let rule: SanitizedRule<Params>;
-
-    // Ensure API key is still valid and user has access
-    try {
-      rule = await rulesClient.get({ id: ruleId });
-
-      if (apm.currentTransaction) {
-        apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_consumer: rule.consumer,
-          alerting_rule_name: rule.name,
-          alerting_rule_tags: rule.tags.join(', '),
-          alerting_rule_type_id: rule.alertTypeId,
-          alerting_rule_params: JSON.stringify(rule.params),
-        });
-      }
-    } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Read, err);
-    }
-
-    this.ruleName = rule.name;
-
-    try {
-      this.ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
-    } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
-    }
-
-    if (rule.monitoring) {
-      if (rule.monitoring.execution.history.length >= MONITORING_HISTORY_LIMIT) {
-        // Remove the first (oldest) record
-        rule.monitoring.execution.history.shift();
-      }
-    }
-    return {
-      monitoring: asOk(rule.monitoring),
-      state: await promiseResult<RuleExecutionState, Error>(
-        this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
-      ),
-      schedule: asOk(
-        // fetch the rule again to ensure we return the correct schedule as it may have
-        // changed during the task execution
-        (await rulesClient.get({ id: ruleId })).schedule
-      ),
-    };
   }
 
   async run(): Promise<RuleTaskRunResult> {
@@ -752,7 +626,11 @@ export class TaskRunner<
     eventLogger.logEvent(startEvent);
 
     const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
-      this.loadRuleAttributesAndRun(event)
+      this.ruleProvider.loadRuleAttributesAndRun((fakeRequest, apiKey, rule) => {
+        this.ruleName = rule.name;
+        this.ruleConsumer = rule.consumer;
+        return this.validateAndExecuteRule(fakeRequest, apiKey, rule, event);
+      })
     );
 
     const ruleMonitoring =
@@ -864,8 +742,8 @@ export class TaskRunner<
           executionStatus
         )}`
       );
-      await this.updateRuleSavedObject(ruleId, namespace, {
-        executionStatus: ruleExecutionStatusToRaw(executionStatus),
+      await this.ruleProvider.updateRuleSavedObject(ruleId, namespace, {
+        executionStatus,
         monitoring: ruleMonitoring,
       });
     }
@@ -1003,9 +881,7 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
-    await this.updateRuleSavedObject(ruleId, namespace, {
-      executionStatus: ruleExecutionStatusToRaw(executionStatus),
-    });
+    await this.ruleProvider.updateRuleSavedObject(ruleId, namespace, { executionStatus });
   }
 }
 

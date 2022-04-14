@@ -5,26 +5,50 @@
  * 2.0.
  */
 
-import { RunContext, TaskInstance } from '../task';
+import { FailedRunResult, RunContext, SuccessfulRunResult, TaskInstance } from '../task';
+import { Result } from './result_type';
 
 type Mapper<T> = (params: T) => Promise<T>;
 interface BeforeSaveContext {
   taskInstance: TaskInstance;
 }
 
-export type BeforeSaveContextFunction = Mapper<BeforeSaveContext>;
-export type BeforeRunContextFunction = Mapper<RunContext>;
-
-export interface Middleware {
-  beforeSave: BeforeSaveContextFunction;
-  beforeRun: BeforeRunContextFunction;
-  beforeMarkRunning: BeforeRunContextFunction;
+interface AfterSaveParams<
+  Context extends RunContext,
+  Successful extends SuccessfulRunResult,
+  Failed extends FailedRunResult
+> {
+  context: Context;
+  result: Result<Successful, Failed>;
 }
 
-export function addMiddlewareToChain(prev: Middleware, next: Partial<Middleware>) {
+export type BeforeSaveContextFunction = Mapper<BeforeSaveContext>;
+export type BeforeRunContextFunction<Context extends RunContext = RunContext> = Mapper<Context>;
+export type AfterRunContextFunction<
+  Context extends RunContext = RunContext,
+  Successful extends SuccessfulRunResult = SuccessfulRunResult,
+  Failed extends FailedRunResult = FailedRunResult
+> = Mapper<AfterSaveParams<Context, Successful, Failed>>;
+
+export interface Middleware<
+  Context extends RunContext = RunContext,
+  Successful extends SuccessfulRunResult = SuccessfulRunResult,
+  Failed extends FailedRunResult = FailedRunResult
+> {
+  beforeSave: BeforeSaveContextFunction;
+  beforeRun: BeforeRunContextFunction<Context>;
+  afterRun: AfterRunContextFunction<Context, Successful, Failed>;
+  beforeMarkRunning: BeforeRunContextFunction<Context>;
+}
+
+export function addMiddlewareToChain<Context extends RunContext = RunContext>(
+  prev: Middleware<Context>,
+  next: Partial<Middleware<Context>>
+) {
   return {
     beforeSave: next.beforeSave ? chain(prev.beforeSave, next.beforeSave) : prev.beforeSave,
     beforeRun: next.beforeRun ? chain(prev.beforeRun, next.beforeRun) : prev.beforeRun,
+    afterRun: next.afterRun ? chain(prev.afterRun, next.afterRun) : prev.afterRun,
     beforeMarkRunning: next.beforeMarkRunning
       ? chain(prev.beforeMarkRunning, next.beforeMarkRunning)
       : prev.beforeMarkRunning,
@@ -36,10 +60,11 @@ const chain =
   (params) =>
     next(params).then(prev);
 
-export function createInitialMiddleware(): Middleware {
+export function createInitialMiddleware(): Middleware<RunContext> {
   return {
-    beforeSave: async (saveOpts: BeforeSaveContext) => saveOpts,
-    beforeRun: async (runOpts: RunContext) => runOpts,
-    beforeMarkRunning: async (runOpts: RunContext) => runOpts,
+    beforeSave: async (saveOpts) => saveOpts,
+    beforeRun: async (runOpts) => runOpts,
+    afterRun: async (afterSaveOpts) => afterSaveOpts,
+    beforeMarkRunning: async (runOpts) => runOpts,
   };
 }

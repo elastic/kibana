@@ -20,7 +20,7 @@ describe('config validation', () => {
           "interval": "5m",
           "removalDelay": "1h",
         },
-        "maxEphemeralActionsPerAlert": 10,
+        "maxEphemeralActionsPerAlert": 0,
         "rules": Object {
           "execution": Object {
             "actions": Object {

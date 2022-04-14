@@ -37,6 +37,7 @@ describe('EphemeralTaskLifecycle', () => {
     const pool = TaskPoolMock.create(poolCapacity);
     const lifecycleEvent$ = new Subject<TaskLifecycleEvent>();
     const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+    const middleware = createInitialMiddleware();
     const opts: EphemeralTaskLifecycleOpts = {
       logger: taskManagerLogger,
       definitions: new TaskTypeDictionary(taskManagerLogger),
@@ -91,12 +92,19 @@ describe('EphemeralTaskLifecycle', () => {
 
     pool.run.mockResolvedValue(Promise.resolve(TaskPoolRunResult.RunningAllClaimedTasks));
 
-    return { poolCapacity, lifecycleEvent$, pool, elasticsearchAndSOAvailability$, opts };
+    return {
+      poolCapacity,
+      lifecycleEvent$,
+      pool,
+      elasticsearchAndSOAvailability$,
+      middleware,
+      opts,
+    };
   }
 
   describe('constructor', () => {
     test('avoids unnecesery subscription if ephemeral tasks are disabled', () => {
-      const { opts } = initTaskLifecycleParams({
+      const { opts, middleware } = initTaskLifecycleParams({
         config: {
           ephemeral_tasks: {
             enabled: false,
@@ -108,41 +116,43 @@ describe('EphemeralTaskLifecycle', () => {
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
       const task = mockTask();
-      expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asErr(task));
+      expect(ephemeralTaskLifecycle.attemptToRun(task, middleware)).toMatchObject(asErr(task));
     });
 
     test('queues up tasks when ephemeral tasks are enabled', () => {
-      const { opts } = initTaskLifecycleParams();
+      const { opts, middleware } = initTaskLifecycleParams();
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
       const task = mockTask();
-      expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
+      expect(ephemeralTaskLifecycle.attemptToRun(task, middleware)).toMatchObject(asOk(task));
     });
 
     test('rejects tasks when ephemeral tasks are enabled and queue is full', () => {
-      const { opts } = initTaskLifecycleParams({
+      const { opts, middleware } = initTaskLifecycleParams({
         config: { ephemeral_tasks: { enabled: true, request_capacity: 2 } },
       });
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
       const task = mockTask();
-      expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
+      expect(ephemeralTaskLifecycle.attemptToRun(task, middleware)).toMatchObject(asOk(task));
       const task2 = mockTask();
-      expect(ephemeralTaskLifecycle.attemptToRun(task2)).toMatchObject(asOk(task2));
+      expect(ephemeralTaskLifecycle.attemptToRun(task2, middleware)).toMatchObject(asOk(task2));
 
       const rejectedTask = mockTask();
-      expect(ephemeralTaskLifecycle.attemptToRun(rejectedTask)).toMatchObject(asErr(rejectedTask));
+      expect(ephemeralTaskLifecycle.attemptToRun(rejectedTask, middleware)).toMatchObject(
+        asErr(rejectedTask)
+      );
     });
 
     test('pulls tasks off queue when a polling cycle completes', () => {
-      const { pool, poolCapacity, opts, lifecycleEvent$ } = initTaskLifecycleParams();
+      const { pool, poolCapacity, opts, lifecycleEvent$, middleware } = initTaskLifecycleParams();
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
       const task = mockTask({ id: `my-phemeral-task` });
-      expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
+      expect(ephemeralTaskLifecycle.attemptToRun(task, middleware)).toMatchObject(asOk(task));
 
       poolCapacity.mockReturnValue({
         availableWorkers: 10,
@@ -160,12 +170,12 @@ describe('EphemeralTaskLifecycle', () => {
     });
 
     test('pulls tasks off queue when a task run completes', () => {
-      const { pool, poolCapacity, opts, lifecycleEvent$ } = initTaskLifecycleParams();
+      const { pool, poolCapacity, opts, lifecycleEvent$, middleware } = initTaskLifecycleParams();
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
       const task = mockTask({ id: `my-phemeral-task` });
-      expect(ephemeralTaskLifecycle.attemptToRun(task)).toMatchObject(asOk(task));
+      expect(ephemeralTaskLifecycle.attemptToRun(task, middleware)).toMatchObject(asOk(task));
 
       poolCapacity.mockReturnValue({
         availableWorkers: 10,
@@ -190,14 +200,20 @@ describe('EphemeralTaskLifecycle', () => {
     });
 
     test('pulls as many tasks off queue as it has capacity for', () => {
-      const { pool, poolCapacity, opts, lifecycleEvent$ } = initTaskLifecycleParams();
+      const { pool, poolCapacity, opts, lifecycleEvent$, middleware } = initTaskLifecycleParams();
 
       const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
       const tasks = [mockTask(), mockTask(), mockTask()];
-      expect(ephemeralTaskLifecycle.attemptToRun(tasks[0])).toMatchObject(asOk(tasks[0]));
-      expect(ephemeralTaskLifecycle.attemptToRun(tasks[1])).toMatchObject(asOk(tasks[1]));
-      expect(ephemeralTaskLifecycle.attemptToRun(tasks[2])).toMatchObject(asOk(tasks[2]));
+      expect(ephemeralTaskLifecycle.attemptToRun(tasks[0], middleware)).toMatchObject(
+        asOk(tasks[0])
+      );
+      expect(ephemeralTaskLifecycle.attemptToRun(tasks[1], middleware)).toMatchObject(
+        asOk(tasks[1])
+      );
+      expect(ephemeralTaskLifecycle.attemptToRun(tasks[2], middleware)).toMatchObject(
+        asOk(tasks[2])
+      );
 
       poolCapacity.mockReturnValue({
         availableWorkers: 2,
@@ -216,7 +232,7 @@ describe('EphemeralTaskLifecycle', () => {
     });
 
     test('pulls only as many tasks of the same type as is allowed by maxConcurrency', () => {
-      const { pool, poolCapacity, opts, lifecycleEvent$ } = initTaskLifecycleParams();
+      const { pool, poolCapacity, opts, lifecycleEvent$, middleware } = initTaskLifecycleParams();
 
       opts.definitions.registerTaskDefinitions({
         report: {
@@ -231,10 +247,10 @@ describe('EphemeralTaskLifecycle', () => {
       const firstLimitedTask = mockTask({ taskType: 'report' });
       const secondLimitedTask = mockTask({ taskType: 'report' });
       // both are queued
-      expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask)).toMatchObject(
+      expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask, middleware)).toMatchObject(
         asOk(firstLimitedTask)
       );
-      expect(ephemeralTaskLifecycle.attemptToRun(secondLimitedTask)).toMatchObject(
+      expect(ephemeralTaskLifecycle.attemptToRun(secondLimitedTask, middleware)).toMatchObject(
         asOk(secondLimitedTask)
       );
 
@@ -256,7 +272,7 @@ describe('EphemeralTaskLifecycle', () => {
     });
 
     test('when pulling tasks from the queue, it takes into account the maxConcurrency of tasks that are already in the pool', () => {
-      const { pool, poolCapacity, opts, lifecycleEvent$ } = initTaskLifecycleParams();
+      const { pool, poolCapacity, opts, lifecycleEvent$, middleware } = initTaskLifecycleParams();
 
       opts.definitions.registerTaskDefinitions({
         report: {
@@ -271,10 +287,10 @@ describe('EphemeralTaskLifecycle', () => {
       const firstLimitedTask = mockTask({ taskType: 'report' });
       const secondLimitedTask = mockTask({ taskType: 'report' });
       // both are queued
-      expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask)).toMatchObject(
+      expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask, middleware)).toMatchObject(
         asOk(firstLimitedTask)
       );
-      expect(ephemeralTaskLifecycle.attemptToRun(secondLimitedTask)).toMatchObject(
+      expect(ephemeralTaskLifecycle.attemptToRun(secondLimitedTask, middleware)).toMatchObject(
         asOk(secondLimitedTask)
       );
 
@@ -305,7 +321,7 @@ describe('EphemeralTaskLifecycle', () => {
   });
 
   test('pulls tasks with both maxConcurrency and unlimited concurrency', () => {
-    const { pool, poolCapacity, opts, lifecycleEvent$ } = initTaskLifecycleParams();
+    const { pool, poolCapacity, opts, lifecycleEvent$, middleware } = initTaskLifecycleParams();
 
     opts.definitions.registerTaskDefinitions({
       report: {
@@ -318,21 +334,27 @@ describe('EphemeralTaskLifecycle', () => {
     const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
     const fooTasks = [mockTask(), mockTask(), mockTask()];
-    expect(ephemeralTaskLifecycle.attemptToRun(fooTasks[0])).toMatchObject(asOk(fooTasks[0]));
+    expect(ephemeralTaskLifecycle.attemptToRun(fooTasks[0], middleware)).toMatchObject(
+      asOk(fooTasks[0])
+    );
 
     const firstLimitedTask = mockTask({ taskType: 'report' });
-    expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask)).toMatchObject(
+    expect(ephemeralTaskLifecycle.attemptToRun(firstLimitedTask, middleware)).toMatchObject(
       asOk(firstLimitedTask)
     );
 
-    expect(ephemeralTaskLifecycle.attemptToRun(fooTasks[1])).toMatchObject(asOk(fooTasks[1]));
+    expect(ephemeralTaskLifecycle.attemptToRun(fooTasks[1], middleware)).toMatchObject(
+      asOk(fooTasks[1])
+    );
 
     const secondLimitedTask = mockTask({ taskType: 'report' });
-    expect(ephemeralTaskLifecycle.attemptToRun(secondLimitedTask)).toMatchObject(
+    expect(ephemeralTaskLifecycle.attemptToRun(secondLimitedTask, middleware)).toMatchObject(
       asOk(secondLimitedTask)
     );
 
-    expect(ephemeralTaskLifecycle.attemptToRun(fooTasks[2])).toMatchObject(asOk(fooTasks[2]));
+    expect(ephemeralTaskLifecycle.attemptToRun(fooTasks[2], middleware)).toMatchObject(
+      asOk(fooTasks[2])
+    );
 
     // pool has capacity for all
     poolCapacity.mockReturnValue({
@@ -354,14 +376,14 @@ describe('EphemeralTaskLifecycle', () => {
   });
 
   test('properly removes from the queue after pulled', () => {
-    const { poolCapacity, opts, lifecycleEvent$ } = initTaskLifecycleParams();
+    const { poolCapacity, opts, lifecycleEvent$, middleware } = initTaskLifecycleParams();
 
     const ephemeralTaskLifecycle = new EphemeralTaskLifecycle(opts);
 
     const tasks = [mockTask(), mockTask(), mockTask()];
-    expect(ephemeralTaskLifecycle.attemptToRun(tasks[0])).toMatchObject(asOk(tasks[0]));
-    expect(ephemeralTaskLifecycle.attemptToRun(tasks[1])).toMatchObject(asOk(tasks[1]));
-    expect(ephemeralTaskLifecycle.attemptToRun(tasks[2])).toMatchObject(asOk(tasks[2]));
+    expect(ephemeralTaskLifecycle.attemptToRun(tasks[0], middleware)).toMatchObject(asOk(tasks[0]));
+    expect(ephemeralTaskLifecycle.attemptToRun(tasks[1], middleware)).toMatchObject(asOk(tasks[1]));
+    expect(ephemeralTaskLifecycle.attemptToRun(tasks[2], middleware)).toMatchObject(asOk(tasks[2]));
 
     expect(ephemeralTaskLifecycle.queuedTasks).toBe(3);
     poolCapacity.mockReturnValue({

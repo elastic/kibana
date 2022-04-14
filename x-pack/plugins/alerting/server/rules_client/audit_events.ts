@@ -10,6 +10,7 @@ import { AuditEvent } from '../../../security/server';
 
 export enum RuleAuditAction {
   CREATE = 'rule_create',
+  SIMULATE = 'rule_simulate',
   GET = 'rule_get',
   RESOLVE = 'rule_resolve',
   UPDATE = 'rule_update',
@@ -32,6 +33,7 @@ type VerbsTuple = [string, string, string];
 
 const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_create: ['create', 'creating', 'created'],
+  rule_simulate: ['simulate', 'simulating', 'simulated'],
   rule_get: ['access', 'accessing', 'accessed'],
   rule_resolve: ['access', 'accessing', 'accessed'],
   rule_update: ['update', 'updating', 'updated'],
@@ -56,6 +58,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_create: 'creation',
+  rule_simulate: 'creation',
   rule_get: 'access',
   rule_resolve: 'access',
   rule_update: 'change',

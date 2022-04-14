@@ -22,7 +22,7 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Rule,
@@ -31,6 +31,7 @@ import {
   IErrorObject,
   RuleType,
   TriggersActionsUiConfig,
+  RuleUpdates,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
@@ -43,6 +44,8 @@ import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { RuleSimulationResult, simulateRule } from '../../lib/rule_api/simulate';
+import RuleSimulationButton from './rule_simulation_button';
 
 export const RuleEdit = ({
   initialRule,
@@ -59,6 +62,10 @@ export const RuleEdit = ({
     rule: cloneDeep(initialRule),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isSimulating, setIsSimulating] = useState<boolean>(false);
+  const [lastRuleSimulationResult, setLastRuleSimulationResult] = useState<
+    RuleSimulationResult | undefined
+  >();
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
@@ -154,6 +161,49 @@ export const RuleEdit = ({
     }
   }
 
+  async function onSimulateRule(): Promise<RuleSimulationResult | undefined> {
+    try {
+      if (
+        !isLoading &&
+        isValidRule(rule, ruleErrors, ruleActionsErrors) &&
+        !hasActionsWithBrokenConnector
+      ) {
+        const simulationResult = await simulateRule({
+          http,
+          rule: pick(
+            rule,
+            'name',
+            'enabled',
+            'ruleTypeId',
+            'consumer',
+            'tags',
+            'throttle',
+            'params',
+            'schedule',
+            'actions',
+            'notifyWhen'
+          ) as RuleUpdates,
+        });
+        setLastRuleSimulationResult(simulationResult);
+        return simulationResult;
+      } else {
+        setRule(
+          getRuleWithInvalidatedFields(rule, ruleParamsErrors, ruleBaseErrors, ruleActionsErrors)
+        );
+      }
+    } catch (errorRes) {
+      toasts.addDanger(
+        errorRes.body?.message ??
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.ruleAdd.simulateFailureNotificationText',
+            {
+              defaultMessage: 'Cannot simulate rule.',
+            }
+          )
+      );
+    }
+  }
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -228,30 +278,46 @@ export const RuleEdit = ({
                   <></>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color="success"
-                    data-test-subj="saveEditedRuleButton"
-                    type="submit"
-                    iconType="check"
-                    isLoading={isSaving}
-                    onClick={async () => {
-                      setIsSaving(true);
-                      const savedRule = await onSaveRule();
-                      setIsSaving(false);
-                      if (savedRule) {
-                        onClose(RuleFlyoutCloseReason.SAVED);
-                        if (onSaveHandler) {
-                          onSaveHandler();
-                        }
-                      }
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleEdit.saveButtonLabel"
-                      defaultMessage="Save"
-                    />
-                  </EuiButton>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <RuleSimulationButton
+                        isSaving={isSaving}
+                        isSimulating={isSimulating}
+                        lastRuleSimulationResult={lastRuleSimulationResult}
+                        onSimulate={async () => {
+                          setIsSimulating(true);
+                          await onSimulateRule();
+                          setIsSimulating(false);
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        color="success"
+                        data-test-subj="saveEditedRuleButton"
+                        type="submit"
+                        iconType="check"
+                        isLoading={isSaving}
+                        onClick={async () => {
+                          setIsSaving(true);
+                          const savedRule = await onSaveRule();
+                          setIsSaving(false);
+                          if (savedRule) {
+                            onClose(RuleFlyoutCloseReason.SAVED);
+                            if (onSaveHandler) {
+                              onSaveHandler();
+                            }
+                          }
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.ruleEdit.saveButtonLabel"
+                          defaultMessage="Save"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutFooter>
