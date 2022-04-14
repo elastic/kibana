@@ -811,15 +811,16 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should hide the alerts column if the alert feature is disabled', async () => {
-    expect.assertions(1);
-
-    const { findAllByTestId } = render(
+    const result = render(
       <TestProviders features={{ alerts: { enabled: false } }}>
         <AllCasesList />
       </TestProviders>
     );
 
-    await expect(findAllByTestId('case-table-column-alertsCount')).rejects.toThrow();
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('case-table-column-alertsCount').length).toBe(0);
+    });
   });
 
   it('should show the alerts column if the alert feature is enabled', async () => {
