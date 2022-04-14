@@ -98,36 +98,33 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         return synthtrace.index([
           transactionInterval
             .rate(config.multiple.prod.rps)
-            .spans((timestamp) => [
-              ...multipleEnvServiceProdInstance
+            .generator((timestamp) =>
+              multipleEnvServiceProdInstance
                 .transaction('GET /api')
                 .timestamp(timestamp)
                 .duration(config.multiple.prod.duration)
                 .success()
-                .serialize(),
-            ]),
+            ),
           transactionInterval
             .rate(config.multiple.dev.rps)
-            .spans((timestamp) => [
-              ...multipleEnvServiceDevInstance
+            .generator((timestamp) =>
+              multipleEnvServiceDevInstance
                 .transaction('GET /api')
                 .timestamp(timestamp)
                 .duration(config.multiple.dev.duration)
                 .failure()
-                .serialize(),
-            ]),
+            ),
           transactionInterval
             .rate(config.multiple.prod.rps)
-            .spans((timestamp) => [
-              ...multipleEnvServiceDevInstance
+            .generator((timestamp) =>
+              multipleEnvServiceDevInstance
                 .transaction('non-request', 'rpc')
                 .timestamp(timestamp)
                 .duration(config.multiple.prod.duration)
                 .success()
-                .serialize(),
-            ]),
-          metricInterval.rate(1).spans((timestamp) => [
-            ...metricOnlyInstance
+            ),
+          metricInterval.rate(1).generator((timestamp) =>
+            metricOnlyInstance
               .appMetrics({
                 'system.memory.actual.free': 1,
                 'system.cpu.total.norm.pct': 1,
@@ -135,13 +132,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 'system.process.cpu.total.norm.pct': 1,
               })
               .timestamp(timestamp)
-              .serialize(),
-          ]),
+          ),
           errorInterval
             .rate(1)
-            .spans((timestamp) => [
-              ...errorOnlyInstance.error('Foo').timestamp(timestamp).serialize(),
-            ]),
+            .generator((timestamp) => errorOnlyInstance.error('Foo').timestamp(timestamp)),
         ]);
       });
 
