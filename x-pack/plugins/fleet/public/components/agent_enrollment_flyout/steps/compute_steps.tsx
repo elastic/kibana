@@ -45,6 +45,7 @@ import {
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
   IncomingDataConfirmationStep,
+  DownloadStep,
 } from '.';
 
 export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
@@ -201,6 +202,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   onClickViewAgents,
   isK8s,
   installedPackagePolicy,
+  isFleetServerPolicySelected,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -209,6 +211,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
   const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
   const apiKeyData = apiKey?.data;
+  const enrollToken = apiKey.data ? apiKey.data.item.api_key : '';
+
   const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '');
 
   const fleetServerHosts = useMemo(() => {
@@ -237,6 +241,12 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
     if (selectionType === 'radio') {
       steps.push(InstallationModeSelectionStep({ mode, setMode }));
+    }
+
+    if (isK8s === 'IS_KUBERNETES') {
+      steps.push(
+        DownloadStep(isFleetServerPolicySelected || false, isK8s || '', enrollToken || '')
+      );
     }
 
     steps.push(
