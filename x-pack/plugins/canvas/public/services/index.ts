@@ -10,6 +10,7 @@ export * from './legacy';
 import { PluginServices } from '../../../../../src/plugins/presentation_util/public';
 
 import { CanvasCustomElementService } from './custom_element';
+import { CanvasDataViewsService } from './data_views';
 import { CanvasEmbeddablesService } from './embeddables';
 import { CanvasExpressionsService } from './expressions';
 import { CanvasFiltersService } from './filters';
@@ -23,6 +24,7 @@ import { CanvasWorkpadService } from './workpad';
 
 export interface CanvasPluginServices {
   customElement: CanvasCustomElementService;
+  dataViews: CanvasDataViewsService;
   embeddables: CanvasEmbeddablesService;
   expressions: CanvasExpressionsService;
   filters: CanvasFiltersService;
@@ -39,6 +41,7 @@ export const pluginServices = new PluginServices<CanvasPluginServices>();
 
 export const useCustomElementService = () =>
   (() => pluginServices.getHooks().customElement.useService())();
+export const useDataViewsService = () => (() => pluginServices.getHooks().dataViews.useService())();
 export const useEmbeddablesService = () =>
   (() => pluginServices.getHooks().embeddables.useService())();
 export const useExpressionsService = () =>

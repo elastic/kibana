@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { ESIndexSelect } from './es_index_select';
-export { ESIndexSelect as ESIndexSelectComponent } from './es_index_select.component';
+export interface CanvasDataViewsService {
+  getFields: (index: string) => Promise<string[]>;
+  getDataViews: () => Promise<string[]>;
+  getDefaultDataView: () => Promise<string>;
+}

@@ -7,28 +7,29 @@
 
 import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import { DataViewListItem } from 'src/plugins/data_views/common';
 
-export interface ESIndexSelectProps {
+export interface ESDataViewSelectProps {
   loading: boolean;
   value: string;
-  indices: string[];
-  onChange: (index: string) => void;
+  dataViews: string[];
+  onChange: (dataView: string) => void;
   onBlur: FocusEventHandler<HTMLDivElement> | undefined;
   onFocus: FocusEventHandler<HTMLDivElement> | undefined;
 }
 
 const defaultIndex = '_all';
 
-export const ESIndexSelect: React.FunctionComponent<ESIndexSelectProps> = ({
+export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = ({
   value = defaultIndex,
   loading,
-  indices,
+  dataViews,
   onChange,
   onFocus,
   onBlur,
 }) => {
   const selectedOption = value !== defaultIndex ? [{ label: value }] : [];
-  const options = indices.map((index) => ({ label: index }));
+  const options = dataViews.map((dataView) => ({ label: dataView }));
 
   return (
     <EuiComboBox
