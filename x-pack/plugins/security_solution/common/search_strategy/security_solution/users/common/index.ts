@@ -67,7 +67,7 @@ export interface AllUsersAggEsItem {
 export interface UsersDomainHitsItem {
   hits: {
     hits: Array<{
-      _source: { user: { domain: Maybe<string> } };
+      fields: { user: { domain: Maybe<Array<string>> } };
     }>;
   };
 }

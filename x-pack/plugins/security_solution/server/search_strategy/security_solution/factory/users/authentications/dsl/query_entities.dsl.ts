@@ -37,7 +37,6 @@ export const buildQueryEntities = ({
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         stack_by_count: {
           cardinality: {
@@ -73,6 +72,8 @@ export const buildQueryEntities = ({
         },
       },
       size: 0,
+      _source: false,
+      fields: [...(docValueFields && !isEmpty(docValueFields) ? docValueFields : []) ]
     },
     track_total_hits: false,
   };

@@ -9,21 +9,21 @@ import { isEmpty } from 'lodash/fp';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/authentications';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
-
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
-import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
+import { authenticationsLastSuccessFields } from '../helpers';
 
-import { authenticationsFields } from '../helpers';
-import { extendMap } from '../../../../../../../common/ecs/ecs_fields/extend_map';
-
-export const auditdFieldsMap: Readonly<Record<string, string>> = {
+export const auditdFieldsMap: Readonly<Record<string, unknown>> = {
   latest: '@timestamp',
-  'lastSuccess.timestamp': 'lastSuccess.@timestamp',
-  'lastFailure.timestamp': 'lastFailure.@timestamp',
-  ...{ ...extendMap('lastSuccess', sourceFieldsMap) },
-  ...{ ...extendMap('lastSuccess', hostFieldsMap) },
-  ...{ ...extendMap('lastFailure', sourceFieldsMap) },
-  ...{ ...extendMap('lastFailure', hostFieldsMap) },
+  'lastSuccess': {
+    'timestamp': '@timestamp',
+    ...sourceFieldsMap,
+    ...hostFieldsMap,
+  },
+  'lastFailure': {
+    'timestamp': '@timestamp',
+    ...sourceFieldsMap,
+    ...hostFieldsMap,
+  },
 };
 
 export const buildQuery = ({
@@ -34,10 +34,7 @@ export const buildQuery = ({
   defaultIndex,
   docValueFields,
 }: UserAuthenticationsRequestOptions) => {
-  const esFields = reduceFields(authenticationsFields, {
-    ...hostFieldsMap,
-    ...sourceFieldsMap,
-  }) as string[];
+  const esFields = authenticationsLastSuccessFields;
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -58,7 +55,6 @@ export const buildQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         stack_by_count: {
           cardinality: {
@@ -85,7 +81,7 @@ export const buildQuery = ({
                 lastFailure: {
                   top_hits: {
                     size: 1,
-                    _source: esFields,
+                    _source: false,
                     sort: [{ '@timestamp': { order: 'desc' as const } }],
                   },
                 },
@@ -101,7 +97,7 @@ export const buildQuery = ({
                 lastSuccess: {
                   top_hits: {
                     size: 1,
-                    _source: esFields,
+                    _source: false,
                     sort: [{ '@timestamp': { order: 'desc' as const } }],
                   },
                 },
@@ -116,6 +112,8 @@ export const buildQuery = ({
         },
       },
       size: 0,
+      _source: false,
+      fields: [...esFields, ...(docValueFields && !isEmpty(docValueFields) ? docValueFields : []), 'host*', 'source*', '@timestamp'],
     },
     track_total_hits: false,
   };

@@ -60,15 +60,15 @@ export const buildUsersQuery = ({
                     },
                   },
                 ],
-                _source: {
-                  includes: ['user.domain'],
-                },
+                _source: false,
               },
             },
           },
         },
       },
       query: { bool: { filter } },
+      _source: false,
+      fields: ['user.*', '@timestamp'],
       size: 0,
     },
   };

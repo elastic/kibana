@@ -7,7 +7,6 @@
 
 import { get, getOr, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
-import { mergeFieldsWithHit } from '../../../../../utils/build_query';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import {
   AuthenticationsEdges,
@@ -17,78 +16,72 @@ import {
   StrategyResponseType,
 } from '../../../../../../common/search_strategy/security_solution';
 
-export const authenticationsFields = [
-  '_id',
-  'failures',
-  'successes',
-  'stackedValue',
-  'lastSuccess.timestamp',
-  'lastSuccess.source.ip',
-  'lastSuccess.host.id',
-  'lastSuccess.host.name',
-  'lastFailure.timestamp',
-  'lastFailure.source.ip',
-  'lastFailure.host.id',
-  'lastFailure.host.name',
-];
+export const authenticationsLastSuccessFields = ['timestamp', 'source.ip', 'host.id', 'host.name'];
+
+export const authenticationsLastFailureFields = ['timestamp', 'source.ip', 'host.id', 'host.name'];
 
 export const formatAuthenticationData = (
-  fields: readonly string[] = authenticationsFields,
   hit: AuthenticationHit,
-  fieldMap: Readonly<Record<string, string>>
-): AuthenticationsEdges =>
-  fields.reduce<AuthenticationsEdges>(
-    (flattenedFields, fieldName) => {
-      if (hit.cursor) {
-        flattenedFields.cursor.value = hit.cursor;
-      }
-      flattenedFields.node = {
-        ...flattenedFields.node,
-        ...{
-          _id: hit._id,
-          stackedValue: [hit.stackedValue],
-          failures: hit.failures,
-          successes: hit.successes,
-        },
-      };
-      const mergedResult = mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-      const fieldPath = `node.${fieldName}`;
-      const fieldValue = get(fieldPath, mergedResult);
+  fieldMap: Readonly<Record<string, unknown>>
+): AuthenticationsEdges => {
+  let flattenedFields = {
+    node: {
+      _id: hit._id,
+      stackedValue: [hit.stackedValue],
+      failures: hit.failures,
+      successes: hit.successes,
+    },
+    cursor: {
+      value: hit.cursor,
+      tiebreaker: null,
+    },
+  };
+  authenticationsLastSuccessFields.forEach((fieldName) => {
+    const fieldPath = `node.lastSuccess.${fieldName}`;
+    const esField = get(`lastSuccess['${fieldName}']`, fieldMap);
+
+    if (!isEmpty(esField)) {
+      const fieldValue = get(esField as string, hit.fields.lastSuccess);
+
       if (!isEmpty(fieldValue)) {
-        return set(
+        flattenedFields = set(
           fieldPath,
           toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
-          mergedResult
+          flattenedFields
         );
-      } else {
-        return mergedResult;
       }
-    },
-    {
-      node: {
-        failures: 0,
-        successes: 0,
-        _id: '',
-        stackedValue: [''],
-      },
-      cursor: {
-        value: '',
-        tiebreaker: null,
-      },
     }
-  );
+  });
+
+  authenticationsLastFailureFields.forEach((fieldName) => {
+    const fieldPath = `node.lastFailure.${fieldName}`;
+    const esField = get(`lastFailure['${fieldName}']`, fieldMap);
+    if (!isEmpty(esField)) {
+      const fieldValue = get(esField as string, hit.fields.lastFailure);
+      if (!isEmpty(fieldValue)) {
+        flattenedFields = set(
+          fieldPath,
+          toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+          flattenedFields
+        );
+      }
+    }
+  });
+
+  return flattenedFields;
+};
 
 export const getHits = <T extends FactoryQueryTypes>(response: StrategyResponseType<T>) =>
   getOr([], 'aggregations.stack_by.buckets', response.rawResponse).map(
     (bucket: AuthenticationBucket) => ({
       _id: getOr(
         `${bucket.key}+${bucket.doc_count}`,
-        'failures.lastFailure.hits.hits[0].id',
+        'failures.lastFailure.hits.hits[0]._id',
         bucket
       ),
-      _source: {
-        lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
-        lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
+      fields: {
+        lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0].fields', bucket),
+        lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0].fields', bucket),
       },
       stackedValue: bucket.key,
       failures: bucket.failures.doc_count,
@@ -104,59 +97,12 @@ export const getHitsEntities = <T extends FactoryQueryTypes>(response: StrategyR
         'failures.lastFailure.hits.hits[0].id',
         bucket
       ),
-      _source: {
-        lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
-        lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
+      fields: {
+        lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0].fields', bucket),
+        lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0].fields', bucket),
       },
       stackedValue: bucket.key,
       failures: bucket.failures.value,
       successes: bucket.successes.value,
     })
   );
-
-export const formatAuthenticationEntitiesData = (
-  fields: readonly string[] = authenticationsFields,
-  hit: AuthenticationHit,
-  fieldMap: Readonly<Record<string, string>>
-): AuthenticationsEdges => {
-  return fields.reduce<AuthenticationsEdges>(
-    (flattenedFields, fieldName) => {
-      if (hit.cursor) {
-        flattenedFields.cursor.value = hit.cursor;
-      }
-      flattenedFields.node = {
-        ...flattenedFields.node,
-        ...{
-          _id: hit._id,
-          stackedValue: [hit.stackedValue],
-          failures: hit.failures,
-          successes: hit.successes,
-        },
-      };
-      const mergedResult = mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-      const fieldPath = `node.${fieldName}`;
-      const fieldValue = get(fieldPath, mergedResult);
-      if (!isEmpty(fieldValue)) {
-        return set(
-          fieldPath,
-          toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
-          mergedResult
-        );
-      } else {
-        return mergedResult;
-      }
-    },
-    {
-      node: {
-        failures: 0,
-        successes: 0,
-        _id: '',
-        stackedValue: [''],
-      },
-      cursor: {
-        value: '',
-        tiebreaker: null,
-      },
-    }
-  );
-};

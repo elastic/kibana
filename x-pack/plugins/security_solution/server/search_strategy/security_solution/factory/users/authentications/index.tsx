@@ -25,9 +25,7 @@ import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/q
 import { buildQueryEntities as buildAuthenticationQueryEntities } from './dsl/query_entities.dsl';
 
 import {
-  authenticationsFields,
   formatAuthenticationData,
-  formatAuthenticationEntitiesData,
   getHits,
   getHitsEntities,
 } from './helpers';
@@ -50,7 +48,7 @@ export const authentications: SecuritySolutionFactory<UsersQueries.authenticatio
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHits(response);
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationData(authenticationsFields, hit, auditdFieldsMap)
+      formatAuthenticationData(hit, auditdFieldsMap)
     );
 
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
@@ -77,7 +75,6 @@ export const authenticationsEntities: SecuritySolutionFactory<UsersQueries.authe
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
-
     return buildAuthenticationQueryEntities(options);
   },
   parse: async (
@@ -89,8 +86,9 @@ export const authenticationsEntities: SecuritySolutionFactory<UsersQueries.authe
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHitsEntities(response);
+    console.log(hits)
     const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
-      formatAuthenticationEntitiesData(authenticationsFields, hit, auditdFieldsMap)
+      formatAuthenticationData(hit, auditdFieldsMap)
     );
 
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);

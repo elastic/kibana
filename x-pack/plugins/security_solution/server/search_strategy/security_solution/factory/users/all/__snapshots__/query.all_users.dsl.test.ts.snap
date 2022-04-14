@@ -14,11 +14,7 @@ Object {
         "aggs": Object {
           "domain": Object {
             "top_hits": Object {
-              "_source": Object {
-                "includes": Array [
-                  "user.domain",
-                ],
-              },
+              "_source": false,
               "size": 1,
               "sort": Array [
                 Object {
@@ -85,6 +81,10 @@ Object {
       },
     },
     "size": 0,
+    "_source": false,
+    "fields": Array [
+      "user.*", "@timestamp"
+    ],
   },
   "ignore_unavailable": true,
   "index": Array [

@@ -2399,7 +2399,7 @@ export const expectedDsl = {
             filter: { term: { 'event.outcome': 'failure' } },
             aggs: {
               lastFailure: {
-                top_hits: { size: 1, _source: [], sort: [{ '@timestamp': { order: 'desc' } }] },
+                top_hits: { size: 1, _source: false, sort: [{ '@timestamp': { order: 'desc' } }] },
               },
             },
           },
@@ -2407,7 +2407,7 @@ export const expectedDsl = {
             filter: { term: { 'event.outcome': 'success' } },
             aggs: {
               lastSuccess: {
-                top_hits: { size: 1, _source: [], sort: [{ '@timestamp': { order: 'desc' } }] },
+                top_hits: { size: 1, _source: false, sort: [{ '@timestamp': { order: 'desc' } }] },
               },
             },
           },
@@ -2431,6 +2431,8 @@ export const expectedDsl = {
         ],
       },
     },
+    _source: false,
+    fields: ['timestamp', 'source.ip', 'host.id', 'host.name', 'host*', 'source*', '@timestamp'],
     size: 0,
   },
   track_total_hits: false,
@@ -2441,7 +2443,7 @@ export const mockHit: AuthenticationHit = {
   _type: 'type-123',
   _id: 'id-123',
   _score: 10,
-  _source: {
+  fields: {
     '@timestamp': 'time-1',
   },
   cursor: 'cursor-1',
