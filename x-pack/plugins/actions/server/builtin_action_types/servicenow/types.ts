@@ -26,6 +26,7 @@ import {
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
+import { ConnectorTokenClientContract } from '../../types';
 
 export type ServiceNowPublicConfigurationBaseType = TypeOf<
   typeof ExternalIncidentServiceConfigurationBaseSchema
@@ -286,10 +287,12 @@ export interface ExternalServiceSIR extends ExternalService {
 }
 
 export type ServiceFactory<T = ExternalService> = (
+  connectorId: string,
   credentials: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  serviceConfig: SNProductsConfigValue
+  serviceConfig: SNProductsConfigValue,
+  connectorTokenClient: ConnectorTokenClientContract
 ) => T;
 
 /**

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 import {
   ExternalServiceCredentials,
@@ -21,7 +21,8 @@ import { ServiceNowSecretConfigurationType } from './types';
 import { request } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { createExternalService } from './service';
-import { createServiceError } from './utils';
+import { createServiceError, getAccessToken } from './utils';
+import { ConnectorTokenClientContract } from '../../types';
 
 const getAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables`;
@@ -30,22 +31,50 @@ const getBulkAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables/bulk`;
 
 export const createExternalServiceSIR: ServiceFactory<ExternalServiceSIR> = (
+  connectorId: string,
   credentials: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  serviceConfig: SNProductsConfigValue
+  serviceConfig: SNProductsConfigValue,
+  connectorTokenClient: ConnectorTokenClientContract
 ): ExternalServiceSIR => {
   const snService = createExternalService(
+    connectorId,
     credentials,
     logger,
     configurationUtilities,
-    serviceConfig
+    serviceConfig,
+    connectorTokenClient
   );
 
+  const { isOAuth } = credentials.config;
+
   const { username, password } = credentials.secrets as ServiceNowSecretConfigurationType;
-  const axiosInstance = axios.create({
-    auth: { username, password },
-  });
+  let axiosInstance = axios.create();
+
+  if (!isOAuth && username && password) {
+    axiosInstance = axios.create({
+      auth: { username, password },
+    });
+  } else {
+    axiosInstance.interceptors.request.use(
+      async (config: AxiosRequestConfig) => {
+        const accessToken = await getAccessToken(
+          connectorId,
+          logger,
+          configurationUtilities,
+          credentials,
+          snService.getUrl(),
+          connectorTokenClient
+        );
+        config.headers.Authorization = accessToken;
+        return config;
+      },
+      (error) => {
+        Promise.reject(error);
+      }
+    );
+  }
 
   const _addObservable = async (data: Observable | Observable[], url: string) => {
     snService.checkIfApplicationIsInstalled();
