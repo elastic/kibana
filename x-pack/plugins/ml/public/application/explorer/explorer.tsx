@@ -621,73 +621,76 @@ export const Explorer: FC<ExplorerUIProps> = ({
           <EuiFlexItem>{mainPanelContent}</EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiResizableContainer
-          direction={isMobile ? 'vertical' : 'horizontal'}
-          onPanelWidthChange={onPanelWidthChange}
-        >
-          {(EuiResizablePanel, EuiResizableButton, actions) => {
-            collapseFn.current = () =>
-              actions.togglePanel!('topInfluencers', { direction: 'left' });
+        <div>
+          <EuiSpacer size={'s'} />
+          <EuiResizableContainer
+            direction={isMobile ? 'vertical' : 'horizontal'}
+            onPanelWidthChange={onPanelWidthChange}
+          >
+            {(EuiResizablePanel, EuiResizableButton, actions) => {
+              collapseFn.current = () =>
+                actions.togglePanel!('topInfluencers', { direction: 'left' });
 
-            return (
-              <>
-                <EuiResizablePanel
-                  panelRef={topInfluencersPanelRef}
-                  id={'topInfluencers'}
-                  mode={[
-                    'collapsible',
-                    {
-                      'data-test-subj': 'mlTopInfluencersToggle',
-                      position: 'top',
-                    },
-                  ]}
-                  minSize={'200px'}
-                  initialSize={20}
-                  paddingSize={'s'}
-                  onToggleCollapsed={onToggleCollapsed}
-                >
-                  <div data-test-subj="mlAnomalyExplorerInfluencerList">
-                    <EuiSpacer size={'s'} />
-                    <EuiTitle className="panel-title">
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.ml.explorer.topInfuencersTitle"
-                          defaultMessage="Top influencers"
-                        />
-                        <EuiIconTip
-                          content={
-                            <FormattedMessage
-                              id="xpack.ml.explorer.topInfluencersTooltip"
-                              defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
-                            />
-                          }
-                          position="right"
-                        />
-                      </h2>
-                    </EuiTitle>
-                    {loading ? (
-                      <EuiLoadingContent lines={10} />
-                    ) : (
-                      <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
-                    )}
-                  </div>
-                </EuiResizablePanel>
+              return (
+                <>
+                  <EuiResizablePanel
+                    panelRef={topInfluencersPanelRef}
+                    id={'topInfluencers'}
+                    mode={[
+                      'collapsible',
+                      {
+                        'data-test-subj': 'mlTopInfluencersToggle',
+                        position: 'top',
+                      },
+                    ]}
+                    minSize={'200px'}
+                    initialSize={20}
+                    paddingSize={'s'}
+                    onToggleCollapsed={onToggleCollapsed}
+                  >
+                    <div data-test-subj="mlAnomalyExplorerInfluencerList">
+                      <EuiSpacer size={'s'} />
+                      <EuiTitle className="panel-title">
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.ml.explorer.topInfuencersTitle"
+                            defaultMessage="Top influencers"
+                          />
+                          <EuiIconTip
+                            content={
+                              <FormattedMessage
+                                id="xpack.ml.explorer.topInfluencersTooltip"
+                                defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
+                              />
+                            }
+                            position="right"
+                          />
+                        </h2>
+                      </EuiTitle>
+                      {loading ? (
+                        <EuiLoadingContent lines={10} />
+                      ) : (
+                        <InfluencersList influencers={influencers} influencerFilter={applyFilter} />
+                      )}
+                    </div>
+                  </EuiResizablePanel>
 
-                <EuiResizableButton />
+                  <EuiResizableButton />
 
-                <EuiResizablePanel
-                  id="mainPage"
-                  mode="main"
-                  minSize={'70%'}
-                  initialSize={80}
-                  paddingSize={'s'}
-                >
-                  {mainPanelContent}
-                </EuiResizablePanel>
-              </>
-            );
-          }}
-        </EuiResizableContainer>
+                  <EuiResizablePanel
+                    id="mainPage"
+                    mode="main"
+                    minSize={'70%'}
+                    initialSize={80}
+                    paddingSize={'s'}
+                  >
+                    {mainPanelContent}
+                  </EuiResizablePanel>
+                </>
+              );
+            }}
+          </EuiResizableContainer>
+        </div>
       )}
     </ExplorerPage>
   );
