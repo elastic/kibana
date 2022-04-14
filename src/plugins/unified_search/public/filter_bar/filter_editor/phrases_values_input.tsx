@@ -40,11 +40,12 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
             id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',
           })}
+          delimiter=","
           options={options}
           getLabel={(option) => option}
           selectedOptions={values || []}
           onSearchChange={this.onSearchChange}
-          onCreateOption={(option: string) => onChange([...(values || []), option])}
+          onCreateOption={(option: string) => onChange([...(values || []), option.trim()])}
           onChange={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
