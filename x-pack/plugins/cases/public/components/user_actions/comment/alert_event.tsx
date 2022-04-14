@@ -9,60 +9,100 @@ import React, { memo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { CommentType } from '../../../../common/api';
 import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
 import { RuleDetailsNavigation } from '../types';
 
-interface Props {
-  alertId: string;
-  commentType: CommentType;
-  getRuleDetailsHref?: RuleDetailsNavigation['href'];
-  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
+interface SingleAlertProps {
   ruleId?: string | null;
   ruleName?: string | null;
-  alertsCount?: number;
+  getRuleDetailsHref?: RuleDetailsNavigation['href'];
+  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   loadingAlertData?: boolean;
 }
 
-const AlertCommentEventComponent: React.FC<Props> = ({
-  alertId,
+interface MultipleAlertsProps extends SingleAlertProps {
+  totalAlerts: number;
+}
+
+const RuleLink: React.FC<SingleAlertProps> = memo(
+  ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, loadingAlertData }) => {
+    const onLinkClick = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        if (onRuleDetailsClick) onRuleDetailsClick(ruleId, ev);
+      },
+      [ruleId, onRuleDetailsClick]
+    );
+
+    const ruleDetailsHref = getRuleDetailsHref?.(ruleId);
+    const finalRuleName = ruleName ?? i18n.UNKNOWN_RULE;
+
+    if (!loadingAlertData && !isEmpty(ruleId) && ruleDetailsHref != null) {
+      return (
+        <LinkAnchor
+          onClick={onLinkClick}
+          href={ruleDetailsHref}
+          data-test-subj={`alert-rule-link-${ruleId ?? 'deleted'}`}
+        >
+          {finalRuleName}
+        </LinkAnchor>
+      );
+    }
+
+    return <>{finalRuleName}</>;
+  }
+);
+
+RuleLink.displayName = 'RuleLink';
+
+const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
   getRuleDetailsHref,
   loadingAlertData = false,
   onRuleDetailsClick,
   ruleId,
   ruleName,
-  alertsCount,
-  commentType,
 }) => {
-  const onLinkClick = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      if (onRuleDetailsClick) onRuleDetailsClick(ruleId, ev);
-    },
-    [ruleId, onRuleDetailsClick]
-  );
-  const detectionsRuleDetailsHref = getRuleDetailsHref?.(ruleId);
-  const finalRuleName = ruleName ?? i18n.UNKNOWN_RULE;
-
   return (
     <>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
       {loadingAlertData && <EuiLoadingSpinner size="m" />}
-      {!loadingAlertData && !isEmpty(ruleId) && detectionsRuleDetailsHref != null && (
-        <LinkAnchor
-          onClick={onLinkClick}
-          href={detectionsRuleDetailsHref}
-          data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}
-        >
-          {finalRuleName}
-        </LinkAnchor>
-      )}
-      {!loadingAlertData && !isEmpty(ruleId) && detectionsRuleDetailsHref == null && finalRuleName}
-      {!loadingAlertData && isEmpty(ruleId) && finalRuleName}
+      <RuleLink
+        ruleId={ruleId}
+        ruleName={ruleName}
+        getRuleDetailsHref={getRuleDetailsHref}
+        onRuleDetailsClick={onRuleDetailsClick}
+        loadingAlertData={loadingAlertData}
+      />
     </>
   );
 };
-AlertCommentEventComponent.displayName = 'AlertCommentEvent';
 
-export const AlertCommentEvent = memo(AlertCommentEventComponent);
+SingleAlertCommentEventComponent.displayName = 'SingleAlertCommentEvent';
+
+export const SingleAlertCommentEvent = memo(SingleAlertCommentEventComponent);
+
+const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
+  getRuleDetailsHref,
+  loadingAlertData = false,
+  onRuleDetailsClick,
+  ruleId,
+  ruleName,
+  totalAlerts,
+}) => {
+  return (
+    <>
+      {`${i18n.MULTIPLE_ALERTS_COMMENT_LABEL_TITLE(totalAlerts)}`}{' '}
+      <RuleLink
+        ruleId={ruleId}
+        ruleName={ruleName}
+        getRuleDetailsHref={getRuleDetailsHref}
+        onRuleDetailsClick={onRuleDetailsClick}
+        loadingAlertData={loadingAlertData}
+      />
+    </>
+  );
+};
+
+MultipleAlertsCommentEventComponent.displayName = 'MultipleAlertsCommentEvent';
+export const MultipleAlertsCommentEvent = memo(MultipleAlertsCommentEventComponent);

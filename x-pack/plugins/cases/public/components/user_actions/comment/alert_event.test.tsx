@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { AlertCommentEvent } from './alert_event';
+import { SingleAlertCommentEvent } from './alert_event';
 import { CommentType } from '../../../../common/api';
 
 const props = {
@@ -38,7 +38,7 @@ describe('UserActionAvatar ', () => {
   it('it renders', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AlertCommentEvent {...props} />
+        <SingleAlertCommentEvent {...props} />
       </TestProviders>
     );
 
@@ -51,7 +51,7 @@ describe('UserActionAvatar ', () => {
   it('does NOT render the link when the rule is null', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AlertCommentEvent {...props} ruleId={null} />
+        <SingleAlertCommentEvent {...props} ruleId={null} />
       </TestProviders>
     );
 
@@ -65,7 +65,7 @@ describe('UserActionAvatar ', () => {
   it('does NOT render the link when the href is invalid but it shows the rule name', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AlertCommentEvent {...props} getRuleDetailsHref={undefined} />
+        <SingleAlertCommentEvent {...props} getRuleDetailsHref={undefined} />
       </TestProviders>
     );
 
@@ -79,7 +79,7 @@ describe('UserActionAvatar ', () => {
   it('show Unknown rule if the rule name is invalid', async () => {
     const wrapper = mount(
       <TestProviders>
-        <AlertCommentEvent {...props} ruleName={null} />
+        <SingleAlertCommentEvent {...props} ruleName={null} />
       </TestProviders>
     );
 
@@ -94,7 +94,7 @@ describe('UserActionAvatar ', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AlertCommentEvent {...props} onRuleDetailsClick={onRuleDetailsClick} />
+        <SingleAlertCommentEvent {...props} onRuleDetailsClick={onRuleDetailsClick} />
       </TestProviders>
     );
 
