@@ -110,6 +110,7 @@ export function EnvironmentSelect({
 
   return (
     <EuiComboBox
+      data-test-subj="environmentFilter"
       async
       isClearable={false}
       style={{ minWidth: '256px' }}

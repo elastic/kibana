@@ -206,7 +206,7 @@ describe.skip('Service Overview', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
-      cy.get('[data-test-subj="environmentFilter"]').select('production');
+      cy.get('[data-test-subj="environmentFilter"]').type('production').click();
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,

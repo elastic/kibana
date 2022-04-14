@@ -132,7 +132,7 @@ export default function suggestionsTests({ getService }: FtrProviderContext) {
 
             expectSnapshot(body).toMatchInline(`
                 Object {
-                  "terms": Array [,
+                  "terms": Array [
                     "Worker",
                   ],
                 }
