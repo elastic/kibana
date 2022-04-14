@@ -111,7 +111,7 @@ export class TestSubjects extends FtrService {
     topOffset?: number
   ): Promise<void> {
     this.log.debug(`TestSubjects.clickWithRetries(${selector})`);
-    await this.findService.clickByCssSelector(
+    await this.findService.clickByCssSelectorWithRetries(
       testSubjSelector(selector),
       timeout,
       topOffset,
