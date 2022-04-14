@@ -140,14 +140,24 @@ Actions are not required on rules. You can run a rule without actions to underst
 
 [float]
 [[controlling-rules]]
-=== Mute and disable rules
+=== Snooze and disable rules
 
-The rule listing allows you to quickly mute/unmute, disable/enable, and delete individual rules by clicking menu button to open the actions menu. Muting means that the rule checks continue to run on a schedule, but that alert will not trigger any action.
+The rule listing allows you to quickly snooze/unsnooze and disable/enable, and delete individual rules using the colored dropdown.
 
 [role="screenshot"]
-image:images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted]
+image:images/individual-snooze-disable.png[The rule status dropdown allows an individual rule to be snoozed or disabled]
 
-You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button:
+Snoozing means that the rule checks continue to run on a schedule, but that alert will not trigger any action. You can set this snooze to expire after a certain period of time, or to snooze indefinitely if you want to snooze the rule's actions until you manually unsnooze them.
+
+[role="screenshot"]
+image:images/snooze-panel.png[The snooze panel allows you to set the length of a rule's snooze period]
+
+If a rule is already snoozed, you can use the snooze UI to change the amount of time it will continue to snooze for, or to cancel the snooze.
+
+[role="screenshot"]
+image:images/cancel-snooze.png[The snooze panel allows you to modify or cancel an existing snooze]
+
+You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button. **(Note that "Mute" refers to an indefinite snooze. This term may be changed in a future version of Kibana.)**
 
 [role="screenshot"]
 image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk,width=75%]
