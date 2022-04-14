@@ -6,8 +6,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { firstValueFrom, Subject } from 'rxjs';
 
 import uuid from 'uuid';
 import _ from 'lodash';
@@ -35,9 +34,7 @@ export class SampleTaskManagerFixturePlugin
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
-  taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
-    .pipe(first())
-    .toPromise();
+  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const performanceState = resetPerfState({});
