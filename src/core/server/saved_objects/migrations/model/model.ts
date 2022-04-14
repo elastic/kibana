@@ -238,8 +238,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isLeft(res)) {
       const left = res.left;
       if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
-        // TODO: Add comment as to what could be causing a timeout waiting for the index
-        // to turn yellow.
+        // `index_not_yellow_timeout` for the LEGACY_CREATE_REINDEX_TARGET source index:
+        // A yellow status timeout could theoretically be temporary for a busy cluster
+        // that takes a long time to allocate the primary and we retry the action to see if
+        // we get a response.
+        // If the cluster hit the low watermark for disk usage the LEGACY_CREATE_TEINDEX_TARGET action will
+        // continue to timeout and eventually lead to a failed migration.
+        // To help users diagnose the problem, we link to the docs from the final error message.
         return delayRetryState(
           stateP,
           left.message,
@@ -299,7 +304,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // After waiting for the specified timeout, the task has not yet
         // completed. Retry this step to see if the task has completed after an
         // exponential delay. We will basically keep polling forever until the
-        // Elasticeasrch task succeeds or fails.
+        // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
       } else if (
         isLeftTypeof(left, 'index_not_found_exception') ||
@@ -361,8 +366,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
-        // The cluster might be busy so we retry this step until the default number of
-        // retries specified in the migration config.
+        // A yellow status timeout could theoretically be temporary for a busy cluster
+        // that takes a long time to allocate the primary and we retry the action to see if
+        // we get a response.
+        // In the event of retries running out, we link to the docs to help with diagnosing
+        // the problem.
         return delayRetryState(
           stateP,
           left.message,
@@ -456,7 +464,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
-        // TODO: Add comment about manually retying the action
+        // `index_not_yellow_timeout` for the CREATE_REINDEX_TEMP target temp index:
+        // The index status did not go yellow within the specified timeout period.
+        // A yellow status timeout could theoretically be temporary for a busy cluster.
+        //
+        // If there is a problem CREATE_REINDEX_TEMP action will
+        // continue to timeout and eventually lead to a failed migration.
+        // To help users diagnose the problem, we link to the docs from the final error message.
         return delayRetryState(
           stateP,
           left.message,
@@ -687,8 +701,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'REFRESH_TARGET',
         };
       } else if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
-        // TODO: add code comment as to why we manually retry this step
-        // Alsodouble check to see if we need to reset the counter on any right response for this state
+        // `index_not_yellow_timeout` for the CLONE_TEMP_TO_TARGET source -> target index:
+        // The target index status did not go yellow within the specified timeout period.
+        // The cluster could just be busy and we retry the action.
+
+        // Once we run out of retries, the migration fails.
+        // Identifying the cause requires inspecting the ouput of the
+        // `_cluster/allocation/explain?index=${targetIndex}` API.
+        // Unless the root cause is identified and addressed, the request will
+        // continue to timeout and eventually lead to a failed migration. We link to the
+        // docs in the final error message to help diagnose the problem.
         return delayRetryState(
           stateP,
           left.message,
@@ -943,8 +965,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
-        // TODO: Add comment as to why we have to manually retry this state
-        // TODO: Double check if we need to reset the delay retry state
+        // `index_not_yellow_timeout` for the CREATE_NEW_TARGET target index:
+        // The cluster might just be busy and we retry the action for a set number of times.
+        // If the cluster hit the low watermark for disk usage the action will continue to timeout.
+        // Unless the disc space is addressed, the LEGACY_CREATE_TEINDEX_TARGET action will
+        // continue to timeout and eventually lead to a failed migration.
+        // To help diagnose the issue, the final Error message is clearly labeled and has
+        // a link to the online docs that has more information on how to diagnose
+        // the error.
         return delayRetryState(
           stateP,
           left.message,

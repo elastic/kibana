@@ -122,7 +122,7 @@ export const cloneIndex = ({
 
   return pipe(
     cloneTask,
-    TaskEither.chainFirstW((res) => {
+    TaskEither.chainW((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right(res);

@@ -321,8 +321,12 @@ describe('migration actions', () => {
   });
 
   describe('waitForIndexStatusYellow', () => {
-    afterAll(async () => {
-      await client.indices.delete({ index: 'red_then_yellow_index' });
+    afterEach(async () => {
+      try {
+        await client.indices.delete({ index: 'red_then_yellow_index' });
+      } catch (e) {
+        // index probably doesn't exist.
+      }
     });
     it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
       // Create a red index
@@ -365,6 +369,42 @@ describe('migration actions', () => {
 
       const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(yellowStatusResponse.status).toBe('yellow');
+    });
+    it('resolves left with "index_not_yellow_timeout" after waiting for an index status to be yellow timeout', async () => {
+      // Create a red index
+      await client.indices
+        .create({
+          index: 'red_then_yellow_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              index: { routing: { allocation: { enable: 'none' } } },
+            },
+          },
+        })
+        .catch((e) => {});
+
+      // Try to clone into an existing index to ensure that we reach a timeout waiting for index status yellow
+      const cloneIndexPromise = cloneIndex({
+        client,
+        source: 'existing_index_with_write_block',
+        target: 'red_then_yellow_index',
+        timeout: '1s',
+      })();
+
+      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [red_then_yellow_index] index to become 'yellow'",
+            "type": "index_not_yellow_timeout",
+          },
+        }
+      `);
     });
   });
 
@@ -459,7 +499,7 @@ describe('migration actions', () => {
           }
       `);
     });
-    it('resolves left with a retryable_es_client_error if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
+    it('resolves left with a index_not_yellow_timeout if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
       // Create a red index
       await client.indices
         .create({
@@ -489,8 +529,8 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
-            "type": "retryable_es_client_error",
+            "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'yellow'",
+            "type": "index_not_yellow_timeout",
           },
         }
       `);
