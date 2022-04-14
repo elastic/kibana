@@ -238,7 +238,7 @@ You can bookmark this document and share the link.
 [[save-your-search]]
 === Save your search for later use
 
-Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
+Save your search so you can use it later, generate a CSV report, or use it to create visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query text, filters,
 and current view of *Discover*, including the columns selected in
 the document table, the sort order, and the {data-source}.
