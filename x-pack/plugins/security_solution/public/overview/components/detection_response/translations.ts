@@ -13,73 +13,117 @@ export const STATUS_CRITICAL_LABEL = i18n.translate(
     defaultMessage: 'Critical',
   }
 );
-
 export const STATUS_HIGH_LABEL = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsByStatus.donut.highLabel',
   {
     defaultMessage: 'High',
   }
 );
-
 export const STATUS_MEDIUM_LABEL = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsByStatus.donut.mediumLabel',
   {
     defaultMessage: 'Medium',
   }
 );
-
 export const STATUS_LOW_LABEL = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsByStatus.donut.lowLabel',
   {
     defaultMessage: 'Low',
   }
 );
-
 export const STATUS_OPEN = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsByStatus.donut.title.open',
   {
     defaultMessage: 'Open',
   }
 );
-
 export const STATUS_ACKNOWLEDGED = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsByStatus.donut.title.acknowledged',
   {
     defaultMessage: 'Acknowledged',
   }
 );
-
 export const STATUS_CLOSED = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsByStatus.donut.title.closed',
   {
     defaultMessage: 'Closed',
   }
 );
-
 export const STATUS_IN_PROGRESS = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsByStatus.donut.title.inProgress',
   {
     defaultMessage: 'In progress',
   }
 );
-
 export const ALERTS = (totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionResponse.alertsByStatus.totalAlerts', {
     values: { totalAlerts },
     defaultMessage: 'total {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
-
 export const ALERTS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.alertsByStatus.title',
   {
     defaultMessage: 'Alerts',
   }
 );
-
 export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
   defaultMessage: 'Updating...',
 });
-
 export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
   defaultMessage: 'Updated',
 });
+export const RULE_ALERTS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.ruleAlertsSectionTitle',
+  {
+    defaultMessage: 'Open alerts by rule',
+  }
+);
+export const NO_ALERTS_FOUND = i18n.translate(
+  'xpack.securitySolution.detectionResponse.noRuleAlerts',
+  {
+    defaultMessage: 'No alerts to display',
+  }
+);
+export const RULE_ALERTS_COLUMN_RULE_NAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.ruleAlertsColumnRuleName',
+  {
+    defaultMessage: 'Rule name',
+  }
+);
+export const RULE_ALERTS_COLUMN_LAST_ALERT = i18n.translate(
+  'xpack.securitySolution.detectionResponse.ruleAlertsColumnLastAlert',
+  {
+    defaultMessage: 'Last alert',
+  }
+);
+export const RULE_ALERTS_COLUMN_ALERT_COUNT = i18n.translate(
+  'xpack.securitySolution.detectionResponse.ruleAlertsColumnAlertCount',
+  {
+    defaultMessage: 'Alert count',
+  }
+);
+export const RULE_ALERTS_COLUMN_SEVERITY = i18n.translate(
+  'xpack.securitySolution.detectionResponse.ruleAlertsColumnSeverity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+export const OPEN_RULE_DETAIL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openRuleDetailTooltip',
+  {
+    defaultMessage: 'Open rule detail',
+  }
+);
+export const OPEN_RULE_ALERTS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openRuleAlertsTooltip',
+  {
+    defaultMessage: 'Open rule alerts',
+  }
+);
+
+export const OPEN_ALL_ALERTS_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openAllAlertsButton',
+  {
+    defaultMessage: 'View all open alerts',
+  }
+);
