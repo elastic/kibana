@@ -8,8 +8,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { RouteValidationFunction } from 'kibana/server';
+import type { RouteValidationFunction } from '../../../../src/core/server';
 
 const getErrorPath = ([first, ...rest]: Context): string[] => {
   if (typeof first === 'undefined') {
