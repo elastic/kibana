@@ -367,6 +367,25 @@ export const staticSourceData: SourceDataItem[] = [
     internalConnectorAvailable: true,
   },
   {
+    name: SOURCE_NAMES.NETWORK_DRVE,
+    iconName: SOURCE_NAMES.NETWORK_DRVE,
+    categories: [
+      // TODO update this when we define these
+    ],
+    serviceType: 'network_drive', // this doesn't exist on the BE
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-network-drive-connector',
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: false,
+    customConnectorAvailable: true,
+  },
+  {
     name: SOURCE_NAMES.ONEDRIVE,
     iconName: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',

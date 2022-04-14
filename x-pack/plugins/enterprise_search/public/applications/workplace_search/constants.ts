@@ -173,6 +173,12 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.jiraServer',
     { defaultMessage: 'Jira (Server)' }
   ),
+  NETWORK_DRVE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.networkDrive',
+    {
+      defaultMessage: 'Network Drive',
+    }
+  ),
   ONEDRIVE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.oneDrive', {
     defaultMessage: 'OneDrive',
   }),

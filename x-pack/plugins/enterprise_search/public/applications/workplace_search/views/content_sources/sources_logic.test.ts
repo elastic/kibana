@@ -322,7 +322,7 @@ describe('SourcesLogic', () => {
     it('availableSources & configuredSources have correct length', () => {
       SourcesLogic.actions.onInitializeSources(serverResponse);
 
-      expect(SourcesLogic.values.availableSources).toHaveLength(17);
+      expect(SourcesLogic.values.availableSources).toHaveLength(18);
       expect(SourcesLogic.values.configuredSources).toHaveLength(5);
     });
     it('externalConfigured is set to true if external is configured', () => {

@@ -15,6 +15,7 @@ import googleDrive from './google_drive.svg';
 import jira from './jira.svg';
 import jiraServer from './jira_server.svg';
 import loadingSmall from './loading_small.svg';
+import networkDrive from './network_drive.svg';
 import oneDrive from './onedrive.svg';
 import outlook from './outlook.svg';
 import salesforce from './salesforce.svg';
@@ -45,6 +46,7 @@ export const images = {
   jiraServer,
   jiraCloud: jira,
   loadingSmall,
+  networkDrive,
   oneDrive,
   outlook,
   salesforce,
