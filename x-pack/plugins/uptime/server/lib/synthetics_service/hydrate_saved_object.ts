@@ -10,6 +10,7 @@ import { UptimeESClient } from '../lib';
 import { UptimeServerSetup } from '../adapters';
 import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 import { SyntheticsMonitor, MonitorFields, Ping } from '../../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 
 export const hydrateSavedObjects = async ({
   monitors,
@@ -125,7 +126,7 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
       },
     },
     'getHydrateQuery',
-    'synthetics-*'
+    SYNTHETICS_INDEX_PATTERN
   );
 
   return data.body.hits.hits.map(

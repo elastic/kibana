@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
           .rate(1)
-          .spans((timestamp) => {
+          .generator((timestamp) => {
             const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
             const count = isInSpike ? 4 : NORMAL_RATE;
             const duration = isInSpike ? 1000 : NORMAL_DURATION;
@@ -56,7 +56,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
-                  .serialize()
               ),
             ];
           });
