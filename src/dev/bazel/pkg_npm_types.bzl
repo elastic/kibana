@@ -6,7 +6,6 @@
 # Side Public License, v 1.
 #
 
-#load("@rules_nodejs//nodejs/private:ts_config.bzl", "TsConfigInfo")
 load("@npm//@bazel/typescript/internal:ts_config.bzl", "TsConfigInfo")
 load("@build_bazel_rules_nodejs//:providers.bzl", "run_node", "LinkablePackageInfo", "DeclarationInfo", "declaration_info")
 load("@build_bazel_rules_nodejs//internal/linker:link_node_modules.bzl", "module_mappings_aspect")

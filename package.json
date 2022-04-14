@@ -459,7 +459,7 @@
     "@babel/traverse": "^7.17.3",
     "@babel/types": "^7.17.0",
     "@bazel/ibazel": "^0.16.2",
-    "@bazel/typescript": "4.0.0",
+    "@bazel/typescript": "4.6.2",
     "@cypress/code-coverage": "^3.9.12",
     "@cypress/snapshot": "^2.1.7",
     "@cypress/webpack-preprocessor": "^5.6.0",
