@@ -20,7 +20,6 @@ export interface Props {
   className: string;
   indexPatterns: DataView[];
   intl: InjectedIntl;
-  appName: string;
   timeRangeForSuggestionsOverride?: boolean;
 }
 
@@ -49,7 +48,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
             filters={props.filters!}
             onFiltersUpdated={props.onFiltersUpdated}
             indexPatterns={props.indexPatterns!}
-            appName={props.appName}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
           />
         </EuiFlexGroup>

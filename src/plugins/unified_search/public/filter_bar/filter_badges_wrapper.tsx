@@ -22,7 +22,6 @@ export interface Props {
   onFiltersUpdated?: (filters: Filter[]) => void;
   indexPatterns: DataView[];
   intl: InjectedIntl;
-  appName: string;
   timeRangeForSuggestionsOverride?: boolean;
 }
 

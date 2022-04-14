@@ -448,7 +448,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
                 filters={this.props.filters!}
                 onFiltersUpdated={this.props.onFiltersUpdated}
                 indexPatterns={this.props.indexPatterns!}
-                appName={this.services.appName}
                 timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
               />
             ) : undefined
@@ -470,7 +469,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             filters={this.props.filters!}
             onFiltersUpdated={this.props.onFiltersUpdated}
             indexPatterns={this.props.indexPatterns!}
-            appName={this.services.appName}
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           />
         </div>
