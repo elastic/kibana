@@ -16,7 +16,7 @@ interface UserActionPropertyActionsProps {
   id: string;
   editLabel: string;
   deleteLabel?: string;
-  deleteConfirmLabel?: string;
+  deleteConfirmTitle?: string;
   quoteLabel: string;
   isLoading: boolean;
   onEdit: (id: string) => void;
@@ -31,7 +31,7 @@ const UserActionPropertyActionsComponent = ({
   editLabel,
   quoteLabel,
   deleteLabel,
-  deleteConfirmLabel,
+  deleteConfirmTitle,
   isLoading,
   onEdit,
   onDelete,
@@ -110,16 +110,14 @@ const UserActionPropertyActionsComponent = ({
       {!isLoading && <PropertyActions propertyActions={propertyActions} />}
       {showDeleteConfirm ? (
         <EuiConfirmModal
-          title={deleteLabel}
+          title={deleteConfirmTitle}
           onCancel={onDeleteCancelClick}
           onConfirm={onDeleteConfirmClick}
           cancelButtonText={CANCEL_BUTTON}
           confirmButtonText={CONFIRM_BUTTON}
           buttonColor="danger"
           defaultFocusedButton="confirm"
-        >
-          {deleteConfirmLabel ? deleteConfirmLabel : ''}
-        </EuiConfirmModal>
+        />
       ) : null}
     </>
   );

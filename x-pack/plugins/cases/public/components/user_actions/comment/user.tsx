@@ -88,6 +88,7 @@ export const createUserAttachmentUserActionBuilder = ({
           commentMarkdown={comment.comment}
           editLabel={i18n.EDIT_COMMENT}
           deleteLabel={i18n.DELETE_COMMENT}
+          deleteConfirmTitle={i18n.DELETE_COMMENT_TITLE}
           quoteLabel={i18n.QUOTE}
           isLoading={isLoading}
           onEdit={handleManageMarkdownEditId.bind(null, comment.id)}

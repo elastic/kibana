@@ -87,6 +87,10 @@ export const DELETE_COMMENT = i18n.translate('xpack.cases.caseView.delete.commen
   defaultMessage: 'Delete comment',
 });
 
+export const DELETE_COMMENT_TITLE = i18n.translate('xpack.cases.caseView.delete.comment', {
+  defaultMessage: 'Delete this comment?',
+});
+
 export const ON = i18n.translate('xpack.cases.caseView.actionLabel.on', {
   defaultMessage: 'on',
 });
