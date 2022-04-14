@@ -92,6 +92,14 @@ describe('ContextContainer', () => {
   });
 
   describe('context building', () => {
+    const resolveAllContexts = async (ctx: Record<string, any>): Promise<unknown> => {
+      const resolved = {} as Record<string, any>;
+      for (const key of Object.getOwnPropertyNames(ctx)) {
+        resolved[key] = await ctx[key];
+      }
+      return resolved;
+    };
+
     it('lazily loads the providers when accessed', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
 
@@ -260,12 +268,12 @@ describe('ContextContainer', () => {
 
     it('resolves dependencies', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
-      expect.assertions(8);
+      expect.assertions(10);
       contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
         coreId,
         'core1',
-        (context) => {
-          expect(context).toEqual({});
+        async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({});
           return 'core';
         }
       );
@@ -273,24 +281,24 @@ describe('ContextContainer', () => {
       contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
         pluginA,
         'ctxFromA',
-        (context) => {
-          expect(context).toEqual({ core1: 'core' });
+        async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({ core1: 'core' });
           return 'aString';
         }
       );
       contextContainer.registerContext<{ ctxFromB: number; core: any }, 'ctxFromB'>(
         pluginB,
         'ctxFromB',
-        (context) => {
-          expect(context).toEqual({ core1: 'core', ctxFromA: 'aString' });
+        async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({ core1: 'core', ctxFromA: 'aString' });
           return 299;
         }
       );
       contextContainer.registerContext<{ ctxFromC: boolean; core: any }, 'ctxFromC'>(
         pluginC,
         'ctxFromC',
-        (context) => {
-          expect(context).toEqual({
+        async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({
             core1: 'core',
             ctxFromA: 'aString',
             ctxFromB: 299,
@@ -301,16 +309,31 @@ describe('ContextContainer', () => {
       contextContainer.registerContext<{ ctxFromD: {}; core: any }, 'ctxFromD'>(
         pluginD,
         'ctxFromD',
-        (context) => {
-          expect(context).toEqual({ core1: 'core' });
+        async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({ core1: 'core' });
           return {};
         }
       );
 
-      const rawHandler1 = jest.fn(() => 'handler1' as any);
+      const rawHandler1 = jest.fn(async (context) => {
+        expect(await resolveAllContexts(context)).toEqual({
+          core1: 'core',
+          ctxFromA: 'aString',
+          ctxFromB: 299,
+          ctxFromC: false,
+        });
+        return 'handler1' as any;
+      });
       const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
 
-      const rawHandler2 = jest.fn(() => 'handler2' as any);
+      const rawHandler2 = jest.fn(async (context) => {
+        expect(await resolveAllContexts(context)).toEqual({
+          core1: 'core',
+          ctxFromD: {},
+        });
+        return 'handler2' as any;
+      });
+
       const handler2 = contextContainer.createHandler(pluginD, rawHandler2);
 
       const request = httpServerMock.createKibanaRequest();
@@ -320,41 +343,25 @@ describe('ContextContainer', () => {
       await handler2(request, response);
 
       // Should have context from pluginC, its deps, and core
-      expect(rawHandler1).toHaveBeenCalledWith(
-        {
-          core1: 'core',
-          ctxFromA: 'aString',
-          ctxFromB: 299,
-          ctxFromC: false,
-        },
-        request,
-        response
-      );
+      expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
 
       // Should have context from pluginD, and core
-      expect(rawHandler2).toHaveBeenCalledWith(
-        {
-          core1: 'core',
-          ctxFromD: {},
-        },
-        request,
-        response
-      );
+      expect(rawHandler2).toHaveBeenCalledWith(expect.any(Object), request, response);
     });
 
     it('exposes all core context to all providers regardless of registration order', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
 
       const contextContainer = new ContextContainer(plugins, coreId);
       contextContainer
-        .registerContext<MyContext, 'ctxFromA'>(pluginA, 'ctxFromA', (context) => {
-          expect(context).toEqual({ core1: 'core', core2: 101 });
-          return `aString ${context.core1} ${context.core2}`;
+        .registerContext<MyContext, 'ctxFromA'>(pluginA, 'ctxFromA', async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({ core1: 'core', core2: 101 });
+          return `aString ${await context.core1} ${await context.core2}`;
         })
         .registerContext<MyContext, 'core1'>(coreId, 'core1', () => 'core')
         .registerContext<MyContext, 'core2'>(coreId, 'core2', () => 101)
-        .registerContext<MyContext, 'ctxFromB'>(pluginB, 'ctxFromB', (context) => {
-          expect(context).toEqual({
+        .registerContext<MyContext, 'ctxFromB'>(pluginB, 'ctxFromB', async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({
             core1: 'core',
             core2: 101,
             ctxFromA: 'aString core 101',
@@ -362,40 +369,45 @@ describe('ContextContainer', () => {
           return 277;
         });
 
-      const rawHandler1 = jest.fn(() => 'handler1' as any);
+      const rawHandler1 = jest.fn(async (context) => {
+        expect(await resolveAllContexts(context)).toEqual({
+          core1: 'core',
+          core2: 101,
+          ctxFromA: 'aString core 101',
+          ctxFromB: 277,
+        });
+        return 'handler1' as any;
+      });
       const handler1 = contextContainer.createHandler(pluginB, rawHandler1);
 
       const request = httpServerMock.createKibanaRequest();
       const response = httpServerMock.createResponseFactory();
       expect(await handler1(request, response)).toEqual('handler1');
 
-      expect(rawHandler1).toHaveBeenCalledWith(
-        {
-          core1: 'core',
-          core2: 101,
-          ctxFromA: 'aString core 101',
-          ctxFromB: 277,
-        },
-        request,
-        response
-      );
+      expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
     });
 
     it('exposes all core context to core providers', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
       const contextContainer = new ContextContainer(plugins, coreId);
 
       contextContainer
-        .registerContext<MyContext, 'core1'>(coreId, 'core1', (context) => {
-          expect(context).toEqual({});
+        .registerContext<MyContext, 'core1'>(coreId, 'core1', async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({});
           return 'core';
         })
-        .registerContext<MyContext, 'core2'>(coreId, 'core2', (context) => {
-          expect(context).toEqual({ core1: 'core' });
+        .registerContext<MyContext, 'core2'>(coreId, 'core2', async (context) => {
+          expect(await resolveAllContexts(context)).toEqual({ core1: 'core' });
           return 101;
         });
 
-      const rawHandler1 = jest.fn(() => 'handler1' as any);
+      const rawHandler1 = jest.fn(async (context) => {
+        expect(await resolveAllContexts(context)).toEqual({
+          core1: 'core',
+          core2: 101,
+        });
+        return 'handler1' as any;
+      });
       const handler1 = contextContainer.createHandler(pluginA, rawHandler1);
 
       const request = httpServerMock.createKibanaRequest();
@@ -403,14 +415,7 @@ describe('ContextContainer', () => {
       expect(await handler1(request, response)).toEqual('handler1');
 
       // If no context is registered for pluginA, only core contexts should be exposed
-      expect(rawHandler1).toHaveBeenCalledWith(
-        {
-          core1: 'core',
-          core2: 101,
-        },
-        request,
-        response
-      );
+      expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
     });
 
     it('does not expose plugin contexts to core handler', async () => {
@@ -420,24 +425,24 @@ describe('ContextContainer', () => {
         .registerContext<MyContext, 'core1'>(coreId, 'core1', (context) => 'core')
         .registerContext<MyContext, 'ctxFromA'>(pluginA, 'ctxFromA', (context) => 'aString');
 
-      const rawHandler1 = jest.fn(() => 'handler1' as any);
+      const rawHandler1 = jest.fn(async (context) => {
+        // pluginA context should not be present in a core handler
+        expect(await resolveAllContexts(context)).toEqual({
+          core1: 'core',
+        });
+        return 'handler1' as any;
+      });
       const handler1 = contextContainer.createHandler(coreId, rawHandler1);
 
       const request = httpServerMock.createKibanaRequest();
       const response = httpServerMock.createResponseFactory();
       expect(await handler1(request, response)).toEqual('handler1');
-      // pluginA context should not be present in a core handler
-      expect(rawHandler1).toHaveBeenCalledWith(
-        {
-          core1: 'core',
-        },
-        request,
-        response
-      );
+
+      expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
     });
 
     it('passes additional arguments to providers', async () => {
-      expect.assertions(6);
+      expect.assertions(7);
       const contextContainer = new ContextContainer(plugins, coreId);
 
       const request = httpServerMock.createKibanaRequest();
@@ -458,19 +463,18 @@ describe('ContextContainer', () => {
         }
       );
 
-      const rawHandler1 = jest.fn(() => 'handler1' as any);
+      const rawHandler1 = jest.fn(async (context) => {
+        expect(await resolveAllContexts(context)).toEqual({
+          core1: 'core',
+          ctxFromB: 77,
+        });
+        return 'handler1' as any;
+      });
       const handler1 = contextContainer.createHandler(pluginD, rawHandler1);
 
       expect(await handler1(request, response)).toEqual('handler1');
 
-      expect(rawHandler1).toHaveBeenCalledWith(
-        {
-          core1: 'core',
-          ctxFromB: 77,
-        },
-        request,
-        response
-      );
+      expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
     });
   });
 
