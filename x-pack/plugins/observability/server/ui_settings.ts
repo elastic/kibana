@@ -92,7 +92,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     name: i18n.translate('xpack.observability.apmProgressiveLoading', {
       defaultMessage: 'Use progressive loading of selected APM views',
     }),
-    description: i18n.translate('xpack.observabiity.apmProgressiveLoadingDescription', {
+    description: i18n.translate('xpack.observability.apmProgressiveLoadingDescription', {
       defaultMessage:
         '{technicalPreviewLabel} Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
       values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
@@ -114,25 +114,25 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ],
     optionLabels: {
       [ProgressiveLoadingQuality.off]: i18n.translate(
-        'xpack.observabiity.apmProgressiveLoadingQualityOff',
+        'xpack.observability.apmProgressiveLoadingQualityOff',
         {
           defaultMessage: 'Off',
         }
       ),
       [ProgressiveLoadingQuality.low]: i18n.translate(
-        'xpack.observabiity.apmProgressiveLoadingQualityLow',
+        'xpack.observability.apmProgressiveLoadingQualityLow',
         {
           defaultMessage: 'Low sampling rate (fastest, least accurate)',
         }
       ),
       [ProgressiveLoadingQuality.medium]: i18n.translate(
-        'xpack.observabiity.apmProgressiveLoadingQualityMedium',
+        'xpack.observability.apmProgressiveLoadingQualityMedium',
         {
           defaultMessage: 'Medium sampling rate',
         }
       ),
       [ProgressiveLoadingQuality.high]: i18n.translate(
-        'xpack.observabiity.apmProgressiveLoadingQualityHigh',
+        'xpack.observability.apmProgressiveLoadingQualityHigh',
         {
           defaultMessage: 'High sampling rate (slower, most accurate)',
         }
