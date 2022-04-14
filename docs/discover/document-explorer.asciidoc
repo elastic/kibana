@@ -4,7 +4,7 @@
 
 *Discover* displays your your documents in table format, so you can
 best show off your data.
-Resize columns, set row height, perform multi-column sorting, compare data, and more.
+Use the document table to resize columns, set row height, perform multi-column sorting, compare data, and more.
 
 ++++
 <script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
