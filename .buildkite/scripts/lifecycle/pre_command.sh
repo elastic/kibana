@@ -65,6 +65,15 @@ EOF
   fi
 }
 
+# If a custom manifest isn't specified, then use the default one that we resolve earlier in the build
+{
+  if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
+    ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST_DEFAULT --default '')}
+    export ES_SNAPSHOT_MANIFEST
+    echo "Using default ES Snapshot Manifest: $ES_SNAPSHOT_MANIFEST"
+  fi
+}
+
 # Setup CI Stats
 {
   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
