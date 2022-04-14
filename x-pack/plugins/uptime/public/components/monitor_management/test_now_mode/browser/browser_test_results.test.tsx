@@ -47,8 +47,8 @@ describe('BrowserTestRunResult', function () {
             },
             sort: [{ '@timestamp': 'desc' }],
           },
-          index: 'heartbeat-8*,heartbeat-7*,synthetics-*',
-          size: 10,
+          index: 'synthetics-*',
+          size: 1000,
         },
       },
       {}

@@ -140,6 +140,7 @@ export interface ProcessEvent {
     kind?: EventKind;
     category?: string;
     action?: EventAction;
+    id?: string;
   };
   user?: User;
   group?: Group;
@@ -178,7 +179,9 @@ export interface Process {
   isUserEntered(): boolean;
   getMaxAlertLevel(): number | null;
   getChildren(verboseMode: boolean): Process[];
+  isVerbose(): boolean;
   getEndTime(): string;
+  isDescendantOf(process: Process): boolean;
 }
 
 export type ProcessMap = {

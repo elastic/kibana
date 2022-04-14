@@ -10,8 +10,8 @@ import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import {
   Datasource,
+  DatasourceLayers,
   DatasourceMap,
-  DatasourcePublicAPI,
   FramePublicAPI,
   InitializationOptions,
   Visualization,
@@ -62,7 +62,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
   datasourceMap: DatasourceMap
 ) {
-  const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
+  const datasourceLayers: DatasourceLayers = {};
   Object.keys(datasourceMap)
     .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)
     .forEach((id) => {
