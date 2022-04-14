@@ -8,7 +8,7 @@
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { BulkCreateCommentRequest, CommentRequest } from '../../common/api';
 
-import { bulkCreateAttachments } from './api';
+import { createAttachments } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
 import { useToasts } from '../common/lib/kibana';
@@ -47,11 +47,11 @@ export interface PostComment {
   updateCase?: (newCase: Case) => void;
   throwOnError?: boolean;
 }
-export interface UseBulkCreateAttachments extends NewCommentState {
-  bulkCreateAttachments: (args: PostComment) => Promise<void>;
+export interface UseCreateAttachments extends NewCommentState {
+  createAttachments: (args: PostComment) => Promise<void>;
 }
 
-export const useBulkCreateAttachments = (): UseBulkCreateAttachments => {
+export const useCreateAttachments = (): UseCreateAttachments => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -69,11 +69,7 @@ export const useBulkCreateAttachments = (): UseBulkCreateAttachments => {
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
 
-        const response = await bulkCreateAttachments(
-          attachments,
-          caseId,
-          abortCtrlRef.current.signal
-        );
+        const response = await createAttachments(attachments, caseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS' });
@@ -107,5 +103,5 @@ export const useBulkCreateAttachments = (): UseBulkCreateAttachments => {
     []
   );
 
-  return { ...state, bulkCreateAttachments: fetch };
+  return { ...state, createAttachments: fetch };
 };

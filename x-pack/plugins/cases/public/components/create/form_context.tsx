@@ -16,9 +16,9 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import {
-  UseBulkCreateAttachments,
-  useBulkCreateAttachments,
-} from '../../containers/use_bulk_create_attachments';
+  UseCreateAttachments,
+  useCreateAttachments,
+} from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { getConnectorById } from '../utils';
@@ -37,7 +37,7 @@ const initialCaseValue: FormProps = {
 interface Props {
   afterCaseCreated?: (
     theCase: Case,
-    bulkCreateAttachments: UseBulkCreateAttachments['bulkCreateAttachments']
+    createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
@@ -54,7 +54,7 @@ export const FormContext: React.FC<Props> = ({
   const { owner } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
-  const { bulkCreateAttachments } = useBulkCreateAttachments();
+  const { createAttachments } = useCreateAttachments();
   const { pushCaseToExternalService } = usePostPushToService();
 
   const submitCase = useCallback(
@@ -84,14 +84,14 @@ export const FormContext: React.FC<Props> = ({
 
         // add attachments to the case
         if (updatedCase && Array.isArray(attachments)) {
-          await bulkCreateAttachments({
+          await createAttachments({
             caseId: updatedCase.id,
             data: attachments,
           });
         }
 
         if (afterCaseCreated && updatedCase) {
-          await afterCaseCreated(updatedCase, bulkCreateAttachments);
+          await afterCaseCreated(updatedCase, createAttachments);
         }
 
         if (updatedCase?.id && connectorToUpdate.id !== 'none') {
@@ -114,7 +114,7 @@ export const FormContext: React.FC<Props> = ({
       afterCaseCreated,
       onSuccess,
       attachments,
-      bulkCreateAttachments,
+      createAttachments,
       pushCaseToExternalService,
     ]
   );

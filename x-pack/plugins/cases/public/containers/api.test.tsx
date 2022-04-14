@@ -27,7 +27,7 @@ import {
   patchCasesStatus,
   patchComment,
   postCase,
-  bulkCreateAttachments,
+  createAttachments,
   pushCase,
   resolveCase,
 } from './api';
@@ -462,7 +462,7 @@ describe('Case Configuration API', () => {
     });
   });
 
-  describe('bulkCreateAttachments', () => {
+  describe('createAttachments', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(basicCaseSnake);
@@ -486,7 +486,7 @@ describe('Case Configuration API', () => {
     ];
 
     test('should be called with correct check url, method, signal', async () => {
-      await bulkCreateAttachments(data, basicCase.id, abortCtrl.signal);
+      await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(
         INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', basicCase.id),
         {
@@ -498,7 +498,7 @@ describe('Case Configuration API', () => {
     });
 
     test('should return correct response', async () => {
-      const resp = await bulkCreateAttachments(data, basicCase.id, abortCtrl.signal);
+      const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
   });

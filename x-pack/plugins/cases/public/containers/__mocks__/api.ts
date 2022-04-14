@@ -101,7 +101,7 @@ export const patchCasesStatus = async (
   signal: AbortSignal
 ): Promise<Case[]> => Promise.resolve(allCases.cases);
 
-export const bulkCreateAttachments = async (
+export const createAttachments = async (
   newComment: CommentRequest,
   caseId: string,
   signal: AbortSignal

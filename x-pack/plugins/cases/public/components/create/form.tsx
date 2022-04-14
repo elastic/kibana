@@ -27,7 +27,7 @@ import { ActionConnector } from '../../../common/api';
 import { Case } from '../../containers/types';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
-import { UseBulkCreateAttachments } from '../../containers/use_bulk_create_attachments';
+import { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
@@ -63,7 +63,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   onSuccess: (theCase: Case) => Promise<void>;
   afterCaseCreated?: (
     theCase: Case,
-    bulkCreateAttachments: UseBulkCreateAttachments['bulkCreateAttachments']
+    createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachments;

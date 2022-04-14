@@ -311,7 +311,7 @@ export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicen
   return convertArrayToCamelCase(response) as ActionLicense[];
 };
 
-export const bulkCreateAttachments = async (
+export const createAttachments = async (
   attachments: BulkCreateCommentRequest,
   caseId: string,
   signal: AbortSignal

@@ -14,14 +14,14 @@ import { Case, CaseStatuses, StatusAll } from '../../../../common';
 import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
-import { useBulkCreateAttachments } from '../../../containers/use_bulk_create_attachments';
+import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { SupportedCaseAttachment } from '../../../types';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
 
 jest.mock('../../../common/use_cases_toast');
-jest.mock('../../../containers/use_bulk_create_attachments');
+jest.mock('../../../containers/use_create_attachments');
 // dummy mock, will call onRowclick when rendering
 jest.mock('./all_cases_selector_modal', () => {
   return {
@@ -46,11 +46,11 @@ const TestComponent: React.FC = () => {
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
 };
 
-const useBulkCreateAttachmentsMock = useBulkCreateAttachments as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
 describe('use cases add to existing case modal hook', () => {
-  useBulkCreateAttachmentsMock.mockReturnValue({
-    bulkCreateAttachments: jest.fn(),
+  useCreateAttachmentsMock.mockReturnValue({
+    createAttachments: jest.fn(),
   });
 
   const dispatch = jest.fn();
@@ -130,10 +130,10 @@ describe('use cases add to existing case modal hook', () => {
     );
   });
 
-  it('should call bulkCreateAttachments when a case is selected and show a toast message', async () => {
+  it('should call createAttachments when a case is selected and show a toast message', async () => {
     const mockBulkCreateAttachments = jest.fn();
-    useBulkCreateAttachmentsMock.mockReturnValueOnce({
-      bulkCreateAttachments: mockBulkCreateAttachments,
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      createAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -160,10 +160,10 @@ describe('use cases add to existing case modal hook', () => {
     expect(mockedToastSuccess).toHaveBeenCalled();
   });
 
-  it('should not call bulkCreateAttachments nor show toast success when  a case is not selected', async () => {
+  it('should not call createAttachments nor show toast success when  a case is not selected', async () => {
     const mockBulkCreateAttachments = jest.fn();
-    useBulkCreateAttachmentsMock.mockReturnValueOnce({
-      bulkCreateAttachments: mockBulkCreateAttachments,
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      createAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToastSuccess = jest.fn();
@@ -188,8 +188,8 @@ describe('use cases add to existing case modal hook', () => {
 
   it('should not show toast success when a case is selected with attachments and fails to update attachments', async () => {
     const mockBulkCreateAttachments = jest.fn().mockRejectedValue(new Error('Impossible'));
-    useBulkCreateAttachmentsMock.mockReturnValueOnce({
-      bulkCreateAttachments: mockBulkCreateAttachments,
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      createAttachments: mockBulkCreateAttachments,
     });
 
     const mockedToast = jest.fn();
