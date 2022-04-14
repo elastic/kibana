@@ -281,7 +281,7 @@ describe('Fleet preconfiguration reset', () => {
           CLOUD_KIBANA_WITHOUT_PACKAGE_POLICY_ID_CONFIG
         );
 
-        // 2. Add APM to the preconfigured policy
+        // 2. Add pacakge policy ids to the preconfigured policy
         await startOrRestartKibana(CLOUD_KIBANA_CONFIG);
       });
 
