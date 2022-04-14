@@ -8,7 +8,7 @@
 import type {
   KibanaRequest,
   KibanaResponseFactory,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   IScopedClusterClient,
   RequestHandler,
   SavedObjectsClientContract,
@@ -25,9 +25,9 @@ import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plu
 import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
 import { getDataViewsServiceFactory } from './data_views_utils';
 
-type MLRequestHandlerContext = RequestHandlerContext & {
+type MLRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;
-};
+}>;
 
 type Handler<P = unknown, Q = unknown, B = unknown> = (handlerParams: {
   client: IScopedClusterClient;
