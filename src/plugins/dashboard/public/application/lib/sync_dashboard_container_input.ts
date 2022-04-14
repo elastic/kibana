@@ -60,7 +60,7 @@ export const syncDashboardContainerInput = (
       .getInput$()
       .subscribe(() => applyContainerChangesToState(syncDashboardContainerProps))
   );
-  subscriptions.add($onDashboardStateChange.subscribe(() => $triggerDashboardRefresh.next()));
+  subscriptions.add($onDashboardStateChange.subscribe(() => $triggerDashboardRefresh.next({})));
   subscriptions.add(
     getSessionURLObservable(history).subscribe(() => {
       $triggerDashboardRefresh.next({ force: true });

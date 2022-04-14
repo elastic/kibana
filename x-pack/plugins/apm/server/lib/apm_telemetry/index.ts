@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Observable, firstValueFrom } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   CoreSetup,
@@ -66,7 +65,7 @@ export async function createApmTelemetry({
   const savedObjectsClient = await getInternalSavedObjectsClient(core);
 
   const collectAndStore = async () => {
-    const config = await config$.pipe(take(1)).toPromise();
+    const config = await firstValueFrom(config$);
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client;
 

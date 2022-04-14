@@ -14,10 +14,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const defaultIndexPatternString = config.get('esTestCluster.ccs')
+    ? 'ftr-remote:logstash-*'
+    : 'logstash-*';
   const defaultSettings = {
-    defaultIndex: 'logstash-*',
+    defaultIndex: defaultIndexPatternString,
   };
+  const localArchiveDirectory = 'test/functional/fixtures/kbn_archiver/discover';
+  const remoteArchiveDirectory = 'test/functional/fixtures/kbn_archiver/ccs/discover';
+  const esNode = config.get('esTestCluster.ccs')
+    ? getService('remoteEsArchiver' as 'esArchiver')
+    : esArchiver;
+  const kbnDirectory = config.get('esTestCluster.ccs')
+    ? remoteArchiveDirectory
+    : localArchiveDirectory;
 
   const createDataView = async (dataViewName: string) => {
     await PageObjects.discover.clickIndexPatternActions();
@@ -32,9 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover integration with data view editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(kbnDirectory);
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
@@ -42,12 +54,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(kbnDirectory);
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
     });
 
     it('allows creating a new data view', async function () {
-      const dataViewToCreate = 'logstash';
+      const dataViewToCreate = config.get('esTestCluster.ccs') ? 'ftr-remote:logstash' : 'logstash';
       await createDataView(dataViewToCreate);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitForWithTimeout(
