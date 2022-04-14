@@ -23,6 +23,7 @@ export const cspRuleSchema = rt.object({
   enabled: rt.boolean(),
   muted: rt.boolean(),
   package_policy_id: rt.string(),
+  policy_id: rt.string(),
 });
 
 export type CspRuleSchema = TypeOf<typeof cspRuleSchema>;

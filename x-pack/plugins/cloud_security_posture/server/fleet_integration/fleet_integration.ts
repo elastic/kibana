@@ -60,6 +60,7 @@ export const getPackagePolicyCreateCallback = (
     }
 
     const cspRules = generateRulesFromTemplates(
+      packagePolicy.id,
       packagePolicy.policy_id,
       existingRuleTemplates.saved_objects
     );
@@ -68,7 +69,8 @@ export const getPackagePolicyCreateCallback = (
       await savedObjectsClient.bulkCreate(cspRules);
       logger.info(`Generated CSP rules for package ${packagePolicy.policy_id}`);
     } catch (e) {
-      logger.error('failed to generate rules out of template, Error: ', e);
+      logger.error('failed to generate rules out of template');
+      logger.error(e);
     }
     // The callback cannot change the package policy
     return packagePolicy;
@@ -89,15 +91,16 @@ export const getPackagePolicyDeleteCallback = (
           const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleSchema> =
             await soClient.find({
               type: cspRuleAssetSavedObjectType,
-              filter: `csp_rule.attributes.package_policy_id: ${deletedPackagePolicy.policy_id}`,
+              filter: `csp_rule.attributes.package_policy_id: ${deletedPackagePolicy.id} AND csp_rule.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
             });
-          Promise.all(
+          await Promise.all(
             cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))
           );
         } catch (e) {
           logger.error(
             `Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`
           );
+          logger.error(e);
         }
       }
     }
@@ -105,22 +108,40 @@ export const getPackagePolicyDeleteCallback = (
 };
 
 const generateRulesFromTemplates = (
-  packagePolicyID: string,
+  packagePolicyId: string,
+  policyId: string,
   cspRuleTemplates: Array<SavedObjectsFindResult<CloudSecurityPostureRuleTemplateSchema>>
-): Array<SavedObjectsBulkCreateObject<CspRuleSchema>> => {
-  const concreteRules: Array<SavedObjectsBulkCreateObject<CspRuleSchema>> = [];
+): Array<SavedObjectsBulkCreateObject<CspRuleSchema>> =>
+  cspRuleTemplates.map((template) => ({
+    type: cspRuleAssetSavedObjectType,
+    attributes: {
+      ...template.attributes,
+      package_policy_id: packagePolicyId,
+      policy_id: policyId,
+    },
+  }));
 
-  for (const ruleTemplate of cspRuleTemplates) {
-    const ruleAttributes = {} as any;
-    // link csp rule with a package policy
-    ruleAttributes.package_policy_id = packagePolicyID;
-    Object.assign(ruleAttributes, ruleTemplate.attributes);
+// const generateRulesFromTemplates = (
+//   packagePolicyId: string,
+//   policyId: string,
+//   cspRuleTemplates: Array<SavedObjectsFindResult<CloudSecurityPostureRuleTemplateSchema>>
 
-    concreteRules.push({
-      attributes: ruleAttributes,
-      type: cspRuleAssetSavedObjectType,
-    });
-  }
+//   // TODO: change to map
+// ): Array<SavedObjectsBulkCreateObject<CspRuleSchema>> => {
+//   const concreteRules: Array<SavedObjectsBulkCreateObject<CspRuleSchema>> = [];
 
-  return concreteRules;
-};
+//   for (const ruleTemplate of cspRuleTemplates) {
+//     const ruleAttributes = {} as any;
+//     // link csp rule with a package policy
+//     ruleAttributes.package_policy_id = packagePolicyId;
+//     ruleAttributes.policy_id = policyId;
+//     Object.assign(ruleAttributes, ruleTemplate.attributes);
+
+//     concreteRules.push({
+//       attributes: ruleAttributes,
+//       type: cspRuleAssetSavedObjectType,
+//     });
+//   }
+
+//   return concreteRules;
+// };
