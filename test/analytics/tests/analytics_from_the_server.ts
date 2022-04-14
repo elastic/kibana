@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   ): Promise<TelemetryCounter[]> => {
     const resp = await supertest
       .get(`/internal/analytics_plugin_a/stats`)
-      .query({ takeNumberOfCounters })
+      .query({ takeNumberOfCounters, eventType: 'test-plugin-lifecycle' })
       .set('kbn-xsrf', 'xxx')
       .expect(200);
 

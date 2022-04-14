@@ -13,14 +13,14 @@ export const bulkApplyTimelineTemplate = {
   FORM_TITLE: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.formTitle',
     {
-      defaultMessage: 'Apply timeline template',
+      defaultMessage: 'Apply Timeline template',
     }
   ),
 
   TEMPLATE_SELECTOR_LABEL: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.templateSelectorLabel',
     {
-      defaultMessage: 'Apply timeline template to selected rules',
+      defaultMessage: 'Apply Timeline template to selected rules',
     }
   ),
 
@@ -28,7 +28,7 @@ export const bulkApplyTimelineTemplate = {
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.templateSelectorHelpText',
     {
       defaultMessage:
-        'Select which timeline to apply to selected rules when investigating generated alerts.',
+        'Select which Timeline to apply to selected rules when investigating generated alerts.',
     }
   ),
 
@@ -42,8 +42,8 @@ export const bulkApplyTimelineTemplate = {
   warningCalloutMessage: (rulesCount: number): JSX.Element => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.warningCalloutMessage"
-      defaultMessage="You are about to apply changes to {rulesCount, plural, one {# selected rule} other {# selected rules}}.
-      If you already applied any templates to these rules, they will be overwritten or (if you select 'None') reset to none."
+      defaultMessage="You're about to apply changes to {rulesCount, plural, one {# selected rule} other {# selected rules}}.
+      If you previously applied Timeline templates to these rules, they will be overwritten or (if you select 'None') reset to none."
       values={{ rulesCount }}
     />
   ),
