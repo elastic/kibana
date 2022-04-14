@@ -419,4 +419,13 @@ storiesOf('SearchBar', module)
         },
       },
     } as unknown as SearchBarProps)
+  )
+  .add('show only query bar without submit', () =>
+    wrapSearchBarInContext({
+      showDatePicker: false,
+      showFilterBar: false,
+      showAutoRefreshOnly: false,
+      showQueryInput: true,
+      showSubmitButton: false,
+    } as SearchBarProps)
   );

@@ -103,7 +103,7 @@ function wrapSearchBarInContext(testProps: any) {
 }
 
 describe('SearchBar', () => {
-  const SEARCH_BAR_ROOT = '.globalQueryBar';
+  const SEARCH_BAR_ROOT = '.uniSearchBar';
   const FILTER_BAR = '.filterBar';
   const QUERY_BAR = '.queryBar';
 

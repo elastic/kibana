@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import './search_bar.scss';
+// TODO: Can we get hooks working in this component to pass the EuiTheme through?
+// import { SearchBarStyles } from './search_bar.styles';
 
 import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -79,12 +81,13 @@ export interface SearchBarOwnProps {
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
   nonKqlMode?: 'lucene' | 'text';
-  // defines padding; use 'inPage' to avoid extra padding;
+  // defines padding and border; use 'inPage' to avoid any padding or border;
   // use 'detached' if the searchBar appears at the very top of the view, without any wrapper
   displayStyle?: 'inPage' | 'detached';
   // super update button background fill control
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
+  showSubmitButton?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -104,6 +107,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showQueryBar: true,
     showFilterBar: true,
     showDatePicker: true,
+    showSubmitButton: true,
     showAutoRefreshOnly: false,
   };
 
@@ -192,15 +196,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   componentWillUnmount() {
     this.renderSavedQueryManagement.clear();
-  }
-
-  private shouldRenderQueryBar() {
-    const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
-    const showQueryInput =
-      this.props.showQueryInput && this.props.indexPatterns && this.state.query;
-    return (
-      this.props.showQueryBar && (showDatePicker || showQueryInput || this.props.showFilterBar)
-    );
   }
 
   private shouldRenderFilterBar() {
@@ -405,9 +400,32 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       />
     );
 
-    let queryBar;
-    if (this.shouldRenderQueryBar()) {
-      queryBar = (
+    let filterBar;
+    if (this.shouldRenderFilterBar()) {
+      filterBar = this.shouldShowDatePickerAsBadge() ? (
+        <FilterItems
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
+          indexPatterns={this.props.indexPatterns!}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+        />
+      ) : (
+        <FilterBar
+          afterQueryBar
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
+          indexPatterns={this.props.indexPatterns!}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+        />
+      );
+    }
+
+    const classes = classNames('uniSearchBar', {
+      [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
+    });
+
+    return (
+      <div className={classes} data-test-subj="globalQueryBar">
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
           query={this.state.query}
@@ -432,6 +450,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          showSubmitButton={this.props.showSubmitButton}
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
           placeholder={this.props.placeholder}
@@ -442,41 +461,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
-          filterBar={
-            this.shouldShowDatePickerAsBadge() ? (
-              <FilterItems
-                filters={this.props.filters!}
-                onFiltersUpdated={this.props.onFiltersUpdated}
-                indexPatterns={this.props.indexPatterns!}
-                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-              />
-            ) : undefined
-          }
+          showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
+          filterBar={filterBar}
         />
-      );
-    }
-
-    let filterBar;
-    if (this.shouldRenderFilterBar()) {
-      filterBar = (
-        <FilterBar
-          afterQueryBar
-          filters={this.props.filters!}
-          onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={this.props.indexPatterns!}
-          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-        />
-      );
-    }
-
-    const globalQueryBarClasses = classNames('globalQueryBar', {
-      'globalQueryBar--inPage': this.props.displayStyle === 'inPage',
-    });
-
-    return (
-      <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
-        {queryBar}
-        {!this.shouldShowDatePickerAsBadge() && filterBar}
       </div>
     );
   }

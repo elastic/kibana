@@ -84,6 +84,8 @@ export interface QueryBarTopRowProps {
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   filterBar?: React.ReactNode;
+  showDatePickerAsBadge?: boolean;
+  showSubmitButton?: boolean;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -121,7 +123,12 @@ const SharingMetaFields = React.memo(function SharingMetaFields({
 export const QueryBarTopRow = React.memo(
   function QueryBarTopRow(props: QueryBarTopRowProps) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
-    const { showQueryInput = true, showDatePicker = true, showAutoRefreshOnly = false } = props;
+    const {
+      showQueryInput = true,
+      showDatePicker = true,
+      showAutoRefreshOnly = false,
+      showSubmitButton = true,
+    } = props;
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
@@ -291,11 +298,14 @@ export const QueryBarTopRow = React.memo(
     }
 
     function shouldRenderUpdatebutton(): boolean {
-      return Boolean(showQueryInput || showDatePicker || showAutoRefreshOnly);
+      return (
+        Boolean(showSubmitButton) &&
+        Boolean(showQueryInput || showDatePicker || showAutoRefreshOnly)
+      );
     }
 
     function shouldShowDatePickerAsBadge(): boolean {
-      return Boolean(props.filterBar) && !shouldRenderQueryInput();
+      return Boolean(props.showDatePickerAsBadge) && !shouldRenderQueryInput();
     }
 
     function renderDatePicker() {
@@ -336,16 +346,18 @@ export const QueryBarTopRow = React.memo(
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
-        <SuperUpdateButton
-          display="base"
-          iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
-          aria-label={props.isLoading ? 'Update query' : 'Refresh query'}
-          isDisabled={isDateRangeInvalid}
-          onClick={onClickSubmitButton}
-          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-          color={props.isDirty ? 'success' : 'primary'}
-          data-test-subj="querySubmitButton"
-        />
+        <EuiFlexItem grow={false}>
+          <SuperUpdateButton
+            display="base"
+            iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
+            aria-label={props.isLoading ? 'Update query' : 'Refresh query'}
+            isDisabled={isDateRangeInvalid}
+            onClick={onClickSubmitButton}
+            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            color={props.isDirty ? 'success' : 'primary'}
+            data-test-subj="querySubmitButton"
+          />
+        </EuiFlexItem>
       );
 
       if (!shouldRenderDatePicker()) {
@@ -353,12 +365,14 @@ export const QueryBarTopRow = React.memo(
       }
 
       return (
-        <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-          <EuiFlexGroup responsive={false} gutterSize="s">
-            {renderDatePicker()}
-            <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-          </EuiFlexGroup>
-        </NoDataPopover>
+        <EuiFlexItem grow={false}>
+          <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
+            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+              {renderDatePicker()}
+              {button}
+            </EuiFlexGroup>
+          </NoDataPopover>
+        </EuiFlexItem>
       );
     }
 
@@ -440,35 +454,33 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
-    const classes = classNames('kbnQueryBar', {
-      'kbnQueryBar--withDatePicker': showDatePicker && !props.dataViewPickerComponentProps,
-      'kbnQueryBar-withDataViewPicker': showDatePicker && props.dataViewPickerComponentProps,
-    });
-
     return (
-      <EuiFlexGroup
-        className={classes}
-        direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
-        responsive={false}
-        gutterSize="s"
-        justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
-        wrap
-      >
-        {renderDataViewsPicker()}
-        <EuiFlexItem
-          grow={!shouldShowDatePickerAsBadge()}
-          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320 }}
-        >
-          {renderQueryInput()}
-        </EuiFlexItem>
-        {props.filterBar}
+      <>
         <SharingMetaFields
           from={currentDateRange.from}
           to={currentDateRange.to}
           dateFormat={uiSettings.get('dateFormat')}
         />
-        <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiFlexGroup
+          className="kbnQueryBar"
+          direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
+          responsive={false}
+          gutterSize="s"
+          justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
+          wrap
+        >
+          {renderDataViewsPicker()}
+          <EuiFlexItem
+            grow={!shouldShowDatePickerAsBadge()}
+            style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320 }}
+          >
+            {renderQueryInput()}
+          </EuiFlexItem>
+          {shouldShowDatePickerAsBadge() && props.filterBar}
+          {renderUpdateButton()}
+        </EuiFlexGroup>
+        {!shouldShowDatePickerAsBadge() && props.filterBar}
+      </>
     );
   },
   ({ query: prevQuery, ...prevProps }, { query: nextQuery, ...nextProps }) => {
