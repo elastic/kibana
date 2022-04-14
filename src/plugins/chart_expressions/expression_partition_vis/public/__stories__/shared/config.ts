@@ -17,6 +17,7 @@ import {
 export const config: RenderValue['visConfig'] = {
   addTooltip: true,
   legendDisplay: LegendDisplay.HIDE,
+  legendSize: 80,
   truncateLegend: true,
   respectSourceOrder: true,
   legendPosition: Position.Bottom,

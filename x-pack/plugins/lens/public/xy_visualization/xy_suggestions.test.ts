@@ -19,7 +19,7 @@ import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
 import type { PaletteOutput } from '@kbn/coloring';
-import { layerTypes } from '../../common';
+import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
@@ -981,7 +981,7 @@ describe('xy_suggestions', () => {
   test('overwrites column to dimension mappings if a date dimension is added', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
-      legend: { isVisible: true, position: 'bottom' },
+      legend: { isVisible: true, position: 'bottom', legendSize: DEFAULT_LEGEND_SIZE },
       valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',

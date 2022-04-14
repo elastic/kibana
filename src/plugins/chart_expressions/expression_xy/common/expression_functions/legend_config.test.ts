@@ -13,7 +13,7 @@ import { legendConfigFunction } from './legend_config';
 
 describe('legendConfigFunction', () => {
   test('produces the correct arguments', () => {
-    const args: LegendConfig = { isVisible: true, position: Position.Left };
+    const args: LegendConfig = { isVisible: true, position: Position.Left, legendSize: 80 };
     const result = legendConfigFunction.fn(null, args, createMockExecutionContext());
 
     expect(result).toEqual({ type: 'legendConfig', ...args });

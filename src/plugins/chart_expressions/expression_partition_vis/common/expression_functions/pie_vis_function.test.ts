@@ -31,6 +31,7 @@ describe('interpreter/functions#pieVis', () => {
     addTooltip: true,
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
+    legendSize: 80,
     isDonut: true,
     emptySizeRatio: EmptySizeRatios.SMALL,
     nestedLegend: true,

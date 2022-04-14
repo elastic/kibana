@@ -273,6 +273,7 @@ export const createMockVisData = (): Datatable => {
 export const createMockPartitionVisParams = (): PartitionVisParams => {
   return {
     legendDisplay: LegendDisplay.SHOW,
+    legendSize: 80,
     addTooltip: true,
     isDonut: true,
     labels: {

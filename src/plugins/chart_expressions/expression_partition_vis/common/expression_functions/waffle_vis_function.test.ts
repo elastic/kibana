@@ -36,6 +36,7 @@ describe('interpreter/functions#waffleVis', () => {
     showValuesInLegend: true,
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
+    legendSize: 80,
     truncateLegend: true,
     maxLegendLines: 2,
     palette: {

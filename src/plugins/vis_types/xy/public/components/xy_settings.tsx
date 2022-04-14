@@ -62,7 +62,7 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
-  legendSize?: number;
+  legendSize: number;
   ariaLabel?: string;
 };
 

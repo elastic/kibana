@@ -35,6 +35,7 @@ describe('interpreter/functions#mosaicVis', () => {
     addTooltip: true,
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
+    legendSize: 80,
     nestedLegend: true,
     truncateLegend: true,
     maxLegendLines: 2,

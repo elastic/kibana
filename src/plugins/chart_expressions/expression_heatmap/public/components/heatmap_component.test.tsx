@@ -35,6 +35,7 @@ const args: HeatmapArguments = {
   legend: {
     isVisible: true,
     position: 'top',
+    legendSize: 80,
     type: 'heatmap_legend',
   },
   gridConfig: {

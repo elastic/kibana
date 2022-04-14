@@ -27,6 +27,7 @@ describe('interpreter/functions#heatmap', () => {
     legend: {
       isVisible: true,
       position: 'top',
+      legendSize: 80,
       type: EXPRESSION_HEATMAP_LEGEND_NAME,
     },
     gridConfig: {

@@ -2091,7 +2091,7 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
-      legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
+      legend: { type: 'legendConfig', isVisible: false, position: Position.Top, legendSize: 80 },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
         type: 'tickLabelsConfig',
@@ -2183,7 +2183,7 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
-      legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
+      legend: { type: 'legendConfig', isVisible: false, position: Position.Top, legendSize: 80 },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
         type: 'tickLabelsConfig',
@@ -2259,7 +2259,7 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
-      legend: { type: 'legendConfig', isVisible: true, position: Position.Top },
+      legend: { type: 'legendConfig', isVisible: true, position: Position.Top, legendSize: 80 },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
         type: 'tickLabelsConfig',

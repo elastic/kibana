@@ -69,6 +69,7 @@ export const createArgsWithLayers = (layers: DataLayerConfigResult[] = [sampleLa
     type: 'legendConfig',
     isVisible: false,
     position: Position.Top,
+    legendSize: 80,
   },
   valueLabels: 'hide',
   valuesInLegend: false,

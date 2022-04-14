@@ -12,6 +12,7 @@ import {
   CategoryDisplay,
   NumberDisplay,
   LegendDisplay,
+  DEFAULT_LEGEND_SIZE,
 } from '../../common';
 import { layerTypes } from '../../common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -40,6 +41,7 @@ function getExampleState(): PieVisualizationState {
         numberDisplay: NumberDisplay.PERCENT,
         categoryDisplay: CategoryDisplay.DEFAULT,
         legendDisplay: LegendDisplay.DEFAULT,
+        legendSize: DEFAULT_LEGEND_SIZE,
         nestedLegend: false,
       },
     ],
