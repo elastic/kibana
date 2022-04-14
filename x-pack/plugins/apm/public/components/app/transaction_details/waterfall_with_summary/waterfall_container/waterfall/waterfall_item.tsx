@@ -19,6 +19,7 @@ import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './badge/sync_badge';
+import { SpanLinksBadge } from './badge/span_links_badge';
 import { ColdStartBadge } from './badge/cold_start_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
@@ -236,6 +237,9 @@ export function WaterfallItem({
             sync={item.doc.span.sync}
             agentName={item.doc.agent.name}
           />
+        )}
+        {item.docType === 'span' && item.doc.span.links?.length && (
+          <SpanLinksBadge size={item.doc.span.links.length} />
         )}
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>

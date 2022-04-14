@@ -38,6 +38,7 @@ import { SyncBadge } from '../badge/sync_badge';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
 import { FailureBadge } from '../failure_badge';
+import { SpanLinks } from '../../../../../../shared/span_links';
 
 function formatType(type: string) {
   switch (type) {
@@ -254,6 +255,24 @@ export function SpanFlyout({
                     },
                   ]
                 : []),
+              {
+                id: 'span_links',
+                name: (
+                  <>
+                    {i18n.translate(
+                      'xpack.apm.propertiesTable.tabs.spanLinks',
+                      { defaultMessage: 'Span links' }
+                    )}{' '}
+                    <EuiBadge>{span.span.links?.length}</EuiBadge>
+                  </>
+                ),
+                content: (
+                  <>
+                    <EuiSpacer size="m" />
+                    <SpanLinks span={span} />
+                  </>
+                ),
+              },
             ]}
           />
         </EuiFlyoutBody>

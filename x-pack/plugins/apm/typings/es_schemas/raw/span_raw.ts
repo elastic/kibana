@@ -63,6 +63,12 @@ export interface SpanRaw extends APMBaseDoc {
       sum: { us: number };
       compression_strategy: string;
     };
+    links?: [
+      {
+        trace: { id: string };
+        span: { id: string };
+      }
+    ];
   };
   timestamp: TimestampUs;
   transaction?: {
