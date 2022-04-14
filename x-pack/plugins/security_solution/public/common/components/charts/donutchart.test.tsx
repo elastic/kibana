@@ -111,10 +111,9 @@ describe('DonutChart', () => {
         chartMargins: { bottom: 0, left: 0, right: 0, top: 0 },
         partition: {
           circlePadding: 4,
-          emptySizeRatio: 0.4,
+          emptySizeRatio: 0.8,
           idealFontSizeJump: 1.1,
-          linkLabel: { maximumSection: Infinity },
-          outerSizeRatio: 0.9,
+          outerSizeRatio: 1,
         },
       },
     });
@@ -139,7 +138,6 @@ describe('DonutChart', () => {
       parsedMockAlertsData?.open?.severities
     );
     expect((Partition as jest.Mock).mock.calls[0][0].layout).toEqual('sunburst');
-    expect((Partition as jest.Mock).mock.calls[0][0].layers.length).toEqual(3);
   });
 
   test('should render chart legend', () => {

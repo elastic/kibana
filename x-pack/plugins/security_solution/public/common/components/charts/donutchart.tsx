@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React from 'react';
 
 import {
   Chart,
@@ -16,15 +16,25 @@ import {
   PartitionLayout,
   defaultPartitionValueFormatter,
   NodeColorAccessor,
+  PartialTheme,
 } from '@elastic/charts';
 import styled from 'styled-components';
-import { ThemeContext } from './donut_theme_context';
 import { useTheme } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
 import { DonutChartEmpty } from './donutchart_empty';
 
 export const NO_LEGEND_DATA: LegendItem[] = [];
+
+const donutTheme: PartialTheme = {
+  chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
+  partition: {
+    idealFontSizeJump: 1.1,
+    outerSizeRatio: 1,
+    emptySizeRatio: 0.8,
+    circlePadding: 4,
+  },
+};
 
 interface DonutChartData {
   key: string;
@@ -45,7 +55,8 @@ export interface DonutChartProps {
   totalCount: number | null | undefined;
 }
 
-const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+/* Make this position absolute in order to overlap the text onto the donut */
+const DonutTextWrapper = styled(EuiFlexGroup)`
   top: 35%;
   width: 100%;
   max-width: 77px;
@@ -70,8 +81,6 @@ export const DonutChart = ({
 }: DonutChartProps) => {
   const theme = useTheme();
 
-  const { chartTheme } = useContext(ThemeContext);
-
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -81,7 +90,7 @@ export const DonutChart = ({
       data-test-subj="donut-chart"
     >
       <StyledEuiFlexItem grow={false}>
-        <StyledEuiFlexGroup
+        <DonutTextWrapper
           direction="column"
           gutterSize="none"
           alignItems="center"
@@ -102,12 +111,12 @@ export const DonutChart = ({
 
             {data && link && <EuiLink className="eui-textTruncate">{label}</EuiLink>}
           </EuiFlexItem>
-        </StyledEuiFlexGroup>
+        </DonutTextWrapper>
         {data == null || totalCount == null || totalCount === 0 ? (
           <DonutChartEmpty size={height} />
         ) : (
           <Chart size={height}>
-            <Settings theme={chartTheme.theme} baseTheme={theme} />
+            <Settings theme={donutTheme} baseTheme={theme} />
             <Partition
               id="donut-chart"
               data={data}
@@ -115,21 +124,6 @@ export const DonutChart = ({
               valueAccessor={(d: Datum) => d.value as number}
               valueFormatter={(d: number) => `${defaultPartitionValueFormatter(d)}`}
               layers={[
-                {
-                  groupByRollup: (d: Datum) => d.group,
-                  shape: {
-                    fillColor: () => '#fff',
-                  },
-                },
-                {
-                  groupByRollup: (d: Datum) => d.group,
-                  shape: {
-                    fillColor: () => '#fff',
-                  },
-                },
-                /* The layers above are for styling purpose,
-               to make the ring thinner.
-               */
                 {
                   groupByRollup: (d: Datum) => d.label ?? d.key,
                   nodeLabel: (d: Datum) => d,
