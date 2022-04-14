@@ -73,7 +73,7 @@
     "yarn": "^1.21.1"
   },
   "resolutions": {
-    "**/@babel/runtime": "^7.17.8",
+    "**/@babel/runtime": "^7.17.9",
     "**/@types/node": "16.11.7",
     "**/chokidar": "^3.4.3",
     "**/deepmerge": "^4.2.2",
@@ -97,7 +97,7 @@
     "puppeteer/node-fetch": "^2.6.7"
   },
   "dependencies": {
-    "@babel/runtime": "^7.17.8",
+    "@babel/runtime": "^7.17.9",
     "@dnd-kit/core": "^3.1.1",
     "@dnd-kit/sortable": "^4.0.0",
     "@dnd-kit/utilities": "^2.0.0",
@@ -440,11 +440,11 @@
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
     "@babel/cli": "^7.17.6",
-    "@babel/core": "^7.17.8",
+    "@babel/core": "^7.17.9",
     "@babel/eslint-parser": "^7.17.0",
     "@babel/eslint-plugin": "^7.17.7",
-    "@babel/generator": "^7.17.7",
-    "@babel/parser": "^7.17.8",
+    "@babel/generator": "^7.17.9",
+    "@babel/parser": "^7.17.9",
     "@babel/plugin-proposal-class-properties": "^7.16.7",
     "@babel/plugin-proposal-export-namespace-from": "^7.16.7",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.7",
@@ -456,7 +456,7 @@
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
     "@babel/register": "^7.17.7",
-    "@babel/traverse": "^7.17.3",
+    "@babel/traverse": "^7.17.9",
     "@babel/types": "^7.17.0",
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "5.4.0",
@@ -759,7 +759,7 @@
     "babel-plugin-add-module-exports": "^1.0.4",
     "babel-plugin-istanbul": "^6.1.1",
     "babel-plugin-require-context-hook": "^1.0.0",
-    "babel-plugin-styled-components": "^2.0.6",
+    "babel-plugin-styled-components": "^2.0.7",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "backport": "^7.3.1",
     "callsites": "^3.1.0",
