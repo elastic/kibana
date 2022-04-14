@@ -17,7 +17,6 @@ import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
-  ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
 } from '@kbn/expressions-plugin/public';
@@ -972,24 +971,24 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
-export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
-  return event.name === 'filter';
+export function isLensFilterEvent(event: unknown): event is LensFilterEvent {
+  return (event as Record<string, unknown>)?.name === 'filter';
 }
 
-export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
-  return event.name === 'brush';
+export function isLensBrushEvent(event: unknown): event is LensBrushEvent {
+  return (event as Record<string, unknown>)?.name === 'brush';
 }
 
 export function isLensEditEvent<T extends LensEditSupportedActions>(
-  event: ExpressionRendererEvent
+  event: unknown
 ): event is LensEditEvent<T> {
-  return event.name === 'edit';
+  return (event as Record<string, unknown>)?.name === 'edit';
 }
 
 export function isLensTableRowContextMenuClickEvent(
-  event: ExpressionRendererEvent
+  event: unknown
 ): event is LensTableRowContextMenuEvent {
-  return event.name === 'tableRowContextMenuClick';
+  return (event as Record<string, unknown>)?.name === 'tableRowContextMenuClick';
 }
 
 /**

@@ -88,7 +88,7 @@ export interface LensUnwrapResult {
 }
 
 export interface LensEmbeddableUiState {
-  hasCompatibleActions?(event: ExpressionRendererEvent): Promise<boolean>;
+  hasCompatibleActions?(event: Pick<ExpressionRendererEvent, 'data' | 'name'>): Promise<boolean>;
 }
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
