@@ -10,8 +10,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Fetch Node.js rules
 http_archive(
   name = "build_bazel_rules_nodejs",
-  sha256 = "8a7c981217239085f78acc9898a1f7ba99af887c1996ceb3b4504655383a2c3c",
-  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.0.0/rules_nodejs-4.0.0.tar.gz"],
+  patch_args = ["-p1"],
+  patches = ["//:src/dev/bazel/rules_nodejs_patches/normalized_paths_for_windows_runfiles.patch"],
+  sha256 = "6f15d75f9e99c19d9291ff8e64e4eb594a6b7d25517760a75ad3621a7a48c2df",
+  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.7.0/rules_nodejs-4.7.0.tar.gz"],
 )
 
 # Build Node.js rules dependencies
