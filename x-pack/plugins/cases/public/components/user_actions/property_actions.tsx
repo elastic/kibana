@@ -117,6 +117,7 @@ const UserActionPropertyActionsComponent = ({
           confirmButtonText={CONFIRM_BUTTON}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          data-test-subj="property-actions-confirm-modal"
         />
       ) : null}
     </>
