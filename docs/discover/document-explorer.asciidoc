@@ -112,7 +112,7 @@ image::images/document-explorer-expand.png[Expanded view of the document table]
 click
 image:images/actions-icon.png[three dots icon in table column] in the *Actions* column
 to:
-.. Filter the results to include or exclude specific fields or values
+.. Filter the results to include or exclude specific fields or values.
 .. Toggle the field in or out the document table.
 .. Pin the field so it stays at the top
 
