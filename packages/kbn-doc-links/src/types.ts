@@ -309,6 +309,9 @@ export interface DocLinks {
     gdalTutorial: string;
   }>;
   readonly monitoring: Record<string, string>;
+  readonly reporting: Readonly<{
+    cloudMinimumRequirements: string;
+  }>;
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
