@@ -50,7 +50,7 @@ export const AdminSearchBar = memo(() => {
   return (
     <div>
       {searchBarIndexPatterns && searchBarIndexPatterns.length > 0 && (
-        <div className="globalQueryBar">
+        <div>
           <SearchBar
             dataTestSubj="adminSearchBar"
             query={searchBarQuery}

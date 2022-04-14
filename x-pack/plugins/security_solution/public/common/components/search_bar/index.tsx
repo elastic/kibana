@@ -315,7 +315,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
     return (
-      <div data-test-subj={`${id}DatePicker`} className="globalQueryBar">
+      <div data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}
