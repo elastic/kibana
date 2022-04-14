@@ -8,6 +8,7 @@
 import { cloneDeep, mapValues } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { SerializableRecord } from '@kbn/utility-types';
+import { LegendConfig as XYLegendConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
@@ -251,6 +252,29 @@ export const commonLockOldMetricVisSettings = (
   visState.textAlign = visState.textAlign ?? 'center';
   visState.titlePosition = visState.titlePosition ?? 'bottom';
   visState.size = visState.size ?? 'xl';
+  return newAttributes;
+};
+
+export const commonLockOldLegendSizeDefault = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+
+  if (['lnsXY', 'lnsHeatmap'].includes(newAttributes.visualizationType + '')) {
+    const legendConfig = (newAttributes.state.visualization as { legend: { legendSize: number } })
+      .legend;
+    legendConfig.legendSize = legendConfig.legendSize ?? 0;
+  }
+
+  if (newAttributes.visualizationType === 'lnsPie') {
+    const layers = (newAttributes.state.visualization as { layers: Array<{ legendSize: number }> })
+      .layers;
+
+    layers.forEach((layer) => {
+      layer.legendSize = layer.legendSize ?? 0;
+    });
+  }
+
   return newAttributes;
 };
 
