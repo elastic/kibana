@@ -6,7 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigKey, SyntheticsMonitor, SyntheticsMonitorWithSecrets } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithSecrets,
+} from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import {
@@ -23,7 +27,7 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, savedObjectsClient, response, server }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
     const { monitorId } = request.params;
     const monitor = await savedObjectsClient.get<SyntheticsMonitor>(
       syntheticsMonitorType,
