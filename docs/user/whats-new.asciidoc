@@ -1,12 +1,189 @@
 [[whats-new]]
-== What's new in 8.0
+== What's new in {minor-version}
 
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes-8.0.0>>. 
+coming::[{minor-version}]
+
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check the <<release-notes, release notes>>.
+
+Previous versions: {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+=== Discover
+
+[float]
+==== Document Explorer on by default
+
+*Document Explorer*, the powerful new way to analyze and explore your data with *Discover*,
+is now on by default. *Document Explorer* helps you quickly sort, select, and compare data,
+resize columns, and view documents in fullscreen. For more information,
+check {kibana-ref}/document-explorer.html[Document Explorer].
+
+[role="screenshot"]
+image::images/highlights-discover.png[A view of the the Document Explorer in Discover]
+
+[float]
+=== Visualization editors
+
+[float]
+==== Auto-apply your changes in Lens
+
+By default, *Lens* has always automatically applied the changes you make to visualizations.
+Now you can control when *Lens* applies your changes and generates suggestions with
+he new ability to turn on and off auto-apply. To start manually applying your changes,
+click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
+For more information, check {kibana-ref}/lens.html#create-the-visualization-panel[Create visualizations].
+
+[role="screenshot"]
+image::images/highlights-lens-auto-apply.png[Auto-apply changes in Lens]
+
+[float]
+==== Add annotations to Lens visualizations (technical preview)
+
+To call out significant changes and trends in your data, you can now add annotations
+to *Lens* visualizations in tech preview. Customize the appearance of annotations with text,
+icons, colors, and more. For more information, check {kibana-ref}/add-annotations.html[Add annotations].
+
+[role="screenshot"]
+image::images/highlights-lens-annotations.png[Annotations in Lens visualzations]
+
+[float]
+==== Open TSVB visualizations in Lens
+
+Open and edit your Time Series *TSVB* visualizations in *Lens*,
+the drag-and-drop visualization editor that provides you with additional
+visualization types, reference lines, and more.
+For more information, check {kibana-ref}/edit-visualizations-in-lens.html[Edit visualizations in Lens].
+
+[role="screenshot"]
+image::images/highlights-lens-tsvb.gif[TSVB visualization in Lens]
+
+[float]
+==== Explore Lens visualization data in Discover
+
+For further exploration of your data, you can now open *Lens* visualization data
+in *Discover*. With *Discover* you can view the documents in the fields you used
+to create the visualization, then navigate back to *Lens* to finish creating your
+visualization. For more information,
+check {kibana-ref}/explore-lens-data-in-discover.html[Explore the data in Discover].
+
+[role="screenshot"]
+image::images/highlights-lens-discover.gif[Seamlessly move from Lens to Discover to further explore your data]
+
+[float]
+==== Enhancements to visualization editors
+
+{kib} offers even more ways to create visualizations:
+* **Metric visualization.** Use the new Metric visualization type in **Lens**
+to show the latest or earliest data, or the last value.
+* **Group by multiple fields in TSVB.** When you select **Terms** from the **Group by**
+dropdown in ****TSVB, you can calculate the top values for multiple fields.
+* **Customize the legend size.** In all visualization editors,
+you can now increase or decrease the visibility of your legend by changing the size.
+
+[float]
+=== Maps
+
+[float]
+==== Hexagons
+
+In *Maps*, you can now display your clusters as hexagons
+instead of rectangles. This feature adds another beautiful, and more precise way, to
+visualize your geo_point fields. Hexagon aggregation is
+a https://www.elastic.co/subscriptions[subscription feature].
+
+[role="screenshot"]
+image::images/highlights-maps-hexagon.png[region map created in Lens]
+
+[float]
+==== Region Maps in Lens
+
+You can now create region maps
+(also called cloropeth maps) from *Lens*.
+
+[role="screenshot"]
+image::images/highlights-maps-region.png[Apply changes to render visualization]
+
+[float]
+==== Custom icons
+
+Upload an SVG image and use it as icons in your maps.
+Edit your maps layer,and then select
+*Layer Style> Symbol style > Icon > Add custom icon*.
+
+[role="screenshot"]
+image::images/highlights-maps-custom-icon.png[Add custom icon button in layer style settings]
+
+[role="screenshot"]
+image::images/highlights-maps-custom-icon-2.png[custom phone icon added to a map]
+
+[float]
+=== Alerting
+
+[float]
+==== Snooze rules
+
+*Alerting* introduces the ability to snooze rules to suppress notifications
+and actions for a user-defined duration. You'll never miss an
+action because you forgot to unmute a rule while handling problems that arose
+unexpectedly or during known downtimes.
+
+[role="screenshot"]
+image::images/highlights-alerting-snooze.png["UI for enabling snooze mode", width=50%]
+
+[float]
+==== Rule history
+
+For better observability and monitoring of your rules, {kib} now
+displays the execution history of your rules and actions. You can customize the
+history view to include granular information with an array of impactful data points,
+including the underlying alerting query durations,
+the number of actions that were triggered or errored, alert context,
+rule execution timeouts, and more.
+
+[role="screenshot"]
+image::images/highlights-alerts-rule-history.png[Rule history table in Alerting]
+
+[float]
+==== Configure rules
+
+*Alerting* introduces configurable guardrails so that as an admin,
+you can apply your policies on a level deeper than RBAC and fully stay on top of
+the stress that the alerting system may put on your instance in case your users misconfigured rules.
+This way you have peace of mind that your instance remains performant.
+
+Specifically, in the kibana.yml file:
+
+* Configure your rule queries to timeout after a custom time expires without the query returning.
+You can do this on a per rule type basis too. Refer to {kibana-ref}/alert-action-settings-kb.html[documentation] for the `rules.execution.timeout setting.``
+
+* Configure a minimum value for the interval with which your rules run. Strictly enforce the
+minimum interval or just display warnings on the UI. Check the documentation for `the minimumScheduleInterval` setting.
+
+* Configure the maximum number of actions that a rule can generate. Specify a different cap for your
+different rule types, depending on your needs. See the documentation for the `rules.execution.actions.max setting`.
+
+[float]
+==== New xMatters connector
+
+With the new xMatters connector, you can
+configure the severity of a rule and assign it tags, so the right
+resources are notified to take action on the corresponding incidents. With the xMatters action,
+you can leverage schedules and escalations to engage with the right resources.
+The xMatters connector supports Basic and URL authentication.
+
+[float]
+==== Cases now part of the Stack
+
+This release brings {kib} Cases into the Stack,
+so that you can open and track issues outside Elastic Solutions as well.
+Access them in *Stack Management* under *Alerts and Insights*.
+
 
 // end::notable-highlights[]
