@@ -20,3 +20,4 @@ export * from './parse_path';
 export * from './theme_tags';
 export * from './obj_helpers';
 export * from './hashes';
+export * from './dll_manifest';

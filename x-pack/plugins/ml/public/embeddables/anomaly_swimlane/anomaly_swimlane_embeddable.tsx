@@ -39,7 +39,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
   AnomalySwimlaneEmbeddableOutput
 > {
   private node?: HTMLElement;
-  private reload$ = new Subject();
+  private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
   constructor(
