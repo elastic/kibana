@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
-export * from './translations';
+export { withSecurityContext } from './with_security_context';
