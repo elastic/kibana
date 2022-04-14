@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { services as functionalServices } from '../../functional/services';
-import { RemoteEsProvider } from './remote_es';
-import { RemoteEsArchiverProvider } from './remote_es_archiver';
-
-export const services = {
-  ...functionalServices,
-  remoteEs: RemoteEsProvider,
-  remoteEsArchiver: RemoteEsArchiverProvider,
-};
+export { FullStoryShipper } from './fullstory_shipper';
+export type { FullStoryShipperConfig } from './fullstory_shipper';
+export type { FullStorySnippetConfig } from './load_snippet';

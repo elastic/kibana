@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
-import { services } from './services';
-import { pageObjects } from '../functional/page_objects';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export { convertMapboxVectorTileToJson } from './convert_mapbox_vector_tile_to_json';

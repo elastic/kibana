@@ -25,7 +25,7 @@ import {
   VerticalBulletIcon,
   HorizontalBulletIcon,
 } from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
-import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
+import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
   GROUP_ID,
@@ -115,7 +115,7 @@ const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizatio
 const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
