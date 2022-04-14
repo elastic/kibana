@@ -96,6 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should initialize trained models and inherit job spaces', async () => {
+      // create trained model linked to job, it should inherit the jobs spaces
       const model = getTestModel(modelIdSpace1, 'classification', dfaJobId1);
       await ml.api.createTrainedModelES(model.model_id, model.body);
 
@@ -108,6 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should initialize trained models and inherit job star spaces', async () => {
+      // create trained model linked to job, it should inherit the jobs spaces
       const model = getTestModel(modelIdStarSpace, 'classification', dfaJobIdStarSpace);
       await ml.api.createTrainedModelES(model.model_id, model.body);
 
@@ -120,6 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should initialize trained models and not inherit spaces', async () => {
+      // create trained model not linked to job, it should have the current space
       const model = getTestModel(modelIdSpace2, 'classification');
       await ml.api.createTrainedModelES(model.model_id, model.body);
 
