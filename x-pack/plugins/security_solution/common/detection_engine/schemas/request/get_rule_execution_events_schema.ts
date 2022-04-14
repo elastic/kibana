@@ -15,7 +15,7 @@ import {
   ExecutionLogTableSortColumns,
   executionLogTableSortColumns,
   ruleExecutionStatus,
-  RuleExecutionStatusType,
+  RuleExecutionStatus,
 } from '../common';
 
 /**
@@ -24,13 +24,13 @@ import {
  *   - If an array is sent in, then the array will be validated to ensure all elements are a ruleExecutionStatus
  */
 export const DefaultStatusFiltersStringArray = new t.Type<
-  RuleExecutionStatusType[],
-  RuleExecutionStatusType[],
+  RuleExecutionStatus[],
+  RuleExecutionStatus[],
   unknown
 >(
   'DefaultStatusFiltersStringArray',
   t.array(ruleExecutionStatus).is,
-  (input, context): Either<t.Errors, RuleExecutionStatusType[]> => {
+  (input, context): Either<t.Errors, RuleExecutionStatus[]> => {
     if (input == null) {
       return t.success([]);
     } else if (typeof input === 'string') {

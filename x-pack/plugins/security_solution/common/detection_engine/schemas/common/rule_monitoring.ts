@@ -53,8 +53,6 @@ export enum RuleExecutionStatus {
 
 export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
 
-export type RuleExecutionStatusType = t.TypeOf<typeof ruleExecutionStatus>;
-
 export const ruleExecutionStatusOrder = PositiveInteger;
 export type RuleExecutionStatusOrder = t.TypeOf<typeof ruleExecutionStatusOrder>;
 
