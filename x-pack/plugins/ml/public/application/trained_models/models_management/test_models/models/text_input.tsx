@@ -13,12 +13,16 @@ export const TextInput: FC<{
   disabled: boolean;
   inputText: string;
   setInputText(input: string): void;
-}> = ({ disabled, inputText, setInputText }) => {
+  placeholder?: string;
+}> = ({ disabled, inputText, setInputText, placeholder }) => {
   return (
     <EuiTextArea
-      placeholder={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
-        defaultMessage: 'Input text',
-      })}
+      placeholder={
+        placeholder ??
+        i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
+          defaultMessage: 'Input text',
+        })
+      }
       value={inputText}
       disabled={disabled === true}
       fullWidth
