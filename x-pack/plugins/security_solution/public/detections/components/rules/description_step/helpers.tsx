@@ -85,6 +85,7 @@ export const buildQueryBarDescription = ({
                   {indexPatterns != null ? (
                     <FilterLabel
                       filter={filter}
+                      // @ts-ignore-next-line
                       valueLabel={getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
                   ) : (

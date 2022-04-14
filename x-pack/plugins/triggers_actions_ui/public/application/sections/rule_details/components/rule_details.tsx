@@ -271,8 +271,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <EuiText size="s">
                     <p>
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.triggerActionsTitle"
-                        defaultMessage="Trigger actions"
+                        id="xpack.triggersActionsUI.sections.ruleDetails.stateTitle"
+                        defaultMessage="State"
                       />
                     </p>
                   </EuiText>

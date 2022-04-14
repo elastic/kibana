@@ -79,48 +79,44 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.successRate)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceInstance
                   .transaction(appleTransaction.name)
                   .timestamp(timestamp)
                   .duration(1000)
                   .success()
-                  .serialize()
               ),
             timerange(start, end)
               .interval('1m')
               .rate(appleTransaction.failureRate)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceInstance
                   .transaction(appleTransaction.name)
                   .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
                   .duration(1000)
                   .timestamp(timestamp)
                   .failure()
-                  .serialize()
               ),
             timerange(start, end)
               .interval('1m')
               .rate(bananaTransaction.successRate)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceInstance
                   .transaction(bananaTransaction.name)
                   .timestamp(timestamp)
                   .duration(1000)
                   .success()
-                  .serialize()
               ),
             timerange(start, end)
               .interval('1m')
               .rate(bananaTransaction.failureRate)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceInstance
                   .transaction(bananaTransaction.name)
                   .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
                   .duration(1000)
                   .timestamp(timestamp)
                   .failure()
-                  .serialize()
               ),
           ]);
         });

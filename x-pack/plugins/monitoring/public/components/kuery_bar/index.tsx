@@ -8,7 +8,8 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { IIndexPattern, QuerySuggestion } from '../../../../../../src/plugins/data/public';
+import type { DataView } from 'src/plugins/data_views/public';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 import { AutocompleteField } from './autocomplete_field';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 
@@ -21,7 +22,7 @@ type LoadSuggestionsFn = (
 export type CurryLoadSuggestionsType = (loadSuggestions: LoadSuggestionsFn) => LoadSuggestionsFn;
 
 interface Props {
-  derivedIndexPattern: IIndexPattern;
+  derivedIndexPattern: DataView;
   onSubmit: (query: string) => void;
   onChange?: (query: string) => void;
   value?: string | null;
@@ -64,17 +65,12 @@ export const KueryBar = ({
     }
   };
 
-  const filteredDerivedIndexPattern = {
-    ...derivedIndexPattern,
-    fields: derivedIndexPattern.fields,
-  };
-
   const defaultPlaceholder = i18n.translate('xpack.monitoring.alerts.kqlSearchFieldPlaceholder', {
     defaultMessage: 'Search for monitoring data',
   });
 
   return (
-    <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
+    <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
           aria-label={placeholder}

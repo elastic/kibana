@@ -142,7 +142,11 @@ describe('deepLinks', () => {
 
   describe('experimental flags', () => {
     it('should return NO users link when enableExperimental.usersEnabled === false', () => {
-      const deepLinks = getDeepLinks(mockGlobalState.app.enableExperimental);
+      const deepLinks = getDeepLinks({
+        ...mockGlobalState.app.enableExperimental,
+        usersEnabled: false,
+      });
+
       expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeFalsy();
     });
 

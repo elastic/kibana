@@ -29,5 +29,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/get_configure'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
+
+    /**
+     * Internal routes
+     */
+    loadTestFile(require.resolve('./internal/bulk_create_attachments'));
   });
 };
