@@ -19,7 +19,6 @@ import { SettingsPageObject } from './settings_page';
 import { SharePageObject } from './share_page';
 import { LoginPageObject } from './login_page';
 import { TimePickerPageObject } from './time_picker';
-import { TimePickerFastPageObject } from './time_picker_fast';
 import { TimelionPageObject } from './timelion_page';
 import { VisualBuilderPageObject } from './visual_builder_page';
 import { VisualizePageObject } from './visualize_page';
@@ -50,7 +49,6 @@ export const pageObjects = {
   login: LoginPageObject,
   timelion: TimelionPageObject,
   timePicker: TimePickerPageObject,
-  timePickerFast: TimePickerFastPageObject,
   visualBuilder: VisualBuilderPageObject,
   visualize: VisualizePageObject,
   visEditor: VisualizeEditorPageObject,
