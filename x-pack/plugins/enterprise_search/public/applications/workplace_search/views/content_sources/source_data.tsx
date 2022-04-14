@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../shared/doc_links';
 
-import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
+import {
+  SOURCE_CATEGORIES,
+  SOURCE_NAMES,
+  SOURCE_OBJ_TYPES,
+  GITHUB_LINK_TITLE,
+} from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
 export const staticExternalSourceData: SourceDataItem = {
@@ -369,9 +374,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.NETWORK_DRVE,
     iconName: SOURCE_NAMES.NETWORK_DRVE,
-    categories: [
-      // TODO update this when we define these
-    ],
+    categories: [SOURCE_CATEGORIES.STORAGE],
     serviceType: 'network_drive', // this doesn't exist on the BE
     configuration: {
       isPublicKey: false,
@@ -418,7 +421,9 @@ export const staticSourceData: SourceDataItem[] = [
     name: SOURCE_NAMES.OUTLOOK,
     iconName: SOURCE_NAMES.OUTLOOK,
     categories: [
-      // TODO update this when we define these
+      SOURCE_CATEGORIES.COMMUNICATIONS,
+      SOURCE_CATEGORIES.PRODUCTIVITY,
+      SOURCE_CATEGORIES.MICROSOFT,
     ],
     serviceType: 'outlook', // this doesn't exist on the BE
     configuration: {
@@ -573,21 +578,11 @@ export const staticSourceData: SourceDataItem[] = [
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
     iconName: SOURCE_NAMES.SHAREPOINT_SERVER,
     categories: [
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing', {
-        defaultMessage: 'File Sharing',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
-        defaultMessage: 'Storage',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
-        defaultMessage: 'Cloud',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
-        defaultMessage: 'Microsoft',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.office', {
-        defaultMessage: 'Office 365',
-      }),
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
     ],
     serviceType: 'share_point_server', // this doesn't exist on the BE
     configuration: {
@@ -628,7 +623,9 @@ export const staticSourceData: SourceDataItem[] = [
     name: SOURCE_NAMES.TEAMS,
     iconName: SOURCE_NAMES.TEAMS,
     categories: [
-      // TODO update this when we define these
+      SOURCE_CATEGORIES.COMMUNICATIONS,
+      SOURCE_CATEGORIES.PRODUCTIVITY,
+      SOURCE_CATEGORIES.MICROSOFT,
     ],
     serviceType: 'teams', // this doesn't exist on the BE
     configuration: {
@@ -675,9 +672,7 @@ export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.ZOOM,
     iconName: SOURCE_NAMES.ZOOM,
-    categories: [
-      // TODO update this when we define these
-    ],
+    categories: [SOURCE_CATEGORIES.COMMUNICATIONS, SOURCE_CATEGORIES.PRODUCTIVITY],
     serviceType: 'zoom', // this doesn't exist on the BE
     configuration: {
       isPublicKey: false,

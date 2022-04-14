@@ -351,6 +351,39 @@ export const SOURCE_OBJ_TYPES = {
   ),
 };
 
+export const SOURCE_CATEGORIES = {
+  CLOUD: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
+    defaultMessage: 'Cloud',
+  }),
+  COMMUNICATIONS: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.communications',
+    {
+      defaultMessage: 'Communications',
+    }
+  ),
+  FILE_SHARING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing',
+    {
+      defaultMessage: 'File Sharing',
+    }
+  ),
+  MICROSOFT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
+    defaultMessage: 'Microsoft',
+  }),
+  OFFICE_365: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.office', {
+    defaultMessage: 'Office 365',
+  }),
+  PRODUCTIVITY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.productivity',
+    {
+      defaultMessage: 'Productivity',
+    }
+  ),
+  STORAGE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
+    defaultMessage: 'Storage',
+  }),
+};
+
 export const API_KEYS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.apiKeysTitle',
   {
