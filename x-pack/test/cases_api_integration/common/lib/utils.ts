@@ -17,6 +17,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import {
+  CASES_INTERNAL_URL,
   CASES_URL,
   CASE_CONFIGURE_CONNECTORS_URL,
   CASE_CONFIGURE_URL,
@@ -49,8 +50,10 @@ import {
   CasesByAlertId,
   CaseResolveResponse,
   CaseMetricsResponse,
+  BulkCreateCommentRequest,
+  CommentType,
 } from '../../../../plugins/cases/common/api';
-import { getPostCaseRequest } from './mock';
+import { getPostCaseRequest, postCaseReq } from './mock';
 import { getCaseUserActionUrl } from '../../../../plugins/cases/common/api/helpers';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
@@ -656,6 +659,31 @@ export const createComment = async ({
   return theCase;
 };
 
+export const bulkCreateAttachments = async ({
+  supertest,
+  caseId,
+  params,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  params: BulkCreateCommentRequest;
+  auth?: { user: User; space: string | null };
+  expectedHttpCode?: number;
+}): Promise<CaseResponse> => {
+  const { body: theCase } = await supertest
+    .post(
+      `${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_create`
+    )
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
 export const updateCase = async ({
   supertest,
   params,
@@ -1142,4 +1170,49 @@ export const extractWarningValueFromWarningHeader = (warningHeader: string) => {
   const lastQuote = warningHeader.length - 1;
   const warningValue = warningHeader.substring(firstQuote + 1, lastQuote);
   return warningValue;
+};
+
+export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRequest => {
+  return [...Array(numberOfAttachments)].map((index) => {
+    if (index % 0) {
+      return {
+        type: CommentType.user,
+        comment: `Test ${index + 1}`,
+        owner: 'securitySolutionFixture',
+      };
+    }
+
+    return {
+      type: CommentType.alert,
+      alertId: `test-id-${index + 1}`,
+      index: `test-index-${index + 1}`,
+      rule: {
+        id: `rule-test-id-${index + 1}`,
+        name: `Test ${index + 1}`,
+      },
+      owner: 'securitySolutionFixture',
+    };
+  });
+};
+
+export const createCaseAndBulkCreateAttachments = async ({
+  supertest,
+  numberOfAttachments = 3,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  numberOfAttachments?: number;
+  auth?: { user: User; space: string | null };
+  expectedHttpCode?: number;
+}): Promise<{ theCase: CaseResponse; attachments: BulkCreateCommentRequest }> => {
+  const postedCase = await createCase(supertest, postCaseReq);
+  const attachments = getAttachments(numberOfAttachments);
+  const patchedCase = await bulkCreateAttachments({
+    supertest,
+    caseId: postedCase.id,
+    params: attachments,
+  });
+
+  return { theCase: patchedCase, attachments };
 };
