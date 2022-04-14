@@ -37,6 +37,7 @@ const roots: string[] = [
   'packages',
   'src/plugins',
   'test',
+  'src/core',
   'src',
 ];
 
