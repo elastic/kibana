@@ -56746,7 +56746,9 @@ const CleanCommand = {
     id: 'total'
   },
 
-  async run(projects) {
+  async run(projects, projectGraph, {
+    kbn
+  }) {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
       This command is only necessary for the circumstance where you need to recover a consistent
       state when problems arise. If you need to run this command often, please let us know by
@@ -56777,7 +56779,7 @@ const CleanCommand = {
     } // Runs Bazel soft clean
 
 
-    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])()) {
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])(kbn.getAbsolute())) {
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean']);
       _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Soft cleaned bazel');
     }
@@ -59015,7 +59017,9 @@ const ResetCommand = {
     id: 'total'
   },
 
-  async run(projects) {
+  async run(projects, projectGraph, {
+    kbn
+  }) {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
       In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
       problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
@@ -59048,11 +59052,10 @@ const ResetCommand = {
           pattern: extraPatterns
         });
       }
-    }
+    } // Runs Bazel hard clean and deletes Bazel Cache Folders
 
-    const repoRoot = Object(path__WEBPACK_IMPORTED_MODULE_3__["resolve"])(__dirname, '../../../..'); // Runs Bazel hard clean and deletes Bazel Cache Folders
 
-    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])(repoRoot)) {
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])(kbn.getAbsolute())) {
       // Hard cleaning bazel
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean', '--expunge']);
       _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Hard cleaned bazel'); // Deletes Bazel Cache Folders

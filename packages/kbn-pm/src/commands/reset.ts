@@ -31,7 +31,7 @@ export const ResetCommand: ICommand = {
     id: 'total',
   },
 
-  async run(projects) {
+  async run(projects, projectGraph, { kbn }) {
     log.warning(dedent`
       In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
       problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
@@ -63,10 +63,8 @@ export const ResetCommand: ICommand = {
       }
     }
 
-    const repoRoot = resolve(__dirname, '../../../..');
-
     // Runs Bazel hard clean and deletes Bazel Cache Folders
-    if (await isBazelBinAvailable(repoRoot)) {
+    if (await isBazelBinAvailable(kbn.getAbsolute())) {
       // Hard cleaning bazel
       await runBazel(['clean', '--expunge']);
       log.success('Hard cleaned bazel');
