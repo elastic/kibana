@@ -20,22 +20,22 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   });
 
   const alertsTableConfigurationRegistry = useKibana().services.alertsTableConfigurationRegistry;
-  if (!alertsTableConfigurationRegistry.has(props.pluginId)) {
+  if (!alertsTableConfigurationRegistry.has(props.configurationId)) {
     throw new Error(
       'This plugin has no registered its alerts table parameters inside TriggersActionsUi'
     );
   }
-  const pluginCustomizations = alertsTableConfigurationRegistry.get(props.pluginId);
+  const alertsTableConfiguration = alertsTableConfigurationRegistry.get(props.configurationId);
 
   const [visibleColumns, setVisibleColumns] = useState(
-    pluginCustomizations.columns.map(({ id }) => id)
+    alertsTableConfiguration.columns.map(({ id }) => id)
   );
 
   return (
     <section data-test-subj={props['data-test-subj']}>
       <EuiDataGrid
         aria-label="Alerts table"
-        columns={pluginCustomizations.columns}
+        columns={alertsTableConfiguration.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
         rowCount={alertsCount}

@@ -195,9 +195,11 @@ export class Plugin
       actionTypeRegistry: this.actionTypeRegistry,
     });
 
-    registerAlertsTable({
-      alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
-    });
+    if (this.experimentalFeatures.internalAlertsTable) {
+      registerAlertsTable({
+        alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
+      });
+    }
 
     return {
       actionTypeRegistry: this.actionTypeRegistry,

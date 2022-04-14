@@ -390,7 +390,7 @@ export interface BulkActionsObjectProp {
 }
 
 export interface AlertsTableProps {
-  pluginId: string;
+  configurationId: string;
   consumers: AlertConsumers[];
   bulkActions: BulkActionsObjectProp;
   // defaultCellActions: TGridCellAction[];
