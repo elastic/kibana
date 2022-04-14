@@ -142,7 +142,7 @@ export const previewRulesRoute = async (
               logs: [
                 {
                   errors: [
-                    'Missing "read" privileges for the ".preview.alerts-security.alerts" or "internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
+                    'Missing "read" privileges for the ".preview.alerts-security.alerts" or ".internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
                   ],
                   warnings: [],
                   duration: 0,
