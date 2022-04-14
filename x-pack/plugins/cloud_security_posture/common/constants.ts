@@ -29,4 +29,5 @@ export const INTERNAL_FEATURE_FLAGS = {
   showBenchmarks: false,
   showManageRulesMock: false,
   showRisksMock: false,
+  showFindingsGroupBy: false,
 } as const;
