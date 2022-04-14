@@ -8,6 +8,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_integration',
-  rootDir: '../..',
+  rootDir: '../../..',
   roots: ['<rootDir>/src/core'],
 };
