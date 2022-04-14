@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SpanIterable } from '@elastic/apm-synthtrace';
+import { EntityIterable } from '@elastic/apm-synthtrace';
 
 export const synthtrace = {
-  index: (events: SpanIterable) =>
+  index: (events: EntityIterable) =>
     new Promise((resolve) => {
       cy.task('synthtrace:index', events.toArray()).then(resolve);
     }),

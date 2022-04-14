@@ -6,9 +6,9 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CommentRequest } from '../../common/api';
+import { BulkCreateCommentRequest } from '../../common/api';
 
-import { postComment } from './api';
+import { createAttachments } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
 import { useToasts } from '../common/lib/kibana';
@@ -43,15 +43,15 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
 
 export interface PostComment {
   caseId: string;
-  data: CommentRequest;
+  data: BulkCreateCommentRequest;
   updateCase?: (newCase: Case) => void;
   throwOnError?: boolean;
 }
-export interface UsePostComment extends NewCommentState {
-  postComment: (args: PostComment) => Promise<void>;
+export interface UseCreateAttachments extends NewCommentState {
+  createAttachments: (args: PostComment) => Promise<void>;
 }
 
-export const usePostComment = (): UsePostComment => {
+export const useCreateAttachments = (): UseCreateAttachments => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -60,7 +60,7 @@ export const usePostComment = (): UsePostComment => {
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
-  const postMyComment = useCallback(
+  const fetch = useCallback(
     async ({ caseId, data, updateCase, throwOnError }: PostComment) => {
       try {
         isCancelledRef.current = false;
@@ -68,7 +68,7 @@ export const usePostComment = (): UsePostComment => {
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
 
-        const response = await postComment(data, caseId, abortCtrlRef.current.signal);
+        const response = await createAttachments(data, caseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS' });
@@ -102,5 +102,5 @@ export const usePostComment = (): UsePostComment => {
     []
   );
 
-  return { ...state, postComment: postMyComment };
+  return { ...state, createAttachments: fetch };
 };
