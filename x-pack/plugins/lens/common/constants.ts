@@ -42,6 +42,16 @@ export const LegendDisplay = {
   HIDE: 'hide',
 } as const;
 
+export const LegendSizes = {
+  AUTO: 0,
+  SMALL: 80,
+  MEDIUM: 130,
+  LARGE: 180,
+  EXTRA_LARGE: 230,
+} as const;
+
+export const DEFAULT_LEGEND_SIZE = LegendSizes.MEDIUM;
+
 export const layerTypes = {
   DATA: 'data',
   REFERENCELINE: 'referenceLine',

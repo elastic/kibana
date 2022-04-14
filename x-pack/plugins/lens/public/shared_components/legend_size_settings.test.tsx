@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { DEFAULT_LEGEND_SIZE, LegendSizes, LegendSizeSettings } from './legend_size_settings';
+import { LegendSizeSettings } from './legend_size_settings';
 import { EuiSuperSelect } from '@elastic/eui';
 import { shallow } from 'enzyme';
+import { DEFAULT_LEGEND_SIZE, LegendSizes } from '../../common';
 
 describe('legend size settings', () => {
   it('renders nothing if not vertical legend', () => {
@@ -23,18 +24,6 @@ describe('legend size settings', () => {
     expect(instance.html()).toBeNull();
   });
 
-  it('defaults to correct value', () => {
-    const instance = shallow(
-      <LegendSizeSettings
-        legendSize={undefined}
-        onLegendSizeChange={() => {}}
-        isVerticalLegend={true}
-      />
-    );
-
-    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(DEFAULT_LEGEND_SIZE);
-  });
-
   it('reflects current setting in select', () => {
     const CURRENT_SIZE = LegendSizes.SMALL;
 
@@ -46,7 +35,7 @@ describe('legend size settings', () => {
       />
     );
 
-    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(CURRENT_SIZE);
+    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(CURRENT_SIZE.toString());
   });
 
   it('allows user to select a new option', () => {
@@ -54,7 +43,7 @@ describe('legend size settings', () => {
 
     const instance = shallow(
       <LegendSizeSettings
-        legendSize={undefined}
+        legendSize={LegendSizes.SMALL}
         onLegendSizeChange={onSizeChange}
         isVerticalLegend={true}
       />
@@ -65,12 +54,12 @@ describe('legend size settings', () => {
     onChange(LegendSizes.EXTRA_LARGE);
     onChange(DEFAULT_LEGEND_SIZE);
 
-    expect(onSizeChange).toHaveBeenNthCalledWith(1, Number(LegendSizes.EXTRA_LARGE));
-    expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
+    expect(onSizeChange).toHaveBeenNthCalledWith(1, LegendSizes.EXTRA_LARGE);
+    expect(onSizeChange).toHaveBeenNthCalledWith(2, DEFAULT_LEGEND_SIZE);
   });
 
   it('hides "auto" option if visualization not using it', () => {
-    const getOptions = (legendSize: number) =>
+    const getOptions = (legendSize: number | undefined) =>
       shallow(
         <LegendSizeSettings
           legendSize={legendSize}
@@ -81,11 +70,9 @@ describe('legend size settings', () => {
         .find(EuiSuperSelect)
         .props().options;
 
-    expect(getOptions(Number(LegendSizes.AUTO))).toContainEqual(
-      expect.objectContaining({ value: LegendSizes.AUTO })
-    );
-    expect(getOptions(Number(LegendSizes.LARGE))).not.toContainEqual(
-      expect.objectContaining({ value: LegendSizes.AUTO })
-    );
+    const autoOption = expect.objectContaining({ value: LegendSizes.AUTO.toString() });
+    expect(getOptions(LegendSizes.AUTO)).toContainEqual(autoOption);
+    expect(getOptions(undefined)).toContainEqual(autoOption);
+    expect(getOptions(LegendSizes.LARGE)).not.toContainEqual(autoOption);
   });
 });

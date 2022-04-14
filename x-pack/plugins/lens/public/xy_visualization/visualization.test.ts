@@ -17,7 +17,7 @@ import type {
   XYReferenceLineLayerConfig,
 } from './types';
 import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { layerTypes } from '../../common';
+import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
@@ -49,7 +49,7 @@ const exampleAnnotation2: EventAnnotationConfig = {
 
 function exampleState(): XYState {
   return {
-    legend: { position: Position.Bottom, isVisible: true },
+    legend: { position: Position.Bottom, isVisible: true, legendSize: DEFAULT_LEGEND_SIZE },
     valueLabels: 'hide',
     preferredSeriesType: 'bar',
     layers: [

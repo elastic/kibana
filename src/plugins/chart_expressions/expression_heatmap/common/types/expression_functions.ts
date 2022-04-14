@@ -43,7 +43,7 @@ export interface HeatmapLegendConfig {
    * Exact legend width (vertical) or height (horizontal)
    * Limited to max of 70% of the chart container dimension Vertical legends limited to min of 30% of computed width
    */
-  legendSize?: number;
+  legendSize: number;
 }
 
 export type HeatmapLegendConfigResult = HeatmapLegendConfig & {

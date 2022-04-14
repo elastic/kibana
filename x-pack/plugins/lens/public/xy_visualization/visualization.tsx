@@ -28,7 +28,7 @@ import {
   YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
-import { layerTypes } from '../../common';
+import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
@@ -151,7 +151,7 @@ export const getXyVisualization = ({
     return (
       state || {
         title: 'Empty XY chart',
-        legend: { isVisible: true, position: Position.Right },
+        legend: { isVisible: true, position: Position.Right, legendSize: DEFAULT_LEGEND_SIZE },
         valueLabels: 'hide',
         preferredSeriesType: defaultSeriesType,
         layers: [

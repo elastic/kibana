@@ -31,7 +31,7 @@ import {
 import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
-import { layerTypes } from '../../common';
+import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
 
 const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Magnitude',
@@ -71,6 +71,7 @@ function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerTy
     legend: {
       isVisible: true,
       position: Position.Right,
+      legendSize: DEFAULT_LEGEND_SIZE,
       maxLines: 1,
       type: LEGEND_FUNCTION,
     },
@@ -338,7 +339,7 @@ export const getHeatmapVisualization = ({
                     arguments: {
                       isVisible: [state.legend.isVisible],
                       position: [state.legend.position],
-                      legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
+                      legendSize: [state.legend.legendSize],
                     },
                   },
                 ],

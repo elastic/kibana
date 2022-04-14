@@ -144,7 +144,7 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
   legendPosition: [layer.legendPosition || Position.Right],
   maxLegendLines: [layer.legendMaxLines ?? 1],
-  legendSize: layer.legendSize ? [layer.legendSize] : [],
+  legendSize: [layer.legendSize],
   nestedLegend: [!!layer.nestedLegend],
   truncateLegend: [
     layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,

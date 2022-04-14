@@ -9,7 +9,7 @@ import { Position } from '@elastic/charts';
 import { getSuggestions } from './suggestions';
 import type { HeatmapVisualizationState } from './types';
 import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
-import { layerTypes } from '../../common';
+import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
 
 describe('heatmap suggestions', () => {
   describe('rejects suggestions', () => {
@@ -293,6 +293,7 @@ describe('heatmap suggestions', () => {
             legend: {
               isVisible: true,
               position: Position.Right,
+              legendSize: DEFAULT_LEGEND_SIZE,
               type: LEGEND_FUNCTION,
             },
           },
@@ -346,6 +347,7 @@ describe('heatmap suggestions', () => {
             legend: {
               isVisible: true,
               position: Position.Right,
+              legendSize: DEFAULT_LEGEND_SIZE,
               type: LEGEND_FUNCTION,
             },
           },
@@ -399,6 +401,7 @@ describe('heatmap suggestions', () => {
             legend: {
               isVisible: true,
               position: Position.Right,
+              legendSize: DEFAULT_LEGEND_SIZE,
               type: LEGEND_FUNCTION,
             },
           },
@@ -463,6 +466,7 @@ describe('heatmap suggestions', () => {
             legend: {
               isVisible: true,
               position: Position.Right,
+              legendSize: DEFAULT_LEGEND_SIZE,
               type: LEGEND_FUNCTION,
             },
           },
@@ -529,6 +533,7 @@ describe('heatmap suggestions', () => {
             legend: {
               isVisible: true,
               position: Position.Right,
+              legendSize: DEFAULT_LEGEND_SIZE,
               type: LEGEND_FUNCTION,
             },
           },
@@ -603,6 +608,7 @@ describe('heatmap suggestions', () => {
             legend: {
               isVisible: true,
               position: Position.Right,
+              legendSize: DEFAULT_LEGEND_SIZE,
               type: LEGEND_FUNCTION,
             },
           },
@@ -677,6 +683,7 @@ describe('heatmap suggestions', () => {
             legend: {
               isVisible: true,
               position: Position.Right,
+              legendSize: DEFAULT_LEGEND_SIZE,
               type: LEGEND_FUNCTION,
             },
           },

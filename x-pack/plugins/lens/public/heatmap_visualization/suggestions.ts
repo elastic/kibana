@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
 import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
-import { layerTypes } from '../../common';
+import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,
@@ -85,6 +85,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     legend: {
       isVisible: state?.legend?.isVisible ?? true,
       position: state?.legend?.position ?? Position.Right,
+      legendSize: state?.legend?.legendSize ?? DEFAULT_LEGEND_SIZE,
       type: LEGEND_FUNCTION,
     },
     gridConfig: {
