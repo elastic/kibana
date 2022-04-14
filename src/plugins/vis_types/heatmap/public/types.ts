@@ -23,7 +23,7 @@ export interface HeatmapVisParams {
   legendPosition: Position;
   truncateLegend?: boolean;
   maxLegendLines?: number;
-  legendSize?: number;
+  legendSize: number;
   lastRangeIsRightOpen: boolean;
   percentageMode: boolean;
   valueAxes: ValueAxis[];

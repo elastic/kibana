@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position } from '@elastic/charts';
 
+import { DEFAULT_LEGEND_SIZE } from '../../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../visualizations/public';
 
@@ -113,6 +114,7 @@ export const histogramVisTypeDefinition = {
       },
       addLegend: true,
       legendPosition: Position.Right,
+      legendSize: DEFAULT_LEGEND_SIZE,
       times: [],
       addTimeMarker: false,
       truncateLegend: true,

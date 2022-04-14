@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
+import { DEFAULT_LEGEND_SIZE } from '../../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../../data/public';
 import { ColorSchemas } from '../../../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
@@ -37,6 +38,7 @@ export const getHeatmapVisTypeDefinition = ({
       addLegend: true,
       enableHover: false,
       legendPosition: Position.Right,
+      legendSize: DEFAULT_LEGEND_SIZE,
       colorsNumber: 4,
       colorSchema: ColorSchemas.GreenToRed,
       setColorRange: false,

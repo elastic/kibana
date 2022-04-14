@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
+import { DEFAULT_LEGEND_SIZE } from '../../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../../data/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common';
@@ -41,6 +42,7 @@ export const getPieVisTypeDefinition = ({
       addTooltip: true,
       legendDisplay: !showElasticChartsOptions ? LegendDisplay.SHOW : LegendDisplay.HIDE,
       legendPosition: Position.Right,
+      legendSize: DEFAULT_LEGEND_SIZE,
       nestedLegend: false,
       truncateLegend: true,
       maxLegendLines: 1,

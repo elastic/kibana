@@ -13,6 +13,7 @@ import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../visualizations/public';
+import { DEFAULT_LEGEND_SIZE } from '../../../../vis_default_editor/public';
 
 import {
   ChartMode,
@@ -113,6 +114,7 @@ export const horizontalBarVisTypeDefinition = {
       },
       addLegend: true,
       legendPosition: Position.Right,
+      legendSize: DEFAULT_LEGEND_SIZE,
       times: [],
       addTimeMarker: false,
       truncateLegend: true,

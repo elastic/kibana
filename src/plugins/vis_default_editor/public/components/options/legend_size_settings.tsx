@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 
-enum LegendSizes {
+export enum LegendSizes {
   AUTO = '0',
   SMALL = '80',
   MEDIUM = '130',
@@ -19,7 +19,7 @@ enum LegendSizes {
   EXTRA_LARGE = '230',
 }
 
-const DEFAULT_LEGEND_SIZE = LegendSizes.MEDIUM;
+export const DEFAULT_LEGEND_SIZE = Number(LegendSizes.MEDIUM);
 
 const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
   {
@@ -78,16 +78,37 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option) => onLegendSizeChange(Number(option) || undefined),
+    (option) => onLegendSizeChange(Number(option)),
     [onLegendSizeChange]
   );
+
+  // undefined means auto. should only be the case for pre 8.3 visualizations
+  const currentSize = (
+    typeof legendSize === 'undefined' ? LegendSizes.AUTO : legendSize
+  ).toString();
+
+  const options =
+    currentSize !== LegendSizes.AUTO
+      ? legendSizeOptions
+      : [
+          {
+            value: LegendSizes.AUTO.toString(),
+            inputDisplay: i18n.translate(
+              'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.auto',
+              {
+                defaultMessage: 'Auto',
+              }
+            ),
+          },
+          ...legendSizeOptions,
+        ];
 
   const legendSizeSelect = (
     <EuiSuperSelect
       fullWidth
       compressed
-      valueOfSelected={legendSize?.toString() ?? DEFAULT_LEGEND_SIZE}
-      options={legendSizeOptions}
+      valueOfSelected={currentSize?.toString()}
+      options={options}
       onChange={onLegendSizeOptionChange}
       disabled={!isVerticalLegend}
     />
