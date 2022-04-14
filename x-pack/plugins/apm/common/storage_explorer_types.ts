@@ -9,7 +9,7 @@ export interface StorageExplorerItem {
   service: string;
   environments: string[];
   size: number;
-  sampling: string;
+  sampling: number;
   transaction: number;
   span: number;
   error: number;

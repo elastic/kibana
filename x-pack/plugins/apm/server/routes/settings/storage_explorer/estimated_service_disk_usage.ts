@@ -5,43 +5,34 @@
  * 2.0.
  */
 
-import { uniq, keyBy, mapValues } from 'lodash';
+import { uniq } from 'lodash';
 import { ApmPluginRequestHandlerContext } from '../../typings';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { StorageExplorerItem } from '../../../../common/storage_explorer_types';
-import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 
 export function mergeServiceStats({
   serviceStats,
-  agentConfigs,
+  totalTransactionsPerService,
   totalDocs,
   totalIndexDiskUsage,
 }: {
   serviceStats: Array<
     Omit<StorageExplorerItem, 'size' | 'sampling'> & { serviceDocs: number }
   >;
-  agentConfigs: AgentConfiguration[];
+  totalTransactionsPerService: Record<string, number>;
   totalDocs: number;
   totalIndexDiskUsage: number;
 }) {
-  const configByServiceName = keyBy(
-    agentConfigs,
-    (config): string => config.service.name ?? ''
-  );
-
-  const sampleRatePerService = mapValues(
-    configByServiceName,
-    (key): string =>
-      (key as AgentConfiguration).settings.transaction_sample_rate
-  );
-
   const mergedServiceStats = serviceStats.map(
-    ({ serviceDocs, service, ...rest }) => {
+    ({ serviceDocs, service, transaction, ...rest }) => {
       const size = (serviceDocs / totalDocs) * totalIndexDiskUsage;
-      const sampling = sampleRatePerService[service];
+      const sampling = totalTransactionsPerService[service]
+        ? transaction / totalTransactionsPerService[service]
+        : 0;
       return {
         ...rest,
         service,
+        transaction,
         size,
         sampling,
       };

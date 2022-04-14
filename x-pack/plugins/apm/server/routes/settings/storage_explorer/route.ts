@@ -17,7 +17,7 @@ import {
   getNumberOfApmDocs,
   mergeServiceStats,
 } from './estimated_service_disk_usage';
-import { listConfigurations } from '../agent_configuration/list_configurations';
+import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -43,23 +43,27 @@ const storageExplorerRoute = createApmServerRoute({
       kuery: '',
     });
 
-    const [serviceStats, totalDocs, totalIndexDiskUsage, agentConfigs] =
-      await Promise.all([
-        getServiceStorageStats({
-          searchAggregatedTransactions,
-          setup,
-          start,
-          end,
-          environment,
-        }),
-        getNumberOfApmDocs({ context, setup }),
-        getTotalIndexDiskUsage({ context, setup }),
-        listConfigurations({ setup }),
-      ]);
+    const [
+      serviceStats,
+      totalDocs,
+      totalIndexDiskUsage,
+      totalTransactionsPerService,
+    ] = await Promise.all([
+      getServiceStorageStats({
+        searchAggregatedTransactions,
+        setup,
+        start,
+        end,
+        environment,
+      }),
+      getNumberOfApmDocs({ context, setup }),
+      getTotalIndexDiskUsage({ context, setup }),
+      getTotalTransactionsPerService({ setup, start, end, environment }),
+    ]);
 
     const mergedServiceStats = mergeServiceStats({
       serviceStats,
-      agentConfigs,
+      totalTransactionsPerService,
       totalDocs,
       totalIndexDiskUsage,
     });
