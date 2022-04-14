@@ -6,7 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { BulkCreateCommentRequest, CommentRequest } from '../../common/api';
+import { BulkCreateCommentRequest } from '../../common/api';
 
 import { createAttachments } from './api';
 import * as i18n from './translations';
@@ -43,7 +43,7 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
 
 export interface PostComment {
   caseId: string;
-  data: CommentRequest | BulkCreateCommentRequest;
+  data: BulkCreateCommentRequest;
   updateCase?: (newCase: Case) => void;
   throwOnError?: boolean;
 }
@@ -62,14 +62,13 @@ export const useCreateAttachments = (): UseCreateAttachments => {
 
   const fetch = useCallback(
     async ({ caseId, data, updateCase, throwOnError }: PostComment) => {
-      const attachments = Array.isArray(data) ? data : [data];
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
 
-        const response = await createAttachments(attachments, caseId, abortCtrlRef.current.signal);
+        const response = await createAttachments(data, caseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS' });

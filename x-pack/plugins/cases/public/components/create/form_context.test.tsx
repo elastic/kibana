@@ -41,6 +41,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { Choice } from '../connectors/servicenow/types';
 import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
+import { CaseAttachments } from '../../types';
 
 const sampleId = 'case-id';
 
@@ -781,6 +782,29 @@ describe('Create case', () => {
 
     expect(createAttachments).toHaveBeenCalledTimes(1);
     expect(createAttachments).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments });
+  });
+
+  it('should NOT call createAttachments if the attachments are an empty array', async () => {
+    useConnectorsMock.mockReturnValue({
+      ...sampleConnectorData,
+      connectors: connectorsMock,
+    });
+    const attachments: CaseAttachments = [];
+
+    const wrapper = mockedContext.render(
+      <FormContext onSuccess={onFormSubmitSuccess} attachments={attachments}>
+        <CreateCaseFormFields {...defaultCreateCaseForm} />
+        <SubmitCaseButton />
+      </FormContext>
+    );
+
+    await fillFormReactTestingLib(wrapper);
+
+    await act(async () => {
+      userEvent.click(wrapper.getByTestId('create-case-submit'));
+    });
+
+    expect(createAttachments).not.toHaveBeenCalled();
   });
 
   it(`should call callbacks in correct order`, async () => {

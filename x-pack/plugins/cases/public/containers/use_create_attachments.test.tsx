@@ -26,11 +26,13 @@ describe('useCreateAttachments', () => {
   });
 
   const abortCtrl = new AbortController();
-  const samplePost = {
-    comment: 'a comment',
-    type: CommentType.user as const,
-    owner: SECURITY_SOLUTION_OWNER,
-  };
+  const samplePost = [
+    {
+      comment: 'a comment',
+      type: CommentType.user as const,
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  ];
   const updateCaseCallback = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,11 +68,7 @@ describe('useCreateAttachments', () => {
         updateCase: updateCaseCallback,
       });
       await waitForNextUpdate();
-      expect(spyOnBulkCreateAttachments).toBeCalledWith(
-        [samplePost],
-        basicCaseId,
-        abortCtrl.signal
-      );
+      expect(spyOnBulkCreateAttachments).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
       expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });
@@ -86,15 +84,11 @@ describe('useCreateAttachments', () => {
 
       result.current.createAttachments({
         caseId: basicCaseId,
-        data: [samplePost],
+        data: samplePost,
         updateCase: updateCaseCallback,
       });
       await waitForNextUpdate();
-      expect(spyOnBulkCreateAttachments).toBeCalledWith(
-        [samplePost],
-        basicCaseId,
-        abortCtrl.signal
-      );
+      expect(spyOnBulkCreateAttachments).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
       expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });

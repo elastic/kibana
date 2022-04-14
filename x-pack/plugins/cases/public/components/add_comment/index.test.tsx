@@ -74,7 +74,7 @@ describe('AddComment ', () => {
       expect(onCommentSaving).toBeCalled();
       expect(createAttachments).toBeCalledWith({
         caseId: addCommentProps.caseId,
-        data: sampleData,
+        data: [sampleData],
         updateCase: onCommentPosted,
       });
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');

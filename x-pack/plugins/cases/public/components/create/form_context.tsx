@@ -83,7 +83,7 @@ export const FormContext: React.FC<Props> = ({
         });
 
         // add attachments to the case
-        if (updatedCase && Array.isArray(attachments)) {
+        if (updatedCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
             caseId: updatedCase.id,
             data: attachments,
