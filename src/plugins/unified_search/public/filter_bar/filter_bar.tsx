@@ -22,11 +22,15 @@ export interface Props {
   indexPatterns: DataView[];
   intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
+  /**
+   * Applies extra styles neccsary when couple with the query bar
+   */
+  afterQueryBar?: boolean;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const euiTheme = useEuiTheme();
-  const styles = FilterBarStyles(euiTheme);
+  const styles = FilterBarStyles(euiTheme, props.afterQueryBar);
   const groupRef = useRef<HTMLDivElement>(null);
 
   return (

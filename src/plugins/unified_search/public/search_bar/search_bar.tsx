@@ -458,17 +458,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     let filterBar;
     if (this.shouldRenderFilterBar()) {
-      const filterGroupClasses = classNames('globalFilterGroup__wrapper');
-
       filterBar = (
-        <div id="globalFilterGroup" className={filterGroupClasses}>
-          <FilterBar
-            filters={this.props.filters!}
-            onFiltersUpdated={this.props.onFiltersUpdated}
-            indexPatterns={this.props.indexPatterns!}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          />
-        </div>
+        <FilterBar
+          afterQueryBar
+          filters={this.props.filters!}
+          onFiltersUpdated={this.props.onFiltersUpdated}
+          indexPatterns={this.props.indexPatterns!}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+        />
       );
     }
 

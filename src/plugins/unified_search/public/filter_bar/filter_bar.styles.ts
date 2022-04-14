@@ -9,13 +9,13 @@
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const FilterBarStyles = ({ euiTheme }: UseEuiTheme) => {
+export const FilterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boolean) => {
   return {
     group: css`
       gap: ${euiTheme.size.xs};
 
       &:not(:empty) {
-        margin-top: ${euiTheme.size.s};
+        margin-top: ${afterQueryBar ? euiTheme.size.s : 0};
       }
     `,
   };
