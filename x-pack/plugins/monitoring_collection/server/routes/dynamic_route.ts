@@ -8,7 +8,6 @@ import { JsonObject } from '@kbn/utility-types';
 import { schema } from '@kbn/config-schema';
 import { IRouter, ServiceStatus } from '../../../../../src/core/server';
 import { getESClusterUuid, getKibanaStats } from '../lib';
-import { MetricResult } from '../plugin';
 
 export function registerDynamicRoute({
   router,
@@ -28,9 +27,7 @@ export function registerDynamicRoute({
     };
   };
   getStatus: () => ServiceStatus<unknown> | undefined;
-  getMetric: (
-    type: string
-  ) => Promise<Array<MetricResult<JsonObject>> | MetricResult<JsonObject> | undefined>;
+  getMetric: (type: string) => Promise<Array<JsonObject | undefined>>;
 }) {
   router.get(
     {

@@ -150,7 +150,13 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     return {
       reportCounter: (name: string, dimensions: Record<string, string>, amount: number = 1) => {
         // @ts-ignore-line
-        apm.registerMetricCounter(name, { ...dimensions, ...this.kibanaDimensions }).inc(amount);
+        const counter = apm.registerMetricCounter(name, {
+          ...dimensions,
+          ...this.kibanaDimensions,
+        });
+        if (counter) {
+          counter.inc(amount);
+        }
       },
       reportGauge: (name: string, dimensions: Record<string, string>, value: number) => {
         apm.registerMetric(name, { ...dimensions, ...this.kibanaDimensions }, () => value);
