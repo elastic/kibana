@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ISavedObjectsRepository, SavedObjectsClient } from '../../../../../core/server';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
 import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../../common/telemetry_config';
@@ -32,11 +31,7 @@ export function createCollectorFetch({
   getSavedObjectsClient,
 }: TelemetryPluginUsageCollectorOptions) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
-    const {
-      sendUsageFrom,
-      allowChangingOptInStatus,
-      optIn = null,
-    } = await config$.pipe(take(1)).toPromise();
+    const { sendUsageFrom, allowChangingOptInStatus, optIn = null } = await firstValueFrom(config$);
     const configTelemetrySendUsageFrom = sendUsageFrom;
     const configTelemetryOptIn = optIn;
 

@@ -92,7 +92,7 @@ function VisualizationSummary({
       {description.icon && (
         <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
-      {description.label}
+      <span className="lnsChartSwitch__summaryText">{description.label}</span>
     </>
   );
 }

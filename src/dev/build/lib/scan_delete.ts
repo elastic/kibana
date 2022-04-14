@@ -16,8 +16,8 @@ import { count, map, mergeAll, mergeMap } from 'rxjs/operators';
 // @ts-ignore
 import { assertAbsolute } from './fs';
 
-const getStat$ = Rx.bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
-const getReadDir$ = Rx.bindNodeCallback<string, string[]>(Fs.readdir);
+const getStat$ = Rx.bindNodeCallback<[Fs.PathLike], [Fs.Stats]>(Fs.stat);
+const getReadDir$ = Rx.bindNodeCallback<[string], [string[]]>(Fs.readdir);
 
 interface Options {
   directory: string;
