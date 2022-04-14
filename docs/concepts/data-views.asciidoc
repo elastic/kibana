@@ -4,7 +4,7 @@
 {kib} requires a {data-source} to access the {es} data that you want to explore.
 A {data-source} selects the data to use and allows you to define properties of the fields.
 
-A {data-source} can point to one or more indices, {ref}/data-streams.html[data stream], or {ref}/alias.html[index aliases].
+A {data-source} can point to one or more indices, {ref}/data-streams.html[data streams], or {ref}/alias.html[index aliases].
 For example, a {data-source} can point to your log data from yesterday,
 or all indices that contain your data.
 
