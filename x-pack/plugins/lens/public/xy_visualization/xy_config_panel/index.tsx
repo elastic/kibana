@@ -297,14 +297,15 @@ export const XyToolbar = memo(function XyToolbar(
   ).truncateText;
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <VisualOptionsPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}
           />
+
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
@@ -410,8 +411,9 @@ export const XyToolbar = memo(function XyToolbar(
           />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -449,6 +451,7 @@ export const XyToolbar = memo(function XyToolbar(
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
             />
           </TooltipWrapper>
+
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
@@ -470,6 +473,7 @@ export const XyToolbar = memo(function XyToolbar(
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
           />
+
           <TooltipWrapper
             tooltipContent={
               shouldRotate
