@@ -68,7 +68,7 @@ describe('AlertSummaryView', () => {
       </TestProviders>
     );
 
-    ['host.name', 'user.name', 'Rule type', 'query'].forEach((fieldId) => {
+    ['host.name', 'user.name', 'Rule type', 'query', 'Source event id'].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });
@@ -77,6 +77,15 @@ describe('AlertSummaryView', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
         <AlertSummaryView {...props} timelineId={TimelineId.active} />
+      </TestProviders>
+    );
+    expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+  });
+
+  test('it does NOT render the action cell when readOnly is passed', () => {
+    const { queryAllByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...{ ...props, isReadOnly: true }} />
       </TestProviders>
     );
     expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);

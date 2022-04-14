@@ -41,12 +41,15 @@ Object {
           "palette",
         ],
         "labelMajorMode": Array [
-          "auto",
+          "none",
         ],
         "labelMinor": Array [
           "some custom sublabel",
         ],
         "metric": Array [],
+        "respectRanges": Array [
+          true,
+        ],
         "shape": Array [
           "circle",
         ],

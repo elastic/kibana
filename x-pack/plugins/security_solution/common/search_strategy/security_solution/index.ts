@@ -11,8 +11,6 @@ import {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
-  HostAuthenticationsRequestOptions,
-  HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
   HostFirstLastSeenStrategyResponse,
   HostsQueries,
@@ -61,7 +59,6 @@ import {
 } from './network';
 import {
   MatrixHistogramQuery,
-  MatrixHistogramQueryEntities,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
@@ -87,12 +84,18 @@ import {
   TotalUsersKpiRequestOptions,
   TotalUsersKpiStrategyResponse,
 } from './users/kpi/total_users';
+import { UsersRequestOptions, UsersStrategyResponse } from './users/all';
+import {
+  UserAuthenticationsRequestOptions,
+  UserAuthenticationsStrategyResponse,
+} from './users/authentications';
 
 export * from './cti';
 export * from './hosts';
 export * from './risk_score';
 export * from './matrix_histogram';
 export * from './network';
+export * from './users';
 
 export type FactoryQueryTypes =
   | HostsQueries
@@ -102,8 +105,7 @@ export type FactoryQueryTypes =
   | NetworkKpiQueries
   | RiskQueries
   | CtiQueries
-  | typeof MatrixHistogramQuery
-  | typeof MatrixHistogramQueryEntities;
+  | typeof MatrixHistogramQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
@@ -131,8 +133,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
-  : T extends HostsQueries.authentications
-  ? HostAuthenticationsStrategyResponse
   : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
@@ -147,6 +147,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UserDetailsStrategyResponse
   : T extends UsersQueries.kpiTotalUsers
   ? TotalUsersKpiStrategyResponse
+  : T extends UsersQueries.authentications
+  ? UserAuthenticationsStrategyResponse
+  : T extends UsersQueries.users
+  ? UsersStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -191,8 +195,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
-  : T extends HostsQueries.authentications
-  ? HostAuthenticationsRequestOptions
   : T extends HostsQueries.firstOrLastSeen
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
@@ -203,10 +205,14 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
+  : T extends UsersQueries.authentications
+  ? UserAuthenticationsRequestOptions
   : T extends UsersQueries.details
   ? UserDetailsRequestOptions
   : T extends UsersQueries.kpiTotalUsers
   ? TotalUsersKpiRequestOptions
+  : T extends UsersQueries.users
+  ? UsersRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns

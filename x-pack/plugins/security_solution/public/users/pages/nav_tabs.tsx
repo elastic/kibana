@@ -26,6 +26,12 @@ export const navTabsUsers = (
       href: getTabsOnUsersUrl(UsersTableType.allUsers),
       disabled: false,
     },
+    [UsersTableType.authentications]: {
+      id: UsersTableType.authentications,
+      name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+      href: getTabsOnUsersUrl(UsersTableType.authentications),
+      disabled: false,
+    },
     [UsersTableType.anomalies]: {
       id: UsersTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
@@ -36,6 +42,18 @@ export const navTabsUsers = (
       id: UsersTableType.risk,
       name: i18n.NAVIGATION_RISK_TITLE,
       href: getTabsOnUsersUrl(UsersTableType.risk),
+      disabled: false,
+    },
+    [UsersTableType.events]: {
+      id: UsersTableType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnUsersUrl(UsersTableType.events),
+      disabled: false,
+    },
+    [UsersTableType.alerts]: {
+      id: UsersTableType.alerts,
+      name: i18n.NAVIGATION_ALERTS_TITLE,
+      href: getTabsOnUsersUrl(UsersTableType.alerts),
       disabled: false,
     },
   };

@@ -9,7 +9,7 @@ import { FIELD_FORMAT_IDS } from '../../../../../src/plugins/field_formats/commo
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { ary, assign, isPlainObject, isString, sortBy } from 'lodash';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { parseInterval } from '../utils/parse_interval';
 
 const { duration: d } = moment;

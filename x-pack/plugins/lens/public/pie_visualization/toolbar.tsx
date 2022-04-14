@@ -17,13 +17,17 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
-import { PalettePicker } from '../shared_components';
+import {
+  ToolbarPopover,
+  LegendSettingsPopover,
+  useDebouncedValue,
+  PalettePicker,
+} from '../shared_components';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 
@@ -179,7 +183,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           </EuiFormRow>
         ) : null}
 
-        {numberOptions.length ? (
+        {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
           <EuiFormRow
             label={i18n.translate('xpack.lens.pieChart.numberLabels', {
               defaultMessage: 'Values',
@@ -189,8 +193,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           >
             <EuiSuperSelect
               compressed
-              disabled={layer.categoryDisplay === 'hide'}
-              valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
+              valueOfSelected={layer.numberDisplay}
               options={numberOptions}
               onChange={onNumberDisplayChange}
             />
@@ -298,14 +301,12 @@ export function DimensionEditor(
   }
 ) {
   return (
-    <>
-      <PalettePicker
-        palettes={props.paletteService}
-        activePalette={props.state.palette}
-        setPalette={(newPalette) => {
-          props.setState({ ...props.state, palette: newPalette });
-        }}
-      />
-    </>
+    <PalettePicker
+      palettes={props.paletteService}
+      activePalette={props.state.palette}
+      setPalette={(newPalette) => {
+        props.setState({ ...props.state, palette: newPalette });
+      }}
+    />
   );
 }

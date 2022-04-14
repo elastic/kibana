@@ -10,7 +10,6 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -30,7 +29,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiNetworkEventsQuery';
+export const ID = 'networkKpiNetworkEventsQuery';
 
 export interface NetworkKpiNetworkEventsArgs {
   networkEvents: number;
@@ -62,7 +61,6 @@ export const useNetworkKpiNetworkEvents = ({
   const [loading, setLoading] = useState(false);
   const [networkKpiNetworkEventsRequest, setNetworkKpiNetworkEventsRequest] =
     useState<NetworkKpiNetworkEventsRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [networkKpiNetworkEventsResponse, setNetworkKpiNetworkEventsResponse] =
     useState<NetworkKpiNetworkEventsArgs>({
@@ -131,29 +129,23 @@ export const useNetworkKpiNetworkEvents = ({
 
   useEffect(() => {
     setNetworkKpiNetworkEventsRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.networkEvents,
-        indices: indexNames,
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-      });
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        factoryQueryType,
-        filterQuery: createFilter(filterQuery),
-        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiNetworkEventsSearch(networkKpiNetworkEventsRequest);
@@ -162,6 +154,14 @@ export const useNetworkKpiNetworkEvents = ({
       abortCtrl.current.abort();
     };
   }, [networkKpiNetworkEventsRequest, networkKpiNetworkEventsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkKpiNetworkEventsResponse];
 };

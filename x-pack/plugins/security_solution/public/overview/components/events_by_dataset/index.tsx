@@ -9,7 +9,6 @@ import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { useEffect, useMemo, useCallback } from 'react';
-import uuid from 'uuid';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
@@ -22,10 +21,12 @@ import {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import { eventsStackByOptions } from '../../../hosts/pages/navigation';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { histogramConfigs } from '../../../hosts/pages/navigation/events_query_tab_body';
+import {
+  eventsStackByOptions,
+  histogramConfigs,
+} from '../../../common/components/events_tab/events_query_tab_body';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { HostsTableType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
@@ -50,6 +51,8 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
+  // Make a unique query type everywhere this query is used
+  queryType: 'topN' | 'overview';
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   showSpacer?: boolean;
@@ -78,6 +81,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   onlyField,
   paddingSize,
   query,
+  queryType,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   showLegend,
@@ -86,8 +90,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   toggleTopN,
 }) => {
-  // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${ID}-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
   useEffect(() => {
     return () => {

@@ -17,11 +17,14 @@ export interface ControlPanelState<TEmbeddableInput extends ControlInput = Contr
   width: ControlWidth;
 }
 
+export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';
+
 export interface ControlsPanels {
   [panelId: string]: ControlPanelState;
 }
 
 export interface ControlGroupInput extends EmbeddableInput, ControlInput {
+  chainingSystem: ControlGroupChainingSystem;
   defaultControlWidth?: ControlWidth;
   controlStyle: ControlStyle;
   panels: ControlsPanels;

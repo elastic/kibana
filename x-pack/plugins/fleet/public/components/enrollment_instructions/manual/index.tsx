@@ -7,14 +7,17 @@
 
 import React from 'react';
 
-import { useStartServices, useKibanaVersion } from '../../../hooks';
+import { useKibanaVersion } from '../../../hooks';
 import type { EnrollmentAPIKey } from '../../../types';
+
+import { InstallationMessage } from '../../agent_enrollment_flyout/installation_message';
 
 import { PlatformSelector } from './platform_selector';
 
 interface Props {
   fleetServerHosts: string[];
   apiKey: EnrollmentAPIKey;
+  isK8s: string | undefined;
 }
 
 function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
@@ -24,8 +27,8 @@ function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHost
 export const ManualInstructions: React.FunctionComponent<Props> = ({
   apiKey,
   fleetServerHosts,
+  isK8s,
 }) => {
-  const { docLinks } = useStartServices();
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
   const kibanaVersion = useKibanaVersion();
 
@@ -40,7 +43,8 @@ cd elastic-agent-${kibanaVersion}-darwin-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
-Expand-Archive .\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip
+cd elastic-agent-${kibanaVersion}-windows-x86_64
 .\\elastic-agent.exe install ${enrollArgs}`;
 
   const linuxDebCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-amd64.deb
@@ -52,14 +56,16 @@ sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm
 sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
   return (
-    <PlatformSelector
-      linuxCommand={linuxCommand}
-      macCommand={macCommand}
-      windowsCommand={windowsCommand}
-      linuxDebCommand={linuxDebCommand}
-      linuxRpmCommand={linuxRpmCommand}
-      troubleshootLink={docLinks.links.fleet.troubleshooting}
-      isK8s={false}
-    />
+    <>
+      <InstallationMessage />
+      <PlatformSelector
+        linuxCommand={linuxCommand}
+        macCommand={macCommand}
+        windowsCommand={windowsCommand}
+        linuxDebCommand={linuxDebCommand}
+        linuxRpmCommand={linuxRpmCommand}
+        isK8s={isK8s === 'IS_KUBERNETES'}
+      />
+    </>
   );
 };

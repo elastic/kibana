@@ -10,7 +10,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { AlertTypeDisabledError } from '../lib/errors/alert_type_disabled';
+import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -21,17 +21,10 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-const SNOOZE_END_TIME = '2025-03-07T00:00:00.000Z';
+// These tests don't test for future snooze time validation, so this date doesn't need to be in the future
+const SNOOZE_END_TIME = '2021-03-07T00:00:00.000Z';
 
 describe('snoozeAlertRoute', () => {
-  beforeAll(() => {
-    jest.useFakeTimers('modern');
-    jest.setSystemTime(new Date(2020, 3, 1));
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
   it('snoozes an alert', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -120,7 +113,7 @@ describe('snoozeAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.snooze.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.snooze.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',

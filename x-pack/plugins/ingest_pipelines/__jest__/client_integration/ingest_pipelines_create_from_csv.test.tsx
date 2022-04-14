@@ -43,16 +43,12 @@ jest.mock('../../../../../src/plugins/kibana_react/public', () => {
 });
 
 describe('<PipelinesCreateFromCsv />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: PipelineCreateFromCsvTestBed;
-
-  afterAll(() => {
-    server.restore();
-  });
 
   beforeEach(async () => {
     await act(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
 
     testBed.component.update();
@@ -105,7 +101,7 @@ describe('<PipelinesCreateFromCsv />', () => {
 
       beforeEach(async () => {
         await act(async () => {
-          testBed = await setup();
+          testBed = await setup(httpSetup);
         });
 
         testBed.component.update();
@@ -119,18 +115,18 @@ describe('<PipelinesCreateFromCsv />', () => {
 
       test('should parse csv from file upload', async () => {
         const { actions, find } = testBed;
-        const totalRequests = server.requests.length;
 
         await actions.clickProcessCsv();
 
-        expect(server.requests.length).toBe(totalRequests + 1);
-
-        const lastRequest = server.requests[server.requests.length - 1];
-        expect(lastRequest.url).toBe(`${API_BASE_PATH}/parse_csv`);
-        expect(JSON.parse(JSON.parse(lastRequest.requestBody).body)).toEqual({
-          copyAction: 'copy',
-          file: fileContent,
-        });
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/parse_csv`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              file: fileContent,
+              copyAction: 'copy',
+            }),
+          })
+        );
 
         expect(JSON.parse(find('pipelineMappingsJSONEditor').text())).toEqual(parsedCsv);
       });
@@ -142,12 +138,12 @@ describe('<PipelinesCreateFromCsv />', () => {
         const errorDetails = 'helpful description';
 
         const error = {
-          status: 400,
+          statusCode: 400,
           error: 'Bad Request',
           message: `${errorTitle}:${errorDetails}`,
         };
 
-        httpRequestsMockHelpers.setParseCsvResponse(undefined, { body: error });
+        httpRequestsMockHelpers.setParseCsvResponse(undefined, error);
 
         actions.selectCsvForUpload(mockFile);
         await actions.clickProcessCsv();
@@ -160,7 +156,7 @@ describe('<PipelinesCreateFromCsv />', () => {
       describe('results', () => {
         beforeEach(async () => {
           await act(async () => {
-            testBed = await setup();
+            testBed = await setup(httpSetup);
           });
 
           testBed.component.update();

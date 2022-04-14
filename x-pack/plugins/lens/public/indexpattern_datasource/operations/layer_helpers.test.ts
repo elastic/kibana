@@ -36,7 +36,7 @@ import {
   MovingAverageIndexPatternColumn,
   OperationDefinition,
 } from './definitions';
-import { TinymathAST } from 'packages/kbn-tinymath';
+import { TinymathAST } from '@kbn/tinymath';
 import { CoreStart } from 'kibana/public';
 
 jest.mock('../operations');
@@ -767,7 +767,7 @@ describe('state_helpers', () => {
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
-          label: 'Top values of bytes',
+          label: 'Top 3 values of bytes',
         })
       );
     });
@@ -1079,7 +1079,7 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(
           expect.objectContaining({
-            label: 'Top values of source',
+            label: 'Top 3 values of source',
           })
         );
       });
@@ -2251,7 +2251,7 @@ describe('state_helpers', () => {
 
     it('should remove column and any incomplete state', () => {
       const termsColumn: TermsIndexPatternColumn = {
-        label: 'Top values of source',
+        label: 'Top 5 values of source',
         dataType: 'string',
         isBucketed: true,
 

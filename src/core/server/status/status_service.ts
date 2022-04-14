@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, Subscription, Subject } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
+import { Observable, combineLatest, Subscription, Subject, firstValueFrom } from 'rxjs';
+import { map, distinctUntilChanged, shareReplay, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
@@ -25,7 +25,7 @@ import type { InternalCoreUsageDataSetup } from '../core_usage_data';
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
-import { PluginsStatusService } from './plugins_status';
+import { PluginsStatusService } from './cached_plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';
 
 interface StatusLogMeta extends LogMeta {
@@ -65,13 +65,13 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     environment,
     coreUsageData,
   }: SetupDeps) {
-    const statusConfig = await this.config$.pipe(take(1)).toPromise();
+    const statusConfig = await firstValueFrom(this.config$);
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
     this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
-      debounceTime(500),
+      debounceTime(80),
       map(([coreStatus, pluginsStatus]) => {
         const summary = getSummaryStatus([
           ...Object.entries(coreStatus),
@@ -174,6 +174,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.subscriptions.forEach((subscription) => {
       subscription.unsubscribe();
     });
+
+    this.pluginsStatus?.stop();
     this.subscriptions = [];
   }
 

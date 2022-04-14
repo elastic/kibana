@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash';
 
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import agent from 'elastic-apm-node';
 
 import { createPersistenceRuleTypeWrapper } from '../../../../../rule_registry/server';
@@ -19,11 +18,7 @@ import {
   getRuleRangeTuples,
   hasReadIndexPrivileges,
   hasTimestampFields,
-  isEqlParams,
-  isQueryParams,
-  isSavedQueryParams,
-  isThreatParams,
-  isThresholdParams,
+  isMachineLearningParams,
 } from '../signals/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { CreateSecurityRuleTypeWrapper } from './types';
@@ -50,6 +45,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
     return persistenceRuleType({
       ...type,
+      cancelAlertsOnRuleTimeout: false,
       useSavedObjectReferences: {
         extractReferences: (params) => extractReferences({ logger, params }),
         injectReferences: (params, savedObjectReferences) =>
@@ -132,22 +128,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ...params,
             name,
             id: alertId,
-          } as unknown as NotificationRuleTypeParams;
+          };
 
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
           try {
-            // Typescript 4.1.3 can't figure out that `!isMachineLearningParams(params)` also excludes the only rule type
-            // of rule params that doesn't include `params.index`, but Typescript 4.3.5 does compute the stricter type correctly.
-            // When we update Typescript to >= 4.3.5, we can replace this logic with `!isMachineLearningParams(params)` again.
-            if (
-              isEqlParams(params) ||
-              isThresholdParams(params) ||
-              isQueryParams(params) ||
-              isSavedQueryParams(params) ||
-              isThreatParams(params)
-            ) {
+            if (!isMachineLearningParams(params)) {
               const index = params.index;
               const hasTimestampOverride = !!timestampOverride;
 
@@ -169,7 +156,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     {
                       index,
                       fields: hasTimestampOverride
-                        ? ['@timestamp', timestampOverride as string]
+                        ? ['@timestamp', timestampOverride]
                         : ['@timestamp'],
                       include_unmapped: true,
                     },
@@ -177,9 +164,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   )
                 );
                 wroteWarningStatus = await hasTimestampFields({
-                  timestampField: hasTimestampOverride
-                    ? (timestampOverride as string)
-                    : '@timestamp',
+                  timestampField: hasTimestampOverride ? timestampOverride : '@timestamp',
                   timestampFieldCapsResponse: timestampFieldCaps,
                   inputIndices,
                   ruleExecutionLogger,
@@ -201,8 +186,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const { tuples, remainingGap } = getRuleRangeTuples({
             logger,
             previousStartedAt,
-            from: from as string,
-            to: to as string,
+            from,
+            to,
             interval,
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             buildRuleMessage,
@@ -235,7 +220,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const exceptionItems = await getExceptions({
               client: exceptionsClient,
-              lists: (params.exceptionsList as ListArray) ?? [],
+              lists: params.exceptionsList,
             });
 
             const bulkCreate = bulkCreateFactory(
@@ -276,6 +261,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   tuple,
                   wrapHits,
                   wrapSequences,
+                  ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
                 },
               });
 
@@ -304,51 +290,52 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             }
 
-            if (result.success) {
-              const createdSignalsCount = result.createdSignals.length;
+            const createdSignalsCount = result.createdSignals.length;
 
-              if (actions.length) {
-                const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
-                const toInMs = parseScheduleDates('now')?.format('x');
-                const resultsLink = getNotificationResultsLink({
-                  from: fromInMs,
-                  to: toInMs,
+            if (actions.length) {
+              const fromInMs = parseScheduleDates(`now-${interval}`)?.format('x');
+              const toInMs = parseScheduleDates('now')?.format('x');
+              const resultsLink = getNotificationResultsLink({
+                from: fromInMs,
+                to: toInMs,
+                id: alertId,
+                kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
+                  ?.kibana_siem_app_url,
+              });
+
+              logger.debug(
+                buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
+              );
+
+              if (completeRule.ruleConfig.throttle != null) {
+                // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
+                await scheduleThrottledNotificationActions({
+                  alertInstance: services.alertFactory.create(alertId),
+                  throttle: completeRule.ruleConfig.throttle ?? '',
+                  startedAt,
                   id: alertId,
                   kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                     ?.kibana_siem_app_url,
+                  outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
+                  ruleId,
+                  esClient: services.scopedClusterClient.asCurrentUser,
+                  notificationRuleParams,
+                  signals: result.createdSignals,
+                  logger,
                 });
-
-                logger.debug(
-                  buildRuleMessage(`Found ${createdSignalsCount} signals for notification.`)
-                );
-
-                if (completeRule.ruleConfig.throttle != null) {
-                  await scheduleThrottledNotificationActions({
-                    alertInstance: services.alertFactory.create(alertId),
-                    throttle: completeRule.ruleConfig.throttle ?? '',
-                    startedAt,
-                    id: alertId,
-                    kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                      ?.kibana_siem_app_url,
-                    outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
-                    ruleId,
-                    esClient: services.scopedClusterClient.asCurrentUser,
-                    notificationRuleParams,
-                    signals: result.createdSignals,
-                    logger,
-                  });
-                } else if (createdSignalsCount) {
-                  const alertInstance = services.alertFactory.create(alertId);
-                  scheduleNotificationActions({
-                    alertInstance,
-                    signalsCount: createdSignalsCount,
-                    signals: result.createdSignals,
-                    resultsLink,
-                    ruleParams: notificationRuleParams,
-                  });
-                }
+              } else if (createdSignalsCount) {
+                const alertInstance = services.alertFactory.create(alertId);
+                scheduleNotificationActions({
+                  alertInstance,
+                  signalsCount: createdSignalsCount,
+                  signals: result.createdSignals,
+                  resultsLink,
+                  ruleParams: notificationRuleParams,
+                });
               }
+            }
 
+            if (result.success) {
               logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
               logger.debug(
                 buildRuleMessage(
@@ -392,23 +379,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                 },
               });
-              // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
-              if (completeRule.ruleConfig.throttle != null) {
-                await scheduleThrottledNotificationActions({
-                  alertInstance: services.alertFactory.create(alertId),
-                  throttle: completeRule.ruleConfig.throttle ?? '',
-                  startedAt,
-                  id: completeRule.alertId,
-                  kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
-                    ?.kibana_siem_app_url,
-                  outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
-                  ruleId,
-                  esClient: services.scopedClusterClient.asCurrentUser,
-                  notificationRuleParams,
-                  signals: result.createdSignals,
-                  logger,
-                });
-              }
             }
           } catch (error) {
             const errorMessage = error.message ?? '(no error message given)';
@@ -426,8 +396,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 indexingDurations: result.bulkCreateTimes,
               },
             });
+
             // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
-            if (completeRule.ruleConfig.throttle != null) {
+            if (actions.length && completeRule.ruleConfig.throttle != null) {
               await scheduleThrottledNotificationActions({
                 alertInstance: services.alertFactory.create(alertId),
                 throttle: completeRule.ruleConfig.throttle ?? '',

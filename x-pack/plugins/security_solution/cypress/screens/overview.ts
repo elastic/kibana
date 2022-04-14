@@ -55,7 +55,7 @@ export const STAT_PACKAGE = {
   domId: '[data-test-subj="host-stat-auditbeatPackage"]',
 };
 export const STAT_PROCESS = {
-  value: '1',
+  value: '2',
   domId: '[data-test-subj="host-stat-auditbeatProcess"]',
 };
 export const STAT_USER = {
@@ -144,7 +144,7 @@ export const OVERVIEW_HOST_STATS = '[data-test-subj="overview-hosts-stats"]';
 
 export const OVERVIEW_NETWORK_STATS = '[data-test-subj="overview-network-stats"]';
 
-export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="empty-page"]';
+export const OVERVIEW_EMPTY_PAGE = '[data-test-subj="siem-landing-page"]';
 
 export const OVERVIEW_REVENT_TIMELINES = '[data-test-subj="overview-recent-timelines"]';
 

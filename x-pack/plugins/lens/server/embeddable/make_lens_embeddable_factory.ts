@@ -14,6 +14,7 @@ import {
 import { DOC_TYPE } from '../../common';
 import {
   commonEnhanceTableRowHeight,
+  commonLockOldMetricVisSettings,
   commonMakeReversePaletteAsCustom,
   commonRemoveTimezoneDateHistogramParam,
   commonRenameFilterReferences,
@@ -98,6 +99,14 @@ export const makeLensEmbeddableFactory =
               let migratedLensState = commonSetLastValueShowArrayValues(lensState.attributes);
               migratedLensState = commonEnhanceTableRowHeight(migratedLensState);
               migratedLensState = commonSetIncludeEmptyRowsDateHistogram(migratedLensState);
+              return {
+                ...lensState,
+                attributes: migratedLensState,
+              } as unknown as SerializableRecord;
+            },
+            '8.3.0': (state) => {
+              const lensState = state as unknown as { attributes: LensDocShape810<VisState810> };
+              const migratedLensState = commonLockOldMetricVisSettings(lensState.attributes);
               return {
                 ...lensState,
                 attributes: migratedLensState,

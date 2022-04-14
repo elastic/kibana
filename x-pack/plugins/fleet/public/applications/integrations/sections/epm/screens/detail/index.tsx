@@ -8,11 +8,9 @@ import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import type { EuiToolTipProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBetaBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiDescriptionList,
@@ -22,7 +20,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,7 +49,7 @@ import type {
   PackageInfo,
 } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, Loading } from '../../../../components';
+import { Error, EuiButtonWithTooltip, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
@@ -144,9 +141,13 @@ export function Detail() {
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
+
   useEffect(() => {
+    if (packageInstallStatus === 'not_installed') {
+      setOldPackageStatus(packageInstallStatus);
+    }
     if (oldPackageInstallStatus === 'not_installed' && packageInstallStatus === 'installed') {
-      setOldPackageStatus(oldPackageInstallStatus);
+      setOldPackageStatus(packageInstallStatus);
       refreshPackageInfo();
     }
   }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
@@ -635,17 +636,3 @@ export function Detail() {
     </WithHeaderLayout>
   );
 }
-
-type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
-
-export const EuiButtonWithTooltip: React.FC<
-  EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }
-> = ({ tooltip: tooltipProps, ...buttonProps }) => {
-  return tooltipProps ? (
-    <EuiToolTip {...tooltipProps}>
-      <EuiButton {...buttonProps} />
-    </EuiToolTip>
-  ) : (
-    <EuiButton {...buttonProps} />
-  );
-};

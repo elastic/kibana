@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { from, Observable, throwError } from 'rxjs';
+import { firstValueFrom, from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import type {
@@ -77,6 +77,7 @@ import {
   eqlRawResponse,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
+  SQL_SEARCH_STRATEGY,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEql } from './expressions';
 import {
@@ -93,6 +94,7 @@ import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 import { CachedUiSettingsClient } from './services';
+import { sqlSearchStrategyProvider } from './strategies/sql_search';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -176,6 +178,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
 
     this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger));
 
     registerBsearchRoute(
       bfetch,
@@ -218,16 +221,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 
-    this.initializerContext.config
-      .create<ConfigSchema>()
-      .pipe(first())
-      .toPromise()
-      .then((value) => {
-        if (value.search.aggs.shardDelay.enabled) {
-          aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
-          expressions.registerFunction(aggShardDelay);
-        }
-      });
+    firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
+      if (value.search.aggs.shardDelay.enabled) {
+        aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+        expressions.registerFunction(aggShardDelay);
+      }
+    });
 
     return {
       __enhance: (enhancements: SearchEnhancements) => {

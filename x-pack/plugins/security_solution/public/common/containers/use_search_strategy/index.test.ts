@@ -6,16 +6,10 @@
  */
 
 import { useSearchStrategy } from './index';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
 import { FactoryQueryTypes } from '../../../../common/search_strategy';
-
-jest.mock('../../../transforms/containers/use_transforms', () => ({
-  useTransforms: jest.fn(() => ({
-    getTransformChangesIfTheyExist: null,
-  })),
-}));
 
 const mockAddToastError = jest.fn();
 
@@ -199,5 +193,20 @@ describe('useSearchStrategy', () => {
     result.current.search({});
 
     expect(start).toBeCalledWith(expect.objectContaining({ signal }));
+  });
+  it('abort = true will cancel any running request', () => {
+    const abortSpy = jest.fn();
+    const signal = new AbortController().signal;
+    jest.spyOn(window, 'AbortController').mockReturnValue({ abort: abortSpy, signal });
+    const factoryQueryType = 'fakeQueryType' as FactoryQueryTypes;
+    const localProps = {
+      ...userSearchStrategyProps,
+      abort: false,
+      factoryQueryType,
+    };
+    const { rerender } = renderHook(() => useSearchStrategy<FactoryQueryTypes>(localProps));
+    localProps.abort = true;
+    act(() => rerender());
+    expect(abortSpy).toHaveBeenCalledTimes(1);
   });
 });

@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
+import { LOADING_STATE_TEST_SUBJECT } from '../../components/csp_page_template';
 import { Rules } from './index';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from 'react-query';
 import { TestProvider } from '../../test/test_provider';
 import { useCspIntegration } from './use_csp_integration';
 import { type RouteComponentProps } from 'react-router-dom';
-import { cspLoadingStateTestId } from '../../components/csp_loading_state';
 import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
+import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegration: jest.fn(),
 }));
+jest.mock('../../common/api/use_cis_kubernetes_integration');
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +45,9 @@ describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+      data: { item: { status: 'installed' } },
+    }));
   });
 
   it('calls API with URL params', async () => {
@@ -63,6 +68,7 @@ describe('<Rules />', () => {
     const Component = getTestComponent({ packagePolicyId: '1', policyId: '2' });
     const request = {
       status: 'error',
+      isError: true,
       data: null,
       error: new Error('some error message'),
     };
@@ -78,13 +84,14 @@ describe('<Rules />', () => {
     const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
     const request = {
       status: 'loading',
+      isLoading: true,
     };
 
     (useCspIntegration as jest.Mock).mockReturnValue(request);
 
     render(<Component />);
 
-    expect(screen.getByTestId(cspLoadingStateTestId)).toBeInTheDocument();
+    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
   });
 
   it('displays success state when result request is resolved', async () => {

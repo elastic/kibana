@@ -31,8 +31,8 @@ import { createMockedFullReference } from './operations/mocks';
 import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
 import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { TinymathAST } from 'packages/kbn-tinymath';
-import { SavedObjectReference } from 'kibana/server';
+import { TinymathAST } from '@kbn/tinymath';
+import { SavedObjectReference } from 'kibana/public';
 import { cloneDeep } from 'lodash';
 
 jest.mock('./loader');
@@ -294,7 +294,6 @@ describe('IndexPattern Data Source', () => {
           },
         },
         savedObjectReferences: [
-          { name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern', id: '1' },
           { name: 'indexpattern-datasource-layer-first', type: 'index-pattern', id: '1' },
         ],
       });
@@ -2468,7 +2467,7 @@ describe('IndexPattern Data Source', () => {
   });
   describe('#isTimeBased', () => {
     it('should return true if date histogram exists in any layer', () => {
-      const state = enrichBaseState({
+      let state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2521,10 +2520,17 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
     it('should return false if date histogram exists but is detached from global time range in every layer', () => {
-      const state = enrichBaseState({
+      let state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2578,9 +2584,44 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
     });
     it('should return false if date histogram does not exist in any layer', () => {
+      let state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
+    it('should return true if the index pattern is time based even if date histogram does not exist in any layer', () => {
       const state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
@@ -2599,7 +2640,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
-      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
   });
 
@@ -2626,9 +2667,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
         })
       ).toBe(state);
     });
@@ -2655,9 +2694,7 @@ describe('IndexPattern Data Source', () => {
       expect(
         indexPatternDatasource.initializeDimension!(state, 'first', {
           columnId: 'newStatic',
-          label: 'MyNewColumn',
           groupId: 'a',
-          dataType: 'number',
           staticValue: 0, // use a falsy value to check also this corner case
         })
       ).toEqual({
@@ -2709,14 +2746,7 @@ describe('IndexPattern Data Source', () => {
       },
     };
 
-    const currentIndexPatternReference = {
-      id: 'some-id',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    };
-
     const references1: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',
@@ -2725,7 +2755,6 @@ describe('IndexPattern Data Source', () => {
     ];
 
     const references2: SavedObjectReference[] = [
-      currentIndexPatternReference,
       {
         id: 'some-DIFFERENT-id',
         name: 'indexpattern-datasource-layer-8bd66b66-aba3-49fb-9ff2-4bf83f2be08e',

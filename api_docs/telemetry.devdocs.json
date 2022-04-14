@@ -6,6 +6,38 @@
     "interfaces": [
       {
         "parentPluginId": "telemetry",
+        "id": "def-public.TelemetryConstants",
+        "type": "Interface",
+        "tags": [],
+        "label": "TelemetryConstants",
+        "description": [
+          "\nPublic's start exposed APIs by the telemetry plugin"
+        ],
+        "path": "src/plugins/telemetry/public/plugin.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryConstants.getPrivacyStatementUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrivacyStatementUrl",
+            "description": [
+              "Elastic's privacy statement url"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "telemetry",
         "id": "def-public.TelemetryPluginConfig",
         "type": "Interface",
         "tags": [],
@@ -269,9 +301,7 @@
       "type": "Interface",
       "tags": [],
       "label": "TelemetryPluginStart",
-      "description": [
-        "\nPublic's start exposed APIs by the telemetry plugin"
-      ],
+      "description": [],
       "path": "src/plugins/telemetry/public/plugin.ts",
       "deprecated": false,
       "children": [
@@ -321,7 +351,13 @@
             "Set of publicly exposed telemetry constants"
           ],
           "signature": [
-            "{ getPrivacyStatementUrl: () => string; }"
+            {
+              "pluginId": "telemetry",
+              "scope": "public",
+              "docId": "kibTelemetryPluginApi",
+              "section": "def-public.TelemetryConstants",
+              "text": "TelemetryConstants"
+            }
           ],
           "path": "src/plugins/telemetry/public/plugin.ts",
           "deprecated": false
@@ -611,7 +647,7 @@
         ],
         "signature": [
           "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Omit<",
-          "ClusterStatsResponse",
+          "ClusterStatsStatsResponseBase",
           ", \"cluster_name\" | \"_nodes\">; collection: string; stack_stats: { data: ",
           {
             "pluginId": "telemetry",

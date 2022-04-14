@@ -31,7 +31,6 @@ import {
   policyDetailsForUpdate,
 } from '../../store/policy_details/selectors';
 
-import { ReactQueryClientProvider } from '../../../../../common/containers/query_client/query_client_provider';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extension/components/fleet_integration_artifacts_card';
 import { BlocklistsApiClient } from '../../../blocklist/services';
@@ -42,6 +41,7 @@ import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../block
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
+import { useEndpointPrivileges } from '../../../../../common/components/user_privileges/endpoint';
 
 export const BLOCKLISTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
@@ -51,7 +51,7 @@ export const BLOCKLISTS_LABELS = {
     }),
   cardTitle: (
     <FormattedMessage
-      id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
+      id="xpack.securitySolution.endpoint.blocklist.fleetIntegration.title"
       defaultMessage="Blocklist"
     />
   ),
@@ -137,10 +137,10 @@ export const TRUSTED_APPS_LABELS = {
 export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy, onChange }) => {
     return (
-      <ReactQueryClientProvider>
+      <>
         <EuiSpacer size="m" />
         <WrappedPolicyDetailsForm policyId={policy.id} onChange={onChange} />
-      </ReactQueryClientProvider>
+      </>
     );
   }
 );
@@ -159,6 +159,7 @@ const WrappedPolicyDetailsForm = memo<{
 
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
+  const { canAccessEndpointManagement } = useEndpointPrivileges();
 
   const hostIsolationExceptionsApiClientInstance = useMemo(
     () => HostIsolationExceptionsApiClient.getInstance(http),
@@ -226,8 +227,8 @@ const WrappedPolicyDetailsForm = memo<{
     });
   }, [onChange, updatedPolicy]);
 
-  return (
-    <div data-test-subj="endpointIntegrationPolicyForm">
+  const artifactCards = useMemo(
+    () => (
       <>
         <div>
           <EuiText>
@@ -277,6 +278,22 @@ const WrappedPolicyDetailsForm = memo<{
           />
         </div>
         <EuiSpacer size="l" />
+      </>
+    ),
+    [
+      blocklistsApiClientInstance,
+      eventFiltersApiClientInstance,
+      hostIsolationExceptionsApiClientInstance,
+      policyId,
+      privileges.canIsolateHost,
+      trustedAppsApiClientInstance,
+    ]
+  );
+
+  return (
+    <div data-test-subj="endpointIntegrationPolicyForm">
+      <>
+        {canAccessEndpointManagement && artifactCards}
         <div>
           <EuiText>
             <h5>

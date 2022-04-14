@@ -12,7 +12,7 @@ import type { Filter } from '@kbn/es-query';
 import { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
-import { APP_ID, APP_UI_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -24,15 +24,18 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import type { EntityType } from '../../../../../timelines/common';
 import { TGridCellAction } from '../../../../../timelines/common/types';
-import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
-import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
   useFieldBrowserOptions,
   FieldEditorActions,
 } from '../../../timelines/components/fields_browser';
+import {
+  useSessionViewNavigation,
+  useSessionView,
+} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -105,12 +108,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
+      sessionViewConfig,
       showCheckboxes,
       sort,
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, id));
 
-  const { timelines: timelinesUi, cases } = useKibana().services;
+  const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
     dataViewId,
@@ -155,11 +159,23 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-  const graphOverlay = useMemo(
-    () =>
-      graphEventId != null && graphEventId.length > 0 ? <GraphOverlay timelineId={id} /> : null,
-    [graphEventId, id]
-  );
+
+  const { Navigation } = useSessionViewNavigation({
+    timelineId: id,
+  });
+
+  const { DetailsPanel, SessionView } = useSessionView({
+    entityType,
+    timelineId: id,
+  });
+
+  const graphOverlay = useMemo(() => {
+    const shouldShowOverlay =
+      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
+    return shouldShowOverlay ? (
+      <GraphOverlay timelineId={id} SessionView={SessionView} Navigation={Navigation} />
+    ) : null;
+  }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
@@ -185,69 +201,58 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     editorActionsRef,
   });
 
-  const casesPermissions = useGetUserCasesPermissions();
-  const CasesContext = cases.ui.getCasesContext();
   const isLive = input.policy.kind === 'interval';
 
   return (
     <>
-      <CasesContext owner={[APP_ID]} userCanCrud={casesPermissions?.crud ?? false}>
-        <FullScreenContainer $isFullScreen={globalFullScreen}>
-          <InspectButtonContainer>
-            {timelinesUi.getTGrid<'embedded'>({
-              additionalFilters,
-              appId: APP_UI_ID,
-              browserFields,
-              bulkActions,
-              columns,
-              dataProviders,
-              dataViewId,
-              defaultCellActions,
-              deletedEventIds,
-              disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-              docValueFields,
-              end,
-              entityType,
-              fieldBrowserOptions,
-              filters: globalFilters,
-              filterStatus: currentFilter,
-              globalFullScreen,
-              graphEventId,
-              graphOverlay,
-              hasAlertsCrud,
-              id,
-              indexNames: selectedPatterns,
-              indexPattern,
-              isLive,
-              isLoadingIndexPattern,
-              itemsPerPage,
-              itemsPerPageOptions,
-              kqlMode,
-              leadingControlColumns,
-              onRuleChange,
-              query,
-              renderCellValue,
-              rowRenderers,
-              runtimeMappings,
-              setQuery,
-              sort,
-              start,
-              tGridEventRenderedViewEnabled,
-              trailingControlColumns,
-              type: 'embedded',
-              unit,
-            })}
-          </InspectButtonContainer>
-        </FullScreenContainer>
-        <DetailsPanel
-          browserFields={browserFields}
-          entityType={entityType}
-          docValueFields={docValueFields}
-          isFlyoutView
-          runtimeMappings={runtimeMappings}
-          timelineId={id}
-        />
-      </CasesContext>
+      <FullScreenContainer $isFullScreen={globalFullScreen}>
+        <InspectButtonContainer>
+          {timelinesUi.getTGrid<'embedded'>({
+            additionalFilters,
+            appId: APP_UI_ID,
+            browserFields,
+            bulkActions,
+            columns,
+            dataProviders,
+            dataViewId,
+            defaultCellActions,
+            deletedEventIds,
+            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+            docValueFields,
+            end,
+            entityType,
+            fieldBrowserOptions,
+            filters: globalFilters,
+            filterStatus: currentFilter,
+            globalFullScreen,
+            graphEventId,
+            graphOverlay,
+            hasAlertsCrud,
+            id,
+            indexNames: selectedPatterns,
+            indexPattern,
+            isLive,
+            isLoadingIndexPattern,
+            itemsPerPage,
+            itemsPerPageOptions,
+            kqlMode,
+            leadingControlColumns,
+            onRuleChange,
+            query,
+            renderCellValue,
+            rowRenderers,
+            runtimeMappings,
+            setQuery,
+            sort,
+            start,
+            tGridEventRenderedViewEnabled,
+            trailingControlColumns,
+            type: 'embedded',
+            unit,
+          })}
+        </InspectButtonContainer>
+      </FullScreenContainer>
+      {DetailsPanel}
     </>
   );
 };

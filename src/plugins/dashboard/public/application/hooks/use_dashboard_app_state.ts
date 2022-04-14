@@ -235,8 +235,12 @@ export const useDashboardAppState = ({
       const dataViewsSubscription = syncDashboardDataViews({
         dashboardContainer,
         dataViews: dashboardBuildContext.dataViews,
-        onUpdateDataViews: (newDataViews: DataView[]) =>
-          setDashboardAppState((s) => ({ ...s, dataViews: newDataViews })),
+        onUpdateDataViews: (newDataViews: DataView[]) => {
+          if (newDataViews.length > 0 && newDataViews[0].id) {
+            dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViews[0].id);
+          }
+          setDashboardAppState((s) => ({ ...s, dataViews: newDataViews }));
+        },
       });
 
       /**
@@ -306,7 +310,7 @@ export const useDashboardAppState = ({
        * the last saved state on save.
        */
       setLastSavedState(savedDashboardState);
-      dashboardBuildContext.$checkForUnsavedChanges.next();
+      dashboardBuildContext.$checkForUnsavedChanges.next(undefined);
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({

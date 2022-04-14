@@ -12,6 +12,7 @@
 import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
+import { lastValueFrom } from 'rxjs';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -254,8 +255,7 @@ export function getFieldsByJob() {
 }
 
 export function getSelectionTimeRange(
-  selectedCells: AppStateSelectedCells | undefined,
-  interval: number,
+  selectedCells: AppStateSelectedCells | undefined | null,
   bounds: TimeRangeBounds
 ): SelectionTimeRange {
   // Returns the time range of the cell(s) currently selected in the swimlane.
@@ -267,7 +267,7 @@ export function getSelectionTimeRange(
   let earliestMs = requiredBounds.min.valueOf();
   let latestMs = requiredBounds.max.valueOf();
 
-  if (selectedCells !== undefined && selectedCells.times !== undefined) {
+  if (selectedCells?.times !== undefined) {
     // time property of the cell data is an array, with the elements being
     // the start times of the first and last cell selected.
     earliestMs =
@@ -285,11 +285,11 @@ export function getSelectionTimeRange(
 }
 
 export function getSelectionInfluencers(
-  selectedCells: AppStateSelectedCells | undefined,
+  selectedCells: AppStateSelectedCells | undefined | null,
   fieldName: string
 ): EntityField[] {
   if (
-    selectedCells !== undefined &&
+    !!selectedCells &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
     selectedCells.viewByFieldName !== undefined &&
     selectedCells.viewByFieldName !== VIEW_BY_JOB_LABEL
@@ -301,11 +301,11 @@ export function getSelectionInfluencers(
 }
 
 export function getSelectionJobIds(
-  selectedCells: AppStateSelectedCells | undefined,
+  selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[]
 ): string[] {
   if (
-    selectedCells !== undefined &&
+    !!selectedCells &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
     selectedCells.viewByFieldName !== undefined &&
     selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
@@ -318,21 +318,20 @@ export function getSelectionJobIds(
 
 export function loadOverallAnnotations(
   selectedJobs: ExplorerJob[],
-  interval: number,
   bounds: TimeRangeBounds
 ): Promise<AnnotationsTable> {
   const jobIds = selectedJobs.map((d) => d.id);
-  const timeRange = getSelectionTimeRange(undefined, interval, bounds);
+  const timeRange = getSelectionTimeRange(undefined, bounds);
 
   return new Promise((resolve) => {
-    ml.annotations
-      .getAnnotations$({
+    lastValueFrom(
+      ml.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
       })
-      .toPromise()
+    )
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
           const errorMessage = extractErrorMessage(resp.error);
@@ -372,23 +371,22 @@ export function loadOverallAnnotations(
 }
 
 export function loadAnnotationsTableData(
-  selectedCells: AppStateSelectedCells | undefined,
+  selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
-  interval: number,
   bounds: Required<TimeRangeBounds>
 ): Promise<AnnotationsTable> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
-  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
+  const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve) => {
-    ml.annotations
-      .getAnnotations$({
+    lastValueFrom(
+      ml.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
       })
-      .toPromise()
+    )
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
           const errorMessage = extractErrorMessage(resp.error);
@@ -431,10 +429,9 @@ export function loadAnnotationsTableData(
 }
 
 export async function loadAnomaliesTableData(
-  selectedCells: AppStateSelectedCells | undefined,
+  selectedCells: AppStateSelectedCells | undefined | null,
   selectedJobs: ExplorerJob[],
-  dateFormatTz: any,
-  interval: number,
+  dateFormatTz: string,
   bounds: Required<TimeRangeBounds>,
   fieldName: string,
   tableInterval: string,
@@ -443,7 +440,7 @@ export async function loadAnomaliesTableData(
 ): Promise<AnomaliesTableData> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
-  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
+  const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve, reject) => {
     ml.results

@@ -11,7 +11,6 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { useHttp } from '../../../../../../common/lib/kibana/hooks';
 import { PackageCustomExtensionComponentProps } from '../../../../../../../../fleet/public';
-import { ReactQueryClientProvider } from '../../../../../../common/containers/query_client/query_client_provider';
 import { FleetArtifactsCard } from './components/fleet_artifacts_card';
 import {
   getBlocklistsListPath,
@@ -23,6 +22,9 @@ import { TrustedAppsApiClient } from '../../../../trusted_apps/service/trusted_a
 import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
 import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { BlocklistsApiClient } from '../../../../blocklist/services';
+import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
+import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint';
+import { NoPermissions } from '../../../../../components/no_permissons';
 
 export const TRUSTED_APPS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
@@ -87,7 +89,7 @@ export const BLOCKLISTS_LABELS = {
     ),
   cardTitle: (
     <FormattedMessage
-      id="xpack.securitySolution.endpoint.blocklists.fleetIntegration.title"
+      id="xpack.securitySolution.endpoint.blocklist.fleetIntegration.title"
       defaultMessage="Blocklist"
     />
   ),
@@ -96,6 +98,9 @@ export const BLOCKLISTS_LABELS = {
 export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
   (props) => {
     const http = useHttp();
+    const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+    const { canAccessEndpointManagement } = useEndpointPrivileges();
+
     const trustedAppsApiClientInstance = useMemo(
       () => TrustedAppsApiClient.getInstance(http),
       [http]
@@ -111,11 +116,14 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       [http]
     );
 
-    const bloklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
+    const blocklistsApiClientInstance = useMemo(
+      () => BlocklistsApiClient.getInstance(http),
+      [http]
+    );
 
-    return (
-      <div data-test-subj="fleetEndpointPackageCustomContent">
-        <ReactQueryClientProvider>
+    const artifactCards = useMemo(
+      () => (
+        <div data-test-subj="fleetEndpointPackageCustomContent">
           <FleetArtifactsCard
             {...props}
             artifactApiClientInstance={trustedAppsApiClientInstance}
@@ -131,25 +139,39 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
             labels={EVENT_FILTERS_LABELS}
             data-test-subj="eventFilters"
           />
+          {canSeeHostIsolationExceptions && (
+            <>
+              <EuiSpacer />
+              <FleetArtifactsCard
+                {...props}
+                artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
+                getArtifactsPath={getHostIsolationExceptionsListPath}
+                labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
+                data-test-subj="hostIsolationExceptions"
+              />
+            </>
+          )}
           <EuiSpacer />
           <FleetArtifactsCard
             {...props}
-            artifactApiClientInstance={hostIsolationExceptionsApiClientInstance}
-            getArtifactsPath={getHostIsolationExceptionsListPath}
-            labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
-            data-test-subj="hostIsolationExceptions"
-          />
-          <EuiSpacer />
-          <FleetArtifactsCard
-            {...props}
-            artifactApiClientInstance={bloklistsApiClientInstance}
+            artifactApiClientInstance={blocklistsApiClientInstance}
             getArtifactsPath={getBlocklistsListPath}
             labels={BLOCKLISTS_LABELS}
             data-test-subj="blocklists"
           />
-        </ReactQueryClientProvider>
-      </div>
+        </div>
+      ),
+      [
+        blocklistsApiClientInstance,
+        canSeeHostIsolationExceptions,
+        eventFiltersApiClientInstance,
+        hostIsolationExceptionsApiClientInstance,
+        trustedAppsApiClientInstance,
+        props,
+      ]
     );
+
+    return canAccessEndpointManagement ? artifactCards : <NoPermissions />;
   }
 );
 

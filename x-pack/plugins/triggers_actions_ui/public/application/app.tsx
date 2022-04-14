@@ -18,6 +18,7 @@ import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constan
 import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
 import { PluginStartContract as AlertingStart } from '../../../alerting/public';
 import type { SpacesPluginStart } from '../../../spaces/public';
 
@@ -47,6 +48,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
   theme$: Observable<CoreTheme>;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -59,7 +61,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { savedObjects, uiSettings, theme$ } = deps;
-  const sections: Section[] = ['rules', 'connectors'];
+  const sections: Section[] = ['rules', 'connectors', 'alerts'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');

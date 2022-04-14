@@ -28,7 +28,6 @@ import * as i18n from './translations';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -135,7 +134,6 @@ export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskS
 
   const [loading, setLoading] = useState<boolean>(featureEnabled);
   const [riskScoreRequest, setRiskScoreRequest] = useState<RiskScoreRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
   const [riskScoreResponse, setRiskScoreResponse] = useState<RiskScoreState<RiskScoreType>>({
@@ -247,16 +245,7 @@ export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskS
         return prevRequest;
       });
     }
-  }, [
-    filterQuery,
-    onlyLatest,
-    timerange,
-    cursorStart,
-    querySize,
-    sort,
-    getTransformChangesIfTheyExist,
-    defaultIndex,
-  ]);
+  }, [filterQuery, onlyLatest, timerange, cursorStart, querySize, sort, defaultIndex]);
 
   useEffect(() => {
     riskScoreSearch(riskScoreRequest);
@@ -265,6 +254,14 @@ export const useRiskScore = <RiskScoreType extends HostsRiskScore[] | UsersRiskS
       abortCtrl.current.abort();
     };
   }, [riskScoreRequest, riskScoreSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, riskScoreResponse];
 };
