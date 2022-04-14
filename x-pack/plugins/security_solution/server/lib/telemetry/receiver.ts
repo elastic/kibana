@@ -533,6 +533,72 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                 bool: {
                   should: [
                     {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Malware Prevention Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Malware Detection Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Ransomware Prevention Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.rule.name': 'Ransomware Detection Alert',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
                       match_phrase: {
                         'kibana.alert.rule.parameters.immutable': 'true',
                       },
