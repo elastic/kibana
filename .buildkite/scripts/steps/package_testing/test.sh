@@ -20,7 +20,7 @@ elif [[ "$TEST_PACKAGE" == "docker" ]]; then
 fi
 cd ..
 
-export VAGRANT_CWD=test/package
+export VAGRANT_CWD=$PWD/test/package
 vagrant up "$TEST_PACKAGE" --no-provision
 
 node scripts/es snapshot \
