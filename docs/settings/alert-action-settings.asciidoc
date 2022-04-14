@@ -211,6 +211,7 @@ For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 `xpack.alerting.rules.run.ruleTypeOverrides`::
 Overrides the configs under `xpack.alerting.rules.run` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
 +
+--
 For example:
 ```
 xpack.alerting.rules.run:
@@ -219,3 +220,4 @@ xpack.alerting.rules.run:
         - id: '.index-threshold'
           timeout: '15m'
 ```
+--
