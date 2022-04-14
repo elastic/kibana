@@ -552,7 +552,7 @@ describe('bulkEdit()', () => {
           function: 'is',
           type: 'function',
         },
-        perPage: 1000,
+        perPage: 100,
         type: 'alert',
         namespaces: ['default'],
       });
