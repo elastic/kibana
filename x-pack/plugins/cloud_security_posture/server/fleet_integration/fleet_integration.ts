@@ -30,7 +30,6 @@ import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../common/schemas
 const isCspPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
 ): boolean => {
-  // TODO: check for CSP package type and not specific package
   return packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME;
 };
 
