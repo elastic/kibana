@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, CoreStart, TelemetryCounter } from 'src/core/server';
@@ -61,13 +61,18 @@ export class AnalyticsPluginAPlugin implements Plugin {
         validate: {
           query: schema.object({
             takeNumberOfCounters: schema.number({ min: 1 }),
+            eventType: schema.string(),
           }),
         },
       },
       async (context, req, res) => {
-        const { takeNumberOfCounters } = req.query;
+        const { takeNumberOfCounters, eventType } = req.query;
 
-        return res.ok({ body: stats.slice(-takeNumberOfCounters) });
+        return res.ok({
+          body: stats
+            .filter((counter) => counter.event_type === eventType)
+            .slice(-takeNumberOfCounters),
+        });
       }
     );
 
@@ -83,7 +88,7 @@ export class AnalyticsPluginAPlugin implements Plugin {
       async (context, req, res) => {
         const { takeNumberOfActions } = req.query;
 
-        const actions = await actions$.pipe(take(takeNumberOfActions), toArray()).toPromise();
+        const actions = await firstValueFrom(actions$.pipe(take(takeNumberOfActions), toArray()));
 
         return res.ok({ body: actions });
       }

@@ -6,8 +6,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from 'kibana/server';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { firstValueFrom, Subject } from 'rxjs';
 import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
 import {
@@ -42,9 +41,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
   private readonly logger: Logger;
 
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
-  taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
-    .pipe(first())
-    .toPromise();
+  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('fixtures', 'plugins', 'alerts');

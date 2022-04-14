@@ -13,6 +13,8 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
   const { loadTestFile, getService } = providerContext;
 
   describe('Endpoint plugin', function () {
+    this.tags('ciGroup9');
+
     const ingestManager = getService('ingestManager');
 
     const log = getService('log');

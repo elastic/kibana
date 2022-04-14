@@ -14,12 +14,14 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 export type { MonitoringConfig } from '../server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
+import { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 interface LegacyStartDependencies {

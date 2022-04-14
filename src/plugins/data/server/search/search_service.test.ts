@@ -16,7 +16,7 @@ import { createIndexPatternsStartMock } from '../data_views/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '../../../bfetch/server/mocks';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
@@ -182,7 +182,7 @@ describe('Search service', () => {
           throw new NoSearchIdInSessionError();
         });
 
-        const res = await mockScopedClient.search(searchRequest, options).toPromise();
+        const res = await lastValueFrom(mockScopedClient.search(searchRequest, options));
 
         const [request, callOptions] = mockStrategy.search.mock.calls[0];
         expect(callOptions).toBe(options);

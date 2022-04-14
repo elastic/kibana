@@ -20,7 +20,7 @@ export class AppStateManager {
   _savedQueryId: string = '';
   _filters: Filter[] = [];
 
-  _updated$ = new Subject();
+  _updated$ = new Subject<void>();
 
   setQueryAndFilters({ query, savedQueryId, filters }: MapsAppState) {
     if (query && this._query !== query) {
