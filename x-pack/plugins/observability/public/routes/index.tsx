@@ -101,6 +101,6 @@ export const routes = {
       return <RuleDetailsPage />;
     },
     params: {},
-    exact: false,
+    exact: true,
   },
 };
