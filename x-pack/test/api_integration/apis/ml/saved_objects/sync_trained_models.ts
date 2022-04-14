@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       const model1 = getTestModel(modelIdSpace1, 'classification', dfaJobId1);
       await ml.api.createTrainedModelES(model1.model_id, model1.body);
 
-      // create model via kibana, so saved object creation is no needed
+      // create model via kibana, so saved object creation is not needed
       const model2 = getTestModel(modelIdSpace2, 'classification', dfaJobId1);
       await ml.api.createTrainedModel(model2.model_id, model2.body);
 
@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
       const model1 = getTestModel(modelIdSpace1, 'classification', dfaJobId1);
       await ml.api.createTrainedModelES(model1.model_id, model1.body);
 
-      // create model via kibana, so saved object creation is no needed
+      // create model via kibana, so saved object creation is not needed
       const model2 = getTestModel(modelIdSpace2, 'classification', dfaJobId1);
       await ml.api.createTrainedModel(model2.model_id, model2.body);
 
