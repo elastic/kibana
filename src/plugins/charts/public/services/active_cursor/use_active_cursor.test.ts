@@ -15,7 +15,8 @@ import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
 import type { Chart, PointerEvent } from '@elastic/charts';
 import type { Datatable } from '../../../../expressions/public';
 
-describe('useActiveCursor', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/130177
+describe.skip('useActiveCursor', () => {
   let cursor: ActiveCursorPayload['cursor'];
   let dispatchExternalPointerEvent: jest.Mock;
 

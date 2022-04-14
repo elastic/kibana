@@ -26,7 +26,7 @@ export const AgentEnrollmentConfirmationStep = ({
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmation', {
-      defaultMessage: 'Confirm agent Enrollment',
+      defaultMessage: 'Confirm agent enrollment',
     }),
     children: (
       <ConfirmAgentEnrollment
@@ -36,6 +36,6 @@ export const AgentEnrollmentConfirmationStep = ({
         agentCount={agentCount}
       />
     ),
-    status: !agentCount ? 'incomplete' : 'complete',
+    status: !agentCount ? undefined : 'complete',
   };
 };
