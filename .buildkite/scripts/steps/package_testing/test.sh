@@ -29,12 +29,15 @@ node scripts/es snapshot \
   --license=trial &
 while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
 
-trap "echo '--- Kibana logs'" EXIT
-if [[ "$TEST_PACKAGE" == "deb" ]] || [[ "$TEST_PACKAGE" == "rpm" ]]; then
-  trap "vagrant ssh $TEST_PACKAGE -t -c 'sudo cat /var/log/kibana/kibana.log'" EXIT
-elif [[ "$TEST_PACKAGE" == "docker" ]]; then
-  trap "vagrant ssh $TEST_PACKAGE -t -c 'sudo docker logs kibana'" EXIT
-fi
+function echoKibanaLogs {
+  echo '--- Kibana logs'
+  if [[ "$TEST_PACKAGE" == "deb" ]] || [[ "$TEST_PACKAGE" == "rpm" ]]; then
+    vagrant ssh $TEST_PACKAGE -t -c 'sudo cat /var/log/kibana/kibana.log'
+  elif [[ "$TEST_PACKAGE" == "docker" ]]; then
+    vagrant ssh $TEST_PACKAGE -t -c 'sudo docker logs kibana'
+  fi
+}
+trap "echoKibanaLogs" EXIT
 
 vagrant provision "$TEST_PACKAGE"
 
