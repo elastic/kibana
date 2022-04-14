@@ -6,6 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AwaitedProperties } from '@kbn/utility-types';
 import { KibanaRequest, KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
 import {
@@ -200,31 +201,30 @@ describe('Host Isolation', () => {
         };
 
         // mock _index_template
-        ctx.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate = jest
-          .fn()
-          .mockImplementationOnce(() => {
+        ctx.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate.mockResponseImplementationOnce(
+          () => {
             if (indexExists) {
-              return Promise.resolve({
+              return {
                 body: true,
                 statusCode: 200,
-              });
+              };
             }
-            return Promise.resolve({
+            return {
               body: false,
               statusCode: 404,
-            });
-          });
+            };
+          }
+        );
 
         const withIdxResp = idxResponse ? idxResponse : { statusCode: 201 };
-        const mockIndexResponse = jest.fn().mockImplementation(() => Promise.resolve(withIdxResp));
-        const mockSearchResponse = jest
-          .fn()
-          .mockImplementation(() =>
-            Promise.resolve({ body: legacyMetadataSearchResponseMock(searchResponse) })
-          );
-
-        ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;
-        ctx.core.elasticsearch.client.asCurrentUser.search = mockSearchResponse;
+        ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
+          () => withIdxResp
+        );
+        ctx.core.elasticsearch.client.asCurrentUser.search.mockResponseImplementation(() => {
+          return {
+            body: legacyMetadataSearchResponseMock(searchResponse),
+          };
+        });
 
         const withLicense = license ? license : Platinum;
         licenseEmitter.next(withLicense);
@@ -279,8 +279,9 @@ describe('Host Isolation', () => {
         searchResponse: metadataResponse,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
-      ).mock.calls[0][0].body;
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
       expect(actionDoc.agents).toContain(AgentID);
     });
     it('records the user who performed the action to the action record', async () => {
@@ -290,8 +291,9 @@ describe('Host Isolation', () => {
         mockUser: testU,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
-      ).mock.calls[0][0].body;
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
       expect(actionDoc.user_id).toEqual(testU.username);
     });
     it('records the comment in the action payload', async () => {
@@ -300,8 +302,9 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'], comment: CommentText },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
-      ).mock.calls[0][0].body;
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
       expect(actionDoc.data.comment).toEqual(CommentText);
     });
     it('creates an action and returns its ID', async () => {
@@ -309,8 +312,9 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'], comment: 'XYZ' },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
-      ).mock.calls[0][0].body;
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
       const actionID = actionDoc.action_id;
       expect(mockResponse.ok).toBeCalled();
       expect((mockResponse.ok.mock.calls[0][0]?.body as HostIsolationResponse).action).toEqual(
@@ -322,8 +326,9 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
-      ).mock.calls[0][0].body;
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
       expect(actionDoc.timeout).toEqual(300);
     });
     it('sends the action to the correct agent when endpoint ID is given', async () => {
@@ -335,8 +340,9 @@ describe('Host Isolation', () => {
         searchResponse: doc,
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
-      ).mock.calls[0][0].body;
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
       expect(actionDoc.agents).toContain(AgentID);
     });
 
@@ -345,8 +351,9 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
-      ).mock.calls[0][0].body;
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
       expect(actionDoc.data.command).toEqual('isolate');
     });
     it('sends the unisolate command payload from the unisolate route', async () => {
@@ -354,8 +361,9 @@ describe('Host Isolation', () => {
         body: { endpoint_ids: ['XYZ'] },
       });
       const actionDoc: EndpointAction = (
-        ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock
-      ).mock.calls[0][0].body;
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
       expect(actionDoc.data.command).toEqual('unisolate');
     });
 
@@ -371,14 +379,17 @@ describe('Host Isolation', () => {
 
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
         const actionDocs: [
-          { index: string; body: LogsEndpointAction },
-          { index: string; body: EndpointAction }
-        ] = [(indexDoc as jest.Mock).mock.calls[0][0], (indexDoc as jest.Mock).mock.calls[1][0]];
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body.EndpointActions.data.command).toEqual('unisolate');
-        expect(actionDocs[1].body.data.command).toEqual('unisolate');
+        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('unisolate');
+        expect(actionDocs[1].body!.data.command).toEqual('unisolate');
       });
 
       it('handles isolation', async () => {
@@ -391,14 +402,17 @@ describe('Host Isolation', () => {
         );
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
         const actionDocs: [
-          { index: string; body: LogsEndpointAction },
-          { index: string; body: EndpointAction }
-        ] = [(indexDoc as jest.Mock).mock.calls[0][0], (indexDoc as jest.Mock).mock.calls[1][0]];
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body.EndpointActions.data.command).toEqual('isolate');
-        expect(actionDocs[1].body.data.command).toEqual('isolate');
+        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('isolate');
+        expect(actionDocs[1].body!.data.command).toEqual('isolate');
       });
 
       it('handles errors', async () => {

@@ -28,15 +28,13 @@ describe('Accurately answers if index template for data stream exists', () => {
     );
   });
 
-  const mockEsApiResponse = (response: { body: boolean; statusCode: number }) => {
-    return jest.fn().mockImplementationOnce(() => Promise.resolve(response));
-  };
-
   it('Returns FALSE for a non-existent data stream index template', async () => {
-    ctxt.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate = mockEsApiResponse({
-      body: false,
-      statusCode: 404,
-    });
+    ctxt.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate.mockResponseImplementation(
+      () => ({
+        body: false,
+        statusCode: 404,
+      })
+    );
     const doesItExist = await doLogsEndpointActionDsExists({
       context: coreMock.createCustomRequestHandlerContext(
         ctxt
@@ -48,10 +46,12 @@ describe('Accurately answers if index template for data stream exists', () => {
   });
 
   it('Returns TRUE for an existing index', async () => {
-    ctxt.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate = mockEsApiResponse({
-      body: true,
-      statusCode: 200,
-    });
+    ctxt.core.elasticsearch.client.asInternalUser.indices.existsIndexTemplate.mockResponseImplementation(
+      () => ({
+        body: true,
+        statusCode: 200,
+      })
+    );
     const doesItExist = await doLogsEndpointActionDsExists({
       context: coreMock.createCustomRequestHandlerContext(
         ctxt
@@ -73,15 +73,11 @@ describe('Accurately answers if index exists', () => {
     );
   });
 
-  const mockEsApiResponse = (response: { body: boolean; statusCode: number }) => {
-    return jest.fn().mockImplementationOnce(() => Promise.resolve(response));
-  };
-
   it('Returns FALSE for a non-existent index', async () => {
-    ctxt.core.elasticsearch.client.asInternalUser.indices.exists = mockEsApiResponse({
+    ctxt.core.elasticsearch.client.asInternalUser.indices.exists.mockResponseImplementation(() => ({
       body: false,
       statusCode: 404,
-    });
+    }));
     const doesItExist = await doesLogsEndpointActionsIndexExist({
       context: coreMock.createCustomRequestHandlerContext(
         ctxt
@@ -93,10 +89,10 @@ describe('Accurately answers if index exists', () => {
   });
 
   it('Returns TRUE for an existing index', async () => {
-    ctxt.core.elasticsearch.client.asInternalUser.indices.exists = mockEsApiResponse({
+    ctxt.core.elasticsearch.client.asInternalUser.indices.exists.mockResponseImplementation(() => ({
       body: true,
       statusCode: 200,
-    });
+    }));
     const doesItExist = await doesLogsEndpointActionsIndexExist({
       context: coreMock.createCustomRequestHandlerContext(
         ctxt

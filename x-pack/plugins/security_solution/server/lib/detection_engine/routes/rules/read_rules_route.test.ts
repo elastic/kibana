@@ -53,12 +53,18 @@ describe.each([
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getReadRequest(), context);
+      const response = await server.inject(
+        getReadRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 when reading a single rule outcome === exactMatch', async () => {
-      const response = await server.inject(getReadRequestWithId(myFakeId), context);
+      const response = await server.inject(
+        getReadRequestWithId(myFakeId),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -70,7 +76,10 @@ describe.each([
         id: myFakeId,
         outcome: 'aliasMatch',
       });
-      const response = await server.inject(getReadRequestWithId(myFakeId), context);
+      const response = await server.inject(
+        getReadRequestWithId(myFakeId),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -83,14 +92,20 @@ describe.each([
         outcome: 'conflict',
         alias_target_id: 'myaliastargetid',
       });
-      const response = await server.inject(getReadRequestWithId(myFakeId), context);
+      const response = await server.inject(
+        getReadRequestWithId(myFakeId),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body.alias_target_id).toEqual('myaliastargetid');
     });
 
     test('returns error if requesting a non-rule', async () => {
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
-      const response = await server.inject(getReadRequest(), context);
+      const response = await server.inject(
+        getReadRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: 'rule_id: "rule-1" not found',
@@ -102,7 +117,10 @@ describe.each([
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getReadRequest(), context);
+      const response = await server.inject(
+        getReadRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -119,7 +137,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_URL,
         query: { rule_id: 'DNE_RULE' },
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'rule_id: "DNE_RULE" not found', status_code: 404 });

@@ -44,12 +44,18 @@ describe('set signal status', () => {
 
   describe('status on signal', () => {
     test('returns 200 when setting a status on a signal by ids', async () => {
-      const response = await server.inject(getSetSignalStatusByIdsRequest(), context);
+      const response = await server.inject(
+        getSetSignalStatusByIdsRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 when setting a status on a signal by query', async () => {
-      const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
+      const response = await server.inject(
+        getSetSignalStatusByQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -68,7 +74,10 @@ describe('set signal status', () => {
       context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
         new Error('Test error')
       );
-      const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
+      const response = await server.inject(
+        getSetSignalStatusByQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -106,7 +115,7 @@ describe('set signal status', () => {
         path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         body: setStatusSignalMissingIdsAndQueryPayload(),
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message: ['either "signal_ids" or "query" must be set'],
