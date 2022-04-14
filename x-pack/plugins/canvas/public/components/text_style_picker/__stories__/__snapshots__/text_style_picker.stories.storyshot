@@ -45,7 +45,7 @@ exports[`Storyshots components/TextStylePicker default 1`] = `
             className="euiFormControlLayout__childrenWrapper"
           >
             <select
-              className="euiSelect euiSelect--compressed euiSelect--inGroup"
+              className="euiSelect euiFormControlLayout--1icons euiSelect--compressed euiSelect--inGroup"
               onChange={[Function]}
               onMouseUp={[Function]}
               value={14}
@@ -505,7 +505,7 @@ exports[`Storyshots components/TextStylePicker interactive 1`] = `
             className="euiFormControlLayout__childrenWrapper"
           >
             <select
-              className="euiSelect euiSelect--compressed euiSelect--inGroup"
+              className="euiSelect euiFormControlLayout--1icons euiSelect--compressed euiSelect--inGroup"
               onChange={[Function]}
               onMouseUp={[Function]}
               value={14}

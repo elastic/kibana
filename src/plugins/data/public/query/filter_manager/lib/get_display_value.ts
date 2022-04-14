@@ -7,15 +7,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Filter, IIndexPattern } from '../../../../common';
+import { Filter } from '../../../../common';
+import { DataView, DataViewField } from '../../../../../data_views/public';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
-function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
+function getValueFormatter(indexPattern?: DataView, key?: string) {
   // checking getFormatterForField exists because there is at least once case where an index pattern
   // is an object rather than an IndexPattern class
   if (!indexPattern || !indexPattern.getFormatterForField || !key) return;
 
-  const field = indexPattern.fields.find((f) => f.name === key);
+  const field = indexPattern.fields.find((f: DataViewField) => f.name === key);
   if (!field) {
     throw new Error(
       i18n.translate('data.filter.filterBar.fieldNotFound', {
@@ -27,7 +28,7 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
   return indexPattern.getFormatterForField(field);
 }
 
-export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexPattern[]): string {
+export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataView[]): string {
   const { key, value } = filter.meta;
   if (typeof value === 'function') {
     const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
