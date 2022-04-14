@@ -24,6 +24,7 @@ import { useKibana } from '../../shared_imports';
 
 import { i18nTexts } from './i18n_texts';
 
+// TODO: Move all of these i18n texts to ./i18n_texts.tsx
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
   defaultMessage: 'N/A',
 });
