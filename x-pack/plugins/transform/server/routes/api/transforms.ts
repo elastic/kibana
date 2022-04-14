@@ -96,10 +96,11 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
             ...req.params,
           });
 
-          if (ctx.alerting) {
+          const alerting = await ctx.alerting;
+          if (alerting) {
             const transformHealthService = transformHealthServiceProvider(
               esClient.asCurrentUser,
-              ctx.alerting.getRulesClient()
+              alerting.getRulesClient()
             );
 
             // @ts-ignore

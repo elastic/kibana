@@ -11,7 +11,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
 } from 'kibana/server';
 
 import { LicensingPluginSetup, LicenseType } from '../../../licensing/server';
@@ -29,9 +29,9 @@ interface SetupSettings {
   defaultErrorMessage: string;
 }
 
-type TransformRequestHandlerContext = RequestHandlerContext & {
+type TransformRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;
-};
+}>;
 
 export class License {
   private licenseStatus: LicenseStatus = {
@@ -75,7 +75,7 @@ export class License {
     const license = this;
 
     return function licenseCheck(
-      ctx: RequestHandlerContext,
+      ctx: TransformRequestHandlerContext,
       request: KibanaRequest<Params, Query, Body>,
       response: KibanaResponseFactory
     ): IKibanaResponse<any> | Promise<IKibanaResponse<any>> {
