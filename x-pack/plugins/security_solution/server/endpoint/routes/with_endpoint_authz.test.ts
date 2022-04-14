@@ -62,9 +62,9 @@ describe('When using `withEndpointAuthz()`', () => {
       },
       { canCreateArtifactsByPolicy: false },
     ],
-  ])('should grant access when needed authz is %j', (neededAuthz, authzOverrides) => {
+  ])('should grant access when needed authz is %j', async (neededAuthz, authzOverrides) => {
     Object.assign(mockContext.securitySolution.endpointAuthz, authzOverrides);
-    withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
+    await withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
       coreMock.createCustomRequestHandlerContext(mockContext),
       mockRequest,
       mockResponse
@@ -89,10 +89,10 @@ describe('When using `withEndpointAuthz()`', () => {
       },
       { canCreateArtifactsByPolicy: false },
     ],
-  ])('should deny access when not authorized for %j', (neededAuthz, authzOverrides) => {
+  ])('should deny access when not authorized for %j', async (neededAuthz, authzOverrides) => {
     Object.assign(mockContext.securitySolution.endpointAuthz, authzOverrides);
 
-    withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
+    await withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
       coreMock.createCustomRequestHandlerContext(mockContext),
       mockRequest,
       mockResponse
