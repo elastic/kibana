@@ -43,12 +43,22 @@ export const flightFieldNames: FlightField[] = [
   'timestamp',
 ];
 
+const numberFields = [
+  'AvgTicketPrice',
+  'dayOfWeek',
+  'DistanceKilometers',
+  'DistanceMiles',
+  'FlightDelayMin',
+  'FlightTimeHour',
+  'FlightTimeMin',
+];
+
 export const flightFieldByName: { [key: string]: DataViewField } = {};
 flightFieldNames.forEach(
   (flightFieldName) =>
     (flightFieldByName[flightFieldName] = {
       name: flightFieldName,
-      type: 'string',
+      type: numberFields.includes(flightFieldName) ? 'number' : 'string',
       aggregatable: true,
     } as unknown as DataViewField)
 );

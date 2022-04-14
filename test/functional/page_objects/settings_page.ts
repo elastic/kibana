@@ -164,6 +164,19 @@ export class SettingsPageObject extends FtrService {
     return await this.testSubjects.find('saveIndexPatternButton');
   }
 
+  async getSaveDataViewButtonActive() {
+    await this.retry.try(async () => {
+      expect(
+        (
+          await this.find.allByCssSelector(
+            '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
+          )
+        ).length
+      ).to.be(1);
+    });
+    return await this.testSubjects.find('saveIndexPatternButton');
+  }
+
   async getCreateButton() {
     return await this.find.displayedByCssSelector('[type="submit"]');
   }
@@ -260,8 +273,12 @@ export class SettingsPageObject extends FtrService {
 
   async clearFieldTypeFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
-    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    });
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -288,7 +305,10 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
-    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+      return await this.find.byCssSelector('div.euiPopover__panel-isOpen');
+    });
     await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
     await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
     await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${language}`);
@@ -341,7 +361,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickIndexPatternByName(name: string) {
-    const indexLink = await this.find.byXPath(`//a[descendant::*[text()='${name}']]`);
+    const indexLink = await this.find.byXPath(`//a[text()='${name}']`);
     await indexLink.click();
   }
 
@@ -437,9 +457,9 @@ export class SettingsPageObject extends FtrService {
     await this.common.scrollKibanaBodyTop();
 
     // if flyout is open
-    const flyoutView = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    const flyoutView = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      await this.testSubjects.click('createDataViewButtonFlyout');
       return;
     }
 
@@ -447,9 +467,9 @@ export class SettingsPageObject extends FtrService {
     if (tableView) {
       await this.testSubjects.click('createIndexPatternButton');
     }
-    const flyoutView2 = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    const flyoutView2 = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView2) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      await this.testSubjects.click('createDataViewButtonFlyout');
     }
   }
 
@@ -547,7 +567,7 @@ export class SettingsPageObject extends FtrService {
     name: string,
     language: string,
     type: string,
-    format: Record<string, any>,
+    format: Record<string, any> | null,
     popularity: string,
     script: string
   ) {
@@ -787,7 +807,7 @@ export class SettingsPageObject extends FtrService {
     await this.flyout.ensureClosed('scriptedFieldsHelpFlyout');
   }
 
-  async executeScriptedField(script: string, additionalField: string) {
+  async executeScriptedField(script: string, additionalField?: string) {
     this.log.debug('execute Scripted Fields help');
     await this.closeScriptedFieldHelp(); // ensure script help is closed so script input is not blocked
     await this.setScriptedFieldScript(script);
@@ -798,7 +818,7 @@ export class SettingsPageObject extends FtrService {
       await this.testSubjects.click('runScriptButton');
       await this.testSubjects.waitForDeleted('.euiLoadingSpinner');
     }
-    let scriptResults;
+    let scriptResults: string = '';
     await this.retry.try(async () => {
       scriptResults = await this.testSubjects.getVisibleText('scriptedFieldPreview');
     });

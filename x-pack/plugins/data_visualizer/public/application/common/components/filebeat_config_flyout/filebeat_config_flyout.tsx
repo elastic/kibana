@@ -33,14 +33,12 @@ export enum EDITOR_MODE {
 interface Props {
   index: string;
   results: FindFileStructureResponse;
-  indexPatternId: string;
   ingestPipelineId: string;
   closeFlyout(): void;
 }
 export const FilebeatConfigFlyout: FC<Props> = ({
   index,
   results,
-  indexPatternId,
   ingestPipelineId,
   closeFlyout,
 }) => {

@@ -11,6 +11,14 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { IndexSelectPopover } from './index_select_popover';
 import { EuiComboBox } from '@elastic/eui';
 
+jest.mock('lodash', () => {
+  const module = jest.requireActual('lodash');
+  return {
+    ...module,
+    debounce: (fn: () => unknown) => fn,
+  };
+});
+
 jest.mock('../../../../triggers_actions_ui/public', () => {
   const original = jest.requireActual('../../../../triggers_actions_ui/public');
   return {

@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SavedObject } from 'kibana/public';
-import { DataView, DataViewAttributes } from 'src/plugins/data/common';
+import type { DataView, DataViewAttributes } from 'src/plugins/data_views/public';
 import { IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
 

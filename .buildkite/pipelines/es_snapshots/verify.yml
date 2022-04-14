@@ -14,6 +14,8 @@ steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
 
   - wait
 
@@ -65,7 +67,7 @@ steps:
 
   - command: .buildkite/scripts/steps/test/jest_integration.sh
     label: 'Jest Integration Tests'
-    parallelism: 2
+    parallelism: 3
     agents:
       queue: n2-4
     timeout_in_minutes: 120
@@ -85,6 +87,8 @@ steps:
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
     label: Trigger promotion
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
     depends_on:
       - default-cigroup
       - default-cigroup-docker
@@ -98,3 +102,5 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default

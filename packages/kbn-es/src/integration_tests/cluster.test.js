@@ -310,6 +310,7 @@ describe('#start(installPath)', () => {
             "action.destructive_requires_name=true",
             "ingest.geoip.downloader.enabled=false",
             "search.check_ccs_compatibility=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
           ],
           undefined,
           Object {
@@ -389,6 +390,7 @@ describe('#run()', () => {
             "action.destructive_requires_name=true",
             "ingest.geoip.downloader.enabled=false",
             "search.check_ccs_compatibility=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
           ],
           undefined,
           Object {

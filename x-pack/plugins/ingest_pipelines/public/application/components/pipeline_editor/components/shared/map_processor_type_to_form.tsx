@@ -256,13 +256,24 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage:
         'Expands a field containing dot notation into an object field. The object field is then accessible by other processors in the pipeline.',
     }),
-    getDefaultDescription: ({ field }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.dot_expander', {
-        defaultMessage: 'Expands "{field}" into an object field',
-        values: {
-          field,
-        },
-      }),
+    getDefaultDescription: ({ field }) => {
+      return field === '*'
+        ? i18n.translate(
+            'xpack.ingestPipelines.processors.defaultDescription.dot_expander.wildcard',
+            {
+              defaultMessage: 'All top-level fields will be expanded',
+            }
+          )
+        : i18n.translate(
+            'xpack.ingestPipelines.processors.defaultDescription.dot_expander.dot_notation',
+            {
+              defaultMessage: 'Expands "{field}" into an object field',
+              values: {
+                field,
+              },
+            }
+          );
+    },
   },
   drop: {
     FieldsComponent: Drop,

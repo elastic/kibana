@@ -8,9 +8,9 @@
 
 import { getDefaultSort } from './get_default_sort';
 import {
-  stubIndexPattern,
-  stubIndexPatternWithoutTimeField,
-} from '../../../../../data/common/stubs';
+  stubDataView,
+  stubDataViewWithoutTimeField,
+} from '../../../../../data_views/common/data_view.stub';
 
 describe('getDefaultSort function', function () {
   test('should be a function', function () {
@@ -18,12 +18,17 @@ describe('getDefaultSort function', function () {
   });
 
   test('should return default sort for an index pattern with timeFieldName', function () {
-    expect(getDefaultSort(stubIndexPattern, 'desc')).toEqual([['@timestamp', 'desc']]);
-    expect(getDefaultSort(stubIndexPattern, 'asc')).toEqual([['@timestamp', 'asc']]);
+    expect(getDefaultSort(stubDataView, 'desc', false)).toEqual([['@timestamp', 'desc']]);
+    expect(getDefaultSort(stubDataView, 'asc', false)).toEqual([['@timestamp', 'asc']]);
   });
 
   test('should return default sort for an index pattern without timeFieldName', function () {
-    expect(getDefaultSort(stubIndexPatternWithoutTimeField, 'desc')).toEqual([]);
-    expect(getDefaultSort(stubIndexPatternWithoutTimeField, 'asc')).toEqual([]);
+    expect(getDefaultSort(stubDataViewWithoutTimeField, 'desc', false)).toEqual([]);
+    expect(getDefaultSort(stubDataViewWithoutTimeField, 'asc', false)).toEqual([]);
+  });
+
+  test('should return empty sort for data view when time column is hidden', function () {
+    expect(getDefaultSort(stubDataView, 'desc', true)).toEqual([]);
+    expect(getDefaultSort(stubDataView, 'asc', true)).toEqual([]);
   });
 });

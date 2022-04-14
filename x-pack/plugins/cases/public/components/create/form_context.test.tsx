@@ -18,7 +18,6 @@ import { usePostComment } from '../../containers/use_post_comment';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { connectorsMock } from '../../containers/configure/mock';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
@@ -41,6 +40,7 @@ import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { Choice } from '../connectors/servicenow/types';
 import userEvent from '@testing-library/user-event';
+import { connectorsMock } from '../../common/mock/connectors';
 
 const sampleId = 'case-id';
 
@@ -268,7 +268,7 @@ describe('Create case', () => {
       });
 
       const wrapper = mount(
-        <TestProviders features={{ alerts: { sync: false } }}>
+        <TestProviders features={{ alerts: { sync: false, enabled: true } }}>
           <FormContext onSuccess={onFormSubmitSuccess}>
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
@@ -844,5 +844,31 @@ describe('Create case', () => {
         afterCaseOrder < pushCaseToExternalServiceOrder &&
         pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder
     ).toBe(true);
+  });
+
+  describe('Permissions', () => {
+    it('should not push to service if the user does not have access to actions', async () => {
+      mockedContext.coreStart.application.capabilities = {
+        ...mockedContext.coreStart.application.capabilities,
+        actions: { save: false, show: false },
+      };
+
+      const result = mockedContext.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await act(async () => {
+        fillFormReactTestingLib(result);
+      });
+
+      await act(async () => {
+        userEvent.click(result.getByTestId('create-case-submit'));
+      });
+
+      expect(pushCaseToExternalService).not.toHaveBeenCalled();
+    });
   });
 });

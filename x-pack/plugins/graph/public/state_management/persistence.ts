@@ -25,7 +25,7 @@ import { updateMetaData, metaDataSelector } from './meta_data';
 import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
 import { getEditPath } from '../services/url';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
-import type { IndexPattern } from '../../../../../src/plugins/data/public';
+import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export interface LoadSavedWorkspacePayload {
   indexPatterns: IndexPatternSavedObject[];
@@ -66,10 +66,20 @@ export const loadingSaga = ({
     }
 
     const selectedIndexPatternId = lookupIndexPatternId(savedWorkspace);
-    const indexPattern = (yield call(
-      indexPatternProvider.get,
-      selectedIndexPatternId
-    )) as IndexPattern;
+    let indexPattern;
+    try {
+      indexPattern = (yield call(indexPatternProvider.get, selectedIndexPatternId)) as DataView;
+    } catch (e) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.graph.loadWorkspace.missingDataViewErrorMessage', {
+          defaultMessage: 'Data view "{name}" not found',
+          values: {
+            name: selectedIndexPatternId,
+          },
+        })
+      );
+      return;
+    }
     const initialSettings = settingsSelector((yield select()) as GraphState);
 
     const createdWorkspace = createWorkspace(indexPattern.title, initialSettings);

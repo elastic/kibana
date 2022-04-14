@@ -54,7 +54,7 @@ jest.mock('../kibana/index_pattern/install', () => {
 });
 jest.mock('../archive', () => {
   return {
-    parseAndVerifyArchiveEntries: jest.fn(() =>
+    generatePackageInfoFromArchiveBuffer: jest.fn(() =>
       Promise.resolve({ packageInfo: { name: 'apache', version: '1.3.0' } })
     ),
     unpackBufferToCache: jest.fn(),
@@ -83,6 +83,7 @@ describe('install', () => {
       .mockImplementation(() => Promise.resolve({ packageInfo: { license: 'basic' } } as any));
 
     mockGetBundledPackages.mockReset();
+    (install._installPackage as jest.Mock).mockClear();
   });
 
   describe('registry', () => {

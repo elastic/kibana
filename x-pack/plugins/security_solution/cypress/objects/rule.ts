@@ -59,6 +59,7 @@ export interface CustomRule {
   timeline: CompleteTimeline;
   maxSignals: number;
   buildingBlockType?: string;
+  exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -163,6 +164,8 @@ const getSeverityOverride4 = (): SeverityOverride => ({
   sourceValue: 'auditbeat',
 });
 
+// Default interval is 1m, our tests config overwrite this to 1s
+// See https://github.com/elastic/kibana/pull/125396 for details
 const getRunsEvery = (): Interval => ({
   interval: '1',
   timeType: 'Seconds',
@@ -309,7 +312,7 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
   thresholdField: 'host.name',
-  threshold: '10',
+  threshold: '1',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
@@ -333,7 +336,7 @@ export const getMachineLearningRule = (): MachineLearningRule => ({
 });
 
 export const getEqlRule = (): CustomRule => ({
-  customQuery: 'any where process.name == "which"',
+  customQuery: 'any where process.name == "zsh"',
   name: 'New EQL Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',
@@ -371,8 +374,8 @@ export const getCCSEqlRule = (): CustomRule => ({
 export const getEqlSequenceRule = (): CustomRule => ({
   customQuery:
     'sequence with maxspan=30s\
-     [any where process.name == "which"]\
-     [any where process.name == "xargs"]',
+     [any where agent.name == "test.local"]\
+     [any where host.name == "test.local"]',
   name: 'New EQL Sequence Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',

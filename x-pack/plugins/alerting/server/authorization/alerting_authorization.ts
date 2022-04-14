@@ -30,6 +30,7 @@ export enum ReadOperations {
   Get = 'get',
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',
+  GetExecutionLog = 'getExecutionLog',
   Find = 'find',
 }
 
@@ -44,6 +45,8 @@ export enum WriteOperations {
   UnmuteAll = 'unmuteAll',
   MuteAlert = 'muteAlert',
   UnmuteAlert = 'unmuteAlert',
+  Snooze = 'snooze',
+  Unsnooze = 'unsnooze',
 }
 
 export interface EnsureAuthorizedOpts {

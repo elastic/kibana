@@ -76,9 +76,9 @@ export function runRoute(
       },
     },
     router.handleLegacyErrors(async (context, request, response) => {
-      const [, { data }] = await core.getStartServices();
+      const [, { dataViews }] = await core.getStartServices();
       const uiSettings = await context.core.uiSettings.client.getAll();
-      const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+      const indexPatternsService = await dataViews.dataViewsServiceFactory(
         context.core.savedObjects.client,
         context.core.elasticsearch.client.asCurrentUser
       );
@@ -90,7 +90,6 @@ export function runRoute(
         getFunction,
         getIndexPatternsService: () => indexPatternsService,
         getStartServices: core.getStartServices,
-        allowedGraphiteUrls: configManager.getGraphiteUrls(),
         esShardTimeout: configManager.getEsShardTimeout(),
       });
       try {

@@ -49,6 +49,13 @@ describe('getAggsFormats', () => {
     expect(getFormat).toHaveBeenCalledTimes(3);
   });
 
+  test('date_range does not crash on empty value', () => {
+    const mapping = { id: 'date_range', params: {} };
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert(undefined)).toBe('');
+  });
+
   test('creates custom format for ip_range', () => {
     const mapping = { id: 'ip_range', params: {} };
     const format = getAggFormat(mapping, getFormat);
@@ -62,12 +69,26 @@ describe('getAggsFormats', () => {
     expect(getFormat).toHaveBeenCalledTimes(4);
   });
 
+  test('ip_range does not crash on empty value', () => {
+    const mapping = { id: 'ip_range', params: {} };
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert(undefined)).toBe('');
+  });
+
   test('creates custom format for range', () => {
     const mapping = { id: 'range', params: {} };
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: 1, lt: 20 })).toBe('≥ 1 and < 20');
     expect(getFormat).toHaveBeenCalledTimes(1);
+  });
+
+  test('range does not crash on empty value', () => {
+    const mapping = { id: 'range', params: {} };
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert(undefined)).toBe('');
   });
 
   test('creates alternative format for range using the template parameter', () => {
@@ -126,7 +147,7 @@ describe('getAggsFormats', () => {
     const mapping = {
       id: 'multi_terms',
       params: {
-        paramsPerField: Array(terms.length).fill({ id: 'terms' }),
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
       },
     };
 
@@ -141,7 +162,7 @@ describe('getAggsFormats', () => {
     const mapping = {
       id: 'multi_terms',
       params: {
-        paramsPerField: Array(terms.length).fill({ id: 'terms' }),
+        paramsPerField: [{ id: 'terms' }, { id: 'terms' }, { id: 'terms' }],
         separator: ' - ',
       },
     };

@@ -156,7 +156,6 @@ export const ColorPicker = ({
                 size="l"
                 color={selectedColor}
                 className={classNames('visColorPicker__valueDot', {
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
                   'visColorPicker__valueDot-isSelected': color === selectedColor,
                 })}
                 style={{ color }}

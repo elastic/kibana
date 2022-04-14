@@ -29,6 +29,7 @@ export const checkIlmMigrationStatus = async ({
   const hasUnmanagedIndices = Object.values(reportingIndicesSettings).some((settings) => {
     return (
       settings?.settings?.index?.lifecycle?.name !== ILM_POLICY_NAME &&
+      // @ts-expect-error index.lifecycle not present on type def
       settings?.settings?.['index.lifecycle']?.name !== ILM_POLICY_NAME
     );
   });

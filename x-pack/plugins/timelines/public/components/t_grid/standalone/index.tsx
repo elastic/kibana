@@ -8,7 +8,7 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter, Query } from '@kbn/es-query';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -39,7 +39,6 @@ import { LastUpdatedAt } from '../..';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
-import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
@@ -49,7 +48,7 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
 `;
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const STANDALONE_ID = 'standalone-t-grid';
+export const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
 const TitleText = styled.span`
@@ -76,16 +75,7 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: auto;
 `;
 
-const casesFeatures = { alerts: { sync: false } };
-
 export interface TGridStandaloneProps {
-  appId: string;
-  casesOwner: string;
-  casePermissions: {
-    crud: boolean;
-    read: boolean;
-  } | null;
-  afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
   dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
@@ -127,10 +117,6 @@ export interface TGridStandaloneProps {
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
-  afterCaseSelection,
-  appId,
-  casesOwner,
-  casePermissions,
   columns,
   dataViewId = null,
   defaultCellActions,
@@ -272,26 +258,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   );
   const hasAlerts = totalCountMinusDeleted > 0;
 
-  const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
-  const selectedEvent = useMemo(() => {
-    const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
-    if (matchedEvent) {
-      return matchedEvent;
-    } else {
-      return undefined;
-    }
-  }, [events, activeCaseFlowId]);
-
-  const addToCaseActionProps = useMemo(() => {
-    return {
-      event: selectedEvent,
-      casePermissions: casePermissions ?? null,
-      appId,
-      owner: casesOwner,
-      onClose: afterCaseSelection,
-    };
-  }, [appId, casePermissions, afterCaseSelection, selectedEvent, casesOwner]);
-
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
@@ -425,7 +391,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </TimelineContext.Provider>
         ) : null}
-        <AddToCaseAction {...addToCaseActionProps} casesFeatures={casesFeatures} />
       </AlertsTableWrapper>
     </InspectButtonContainer>
   );

@@ -52,13 +52,19 @@ const hostName = 'siem-window';
 describe('Table Navigation', () => {
   const mockHasMlUserPermissions = true;
   const mockRiskyHostEnabled = true;
+
   const mockProps: TabNavigationProps & RouteSpyState = {
     pageName: 'hosts',
     pathName: '/hosts',
     detailName: undefined,
     search: '',
     tabName: HostsTableType.authentications,
-    navTabs: navTabsHostDetails(hostName, mockHasMlUserPermissions, mockRiskyHostEnabled),
+    navTabs: navTabsHostDetails({
+      hostName,
+      hasMlUserPermissions: mockHasMlUserPermissions,
+      isRiskyHostsEnabled: mockRiskyHostEnabled,
+    }),
+
     [CONSTANTS.timerange]: {
       global: {
         [CONSTANTS.timerange]: {
@@ -119,5 +125,23 @@ describe('Table Navigation', () => {
     expect(firstTab.props().href).toBe(
       `/app/securitySolutionUI/hosts/siem-window/authentications${SEARCH_QUERY}`
     );
+  });
+
+  test('it renders a EuiBetaBadge only on the sessions tab', () => {
+    Object.keys(HostsTableType).forEach((tableType) => {
+      if (tableType !== HostsTableType.sessions) {
+        const wrapper = mount(<TabNavigationComponent {...mockProps} />);
+
+        const betaBadge = wrapper.find(
+          `EuiTab[data-test-subj="navigation-${tableType}"] EuiBetaBadge`
+        );
+
+        if (tableType === HostsTableType.sessions) {
+          expect(betaBadge).toBeTruthy();
+        } else {
+          expect(betaBadge).toEqual({});
+        }
+      }
+    });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public';
@@ -59,7 +59,7 @@ export class LicenseManagementUIPlugin
       order: 0,
       mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const [coreStart, { telemetry }] = await getStartServices();
-        const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
+        const initialLicense = await firstValueFrom(plugins.licensing.license$);
 
         // Setup documentation links
         const {

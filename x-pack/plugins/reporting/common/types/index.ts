@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { ScreenshotResult } from '../../../screenshotting/server';
+import type { PdfScreenshotResult, PngScreenshotResult } from '../../../screenshotting/server';
 import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
 export type { JobParamsPNGDeprecated } from './export_types/png';
@@ -32,24 +32,16 @@ export interface ReportDocumentHead {
 
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
-  error_code?: string;
   size: number;
 }
-
-type ScreenshotMetrics = Required<ScreenshotResult>['metrics'];
 
 export interface CsvMetrics {
   rows: number;
 }
 
-export type PngMetrics = ScreenshotMetrics;
+export type PngMetrics = PngScreenshotResult['metrics'];
 
-export interface PdfMetrics extends Partial<ScreenshotMetrics> {
-  /**
-   * A number of emitted pages in the generated PDF report.
-   */
-  pages: number;
-}
+export type PdfMetrics = PdfScreenshotResult['metrics'];
 
 export interface TaskRunMetrics {
   csv?: CsvMetrics;
@@ -63,6 +55,16 @@ export interface TaskRunResult {
   max_size_reached?: boolean;
   warnings?: string[];
   metrics?: TaskRunMetrics;
+
+  /**
+   * When running a report task we may finish with warnings that were triggered
+   * by an error. We can pass the error code via the task run result to the
+   * task runner so that it can be recorded for telemetry.
+   *
+   * Alternatively, this field can be populated in the event that the task does
+   * not complete in the task runner's error handler.
+   */
+  error_code?: string;
 }
 
 export interface ReportSource {

@@ -38,25 +38,26 @@ import {
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
 import {
+  formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
+  parseDuration,
 } from '../../../../../alerting/common/parse_duration';
-import { loadRuleTypes } from '../../lib/rule_api';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
   Rule,
   IErrorObject,
   RuleAction,
-  RuleTypeIndex,
   RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
 import {
-  AlertActionParam as RuleActionParam,
+  RuleActionParam,
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
@@ -73,7 +74,8 @@ import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
-import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
+import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
 
@@ -83,6 +85,7 @@ function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[
 
 interface RuleFormProps<MetaData = Record<string, any>> {
   rule: InitialRule;
+  config: TriggersActionsUiConfig;
   dispatch: React.Dispatch<RuleReducerAction>;
   errors: IErrorObject;
   ruleTypeRegistry: RuleTypeRegistryContract;
@@ -92,13 +95,12 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
+  filteredSolutions?: string[] | undefined;
 }
-
-const defaultScheduleInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
-const defaultScheduleIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL);
 
 export const RuleForm = ({
   rule,
+  config,
   canChangeTrigger = true,
   dispatch,
   errors,
@@ -108,19 +110,24 @@ export const RuleForm = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
+  filteredSolutions,
 }: RuleFormProps) => {
   const {
-    http,
     notifications: { toasts },
     docLinks,
     application: { capabilities },
     kibanaFeatures,
     charts,
     data,
+    unifiedSearch,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
+
+  const defaultRuleInterval = getInitialInterval(config.minimumScheduleInterval?.value);
+  const defaultScheduleInterval = getDurationNumberInItsUnit(defaultRuleInterval);
+  const defaultScheduleIntervalUnit = getDurationUnitValue(defaultRuleInterval);
 
   const [ruleInterval, setRuleInterval] = useState<number | undefined>(
     rule.schedule.interval
@@ -139,7 +146,6 @@ export const RuleForm = ({
     rule.throttle ? getDurationUnitValue(rule.throttle) : 'h'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [ruleTypeIndex, setRuleTypeIndex] = useState<RuleTypeIndex | null>(null);
 
   const [availableRuleTypes, setAvailableRuleTypes] = useState<
     Array<{ ruleTypeModel: RuleTypeModel; ruleType: RuleType }>
@@ -152,53 +158,77 @@ export const RuleForm = ({
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
   let hasDisabledByLicenseRuleTypes: boolean = false;
+  const {
+    ruleTypes,
+    error: loadRuleTypesError,
+    ruleTypeIndex,
+  } = useLoadRuleTypes({ filteredSolutions });
 
   // load rule types
   useEffect(() => {
-    (async () => {
-      try {
-        const ruleTypesResult = await loadRuleTypes({ http });
-        const index: RuleTypeIndex = new Map();
-        for (const ruleTypeItem of ruleTypesResult) {
-          index.set(ruleTypeItem.id, ruleTypeItem);
-        }
-        if (rule.ruleTypeId && index.has(rule.ruleTypeId)) {
-          setDefaultActionGroupId(index.get(rule.ruleTypeId)!.defaultActionGroupId);
-        }
-        setRuleTypeIndex(index);
+    if (rule.ruleTypeId && ruleTypeIndex?.has(rule.ruleTypeId)) {
+      setDefaultActionGroupId(ruleTypeIndex.get(rule.ruleTypeId)!.defaultActionGroupId);
+    }
 
-        const availableRuleTypesResult = getAvailableRuleTypes(ruleTypesResult);
-        setAvailableRuleTypes(availableRuleTypesResult);
-
-        const solutionsResult = availableRuleTypesResult.reduce(
-          (result: Map<string, string>, ruleTypeItem) => {
-            if (!result.has(ruleTypeItem.ruleType.producer)) {
-              result.set(
-                ruleTypeItem.ruleType.producer,
-                (kibanaFeatures
-                  ? getProducerFeatureName(ruleTypeItem.ruleType.producer, kibanaFeatures)
-                  : capitalize(ruleTypeItem.ruleType.producer)) ??
-                  capitalize(ruleTypeItem.ruleType.producer)
-              );
+    const getAvailableRuleTypes = (ruleTypesResult: RuleType[]) =>
+      ruleTypeRegistry
+        .list()
+        .reduce(
+          (
+            arr: Array<{ ruleType: RuleType; ruleTypeModel: RuleTypeModel }>,
+            ruleTypeRegistryItem: RuleTypeModel
+          ) => {
+            const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
+            if (ruleType) {
+              arr.push({
+                ruleType,
+                ruleTypeModel: ruleTypeRegistryItem,
+              });
             }
-            return result;
+            return arr;
           },
-          new Map()
+          []
+        )
+        .filter((item) => item.ruleType && hasAllPrivilege(rule, item.ruleType))
+        .filter((item) =>
+          rule.consumer === ALERTS_FEATURE_ID
+            ? !item.ruleTypeModel.requiresAppContext
+            : item.ruleType!.producer === rule.consumer
         );
-        setSolutions(
-          new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
-        );
-      } catch (e) {
-        toasts.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.ruleForm.unableToLoadRuleTypesMessage',
-            { defaultMessage: 'Unable to load rule types' }
-          ),
-        });
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
+    setAvailableRuleTypes(availableRuleTypesResult);
+
+    const solutionsResult = availableRuleTypesResult.reduce(
+      (result: Map<string, string>, ruleTypeItem) => {
+        if (!result.has(ruleTypeItem.ruleType.producer)) {
+          result.set(
+            ruleTypeItem.ruleType.producer,
+            (kibanaFeatures
+              ? getProducerFeatureName(ruleTypeItem.ruleType.producer, kibanaFeatures)
+              : capitalize(ruleTypeItem.ruleType.producer)) ??
+              capitalize(ruleTypeItem.ruleType.producer)
+          );
+        }
+        return result;
+      },
+      new Map()
+    );
+    setSolutions(
+      new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
+    );
+  }, [ruleTypes, ruleTypeIndex, rule.ruleTypeId, kibanaFeatures, rule, ruleTypeRegistry]);
+
+  useEffect(() => {
+    if (loadRuleTypesError) {
+      toasts.addDanger({
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleForm.unableToLoadRuleTypesMessage',
+          { defaultMessage: 'Unable to load rule types' }
+        ),
+      });
+    }
+  }, [loadRuleTypesError, toasts]);
 
   useEffect(() => {
     setRuleTypeModel(rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null);
@@ -211,15 +241,10 @@ export const RuleForm = ({
     if (rule.schedule.interval) {
       const interval = getDurationNumberInItsUnit(rule.schedule.interval);
       const intervalUnit = getDurationUnitValue(rule.schedule.interval);
-
-      if (interval !== defaultScheduleInterval) {
-        setRuleInterval(interval);
-      }
-      if (intervalUnit !== defaultScheduleIntervalUnit) {
-        setRuleIntervalUnit(intervalUnit);
-      }
+      setRuleInterval(interval);
+      setRuleIntervalUnit(intervalUnit);
     }
-  }, [rule.schedule.interval]);
+  }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
 
   const setRuleProperty = useCallback(
     <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
@@ -276,31 +301,6 @@ export const RuleForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableRuleTypes, searchText, JSON.stringify(solutionsFilter)]);
 
-  const getAvailableRuleTypes = (ruleTypesResult: RuleType[]) =>
-    ruleTypeRegistry
-      .list()
-      .reduce(
-        (
-          arr: Array<{ ruleType: RuleType; ruleTypeModel: RuleTypeModel }>,
-          ruleTypeRegistryItem: RuleTypeModel
-        ) => {
-          const ruleType = ruleTypesResult.find((item) => ruleTypeRegistryItem.id === item.id);
-          if (ruleType) {
-            arr.push({
-              ruleType,
-              ruleTypeModel: ruleTypeRegistryItem,
-            });
-          }
-          return arr;
-        },
-        []
-      )
-      .filter((item) => item.ruleType && hasAllPrivilege(rule, item.ruleType))
-      .filter((item) =>
-        rule.consumer === ALERTS_FEATURE_ID
-          ? !item.ruleTypeModel.requiresAppContext
-          : item.ruleType!.producer === rule.consumer
-      );
   const selectedRuleType = rule?.ruleTypeId ? ruleTypeIndex?.get(rule?.ruleTypeId) : undefined;
   const recoveryActionGroup = selectedRuleType?.recoveryActionGroup?.id;
   const getDefaultActionParams = useCallback(
@@ -524,6 +524,7 @@ export const RuleForm = ({
               metadata={metadata}
               charts={charts}
               data={data}
+              unifiedSearch={unifiedSearch}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -591,6 +592,44 @@ export const RuleForm = ({
       />
     </>
   );
+
+  const getHelpTextForInterval = () => {
+    if (!config || !config.minimumScheduleInterval) {
+      return '';
+    }
+
+    // No help text if there is an error
+    if (errors['schedule.interval'].length > 0) {
+      return '';
+    }
+
+    if (config.minimumScheduleInterval.enforce) {
+      // Always show help text if minimum is enforced
+      return i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
+        defaultMessage: 'Interval must be at least {minimum}.',
+        values: {
+          minimum: formatDuration(config.minimumScheduleInterval.value, true),
+        },
+      });
+    } else if (
+      rule.schedule.interval &&
+      parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
+    ) {
+      // Only show help text if current interval is less than suggested
+      return i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpSuggestionText',
+        {
+          defaultMessage:
+            'Intervals less than {minimum} are not recommended due to performance considerations.',
+          values: {
+            minimum: formatDuration(config.minimumScheduleInterval.value, true),
+          },
+        }
+      );
+    } else {
+      return '';
+    }
+  };
 
   return (
     <EuiForm>
@@ -665,17 +704,19 @@ export const RuleForm = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
+            data-test-subj="intervalFormRow"
             display="rowCompressed"
+            helpText={getHelpTextForInterval()}
             label={labelForRuleChecked}
-            isInvalid={errors.interval.length > 0}
-            error={errors.interval}
+            isInvalid={errors['schedule.interval'].length > 0}
+            error={errors['schedule.interval']}
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <EuiFieldNumber
                   fullWidth
                   min={1}
-                  isInvalid={errors.interval.length > 0}
+                  isInvalid={errors['schedule.interval'].length > 0}
                   value={ruleInterval || ''}
                   name="interval"
                   data-test-subj="intervalInput"

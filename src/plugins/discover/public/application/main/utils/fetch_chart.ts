@@ -7,14 +7,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
+import { lastValueFrom } from 'rxjs';
 import {
   DataPublicPluginStart,
   isCompleteResponse,
   search,
   ISearchSource,
+  tabifyAggResponse,
 } from '../../../../../data/public';
 import { getChartAggConfigs, getDimensions } from './index';
-import { tabifyAggResponse } from '../../../../../data/common';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from './use_saved_search';
 import { FetchDeps } from './fetch_all';
@@ -40,11 +41,7 @@ export function fetchChart(
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
 
   const executionContext = {
-    type: 'application',
-    name: 'discover',
     description: 'fetch chart data and total hits',
-    url: window.location.pathname,
-    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource
@@ -81,7 +78,7 @@ export function fetchChart(
       })
     );
 
-  return fetch$.toPromise();
+  return lastValueFrom(fetch$);
 }
 
 export function updateSearchSource(

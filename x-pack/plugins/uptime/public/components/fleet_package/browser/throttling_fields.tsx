@@ -7,12 +7,19 @@
 
 import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSwitch, EuiSpacer, EuiFormRow, EuiFieldNumber, EuiText } from '@elastic/eui';
+import {
+  EuiSwitch,
+  EuiSpacer,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiText,
+  EuiCallOut,
+} from '@elastic/eui';
 import { DescribedFormGroupWithWrap } from '../common/described_form_group_with_wrap';
 
 import { OptionalLabel } from '../optional_label';
-import { useBrowserAdvancedFieldsContext } from '../contexts';
-import { Validation, ConfigKey } from '../types';
+import { useBrowserAdvancedFieldsContext, usePolicyConfigContext } from '../contexts';
+import { Validation, ConfigKey, BandwidthLimitKey } from '../types';
 
 interface Props {
   validate: Validation;
@@ -26,8 +33,68 @@ type ThrottlingConfigs =
   | ConfigKey.UPLOAD_SPEED
   | ConfigKey.LATENCY;
 
+export const ThrottlingDisabledCallout = () => {
+  return (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.title"
+          defaultMessage="Automatic cap"
+        />
+      }
+      color="warning"
+      iconType="alert"
+    >
+      <FormattedMessage
+        id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.message"
+        defaultMessage="When disabling throttling, your monitor will still have its bandwidth capped by the configurations of the Synthetics Nodes in which it's running."
+      />
+    </EuiCallOut>
+  );
+};
+
+export const ThrottlingExceededCallout = () => {
+  return (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.title"
+          defaultMessage="You've exceeded the Synthetics Node bandwidth limits"
+        />
+      }
+      color="warning"
+      iconType="alert"
+    >
+      <FormattedMessage
+        id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.message"
+        defaultMessage="When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped."
+      />
+    </EuiCallOut>
+  );
+};
+
+export const ThrottlingExceededMessage = ({
+  throttlingField,
+  limit,
+}: {
+  throttlingField: string;
+  limit: number;
+}) => {
+  return (
+    <FormattedMessage
+      id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.throttling_exceeded.message"
+      defaultMessage="You have exceeded the { throttlingField } limit for Synthetic Nodes. The { throttlingField } value can't be larger than { limit }Mbps."
+      values={{ throttlingField, limit }}
+    />
+  );
+};
+
 export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onFieldBlur }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
+  const { runsOnService, throttling } = usePolicyConfigContext();
+
+  const maxDownload = throttling[BandwidthLimitKey.DOWNLOAD];
+  const maxUpload = throttling[BandwidthLimitKey.UPLOAD];
 
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ThrottlingConfigs }) => {
@@ -36,7 +103,13 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
     [setFields]
   );
 
-  const throttlingInputs = fields[ConfigKey.IS_THROTTLING_ENABLED] ? (
+  const exceedsDownloadLimits =
+    runsOnService && parseFloat(fields[ConfigKey.DOWNLOAD_SPEED]) > maxDownload;
+  const exceedsUploadLimits =
+    runsOnService && parseFloat(fields[ConfigKey.UPLOAD_SPEED]) > maxUpload;
+  const isThrottlingEnabled = fields[ConfigKey.IS_THROTTLING_ENABLED];
+
+  const throttlingInputs = isThrottlingEnabled ? (
     <>
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -47,12 +120,16 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
           />
         }
         labelAppend={<OptionalLabel />}
-        isInvalid={!!validate[ConfigKey.DOWNLOAD_SPEED]?.(fields)}
+        isInvalid={!!validate[ConfigKey.DOWNLOAD_SPEED]?.(fields) || exceedsDownloadLimits}
         error={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.download.error"
-            defaultMessage="Download speed must be greater than zero."
-          />
+          exceedsDownloadLimits ? (
+            <ThrottlingExceededMessage throttlingField="download" limit={maxDownload} />
+          ) : (
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.download.error"
+              defaultMessage="Download speed must be greater than zero."
+            />
+          )
         }
       >
         <EuiFieldNumber
@@ -82,12 +159,16 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
           />
         }
         labelAppend={<OptionalLabel />}
-        isInvalid={!!validate[ConfigKey.UPLOAD_SPEED]?.(fields)}
+        isInvalid={!!validate[ConfigKey.UPLOAD_SPEED]?.(fields) || exceedsUploadLimits}
         error={
-          <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.upload.error"
-            defaultMessage="Upload speed must be greater than zero."
-          />
+          exceedsUploadLimits ? (
+            <ThrottlingExceededMessage throttlingField="upload" limit={maxUpload} />
+          ) : (
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.upload.error"
+              defaultMessage="Upload speed must be greater than zero."
+            />
+          )
         }
       >
         <EuiFieldNumber
@@ -144,7 +225,12 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
         />
       </EuiFormRow>
     </>
-  ) : null;
+  ) : (
+    <>
+      <EuiSpacer />
+      <ThrottlingDisabledCallout />
+    </>
+  );
 
   return (
     <DescribedFormGroupWithWrap
@@ -183,6 +269,12 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
         }
         onBlur={() => onFieldBlur?.(ConfigKey.IS_THROTTLING_ENABLED)}
       />
+      {isThrottlingEnabled && (exceedsDownloadLimits || exceedsUploadLimits) ? (
+        <>
+          <EuiSpacer />
+          <ThrottlingExceededCallout />
+        </>
+      ) : null}
       {throttlingInputs}
     </DescribedFormGroupWithWrap>
   );

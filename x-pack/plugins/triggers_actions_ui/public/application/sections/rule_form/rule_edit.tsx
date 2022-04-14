@@ -24,7 +24,14 @@ import {
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Rule, RuleFlyoutCloseReason, RuleEditProps, IErrorObject, RuleType } from '../../../types';
+import {
+  Rule,
+  RuleFlyoutCloseReason,
+  RuleEditProps,
+  IErrorObject,
+  RuleType,
+  TriggersActionsUiConfig,
+} from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, ConcreteRuleReducer } from './rule_reducer';
@@ -35,6 +42,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
+import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 
 export const RuleEdit = ({
   initialRule,
@@ -60,6 +68,7 @@ export const RuleEdit = ({
   const [serverRuleType, setServerRuleType] = useState<RuleType<string, string> | undefined>(
     props.ruleType
   );
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
 
   const {
     http,
@@ -70,6 +79,12 @@ export const RuleEdit = ({
   };
 
   const ruleType = ruleTypeRegistry.get(rule.ruleTypeId);
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
 
   useEffect(() => {
     (async () => {
@@ -96,7 +111,7 @@ export const RuleEdit = ({
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
     rule as Rule,
     ruleType,
-    serverRuleType
+    config
   );
 
   const checkForChangesAndCloseFlyout = () => {
@@ -178,6 +193,7 @@ export const RuleEdit = ({
               )}
               <RuleForm
                 rule={rule}
+                config={config}
                 dispatch={dispatch}
                 errors={ruleErrors}
                 actionTypeRegistry={actionTypeRegistry}

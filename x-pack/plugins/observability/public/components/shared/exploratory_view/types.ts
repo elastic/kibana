@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PaletteOutput } from 'src/plugins/charts/public';
-import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
-import {
+import type { PaletteOutput } from '@kbn/coloring';
+import type { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import type {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -16,8 +16,8 @@ import {
   YConfig,
 } from '../../../../../lens/public';
 
-import { PersistableFilter } from '../../../../../lens/common';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { PersistableFilter } from '../../../../../lens/common';
+import type { DataView } from '../../../../../../../src/plugins/data_views/common';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -65,6 +65,7 @@ export interface SeriesConfig {
         filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
       }
   >;
+  textDefinitionFields?: string[];
   metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
@@ -75,6 +76,7 @@ export interface SeriesConfig {
 }
 
 export type URLReportDefinition = Record<string, string[]>;
+export type URLTextReportDefinition = Record<string, string>;
 
 export interface SeriesUrl {
   name: string;
@@ -88,6 +90,7 @@ export interface SeriesUrl {
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
+  textReportDefinitions?: URLTextReportDefinition;
   selectedMetricField?: string;
   hidden?: boolean;
   color?: string;
@@ -102,7 +105,7 @@ export interface UrlFilter {
 }
 
 export interface ConfigProps {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   series?: SeriesUrl;
 }
 

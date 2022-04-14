@@ -10,7 +10,7 @@ import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -18,7 +18,6 @@ import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
-// @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
 moment.suppressDeprecationWarnings = true;
 
 import {
@@ -43,7 +42,7 @@ import {
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
-  isRACAlert,
+  isDetectionAlert,
   getField,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
@@ -426,10 +425,10 @@ describe('utils', () => {
   });
 
   describe('#getListsClient', () => {
-    let alertServices: AlertServicesMock;
+    let alertServices: RuleExecutorServicesMock;
 
     beforeEach(() => {
-      alertServices = alertsMock.createAlertServices();
+      alertServices = alertsMock.createRuleExecutorServices();
     });
 
     test('it successfully returns list and exceptions list client', async () => {
@@ -757,12 +756,12 @@ describe('utils', () => {
 
       expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
       });
     });
 
@@ -797,12 +796,12 @@ describe('utils', () => {
 
       expect(res).toBeTruthy();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatus['partial failure'],
         message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.',
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       });
     });
   });
@@ -1548,10 +1547,10 @@ describe('utils', () => {
     });
   });
 
-  describe('isRACAlert', () => {
+  describe('isDetectionAlert', () => {
     test('alert with dotted fields returns true', () => {
       expect(
-        isRACAlert({
+        isDetectionAlert({
           [ALERT_UUID]: '123',
         })
       ).toEqual(true);
@@ -1559,7 +1558,7 @@ describe('utils', () => {
 
     test('alert with nested fields returns true', () => {
       expect(
-        isRACAlert({
+        isDetectionAlert({
           kibana: {
             alert: { uuid: '123' },
           },
@@ -1568,31 +1567,31 @@ describe('utils', () => {
     });
 
     test('undefined returns false', () => {
-      expect(isRACAlert(undefined)).toEqual(false);
+      expect(isDetectionAlert(undefined)).toEqual(false);
     });
 
     test('null returns false', () => {
-      expect(isRACAlert(null)).toEqual(false);
+      expect(isDetectionAlert(null)).toEqual(false);
     });
 
     test('number returns false', () => {
-      expect(isRACAlert(5)).toEqual(false);
+      expect(isDetectionAlert(5)).toEqual(false);
     });
 
     test('string returns false', () => {
-      expect(isRACAlert('a')).toEqual(false);
+      expect(isDetectionAlert('a')).toEqual(false);
     });
 
     test('array returns false', () => {
-      expect(isRACAlert([])).toEqual(false);
+      expect(isDetectionAlert([])).toEqual(false);
     });
 
     test('empty object returns false', () => {
-      expect(isRACAlert({})).toEqual(false);
+      expect(isDetectionAlert({})).toEqual(false);
     });
 
     test('alert with null value returns false', () => {
-      expect(isRACAlert({ 'kibana.alert.uuid': null })).toEqual(false);
+      expect(isDetectionAlert({ 'kibana.alert.uuid': null })).toEqual(false);
     });
   });
 

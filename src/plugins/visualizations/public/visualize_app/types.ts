@@ -37,8 +37,8 @@ import type {
 import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import type { Filter } from '@kbn/es-query';
 import type { Query, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import type { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import type { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
@@ -89,13 +89,13 @@ export interface VisualizeServices extends CoreStart {
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;
   share?: SharePluginStart;
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
-  savedObjectsPublic: SavedObjectsStart;
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;

@@ -13,17 +13,23 @@ export type OutputType = typeof outputType;
 export interface NewOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_preconfigured?: boolean;
   name: string;
   type: ValueOf<OutputType>;
   hosts?: string[];
   ca_sha256?: string;
   ca_trusted_fingerprint?: string;
   config_yaml?: string;
-  is_preconfigured?: boolean;
+  ssl?: {
+    certificate_authorities?: string[];
+    certificate?: string;
+    key?: string;
+  };
 }
 
 export type OutputSOAttributes = NewOutput & {
   output_id?: string;
+  ssl?: string; // encrypted ssl field
 };
 
 export type Output = NewOutput & {

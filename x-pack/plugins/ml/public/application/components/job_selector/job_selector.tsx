@@ -76,7 +76,7 @@ export function getInitialGroupsMap(selectedGroups: GroupObj[]): GroupsMap {
   return map;
 }
 
-interface JobSelectorProps {
+export interface JobSelectorProps {
   dateFormatTz: string;
   singleSelection: boolean;
   timeseriesOnly: boolean;

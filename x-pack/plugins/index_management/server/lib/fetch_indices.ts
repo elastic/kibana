@@ -31,7 +31,6 @@ async function fetchIndicesCall(
       '*.data_stream',
     ],
     // for better performance only compute aliases and settings of indices but not mappings
-    // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
     features: ['aliases', 'settings'],
   });
 
@@ -51,9 +50,7 @@ async function fetchIndicesCall(
     const indexStats = indicesStats[indexName];
     const aliases = Object.keys(indexData.aliases!);
     return {
-      // @ts-expect-error new property https://github.com/elastic/elasticsearch-specification/issues/1253
       health: indexStats?.health,
-      // @ts-expect-error new property https://github.com/elastic/elasticsearch-specification/issues/1253
       status: indexStats?.status,
       name: indexName,
       uuid: indexStats?.uuid,

@@ -29,10 +29,9 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkTopCountriesQuery';
+export const ID = 'networkTopCountriesQuery';
 
 export interface NetworkTopCountriesArgs {
   id: string;
@@ -76,7 +75,6 @@ export const useNetworkTopCountries = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [networkTopCountriesRequest, setHostRequest] =
     useState<NetworkTopCountriesRequestOptions | null>(null);
@@ -170,45 +168,27 @@ export const useNetworkTopCountries = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
-        factoryQueryType: NetworkQueries.topCountries,
-        indices: indexNames,
-        filterQuery,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-      });
-
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        factoryQueryType,
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkQueries.topCountries,
         filterQuery: createFilter(filterQuery),
         flowTarget,
         ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
-        timerange,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    indexNames,
-    endDate,
-    filterQuery,
-    ip,
-    limit,
-    startDate,
-    sort,
-    flowTarget,
-    getTransformChangesIfTheyExist,
-  ]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, flowTarget]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);
@@ -217,6 +197,14 @@ export const useNetworkTopCountries = ({
       abortCtrl.current.abort();
     };
   }, [networkTopCountriesRequest, networkTopCountriesSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkTopCountriesResponse];
 };

@@ -10,8 +10,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { nodeTypes } from '@kbn/es-query';
-import { esKuery } from '../../../../../../src/plugins/data/server';
+import { nodeTypes, fromKueryExpression } from '@kbn/es-query';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
@@ -38,6 +37,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
@@ -287,6 +287,37 @@ describe('find()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.find({ options: { sortField: 'name' } });
     expect(jest.requireMock('../lib/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
+  });
+
+  test('should translate filter/sort/search on params to mapped_params', async () => {
+    const filter = fromKueryExpression(
+      '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
+    );
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
+    const rulesClient = new RulesClient(rulesClientParams);
+    await rulesClient.find({
+      options: {
+        sortField: 'params.risk_score',
+        searchFields: ['params.risk_score', 'params.severity'],
+        filter: 'alert.attributes.params.risk_score > 50',
+      },
+      excludeFromPublicApi: true,
+    });
+
+    const findCallParams = unsecuredSavedObjectsClient.find.mock.calls[0][0];
+
+    expect(findCallParams.searchFields).toEqual([
+      'mapped_params.risk_score',
+      'mapped_params.severity',
+    ]);
+
+    expect(findCallParams.filter.arguments[0].arguments[0].value).toEqual(
+      'alert.attributes.mapped_params.risk_score'
+    );
   });
 
   test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
@@ -618,7 +649,7 @@ describe('find()', () => {
 
   describe('authorization', () => {
     test('ensures user is query filter types down to those the user is authorized to find', async () => {
-      const filter = esKuery.fromKueryExpression(
+      const filter = fromKueryExpression(
         '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
       );
       authorization.getFindAuthorizationFilter.mockResolvedValue({
@@ -631,7 +662,7 @@ describe('find()', () => {
 
       const [options] = unsecuredSavedObjectsClient.find.mock.calls[0];
       expect(options.filter).toEqual(
-        nodeTypes.function.buildNode('and', [esKuery.fromKueryExpression('someTerm'), filter])
+        nodeTypes.function.buildNode('and', [fromKueryExpression('someTerm'), filter])
       );
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledTimes(1);
     });

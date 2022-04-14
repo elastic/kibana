@@ -15,14 +15,16 @@ import {
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   CommonFields,
   ConfigKey,
   FetchMonitorManagementListQueryArgs,
   ICMPSimpleFields,
   MonitorFields,
+  Ping,
   ServiceLocations,
-  SyntheticsMonitorWithId,
+  EncryptedSyntheticsMonitorWithId,
   TCPSimpleFields,
 } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
@@ -33,7 +35,6 @@ import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface MonitorManagementListPageState {
   pageIndex: number;
@@ -47,6 +48,7 @@ interface Props {
   monitorList: MonitorManagementListState;
   onPageStateChange: (state: MonitorManagementListPageState) => void;
   onUpdate: () => void;
+  errorSummaries?: Ping[];
 }
 
 export const MonitorManagementList = ({
@@ -58,13 +60,18 @@ export const MonitorManagementList = ({
   },
   onPageStateChange,
   onUpdate,
+  errorSummaries,
 }: Props) => {
   const { basePath } = useContext(UptimeSettingsContext);
   const isXl = useBreakpoints().up('xl');
 
   const { total } = list as MonitorManagementListState['list'];
-  const monitors: SyntheticsMonitorWithId[] = useMemo(
-    () => list.monitors.map((monitor) => ({ ...monitor.attributes, id: monitor.id })),
+  const monitors: EncryptedSyntheticsMonitorWithId[] = useMemo(
+    () =>
+      list.monitors.map((monitor) => ({
+        ...monitor.attributes,
+        id: monitor.id,
+      })),
     [list.monitors]
   );
 
@@ -72,7 +79,7 @@ export const MonitorManagementList = ({
     ({
       page = { index: 0, size: 10 },
       sort = { field: ConfigKey.NAME, direction: 'asc' },
-    }: Criteria<SyntheticsMonitorWithId>) => {
+    }: Criteria<EncryptedSyntheticsMonitorWithId>) => {
       const { index, size } = page;
       const { field, direction } = sort;
 
@@ -90,12 +97,12 @@ export const MonitorManagementList = ({
     pageIndex: pageIndex - 1, // page index for EuiBasicTable is base 0
     pageSize,
     totalItemCount: total || 0,
-    pageSizeOptions: [10, 25, 50, 100],
+    pageSizeOptions: [5, 10, 25, 50, 100],
   };
 
-  const sorting: EuiTableSortingType<SyntheticsMonitorWithId> = {
+  const sorting: EuiTableSortingType<EncryptedSyntheticsMonitorWithId> = {
     sort: {
-      field: sortField as keyof SyntheticsMonitorWithId,
+      field: sortField as keyof EncryptedSyntheticsMonitorWithId,
       direction: sortOrder,
     },
   };
@@ -110,7 +117,7 @@ export const MonitorManagementList = ({
         defaultMessage: 'Monitor name',
       }),
       sortable: true,
-      render: (name: string, { id }: SyntheticsMonitorWithId) => (
+      render: (name: string, { id }: EncryptedSyntheticsMonitorWithId) => (
         <EuiLink
           href={`${basePath}/app/uptime/monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
         >
@@ -168,7 +175,7 @@ export const MonitorManagementList = ({
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),
-      render: (_enabled: boolean, monitor: SyntheticsMonitorWithId) => (
+      render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
         <MonitorEnabled
           id={monitor.id}
           monitor={monitor}
@@ -182,23 +189,25 @@ export const MonitorManagementList = ({
       name: i18n.translate('xpack.uptime.monitorManagement.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (fields: SyntheticsMonitorWithId) => (
+      render: (fields: EncryptedSyntheticsMonitorWithId) => (
         <Actions
           id={fields.id}
           name={fields[ConfigKey.NAME]}
           isDisabled={!canEdit}
           onUpdate={onUpdate}
+          errorSummaries={errorSummaries}
+          monitors={list.monitors}
         />
       ),
     },
-  ] as Array<EuiBasicTableColumn<SyntheticsMonitorWithId>>;
+  ] as Array<EuiBasicTableColumn<EncryptedSyntheticsMonitorWithId>>;
 
   return (
     <EuiPanel hasBorder>
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={i18n.translate('xpack.uptime.monitorManagement.monitorList.title', {
-          defaultMessage: 'Monitor management list',
+          defaultMessage: 'Monitor Management list',
         })}
         error={error?.message}
         loading={loading}

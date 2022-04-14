@@ -9,12 +9,12 @@ import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/common';
-import {
-  FetchLogSourceConfigurationError,
-  FetchLogSourceStatusError,
-  ResolveLogSourceConfigurationError,
-} from '../../../common/log_sources';
 import { useLinkProps } from '../../../../observability/public';
+import {
+  FetchLogViewStatusError,
+  FetchLogViewError,
+  ResolveLogViewError,
+} from '../../../common/log_views';
 import { LogsPageTemplate } from '../../pages/logs/page_template';
 
 export const LogSourceErrorPage: React.FC<{
@@ -72,7 +72,7 @@ export const LogSourceErrorPage: React.FC<{
 };
 
 const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
-  if (error instanceof ResolveLogSourceConfigurationError) {
+  if (error instanceof ResolveLogViewError) {
     return (
       <LogSourceErrorCallout
         title={
@@ -97,7 +97,7 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
         )}
       </LogSourceErrorCallout>
     );
-  } else if (error instanceof FetchLogSourceConfigurationError) {
+  } else if (error instanceof FetchLogViewError) {
     return (
       <LogSourceErrorCallout
         title={
@@ -110,7 +110,7 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
         {`${error.cause?.message ?? error.message}`}
       </LogSourceErrorCallout>
     );
-  } else if (error instanceof FetchLogSourceStatusError) {
+  } else if (error instanceof FetchLogViewStatusError) {
     return (
       <LogSourceErrorCallout
         title={

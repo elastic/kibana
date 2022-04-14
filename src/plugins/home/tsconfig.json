@@ -10,12 +10,11 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts"],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
     { "path": "../custom_integrations/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../share/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../telemetry/tsconfig.json" }
+    { "path": "../usage_collection/tsconfig.json" }
   ]
 }

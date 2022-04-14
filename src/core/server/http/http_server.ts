@@ -19,8 +19,9 @@ import {
 import agent from 'elastic-apm-node';
 
 import type { Duration } from 'moment';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import apm from 'elastic-apm-node';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import type { InternalExecutionContextSetup } from '../execution_context';
@@ -222,7 +223,7 @@ export class HttpServer {
     if (hasStarted) {
       this.log.debug('stopping http server');
 
-      const shutdownTimeout = await this.shutdownTimeout$.pipe(take(1)).toPromise();
+      const shutdownTimeout = await firstValueFrom(this.shutdownTimeout$.pipe(take(1)));
       await this.server.stop({ timeout: shutdownTimeout.asMilliseconds() });
 
       this.log.debug(`http server stopped`);
@@ -338,7 +339,11 @@ export class HttpServer {
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
-      if (parentContext) executionContext?.set(parentContext);
+
+      if (executionContext && parentContext) {
+        executionContext.set(parentContext);
+        apm.addLabels(executionContext.getAsLabels());
+      }
 
       executionContext?.setRequestId(requestId);
 

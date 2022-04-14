@@ -35,6 +35,10 @@ import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
+import { useExecutionContext } from '../../../../kibana_react/public';
+
+const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
+const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -53,7 +57,6 @@ export const DashboardListing = ({
     services: {
       core,
       data,
-      savedObjects,
       savedDashboards,
       savedObjectsClient,
       savedObjectsTagging,
@@ -66,6 +69,11 @@ export const DashboardListing = ({
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'list',
+  });
 
   // Set breadcrumbs useEffect
   useEffect(() => {
@@ -99,7 +107,8 @@ export const DashboardListing = ({
   }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
 
   const { showWriteControls } = dashboardCapabilities;
-  const listingLimit = savedObjects.settings.getListingLimit();
+  const listingLimit = core.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = core.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';
 
   const tableColumns = useMemo(
@@ -280,7 +289,7 @@ export const DashboardListing = ({
     <TableListView
       createItem={!showWriteControls ? undefined : createItem}
       deleteItems={!showWriteControls ? undefined : deleteItems}
-      initialPageSize={savedObjects.settings.getPerPage()}
+      initialPageSize={initialPageSize}
       editItem={!showWriteControls ? undefined : editItem}
       initialFilter={initialFilter ?? defaultFilter}
       toastNotifications={core.notifications.toasts}
@@ -298,6 +307,7 @@ export const DashboardListing = ({
         tableColumns,
       }}
       theme={core.theme}
+      application={core.application}
     >
       <DashboardUnsavedListing
         redirectTo={redirectTo}

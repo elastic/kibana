@@ -12,7 +12,7 @@ import { XyToolbar } from '.';
 import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../../types';
-import { State } from '../types';
+import { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
@@ -63,7 +63,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'bar' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'bar' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
@@ -79,7 +84,12 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           state={{
             ...state,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
@@ -99,7 +109,12 @@ describe('XY Config panels', () => {
           state={{
             ...state,
             hideEndzones: true,
-            layers: [{ ...state.layers[0], yConfig: [{ axisMode: 'right', forAccessor: 'foo' }] }],
+            layers: [
+              {
+                ...state.layers[0],
+                yConfig: [{ axisMode: 'right', forAccessor: 'foo' }],
+              } as XYDataLayerConfig,
+            ],
           }}
         />
       );
@@ -205,7 +220,10 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           accessor="bar"
           groupId="left"
-          state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' } as XYDataLayerConfig],
+          }}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -245,7 +263,19 @@ describe('XY Config panels', () => {
     });
 
     test('sets the color of a dimension to the color from palette service if not set explicitly', () => {
-      const state = testState();
+      const state = {
+        ...testState(),
+        layers: [
+          {
+            seriesType: 'bar',
+            layerType: layerTypes.DATA,
+            layerId: 'first',
+            splitAccessor: undefined,
+            xAccessor: 'foo',
+            accessors: ['bar'],
+          },
+        ],
+      } as XYState;
       const component = mount(
         <DimensionEditor
           layerId={state.layers[0].layerId}
@@ -262,19 +292,7 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           accessor="bar"
           groupId="left"
-          state={{
-            ...state,
-            layers: [
-              {
-                seriesType: 'bar',
-                layerType: layerTypes.DATA,
-                layerId: 'first',
-                splitAccessor: undefined,
-                xAccessor: 'foo',
-                accessors: ['bar'],
-              },
-            ],
-          }}
+          state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
@@ -285,7 +303,21 @@ describe('XY Config panels', () => {
     });
 
     test('uses the overwrite color if set', () => {
-      const state = testState();
+      const state = {
+        ...testState(),
+        layers: [
+          {
+            seriesType: 'bar',
+            layerType: layerTypes.DATA,
+            layerId: 'first',
+            splitAccessor: undefined,
+            xAccessor: 'foo',
+            accessors: ['bar'],
+            yConfig: [{ forAccessor: 'bar', color: 'red' }],
+          },
+        ],
+      } as XYState;
+
       const component = mount(
         <DimensionEditor
           layerId={state.layers[0].layerId}
@@ -302,20 +334,7 @@ describe('XY Config panels', () => {
           setState={jest.fn()}
           accessor="bar"
           groupId="left"
-          state={{
-            ...state,
-            layers: [
-              {
-                seriesType: 'bar',
-                layerType: layerTypes.DATA,
-                layerId: 'first',
-                splitAccessor: undefined,
-                xAccessor: 'foo',
-                accessors: ['bar'],
-                yConfig: [{ forAccessor: 'bar', color: 'red' }],
-              },
-            ],
-          }}
+          state={state}
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}

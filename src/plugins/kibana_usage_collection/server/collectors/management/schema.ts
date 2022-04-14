@@ -10,11 +10,6 @@ import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { UsageStats } from './types';
 
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
-  // sensitive
-  'timelion:quandl.key': {
-    type: 'keyword',
-    _meta: { description: 'Default value of the setting was changed.' },
-  },
   'securitySolution:defaultIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -34,10 +29,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'notifications:banner': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  'timelion:graphite.url': {
-    type: 'keyword',
-    _meta: { description: 'Default value of the setting changed.' },
   },
   'xpackDashboardMode:roles': {
     type: 'keyword',
@@ -124,6 +115,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableCcsWarning': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:includeFrozen': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -172,7 +167,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -433,6 +427,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableInfrastructureView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableServiceGroups': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

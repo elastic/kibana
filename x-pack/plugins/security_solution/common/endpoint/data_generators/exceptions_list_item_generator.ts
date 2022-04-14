@@ -14,9 +14,10 @@ import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+  ENDPOINT_BLOCKLISTS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { BaseDataGenerator } from './base_data_generator';
-import { ConditionEntryField } from '../types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from '../service/artifacts/constants';
 
 /** Utility that removes null and undefined from a Type's property value */
@@ -247,6 +248,86 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
   ): UpdateExceptionListItemSchemaWithNonNullProps {
     return {
       ...exceptionItemToUpdateExceptionItem(this.generateHostIsolationException()),
+      ...overrides,
+    };
+  }
+
+  generateBlocklist(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
+    const os = this.randomOSFamily() as ExceptionListItemSchema['os_types'][number];
+    const entriesList: CreateExceptionListItemSchema['entries'] = [
+      {
+        field: 'file.path',
+        value:
+          os === 'windows'
+            ? ['C:\\some\\path', 'C:\\some\\other\\path', 'C:\\yet\\another\\path']
+            : ['/some/path', 'some/other/path', 'yet/another/path'],
+        type: 'match_any',
+        operator: 'included',
+      },
+      {
+        field: 'file.hash.sha256',
+        value: [
+          'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
+          '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
+          'FCDE2B2EDBA56BF408601FB721FE9B5C338D10EE429EA04FAE5511B68FBF8FB9',
+        ],
+        type: 'match_any',
+        operator: 'included',
+      },
+      {
+        field: 'file.hash.md5',
+        value: ['741462ab431a22233C787BAAB9B653C7'],
+        type: 'match_any',
+        operator: 'included',
+      },
+      {
+        field: 'file.hash.sha1',
+        value: ['aedb279e378BED6C2DB3C9DC9e12ba635e0b391c'],
+        type: 'match_any',
+        operator: 'included',
+      },
+    ];
+
+    if (os === 'windows') {
+      entriesList.push({
+        field: 'file.Ext.code_signature',
+        entries: [
+          {
+            field: 'subject_name',
+            value: ['notsus.exe', 'verynotsus.exe', 'superlegit.exe'],
+            type: 'match_any',
+            operator: 'included',
+          },
+        ],
+        type: 'nested',
+      });
+    }
+
+    return this.generate({
+      name: `Blocklist ${this.randomString(5)}`,
+      list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
+      item_id: `generator_endpoint_blocklist_${this.seededUUIDv4()}`,
+      tags: [this.randomChoice([BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG])],
+      os_types: [os],
+      entries: [entriesList[this.randomN(entriesList.length)]],
+      ...overrides,
+    });
+  }
+
+  generateBlocklistForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToCreateExceptionItem(this.generateBlocklist()),
+      ...overrides,
+    };
+  }
+
+  generateBlocklistForUpdate(
+    overrides: Partial<UpdateExceptionListItemSchema> = {}
+  ): UpdateExceptionListItemSchemaWithNonNullProps {
+    return {
+      ...exceptionItemToUpdateExceptionItem(this.generateBlocklist()),
       ...overrides,
     };
   }

@@ -51,6 +51,9 @@ const pipeline = {
     {
       command: '.buildkite/pipelines/flaky_tests/runner.sh',
       label: 'Create pipeline',
+      agents: {
+        queue: 'kibana-default',
+      },
     },
   ],
 };

@@ -32,12 +32,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
     });
 
     it('should switch to gauge and render a gauge with default values', async () => {
       await PageObjects.lens.switchToVisualization('horizontalBullet', 'gauge');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('gaugeChart');
       const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
       const textContent = await elementWithInfo.getAttribute('textContent');
       expect(textContent).to.contain('Average of bytes'); // it gets default title
@@ -63,25 +63,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor-select', 'custom', {});
       await PageObjects.lens.retrySetValue('lnsToolbarGaugeLabelMinor', 'custom subtitle');
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_goalDimensionPanel > lns-empty-dimension'
       );
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_minDimensionPanel > lns-empty-dimension-suggested-value'
       );
       await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '1000');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.openDimensionEditor(
         'lnsGauge_maxDimensionPanel > lns-empty-dimension-suggested-value'
       );
       await PageObjects.lens.retrySetValue('lns-indexPattern-static_value-input', '25000');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('gaugeChart');
       await PageObjects.lens.closeDimensionEditor();
 
       const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');

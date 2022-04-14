@@ -22,6 +22,8 @@ import {
   severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
+  alias_purpose as savedObjectResolveAliasPurpose,
+  outcome as savedObjectResolveOutcome,
   SortOrder,
   author,
   building_block_type,
@@ -41,8 +43,8 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 
 /**
- * Params is an "record", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/alert.ts
+ * Params is an "record", since it is a type of RuleActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/rule.ts
  * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
@@ -115,8 +117,9 @@ export const RuleSchema = t.intersection([
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
-    outcome: t.union([t.literal('exactMatch'), t.literal('aliasMatch'), t.literal('conflict')]),
+    outcome: savedObjectResolveOutcome,
     alias_target_id: t.string,
+    alias_purpose: savedObjectResolveAliasPurpose,
     building_block_type,
     anomaly_threshold: t.number,
     filters: t.array(t.unknown),
@@ -216,19 +219,6 @@ export interface FetchRulesResponse {
 export interface FetchRuleProps {
   id: string;
   signal: AbortSignal;
-}
-
-export interface EnableRulesProps {
-  ids: string[];
-  enabled: boolean;
-}
-
-export interface DeleteRulesProps {
-  ids: string[];
-}
-
-export interface DuplicateRulesProps {
-  rules: Rule[];
 }
 
 export interface BulkActionProps<Action extends BulkAction> {

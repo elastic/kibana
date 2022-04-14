@@ -53,6 +53,8 @@ export enum RuleExecutionStatus {
 
 export const ruleExecutionStatus = enumeration('RuleExecutionStatus', RuleExecutionStatus);
 
+export type RuleExecutionStatusType = t.TypeOf<typeof ruleExecutionStatus>;
+
 export const ruleExecutionStatusOrder = PositiveInteger;
 export type RuleExecutionStatusOrder = t.TypeOf<typeof ruleExecutionStatusOrder>;
 
@@ -111,3 +113,42 @@ export const ruleExecutionEvent = t.type({
 });
 
 export type RuleExecutionEvent = t.TypeOf<typeof ruleExecutionEvent>;
+
+// -------------------------------------------------------------------------------------------------
+// Aggregate Rule execution events
+
+export const aggregateRuleExecutionEvent = t.type({
+  execution_uuid: t.string,
+  timestamp: IsoDateString,
+  duration_ms: t.number,
+  status: t.string,
+  message: t.string,
+  num_active_alerts: t.number,
+  num_new_alerts: t.number,
+  num_recovered_alerts: t.number,
+  num_triggered_actions: t.number,
+  num_succeeded_actions: t.number,
+  num_errored_actions: t.number,
+  total_search_duration_ms: t.number,
+  es_search_duration_ms: t.number,
+  schedule_delay_ms: t.number,
+  timed_out: t.boolean,
+  indexing_duration_ms: t.number,
+  search_duration_ms: t.number,
+  gap_duration_ms: t.number,
+  security_status: t.string,
+  security_message: t.string,
+});
+
+export type AggregateRuleExecutionEvent = t.TypeOf<typeof aggregateRuleExecutionEvent>;
+
+export const executionLogTableSortColumns = t.keyof({
+  timestamp: IsoDateString,
+  duration_ms: t.number,
+  gap_duration_ms: t.number,
+  indexing_duration_ms: t.number,
+  search_duration_ms: t.number,
+  schedule_delay_ms: t.number,
+});
+
+export type ExecutionLogTableSortColumns = t.TypeOf<typeof executionLogTableSortColumns>;

@@ -50,9 +50,10 @@ export interface IExecutionContextContainer {
 }
 
 function stringify(ctx: KibanaExecutionContext): string {
-  const stringifiedCtx = `${encodeURIComponent(ctx.type)}:${encodeURIComponent(
+  const encodeURIComponentIfNotEmpty = (val?: string) => encodeURIComponent(val || '');
+  const stringifiedCtx = `${encodeURIComponentIfNotEmpty(ctx.type)}:${encodeURIComponentIfNotEmpty(
     ctx.name
-  )}:${encodeURIComponent(ctx.id!)}`;
+  )}:${encodeURIComponentIfNotEmpty(ctx.id)}`;
   return ctx.child ? `${stringifiedCtx};${stringify(ctx.child)}` : stringifiedCtx;
 }
 

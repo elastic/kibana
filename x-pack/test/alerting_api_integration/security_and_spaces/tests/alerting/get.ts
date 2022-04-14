@@ -10,7 +10,7 @@ import { SuperTest, Test } from 'supertest';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
@@ -32,7 +32,7 @@ const getTestUtils = (
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -81,7 +81,12 @@ const getTestUtils = (
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
-                ...(describeType === 'internal' ? { monitoring: response.body.monitoring } : {}),
+                ...(describeType === 'internal'
+                  ? {
+                      monitoring: response.body.monitoring,
+                      snooze_end_time: response.body.snooze_end_time,
+                    }
+                  : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
@@ -96,7 +101,7 @@ const getTestUtils = (
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
@@ -143,7 +148,7 @@ const getTestUtils = (
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
@@ -201,7 +206,7 @@ const getTestUtils = (
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
               })
@@ -258,7 +263,7 @@ const getTestUtils = (
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 

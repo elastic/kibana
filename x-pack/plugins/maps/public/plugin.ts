@@ -12,6 +12,7 @@ import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public'
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import type { DashboardStart } from 'src/plugins/dashboard/public';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import type {
   AppMountParameters,
   CoreSetup,
@@ -21,7 +22,7 @@ import type {
 } from '../../../../src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MapInspectorView } from './inspector/map_inspector_view';
-import { setMapAppConfig, setStartServices } from './kibana_services';
+import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -51,6 +52,7 @@ import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import type { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
@@ -73,11 +75,18 @@ import {
 } from './legacy_visualizations';
 import type { SecurityPluginStart } from '../../security/public';
 import type { SpacesPluginStart } from '../../spaces/public';
+import type { CloudSetup } from '../../cloud/public';
+import type { LensPublicSetup } from '../../lens/public';
+
+import { setupLensChoroplethChart } from './lens';
+import { SharedUXPluginStart } from '../../../../src/plugins/shared_ux/public';
 
 export interface MapsPluginSetupDependencies {
+  cloud?: CloudSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
+  lens: LensPublicSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
@@ -88,7 +97,9 @@ export interface MapsPluginSetupDependencies {
 export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
   inspector: InspectorStartContract;
   licensing: LicensingPluginStart;
@@ -104,6 +115,7 @@ export interface MapsPluginStartDependencies {
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   usageCollection?: UsageCollectionSetup;
+  sharedUX: SharedUXPluginStart;
 }
 
 /**
@@ -130,7 +142,10 @@ export class MapsPlugin
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
+  public setup(
+    core: CoreSetup<MapsPluginStartDependencies, MapsPluginStart>,
+    plugins: MapsPluginSetupDependencies
+  ): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -174,6 +189,8 @@ export class MapsPlugin
       },
     });
 
+    setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
+
     // register wrapper around legacy tile_map and region_map visualizations
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
@@ -181,6 +198,8 @@ export class MapsPlugin
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualization(tileMapVisType);
+
+    setIsCloudEnabled(!!plugins.cloud?.isCloudEnabled);
 
     return {
       registerLayerWizard: registerLayerWizardExternal,

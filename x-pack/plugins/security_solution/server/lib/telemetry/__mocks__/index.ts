@@ -44,6 +44,7 @@ export const createMockTelemetryReceiver = (
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
+    fetchEndpointMetadata: jest.fn(),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 

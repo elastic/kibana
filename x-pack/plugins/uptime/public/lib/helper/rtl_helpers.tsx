@@ -12,7 +12,6 @@ import {
   render as reactTestLibRender,
   MatcherFunction,
   RenderOptions,
-  Nullish,
 } from '@testing-library/react';
 import { Router, Route } from 'react-router-dom';
 import { merge } from 'lodash';
@@ -134,6 +133,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
     storage: createMockStore(),
     data: dataPluginMock.createStartContract(),
     observability: {
+      useRulesLink: () => ({ href: 'newRuleLink' }),
       navigation: {
         // @ts-ignore
         PageTemplate: EuiPageTemplate,
@@ -284,20 +284,25 @@ const getHistoryFromUrl = (url: Url) => {
   });
 };
 
-// This function allows us to query for the nearest button with test
-// no matter whether it has nested tags or not (as EuiButton elements do).
-export const forNearestButton =
+const forNearestTag =
+  (tag: string) =>
   (getByText: (f: MatcherFunction) => HTMLElement | null) =>
   (text: string): HTMLElement | null =>
-    getByText((_content: string, node: Nullish<Element>) => {
+    getByText((_content: string, node: Element | null) => {
       if (!node) return false;
       const noOtherButtonHasText = Array.from(node.children).every(
-        (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== 'button')
+        (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== tag)
       );
       return (
-        noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === 'button'
+        noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === tag
       );
     });
+
+// This function allows us to query for the nearest button with test
+// no matter whether it has nested tags or not (as EuiButton elements do).
+export const forNearestButton = forNearestTag('button');
+
+export const forNearestAnchor = forNearestTag('a');
 
 export const makeUptimePermissionsCore = (
   permissions: Partial<{
@@ -339,7 +344,7 @@ const finderWithClassWrapper =
     customAttribute?: keyof Element | keyof HTMLElement
   ) =>
   (text: string): HTMLElement | null =>
-    getterFn((_content: string, node: Nullish<Element>) => {
+    getterFn((_content: string, node: Element | null) => {
       if (!node) return false;
       // There are actually properties that are not in Element but which
       // appear on the `node`, so we must cast the customAttribute as a keyof Element

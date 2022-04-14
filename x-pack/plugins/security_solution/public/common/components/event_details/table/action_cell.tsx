@@ -18,7 +18,9 @@ interface Props extends EnrichedFieldInfo {
   disabled?: boolean;
   getLinkValue?: (field: string) => string | null;
   onFilterAdded?: () => void;
+  setIsPopoverVisible?: (isVisible: boolean) => void;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
+  hideAddToTimeline?: boolean;
 }
 
 export const ActionCell: React.FC<Props> = React.memo(
@@ -31,9 +33,11 @@ export const ActionCell: React.FC<Props> = React.memo(
     getLinkValue,
     linkValue,
     onFilterAdded,
+    setIsPopoverVisible,
     timelineId,
     toggleColumn,
     values,
+    hideAddToTimeline,
   }) => {
     const actionCellConfig = useActionCellDataProvider({
       contextId,
@@ -53,9 +57,10 @@ export const ActionCell: React.FC<Props> = React.memo(
     const toggleTopN = useCallback(() => {
       setShowTopN((prevShowTopN) => {
         const newShowTopN = !prevShowTopN;
+        if (setIsPopoverVisible) setIsPopoverVisible(newShowTopN);
         return newShowTopN;
       });
-    }, []);
+    }, [setIsPopoverVisible]);
 
     const closeTopN = useCallback(() => {
       setShowTopN(false);
@@ -69,6 +74,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         dataProvider={actionCellConfig?.dataProvider}
         enableOverflowButton={true}
         field={data.field}
+        hideAddToTimeline={hideAddToTimeline}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}

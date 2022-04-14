@@ -83,11 +83,13 @@ export function createPluginSetupContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
+    analytics: deps.analytics,
     application: {
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
     },
     fatalErrors: deps.fatalErrors,
+    executionContext: deps.executionContext,
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
@@ -120,6 +122,7 @@ export function createPluginStartContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreStart {
   return {
+    analytics: deps.analytics,
     application: {
       applications$: deps.application.applications$,
       currentAppId$: deps.application.currentAppId$,
@@ -129,6 +132,7 @@ export function createPluginStartContext<
       getUrlForApp: deps.application.getUrlForApp,
     },
     docLinks: deps.docLinks,
+    executionContext: deps.executionContext,
     http: deps.http,
     chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,

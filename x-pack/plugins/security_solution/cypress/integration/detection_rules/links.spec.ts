@@ -7,17 +7,20 @@
 
 import { getNewRule } from '../../objects/rule';
 import { RULES_MONITORING_TABLE, RULE_NAME } from '../../screens/alerts_detection_rules';
-import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
-import { cleanKibana, reload } from '../../tasks/common';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
 describe('Rules talbes links', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRuleActivated(getNewRule(), 'rule1');
-    reload();
+    login();
+  });
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    createCustomRuleEnabled(getNewRule(), 'rule1');
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   it('should render correct link for rule name - rules', () => {

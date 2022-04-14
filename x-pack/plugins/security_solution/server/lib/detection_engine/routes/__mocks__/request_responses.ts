@@ -24,7 +24,11 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
+  DETECTION_ENGINE_RULES_BULK_UPDATE,
+  DETECTION_ENGINE_RULES_BULK_DELETE,
+  DETECTION_ENGINE_RULES_BULK_CREATE,
 } from '../../../../../common/constants';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { RuleAlertType, HapiReadableStream } from '../../rules/types';
 import { requestMock } from './request';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
@@ -34,7 +38,7 @@ import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/det
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
+import { SanitizedRule, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import {
   getPerformBulkActionSchemaMock,
@@ -109,21 +113,21 @@ export const getFindRequest = () =>
 export const getReadBulkRequest = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    path: DETECTION_ENGINE_RULES_BULK_CREATE,
     body: [getCreateRulesSchemaMock()],
   });
 
 export const getUpdateBulkRequest = () =>
   requestMock.create({
     method: 'put',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
     body: [getCreateRulesSchemaMock()],
   });
 
 export const getPatchBulkRequest = () =>
   requestMock.create({
     method: 'patch',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
     body: [getCreateRulesSchemaMock()],
   });
 
@@ -144,28 +148,28 @@ export const getBulkActionEditRequest = () =>
 export const getDeleteBulkRequest = () =>
   requestMock.create({
     method: 'delete',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ rule_id: 'rule-1' }],
   });
 
 export const getDeleteBulkRequestById = () =>
   requestMock.create({
     method: 'delete',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequestById = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequest = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ rule_id: 'rule-1' }],
   });
 
@@ -241,6 +245,10 @@ export const getRuleExecutionEventsRequest = () =>
     path: DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
     params: {
       ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    },
+    query: {
+      start: '2022-03-31T22:02:01.622Z',
+      end: '2022-03-31T22:02:31.622Z',
     },
   });
 
@@ -384,7 +392,7 @@ export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
 export const getAlertMock = <T extends RuleParams>(
   isRuleRegistryEnabled: boolean,
   params: T
-): SanitizedAlert<T> => ({
+): SanitizedRule<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
@@ -555,6 +563,59 @@ export const getLastFailures = (): RuleExecutionEvent[] => [
     message: 'Rule failed',
   },
 ];
+
+export const getAggregateExecutionEvents = (): GetAggregateRuleExecutionEventsResponse => ({
+  events: [
+    {
+      execution_uuid: '34bab6e0-89b6-4d10-9cbb-cda76d362db6',
+      timestamp: '2022-03-11T22:04:05.931Z',
+      duration_ms: 1975,
+      status: 'success',
+      message:
+        "rule executed: siem.queryRule:f78f3550-a186-11ec-89a1-0bce95157aba: 'This Rule Makes Alerts, Actions, AND Moar!'",
+      num_active_alerts: 0,
+      num_new_alerts: 0,
+      num_recovered_alerts: 0,
+      num_triggered_actions: 0,
+      num_succeeded_actions: 0,
+      num_errored_actions: 0,
+      total_search_duration_ms: 0,
+      es_search_duration_ms: 538,
+      schedule_delay_ms: 2091,
+      timed_out: false,
+      indexing_duration_ms: 7,
+      search_duration_ms: 551,
+      gap_duration_ms: 0,
+      security_status: 'succeeded',
+      security_message: 'succeeded',
+    },
+    {
+      execution_uuid: '254d8400-9dc7-43c5-ad4b-227273d1a44b',
+      timestamp: '2022-03-11T22:02:41.923Z',
+      duration_ms: 11916,
+      status: 'success',
+      message:
+        "rule executed: siem.queryRule:f78f3550-a186-11ec-89a1-0bce95157aba: 'This Rule Makes Alerts, Actions, AND Moar!'",
+      num_active_alerts: 0,
+      num_new_alerts: 0,
+      num_recovered_alerts: 0,
+      num_triggered_actions: 1,
+      num_succeeded_actions: 1,
+      num_errored_actions: 0,
+      total_search_duration_ms: 0,
+      es_search_duration_ms: 1406,
+      schedule_delay_ms: 1583,
+      timed_out: false,
+      indexing_duration_ms: 0,
+      search_duration_ms: 0,
+      gap_duration_ms: 0,
+      security_status: 'partial failure',
+      security_message:
+        'Check privileges failed to execute ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [broken-index] name: "This Rule Makes Alerts, Actions, AND Moar!" id: "f78f3550-a186-11ec-89a1-0bce95157aba" rule id: "b64b4540-d035-4826-a1e7-f505bf4b9653" execution id: "254d8400-9dc7-43c5-ad4b-227273d1a44b" space ID: "default"',
+    },
+  ],
+  total: 2,
+});
 
 export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({
   took: 1,

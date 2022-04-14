@@ -6,8 +6,8 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { SavedObjectReference } from 'kibana/server';
 import { FilterManager } from 'src/plugins/data/public';
+import { SavedObjectReference } from 'kibana/public';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -19,11 +19,21 @@ export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
+export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoApplyDisabled;
+export const selectChangesApplied = (state: LensState) =>
+  !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
 export const selectDatasourceStates = (state: LensState) => state.lens.datasourceStates;
 export const selectActiveDatasourceId = (state: LensState) => state.lens.activeDatasourceId;
 export const selectActiveData = (state: LensState) => state.lens.activeData;
 export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
+
+let applyChangesCounter: number | undefined;
+export const selectTriggerApplyChanges = (state: LensState) => {
+  const shouldApply = state.lens.applyChangesCounter !== applyChangesCounter;
+  applyChangesCounter = state.lens.applyChangesCounter;
+  return shouldApply;
+};
 
 export const selectExecutionContext = createSelector(
   [selectQuery, selectFilters, selectResolvedDateRange],
@@ -149,14 +159,16 @@ export const selectDatasourceLayers = createSelector(
 
 export const selectFramePublicAPI = createSelector(
   [
-    selectDatasourceStates,
+    selectCurrentDatasourceStates,
     selectActiveData,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<DatasourceMap>,
+    selectResolvedDateRange,
   ],
-  (datasourceStates, activeData, datasourceMap) => {
+  (datasourceStates, activeData, datasourceMap, dateRange) => {
     return {
       datasourceLayers: getDatasourceLayers(datasourceStates, datasourceMap),
       activeData,
+      dateRange,
     };
   }
 );

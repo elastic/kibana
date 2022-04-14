@@ -180,6 +180,28 @@ describe('getRuleWithInvalidatedFields', () => {
     expect(rule.ruleTypeId).toBeNull();
   });
 
+  test('handles undefined fields with dot notation', () => {
+    const rule: Rule = {
+      params: {},
+      consumer: 'test',
+      schedule: {
+        interval: undefined,
+      },
+      actions: [],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+    } as any;
+    const baseAlertErrors = {
+      'schedule.interval': ['Interval is required.'],
+    };
+    const actionsErrors: IErrorObject[] = [];
+    const paramsErrors = {};
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(rule.schedule.interval).toBeNull();
+  });
+
   test('does not set to null any fields that are required and defined but invalid in rule', () => {
     const rule: Rule = {
       name: 'test',
@@ -200,6 +222,28 @@ describe('getRuleWithInvalidatedFields', () => {
     const paramsErrors = {};
     getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
     expect(rule.consumer).toEqual('@@@@');
+  });
+
+  test('handles defined but invalid fields with dot notation', () => {
+    const rule: Rule = {
+      params: {},
+      consumer: 'test',
+      schedule: {
+        interval: '1s',
+      },
+      actions: [],
+      tags: [],
+      muteAll: false,
+      enabled: false,
+      mutedInstanceIds: [],
+    } as any;
+    const baseAlertErrors = {
+      'schedule.interval': ['Interval is too short.'],
+    };
+    const actionsErrors: IErrorObject[] = [];
+    const paramsErrors = {};
+    getRuleWithInvalidatedFields(rule, paramsErrors, baseAlertErrors, actionsErrors);
+    expect(rule.schedule.interval).toEqual('1s');
   });
 
   test('set to null all fields that are required but undefined in rule params', () => {

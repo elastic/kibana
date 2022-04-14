@@ -6,20 +6,22 @@
  */
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from 'kibana/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { finished, Writable } from 'stream';
 import { promisify } from 'util';
-import { getContentStream, LevelLogger } from '../';
-import { ReportingCore } from '../../';
-import {
+import { getContentStream } from '../';
+import type { ReportingCore } from '../../';
+import type {
   RunContext,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '../../../../task_manager/server';
 import { CancellationToken } from '../../../common/cancellation_token';
-import { ReportingError, UnknownError, QueueTimeoutError } from '../../../common/errors';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
+import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
@@ -60,7 +62,7 @@ function reportFromTask(task: ReportTaskParams) {
 export class ExecuteReportTask implements ReportingTask {
   public TYPE = REPORTING_EXECUTE_TYPE;
 
-  private logger: LevelLogger;
+  private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
   private taskExecutors?: Map<string, TaskExecutor>;
   private kibanaId?: string;
@@ -70,9 +72,9 @@ export class ExecuteReportTask implements ReportingTask {
   constructor(
     private reporting: ReportingCore,
     private config: ReportingConfigType,
-    logger: LevelLogger
+    logger: Logger
   ) {
-    this.logger = logger.clone(['runTask']);
+    this.logger = logger.get('runTask');
   }
 
   /*
@@ -86,7 +88,7 @@ export class ExecuteReportTask implements ReportingTask {
     const exportTypesRegistry = reporting.getExportTypesRegistry();
     const executors = new Map<string, TaskExecutor>();
     for (const exportType of exportTypesRegistry.getAll()) {
-      const exportTypeLogger = this.logger.clone([exportType.id]);
+      const exportTypeLogger = this.logger.get(exportType.jobType);
       const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
       // The task will run the function with the job type as a param.
       // This allows us to retrieve the specific export type runFn when called to run an export
@@ -227,11 +229,12 @@ export class ExecuteReportTask implements ReportingTask {
       docOutput.size = output.size;
       docOutput.warnings =
         output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
+      docOutput.error_code = output.error_code;
     } else {
       const defaultOutput = null;
       docOutput.content = output.toString() || defaultOutput;
       docOutput.content_type = unknownMime;
-      docOutput.warnings = [output.details ?? output.toString()];
+      docOutput.warnings = [output.toString()];
       docOutput.error_code = output.code;
     }
 
@@ -256,9 +259,11 @@ export class ExecuteReportTask implements ReportingTask {
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
-    return Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream))
-      .pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
-      .toPromise();
+    return Rx.lastValueFrom(
+      Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
+        timeout(queueTimeout)
+      ) // throw an error if a value is not emitted before timeout
+    );
   }
 
   public async _completeJob(
@@ -284,6 +289,12 @@ export class ExecuteReportTask implements ReportingTask {
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;
     return report;
+  }
+
+  // Generic is used to let TS infer the return type at call site.
+  private async throwIfKibanaShutsDown<T>(): Promise<T> {
+    await this.reporting.getKibanaShutdown$().toPromise();
+    throw new KibanaShuttingDownError();
   }
 
   /*
@@ -359,7 +370,10 @@ export class ExecuteReportTask implements ReportingTask {
 
             eventLog.logExecutionStart();
 
-            const output = await this._performJob(task, cancellationToken, stream);
+            const output = await Promise.race<TaskRunResult>([
+              this._performJob(task, cancellationToken, stream),
+              this.throwIfKibanaShutsDown(),
+            ]);
 
             stream.end();
 
@@ -416,10 +430,7 @@ export class ExecuteReportTask implements ReportingTask {
                 if (report == null) {
                   throw new Error(`Report ${jobId} is null!`);
                 }
-                const error =
-                  failedToExecuteErr instanceof ReportingError
-                    ? failedToExecuteErr
-                    : new UnknownError();
+                const error = mapToReportingError(failedToExecuteErr);
                 error.details =
                   error.details ||
                   `Max attempts (${attempts}) reached for job ${jobId}. Failed with: ${failedToExecuteErr.message}`;
@@ -475,7 +486,7 @@ export class ExecuteReportTask implements ReportingTask {
     return await this.getTaskManagerStart().schedule(taskInstance);
   }
 
-  private async rescheduleTask(task: ReportTaskParams, logger: LevelLogger) {
+  private async rescheduleTask(task: ReportTaskParams, logger: Logger) {
     logger.info(`Rescheduling task:${task.id} to retry after error.`);
 
     const oldTaskInstance: ReportingExecuteTaskInstance = {

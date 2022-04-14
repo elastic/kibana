@@ -32,7 +32,6 @@ export interface ServiceData {
 
 export class ServiceAPIClient {
   private readonly username?: string;
-  private readonly devUrl?: string;
   private readonly authorization: string;
   public locations: ServiceLocations;
   private logger: Logger;
@@ -41,9 +40,8 @@ export class ServiceAPIClient {
 
   constructor(logger: Logger, config: ServiceConfig, kibanaVersion: string) {
     this.config = config;
-    const { username, password, devUrl } = config;
+    const { username, password } = config;
     this.username = username;
-    this.devUrl = devUrl;
     this.kibanaVersion = kibanaVersion;
 
     if (username && password) {
@@ -61,8 +59,10 @@ export class ServiceAPIClient {
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
 
+      const rejectUnauthorized = process.env.NODE_ENV === 'production';
+
       return new https.Agent({
-        rejectUnauthorized: true, // (NOTE: this will disable client verification)
+        rejectUnauthorized,
         cert: tlsConfig.certificate,
         key: tlsConfig.key,
       });
@@ -74,7 +74,7 @@ export class ServiceAPIClient {
   }
 
   async put(data: ServiceData) {
-    return this.callAPI('POST', data);
+    return this.callAPI('PUT', data);
   }
 
   async delete(data: ServiceData) {
@@ -83,6 +83,41 @@ export class ServiceAPIClient {
 
   async runOnce(data: ServiceData) {
     return this.callAPI('POST', { ...data, runOnce: true });
+  }
+
+  async checkAccountAccessStatus() {
+    if (this.authorization) {
+      // in case username/password is provided, we assume it's always allowed
+      return { allowed: true, signupUrl: null };
+    }
+
+    const httpsAgent = this.getHttpsAgent();
+
+    if (this.locations.length > 0 && httpsAgent) {
+      // get a url from a random location
+      const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
+
+      try {
+        const { data } = await axios({
+          method: 'GET',
+          url: url + '/allowed',
+          headers:
+            process.env.NODE_ENV !== 'production' && this.authorization
+              ? {
+                  Authorization: this.authorization,
+                }
+              : undefined,
+          httpsAgent,
+        });
+
+        const { allowed, signupUrl } = data;
+        return { allowed, signupUrl };
+      } catch (e) {
+        this.logger.error(e);
+      }
+    }
+
+    return { allowed: false, signupUrl: null };
   }
 
   async callAPI(
@@ -102,13 +137,14 @@ export class ServiceAPIClient {
 
       return axios({
         method,
-        url: (this.devUrl ?? url) + (runOnce ? '/run' : '/monitors'),
+        url: url + (runOnce ? '/run' : '/monitors'),
         data: { monitors: monitorsStreams, output, stack_version: this.kibanaVersion },
-        headers: this.authorization
-          ? {
-              Authorization: this.authorization,
-            }
-          : undefined,
+        headers:
+          process.env.NODE_ENV !== 'production' && this.authorization
+            ? {
+                Authorization: this.authorization,
+              }
+            : undefined,
         httpsAgent: this.getHttpsAgent(),
       });
     };
@@ -134,6 +170,9 @@ export class ServiceAPIClient {
             catchError((err) => {
               pushErrors.push({ locationId: id, error: err.response?.data });
               this.logger.error(err);
+              if (err.response?.data?.reason) {
+                this.logger.error(err.response?.data?.reason);
+              }
               // we don't want to throw an unhandled exception here
               return of(true);
             })

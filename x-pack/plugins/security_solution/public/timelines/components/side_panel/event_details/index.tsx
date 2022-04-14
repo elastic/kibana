@@ -33,8 +33,8 @@ import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
 import { EntityType } from '../../../../../../timelines/common';
-import { useHostRiskScore } from '../../../../hosts/containers/host_risk_score';
-import { HostRisk } from '../../../../common/containers/hosts_risk/types';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
+import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -65,6 +65,7 @@ interface EventDetailsPanelProps {
   runtimeMappings: MappingRuntimeFields;
   tabType: TimelineTabs;
   timelineId: string;
+  isReadOnly?: boolean;
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
@@ -78,15 +79,18 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   runtimeMappings,
   tabType,
   timelineId,
+  isReadOnly,
 }) => {
-  const [loading, detailsData, rawEventData, ecsData] = useTimelineEventsDetails({
-    docValueFields,
-    entityType,
-    indexName: expandedEvent.indexName ?? '',
-    eventId: expandedEvent.eventId ?? '',
-    runtimeMappings,
-    skip: !expandedEvent.eventId,
-  });
+  const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
+    {
+      docValueFields,
+      entityType,
+      indexName: expandedEvent.indexName ?? '',
+      eventId: expandedEvent.eventId ?? '',
+      runtimeMappings,
+      skip: !expandedEvent.eventId,
+    }
+  );
 
   const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
 
@@ -127,7 +131,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   );
 
   const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    hostName,
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     pagination: {
       cursorStart: 0,
       querySize: 1,
@@ -223,20 +227,24 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             timelineTabType="flyout"
             hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
+            isReadOnly={isReadOnly}
           />
         )}
       </StyledEuiFlyoutBody>
 
-      <EventDetailsFooter
-        detailsData={detailsData}
-        detailsEcsData={ecsData}
-        expandedEvent={expandedEvent}
-        handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
-        timelineId={timelineId}
-      />
+      {!isReadOnly && (
+        <EventDetailsFooter
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          expandedEvent={expandedEvent}
+          refetchFlyoutData={refetchFlyoutData}
+          handleOnEventClosed={handleOnEventClosed}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          loadingEventDetails={loading}
+          onAddIsolationStatusClick={showHostIsolationPanel}
+          timelineId={timelineId}
+        />
+      )}
     </>
   ) : (
     <>
@@ -260,6 +268,19 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         hostRisk={hostRisk}
         handleOnEventClosed={handleOnEventClosed}
       />
+      {!isReadOnly && (
+        <EventDetailsFooter
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          expandedEvent={expandedEvent}
+          handleOnEventClosed={handleOnEventClosed}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          loadingEventDetails={loading}
+          onAddIsolationStatusClick={showHostIsolationPanel}
+          refetchFlyoutData={refetchFlyoutData}
+          timelineId={timelineId}
+        />
+      )}
     </>
   );
 };

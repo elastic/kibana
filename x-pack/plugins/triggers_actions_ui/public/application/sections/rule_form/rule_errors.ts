@@ -6,26 +6,26 @@
  */
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { parseDuration } from '../../../../../alerting/common/parse_duration';
+import { formatDuration, parseDuration } from '../../../../../alerting/common/parse_duration';
 import {
   RuleTypeModel,
   Rule,
   IErrorObject,
   RuleAction,
-  RuleType,
   ValidationResult,
   ActionTypeRegistryContract,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { InitialRule } from './rule_reducer';
 
 export function validateBaseProperties(
   ruleObject: InitialRule,
-  serverRuleType?: RuleType<string, string>
+  config: TriggersActionsUiConfig
 ): ValidationResult {
   const validationResult = { errors: {} };
   const errors = {
     name: new Array<string>(),
-    interval: new Array<string>(),
+    'schedule.interval': new Array<string>(),
     ruleTypeId: new Array<string>(),
     actionConnectors: new Array<string>(),
   };
@@ -38,20 +38,20 @@ export function validateBaseProperties(
     );
   }
   if (ruleObject.schedule.interval.length < 2) {
-    errors.interval.push(
+    errors['schedule.interval'].push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredIntervalText', {
         defaultMessage: 'Check interval is required.',
       })
     );
-  } else if (serverRuleType?.minimumScheduleInterval) {
+  } else if (config.minimumScheduleInterval && config.minimumScheduleInterval.enforce) {
     const duration = parseDuration(ruleObject.schedule.interval);
-    const minimumDuration = parseDuration(serverRuleType.minimumScheduleInterval);
+    const minimumDuration = parseDuration(config.minimumScheduleInterval.value);
     if (duration < minimumDuration) {
-      errors.interval.push(
+      errors['schedule.interval'].push(
         i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.belowMinimumText', {
-          defaultMessage: 'Interval is below minimum ({minimum}) for this rule type',
+          defaultMessage: 'Interval must be at least {minimum}.',
           values: {
-            minimum: serverRuleType.minimumScheduleInterval,
+            minimum: formatDuration(config.minimumScheduleInterval.value, true),
           },
         })
       );
@@ -82,12 +82,12 @@ export function validateBaseProperties(
 export function getRuleErrors(
   rule: Rule,
   ruleTypeModel: RuleTypeModel | null,
-  serverRuleType?: RuleType<string, string>
+  config: TriggersActionsUiConfig
 ) {
   const ruleParamsErrors: IErrorObject = ruleTypeModel
     ? ruleTypeModel.validate(rule.params).errors
     : [];
-  const ruleBaseErrors = validateBaseProperties(rule, serverRuleType).errors as IErrorObject;
+  const ruleBaseErrors = validateBaseProperties(rule, config).errors as IErrorObject;
   const ruleErrors = {
     ...ruleParamsErrors,
     ...ruleBaseErrors,

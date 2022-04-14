@@ -11,7 +11,10 @@ import { Alert, AlertFactoryDoneUtils } from './alert';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  uiSettingsServiceMock,
+  httpServerMock,
 } from '../../../../src/core/server/mocks';
+import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
 import { AlertInstanceContext, AlertInstanceState } from './types';
 
 export { rulesClientMock };
@@ -20,6 +23,7 @@ const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
+    getConfig: jest.fn(),
   };
   return mock;
 };
@@ -92,7 +96,7 @@ const createAbortableSearchServiceMock = () => {
   };
 };
 
-const createAlertServicesMock = <
+const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
@@ -104,17 +108,23 @@ const createAlertServicesMock = <
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     savedObjectsClient: savedObjectsClientMock.create(),
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => true,
     shouldStopExecution: () => true,
     search: createAbortableSearchServiceMock(),
+    searchSourceClient: Promise.resolve(
+      dataPluginMock
+        .createStartContract()
+        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
+    ),
   };
 };
-export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
+export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
 
 export const alertsMock = {
   createAlertFactory: createAlertFactoryMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
-  createAlertServices: createAlertServicesMock,
+  createRuleExecutorServices: createRuleExecutorServicesMock,
 };

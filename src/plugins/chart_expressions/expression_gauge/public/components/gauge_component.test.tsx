@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { ColorStop } from '@kbn/coloring';
 import { chartPluginMock } from '../../../../charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import type { Datatable } from '../../../../expressions/public';
@@ -15,7 +16,6 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
   GaugeRenderProps,
   GaugeArguments,
-  ColorStop,
   GaugeLabelMajorModes,
   GaugeTicksPositions,
   GaugeColorModes,
@@ -54,6 +54,7 @@ jest.mock('@elastic/charts', () => {
 });
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
+const paletteThemeService = chartPluginMock.createSetupContract().palettes;
 const formatService = fieldFormatsServiceMock.createStartContract();
 const args: GaugeArguments = {
   labelMajor: 'Gauge',
@@ -78,15 +79,27 @@ const createData = (
   };
 };
 
+const mockState = new Map();
+const uiState = {
+  get: jest
+    .fn()
+    .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
+  set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
+  emit: jest.fn(),
+  setSilent: jest.fn(),
+} as any;
+
 describe('GaugeComponent', function () {
   let wrapperProps: GaugeRenderProps;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     wrapperProps = {
       data: createData(),
       chartsThemeService,
       args,
       formatFactory: formatService.deserialize,
+      paletteService: await paletteThemeService.getPalettes(),
+      uiState,
     };
   });
 

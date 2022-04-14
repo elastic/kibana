@@ -814,6 +814,50 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.updateLayerById",
+            "type": "Function",
+            "tags": [],
+            "label": "updateLayerById",
+            "description": [],
+            "signature": [
+              "(layerDescriptor: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.LayerDescriptor",
+                "text": "LayerDescriptor"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.updateLayerById.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "layerDescriptor",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "common",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-common.LayerDescriptor",
+                    "text": "LayerDescriptor"
+                  }
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.onSingleValueTrigger",
             "type": "Function",
             "tags": [],
@@ -1174,6 +1218,16 @@
             "type": "string",
             "tags": [],
             "label": "field",
+            "description": [],
+            "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.EMSTermJoinConfig.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
             "description": [],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false
@@ -1665,7 +1719,7 @@
             "label": "getHtmlDisplayValue",
             "description": [],
             "signature": [
-              "() => string"
+              "() => React.ReactNode"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
@@ -2872,7 +2926,7 @@
         "label": "LayerWizard",
         "description": [],
         "signature": [
-          "{ title: string; categories: ",
+          "{ id: string; title: string; categories: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -2950,6 +3004,20 @@
           "[]; }"
         ],
         "path": "x-pack/plugins/maps/public/embeddable/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-public.MAPS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "MAPS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"MAPS_APP_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/maps/public/locators.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -3344,9 +3412,48 @@
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.VECTOR_STYLES",
+        "type": "Enum",
+        "tags": [],
+        "label": "VECTOR_STYLES",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_ID",
+        "description": [],
+        "signature": [
+          "\"maps\""
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
+        "id": "def-common.DECIMAL_DEGREES_PRECISION",
+        "type": "number",
+        "tags": [],
+        "label": "DECIMAL_DEGREES_PRECISION",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "maps",
         "id": "def-common.EMSFileSourceDescriptor",

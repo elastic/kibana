@@ -35,6 +35,7 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -58,6 +59,8 @@ describe('TelemetryEventsSender', () => {
             test: 'me',
             another: 'nope',
             Ext: {
+              bytes_compressed: 'data up to 4mb',
+              bytes_compressed_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
@@ -108,6 +111,7 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -129,6 +133,8 @@ describe('TelemetryEventsSender', () => {
             created: 0,
             path: 'X',
             Ext: {
+              bytes_compressed: 'data up to 4mb',
+              bytes_compressed_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',

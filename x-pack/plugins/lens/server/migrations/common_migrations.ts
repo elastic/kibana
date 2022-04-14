@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, mapValues } from 'lodash';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
@@ -23,10 +23,12 @@ import {
   VisStatePost715,
   VisStatePre715,
   VisState716,
+  VisState810,
+  VisState820,
   CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
-import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -190,6 +192,66 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715): LensD
     delete filter.meta.indexRefName;
   }
   return newAttributes as LensDocShape810;
+};
+
+export const commonSetLastValueShowArrayValues = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (
+        column.operationType === 'last_value' &&
+        !(typeof column.params.showArrayValues === 'boolean')
+      ) {
+        column.params.showArrayValues = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
+export const commonEnhanceTableRowHeight = (
+  attributes: LensDocShape810<VisState810>
+): LensDocShape810<VisState820> => {
+  if (attributes.visualizationType !== 'lnsDatatable') {
+    return attributes;
+  }
+  const visState810 = attributes.state.visualization as VisState810;
+  const newAttributes = cloneDeep(attributes);
+  const vizState = newAttributes.state.visualization as VisState820;
+  vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
+  vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
+  return newAttributes;
+};
+
+export const commonSetIncludeEmptyRowsDateHistogram = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  for (const layer of Object.values(newAttributes.state.datasourceStates.indexpattern.layers)) {
+    for (const column of Object.values(layer.columns)) {
+      if (column.operationType === 'date_histogram') {
+        column.params.includeEmptyRows = true;
+      }
+    }
+  }
+  return newAttributes;
+};
+
+export const commonLockOldMetricVisSettings = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  if (newAttributes.visualizationType !== 'lnsMetric') {
+    return newAttributes;
+  }
+
+  const visState = newAttributes.state.visualization as MetricState;
+  visState.textAlign = visState.textAlign ?? 'center';
+  visState.titlePosition = visState.titlePosition ?? 'bottom';
+  visState.size = visState.size ?? 'xl';
+  return newAttributes;
 };
 
 const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {

@@ -14,7 +14,8 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList, percentileFields } from './rules_list';
 import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
 import {
-  AlertExecutionStatusErrorReasons,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
   parseDuration,
 } from '../../../../../../alerting/common';
@@ -30,6 +31,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/rule_api', () => ({
   loadRules: jest.fn(),
   loadRuleTypes: jest.fn(),
+  loadRuleAggregations: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -37,6 +39,11 @@ jest.mock('../../../lib/rule_api', () => ({
 }));
 jest.mock('../../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
+}));
+jest.mock('../../../../common/lib/config_api', () => ({
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -52,7 +59,8 @@ jest.mock('../../../lib/capabilities', () => ({
   hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
-const { loadRules, loadRuleTypes } = jest.requireMock('../../../lib/rule_api');
+const { loadRules, loadRuleTypes, loadRuleAggregations } =
+  jest.requireMock('../../../lib/rule_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -161,7 +169,7 @@ describe('rules_list component with items', () => {
       tags: ['tag1'],
       enabled: true,
       ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
+      schedule: { interval: '1s' },
       actions: [],
       params: { name: 'test rule type name' },
       scheduledTaskId: null,
@@ -297,7 +305,7 @@ describe('rules_list component with items', () => {
         lastDuration: 122000,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.Unknown,
+          reason: RuleExecutionStatusErrorReasons.Unknown,
           message: 'test',
         },
       },
@@ -323,7 +331,33 @@ describe('rules_list component with items', () => {
         lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.License,
+          reason: RuleExecutionStatusErrorReasons.License,
+          message: 'test',
+        },
+      },
+    },
+    {
+      id: '6',
+      name: 'test rule warning',
+      tags: [],
+      enabled: true,
+      ruleTypeId: 'test_rule_type',
+      schedule: { interval: '5d' },
+      actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+      params: { name: 'test rule type name' },
+      scheduledTaskId: null,
+      createdBy: null,
+      updatedBy: null,
+      apiKeyOwner: null,
+      throttle: '1m',
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'warning',
+        lastDuration: 500,
+        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        warning: {
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
           message: 'test',
         },
       },
@@ -349,6 +383,11 @@ describe('rules_list component with items', () => {
     ]);
     loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
+    loadRuleAggregations.mockResolvedValue({
+      ruleEnabledStatus: { enabled: 2, disabled: 0 },
+      ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
+      ruleMutedStatus: { muted: 0, unmuted: 2 },
+    });
 
     const ruleTypeMock: RuleTypeModel = {
       id: 'test_rule_type',
@@ -378,6 +417,7 @@ describe('rules_list component with items', () => {
 
     expect(loadRules).toHaveBeenCalled();
     expect(loadActionTypes).toHaveBeenCalled();
+    expect(loadRuleAggregations).toHaveBeenCalled();
   }
 
   it('renders table of rules', async () => {
@@ -386,11 +426,6 @@ describe('rules_list component with items', () => {
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
-
-    // Enabled switch column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-enabled"]').length).toEqual(
-      mockedRulesData.length
-    );
 
     // Name and rule type column
     const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
@@ -436,6 +471,19 @@ describe('rules_list component with items', () => {
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-interval"]').length
     ).toEqual(mockedRulesData.length);
 
+    // Schedule interval tooltip
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+      'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
+    );
+
+    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOut');
+
     // Duration column
     expect(
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-duration"]').length
@@ -459,15 +507,16 @@ describe('rules_list component with items', () => {
       'The length of time it took for the rule to run (mm:ss).'
     );
 
-    // Status column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
-      mockedRulesData.length
-    );
+    // Last response column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
+    ).toEqual(mockedRulesData.length);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-unknown"]').length).toEqual(0);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').length).toEqual(2);
+    expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-warning"]').length).toEqual(1);
     expect(wrapper.find('[data-test-subj="ruleStatus-error-tooltip"]').length).toEqual(2);
     expect(
       wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length
@@ -480,6 +529,11 @@ describe('rules_list component with items', () => {
     );
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
       'License Error'
+    );
+
+    // Status control column
+    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
+      mockedRulesData.length
     );
 
     // Monitoring column
@@ -673,7 +727,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -692,10 +746,10 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('sorts rules when clicking the enabled column', async () => {
+  it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_8"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -724,6 +778,28 @@ describe('rules_list component with items', () => {
     await setup(false);
     expect(wrapper.find('[data-test-subj="ruleSidebarEditAction"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="ruleSidebarDeleteAction"]').exists()).toBeTruthy();
+  });
+
+  it('renders brief', async () => {
+    await setup();
+
+    // { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 }
+    expect(wrapper.find('EuiHealth[data-test-subj="totalOkRulesCount"]').text()).toEqual('Ok: 1');
+    expect(wrapper.find('EuiHealth[data-test-subj="totalActiveRulesCount"]').text()).toEqual(
+      'Active: 2'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="totalErrorRulesCount"]').text()).toEqual(
+      'Error: 3'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="totalPendingRulesCount"]').text()).toEqual(
+      'Pending: 4'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="totalUnknownRulesCount"]').text()).toEqual(
+      'Unknown: 5'
+    );
+    expect(wrapper.find('EuiHealth[data-test-subj="totalWarningRulesCount"]').text()).toEqual(
+      'Warning: 6'
+    );
   });
 });
 
@@ -890,7 +966,7 @@ describe('rules_list with show only capability', () => {
   });
 });
 
-describe('rules_list with disabled itmes', () => {
+describe('rules_list with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {

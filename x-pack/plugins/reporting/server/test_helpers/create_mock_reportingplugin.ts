@@ -10,8 +10,12 @@ jest.mock('../usage');
 
 import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { coreMock, elasticsearchServiceMock, statusServiceMock } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  statusServiceMock,
+} from 'src/core/server/mocks';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
@@ -27,7 +31,6 @@ import { buildConfig, ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
-import { createMockLevelLogger } from './create_mock_levellogger';
 
 export const createMockPluginSetup = (
   setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
@@ -38,13 +41,13 @@ export const createMockPluginSetup = (
     router: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
     security: securityMock.createSetup(),
     taskManager: taskManagerMock.createSetup(),
-    logger: createMockLevelLogger(),
+    logger: loggingSystemMock.createLogger(),
     status: statusServiceMock.createSetupContract(),
     ...setupMock,
   };
 };
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 const createMockReportingStore = async (config: ReportingConfigType) => {
   const mockConfigSchema = createMockConfigSchema(config);
@@ -114,6 +117,16 @@ export const createMockConfigSchema = (
     roles: {
       enabled: false,
       ...overrides.roles,
+    },
+    capture: {
+      maxAttempts: 1,
+      loadDelay: 1,
+      timeouts: {
+        openUrl: 100,
+        renderComplete: 100,
+        waitForElements: 100,
+      },
+      zoom: 1,
     },
   } as ReportingConfigType;
 };

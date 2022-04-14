@@ -18,6 +18,7 @@ import {
   IErrorObject,
   RuleAddProps,
   RuleTypeIndex,
+  TriggersActionsUiConfig,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
@@ -32,7 +33,9 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { DEFAULT_RULE_INTERVAL } from '../../constants';
+import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { getInitialInterval } from './get_initial_interval';
 
 const RuleAdd = ({
   consumer,
@@ -45,6 +48,7 @@ const RuleAdd = ({
   reloadRules,
   onSave,
   metadata,
+  filteredSolutions,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -55,7 +59,7 @@ const RuleAdd = ({
       consumer,
       ruleTypeId,
       schedule: {
-        interval: DEFAULT_ALERT_INTERVAL,
+        interval: DEFAULT_RULE_INTERVAL,
       },
       actions: [],
       tags: [],
@@ -67,6 +71,7 @@ const RuleAdd = ({
   const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
     rule: initialRule,
   });
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
   const [initialRuleParams, setInitialRuleParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
@@ -91,6 +96,12 @@ const RuleAdd = ({
   } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
+
+  useEffect(() => {
+    (async () => {
+      setConfig(await triggersActionsUiConfig({ http }));
+    })();
+  }, [http]);
 
   useEffect(() => {
     if (ruleTypeId) {
@@ -137,6 +148,14 @@ const RuleAdd = ({
   }, [rule, actionTypeRegistry]);
 
   useEffect(() => {
+    if (config.minimumScheduleInterval && !initialValues?.schedule?.interval) {
+      setRuleProperty('schedule', {
+        interval: getInitialInterval(config.minimumScheduleInterval.value),
+      });
+    }
+  }, [config.minimumScheduleInterval, initialValues]);
+
+  useEffect(() => {
     if (rule.ruleTypeId && ruleTypeIndex) {
       const type = ruleTypeIndex.get(rule.ruleTypeId);
       if (type?.defaultScheduleInterval && !changedFromDefaultInterval) {
@@ -146,7 +165,7 @@ const RuleAdd = ({
   }, [rule.ruleTypeId, ruleTypeIndex, rule.schedule.interval, changedFromDefaultInterval]);
 
   useEffect(() => {
-    if (rule.schedule.interval !== DEFAULT_ALERT_INTERVAL && !changedFromDefaultInterval) {
+    if (rule.schedule.interval !== DEFAULT_RULE_INTERVAL && !changedFromDefaultInterval) {
       setChangedFromDefaultInterval(true);
     }
   }, [rule.schedule.interval, changedFromDefaultInterval]);
@@ -178,7 +197,7 @@ const RuleAdd = ({
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
     rule as Rule,
     ruleType,
-    rule.ruleTypeId ? ruleTypeIndex?.get(rule.ruleTypeId) : undefined
+    config
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
@@ -230,6 +249,7 @@ const RuleAdd = ({
             <EuiFlyoutBody>
               <RuleForm
                 rule={rule}
+                config={config}
                 dispatch={dispatch}
                 errors={ruleErrors}
                 canChangeTrigger={canChangeTrigger}
@@ -242,6 +262,7 @@ const RuleAdd = ({
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
+                filteredSolutions={filteredSolutions}
               />
             </EuiFlyoutBody>
             <RuleAddFooter

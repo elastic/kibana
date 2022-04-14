@@ -14,18 +14,19 @@ import {
   hasObjectErrors,
   isValidRule,
 } from './rule_errors';
-import { Rule, RuleType, RuleTypeModel } from '../../../types';
+import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
+const config = { minimumScheduleInterval: { value: '1m', enforce: false } };
 describe('rule_errors', () => {
   describe('validateBaseProperties()', () => {
     it('should validate the name', () => {
       const rule = mockRule();
       rule.name = '';
-      const result = validateBaseProperties(rule);
+      const result = validateBaseProperties(rule, config);
       expect(result.errors).toStrictEqual({
         name: ['Name is required.'],
-        interval: [],
+        'schedule.interval': [],
         ruleTypeId: [],
         actionConnectors: [],
       });
@@ -34,25 +35,36 @@ describe('rule_errors', () => {
     it('should validate the interval', () => {
       const rule = mockRule();
       rule.schedule.interval = '';
-      const result = validateBaseProperties(rule);
+      const result = validateBaseProperties(rule, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        interval: ['Check interval is required.'],
+        'schedule.interval': ['Check interval is required.'],
         ruleTypeId: [],
         actionConnectors: [],
       });
     });
 
-    it('should validate the minimumScheduleInterval', () => {
+    it('should validate the minimumScheduleInterval if enforce = false', () => {
       const rule = mockRule();
-      rule.schedule.interval = '2m';
-      const result = validateBaseProperties(
-        rule,
-        mockserverRuleType({ minimumScheduleInterval: '5m' })
-      );
+      rule.schedule.interval = '2s';
+      const result = validateBaseProperties(rule, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        interval: ['Interval is below minimum (5m) for this rule type'],
+        'schedule.interval': [],
+        ruleTypeId: [],
+        actionConnectors: [],
+      });
+    });
+
+    it('should validate the minimumScheduleInterval if enforce = true', () => {
+      const rule = mockRule();
+      rule.schedule.interval = '2s';
+      const result = validateBaseProperties(rule, {
+        minimumScheduleInterval: { value: '1m', enforce: true },
+      });
+      expect(result.errors).toStrictEqual({
+        name: [],
+        'schedule.interval': ['Interval must be at least 1 minute.'],
         ruleTypeId: [],
         actionConnectors: [],
       });
@@ -61,10 +73,10 @@ describe('rule_errors', () => {
     it('should validate the ruleTypeId', () => {
       const rule = mockRule();
       rule.ruleTypeId = '';
-      const result = validateBaseProperties(rule);
+      const result = validateBaseProperties(rule, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        interval: [],
+        'schedule.interval': [],
         ruleTypeId: ['Rule type is required.'],
         actionConnectors: [],
       });
@@ -82,10 +94,10 @@ describe('rule_errors', () => {
           },
         },
       ];
-      const result = validateBaseProperties(rule);
+      const result = validateBaseProperties(rule, config);
       expect(result.errors).toStrictEqual({
         name: [],
-        interval: [],
+        'schedule.interval': [],
         ruleTypeId: [],
         actionConnectors: ['Action for myActionType connector is required.'],
       });
@@ -105,20 +117,20 @@ describe('rule_errors', () => {
             },
           }),
         }),
-        mockserverRuleType()
+        config
       );
       expect(result).toStrictEqual({
         ruleParamsErrors: { field: ['This is wrong'] },
         ruleBaseErrors: {
           name: ['Name is required.'],
-          interval: [],
+          'schedule.interval': [],
           ruleTypeId: [],
           actionConnectors: [],
         },
         ruleErrors: {
           name: ['Name is required.'],
           field: ['This is wrong'],
-          interval: [],
+          'schedule.interval': [],
           ruleTypeId: [],
           actionConnectors: [],
         },
@@ -216,31 +228,6 @@ describe('rule_errors', () => {
     });
   });
 });
-
-function mockserverRuleType(
-  overloads: Partial<RuleType<string, string>> = {}
-): RuleType<string, string> {
-  return {
-    actionGroups: [],
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    recoveryActionGroup: {
-      id: 'recovery',
-      name: 'doRecovery',
-    },
-    id: 'myAppRuleType',
-    name: 'myAppRuleType',
-    producer: 'myApp',
-    authorizedConsumers: {},
-    enabledInLicense: true,
-    actionVariables: {
-      context: [],
-      state: [],
-      params: [],
-    },
-    ...overloads,
-  };
-}
 
 function mockRuleTypeModel(overloads: Partial<RuleTypeModel> = {}): RuleTypeModel {
   return {

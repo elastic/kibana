@@ -23,7 +23,7 @@ export async function getEsGridTile({
   y,
   z,
   requestBody = {},
-  requestType = RENDER_AS.POINT,
+  renderAs = RENDER_AS.POINT,
   gridPrecision,
   abortController,
 }: {
@@ -37,7 +37,7 @@ export async function getEsGridTile({
   context: DataRequestHandlerContext;
   logger: Logger;
   requestBody: any;
-  requestType: RENDER_AS.GRID | RENDER_AS.POINT;
+  renderAs: RENDER_AS;
   gridPrecision: number;
   abortController: AbortController;
 }): Promise<Stream | null> {
@@ -49,14 +49,18 @@ export async function getEsGridTile({
       exact_bounds: false,
       extent: 4096, // full resolution,
       query: requestBody.query,
-      grid_type: requestType === RENDER_AS.GRID ? 'grid' : 'centroid',
+      grid_agg: renderAs === RENDER_AS.HEX ? 'geohex' : 'geotile',
+      grid_type: renderAs === RENDER_AS.GRID || renderAs === RENDER_AS.HEX ? 'grid' : 'centroid',
       aggs: requestBody.aggs,
       fields: requestBody.fields,
       runtime_mappings: requestBody.runtime_mappings,
     };
 
     const tile = await core.executionContext.withContext(
-      makeExecutionContext('mvt:get_grid_tile', url),
+      makeExecutionContext({
+        description: 'mvt:get_grid_tile',
+        url,
+      }),
       async () => {
         return await context.core.elasticsearch.client.asCurrentUser.transport.request(
           {

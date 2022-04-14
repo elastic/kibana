@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-import { getHttp, getIndexPatternService, getSearchService } from '../../../kibana_services';
+import {
+  getExecutionContext,
+  getHttp,
+  getIndexPatternService,
+  getSearchService,
+} from '../../../kibana_services';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import {
   ES_GEO_FIELD_TYPE,
@@ -129,6 +135,13 @@ describe('ESGeoGridSource', () => {
         },
       },
     });
+
+    const coreStartMock = coreMock.createStart();
+    coreStartMock.executionContext.get.mockReturnValue({
+      name: 'some-app',
+    });
+    // @ts-expect-error
+    getExecutionContext.mockReturnValue(coreStartMock.executionContext);
   });
 
   afterEach(() => {
@@ -303,7 +316,7 @@ describe('ESGeoGridSource', () => {
       const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234');
 
       expect(tileUrl).toEqual(
-        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&gridPrecision=8&requestBody=(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'1'%3A('0'%3Asize%2C'1'%3A0)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A''))%2C'6'%3A('0'%3Aaggs%2C'1'%3A())))&requestType=point&token=1234"
+        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&gridPrecision=8&requestBody=(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'1'%3A('0'%3Asize%2C'1'%3A0)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A''))%2C'6'%3A('0'%3Aaggs%2C'1'%3A())))&renderAs=heatmap&token=1234"
       );
     });
   });

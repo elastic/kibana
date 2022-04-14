@@ -8,6 +8,7 @@
 import { groups } from './groups.mock';
 
 import { IndexingRule } from '../types';
+import { SourceConfigData } from '../views/content_sources/components/add_source/add_source_logic';
 import { staticSourceData } from '../views/content_sources/source_data';
 import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
 
@@ -339,24 +340,34 @@ export const mergedConfiguredSources = mergeServerAndStaticData(
   contentSources
 );
 
-export const sourceConfigData = {
+export const sourceConfigData: SourceConfigData = {
   serviceType: 'confluence_cloud',
   name: 'Confluence',
   configured: true,
   needsPermissions: true,
   accountContextOnly: false,
-  supportedByLicense: true,
   privateSourcesEnabled: false,
   categories: ['wiki', 'atlassian', 'intranet'],
   configuredFields: {
-    isOauth1: false,
     clientId: 'CyztADsSECRETCSAUCEh1a',
     clientSecret: 'GSjJxqSECRETCSAUCEksHk',
     baseUrl: 'https://mine.atlassian.net',
     privateKey: '-----BEGIN PRIVATE KEY-----\nkeykeykeykey==\n-----END PRIVATE KEY-----\n',
     publicKey: '-----BEGIN PUBLIC KEY-----\nkeykeykeykey\n-----END PUBLIC KEY-----\n',
     consumerKey: 'elastic_enterprise_search_123',
+    externalConnectorApiKey: 'asdf1234',
+    externalConnectorUrl: 'https://www.elastic.co',
   },
+};
+
+export const externalConfiguredConnector = {
+  serviceType: 'external',
+  name: 'External Connector',
+  configured: true,
+  needsPermissions: false,
+  accountContextOnly: true,
+  supportedByLicense: false,
+  privateSourcesEnabled: false,
 };
 
 export const oauthApplication = {

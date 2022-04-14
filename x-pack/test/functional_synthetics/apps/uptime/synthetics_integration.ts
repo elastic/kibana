@@ -131,8 +131,8 @@ export default function (providerContext: FtrProviderContext) {
     type: `synthetics/${monitorType}`,
     use_output: 'default',
   });
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125881
-  describe.skip('When on the Synthetics Integration Policy Create Page', function () {
+
+  describe('When on the Synthetics Integration Policy Create Page', function () {
     skipIfNoDockerRegistry(providerContext);
     const basicConfig = {
       name: monitorName,
@@ -555,7 +555,7 @@ export default function (providerContext: FtrProviderContext) {
             monitorType: 'browser',
             config: {
               screenshots: 'on',
-              schedule: '@every 3m',
+              schedule: '@every 10m',
               timeout: null,
               tags: [config.tags],
               throttling: '5d/3u/20l',
@@ -605,7 +605,7 @@ export default function (providerContext: FtrProviderContext) {
             monitorType: 'browser',
             config: {
               screenshots: 'on',
-              schedule: '@every 3m',
+              schedule: '@every 10m',
               timeout: null,
               tags: [config.tags],
               throttling: '5d/3u/20l',
@@ -664,7 +664,7 @@ export default function (providerContext: FtrProviderContext) {
             monitorType: 'browser',
             config: {
               screenshots: advancedConfig.screenshots,
-              schedule: '@every 3m',
+              schedule: '@every 10m',
               timeout: null,
               tags: [config.tags],
               throttling: '1337d/1338u/1339l',
@@ -728,7 +728,7 @@ export default function (providerContext: FtrProviderContext) {
             monitorType: 'browser',
             config: {
               screenshots: advancedConfig.screenshots,
-              schedule: '@every 3m',
+              schedule: '@every 10m',
               timeout: null,
               tags: [config.tags],
               'service.name': config.apmServiceName,

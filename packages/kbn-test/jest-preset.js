@@ -9,12 +9,14 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
+  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts', 'jest\\.config\\.js'],
 
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: !!process.env.CODE_COVERAGE
@@ -82,7 +84,7 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
-    '<rootDir>/node_modules/@emotion/jest/serializer',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/emotion.js',
   ],
 
   // The test environment that will be used for testing
@@ -128,4 +130,6 @@ module.exports = {
 
   // A custom resolver to preserve symlinks by default
   resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+
+  watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 };

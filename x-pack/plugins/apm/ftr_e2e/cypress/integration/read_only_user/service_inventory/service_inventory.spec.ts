@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
+import { checkA11y } from '../../../support/commands';
 
 const timeRange = {
   rangeFrom: '2021-10-10T00:00:00.000Z',
@@ -53,6 +55,12 @@ describe('When navigating to the service inventory', () => {
     cy.visit(serviceInventoryHref);
   });
 
+  it('has no detectable a11y violations on load', () => {
+    cy.contains('h1', 'Services');
+    // set skipFailures to true to not fail the test when there are accessibility failures
+    checkA11y({ skipFailures: true });
+  });
+
   it('has a list of services', () => {
     cy.contains('opbeans-node');
     cy.contains('opbeans-java');
@@ -93,12 +101,12 @@ describe('When navigating to the service inventory', () => {
       cy.wait(aliasNames);
     });
 
-    it.skip('when selecting a different time range and clicking the update button', () => {
+    it('when selecting a different time range and clicking the update button', () => {
       cy.wait(aliasNames);
 
       cy.selectAbsoluteTimeRange(
-        'Oct 10, 2021 @ 01:00:00.000',
-        'Oct 10, 2021 @ 01:30:00.000'
+        moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
+        moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
       cy.contains('Update').click();
       cy.wait(aliasNames);

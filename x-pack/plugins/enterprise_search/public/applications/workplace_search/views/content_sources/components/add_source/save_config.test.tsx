@@ -18,6 +18,7 @@ import { EuiSteps, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { ApiKey } from '../../../../components/shared/api_key';
 import { staticSourceData } from '../../source_data';
 
+import { ExternalConnectorFormFields } from './add_external_connector';
 import { ConfigDocsLinks } from './config_docs_links';
 import { SaveConfig } from './save_config';
 
@@ -27,6 +28,8 @@ describe('SaveConfig', () => {
   const onDeleteConfig = jest.fn();
   const setClientIdValue = jest.fn();
   const setClientSecretValue = jest.fn();
+  const setExternalConnectorUrl = jest.fn();
+  const setExternalConnectorApiKey = jest.fn();
   const setBaseUrlValue = jest.fn();
 
   const credentialsSourceConfig = staticSourceData[0].configuration;
@@ -43,6 +46,11 @@ describe('SaveConfig', () => {
     header: <h1>Header</h1>,
   };
 
+  const publicProps = {
+    ...props,
+    configuration: publicKeySourceConfig,
+  };
+
   const values = {
     sourceConfigData,
     buttonLoading: false,
@@ -57,6 +65,8 @@ describe('SaveConfig', () => {
       setClientIdValue,
       setClientSecretValue,
       setBaseUrlValue,
+      setExternalConnectorUrl,
+      setExternalConnectorApiKey,
     });
     setMockValues({ ...values });
   });
@@ -75,6 +85,15 @@ describe('SaveConfig', () => {
 
     expect(preventDefault).toHaveBeenCalled();
     expect(advanceStep).toHaveBeenCalled();
+  });
+
+  describe('external connector', () => {
+    const externalConnectorConfigData = { ...sourceConfigData, serviceType: 'external' };
+    it('shows external url fields', () => {
+      setMockValues({ sourceConfigData: externalConnectorConfigData });
+      const wrapper = shallow(<SaveConfig {...props} />);
+      expect(wrapper.find(EuiSteps).dive().find(ExternalConnectorFormFields)).toHaveLength(1);
+    });
   });
 
   describe('credentials item', () => {
@@ -98,11 +117,6 @@ describe('SaveConfig', () => {
   });
 
   describe('public key item', () => {
-    const publicProps = {
-      ...props,
-      configuration: publicKeySourceConfig,
-    };
-
     it('renders form controls', () => {
       const wrapper = shallow(<SaveConfig {...publicProps} />);
       const steps = wrapper.find(EuiSteps);
@@ -117,6 +131,22 @@ describe('SaveConfig', () => {
 
       expect(steps.dive().find(ApiKey)).toHaveLength(2);
       expect(steps.dive().find(ConfigDocsLinks)).toHaveLength(1);
+    });
+
+    it('renders empty ApiKeys', () => {
+      setMockValues({
+        ...values,
+        sourceConfigData: {
+          ...values.sourceConfigData,
+          configuredFields: {},
+        },
+      });
+
+      const wrapper = shallow(<SaveConfig {...publicProps} />);
+      const steps = wrapper.find(EuiSteps);
+
+      expect(steps.dive().find(ApiKey).at(0).prop('apiKey')).toEqual('');
+      expect(steps.dive().find(ApiKey).at(1).prop('apiKey')).toEqual('');
     });
 
     it('handles Base URI change', () => {

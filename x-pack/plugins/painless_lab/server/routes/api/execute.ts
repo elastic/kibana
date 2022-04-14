@@ -26,10 +26,17 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
 
       try {
         const client = ctx.core.elasticsearch.client.asCurrentUser;
-        const response = await client.scriptsPainlessExecute({
-          // @ts-expect-error `ExecutePainlessScriptRequest.body` does not allow `string`
-          body,
-        });
+        const response = await client.scriptsPainlessExecute(
+          {
+            // @ts-expect-error `ExecutePainlessScriptRequest.body` does not allow `string`
+            body,
+          },
+          {
+            headers: {
+              'content-type': 'application/json',
+            },
+          }
+        );
 
         return res.ok({
           body: response,

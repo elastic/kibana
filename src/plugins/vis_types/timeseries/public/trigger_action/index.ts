@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import type {
   NavigateToLensContext,
   VisualizeEditorLayersContext,
@@ -16,6 +16,7 @@ import { getDataSourceInfo } from './get_datasource_info';
 import { getFieldType } from './get_field_type';
 import { getSeries } from './get_series';
 import { getYExtents } from './get_extents';
+import { getFieldsForTerms } from '../../common/fields_utils';
 
 const SUPPORTED_FORMATTERS = ['bytes', 'percent', 'number'];
 
@@ -36,6 +37,11 @@ export const triggerTSVBtoLensConfiguration = async (
     return null;
   }
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
+  // get the active series number
+  let seriesNum = 0;
+  model.series.forEach((series) => {
+    if (!series.hidden) seriesNum++;
+  });
 
   // handle multiple layers/series
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
@@ -52,7 +58,7 @@ export const triggerTSVBtoLensConfiguration = async (
     const timeShift = layer.offset_time;
     // translate to Lens seriesType
     const layerChartType =
-      layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
+      layer.chart_type === 'line' && Number(layer.fill) > 0 ? 'area' : layer.chart_type;
     let chartType = layerChartType;
 
     if (layer.stacked !== 'none' && layer.stacked !== 'percent') {
@@ -63,7 +69,7 @@ export const triggerTSVBtoLensConfiguration = async (
     }
 
     // handle multiple metrics
-    let metricsArray = getSeries(layer.metrics);
+    let metricsArray = getSeries(layer.metrics, seriesNum);
     if (!metricsArray) {
       return null;
     }
@@ -99,13 +105,21 @@ export const triggerTSVBtoLensConfiguration = async (
     }
 
     const palette = layer.palette as PaletteOutput;
+    const splitFields = getFieldsForTerms(layer.terms_field);
 
     // in case of terms in a date field, we want to apply the date_histogram
     let splitWithDateHistogram = false;
-    if (layer.terms_field && layer.split_mode === 'terms') {
-      const fieldType = await getFieldType(indexPatternId, layer.terms_field);
-      if (fieldType === 'date') {
-        splitWithDateHistogram = true;
+    if (layer.terms_field && layer.split_mode === 'terms' && splitFields) {
+      for (const f of splitFields) {
+        const fieldType = await getFieldType(indexPatternId, f);
+
+        if (fieldType === 'date') {
+          if (splitFields.length === 1) {
+            splitWithDateHistogram = true;
+          } else {
+            return null;
+          }
+        }
       }
     }
 
@@ -114,7 +128,7 @@ export const triggerTSVBtoLensConfiguration = async (
       timeFieldName: timeField,
       chartType,
       axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
-      ...(layer.terms_field && { splitField: layer.terms_field }),
+      ...(layer.terms_field && { splitFields }),
       splitWithDateHistogram,
       ...(layer.split_mode !== 'everything' && { splitMode: layer.split_mode }),
       ...(splitFilters.length > 0 && { splitFilters }),
@@ -136,6 +150,9 @@ export const triggerTSVBtoLensConfiguration = async (
       timeInterval: model.interval && !model.interval?.includes('=') ? model.interval : 'auto',
       ...(SUPPORTED_FORMATTERS.includes(layer.formatter) && { format: layer.formatter }),
       ...(layer.label && { label: layer.label }),
+      dropPartialBuckets: layer.override_index_pattern
+        ? layer.series_drop_last_bucket > 0
+        : model.drop_last_bucket > 0,
     };
     layersConfiguration[layerIdx] = layerConfiguration;
   }

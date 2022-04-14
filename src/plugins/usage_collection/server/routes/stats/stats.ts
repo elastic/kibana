@@ -9,13 +9,11 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import defaultsDeep from 'lodash/defaultsDeep';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import {
   ElasticsearchClient,
   IRouter,
-  KibanaRequest,
   MetricsServiceSetup,
   SavedObjectsClientContract,
   ServiceStatus,
@@ -55,10 +53,9 @@ export function registerStatsRoute({
 }) {
   const getUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest
+    savedObjectsClient: SavedObjectsClientContract
   ): Promise<UsageObject> => {
-    const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient, kibanaRequest);
+    const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient);
     return collectorSet.toObject(usage);
   };
 
@@ -97,7 +94,7 @@ export function registerStatsRoute({
 
         const [usage, clusterUuid] = await Promise.all([
           shouldGetUsage
-            ? getUsage(asCurrentUser, savedObjectsClient, req)
+            ? getUsage(asCurrentUser, savedObjectsClient)
             : Promise.resolve<UsageObject>({}),
           getClusterUuid(asCurrentUser),
         ]);
@@ -145,12 +142,11 @@ export function registerStatsRoute({
       }
 
       // Guaranteed to resolve immediately due to replay effect on getOpsMetrics$
-      const { collected_at: collectedAt, ...lastMetrics } = await metrics
-        .getOpsMetrics$()
-        .pipe(first())
-        .toPromise();
+      const { collected_at: collectedAt, ...lastMetrics } = await firstValueFrom(
+        metrics.getOpsMetrics$()
+      );
 
-      const overallStatus = await overallStatus$.pipe(first()).toPromise();
+      const overallStatus = await firstValueFrom(overallStatus$);
       const kibanaStats = collectorSet.toApiFieldNames({
         ...lastMetrics,
         kibana: {

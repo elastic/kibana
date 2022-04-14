@@ -11,6 +11,7 @@ import type {
   CoreSetup,
   CoreStart,
   Logger,
+  PackageInfo,
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
@@ -45,6 +46,7 @@ export interface ScreenshottingStart {
 export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, SetupDeps> {
   private config: ConfigType;
   private logger: Logger;
+  private packageInfo: PackageInfo;
   private screenshotMode!: ScreenshotModePluginSetup;
   private browserDriverFactory!: Promise<HeadlessChromiumDriverFactory>;
   private screenshots!: Promise<Screenshots>;
@@ -52,6 +54,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
   constructor(context: PluginInitializerContext<ConfigType>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.packageInfo = context.env.packageInfo;
   }
 
   setup({ http }: CoreSetup, { screenshotMode }: SetupDeps) {
@@ -82,7 +85,7 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
       const browserDriverFactory = await this.browserDriverFactory;
       const logger = this.logger.get('screenshot');
 
-      return new Screenshots(browserDriverFactory, logger, this.config);
+      return new Screenshots(browserDriverFactory, logger, this.packageInfo, http, this.config);
     })();
     // Already handled in `browserDriverFactory`
     this.screenshots.catch(() => {});
@@ -94,10 +97,10 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     return {
       diagnose: () =>
         from(this.browserDriverFactory).pipe(switchMap((factory) => factory.diagnose())),
-      getScreenshots: (options) =>
+      getScreenshots: ((options) =>
         from(this.screenshots).pipe(
           switchMap((screenshots) => screenshots.getScreenshots(options))
-        ),
+        )) as ScreenshottingStart['getScreenshots'],
     };
   }
 

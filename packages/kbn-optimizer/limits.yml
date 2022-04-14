@@ -41,7 +41,7 @@ pageLoadAssetSize:
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
-  observability: 89709
+  observability: 95000
   painlessLab: 179748
   remoteClusters: 51327
   rollup: 97204
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 100000
+  triggersActionsUi: 102400
   upgradeAssistant: 81241
   uptime: 40825
   urlForwarding: 32579
@@ -99,8 +99,7 @@ pageLoadAssetSize:
   visTypeMetric: 23332
   bfetch: 22837
   kibanaUtils: 79713
-  data: 491273
-  dataViews: 42532
+  dataViews: 43532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 74422
@@ -121,3 +120,11 @@ pageLoadAssetSize:
   expressionPartitionVis: 26338
   sharedUX: 16225
   ux: 20784
+  sessionView: 77750
+  cloudSecurityPosture: 19109
+  visTypeGauge: 24113
+  unifiedSearch: 49195
+  data: 454087
+  expressionXY: 26500
+  eventAnnotation: 19334
+  screenshotting: 22870

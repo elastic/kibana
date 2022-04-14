@@ -10,10 +10,10 @@ import semverValid from 'semver/functions/valid';
 
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
 import type { PreconfiguredOutput } from '../../../common';
-import { outputType } from '../../../common';
 
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
+import { NewOutputSchema } from './output';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -74,16 +74,10 @@ function validatePreconfiguredOutputs(outputs: PreconfiguredOutput[]) {
 }
 
 export const PreconfiguredOutputsSchema = schema.arrayOf(
-  schema.object({
+  NewOutputSchema.extends({
     id: schema.string(),
-    is_default: schema.boolean({ defaultValue: false }),
-    is_default_monitoring: schema.boolean({ defaultValue: false }),
-    name: schema.string(),
-    type: schema.oneOf([schema.literal(outputType.Elasticsearch)]),
-    hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
-    ca_sha256: schema.maybe(schema.string()),
-    ca_trusted_fingerprint: schema.maybe(schema.string()),
     config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    config_yaml: schema.never(),
   }),
   {
     defaultValue: [],
