@@ -9,8 +9,9 @@
 import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
-import { VIS_EVENT_TO_TRIGGER, VisParams } from '@kbn/visualizations-plugin/public';
+import { VisParams } from '@kbn/visualizations-plugin/public';
 import { TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
@@ -46,9 +47,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     },
     toExpressionAst,
     inspectorAdapters: {},
-    getSupportedTriggers: () => {
-      return [VIS_EVENT_TO_TRIGGER.applyFilter];
-    },
+    getSupportedTriggers: () => [APPLY_FILTER_TRIGGER],
     getUsedIndexPattern: async (params: VisParams) => {
       try {
         const args = (await parseTimelionExpressionAsync(params.expression))?.args ?? [];

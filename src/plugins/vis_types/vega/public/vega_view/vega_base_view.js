@@ -353,7 +353,7 @@ export class VegaBaseView {
     const indexId = await this.findIndex(index);
     const filter = buildQueryFilter(query, indexId, alias);
 
-    this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
+    this._fireEvent({ name: 'FILTER_TRIGGER', data: { filters: [filter] } });
   }
 
   /**
@@ -389,7 +389,7 @@ export class VegaBaseView {
     const { from, to, mode } = VegaBaseView._parseTimeRange(start, end);
 
     this._fireEvent({
-      name: 'applyFilter',
+      name: 'FILTER_TRIGGER',
       data: {
         timeFieldName: '*',
         filters: [

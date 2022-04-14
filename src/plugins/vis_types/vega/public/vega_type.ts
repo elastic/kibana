@@ -9,12 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import { parse } from 'hjson';
 
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
-import {
-  VIS_EVENT_TO_TRIGGER,
-  VisGroups,
-  VisTypeDefinition,
-} from '@kbn/visualizations-plugin/public';
+import { VisGroups, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
@@ -54,9 +51,7 @@ export const createVegaTypeDefinition = (): VisTypeDefinition<VisParams> => {
       showQueryBar: true,
       showFilterBar: true,
     },
-    getSupportedTriggers: () => {
-      return [VIS_EVENT_TO_TRIGGER.applyFilter];
-    },
+    getSupportedTriggers: () => [APPLY_FILTER_TRIGGER],
     getUsedIndexPattern: async (visParams) => {
       try {
         const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });

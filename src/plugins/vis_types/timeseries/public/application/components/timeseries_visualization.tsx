@@ -15,6 +15,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
@@ -87,7 +88,7 @@ function TimeseriesVisualization({
         };
       } else {
         event = {
-          name: 'applyFilter',
+          name: APPLY_FILTER_TRIGGER,
           data: {
             timeFieldName: '*',
             filters: [

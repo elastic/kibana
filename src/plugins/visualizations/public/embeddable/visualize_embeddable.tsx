@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _, { get } from 'lodash';
+import _, { get, isUndefined, omitBy } from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -15,7 +15,12 @@ import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { SavedObjectAttributes, KibanaExecutionContext } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { TimeRange, Query, TimefilterContract } from '@kbn/data-plugin/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  TimeRange,
+  Query,
+  TimefilterContract,
+} from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableInput,
@@ -325,6 +330,17 @@ export class VisualizeEmbeddable
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
+      getExtraActionContext: ({ name, data }) => {
+        if (name === APPLY_FILTER_TRIGGER) {
+          return omitBy(
+            {
+              embeddable: this,
+              timeFieldName: this.vis.data.indexPattern?.timeFieldName,
+            },
+            isUndefined
+          );
+        }
+      },
       renderMode: this.input.renderMode || 'view',
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
@@ -333,8 +349,6 @@ export class VisualizeEmbeddable
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async (event) => {
-        event.preventDefault();
-
         // maps hack, remove once esaggs function is cleaned up and ready to accept variables
         if (event.name === 'bounds') {
           const agg = this.vis.data.aggs!.aggs.find((a: any) => {
@@ -348,25 +362,19 @@ export class VisualizeEmbeddable
             agg.params.precision = event.data.precision;
             this.reload();
           }
+          event.preventDefault();
+
           return;
         }
 
-        if (!this.input.disableTriggers) {
-          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
-          let context;
+        if (!this.input.disableTriggers && event.name !== APPLY_FILTER_TRIGGER) {
+          event.preventDefault();
 
-          if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-            context = {
-              embeddable: this,
-              timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
-              ...event.data,
-            };
-          } else {
-            context = {
-              embeddable: this,
-              data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
-            };
-          }
+          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+          const context = {
+            embeddable: this,
+            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
+          };
 
           getUiActions().getTrigger(triggerId).exec(context);
         }

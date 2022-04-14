@@ -11,6 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { RangeFilterParams } from '@kbn/es-query';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { TimelionVisDependencies } from './plugin';
@@ -42,7 +43,7 @@ export const getTimelionVisRenderer: (
 
     const onBrushEvent = (rangeFilterParams: RangeFilterParams) => {
       handlers.event({
-        name: 'applyFilter',
+        name: APPLY_FILTER_TRIGGER,
         data: {
           timeFieldName: '*',
           filters: [
