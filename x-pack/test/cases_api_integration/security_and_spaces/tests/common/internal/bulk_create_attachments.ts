@@ -407,8 +407,37 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s when attempting to add more than 1K alerts in multiple request', async () => {
+      it('400s when attempting to add an alert to a case that already has 1K alerts', async () => {
         const alerts = [...Array(1000).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertReq,
+              alertId: alerts,
+              index: alerts,
+            },
+          ],
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertReq,
+              alertId: 'test-id',
+              index: 'test-index',
+            },
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when the case already has alerts and the sum of existing and new alerts exceed 1k', async () => {
+        const alerts = [...Array(1200).keys()].map((num) => `test-${num}`);
         const postedCase = await createCase(supertest, postCaseReq);
         await bulkCreateAttachments({
           supertest,
@@ -420,7 +449,6 @@ export default ({ getService }: FtrProviderContext): void => {
               index: alerts.slice(0, 500),
             },
           ],
-          expectedHttpCode: 200,
         });
 
         await bulkCreateAttachments({
