@@ -333,6 +333,8 @@ export class VisualizeEmbeddable
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async (event) => {
+        event.preventDefault();
+
         // maps hack, remove once esaggs function is cleaned up and ready to accept variables
         if (event.name === 'bounds') {
           const agg = this.vis.data.aggs!.aggs.find((a: any) => {

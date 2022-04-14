@@ -293,6 +293,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
+      event.preventDefault();
+
       if (!plugins.uiActions) {
         // ui actions not available, not handling event...
         return;

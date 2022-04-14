@@ -18,9 +18,14 @@ import {
   ExpressionRendererEvent,
 } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
+import {
+  IInterpreterRenderEvent,
+  IInterpreterRenderHandlers,
+  IInterpreterRenderUpdateParams,
+  RenderMode,
+} from '../common';
 
-import { getRenderersRegistry } from './services';
+import { getRenderersRegistry, getUiActions } from './services';
 
 export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 
@@ -43,7 +48,7 @@ export class ExpressionRenderHandler {
   private destroyFn?: Function;
   private renderCount: number = 0;
   private renderSubject: Rx.BehaviorSubject<number | null>;
-  private eventsSubject: Rx.Subject<unknown>;
+  private eventsSubject: Rx.Subject<ExpressionRendererEvent>;
   private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
@@ -61,7 +66,7 @@ export class ExpressionRenderHandler {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
-    this.events$ = this.eventsSubject.asObservable() as Observable<ExpressionRendererEvent>;
+    this.events$ = this.eventsSubject.asObservable();
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
@@ -85,9 +90,6 @@ export class ExpressionRenderHandler {
       update: (params: UpdateValue) => {
         this.updateSubject.next(params);
       },
-      event: (data) => {
-        this.eventsSubject.next(data);
-      },
       getRenderMode: () => {
         return renderMode || 'view';
       },
@@ -100,6 +102,7 @@ export class ExpressionRenderHandler {
       isInteractive: () => {
         return interactive ?? true;
       },
+      event: this.event.bind(this),
     };
   }
 
@@ -151,6 +154,31 @@ export class ExpressionRenderHandler {
   handleRenderError = (error: ExpressionRenderError) => {
     this.onRenderError(this.element, error, this.handlers);
   };
+
+  protected event(data: IInterpreterRenderEvent): void {
+    let isDefaultPrevented = false;
+    const event = {
+      ...data,
+      preventDefault: () => {
+        isDefaultPrevented = true;
+      },
+    };
+
+    this.eventsSubject.next(event);
+
+    if (isDefaultPrevented || !this.handlers.isInteractive()) {
+      return;
+    }
+
+    const uiActions = getUiActions();
+    if (!uiActions?.hasTrigger(event.name)) {
+      return;
+    }
+
+    uiActions.getTrigger(data.name).exec({
+      ...(data.data && typeof data.data === 'object' ? data.data : {}),
+    });
+  }
 }
 
 export type IExpressionRenderer = (

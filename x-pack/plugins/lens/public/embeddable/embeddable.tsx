@@ -611,6 +611,8 @@ export class Embeddable
   }
 
   handleEvent = async (event: ExpressionRendererEvent) => {
+    event.preventDefault();
+
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }

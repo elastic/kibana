@@ -9,10 +9,13 @@
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { ExpressionRenderError } from './types';
-import { getRenderersRegistry } from './services';
+import { getRenderersRegistry, getUiActions } from './services';
 import { first, take, toArray } from 'rxjs/operators';
-import { IInterpreterRenderHandlers } from '../common';
+import type { ExpressionRenderer, IInterpreterRenderHandlers } from '../common';
+import _ from 'lodash';
 
 const element: HTMLElement = {} as HTMLElement;
 const mockNotificationService = {
@@ -23,9 +26,9 @@ const mockNotificationService = {
 jest.mock('./services', () => {
   const renderers: Record<string, unknown> = {
     test: {
-      render: (el: HTMLElement, value: unknown, handlers: IInterpreterRenderHandlers) => {
+      render: jest.fn((el: HTMLElement, value: unknown, handlers: IInterpreterRenderHandlers) => {
         handlers.done();
-      },
+      }),
     },
   };
 
@@ -36,6 +39,7 @@ jest.mock('./services', () => {
     getNotifications: jest.fn(() => {
       return mockNotificationService;
     }),
+    getUiActions: jest.fn(),
   };
 });
 
@@ -179,6 +183,54 @@ describe('ExpressionRenderHandler', () => {
       const renderPromise = expressionRenderHandler.render$.pipe(take(2), toArray()).toPromise();
       expressionRenderHandler.render(false as unknown as SerializableRecord);
       await expect(renderPromise).resolves.toEqual([1, 2]);
+    });
+  });
+
+  describe('handlers', () => {
+    describe('event', () => {
+      let handler: ExpressionRenderHandler;
+      let handlers: IInterpreterRenderHandlers;
+      let trigger: jest.Mocked<ReturnType<UiActionsStart['getTrigger']>>;
+      let uiActions: jest.Mocked<UiActionsStart>;
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+
+        uiActions = uiActionsPluginMock.createStartContract();
+        trigger = { exec: jest.fn() } as unknown as typeof trigger;
+        handler = new ExpressionRenderHandler(element);
+        handler.render({ type: 'render', as: 'test' });
+        const renderer = getRenderersRegistry().get('test') as jest.Mocked<ExpressionRenderer>;
+        [[, , handlers]] = renderer?.render.mock.calls;
+
+        (getUiActions as jest.MockedFunction<typeof getUiActions>).mockReturnValue(uiActions);
+        uiActions.getTrigger.mockReturnValueOnce(trigger);
+      });
+
+      it('should prevent the default behavior', () => {
+        handler.events$.subscribe((event) => {
+          event.preventDefault();
+        });
+        handlers.event({ name: 'click' });
+
+        expect(uiActions.hasTrigger).not.toHaveBeenCalled();
+      });
+
+      it('should not execute a trigger if not present', () => {
+        uiActions.hasTrigger.mockReturnValueOnce(false);
+        handlers.event({ name: 'click' });
+
+        expect(uiActions.getTrigger).not.toHaveBeenCalled();
+      });
+
+      it('should execute a trigger', () => {
+        uiActions.hasTrigger.mockReturnValueOnce(true);
+        handlers.event({ name: 'click', data: { something: 'kibana' } });
+
+        expect(uiActions.getTrigger).toHaveBeenCalledTimes(1);
+        expect(uiActions.getTrigger).toHaveBeenCalledWith('click');
+        expect(trigger.exec).toHaveBeenCalledWith(expect.objectContaining({ something: 'kibana' }));
+      });
     });
   });
 });

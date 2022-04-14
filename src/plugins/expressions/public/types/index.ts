@@ -76,4 +76,10 @@ export type RenderErrorHandlerFnType = (
 ) => void;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ExpressionRendererEvent = IInterpreterRenderEvent<any>;
+export interface ExpressionRendererEvent extends IInterpreterRenderEvent<any> {
+  /**
+   * Prevent default event handling.
+   * By default, a UI Actions trigger will be executed.
+   */
+  preventDefault(): void;
+}

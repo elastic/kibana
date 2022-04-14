@@ -872,7 +872,7 @@ describe('embeddable', () => {
     const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
 
     const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
-    onEvent({ name: 'brush', data: eventData });
+    onEvent({ name: 'brush', data: eventData, preventDefault: jest.fn() });
 
     expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
     expect(trigger.exec).toHaveBeenCalledWith(
@@ -922,7 +922,7 @@ describe('embeddable', () => {
 
     const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
 
-    onEvent({ name: 'tableRowContextMenuClick', data: {} });
+    onEvent({ name: 'tableRowContextMenuClick', data: {}, preventDefault: jest.fn() });
 
     expect(getTrigger).toHaveBeenCalledWith(ROW_CLICK_TRIGGER);
   });
@@ -1071,6 +1071,7 @@ describe('embeddable', () => {
         onEvent?.({
           name: 'filter',
           data: { pings: false, table: { rows: [], columns: [] }, column: 0 },
+          preventDefault: jest.fn(),
         });
       }, 10);
 
@@ -1128,6 +1129,7 @@ describe('embeddable', () => {
         onEvent?.({
           name: 'brush',
           data: { range: [0, 1], table: { rows: [], columns: [] }, column: 0 },
+          preventDefault: jest.fn(),
         });
       }, 10);
 
@@ -1182,7 +1184,11 @@ describe('embeddable', () => {
 
     expressionRenderer = jest.fn(({ onEvent }) => {
       setTimeout(() => {
-        onEvent?.({ name: 'tableRowContextMenuClick', data: { name: 'test' } });
+        onEvent?.({
+          name: 'tableRowContextMenuClick',
+          data: { name: 'test' },
+          preventDefault: jest.fn(),
+        });
       }, 10);
 
       return null;
@@ -1301,7 +1307,7 @@ describe('embeddable', () => {
     expect(expressionRenderer.mock.calls[0][0]!.expression).toBe(`not_edited`);
 
     // TEST EDIT EVENT
-    await embeddable.handleEvent({ name: 'edit' });
+    await embeddable.handleEvent({ name: 'edit', preventDefault: jest.fn() });
 
     expect(onEditActionMock).toHaveBeenCalledTimes(1);
     expect(documentToExpressionMock).toHaveBeenCalled();

@@ -455,7 +455,7 @@ describe('workspace_panel', () => {
     const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
     const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
-    onEvent({ name: 'brush', data: eventData });
+    onEvent({ name: 'brush', data: eventData, preventDefault: jest.fn() });
 
     expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
     expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });

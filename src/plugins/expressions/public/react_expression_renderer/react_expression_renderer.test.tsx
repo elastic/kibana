@@ -299,6 +299,7 @@ describe('ExpressionRenderer', () => {
       data: {
         bar: 'baz',
       },
+      preventDefault: jest.fn(),
     };
 
     (ExpressionLoader as jest.Mock).mockImplementation(() => {

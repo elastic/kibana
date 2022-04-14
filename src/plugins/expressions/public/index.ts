@@ -82,6 +82,7 @@ export type {
   FontValue,
   FontWeight,
   FunctionsRegistry,
+  IInterpreterRenderEvent,
   IInterpreterRenderHandlers,
   InterpreterErrorType,
   IRegistry,
