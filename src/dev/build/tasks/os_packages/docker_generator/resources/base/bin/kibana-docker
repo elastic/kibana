@@ -44,7 +44,7 @@ kibana_vars=(
     unifiedSearch.autocomplete.valueSuggestions.timeout
     unifiedSearch.autocomplete.querySuggestions.enabled
     unifiedSearch.autocomplete.valueSuggestions.enabled
-    unifiedSearch.autocomplete.valueSuggestions.timeout
+    unifiedSearch.autocomplete.valueSuggestions.tiers
     elasticsearch.customHeaders
     elasticsearch.hosts
     elasticsearch.logQueries
