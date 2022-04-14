@@ -220,7 +220,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await retry.try(async () => {
               await browser
                 .getActions()
-                .move({ x: 100, y: 65, origin: el._webElement })
+                .move({ x: 70, y: 100, origin: el._webElement })
                 .click()
                 .perform();
               await common.sleep(2000);
