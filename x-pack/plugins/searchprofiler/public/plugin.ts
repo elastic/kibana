@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
@@ -51,7 +51,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         const { notifications, i18n: i18nDep } = coreStart;
         const { renderApp } = await import('./application');
 
-        const license = await licensing.license$.pipe(first()).toPromise();
+        const license = await firstValueFrom(licensing.license$);
         const initialLicenseStatus = checkLicenseStatus(license);
 
         return renderApp({

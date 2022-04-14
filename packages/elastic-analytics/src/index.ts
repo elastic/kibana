@@ -36,8 +36,10 @@ export type {
   // Types for the registerEventType API
   EventTypeOpts,
 } from './analytics_client';
+
 export type { Event, EventContext, EventType, TelemetryCounter } from './events';
 export { TelemetryCounterType } from './events';
+
 export type {
   RootSchema,
   SchemaObject,
@@ -52,4 +54,6 @@ export type {
   AllowedSchemaStringTypes,
   AllowedSchemaTypes,
 } from './schema';
-export type { IShipper } from './shippers';
+
+export type { IShipper, FullStorySnippetConfig, FullStoryShipperConfig } from './shippers';
+export { FullStoryShipper } from './shippers';

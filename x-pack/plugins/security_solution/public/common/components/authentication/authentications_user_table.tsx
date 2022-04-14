@@ -12,20 +12,22 @@ import { useDispatch } from 'react-redux';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
 import { PaginatedTable } from '../paginated_table';
 
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-
 import * as i18n from './translations';
-import { getHostsPageAuthenticationColumns, rowItems } from './helpers';
+import {
+  getUserDetailsAuthenticationColumns,
+  getUsersPageAuthenticationColumns,
+  rowItems,
+} from './helpers';
 import { useAuthentications } from '../../containers/authentications';
 import { useQueryInspector } from '../page/manage_query';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { usersActions, usersModel, usersSelectors } from '../../../users/store';
-import { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
+import { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
 
-const AuthenticationsUserTableComponent: React.FC<UsersComponentsQueryProps> = ({
+const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps> = ({
   docValueFields,
   endDate,
   filterQuery,
@@ -35,9 +37,8 @@ const AuthenticationsUserTableComponent: React.FC<UsersComponentsQueryProps> = (
   type,
   setQuery,
   deleteQuery,
+  userName,
 }) => {
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
-
   const dispatch = useDispatch();
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
@@ -60,10 +61,13 @@ const AuthenticationsUserTableComponent: React.FC<UsersComponentsQueryProps> = (
     startDate,
     activePage,
     limit,
-    stackByField: AuthStackByField.userName,
+    stackByField: userName ? AuthStackByField.hostName : AuthStackByField.userName,
   });
 
-  const columns = getHostsPageAuthenticationColumns(usersEnabled);
+  const columns = useMemo(
+    () => (userName ? getUserDetailsAuthenticationColumns() : getUsersPageAuthenticationColumns()),
+    [userName]
+  );
 
   const updateLimitPagination = useCallback(
     (newLimit) =>
@@ -105,7 +109,7 @@ const AuthenticationsUserTableComponent: React.FC<UsersComponentsQueryProps> = (
       dataTestSubj="table-users-authentications"
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
-      headerUnit={i18n.UNIT(totalCount)}
+      headerUnit={userName ? i18n.HOSTS_UNIT(totalCount) : i18n.USERS_UNIT(totalCount)}
       id={TABLE_QUERY_ID}
       isInspect={isInspected}
       itemsPerRow={rowItems}

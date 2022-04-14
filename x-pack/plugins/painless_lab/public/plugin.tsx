@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from 'src/core/public';
 
@@ -58,7 +58,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           chrome,
         } = core;
 
-        const license = await licensing.license$.pipe(first()).toPromise();
+        const license = await firstValueFrom(licensing.license$);
         const licenseStatus = checkLicenseStatus(license);
 
         if (!licenseStatus.valid) {

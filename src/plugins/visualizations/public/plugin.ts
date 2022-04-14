@@ -280,7 +280,6 @@ export class VisualizationsPlugin
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
           createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
-          savedObjectsPublic: pluginsStart.savedObjects,
           scopedHistory: params.history,
           restorePreviousUrl,
           setHeaderActionMenu: params.setHeaderActionMenu,

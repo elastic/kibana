@@ -106,7 +106,7 @@ export class ReportingPublicPlugin
 {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
-  private readonly stop$ = new Rx.ReplaySubject(1);
+  private readonly stop$ = new Rx.ReplaySubject<void>(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
   });

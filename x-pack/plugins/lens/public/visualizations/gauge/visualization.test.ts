@@ -9,7 +9,7 @@ import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { GROUP_ID } from './constants';
-import type { DatasourcePublicAPI, OperationDescriptor } from '../../types';
+import type { DatasourceLayers, OperationDescriptor } from '../../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { layerTypes } from '../../../common';
 import type { GaugeVisualizationState } from './constants';
@@ -455,7 +455,7 @@ describe('gauge', () => {
   });
 
   describe('#toExpression', () => {
-    let datasourceLayers: Record<string, DatasourcePublicAPI>;
+    let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({

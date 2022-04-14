@@ -90,7 +90,6 @@ export function runRoute(
         getFunction,
         getIndexPatternsService: () => indexPatternsService,
         getStartServices: core.getStartServices,
-        allowedGraphiteUrls: configManager.getGraphiteUrls(),
         esShardTimeout: configManager.getEsShardTimeout(),
       });
       try {

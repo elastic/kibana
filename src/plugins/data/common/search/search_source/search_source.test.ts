@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of, throwError } from 'rxjs';
+import { lastValueFrom, of, throwError } from 'rxjs';
 import { IndexPattern } from '../..';
 import { SearchSource, SearchSourceDependencies, SortDirection } from './';
 import { AggConfigs, AggTypesRegistryStart } from '../../';
@@ -1240,7 +1240,7 @@ describe('SearchSource', () => {
         const fetch$ = searchSource.fetch$({});
         fetch$.subscribe(fetchSub);
 
-        const resp = await fetch$.toPromise();
+        const resp = await lastValueFrom(fetch$);
 
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);

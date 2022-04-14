@@ -6,7 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import moment from 'moment';
 import type {
   ElasticsearchClient,
@@ -150,7 +150,7 @@ export class BulkUploader implements IBulkUploader {
       collected_at: collectedAt,
       requests: { statusCodes, ...requests },
       ...lastMetrics
-    } = await this.opsMetrics$.pipe(take(1)).toPromise();
+    } = await firstValueFrom(this.opsMetrics$);
     return {
       ...lastMetrics,
       process,
