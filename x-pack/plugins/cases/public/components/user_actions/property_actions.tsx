@@ -44,16 +44,16 @@ const UserActionPropertyActionsComponent = ({
   const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const onDeleteClick = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
+
   const onDeleteConfirmClick = useCallback(() => {
     if (onDelete) {
       onDelete(id);
     }
     setShowDeleteConfirm(false);
   }, [id, onDelete]);
-
-  const onDeleteClick = useCallback(() => {
-    setShowDeleteConfirm(true);
-  }, []);
 
   const onDeleteCancelClick = useCallback(() => {
     setShowDeleteConfirm(false);
