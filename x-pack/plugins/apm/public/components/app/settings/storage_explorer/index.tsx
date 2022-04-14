@@ -34,8 +34,8 @@ import { asPercent } from '../../../../../common/utils/formatters';
 import { useChartTheme } from '../../../../../../observability/public';
 
 export function StorageExplorer() {
-  const rangeFrom = 'now/d';
-  const rangeTo = 'now/d';
+  const rangeFrom = 'now-15d';
+  const rangeTo = 'now';
   const environment = ENVIRONMENT_ALL.value;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
