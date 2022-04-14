@@ -91,7 +91,9 @@ export const getPackagePolicyDeleteCallback = (
               type: cspRuleAssetSavedObjectType,
               filter: `csp_rule.attributes.package_policy_id: ${deletedPackagePolicy.policy_id}`,
             });
-          cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id));
+          Promise.all(
+            cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))
+          );
         } catch (e) {
           logger.error(
             `Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`
