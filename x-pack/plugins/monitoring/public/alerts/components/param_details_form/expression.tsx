@@ -7,7 +7,7 @@
 
 import React, { Fragment, useCallback } from 'react';
 import { EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CommonAlertParamDetails } from '../../../../common/types/alerts';
@@ -29,14 +29,14 @@ export interface Props {
   setRuleProperty: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   paramDetails: CommonAlertParamDetails;
-  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   config?: MonitoringConfig;
 }
 
 export const Expression: React.FC<Props> = (props) => {
-  const { ruleParams, paramDetails, setRuleParams, errors, config, data } = props;
+  const { ruleParams, paramDetails, setRuleParams, errors, config, dataViews } = props;
 
-  const { derivedIndexPattern } = useDerivedIndexPattern(data, config);
+  const { derivedIndexPattern } = useDerivedIndexPattern(dataViews, config);
 
   const alertParamsUi = Object.keys(paramDetails).map((alertParamName) => {
     const details = paramDetails[alertParamName];
@@ -92,11 +92,12 @@ export const Expression: React.FC<Props> = (props) => {
 
   const onFilterChange = useCallback(
     (filter: string) => {
-      setRuleParams('filterQueryText', filter);
-      setRuleParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      if (derivedIndexPattern) setRuleParams('filterQueryText', filter);
+      if (derivedIndexPattern)
+        setRuleParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+        );
     },
     [setRuleParams, derivedIndexPattern]
   );
@@ -105,6 +106,17 @@ export const Expression: React.FC<Props> = (props) => {
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
+
+  const kueryBar = derivedIndexPattern ? (
+    <KueryBar
+      value={ruleParams.filterQueryText}
+      derivedIndexPattern={derivedIndexPattern}
+      onSubmit={onFilterChange}
+      onChange={debouncedOnFilterChange}
+    />
+  ) : (
+    <></>
+  );
 
   return (
     <Fragment>
@@ -119,12 +131,7 @@ export const Expression: React.FC<Props> = (props) => {
             defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
           })}
         >
-          <KueryBar
-            value={ruleParams.filterQueryText}
-            derivedIndexPattern={derivedIndexPattern}
-            onSubmit={onFilterChange}
-            onChange={debouncedOnFilterChange}
-          />
+          {kueryBar}
         </EuiFormRow>
         <EuiSpacer />
       </EuiForm>

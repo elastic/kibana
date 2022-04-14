@@ -176,6 +176,14 @@ export type GetAppUrl = (param: {
  * Returns a full URL to the provided page path by using
  * kibana's `getUrlForApp()`
  */
+
+export type GetAppUrl = (param: {
+  appId?: string;
+  deepLinkId?: string;
+  path?: string;
+  absolute?: boolean;
+}) => string;
+
 export const useAppUrl = () => {
   const { getUrlForApp } = useKibana().services.application;
 

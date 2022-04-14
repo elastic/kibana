@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { Comparator } from '../../../common/comparator_types';
 
 export type ComparatorFn = (value: number, threshold: number[]) => boolean;
@@ -32,6 +33,19 @@ export const ComparatorFns = new Map<Comparator, ComparatorFn>([
     (value: number, threshold: number[]) => value < threshold[0] || value > threshold[1],
   ],
 ]);
+
+export const getComparatorSchemaType = (validate: (comparator: Comparator) => string | void) =>
+  schema.oneOf(
+    [
+      schema.literal(Comparator.GT),
+      schema.literal(Comparator.LT),
+      schema.literal(Comparator.GT_OR_EQ),
+      schema.literal(Comparator.LT_OR_EQ),
+      schema.literal(Comparator.BETWEEN),
+      schema.literal(Comparator.NOT_BETWEEN),
+    ],
+    { validate }
+  );
 
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
 

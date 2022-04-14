@@ -4,7 +4,7 @@
 <titleabbrev>Get tags</titleabbrev>
 ++++
 
-Aggregates and returns all unique tags from all cases.
+Aggregates and returns a list of case tags.
 
 === Request
 
@@ -21,10 +21,6 @@ You must have `read` privileges for the *Cases* feature in the *Management*,
 
 === Path parameters
 
-`<case_id>`::
-(Required, string) An identifier for the case to retrieve. Use 
-<<cases-api-find-cases>> to retrieve case IDs.
-
 `<space_id>`::
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
@@ -32,9 +28,9 @@ default space is used.
 === Query parameters
 
 `owner`::
-(Optional, string) Specifies the set of applications to limit the retrieved 
-tags. If not specified, the response contains all tags that the user has access 
-to read.
+(Optional, string or array of strings) A filter to limit the retrieved tags to a specific set of applications.
+Valid values are: `cases`, `observability`, and `securitySolution`. If this parameter is omitted, the response
+contains tags from all cases that the user has access to read.
 
 ==== Response code
 
@@ -43,15 +39,13 @@ to read.
 
 ==== Example
 
-Gets all tags for all cases:
-
 [source,sh]
 --------------------------------------------------
 GET api/cases/tags
 --------------------------------------------------
 // KIBANA
 
-The API returns a JSON object with all tags for all cases. For example: 
+The API returns a JSON object with tags from all the cases that the user has access to read. For example: 
 
 [source,json]
 --------------------------------------------------

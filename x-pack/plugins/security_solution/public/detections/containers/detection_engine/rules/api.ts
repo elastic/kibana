@@ -6,7 +6,7 @@
  */
 
 import { camelCase } from 'lodash';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { HttpStart } from 'src/core/public';
 
 import {

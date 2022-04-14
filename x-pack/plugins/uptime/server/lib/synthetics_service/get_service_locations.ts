@@ -21,6 +21,7 @@ export const getDevLocation = (devUrl: string): ServiceLocation => ({
   label: 'Local Synthetics Service',
   geo: { lat: 0, lon: 0 },
   url: devUrl,
+  isServiceManaged: true,
 });
 
 export async function getServiceLocations(server: UptimeServerSetup) {
@@ -53,8 +54,7 @@ export async function getServiceLocations(server: UptimeServerSetup) {
     const throttling = pick(
       data.throttling,
       BandwidthLimitKey.DOWNLOAD,
-      BandwidthLimitKey.UPLOAD,
-      BandwidthLimitKey.LATENCY
+      BandwidthLimitKey.UPLOAD
     ) as ThrottlingOptions;
 
     return { throttling, locations };

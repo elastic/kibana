@@ -63,14 +63,13 @@ describe('useInlineErrors', function () {
           size: 1000,
           sort: [{ '@timestamp': 'desc' }],
         },
-        index: 'heartbeat-8*,heartbeat-7*,synthetics-*',
+        index: 'synthetics-*',
       },
       [
-        'heartbeat-8*,heartbeat-7*,synthetics-*',
         {
           error: { monitorList: null, serviceLocations: null, enablement: null },
           enablement: null,
-          list: { monitors: [], page: 1, perPage: 10, total: null },
+          list: { monitors: [], page: 1, perPage: 10, total: null, syncErrors: null },
           loading: { monitorList: false, serviceLocations: false, enablement: false },
           locations: [],
           syntheticsService: {
