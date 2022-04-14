@@ -48,7 +48,9 @@ export class TimePickerPageObject extends FtrService {
   }
 
   async ensureHiddenNoDataPopover() {
-    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton');
+    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton', {
+      timeout: 100,
+    });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
     }
@@ -103,15 +105,19 @@ export class TimePickerPageObject extends FtrService {
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
     await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
-    const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton');
-    if (isShowDatesButton) {
-      await this.testSubjects.click('superDatePickerShowDatesButton');
-    }
-    await this.testSubjects.exists('superDatePickerstartDatePopoverButton');
-    // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
-    if (isShowDatesButton) {
-      await this.testSubjects.click('superDatePickerstartDatePopoverButton');
-    }
+    await this.retry.tryForTime(5000, async () => {
+      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton', {
+        timeout: 50,
+      });
+      if (isShowDatesButton) {
+        await this.testSubjects.clickWithRetries('superDatePickerShowDatesButton', 0, 50);
+      }
+      await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
+      // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
+      if (isShowDatesButton) {
+        await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+      }
+    });
   }
 
   /**
@@ -156,11 +162,12 @@ export class TimePickerPageObject extends FtrService {
 
     await this.retry.waitFor('Timepicker popover to close', async () => {
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput'));
+      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
     });
 
     const superDatePickerApplyButtonExists = await this.testSubjects.exists(
-      'superDatePickerApplyTimeButton'
+      'superDatePickerApplyTimeButton',
+      { timeout: 100 }
     );
     if (superDatePickerApplyButtonExists) {
       // Timepicker is in top nav
