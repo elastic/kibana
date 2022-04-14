@@ -81,15 +81,8 @@ export interface RouteDependencies {
 }
 
 export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
-  // NOTE / TODO: These uppercase versions are here temporarily until all routes are converted to TS,
-  // and using the standard RouteMethod type.
-  method: RouteMethod | 'GET' | 'POST' | 'PUT';
+  method: RouteMethod;
 } & RouteConfig<Params, Query, Body, Method> & {
-    // NOTE / TODO: Ideally we'd make all routes stop using this nested custom "config" as
-    // validate already exists on the RouteConfig type.
-    config?: {
-      validate: RouteConfig<Params, Query, Body, Method>['validate'];
-    };
     handler: (request: LegacyRequest) => any;
   };
 

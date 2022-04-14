@@ -18,7 +18,7 @@ import { MonitoringCore } from '../../../../types';
 
 export function apmOverviewRoute(server: MonitoringCore) {
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm',
     validate: {
       params: createValidationFunction(postApmOverviewRequestParamsRT),
