@@ -353,7 +353,7 @@ class FilterEditorUI extends Component<Props, State> {
       case 'phrase':
         return (
           <PhraseValueInput
-            dataView={dataView}
+            indexPattern={dataView}
             field={this.state.selectedField}
             value={this.state.params}
             onChange={this.onParamsChange}
@@ -365,7 +365,7 @@ class FilterEditorUI extends Component<Props, State> {
       case 'phrases':
         return (
           <PhrasesValuesInput
-            dataView={dataView}
+            indexPattern={dataView}
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
