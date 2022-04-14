@@ -48,7 +48,7 @@ describe('FieldSuggestions', () => {
 
     it('should return an empty array', async () => {
       const suggestions = await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field: stubFields[0],
         query: '',
       });
@@ -64,7 +64,7 @@ describe('FieldSuggestions', () => {
     it('should return true/false for boolean fields', async () => {
       const [field] = stubFields.filter(({ type }) => type === 'boolean');
       const suggestions = await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
       });
@@ -76,7 +76,7 @@ describe('FieldSuggestions', () => {
     it('should return an empty array if the field type is not a string or boolean', async () => {
       const [field] = stubFields.filter(({ type }) => type !== 'string' && type !== 'boolean');
       const suggestions = await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
       });
@@ -88,7 +88,7 @@ describe('FieldSuggestions', () => {
     it('should return an empty array if the field is not aggregatable', async () => {
       const [field] = stubFields.filter(({ aggregatable }) => !aggregatable);
       const suggestions = await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
       });
@@ -103,7 +103,7 @@ describe('FieldSuggestions', () => {
       );
 
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
         useTimeRange: false,
@@ -117,7 +117,7 @@ describe('FieldSuggestions', () => {
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
       const args = {
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
         useTimeRange: false,
@@ -134,7 +134,7 @@ describe('FieldSuggestions', () => {
         ({ type, aggregatable }) => type === 'string' && aggregatable
       );
       const args = {
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
         useTimeRange: false,
@@ -158,25 +158,25 @@ describe('FieldSuggestions', () => {
       );
 
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field: fields[0],
         query: '',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field: fields[0],
         query: 'query',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field: fields[1],
         query: '',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field: fields[1],
         query: 'query',
         useTimeRange: false,
@@ -189,25 +189,25 @@ describe('FieldSuggestions', () => {
       };
 
       await getValueSuggestions({
-        dataView: customDataView,
+        indexPattern: customDataView,
         field: fields[0],
         query: '',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        dataView: customDataView,
+        indexPattern: customDataView,
         field: fields[0],
         query: 'query',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        dataView: customDataView,
+        indexPattern: customDataView,
         field: fields[1],
         query: '',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        dataView: customDataView,
+        indexPattern: customDataView,
         field: fields[1],
         query: 'query',
         useTimeRange: false,
@@ -222,7 +222,7 @@ describe('FieldSuggestions', () => {
       );
 
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
         useTimeRange: true,
@@ -243,7 +243,7 @@ describe('FieldSuggestions', () => {
       );
 
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
         useTimeRange: true,
@@ -263,7 +263,7 @@ describe('FieldSuggestions', () => {
       );
 
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
         useTimeRange: true,
@@ -283,7 +283,7 @@ describe('FieldSuggestions', () => {
       );
 
       await getValueSuggestions({
-        dataView: stubDataView,
+        indexPattern: stubDataView,
         field,
         query: '',
         useTimeRange: true,

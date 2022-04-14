@@ -47,9 +47,9 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
     const { getValueSuggestions } = await autoCompleteServicePromise;
 
     const data = await Promise.all(
-      dataViewFieldEntries.map(([dataView, field]) =>
+      dataViewFieldEntries.map(([indexPattern, field]) =>
         getValueSuggestions({
-          dataView,
+          indexPattern,
           field,
           query,
           boolFilter,

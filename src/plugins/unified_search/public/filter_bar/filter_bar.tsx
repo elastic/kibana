@@ -66,7 +66,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           filter={filter}
           onUpdate={(newFilter) => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
-          dataViews={props.dataViews}
+          indexPatterns={props.dataViews}
           uiSettings={uiSettings!}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
         />
