@@ -20,7 +20,7 @@ sleep 120
 
 cd "$XPACK_DIR"
 
-journeys=("ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard")
+journeys=("ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
 
 for i in "${journeys[@]}"; do
     echo "JOURNEY[${i}] is running"
