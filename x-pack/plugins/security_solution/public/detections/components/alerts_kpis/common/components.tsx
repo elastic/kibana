@@ -64,6 +64,7 @@ export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSe
         placeholder={i18n.STACK_BY_PLACEHOLDER}
         prepend={i18n.STACK_BY_LABEL}
         singleSelection={singleSelection}
+        isClearable={false}
         sortMatchesBy="startsWith"
         options={stackOptions}
         selectedOptions={selectedOptions}
