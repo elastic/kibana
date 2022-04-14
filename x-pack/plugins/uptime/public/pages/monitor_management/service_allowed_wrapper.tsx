@@ -13,15 +13,6 @@ import { useSyntheticsServiceAllowed } from '../../components/monitor_management
 export const ServiceAllowedWrapper: React.FC = ({ children }) => {
   const { isAllowed, signupUrl, loading } = useSyntheticsServiceAllowed();
 
-  if (loading) {
-    return (
-      <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-        title={<h2>{LOADING_MONITOR_MANAGEMENT_LABEL}</h2>}
-      />
-    );
-  }
-
   // checking for explicit false
   if (isAllowed === false) {
     return (
@@ -37,7 +28,17 @@ export const ServiceAllowedWrapper: React.FC = ({ children }) => {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {loading && (
+        <EuiEmptyPrompt
+          icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+          title={<h2>{LOADING_MONITOR_MANAGEMENT_LABEL}</h2>}
+        />
+      )}
+      <div style={{ visibility: loading ? 'hidden' : 'initial' }}>{children}</div>
+    </>
+  );
 };
 
 const REQUEST_ACCESS_LABEL = i18n.translate('xpack.uptime.monitorManagement.requestAccess', {

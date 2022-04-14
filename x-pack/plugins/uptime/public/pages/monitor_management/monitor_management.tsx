@@ -7,11 +7,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { EuiCallOut, EuiButton, EuiSpacer, EuiLink } from '@elastic/eui';
 import { useTrackPageview } from '../../../../observability/public';
-import { ConfigKey } from '../../../common/runtime_types';
-import { getMonitors } from '../../state/actions';
 import { monitorManagementListSelector } from '../../state/selectors';
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 import { MonitorListContainer } from '../../components/monitor_management/monitor_list/monitor_list_container';
@@ -20,12 +18,12 @@ import { useEnablement } from '../../components/monitor_management/hooks/use_ena
 import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { ERROR_HEADING_LABEL } from './content';
+import { useMonitorList } from '../../components/monitor_management/hooks/use_monitor_list';
 
 export const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
   useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
   useMonitorManagementBreadcrumbs();
-  const dispatch = useDispatch();
   const [shouldFocusEnablementButton, setShouldFocusEnablementButton] = useState(false);
 
   const {
@@ -41,19 +39,6 @@ export const MonitorManagementPage: React.FC = () => {
   const isEnabledRef = useRef(isEnabled);
 
   useEffect(() => {
-    if (monitorList.total === null) {
-      dispatch(
-        getMonitors({
-          page: 1, // saved objects page index is base 1
-          perPage: 10,
-          sortOrder: 'asc',
-          sortField: ConfigKey.NAME,
-        })
-      );
-    }
-  }, [dispatch, monitorList.total]);
-
-  useEffect(() => {
     if (!isEnabled && isEnabledRef.current === true) {
       /* shift focus to enable button when enable toggle disappears. Prevent
        * focus loss on the page */
@@ -62,10 +47,12 @@ export const MonitorManagementPage: React.FC = () => {
     isEnabledRef.current = Boolean(isEnabled);
   }, [isEnabled]);
 
+  const { pageState, dispatchPageAction } = useMonitorList();
+
   return (
     <>
       <Loader
-        loading={enablementLoading || locationsLoading || monitorList.total === null}
+        loading={enablementLoading || locationsLoading}
         error={Boolean(enablementError)}
         loadingTitle={LOADING_LABEL}
         errorTitle={ERROR_HEADING_LABEL}
@@ -97,7 +84,7 @@ export const MonitorManagementPage: React.FC = () => {
             <EuiSpacer size="s" />
           </>
         ) : null}
-        {isEnabled || (!isEnabled && monitorList.total) ? <MonitorListContainer /> : null}
+        <MonitorListContainer pageState={pageState} dispatchPageAction={dispatchPageAction} />
       </Loader>
       {isEnabled !== undefined && monitorList.total === 0 && (
         <EnablementEmptyState focusButton={shouldFocusEnablementButton} />

@@ -47,7 +47,7 @@ export function* fetchMonitorManagementEffect() {
       getServiceLocationsFailure
     )
   );
-  yield takeLatest(
+  yield takeLeading(
     getSyntheticsEnablement,
     fetchEffectFactory(
       fetchGetSyntheticsEnablement,
