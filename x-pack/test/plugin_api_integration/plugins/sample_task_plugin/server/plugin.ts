@@ -8,8 +8,7 @@
 import _ from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
 import { EventEmitter } from 'events';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { firstValueFrom, Subject } from 'rxjs';
 import { initRoutes } from './init_routes';
 import {
   TaskManagerSetupContract,
@@ -32,9 +31,7 @@ export class SampleTaskManagerFixturePlugin
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
-  taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
-    .pipe(first())
-    .toPromise();
+  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();

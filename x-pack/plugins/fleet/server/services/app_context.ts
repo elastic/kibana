@@ -29,6 +29,7 @@ import type {
   ExternalCallbacksStorage,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
@@ -183,6 +184,8 @@ class AppContextService {
           ? PostPackagePolicyCreateCallback
           : T extends 'postPackagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostCreate'
+          ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
       >
     | undefined {
@@ -192,6 +195,8 @@ class AppContextService {
           ? PostPackagePolicyCreateCallback
           : T extends 'postPackagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostCreate'
+          ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
       >;
     }

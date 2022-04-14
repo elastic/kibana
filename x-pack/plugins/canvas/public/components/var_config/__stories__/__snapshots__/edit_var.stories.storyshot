@@ -124,6 +124,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -420,6 +421,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -657,6 +659,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -867,6 +870,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"

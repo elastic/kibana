@@ -32,7 +32,7 @@ export const registerFetchRoute = ({ router, license }: RouteDependencies) => {
           name: '*',
         });
         const repos: ListSnapshotReposResponse = {
-          repositories: Object.keys(esResult.body),
+          repositories: Object.keys(esResult),
         };
         return response.ok({ body: repos });
       } catch (e) {
