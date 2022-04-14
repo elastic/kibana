@@ -88,7 +88,13 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             (response.status >= 200 && response.status < 300) || response.status === 404;
 
           if (isSuccess) {
-            let value = JSON.stringify(body, null, 2);
+            let value;
+            // check if object is ArrayBuffer
+            if (body instanceof ArrayBuffer) {
+              value = body;
+            } else {
+              value = JSON.stringify(body, null, 2);
+            }
 
             const warnings = response.headers.get('warning');
             if (warnings) {
