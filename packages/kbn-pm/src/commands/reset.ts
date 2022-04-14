@@ -9,7 +9,7 @@
 import dedent from 'dedent';
 import del from 'del';
 import ora from 'ora';
-import { join, relative, resolve } from 'path';
+import { join, relative } from 'path';
 
 import {
   getBazelDiskCacheFolder,
