@@ -110,7 +110,6 @@ export async function getServiceStorageStats({
       serviceDocs,
       environments,
       ...docsCount,
-      calls: 0,
     };
   });
 

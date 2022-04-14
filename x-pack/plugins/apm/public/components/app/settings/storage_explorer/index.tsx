@@ -101,16 +101,6 @@ export function StorageExplorer() {
       sortable: true,
     },
     {
-      field: 'calls',
-      name: i18n.translate(
-        'xpack.apm.settings.storageExplorer.table.callsColumnName',
-        {
-          defaultMessage: 'Calls',
-        }
-      ),
-      sortable: true,
-    },
-    {
       field: 'sampling',
       name: i18n.translate(
         'xpack.apm.settings.storageExplorer.table.samplingColumnName',
