@@ -14,7 +14,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const toasts = getService('toasts');
 
-  describe('Configure', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/129314
+  describe.skip('Configure', function () {
     before(async () => {
       await cases.navigation.navigateToConfigurationPage();
     });
