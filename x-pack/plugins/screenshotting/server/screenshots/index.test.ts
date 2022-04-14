@@ -66,6 +66,16 @@ describe('Screenshot Observable Pipeline', () => {
     } as unknown as typeof options;
     screenshots = new Screenshots(driverFactory, logger, packageInfo, http, {
       poolSize: 1,
+      capture: {
+        timeouts: {
+          openUrl: 11,
+          waitForElements: 12,
+          renderComplete: 13,
+        },
+        loadDelay: 5000000000,
+        zoom: 2,
+      },
+      networkPolicy: {},
     } as ConfigType);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);

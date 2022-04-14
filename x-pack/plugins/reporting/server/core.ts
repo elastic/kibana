@@ -35,7 +35,6 @@ import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import type { SpacesPluginSetup } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
-import { durationToNumber } from '../common/schema_utils';
 import type { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
@@ -366,21 +365,9 @@ export class ReportingCore {
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        const config = this.getConfig();
         return screenshotting.getScreenshots({
           ...options,
-          timeouts: {
-            loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
-            openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
-            waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
-            renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
-          },
-
-          layout: {
-            zoom: config.get('capture', 'zoom'),
-            ...options.layout,
-          },
-
+          layout: options.layout,
           urls: options.urls.map((url) =>
             typeof url === 'string'
               ? url

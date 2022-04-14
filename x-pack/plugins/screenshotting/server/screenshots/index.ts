@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { Optional } from '@kbn/utility-types';
+import type { Transaction } from 'elastic-apm-node';
+import apm from 'elastic-apm-node';
 import ipaddr from 'ipaddr.js';
 import { sum } from 'lodash';
-import apm from 'elastic-apm-node';
-import type { Transaction } from 'elastic-apm-node';
-import { from, of, Observable } from 'rxjs';
-import type { Optional } from '@kbn/utility-types';
+import { from, Observable, of } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -30,10 +30,9 @@ import {
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
 } from '../../common';
-import type { ConfigType } from '../config';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
-import { createLayout } from '../layouts';
-import type { Layout } from '../layouts';
+import type { ConfigType } from '../config';
+import { durationToNumber } from '../config';
 import {
   PdfScreenshotOptions,
   PdfScreenshotResult,
@@ -42,12 +41,13 @@ import {
   toPdf,
   toPng,
 } from '../formats';
-import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
+import type { Layout } from '../layouts';
+import { createLayout } from '../layouts';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
+import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
 import { Semaphore } from './semaphore';
 
-export type { UrlOrUrlWithContext } from './observable';
-export type { ScreenshotObservableResult } from './observable';
+export type { ScreenshotObservableResult, UrlOrUrlWithContext } from './observable';
 
 export interface CaptureOptions extends Optional<ScreenshotObservableOptions, 'urls'> {
   /**
@@ -101,9 +101,9 @@ export class Screenshots {
     private readonly logger: Logger,
     private readonly packageInfo: PackageInfo,
     private readonly http: HttpServiceSetup,
-    { poolSize }: ConfigType
+    private readonly config: ConfigType
   ) {
-    this.semaphore = new Semaphore(poolSize);
+    this.semaphore = new Semaphore(config.poolSize);
   }
 
   private createLayout(transaction: Transaction | null, options: CaptureOptions): Layout {
@@ -121,16 +121,13 @@ export class Screenshots {
     options: ScreenshotObservableOptions
   ): Observable<CaptureResult> {
     const apmCreatePage = transaction?.startSpan('create-page', 'wait');
-    const {
-      browserTimezone,
-      timeouts: { openUrl: openUrlTimeout },
-    } = options;
+    const { browserTimezone } = options;
 
     return this.browserDriverFactory
       .createPage(
         {
           browserTimezone,
-          openUrlTimeout,
+          openUrlTimeout: durationToNumber(this.config.capture.timeouts.openUrl),
           defaultViewport: { height: layout.height, width: layout.width },
         },
         this.logger
@@ -141,7 +138,13 @@ export class Screenshots {
           apmCreatePage?.end();
           unexpectedExit$.subscribe({ error: () => transaction?.end() });
 
-          const screen = new ScreenshotObservableHandler(driver, this.logger, layout, options);
+          const screen = new ScreenshotObservableHandler(
+            driver,
+            this.config,
+            this.logger,
+            layout,
+            options
+          );
 
           return from(options.urls).pipe(
             concatMap((url, index) =>

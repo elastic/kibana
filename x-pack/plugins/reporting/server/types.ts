@@ -48,7 +48,6 @@ export interface ReportingSetup {
 export type ReportingStart = ReportingSetup;
 export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
-export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 /**
