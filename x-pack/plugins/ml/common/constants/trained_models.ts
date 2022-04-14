@@ -25,7 +25,7 @@ export const SUPPORTED_PYTORCH_TASKS = {
   ZERO_SHOT_CLASSIFICATION: 'zero_shot_classification',
   // CLASSIFICATION_LABELS: 'classification_labels',
   TEXT_CLASSIFICATION: 'text_classification',
-  // TEXT_EMBEDDING: 'text_embedding',
+  TEXT_EMBEDDING: 'text_embedding',
 } as const;
 export type SupportedPytorchTasksType =
   typeof SUPPORTED_PYTORCH_TASKS[keyof typeof SUPPORTED_PYTORCH_TASKS];

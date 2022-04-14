@@ -22,6 +22,9 @@ import {
 } from './models/text_classification';
 import type { FormattedTextClassificationResponse } from './models/text_classification';
 
+import { TextEmbeddingOutput, TextEmbeddingInference } from './models/text_embedding';
+import type { FormattedTextEmbeddingResponse } from './models/text_embedding';
+
 import { TextInput } from './models/text_input';
 
 import {
@@ -106,6 +109,15 @@ export const SelectedModel: FC<Props> = ({ model }) => {
           )}
         </>
       );
+    }
+
+    if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
+      const inferrer = new TextEmbeddingInference(trainedModels, model);
+      const getOutputComponent = (output: FormattedTextEmbeddingResponse) => (
+        <TextEmbeddingOutput result={output} />
+      );
+
+      return <>{getComp(() => inferrer.infer(inputText), getOutputComponent, getInputComponent)}</>;
     }
   }
   if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
