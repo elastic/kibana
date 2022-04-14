@@ -32,7 +32,7 @@ type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter
 export interface FilterItemProps {
   id: string;
   filter: Filter;
-  dataViews: DataView[];
+  indexPatterns: DataView[];
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
@@ -65,7 +65,7 @@ export const FILTER_EDITOR_WIDTH = 800;
 export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [dataViewExists, setDataViewExists] = useState<boolean | undefined>(undefined);
-  const { id, filter, dataViews, hiddenPanelOptions } = props;
+  const { id, filter, indexPatterns: dataViews, hiddenPanelOptions } = props;
 
   useEffect(() => {
     const index = props.filter.meta.index;
@@ -275,7 +275,7 @@ export function FilterItem(props: FilterItemProps) {
    */
   function isFilterApplicable() {
     // Any filter is applicable if no data views were provided to FilterBar.
-    if (!props.dataViews.length) return true;
+    if (!props.indexPatterns.length) return true;
 
     const ip = getDataViewFromFilter(filter, dataViews);
     if (ip) return true;

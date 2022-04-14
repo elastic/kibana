@@ -22,7 +22,7 @@ import { AutocompleteUsageCollector } from '../collectors';
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
 interface ValueSuggestionsGetFnArgs {
-  dataView: IIndexPattern;
+  indexPattern: IIndexPattern;
   field: IFieldType;
   query: string;
   useTimeRange?: boolean;
@@ -90,7 +90,7 @@ export const setupValueSuggestionProvider = (
   );
 
   return async ({
-    dataView,
+    indexPattern: dataView,
     field,
     query,
     useTimeRange,

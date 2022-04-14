@@ -22,7 +22,7 @@ export type DataViewSelectProps = Required<
 > & {
   onChange: (dataViewId?: string) => void;
   indexPatternId: string;
-  onNoDataViews?: () => void;
+  onNoIndexPatterns?: () => void;
 };
 
 export type DataViewSelectInternalProps = DataViewSelectProps & {
@@ -120,8 +120,8 @@ export default class DataViewSelect extends Component<DataViewSelectInternalProp
       options,
     });
 
-    if (this.props.onNoDataViews && searchValue === '' && options.length === 0) {
-      this.props.onNoDataViews();
+    if (this.props.onNoIndexPatterns && searchValue === '' && options.length === 0) {
+      this.props.onNoIndexPatterns();
     }
   }, 300);
 
@@ -144,7 +144,7 @@ export default class DataViewSelect extends Component<DataViewSelectInternalProp
       onChange,
       indexPatternId: dataViewId,
       placeholder,
-      onNoDataViews,
+      onNoIndexPatterns,
       dataViewService,
       ...rest
     } = this.props;
