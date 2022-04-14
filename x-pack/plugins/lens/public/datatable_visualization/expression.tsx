@@ -9,9 +9,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from 'src/plugins/data/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
 import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';

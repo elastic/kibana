@@ -47,10 +47,10 @@ export interface BasicSettingRow {
   labelAppend?: string;
   labelAppendLink?: string;
   labelAppendLinkText?: string;
+  dataTestSubj?: string;
   settings?: SettingsRow[];
   validation?: SettingValidation;
   required?: boolean;
-  readOnly?: boolean;
 }
 
 export type SettingsRow = BasicSettingRow | AdvancedSettingRow;

@@ -8,12 +8,14 @@
 
 import React from 'react';
 
+import type { HttpSetup } from 'kibana/public';
 import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../lib/mappings/mappings';
 import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
+import type { SenseEditor } from '../models';
 
 const getAutocompleteDiff = (
   newSettings: DevToolsSettings,
@@ -26,13 +28,15 @@ const getAutocompleteDiff = (
 };
 
 const refreshAutocompleteSettings = (
+  http: HttpSetup,
   settings: SettingsService,
   selectedSettings: DevToolsSettings['autocomplete']
 ) => {
-  retrieveAutoCompleteInfo(settings, selectedSettings);
+  retrieveAutoCompleteInfo(http, settings, selectedSettings);
 };
 
 const fetchAutocompleteSettingsIfNeeded = (
+  http: HttpSetup,
   settings: SettingsService,
   newSettings: DevToolsSettings,
   prevSettings: DevToolsSettings
@@ -57,28 +61,29 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {} as DevToolsSettings['autocomplete']
       );
-      retrieveAutoCompleteInfo(settings, changedSettings);
+      retrieveAutoCompleteInfo(http, settings, changedSettings);
     } else if (isPollingChanged && newSettings.polling) {
       // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
-      retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
+      retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
     }
   }
 };
 
 export interface Props {
   onClose: () => void;
+  editorInstance: SenseEditor | null;
 }
 
-export function Settings({ onClose }: Props) {
+export function Settings({ onClose, editorInstance }: Props) {
   const {
-    services: { settings },
+    services: { settings, http },
   } = useServicesContext();
 
   const dispatch = useEditorActionContext();
 
   const onSaveSettings = (newSettings: DevToolsSettings) => {
     const prevSettings = settings.toJSON();
-    fetchAutocompleteSettingsIfNeeded(settings, newSettings, prevSettings);
+    fetchAutocompleteSettingsIfNeeded(http, settings, newSettings, prevSettings);
 
     // Update the new settings in localStorage
     settings.updateSettings(newSettings);
@@ -96,9 +101,10 @@ export function Settings({ onClose }: Props) {
       onClose={onClose}
       onSaveSettings={onSaveSettings}
       refreshAutocompleteSettings={(selectedSettings) =>
-        refreshAutocompleteSettings(settings, selectedSettings)
+        refreshAutocompleteSettings(http, settings, selectedSettings)
       }
       settings={settings.toJSON()}
+      editorInstance={editorInstance}
     />
   );
 }

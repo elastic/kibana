@@ -25,6 +25,7 @@ import {
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 
@@ -32,6 +33,7 @@ import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { getAlertsTableLazy } from './common/get_alerts_table';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -45,8 +47,10 @@ import type {
   RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
+  AlertsTableProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
+import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -68,6 +72,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditAlertFlyout: (
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
+  getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
 }
 
 interface PluginsSetup {
@@ -78,11 +83,13 @@ interface PluginsSetup {
 
 interface PluginsStart {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export class Plugin
@@ -160,9 +167,11 @@ export class Plugin
         return renderApp({
           ...coreStart,
           data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
           charts: pluginsStart.charts,
           alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,
+          unifiedSearch: pluginsStart.unifiedSearch,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
           theme$: params.theme$,
@@ -214,6 +223,9 @@ export class Plugin
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
         });
+      },
+      getAlertsTable: (props: AlertsTableProps) => {
+        return getAlertsTableLazy(props);
       },
     };
   }

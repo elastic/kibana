@@ -16,6 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
   describe('endpoint', function () {
+    this.tags('ciGroup7');
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');

@@ -11,7 +11,7 @@ import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeState,
+  RuleTypeState,
 } from '../../../../../alerting/common';
 import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
@@ -29,7 +29,11 @@ export interface NotStartedTransformResponse extends BaseResponse {
   node_name?: string;
 }
 
-export type TransformHealthResult = NotStartedTransformResponse;
+export interface ErrorMessagesTransformResponse extends BaseResponse {
+  error_messages: Array<{ message: string; timestamp: number; node_name?: string }>;
+}
+
+export type TransformHealthResult = NotStartedTransformResponse | ErrorMessagesTransformResponse;
 
 export type TransformHealthAlertContext = {
   results: TransformHealthResult[];
@@ -60,7 +64,7 @@ export function registerTransformHealthRuleType(params: RegisterParams) {
 export function getTransformHealthRuleType(): RuleType<
   TransformHealthRuleParams,
   never,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   TransformHealthAlertContext,
   TransformIssue
@@ -105,7 +109,7 @@ export function getTransformHealthRuleType(): RuleType<
       } = options;
 
       const transformHealthService = transformHealthServiceProvider(
-        scopedClusterClient.asInternalUser
+        scopedClusterClient.asCurrentUser
       );
 
       const executionResult = await transformHealthService.getHealthChecksResults(params);

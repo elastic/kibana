@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import * as i18n from '../rule_preview/translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -14,9 +14,12 @@ import { TestProviders } from '../../../../common/mock';
 import { usePreviewHistogram } from './use_preview_histogram';
 
 import { PreviewHistogram } from './preview_histogram';
+import { ALL_VALUES_ZEROS_TITLE } from '../../../../common/components/charts/translation';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/use_global_time');
 jest.mock('./use_preview_histogram');
+jest.mock('../../../../common/components/url_state/normalize_time_range.ts');
 
 describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
@@ -34,6 +37,37 @@ describe('PreviewHistogram', () => {
     jest.clearAllMocks();
   });
 
+  describe('when there is no data', () => {
+    (usePreviewHistogram as jest.Mock).mockReturnValue([
+      false,
+      {
+        inspect: { dsl: [], response: [] },
+        totalCount: 1,
+        refetch: jest.fn(),
+        data: [],
+        buckets: [],
+      },
+    ]);
+
+    test('it renders an empty histogram and table', () => {
+      const wrapper = render(
+        <TestProviders>
+          <PreviewHistogram
+            addNoiseWarning={jest.fn()}
+            timeFrame="M"
+            previewId={'test-preview-id'}
+            spaceId={'default'}
+            ruleType={'query'}
+            index={['']}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.findByText('hello grid')).toBeTruthy();
+      expect(wrapper.findByText(ALL_VALUES_ZEROS_TITLE)).toBeTruthy();
+    });
+  });
+
   test('it renders loader when isLoading is true', () => {
     (usePreviewHistogram as jest.Mock).mockReturnValue([
       true,
@@ -46,7 +80,7 @@ describe('PreviewHistogram', () => {
       },
     ]);
 
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <PreviewHistogram
           addNoiseWarning={jest.fn()}
@@ -59,72 +93,7 @@ describe('PreviewHistogram', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="preview-histogram-loading"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="header-section-subtitle"]').text()).toEqual(
-      i18n.QUERY_PREVIEW_SUBTITLE_LOADING
-    );
-  });
-
-  test('it configures data and subtitle', () => {
-    (usePreviewHistogram as jest.Mock).mockReturnValue([
-      false,
-      {
-        inspect: { dsl: [], response: [] },
-        totalCount: 9154,
-        refetch: jest.fn(),
-        data: [
-          { x: 1602247050000, y: 2314, g: 'All others' },
-          { x: 1602247162500, y: 3471, g: 'All others' },
-          { x: 1602247275000, y: 3369, g: 'All others' },
-        ],
-        buckets: [],
-      },
-    ]);
-
-    const wrapper = mount(
-      <TestProviders>
-        <PreviewHistogram
-          addNoiseWarning={jest.fn()}
-          timeFrame="M"
-          previewId={'test-preview-id'}
-          spaceId={'default'}
-          ruleType={'query'}
-          index={['']}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="preview-histogram-loading"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="header-section-subtitle"]').text()).toEqual(
-      i18n.QUERY_PREVIEW_TITLE(9154)
-    );
-    expect(
-      (
-        wrapper.find('[data-test-subj="preview-histogram-bar-chart"]').props() as {
-          barChart: unknown;
-        }
-      ).barChart
-    ).toEqual([
-      {
-        key: 'hits',
-        value: [
-          {
-            g: 'All others',
-            x: 1602247050000,
-            y: 2314,
-          },
-          {
-            g: 'All others',
-            x: 1602247162500,
-            y: 3471,
-          },
-          {
-            g: 'All others',
-            x: 1602247275000,
-            y: 3369,
-          },
-        ],
-      },
-    ]);
+    expect(wrapper.findByTestId('preview-histogram-loading')).toBeTruthy();
+    expect(wrapper.findByText(i18n.QUERY_PREVIEW_SUBTITLE_LOADING)).toBeTruthy();
   });
 });

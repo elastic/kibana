@@ -8,14 +8,15 @@
 import moment from 'moment';
 import { UptimeESClient } from '../lib';
 import { UptimeServerSetup } from '../adapters';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../common/types';
 import { SyntheticsMonitor, MonitorFields, Ping } from '../../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 
 export const hydrateSavedObjects = async ({
   monitors,
   server,
 }: {
-  monitors: SyntheticsMonitorSavedObject[];
+  monitors: DecryptedSyntheticsMonitorSavedObject[];
   server: UptimeServerSetup;
 }) => {
   try {
@@ -43,7 +44,7 @@ export const hydrateSavedObjects = async ({
         missingInfoIds
       );
 
-      const updatedObjects: SyntheticsMonitorSavedObject[] = [];
+      const updatedObjects: DecryptedSyntheticsMonitorSavedObject[] = [];
       monitors
         .filter((monitor) => missingInfoIds.includes(monitor.id))
         .forEach((monitor) => {
@@ -73,7 +74,7 @@ export const hydrateSavedObjects = async ({
             updatedObjects.push({
               ...monitor,
               attributes: resultAttributes,
-            } as SyntheticsMonitorSavedObject);
+            } as DecryptedSyntheticsMonitorSavedObject);
           }
         });
 
@@ -125,7 +126,7 @@ const fetchSampleMonitorDocuments = async (esClient: UptimeESClient, configIds: 
       },
     },
     'getHydrateQuery',
-    'synthetics-*'
+    SYNTHETICS_INDEX_PATTERN
   );
 
   return data.body.hits.hits.map(

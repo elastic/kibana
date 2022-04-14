@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { exportTimeline } from '../../tasks/timelines';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 import { createTimeline } from '../../tasks/api_calls/timelines';
@@ -25,11 +25,11 @@ describe('Export timelines', () => {
       cy.wrap(response).as('timelineResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId');
     });
+    login();
   });
 
   it('Exports a custom timeline', function () {
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
-    waitForTimelinesPanelToBeLoaded();
+    visitWithoutDateRange(TIMELINES_URL);
     exportTimeline(this.timelineId);
 
     cy.wait('@export').then(({ response }) => {

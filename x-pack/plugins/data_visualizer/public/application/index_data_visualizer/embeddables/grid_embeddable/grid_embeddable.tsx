@@ -84,6 +84,7 @@ export const EmbeddableWrapper = ({
     },
     [dataVisualizerListState, onOutputChange]
   );
+
   const { configs, searchQueryLanguage, searchString, extendedColumns, progress, setLastRefresh } =
     useDataVisualizerGridData(input, dataVisualizerListState);
 
@@ -188,7 +189,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
   DataVisualizerGridEmbeddableOutput
 > {
   private node?: HTMLElement;
-  private reload$ = new Subject();
+  private reload$ = new Subject<void>();
   public readonly type: string = DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE;
 
   constructor(

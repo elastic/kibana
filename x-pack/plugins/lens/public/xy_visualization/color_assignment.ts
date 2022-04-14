@@ -6,26 +6,18 @@
  */
 
 import { uniq, mapValues } from 'lodash';
-import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from 'src/plugins/expressions';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { AccessorConfig, FramePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory, LayerType } from '../../common';
-import type { XYLayerConfig } from '../../common/expressions';
-import { isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
+import { FormatFactory } from '../../common';
+import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import { getReferenceLineAccessorColorConfig } from './reference_line_helpers';
+import { XYDataLayerConfig, XYLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
-
-interface LayerColorConfig {
-  palette?: PaletteOutput;
-  splitAccessor?: string;
-  accessors: string[];
-  layerId: string;
-  layerType: LayerType;
-}
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
@@ -33,24 +25,26 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(sortedLayer: LayerColorConfig, seriesKey: string, yAccessor: string): number;
+    getRank(sortedLayer: XYDataLayerConfig, seriesKey: string, yAccessor: string): number;
   }
 >;
 
 export function getColorAssignments(
-  layers: LayerColorConfig[],
+  layers: XYLayerConfig[],
   data: { tables: Record<string, Datatable> },
   formatFactory: FormatFactory
 ): ColorAssignments {
-  const layersPerPalette: Record<string, LayerColorConfig[]> = {};
+  const layersPerPalette: Record<string, XYDataLayerConfig[]> = {};
 
-  layers.forEach((layer) => {
-    const palette = layer.palette?.name || 'default';
-    if (!layersPerPalette[palette]) {
-      layersPerPalette[palette] = [];
-    }
-    layersPerPalette[palette].push(layer);
-  });
+  layers
+    .filter((layer): layer is XYDataLayerConfig => isDataLayer(layer))
+    .forEach((layer) => {
+      const palette = layer.palette?.name || 'default';
+      if (!layersPerPalette[palette]) {
+        layersPerPalette[palette] = [];
+      }
+      layersPerPalette[palette].push(layer);
+    });
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer, layerIndex) => {
@@ -82,7 +76,7 @@ export function getColorAssignments(
     );
     return {
       totalSeriesCount,
-      getRank(sortedLayer: LayerColorConfig, seriesKey: string, yAccessor: string) {
+      getRank(sortedLayer: XYDataLayerConfig, seriesKey: string, yAccessor: string) {
         const layerIndex = paletteLayers.findIndex((l) => sortedLayer.layerId === l.layerId);
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
         const splitRank = currentSeriesPerLayer.splits.indexOf(seriesKey);
@@ -125,6 +119,7 @@ export function getAccessorColorConfig(
         triggerIcon: 'disabled',
       };
     }
+
     const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
     const rank = colorAssignments[currentPalette.name].getRank(
       layer,

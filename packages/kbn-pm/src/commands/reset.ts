@@ -9,7 +9,7 @@
 import dedent from 'dedent';
 import del from 'del';
 import ora from 'ora';
-import { join, relative } from 'path';
+import { join, relative, resolve } from 'path';
 
 import {
   getBazelDiskCacheFolder,
@@ -63,8 +63,10 @@ export const ResetCommand: ICommand = {
       }
     }
 
+    const repoRoot = resolve(__dirname, '../../../..');
+
     // Runs Bazel hard clean and deletes Bazel Cache Folders
-    if (await isBazelBinAvailable()) {
+    if (await isBazelBinAvailable(repoRoot)) {
       // Hard cleaning bazel
       await runBazel(['clean', '--expunge']);
       log.success('Hard cleaned bazel');

@@ -8,13 +8,15 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../types';
-import type { State, XYState, XYSuggestion } from './types';
 import type {
-  SeriesType,
-  XYDataLayerConfig,
+  State,
+  XYState,
+  XYSuggestion,
   XYLayerConfig,
+  XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../common/expressions';
+} from './types';
+import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
@@ -45,7 +47,7 @@ const exampleAnnotation2: EventAnnotationConfig = {
   label: 'Annotation2',
 };
 
-function exampleState(): State {
+function exampleState(): XYState {
   return {
     legend: { position: Position.Bottom, isVisible: true },
     valueLabels: 'hide',
@@ -58,7 +60,7 @@ function exampleState(): State {
         splitAccessor: 'd',
         xAccessor: 'a',
         accessors: ['b', 'c'],
-      } as XYDataLayerConfig,
+      },
     ],
   };
 }
@@ -127,7 +129,7 @@ describe('xy_visualization', () => {
   });
 
   describe('#getVisualizationTypeId', () => {
-    function mixedState(...types: SeriesType[]) {
+    function mixedState(...types: SeriesType[]): XYState {
       const state = exampleState();
       return {
         ...state,
@@ -330,16 +332,18 @@ describe('xy_visualization', () => {
         { columnId: 'c', fields: [] },
       ]);
 
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [],
-          columns: [],
+      frame = {
+        datasourceLayers: {
+          first: mockDatasource.publicAPIMock,
         },
+        activeData: {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        },
+        dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -434,7 +438,6 @@ describe('xy_visualization', () => {
 
     describe('annotations', () => {
       it('should add a dimension to a annotation layer', () => {
-        jest.spyOn(Date, 'now').mockReturnValue(new Date('2022-04-18T11:01:58.135Z').valueOf());
         expect(
           xyVisualization.setDimension({
             frame,
@@ -461,7 +464,7 @@ describe('xy_visualization', () => {
               icon: 'triangle',
               id: 'newCol',
               key: {
-                timestamp: '2022-04-18T11:01:58.135Z',
+                timestamp: '2022-04-15T00:00:00.000Z',
                 type: 'point_in_time',
               },
               label: 'Event',
@@ -1039,7 +1042,7 @@ describe('xy_visualization', () => {
                 ...baseState.layers[0],
                 accessors: ['a'],
                 seriesType: 'bar_percentage_stacked',
-              } as XYDataLayerConfig,
+              } as XYLayerConfig,
             ],
           },
           frame,
@@ -1648,7 +1651,7 @@ describe('xy_visualization', () => {
                 ...baseState.layers[0],
                 splitAccessor: undefined,
                 ...layerConfigOverride,
-              } as XYDataLayerConfig,
+              } as XYLayerConfig,
             ],
           },
           frame,

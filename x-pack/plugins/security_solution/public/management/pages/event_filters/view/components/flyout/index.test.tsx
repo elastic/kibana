@@ -14,7 +14,7 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import { MiddlewareActionSpyHelper } from '../../../../../../common/store/test_utils';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utils';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -25,6 +25,7 @@ import { EventFiltersListPageState } from '../../../types';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { licenseService } from '../../../../../../common/hooks/use_license';
 import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { of } from 'rxjs';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../form');
@@ -92,7 +93,7 @@ describe('Event filter flyout', () => {
         http: {},
         data: {
           search: {
-            search: jest.fn().mockImplementation(() => ({ toPromise: () => esResponseData() })),
+            search: jest.fn().mockImplementation(() => of(esResponseData())),
           },
         },
         notifications: {},

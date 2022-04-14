@@ -49,7 +49,7 @@ export const BootstrapCommand: ICommand = {
       }
     };
 
-    // Force install is set in case a flag `--force-install` is passed into kbn bootstrap
+    // Force install is set in case a flag is passed into yarn kbn bootstrap
     const forceInstall = !!options && options['force-install'] === true;
 
     // Install bazel machinery tools if needed
@@ -71,8 +71,8 @@ export const BootstrapCommand: ICommand = {
     if (forceInstall) {
       await time('force install dependencies', async () => {
         await removeYarnIntegrityFileIfExists(resolve(kibanaProjectPath, 'node_modules'));
-        await runBazel(['clean']);
-        await runBazel(['run', '@nodejs//:yarn'], runOffline, {
+        await runBazel(['clean', '--expunge']);
+        await runBazel(['run', '@yarn//:yarn'], runOffline, {
           env: {
             SASS_BINARY_SITE:
               'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',

@@ -13,24 +13,25 @@ To access an Elasticsearch instance that has live data you have three options:
 
 ## 1. Using Synthtrace
 
-**Start Elasticsearch**
+**Start Elasticsearch & Kibana**
+
+Elasticsearch:
 ```
 yarn es snapshot
 ```
-
-**Create APM mappings**
-
+Kibana:
 ```
-node ./scripts/es_archiver load "x-pack/plugins/apm/ftr_e2e/cypress/fixtures/es_archiver/apm_mappings_only_8.0.0" --es-url=http://system_indices_superuser:changeme@localhost:9200 --kibana-url=http://elastic:changeme@localhost:5601 --config=./test/functional/config.js
+yarn start
 ```
-
-*Note: Elasticsearch must be available before running the above command*
 
 
 **Run Synthtrace**
 ```
-node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://elastic:changeme@localhost:9200
+node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts \
+  --local
 ```
+
+The `--local` flag is a shortcut to specifying `--target` and `--kibana`.  It autodiscovers the current kibana basepath and installs the appropiate APM package.
 
 **Connect Kibana to ES**
 Update `config/kibana.dev.yml` with:
@@ -46,6 +47,16 @@ Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packa
 ## 2. Cloud-based ES Cluster (internal devs only)
 
 Use the [oblt-cli](https://github.com/elastic/observability-test-environments/blob/master/tools/oblt_cli/README.md) to connect to a cloud-based ES cluster.
+
+**Run Synthtrace**
+
+If you want to bootstrap some data on a cloud instance you can also use the following
+
+```
+node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts \
+  --cloudId "myname:<base64string>" \
+  --maxDocs 100000
+```
 
 ## 3. Local ES Cluster
 

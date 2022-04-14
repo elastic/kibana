@@ -7,16 +7,21 @@
 
 import { getSuggestions } from './xy_suggestions';
 import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
-import { State, XYState, visualizationTypes } from './types';
+import {
+  State,
+  XYState,
+  visualizationTypes,
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
+} from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
-import { XYAnnotationLayerConfig, XYDataLayerConfig } from '../../common/expressions';
 
 jest.mock('../id_generator');
 

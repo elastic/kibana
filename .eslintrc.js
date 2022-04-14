@@ -274,12 +274,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: [
-        '**/*.{js,mjs,ts,tsx}',
-        '!plugins/**/*',
-        '!packages/elastic-datemath/**/*',
-        '!packages/elastic-eslint-config-kibana/**/*',
-      ],
+      files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -309,8 +304,8 @@ module.exports = {
      */
     {
       files: [
-        'packages/elastic-datemath/**/*.{js,mjs,ts,tsx}',
         'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [
@@ -585,30 +580,6 @@ module.exports = {
     },
 
     /**
-     * Files that are allowed to import webpack-specific stuff
-     */
-    {
-      files: [
-        '**/public/**/*.js',
-        'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
-      ],
-      settings: {
-        // instructs import/no-extraneous-dependencies to treat certain modules
-        // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins'],
-
-        'import/resolver': {
-          '@kbn/eslint-import-resolver-kibana': {
-            forceNode: false,
-            rootPackageName: 'kibana',
-            kibanaPath: '.',
-            pluginMap: {},
-          },
-        },
-      },
-    },
-
-    /**
      * Single package.json rules, it tells eslint to ignore the child package.json files
      * and look for dependencies declarations in the single and root level package.json
      */
@@ -695,7 +666,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
@@ -1273,132 +1243,6 @@ module.exports = {
     },
 
     /**
-     * Metrics entities overrides. These rules below are maintained and owned by
-     * the people within the security-solution-platform team. Please see ping them
-     * or check with them if you are encountering issues, have suggestions, or would
-     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
-     * evolve and change over time just like coding styles, so please do not hesitate to
-     * reach out.
-     */
-    {
-      // front end and common typescript and javascript files only
-      files: [
-        'x-pack/plugins/metrics_entities/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/metrics_entities/common/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'import/no-nodejs-modules': 'error',
-        'no-restricted-imports': [
-          'error',
-          {
-            // prevents UI code from importing server side code and then webpack including it when doing builds
-            patterns: ['**/server/*'],
-          },
-        ],
-      },
-    },
-    {
-      // typescript and javascript for front and back end
-      files: ['x-pack/plugins/metrics_entities/**/*.{js,mjs,ts,tsx}'],
-      plugins: ['eslint-plugin-node'],
-      env: {
-        jest: true,
-      },
-      rules: {
-        'accessor-pairs': 'error',
-        'array-callback-return': 'error',
-        'no-array-constructor': 'error',
-        complexity: 'error',
-        'consistent-return': 'error',
-        'func-style': ['error', 'expression'],
-        'import/order': [
-          'error',
-          {
-            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-            'newlines-between': 'always',
-          },
-        ],
-        'sort-imports': [
-          'error',
-          {
-            ignoreDeclarationSort: true,
-          },
-        ],
-        'node/no-deprecated-api': 'error',
-        'no-bitwise': 'error',
-        'no-continue': 'error',
-        'no-dupe-keys': 'error',
-        'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
-        'no-empty-character-class': 'error',
-        'no-empty-pattern': 'error',
-        'no-ex-assign': 'error',
-        'no-extend-native': 'error',
-        'no-extra-bind': 'error',
-        'no-extra-boolean-cast': 'error',
-        'no-extra-label': 'error',
-        'no-func-assign': 'error',
-        'no-implicit-globals': 'error',
-        'no-implied-eval': 'error',
-        'no-invalid-regexp': 'error',
-        'no-inner-declarations': 'error',
-        'no-lone-blocks': 'error',
-        'no-multi-assign': 'error',
-        'no-misleading-character-class': 'error',
-        'no-new-symbol': 'error',
-        'no-obj-calls': 'error',
-        'no-param-reassign': ['error', { props: true }],
-        'no-process-exit': 'error',
-        'no-prototype-builtins': 'error',
-        'no-return-await': 'error',
-        'no-self-compare': 'error',
-        'no-shadow-restricted-names': 'error',
-        'no-sparse-arrays': 'error',
-        'no-this-before-super': 'error',
-        // rely on typescript
-        'no-undef': 'off',
-        'no-unreachable': 'error',
-        'no-unsafe-finally': 'error',
-        'no-useless-call': 'error',
-        'no-useless-catch': 'error',
-        'no-useless-concat': 'error',
-        'no-useless-computed-key': 'error',
-        'no-useless-escape': 'error',
-        'no-useless-rename': 'error',
-        'no-useless-return': 'error',
-        'no-void': 'error',
-        'one-var-declaration-per-line': 'error',
-        'prefer-object-spread': 'error',
-        'prefer-promise-reject-errors': 'error',
-        'prefer-rest-params': 'error',
-        'prefer-spread': 'error',
-        'prefer-template': 'error',
-        'require-atomic-updates': 'error',
-        'symbol-description': 'error',
-        'vars-on-top': 'error',
-        '@typescript-eslint/explicit-member-accessibility': 'error',
-        '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
-        '@typescript-eslint/explicit-function-return-type': 'error',
-        '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
-        'no-template-curly-in-string': 'error',
-        'sort-keys': 'error',
-        'prefer-destructuring': 'error',
-        'no-restricted-imports': [
-          'error',
-          {
-            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
-            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
-            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
-            patterns: ['*legacy*'],
-          },
-        ],
-      },
-    },
-    /**
      * Alerting Services overrides
      */
     {
@@ -1572,14 +1416,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
-      rules: {
-        'import/no-unresolved': [
-          'error',
-          {
-            ignore: ['!!raw-loader.+.svg$'],
-          },
-        ],
-      },
     },
     {
       files: ['x-pack/plugins/canvas/public/**/*.js'],

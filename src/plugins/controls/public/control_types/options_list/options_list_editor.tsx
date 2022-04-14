@@ -38,6 +38,8 @@ export const OptionsListEditor = ({
   initialInput,
   setValidState,
   setDefaultTitle,
+  getRelevantDataViewId,
+  setLastUsedDataViewId,
 }: ControlEditorProps<OptionsListEmbeddableInput>) => {
   // Controls Services Context
   const { dataViews } = pluginServices.getHooks();
@@ -54,7 +56,8 @@ export const OptionsListEditor = ({
     if (state.fieldName) setDefaultTitle(state.fieldName);
     (async () => {
       const dataViewListItems = await getIdsWithTitle();
-      const initialId = initialInput?.dataViewId ?? (await getDefaultId());
+      const initialId =
+        initialInput?.dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
       let dataView: DataView | undefined;
       if (initialId) {
         onChange({ dataViewId: initialId });
@@ -81,10 +84,14 @@ export const OptionsListEditor = ({
           dataViews={state.dataViewListItems}
           selectedDataViewId={dataView?.id}
           onChangeDataViewId={(dataViewId) => {
+            setLastUsedDataViewId?.(dataViewId);
+            if (dataViewId === dataView?.id) return;
+
             onChange({ dataViewId });
-            get(dataViewId).then((newDataView) =>
-              setState((s) => ({ ...s, dataView: newDataView }))
-            );
+            setState((s) => ({ ...s, fieldName: undefined }));
+            get(dataViewId).then((newDataView) => {
+              setState((s) => ({ ...s, dataView: newDataView }));
+            });
           }}
           trigger={{
             label: state.dataView?.title ?? OptionsListStrings.editor.getNoDataViewTitle(),

@@ -15,6 +15,7 @@ import { ControlGroupEditor } from './control_group_editor';
 import { OverlayRef } from '../../../../../core/public';
 import { pluginServices } from '../../services';
 import { ControlGroupContainer } from '..';
+import { setFlyoutRef } from '../embeddable/control_group_container';
 
 export interface EditControlGroupButtonProps {
   controlGroupContainer: ControlGroupContainer;
@@ -59,9 +60,14 @@ export const EditControlGroup = ({
         </PresentationUtilProvider>
       ),
       {
-        onClose: () => flyoutInstance.close(),
+        outsideClickCloses: false,
+        onClose: () => {
+          flyoutInstance.close();
+          setFlyoutRef(undefined);
+        },
       }
     );
+    setFlyoutRef(flyoutInstance);
   };
 
   const commonButtonProps = {

@@ -17,13 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
 import {
-  ToolbarPopover,
-  useDebouncedValue,
-  TooltipWrapper,
-  AxisTitleSettings,
-} from '../../shared_components';
+  AxesSettingsConfig,
+  AxisExtentConfig,
+} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { XYLayerConfig } from '../types';
+import { ToolbarPopover, useDebouncedValue, AxisTitleSettings } from '../../shared_components';
 import { isHorizontalChart } from '../state_helpers';
 import { EuiIconAxisBottom } from '../../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../../assets/axis_left';
@@ -31,6 +30,7 @@ import { EuiIconAxisRight } from '../../assets/axis_right';
 import { EuiIconAxisTop } from '../../assets/axis_top';
 import { ToolbarButtonProps } from '../../../../../../src/plugins/kibana_react/public';
 import { validateExtent } from '../axes_configuration';
+
 import './axis_settings_popover.scss';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -307,20 +307,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           showLabel={false}
         />
       </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        isDisabled={useMultilayerTimeAxis}
-        label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
-          defaultMessage: 'Orientation',
-        })}
-      >
-        <TooltipWrapper
-          tooltipContent={i18n.translate('xpack.lens.xyChart.axisOrientationMultilayer.disabled', {
-            defaultMessage: 'These options can be configured only with non-time-based axes',
+      {!useMultilayerTimeAxis && areTickLabelsVisible && (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+            defaultMessage: 'Orientation',
           })}
-          condition={Boolean(useMultilayerTimeAxis)}
-          display="block"
         >
           <EuiButtonGroup
             isFullWidth
@@ -329,7 +322,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             })}
             data-test-subj="lnsXY_axisOrientation_groups"
             name="axisOrientation"
-            isDisabled={!areTickLabelsVisible || Boolean(useMultilayerTimeAxis)}
             buttonSize="compressed"
             options={axisOrientationOptions}
             idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}
@@ -340,8 +332,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
               setOrientation(axis, newOrientation);
             }}
           />
-        </TooltipWrapper>
-      </EuiFormRow>
+        </EuiFormRow>
+      )}
       {setEndzoneVisibility && (
         <EuiFormRow
           display="columnCompressedSwitch"
