@@ -45,6 +45,7 @@ export async function send({
     asResponse,
     asSystemRequest,
   };
+
   return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, options);
 }
 

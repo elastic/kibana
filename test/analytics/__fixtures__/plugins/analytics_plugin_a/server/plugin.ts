@@ -61,13 +61,18 @@ export class AnalyticsPluginAPlugin implements Plugin {
         validate: {
           query: schema.object({
             takeNumberOfCounters: schema.number({ min: 1 }),
+            eventType: schema.string(),
           }),
         },
       },
       async (context, req, res) => {
-        const { takeNumberOfCounters } = req.query;
+        const { takeNumberOfCounters, eventType } = req.query;
 
-        return res.ok({ body: stats.slice(-takeNumberOfCounters) });
+        return res.ok({
+          body: stats
+            .filter((counter) => counter.event_type === eventType)
+            .slice(-takeNumberOfCounters),
+        });
       }
     );
 
