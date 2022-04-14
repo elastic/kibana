@@ -12,9 +12,10 @@ import { useKibana } from '../../../utils/kibana_react';
 
 export function Name({ name, rule }: RuleNameProps) {
   const { http } = useKibana().services;
-  const detailsLink = http.basePath.prepend(
-    `/app/management/insightsAndAlerting/triggersActions/rule/${rule.id}`
-  );
+  // const detailsLink = http.basePath.prepend(
+  //   `/app/management/insightsAndAlerting/triggersActions/rule/${rule.id}`
+  // );
+  const detailsLink = http.basePath.prepend(`/app/observability/alerts/rules/${rule.id}`);
   const link = (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>

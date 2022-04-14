@@ -16,6 +16,7 @@ import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { RulesPage } from '../pages/rules';
+import { RuleDetailPage } from '../pages/detail';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -94,5 +95,12 @@ export const routes = {
     },
     params: {},
     exact: true,
+  },
+  '/alerts/rules/:ruleId': {
+    handler: () => {
+      return <RuleDetailPage />;
+    },
+    params: {},
+    exact: false,
   },
 };
