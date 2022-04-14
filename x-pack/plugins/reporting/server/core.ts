@@ -24,12 +24,11 @@ import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
 import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
-import type {
-  ScreenshottingStart,
-  PngScreenshotOptions as BasePngScreenshotOptions,
-  PngScreenshotResult,
+import {
   PdfScreenshotResult,
-  UrlOrUrlWithContext,
+  PngScreenshotResult,
+  ScreenshotOptions,
+  ScreenshottingStart,
 } from '../../screenshotting/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
@@ -164,7 +163,7 @@ export class ReportingCore {
     if (this.pluginSetupDeps && this.config) {
       return true;
     }
-    return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
+    return await Rx.firstValueFrom(this.pluginSetup$.pipe(take(2))); // once for pluginSetupDeps (sync) and twice for config (async)
   }
 
   /*
@@ -251,7 +250,7 @@ export class ReportingCore {
       return this.pluginStartDeps;
     }
 
-    return await this.pluginStart$.pipe(first()).toPromise();
+    return await Rx.firstValueFrom(this.pluginStart$);
   }
 
   public getExportTypesRegistry() {
@@ -270,12 +269,9 @@ export class ReportingCore {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
     const registry = this.getExportTypesRegistry();
 
-    return await license$
-      .pipe(
-        map((license) => checkLicense(registry, license)),
-        first()
-      )
-      .toPromise();
+    return await Rx.firstValueFrom(
+      license$.pipe(map((license) => checkLicense(registry, license)))
+    );
   }
 
   /*
@@ -389,8 +385,8 @@ export class ReportingCore {
             typeof url === 'string'
               ? url
               : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-          ) as UrlOrUrlWithContext[],
-        } as BasePngScreenshotOptions);
+          ),
+        } as ScreenshotOptions);
       })
     );
   }

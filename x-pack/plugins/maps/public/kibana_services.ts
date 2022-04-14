@@ -6,10 +6,10 @@
  */
 
 import type { CoreStart } from 'kibana/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';
-import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
 import { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 
 let coreStart: CoreStart;
@@ -51,7 +51,6 @@ export const getVisualizeCapabilities = () => coreStart.application.capabilities
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;
-export const getSavedObjects = () => pluginsStart.savedObjects;
 export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;
@@ -65,6 +64,8 @@ export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getUsageCollection = () => pluginsStart.usageCollection;
+export const getSharedUXPluginContext = () => pluginsStart.sharedUX;
+export const getApplication = () => coreStart.application;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

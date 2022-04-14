@@ -111,13 +111,8 @@ describe('Security Plugin', () => {
           },
           "license": Object {
             "features$": Observable {
-              "_isScalar": false,
-              "operator": MapOperator {
-                "project": [Function],
-                "thisArg": undefined,
-              },
+              "operator": [Function],
               "source": Observable {
-                "_isScalar": false,
                 "_subscribe": [Function],
               },
             },

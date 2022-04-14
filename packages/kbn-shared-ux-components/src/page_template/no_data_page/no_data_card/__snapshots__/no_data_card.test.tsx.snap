@@ -1,13 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NoDataCard props button 1`] = `
-.emotion-0 {
-  max-width: 400px;
-  margin-inline: auto;
-}
-
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned emotion-0"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned css-1hu4pg0-EuiCard"
 >
   <div
     class="euiCard__content"
@@ -49,13 +44,8 @@ exports[`NoDataCard props button 1`] = `
 `;
 
 exports[`NoDataCard props extends EuiCardProps 1`] = `
-.emotion-0 {
-  max-width: 400px;
-  margin-inline: auto;
-}
-
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned custom_class emotion-0"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned custom_class css-1hu4pg0-EuiCard"
 >
   <div
     class="euiCard__content"
@@ -97,13 +87,8 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
 `;
 
 exports[`NoDataCard props href 1`] = `
-.emotion-0 {
-  max-width: 400px;
-  margin-inline: auto;
-}
-
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable emotion-0"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
 >
   <div
     class="euiCard__content"
@@ -152,13 +137,8 @@ exports[`NoDataCard props href 1`] = `
 `;
 
 exports[`NoDataCard props isDisabled 1`] = `
-.emotion-0 {
-  max-width: 400px;
-  margin-inline: auto;
-}
-
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiCard euiCard--centerAligned euiCard-isDisabled emotion-0"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiCard euiCard--centerAligned euiCard-isDisabled css-1hu4pg0-EuiCard"
 >
   <div
     class="euiCard__content"
@@ -188,13 +168,8 @@ exports[`NoDataCard props isDisabled 1`] = `
 `;
 
 exports[`NoDataCard renders 1`] = `
-.emotion-0 {
-  max-width: 400px;
-  margin-inline: auto;
-}
-
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned emotion-0"
+  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned css-1hu4pg0-EuiCard"
 >
   <div
     class="euiCard__content"

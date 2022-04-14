@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 export const INTERVAL_STRING_RE = new RegExp(`^([\\d\\.]+)\\s*(${dateMath.units.join('|')})$`);
 

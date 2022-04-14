@@ -8,7 +8,7 @@
 
 import type { IRouter, SavedObjectsClient } from 'kibana/server';
 import type { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from '../telemetry_repository';
 
 export function registerTelemetryLastReported(
@@ -22,9 +22,7 @@ export function registerTelemetryLastReported(
       validate: false,
     },
     async (context, req, res) => {
-      const savedObjectsInternalClient = await savedObjectsInternalClient$
-        .pipe(take(1))
-        .toPromise();
+      const savedObjectsInternalClient = await firstValueFrom(savedObjectsInternalClient$);
       const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsInternalClient);
 
       return res.ok({
@@ -42,9 +40,7 @@ export function registerTelemetryLastReported(
       validate: false,
     },
     async (context, req, res) => {
-      const savedObjectsInternalClient = await savedObjectsInternalClient$
-        .pipe(take(1))
-        .toPromise();
+      const savedObjectsInternalClient = await firstValueFrom(savedObjectsInternalClient$);
       await updateTelemetrySavedObject(savedObjectsInternalClient, {
         lastReported: Date.now(),
       });
