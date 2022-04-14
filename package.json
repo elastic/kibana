@@ -915,7 +915,7 @@
     "tough-cookie": "^4.0.0",
     "ts-loader": "^7.0.5",
     "ts-morph": "^13.0.2",
-    "tsd": "^0.13.1",
+    "tsd": "^0.20.0",
     "typescript": "4.6.3",
     "unlazy-loader": "^0.1.3",
     "url-loader": "^2.2.0",
