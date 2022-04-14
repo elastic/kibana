@@ -144,14 +144,14 @@ const columns = [
     isSortable: getIsColumnSortable('num_triggered_actions'),
   },
   {
-    id: 'num_scheduled_actions',
+    id: 'num_generated_actions',
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActions',
       {
         defaultMessage: 'Generated actions',
       }
     ),
-    isSortable: getIsColumnSortable('num_scheduled_actions'),
+    isSortable: getIsColumnSortable('num_generated_actions'),
   },
   {
     id: 'num_succeeded_actions',
