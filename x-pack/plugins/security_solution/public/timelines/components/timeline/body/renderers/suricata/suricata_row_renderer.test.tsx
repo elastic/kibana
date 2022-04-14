@@ -10,7 +10,6 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../../common/mock';
 import '../../../../../../common/mock/match_media';
@@ -42,7 +41,6 @@ describe('suricata_row_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     const children = suricataRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: nonSuricata,
       isDraggable: true,
       timelineId: 'test',
@@ -62,7 +60,6 @@ describe('suricata_row_renderer', () => {
 
   test('should render a suricata row', () => {
     const children = suricataRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: suricata,
       isDraggable: true,
       timelineId: 'test',
@@ -72,7 +69,12 @@ describe('suricata_row_renderer', () => {
         <span>{children}</span>
       </TestProviders>
     );
-    expect(removeExternalLinkText(wrapper.text())).toContain(
+
+    const extractEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
+      'External link',
+      ''
+    );
+    expect(extractEuiIconText).toContain(
       '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
     );
   });
@@ -80,7 +82,6 @@ describe('suricata_row_renderer', () => {
   test('should render a suricata row even if it does not have a suricata signature', () => {
     delete suricata?.suricata?.eve?.alert?.signature;
     const children = suricataRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: suricata,
       isDraggable: true,
       timelineId: 'test',

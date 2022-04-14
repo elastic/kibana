@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subscription, timer } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subscription, timer } from 'rxjs';
 import fetch from 'node-fetch';
 import type { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
 import {
@@ -119,7 +118,7 @@ export class FetcherTask {
 
   private async getCurrentConfigs(): Promise<TelemetryConfig> {
     const telemetrySavedObject = await getTelemetrySavedObject(this.internalRepository!);
-    const config = await this.config$.pipe(take(1)).toPromise();
+    const config = await firstValueFrom(this.config$);
     const currentKibanaVersion = this.currentKibanaVersion;
     const configTelemetrySendUsageFrom = config.sendUsageFrom;
     const allowChangingOptInStatus = config.allowChangingOptInStatus;

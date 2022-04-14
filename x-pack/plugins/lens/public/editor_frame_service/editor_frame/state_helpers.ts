@@ -10,12 +10,11 @@ import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import {
   Datasource,
+  DatasourceLayers,
   DatasourceMap,
-  DatasourcePublicAPI,
   FramePublicAPI,
   InitializationOptions,
   Visualization,
-  VisualizationDimensionGroupConfig,
   VisualizationMap,
   VisualizeEditorContext,
 } from '../../types';
@@ -63,7 +62,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,
   datasourceMap: DatasourceMap
 ) {
-  const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
+  const datasourceLayers: DatasourceLayers = {};
   Object.keys(datasourceMap)
     .filter((id) => datasourceStates[id] && !datasourceStates[id].isLoading)
     .forEach((id) => {
@@ -197,24 +196,8 @@ export const validateDatasourceAndVisualization = (
   currentVisualizationState: unknown | undefined,
   frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
 ): ErrorMessage[] | undefined => {
-  const layersGroups = currentVisualizationState
-    ? currentVisualization
-        ?.getLayerIds(currentVisualizationState)
-        .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
-          const groups = currentVisualization?.getConfiguration({
-            frame: frameAPI,
-            layerId,
-            state: currentVisualizationState,
-          }).groups;
-          if (groups) {
-            memo[layerId] = groups;
-          }
-          return memo;
-        }, {})
-    : undefined;
-
   const datasourceValidationErrors = currentDatasourceState
-    ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)
+    ? currentDataSource?.getErrorMessages(currentDatasourceState)
     : undefined;
 
   const visualizationValidationErrors = currentVisualizationState

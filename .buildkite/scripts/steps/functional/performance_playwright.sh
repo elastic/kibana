@@ -20,10 +20,11 @@ sleep 120
 
 cd "$XPACK_DIR"
 
-jobId=$(npx uuid)
-export TEST_JOB_ID="$jobId"
-
-journeys=("ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard")
+<<<<<<< HEAD
+journeys=("ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
+=======
+journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard")
+>>>>>>> origin/main
 
 for i in "${journeys[@]}"; do
     echo "JOURNEY[${i}] is running"

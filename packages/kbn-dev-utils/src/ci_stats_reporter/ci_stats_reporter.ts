@@ -312,6 +312,10 @@ export class CiStatsReporter {
           data: body,
           params: query,
           adapter: httpAdapter,
+
+          // if it can be serialized into a string, send it
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity,
         });
 
         return resp.data;

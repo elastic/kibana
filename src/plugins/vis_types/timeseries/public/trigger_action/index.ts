@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import type {
   NavigateToLensContext,
   VisualizeEditorLayersContext,
@@ -58,7 +58,7 @@ export const triggerTSVBtoLensConfiguration = async (
     const timeShift = layer.offset_time;
     // translate to Lens seriesType
     const layerChartType =
-      layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
+      layer.chart_type === 'line' && Number(layer.fill) > 0 ? 'area' : layer.chart_type;
     let chartType = layerChartType;
 
     if (layer.stacked !== 'none' && layer.stacked !== 'percent') {

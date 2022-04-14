@@ -57,6 +57,7 @@ export const getAnomalies = async (
               lists: params.exceptionItems,
               excludeExceptions: true,
               chunkSize: 1024,
+              alias: null,
             })?.query,
           },
         },

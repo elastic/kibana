@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import { AlertTypeParams, AlertTypeParamsValidator } from '../types';
+import { RuleTypeParams, RuleTypeParamsValidator } from '../types';
 
-export function validateRuleTypeParams<Params extends AlertTypeParams>(
+export function validateRuleTypeParams<Params extends RuleTypeParams>(
   params: Record<string, unknown>,
-  validator?: AlertTypeParamsValidator<Params>
+  validator?: RuleTypeParamsValidator<Params>
 ): Params {
   if (!validator) {
     return params as Params;

@@ -447,13 +447,17 @@ const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
   onClose: () => setShowFlyout(false),
 };
 
+const canAssignSpaces = !capabilities || !!capabilities.savedObjectsManagement.shareIntoSpace;
+const clickProperties = canAssignSpaces
+  ? { cursorStyle: 'pointer', listOnClick: () => setShowFlyout(true) }
+  : { cursorStyle: 'not-allowed' };
 return (
   <>
     <LazySpaceList
       namespaces={spaceIds}
       displayLimit={8}
       behaviorContext="outside-space" <4>
-      listOnClick={() => setShowFlyout(true)}
+      {...clickProperties}
     />
     {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
   </>

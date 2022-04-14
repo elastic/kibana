@@ -11,6 +11,7 @@ import { Filter } from '@kbn/es-query';
 import { DataViewField, DataView, ISearchSource } from 'src/plugins/data/common';
 import type { Query } from 'src/plugins/data/common';
 import type { KibanaExecutionContext } from 'kibana/public';
+import { lastValueFrom } from 'rxjs';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -176,8 +177,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback(() => abortController.abort());
 
     try {
-      const { rawResponse: resp } = await searchSource
-        .fetch$({
+      const { rawResponse: resp } = await lastValueFrom(
+        searchSource.fetch$({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
           legacyHitsTotal: false,
@@ -189,7 +190,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           },
           executionContext,
         })
-        .toPromise();
+      );
       return resp;
     } catch (error) {
       if (isSearchSourceAbortError(error)) {
@@ -279,11 +280,13 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({
-        abortSignal: abortController.signal,
-        legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_source:bounds'),
-      });
+      const { rawResponse: esResp } = await lastValueFrom(
+        searchSource.fetch$({
+          abortSignal: abortController.signal,
+          legacyHitsTotal: false,
+          executionContext: makePublicExecutionContext('es_source:bounds'),
+        })
+      );
 
       if (!esResp.aggregations) {
         return null;

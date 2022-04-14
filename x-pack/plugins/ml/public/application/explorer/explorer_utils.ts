@@ -12,6 +12,7 @@
 import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
+import { lastValueFrom } from 'rxjs';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
@@ -323,14 +324,14 @@ export function loadOverallAnnotations(
   const timeRange = getSelectionTimeRange(undefined, bounds);
 
   return new Promise((resolve) => {
-    ml.annotations
-      .getAnnotations$({
+    lastValueFrom(
+      ml.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
       })
-      .toPromise()
+    )
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
           const errorMessage = extractErrorMessage(resp.error);
@@ -378,14 +379,14 @@ export function loadAnnotationsTableData(
   const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
   return new Promise((resolve) => {
-    ml.annotations
-      .getAnnotations$({
+    lastValueFrom(
+      ml.annotations.getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
       })
-      .toPromise()
+    )
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
           const errorMessage = extractErrorMessage(resp.error);
