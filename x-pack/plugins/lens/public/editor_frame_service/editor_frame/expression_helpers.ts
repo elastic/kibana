@@ -7,7 +7,7 @@
 
 import { Ast, AstFunction, fromExpression } from '@kbn/interpreter';
 import { DatasourceStates } from '../../state_management';
-import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
+import { Visualization, DatasourceMap, DatasourceLayers } from '../../types';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
@@ -74,7 +74,7 @@ export function buildExpression({
   visualizationState: unknown;
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
-  datasourceLayers: Record<string, DatasourcePublicAPI>;
+  datasourceLayers: DatasourceLayers;
 }): Ast | null {
   if (visualization === null) {
     return null;

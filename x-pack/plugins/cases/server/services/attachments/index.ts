@@ -51,6 +51,14 @@ interface CreateAttachmentArgs extends ClientArgs {
   id: string;
 }
 
+interface BulkCreateAttachments extends ClientArgs {
+  attachments: Array<{
+    attributes: AttachmentAttributes;
+    references: SavedObjectReference[];
+    id: string;
+  }>;
+}
+
 interface UpdateArgs {
   attachmentId: string;
   updatedAttributes: AttachmentPatchAttributes;
@@ -241,6 +249,18 @@ export class AttachmentService {
       );
     } catch (error) {
       this.log.error(`Error on POST a new comment: ${error}`);
+      throw error;
+    }
+  }
+
+  public async bulkCreate({ unsecuredSavedObjectsClient, attachments }: BulkCreateAttachments) {
+    try {
+      this.log.debug(`Attempting to bulk create attachments`);
+      return await unsecuredSavedObjectsClient.bulkCreate(
+        attachments.map((attachment) => ({ type: CASE_COMMENT_SAVED_OBJECT, ...attachment }))
+      );
+    } catch (error) {
+      this.log.error(`Error on bulk create attachments: ${error}`);
       throw error;
     }
   }

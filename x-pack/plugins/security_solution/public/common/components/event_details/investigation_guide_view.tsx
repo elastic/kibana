@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiHorizontalRule, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import React, { useMemo } from 'react';
@@ -39,7 +39,7 @@ const InvestigationGuideViewComponent: React.FC<{
 
   return (
     <>
-      <EuiHorizontalRule />
+      <EuiSpacer size="l" />
       <EuiTitle size="xxxs" data-test-subj="summary-view-guide">
         <h5>{i18n.INVESTIGATION_GUIDE}</h5>
       </EuiTitle>

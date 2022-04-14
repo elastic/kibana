@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import { DatasourcePublicAPI, OperationMetadata, VisualizationType } from '../types';
+import { DatasourceLayers, OperationMetadata, VisualizationType } from '../types';
 import {
   State,
   visualizationTypes,
@@ -63,10 +63,7 @@ export function getAxisName(
 // * 2 or more layers
 // * at least one with date histogram
 // * at least one with interval function
-export function checkXAccessorCompatibility(
-  state: XYState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
-) {
+export function checkXAccessorCompatibility(state: XYState, datasourceLayers: DatasourceLayers) {
   const dataLayers = getDataLayers(state.layers);
   const errors = [];
   const hasDateHistogramSet = dataLayers.some(
@@ -116,7 +113,7 @@ export function checkXAccessorCompatibility(
 export function checkScaleOperation(
   scaleType: 'ordinal' | 'interval' | 'ratio',
   dataType: 'date' | 'number' | 'string' | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: DatasourceLayers
 ) {
   return (layer: XYDataLayerConfig) => {
     const datasourceAPI = datasourceLayers[layer.layerId];

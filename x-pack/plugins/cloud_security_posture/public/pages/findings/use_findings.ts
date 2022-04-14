@@ -8,6 +8,7 @@ import type { Filter } from '@kbn/es-query';
 import { type UseQueryResult, useQuery } from 'react-query';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { number } from 'io-ts';
+import { lastValueFrom } from 'rxjs';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import type {
   DataView,
@@ -122,7 +123,7 @@ export const useFindings = (
         createFindingsSearchSource({ ...searchProps, dataView }, query)
       );
 
-      const response = await source.fetch$().toPromise();
+      const response = await lastValueFrom(source.fetch$());
 
       return response;
     },
