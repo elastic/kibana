@@ -21,7 +21,7 @@ describe('Kuery field suggestions', () => {
 
   beforeEach(() => {
     querySuggestionsArgs = {
-      dataViews: [dataViewResponse],
+      indexPatterns: [dataViewResponse],
     } as unknown as QuerySuggestionGetFnArgs;
 
     getSuggestions = setupGetFieldSuggestions(coreMock.createSetup());
