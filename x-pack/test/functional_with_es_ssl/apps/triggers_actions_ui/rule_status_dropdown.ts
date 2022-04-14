@@ -28,11 +28,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load from the shareable lazy loader', async () => {
+      await testSubjects.find('statusDropdown');
       const exists = await testSubjects.exists('statusDropdown');
       expect(exists).to.be(true);
     });
 
     it('should store the previous snooze interval', async () => {
+      await testSubjects.find('statusDropdown');
       await testSubjects.click('statusDropdown');
       await testSubjects.click('statusDropdownSnoozeItem');
       await testSubjects.setValue('ruleSnoozeIntervalValue', '10');
