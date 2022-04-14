@@ -59,7 +59,6 @@ import { getLegendAction } from './legend_action';
 import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common/types';
-import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
 import { SplitChart } from './split_chart';
 import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
 import { SeriesTypes, ValueLabelModes } from '../../common/constants';
