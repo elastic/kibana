@@ -120,28 +120,3 @@ const generateRulesFromTemplates = (
       policy_id: policyId,
     },
   }));
-
-// const generateRulesFromTemplates = (
-//   packagePolicyId: string,
-//   policyId: string,
-//   cspRuleTemplates: Array<SavedObjectsFindResult<CloudSecurityPostureRuleTemplateSchema>>
-
-//   // TODO: change to map
-// ): Array<SavedObjectsBulkCreateObject<CspRuleSchema>> => {
-//   const concreteRules: Array<SavedObjectsBulkCreateObject<CspRuleSchema>> = [];
-
-//   for (const ruleTemplate of cspRuleTemplates) {
-//     const ruleAttributes = {} as any;
-//     // link csp rule with a package policy
-//     ruleAttributes.package_policy_id = packagePolicyId;
-//     ruleAttributes.policy_id = policyId;
-//     Object.assign(ruleAttributes, ruleTemplate.attributes);
-
-//     concreteRules.push({
-//       attributes: ruleAttributes,
-//       type: cspRuleAssetSavedObjectType,
-//     });
-//   }
-
-//   return concreteRules;
-// };
