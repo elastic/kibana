@@ -17,13 +17,6 @@ const MIN_CLOUD_OS_MEM_BYTES: number = MIN_CLOUD_OS_MEM_GB * Math.pow(1024, 3);
  * if we do not Chromium cannot start. See {@link MIN_CLOUD_OS_MEM_BYTES}.
  */
 export function systemHasInsufficientMemory(logger: Logger, cloud?: CloudSetup): boolean {
-  logger.fatal(`TOTAL MEM: ${os.totalmem()}`);
-  logger.fatal(`isCloudEnabled? ${Boolean(cloud?.isCloudEnabled)}`);
-  logger.fatal(
-    `systemHasInsufficientMemory? ${
-      Boolean(cloud?.isCloudEnabled) && os.totalmem() < MIN_CLOUD_OS_MEM_BYTES
-    }`
-  );
   return (
     Boolean(cloud?.isCloudEnabled || cloud?.deploymentId) && os.totalmem() < MIN_CLOUD_OS_MEM_BYTES
   );
