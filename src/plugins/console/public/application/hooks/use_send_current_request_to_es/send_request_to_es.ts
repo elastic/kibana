@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { HttpSetup, IHttpFetchError } from 'kibana/public';
 import { extractWarningMessages } from '../../../lib/utils';
 import { XJson } from '../../../../../es_ui_shared/public';
 // @ts-ignore
@@ -15,6 +16,7 @@ import { BaseResponseType } from '../../../types';
 const { collapseLiteralStrings } = XJson;
 
 export interface EsRequestArgs {
+  http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[] }>;
 }
 
@@ -47,7 +49,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
     const isMultiRequest = requests.length > 1;
 
-    const sendNextRequest = () => {
+    const sendNextRequest = async () => {
       if (reqId !== CURRENT_REQ_ID) {
         resolve(results);
         return;
@@ -65,23 +67,36 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
       } // append a new line for bulk requests.
 
       const startTime = Date.now();
-      es.send(esMethod, esPath, esData).always(
-        (dataOrjqXHR, textStatus: string, jqXhrORerrorThrown) => {
-          if (reqId !== CURRENT_REQ_ID) {
-            return;
-          }
 
-          const xhr = dataOrjqXHR.promise ? dataOrjqXHR : jqXhrORerrorThrown;
+      try {
+        const { response, body } = await es.send({
+          http: args.http,
+          method: esMethod,
+          path: esPath,
+          data: esData,
+          asResponse: true,
+        });
 
+        if (reqId !== CURRENT_REQ_ID) {
+          // Skip if previous request is not resolved yet. This can happen when issuing multiple requests at the same time and with slow networks
+          return;
+        }
+
+        if (response) {
           const isSuccess =
-            typeof xhr.status === 'number' &&
             // Things like DELETE index where the index is not there are OK.
-            ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 404);
+            (response.status >= 200 && response.status < 300) || response.status === 404;
 
           if (isSuccess) {
-            let value = xhr.responseText;
+            let value;
+            // check if object is ArrayBuffer
+            if (body instanceof ArrayBuffer) {
+              value = body;
+            } else {
+              value = JSON.stringify(body, null, 2);
+            }
 
-            const warnings = xhr.getResponseHeader('warning');
+            const warnings = response.headers.get('warning');
             if (warnings) {
               const warningMessages = extractWarningMessages(warnings);
               value = warningMessages.join('\n') + '\n' + value;
@@ -94,9 +109,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             results.push({
               response: {
                 timeMs: Date.now() - startTime,
-                statusCode: xhr.status,
-                statusText: xhr.statusText,
-                contentType: xhr.getResponseHeader('Content-Type'),
+                statusCode: response.status,
+                statusText: response.statusText,
+                contentType: response.headers.get('Content-Type') as BaseResponseType,
                 value,
               },
               request: {
@@ -107,37 +122,47 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             });
 
             // single request terminate via sendNextRequest as well
-            sendNextRequest();
-          } else {
-            let value;
-            let contentType: string;
-            if (xhr.responseText) {
-              value = xhr.responseText; // ES error should be shown
-              contentType = xhr.getResponseHeader('Content-Type');
-            } else {
-              value = 'Request failed to get to the server (status code: ' + xhr.status + ')';
-              contentType = 'text/plain';
-            }
-            if (isMultiRequest) {
-              value = '# ' + req.method + ' ' + req.url + '\n' + value;
-            }
-            reject({
-              response: {
-                value,
-                contentType,
-                timeMs: Date.now() - startTime,
-                statusCode: xhr.status,
-                statusText: xhr.statusText,
-              },
-              request: {
-                data: esData,
-                method: esMethod,
-                path: esPath,
-              },
-            });
+            await sendNextRequest();
           }
         }
-      );
+      } catch (error) {
+        let value;
+        let contentType: string | null = '';
+
+        const { response, body = {} } = error as IHttpFetchError;
+        if (response) {
+          const { status, headers } = response;
+          if (body) {
+            value = JSON.stringify(body, null, 2); // ES error should be shown
+            contentType = headers.get('Content-Type');
+          } else {
+            value = 'Request failed to get to the server (status code: ' + status + ')';
+            contentType = headers.get('Content-Type');
+          }
+
+          if (isMultiRequest) {
+            value = '# ' + req.method + ' ' + req.url + '\n' + value;
+          }
+        } else {
+          value =
+            "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
+        }
+
+        reject({
+          response: {
+            value,
+            contentType,
+            timeMs: Date.now() - startTime,
+            statusCode: error?.response?.status ?? 500,
+            statusText: error?.response?.statusText ?? 'error',
+          },
+          request: {
+            data: esData,
+            method: esMethod,
+            path: esPath,
+          },
+        });
+      }
     };
 
     sendNextRequest();

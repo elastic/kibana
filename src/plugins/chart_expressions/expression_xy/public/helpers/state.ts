@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CommonXYLayerConfigResult, SeriesType, YConfig } from '../../common';
+import type { CommonXYLayerConfigResult, SeriesType, ExtendedYConfig, YConfig } from '../../common';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -29,8 +29,6 @@ export const getSeriesColor = (layer: CommonXYLayerConfigResult, accessor: strin
   if ((isDataLayer(layer) && layer.splitAccessor) || isAnnotationsLayer(layer)) {
     return null;
   }
-
-  return (
-    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
-  );
+  const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer?.yConfig;
+  return yConfig?.find((yConf) => yConf.forAccessor === accessor)?.color || null;
 };

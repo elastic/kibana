@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { AnnotationTooltipFormatter } from '@elastic/charts';
+import { AvailableAnnotationIcon, EventAnnotationArgs } from '../../../../event_annotation/common';
 import { XY_VIS_RENDERER } from '../constants';
 import { XYProps } from './expression_functions';
 
@@ -17,4 +19,11 @@ export interface XYRender {
   type: 'render';
   as: typeof XY_VIS_RENDERER;
   value: XYChartProps;
+}
+
+export interface CollectiveConfig extends Omit<EventAnnotationArgs, 'icon'> {
+  roundedTimestamp: number;
+  axisMode: 'bottom';
+  icon?: AvailableAnnotationIcon | string;
+  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }

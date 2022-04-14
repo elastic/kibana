@@ -5,60 +5,114 @@
  * 2.0.
  */
 
-import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ThresholdSignalHistory } from '../types';
-import { BuildRuleMessage } from '../rule_messages';
-import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
 import { buildThresholdSignalHistory } from './build_signal_history';
+import { IRuleDataReader } from '../../../../../../rule_registry/server';
+import { createErrorsFromShard } from '../utils';
 
 interface GetThresholdSignalHistoryParams {
   from: string;
   to: string;
-  indexPattern: string[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
   ruleId: string;
   bucketByFields: string[];
-  timestampOverride: TimestampOverrideOrUndefined;
-  buildRuleMessage: BuildRuleMessage;
+  ruleDataReader: IRuleDataReader;
 }
 
 export const getThresholdSignalHistory = async ({
   from,
   to,
-  indexPattern,
-  services,
-  logger,
   ruleId,
   bucketByFields,
-  timestampOverride,
-  buildRuleMessage,
+  ruleDataReader,
 }: GetThresholdSignalHistoryParams): Promise<{
   signalHistory: ThresholdSignalHistory;
   searchErrors: string[];
 }> => {
-  const { searchResult, searchErrors } = await findPreviousThresholdSignals({
-    indexPattern,
+  const request = buildPreviousThresholdAlertRequest({
     from,
     to,
-    services,
-    logger,
     ruleId,
     bucketByFields,
-    timestampOverride,
-    buildRuleMessage,
   });
 
+  const response = await ruleDataReader.search(request);
   return {
-    signalHistory: buildThresholdSignalHistory({
-      alerts: searchResult.hits.hits,
+    signalHistory: buildThresholdSignalHistory({ alerts: response.hits.hits }),
+    searchErrors: createErrorsFromShard({
+      errors: response._shards.failures ?? [],
     }),
-    searchErrors,
+  };
+};
+
+export const buildPreviousThresholdAlertRequest = ({
+  from,
+  to,
+  ruleId,
+  bucketByFields,
+}: {
+  from: string;
+  to: string;
+  ruleId: string;
+  bucketByFields: string[];
+}): estypes.SearchRequest => {
+  return {
+    size: 10000,
+    // We should switch over to @elastic/elasticsearch/lib/api/types instead of typesWithBodyKey where possible,
+    // but api/types doesn't have a complete type for `sort`
+    body: {
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      query: {
+        bool: {
+          must: [
+            {
+              range: {
+                '@timestamp': {
+                  lte: to,
+                  gte: from,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+            {
+              term: {
+                'signal.rule.rule_id': ruleId,
+              },
+            },
+            // We might find a signal that was generated on the interval for old data... make sure to exclude those.
+            {
+              range: {
+                'signal.original_time': {
+                  gte: from,
+                },
+              },
+            },
+            ...bucketByFields.map((field) => {
+              return {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'signal.rule.threshold.field': field,
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.alert.rule.parameters.threshold.field': field,
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              };
+            }),
+          ],
+        },
+      },
+    },
   };
 };

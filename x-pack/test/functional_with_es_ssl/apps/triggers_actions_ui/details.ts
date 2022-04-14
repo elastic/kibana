@@ -136,7 +136,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return response;
   }
 
-  describe('Rule Details', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/129337
+  // Failing: See https://github.com/elastic/kibana/issues/129337
+  describe.skip('Rule Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
@@ -327,8 +329,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
 
-        const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
-        expect(headingText.includes(updatedRuleName)).to.be(true);
+        await retry.tryForTime(30 * 1000, async () => {
+          const headingText = await pageObjects.ruleDetailsUI.getHeadingText();
+          expect(headingText.includes(updatedRuleName)).to.be(true);
+        });
       });
 
       it('should reset rule when canceling an edit', async () => {

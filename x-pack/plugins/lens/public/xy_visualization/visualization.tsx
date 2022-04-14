@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { ThemeServiceStart } from 'kibana/public';
 import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';
@@ -31,6 +31,8 @@ import type {
 import {
   FillStyle,
   SeriesType,
+  YAxisMode,
+  ExtendedYConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   State,
@@ -80,7 +82,7 @@ import {
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
 import { XYState } from './types';
-import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
@@ -92,7 +94,7 @@ type ConvertActiveDataFn = (
 
 const updateFrame = (
   state: State | undefined,
-  frame: FramePublicAPI,
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
   convertActiveData?: ConvertActiveDataFn
 ) => {
   if (!frame) {
@@ -399,7 +401,7 @@ export const getXyVisualization = ({
     }
     const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map<YConfig>((metric, idx) => {
+    const yConfig = metrics.map<ExtendedYConfig>((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
@@ -752,7 +754,7 @@ const getMappedAccessors = ({
   layer,
 }: {
   accessors: string[];
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
   state: XYState;

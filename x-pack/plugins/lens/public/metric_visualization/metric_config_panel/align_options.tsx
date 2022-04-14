@@ -15,6 +15,8 @@ export interface TitlePositionProps {
   setState: (newState: MetricState) => void;
 }
 
+export const DEFAULT_TEXT_ALIGNMENT = 'left';
+
 const alignButtonIcons = [
   {
     id: `left`,
@@ -46,7 +48,7 @@ export const AlignOptions: React.FC<TitlePositionProps> = ({ state, setState }) 
         defaultMessage: 'Align',
       })}
       options={alignButtonIcons}
-      idSelected={state.textAlign ?? 'center'}
+      idSelected={state.textAlign ?? DEFAULT_TEXT_ALIGNMENT}
       onChange={(id) => {
         setState({ ...state, textAlign: id as MetricState['textAlign'] });
       }}

@@ -9,9 +9,10 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
 import {
+  AxisExtentConfigResult,
+  DataLayerConfigResult,
   XYArgs,
   XYLayerConfigResult,
-  DataLayerConfigResult,
   XYRender,
   AxisConfigResult,
 } from '../types';
@@ -34,6 +35,7 @@ import {
   LayerTypes,
   AXIS_CONFIG,
   AxisModes,
+  AxisExtentModes,
 } from '../constants';
 import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
@@ -56,6 +58,51 @@ function validateLayerMode(layers: DataLayerConfigResult[], axes: AxisConfigResu
     );
   }
 }
+const errors = {
+  extendBoundsAreInvalidError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.extendBoundsAreInvalidError', {
+      defaultMessage:
+        'For area and bar modes, and custom extent mode, the lower bound should be less or greater than 0 and the upper bound - be greater or equal than 0',
+    }),
+  notUsedFillOpacityError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
+      defaultMessage: '`fillOpacity` argument is applicable only for area charts.',
+    }),
+  valueLabelsForNotBarsOrHistogramBarsChartsError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarsOrHistogramBarsChartsError',
+      {
+        defaultMessage:
+          '`valueLabels` argument is applicable only for bar charts, which are not histograms.',
+      }
+    ),
+  dataBoundsForNotLineChartError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
+      defaultMessage: 'Only line charts can be fit to the data bounds',
+    }),
+};
+
+const validateExtent = (
+  extent: AxisExtentConfigResult,
+  hasBarOrArea: boolean,
+  dataLayers: DataLayerConfigResult[]
+) => {
+  const isValidLowerBound =
+    extent.lowerBound === undefined || (extent.lowerBound !== undefined && extent.lowerBound <= 0);
+  const isValidUpperBound =
+    extent.upperBound === undefined || (extent.upperBound !== undefined && extent.upperBound >= 0);
+
+  const areValidBounds = isValidLowerBound && isValidUpperBound;
+
+  if (hasBarOrArea && extent.mode === AxisExtentModes.CUSTOM && !areValidBounds) {
+    throw new Error(errors.extendBoundsAreInvalidError());
+  }
+
+  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType.includes('line'));
+  if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
+    throw new Error(errors.dataBoundsForNotLineChartError());
+  }
+};
 
 export const xyVisFunction: ExpressionFunctionDefinition<
   typeof XY_VIS,
@@ -137,6 +184,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Value labels mode',
       }),
       strict: true,
+      default: ValueLabelModes.HIDE,
     },
     tickLabelsVisibilitySettings: {
       types: [TICK_LABELS_CONFIG],
@@ -254,8 +302,25 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }, []);
 
       const logTable = prepareLogTable(data, layerDimensions, true);
-
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+    }
+
+    const hasBar = dataLayers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
+    const hasArea = dataLayers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
+
+    validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
+    validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
+
+    if (!hasArea && args.fillOpacity !== undefined) {
+      throw new Error(errors.notUsedFillOpacityError());
+    }
+
+    const hasNotHistogramBars =
+      dataLayers.filter(({ seriesType, isHistogram }) => seriesType.includes('bar') && !isHistogram)
+        .length > 0;
+
+    if ((!hasBar || !hasNotHistogramBars) && args.valueLabels !== ValueLabelModes.HIDE) {
+      throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
     }
 
     return {

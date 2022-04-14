@@ -12,6 +12,7 @@ import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
   xyVisFunction,
   yAxisConfigFunction,
+  extendedYAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
   dataLayerFunction,
@@ -33,6 +34,7 @@ export class ExpressionXyPlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(yAxisConfigFunction);
+    expressions.registerFunction(extendedYAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
     expressions.registerFunction(dataLayerFunction);

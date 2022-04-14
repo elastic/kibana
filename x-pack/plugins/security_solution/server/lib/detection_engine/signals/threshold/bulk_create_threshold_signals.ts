@@ -14,7 +14,7 @@ import { Logger } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
+  RuleExecutorServices,
 } from '../../../../../../alerting/server';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
@@ -35,7 +35,7 @@ import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
   completeRule: CompleteRule<ThresholdRuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
   filter: unknown;

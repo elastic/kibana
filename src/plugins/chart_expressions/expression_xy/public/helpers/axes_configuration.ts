@@ -10,11 +10,11 @@ import { Position } from '@elastic/charts';
 import { FormatFactory } from '../types';
 import {
   AxisConfig,
-  AxisMode,
-  YConfigResult,
   AxisExtentConfig,
   CommonXYDataLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
+  ExtendedYConfig,
+  YConfig,
 } from '../../common';
 import { AxisModes } from '../../common/constants';
 import type {
@@ -64,8 +64,9 @@ export function groupAxesByType(
   };
 
   layers.forEach((layer, index) => {
-    const { table, yConfig } = layer;
+    const { table } = layer;
     layer.accessors.forEach((accessor) => {
+      const yConfig: Array<ExtendedYConfig | YConfig> | undefined = layer.yConfig;
       const yConfigByAccessor = yConfig?.find((config) => config.forAccessor === accessor);
       const axisConfigById = axes?.find(
         (axis) => yConfigByAccessor?.axisId && axis.id === yConfigByAccessor?.axisId
@@ -200,6 +201,7 @@ export function getAxesConfiguration(
 
   return axisGroups;
 }
+<<<<<<< HEAD
 
 export const getAxisConfig = (axesGroup?: GroupsConfiguration, yConfig?: YConfigResult) => {
   return axesGroup?.find(
@@ -222,3 +224,5 @@ export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig)
     extent.upperBound <= extent.lowerBound;
   return { inclusiveZeroError, boundaryError };
 }
+=======
+>>>>>>> Kunzetsov/chart_expressions-xy-extended_layers

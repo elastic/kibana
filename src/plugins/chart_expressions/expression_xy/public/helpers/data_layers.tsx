@@ -50,6 +50,30 @@ type GetSeriesPropsFn = (config: {
   fillOpacity?: number;
 }) => SeriesSpec;
 
+type GetSeriesNameFn = (
+  data: XYChartSeriesIdentifier,
+  config: {
+    layer: CommonXYDataLayerConfigResult;
+    splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
+    splitFormatter: FieldFormat;
+    alreadyFormattedColumns: Record<string, boolean>;
+    columnToLabelMap: Record<string, string>;
+  }
+) => SeriesName;
+
+type GetColorFn = (
+  seriesIdentifier: XYChartSeriesIdentifier,
+  config: {
+    layer: CommonXYDataLayerConfigResult;
+    layerId: number;
+    accessor: string;
+    colorAssignments: ColorAssignments;
+    columnToLabelMap: Record<string, string>;
+    paletteService: PaletteRegistry;
+    syncColors?: boolean;
+  }
+) => string | null;
+
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
 export const getFormattedTable = (
@@ -106,17 +130,6 @@ export const getAreAlreadyFormattedLayersInfo = (
     {}
   );
 
-type GetSeriesNameFn = (
-  data: XYChartSeriesIdentifier,
-  config: {
-    layer: CommonXYDataLayerConfigResult;
-    splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
-    splitFormatter: FieldFormat;
-    alreadyFormattedColumns: Record<string, boolean>;
-    columnToLabelMap: Record<string, string>;
-  }
-) => SeriesName;
-
 const getSeriesName: GetSeriesNameFn = (
   data,
   { layer, splitHint, splitFormatter, alreadyFormattedColumns, columnToLabelMap }
@@ -157,19 +170,6 @@ const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
 });
 
 const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
-
-type GetColorFn = (
-  seriesIdentifier: XYChartSeriesIdentifier,
-  config: {
-    layer: CommonXYDataLayerConfigResult;
-    layerId: number;
-    accessor: string;
-    colorAssignments: ColorAssignments;
-    columnToLabelMap: Record<string, string>;
-    paletteService: PaletteRegistry;
-    syncColors?: boolean;
-  }
-) => string | null;
 
 const getColor: GetColorFn = (
   { yAccessor, seriesKeys },
@@ -269,7 +269,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   return {
     splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
     stackAccessors: isStacked ? [layer.xAccessor as string] : [],
-    id: `${layer.splitAccessor}-${accessor}`,
+    id: layer.splitAccessor ? `${layer.splitAccessor}-${accessor}` : `${accessor}`,
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
     data: rows,

@@ -8,8 +8,8 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
+import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable } from '../../../../expressions';
-import { PaletteOutput } from '../../../../charts/common';
 import { EventAnnotationOutput } from '../../../../event_annotation/common';
 import {
   AxisExtentModes,
@@ -40,6 +40,8 @@ import {
   EndValues,
   EXTENDED_ANNOTATION_LAYER,
   AXIS_CONFIG,
+  EXTENDED_Y_CONFIG,
+  AvailableReferenceLineIcons,
 } from '../constants';
 
 export type EndValue = $Values<typeof EndValues>;
@@ -55,6 +57,7 @@ export type IconPosition = $Values<typeof IconPositions>;
 export type ValueLabelMode = $Values<typeof ValueLabelModes>;
 export type AxisExtentMode = $Values<typeof AxisExtentModes>;
 export type FittingFunction = $Values<typeof FittingFunctions>;
+export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
 
 export interface AxesSettingsConfig {
   x: boolean;
@@ -84,16 +87,19 @@ export interface AxisConfig {
   showTitle?: boolean;
 }
 
-export interface YConfig {
-  forAccessor: string;
-  color?: string;
-  icon?: string;
+export interface ExtendedYConfig extends YConfig {
+  icon?: AvailableReferenceLineIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
   axisId?: string;
+}
+
+export interface YConfig {
+  forAccessor: string;
+  color?: string;
 }
 
 export interface DataLayerArgs {
@@ -290,13 +296,13 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
 export interface ReferenceLineLayerArgs {
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: YConfigResult[];
+  yConfig?: ExtendedYConfigResult[];
 }
 
 export interface ExtendedReferenceLineLayerArgs {
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: YConfigResult[];
+  yConfig?: ExtendedYConfigResult[];
   table?: Datatable;
 }
 
@@ -348,6 +354,7 @@ export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette
 };
 
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
+export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
 
 export type AxisConfigResult = AxisConfig & { type: typeof AXIS_CONFIG };
 

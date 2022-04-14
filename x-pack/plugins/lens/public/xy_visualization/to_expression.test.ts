@@ -347,7 +347,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'inside',
+        valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -364,14 +364,14 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('inside');
+    expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('show');
   });
 
   it('should compute the correct series color fallback based on the layer type', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'inside',
+        valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
           {

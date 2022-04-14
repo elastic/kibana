@@ -15,8 +15,8 @@ import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
 import { EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
   ActionGroup,
-  AlertExecutionStatusErrorReasons,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -107,7 +107,7 @@ describe('rule_details', () => {
         status: 'error',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.License,
+          reason: RuleExecutionStatusErrorReasons.License,
           message: 'test',
         },
       },
@@ -127,7 +127,7 @@ describe('rule_details', () => {
         status: 'warning',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         warning: {
-          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
           message: 'warning message',
         },
       },

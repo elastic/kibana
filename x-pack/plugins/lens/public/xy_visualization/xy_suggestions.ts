@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -32,6 +32,7 @@ const columnSortOrder = {
   histogram: 6,
   geo_point: 7,
   geo_shape: 8,
+  murmur3: 9,
 };
 
 /**

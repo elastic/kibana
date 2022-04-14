@@ -72,22 +72,22 @@ function getIconPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOp
   ];
 }
 
-interface MarkerDecorationConfig {
+export interface MarkerDecorationConfig<T extends string = string> {
   axisMode?: YAxisMode;
-  icon?: string;
+  icon?: T;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
 }
 
-export const TextDecorationSetting = ({
+export function TextDecorationSetting<Icon extends string = string>({
   currentConfig,
   setConfig,
   customIconSet,
 }: {
-  currentConfig?: MarkerDecorationConfig;
-  setConfig: (config: MarkerDecorationConfig) => void;
-  customIconSet?: IconSet;
-}) => {
+  currentConfig?: MarkerDecorationConfig<Icon>;
+  setConfig: (config: MarkerDecorationConfig<Icon>) => void;
+  customIconSet?: IconSet<Icon>;
+}) {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.lineMarker.textVisibility', {
@@ -127,17 +127,17 @@ export const TextDecorationSetting = ({
       />
     </EuiFormRow>
   );
-};
+}
 
-export const IconSelectSetting = ({
+export function IconSelectSetting<Icon extends string = string>({
   currentConfig,
   setConfig,
   customIconSet,
 }: {
-  currentConfig?: MarkerDecorationConfig;
-  setConfig: (config: MarkerDecorationConfig) => void;
-  customIconSet?: IconSet;
-}) => {
+  currentConfig?: MarkerDecorationConfig<Icon>;
+  setConfig: (config: MarkerDecorationConfig<Icon>) => void;
+  customIconSet: IconSet<Icon>;
+}) {
   return (
     <EuiFormRow
       display="columnCompressed"
@@ -155,17 +155,17 @@ export const IconSelectSetting = ({
       />
     </EuiFormRow>
   );
-};
+}
 
-export const MarkerDecorationPosition = ({
+export function MarkerDecorationPosition<Icon extends string = string>({
   currentConfig,
   setConfig,
   isHorizontal,
 }: {
-  currentConfig?: MarkerDecorationConfig;
-  setConfig: (config: MarkerDecorationConfig) => void;
+  currentConfig?: MarkerDecorationConfig<Icon>;
+  setConfig: (config: MarkerDecorationConfig<Icon>) => void;
   isHorizontal: boolean;
-}) => {
+}) {
   return (
     <>
       {hasIcon(currentConfig?.icon) || currentConfig?.textVisibility ? (
@@ -211,4 +211,4 @@ export const MarkerDecorationPosition = ({
       ) : null}
     </>
   );
-};
+}

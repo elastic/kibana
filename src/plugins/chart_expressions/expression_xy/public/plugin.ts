@@ -20,6 +20,7 @@ import {
   extendedDataLayerFunction,
   yAxisConfigFunction,
   axisConfigFunction,
+  extendedYAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
   axisExtentConfigFunction,
@@ -56,6 +57,7 @@ export class ExpressionXyPlugin {
     { expressions, charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
+    expressions.registerFunction(extendedYAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
     expressions.registerFunction(dataLayerFunction);

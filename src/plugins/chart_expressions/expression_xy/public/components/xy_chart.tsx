@@ -26,6 +26,7 @@ import {
   AxisStyle,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
+import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '../../../../expressions/common';
 import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
@@ -34,7 +35,6 @@ import { EventAnnotationServiceType } from '../../../../event_annotation/public'
 import {
   ChartsPluginSetup,
   ChartsPluginStart,
-  PaletteRegistry,
   useActiveCursor,
 } from '../../../../../plugins/charts/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../plugins/charts/common';
@@ -50,7 +50,6 @@ import {
   isDataLayer,
   getAxesConfiguration,
   GroupsConfiguration,
-  validateExtent,
   computeOverallDataDomain,
   getLinesCausedPaddings,
   getAxisConfig,
@@ -60,11 +59,11 @@ import { getLegendAction } from './legend_action';
 import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common/types';
+import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
+import { SeriesTypes, ValueLabelModes } from '../../common/constants';
+import { DataLayers } from './data_layers';
 
 import './xy_chart.scss';
-import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
-import { SeriesTypes } from '../../common/constants';
-import { DataLayers } from './data_layers';
 
 declare global {
   interface Window {
@@ -325,13 +324,9 @@ export function XYChart({
     const padding = axis.boundsMargin || undefined;
     let min: number = NaN;
     let max: number = NaN;
-
     if (extent.mode === 'custom') {
-      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
-      if (!inclusiveZeroError && !boundaryError) {
-        min = extent.lowerBound ?? NaN;
-        max = extent.upperBound ?? NaN;
-      }
+      min = extent.lowerBound ?? NaN;
+      max = extent.upperBound ?? NaN;
     } else {
       const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
         yConfig?.some((config) => Boolean(getAxisConfig([axis], config)))
@@ -372,7 +367,9 @@ export function XYChart({
     !isHistogramViz;
 
   const valueLabelsStyling =
-    shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
+    shouldShowValueLabels &&
+    valueLabels !== ValueLabelModes.HIDE &&
+    getValueLabelsStyling(shouldRotate);
 
   const clickHandler: ElementClickListener = ([[geometry, series]]) => {
     // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue

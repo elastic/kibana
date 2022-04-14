@@ -332,16 +332,18 @@ describe('xy_visualization', () => {
         { columnId: 'c', fields: [] },
       ]);
 
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [],
-          columns: [],
+      frame = {
+        datasourceLayers: {
+          first: mockDatasource.publicAPIMock,
         },
+        activeData: {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        },
+        dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -436,7 +438,6 @@ describe('xy_visualization', () => {
 
     describe('annotations', () => {
       it('should add a dimension to a annotation layer', () => {
-        jest.spyOn(Date, 'now').mockReturnValue(new Date('2022-04-18T11:01:58.135Z').valueOf());
         expect(
           xyVisualization.setDimension({
             frame,
@@ -463,7 +464,7 @@ describe('xy_visualization', () => {
               icon: 'triangle',
               id: 'newCol',
               key: {
-                timestamp: '2022-04-18T11:01:58.135Z',
+                timestamp: '2022-04-15T00:00:00.000Z',
                 type: 'point_in_time',
               },
               label: 'Event',

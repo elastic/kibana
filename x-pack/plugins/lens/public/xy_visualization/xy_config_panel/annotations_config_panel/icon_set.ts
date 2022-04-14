@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { IconTriangle, IconCircle } from '../../../assets/annotation_icons';
 
-export const annotationsIconSet = [
+import { i18n } from '@kbn/i18n';
+import { AvailableAnnotationIcon } from '../../../../../../../src/plugins/event_annotation/common';
+import { IconTriangle, IconCircle } from '../../../assets/annotation_icons';
+import { IconSet } from '../shared/icon_select';
+
+export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
   {
     value: 'asterisk',
     label: i18n.translate('xpack.lens.xyChart.iconSelect.asteriskIconLabel', {

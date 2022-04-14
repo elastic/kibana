@@ -9,7 +9,7 @@
 import { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { sha256 } from 'js-sha256';
-import type { Alert } from '../../../../../../x-pack/plugins/alerting/common';
+import type { Rule } from '../../../../../../x-pack/plugins/alerting/common';
 import { getTime, IndexPattern } from '../../../../data/common';
 import type { Filter } from '../../../../data/public';
 import { DiscoverAppLocatorParams } from '../../locator';
@@ -27,7 +27,7 @@ const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntr
 
 const buildTimeRangeFilter = (
   dataView: IndexPattern,
-  fetchedAlert: Alert<SearchThresholdAlertParams>,
+  fetchedAlert: Rule<SearchThresholdAlertParams>,
   timeFieldName: string
 ) => {
   const filter = getTime(dataView, {

@@ -15,7 +15,7 @@ import { LayerTypes } from '../../common/constants';
 import {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfigResult,
-  YConfig,
+  ExtendedYConfig,
 } from '../../common/types';
 import { ReferenceLineAnnotations, ReferenceLineAnnotationsProps } from './reference_lines';
 
@@ -104,7 +104,7 @@ describe('ReferenceLineAnnotations', () => {
       ['yAccessorLeft', 'below'],
       ['yAccessorRight', 'above'],
       ['yAccessorRight', 'below'],
-    ] as Array<[string, YConfig['fill']]>)(
+    ] as Array<[string, ExtendedYConfig['fill']]>)(
       'should render a RectAnnotation for a reference line with fill set: %s %s',
       (layerPrefix, fill) => {
         const wrapper = shallow(
@@ -115,8 +115,8 @@ describe('ReferenceLineAnnotations', () => {
                 forAccessor: `${layerPrefix}FirstId`,
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
                 axisId: getAxisFromId(layerPrefix),
+                type: 'extendedYConfig',
               },
             ])}
           />
@@ -142,7 +142,7 @@ describe('ReferenceLineAnnotations', () => {
     it.each([
       ['xAccessor', 'above'],
       ['xAccessor', 'below'],
-    ] as Array<[string, YConfig['fill']]>)(
+    ] as Array<[string, ExtendedYConfig['fill']]>)(
       'should render a RectAnnotation for a reference line with fill set: %s %s',
       (layerPrefix, fill) => {
         const wrapper = shallow(
@@ -152,7 +152,7 @@ describe('ReferenceLineAnnotations', () => {
               {
                 forAccessor: `${layerPrefix}FirstId`,
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
                 axisId: 'bottom',
               },
@@ -182,7 +182,7 @@ describe('ReferenceLineAnnotations', () => {
       ['yAccessorLeft', 'below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
       ['yAccessorRight', 'above', { y0: 5, y1: 10 }, { y0: 10, y1: undefined }],
       ['yAccessorRight', 'below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
-    ] as Array<[string, YConfig['fill'], YCoords, YCoords]>)(
+    ] as Array<[string, ExtendedYConfig['fill'], YCoords, YCoords]>)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
         const wrapper = shallow(
@@ -192,14 +192,14 @@ describe('ReferenceLineAnnotations', () => {
               {
                 forAccessor: `${layerPrefix}FirstId`,
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
                 axisId: getAxisFromId(layerPrefix),
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
                 axisId: getAxisFromId(layerPrefix),
               },
@@ -231,7 +231,7 @@ describe('ReferenceLineAnnotations', () => {
     it.each([
       ['xAccessor', 'above', { x0: 1, x1: 2 }, { x0: 2, x1: undefined }],
       ['xAccessor', 'below', { x0: undefined, x1: 1 }, { x0: 1, x1: 2 }],
-    ] as Array<[string, YConfig['fill'], XCoords, XCoords]>)(
+    ] as Array<[string, ExtendedYConfig['fill'], XCoords, XCoords]>)(
       'should avoid overlap between two reference lines with fill in the same direction: 2 x %s %s',
       (layerPrefix, fill, coordsA, coordsB) => {
         const wrapper = shallow(
@@ -241,14 +241,14 @@ describe('ReferenceLineAnnotations', () => {
               {
                 forAccessor: `${layerPrefix}FirstId`,
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
                 axisId: 'bottom',
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 lineStyle: 'solid',
-                type: 'yConfig',
+                type: 'extendedYConfig',
                 fill,
                 axisId: 'bottom',
               },
@@ -290,15 +290,15 @@ describe('ReferenceLineAnnotations', () => {
                 forAccessor: `${layerPrefix}FirstId`,
                 lineStyle: 'solid',
                 fill: 'above',
-                type: 'yConfig',
                 axisId: axisMode,
+                type: 'extendedYConfig',
               },
               {
                 forAccessor: `${layerPrefix}SecondId`,
                 lineStyle: 'solid',
                 fill: 'below',
-                type: 'yConfig',
                 axisId: axisMode,
+                type: 'extendedYConfig',
               },
             ])}
           />
@@ -328,7 +328,7 @@ describe('ReferenceLineAnnotations', () => {
     it.each([
       ['above', { y0: 5, y1: 10 }, { y0: 10, y1: undefined }],
       ['below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
-    ] as Array<[YConfig['fill'], YCoords, YCoords]>)(
+    ] as Array<[ExtendedYConfig['fill'], YCoords, YCoords]>)(
       'should be robust and works also for different axes when on same direction: 1x Left + 1x Right both %s',
       (fill, coordsA, coordsB) => {
         const wrapper = shallow(
@@ -339,15 +339,15 @@ describe('ReferenceLineAnnotations', () => {
                 forAccessor: `yAccessorLeftFirstId`,
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
                 axisId: 'left',
+                type: 'extendedYConfig',
               },
               {
                 forAccessor: `yAccessorRightSecondId`,
                 lineStyle: 'solid',
                 fill,
-                type: 'yConfig',
                 axisId: 'right',
+                type: 'extendedYConfig',
               },
             ])}
           />

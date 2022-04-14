@@ -10,4 +10,4 @@ export type { EventAnnotationArgs, EventAnnotationOutput } from './manual_event_
 export { manualEventAnnotation } from './manual_event_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
-export type { EventAnnotationConfig } from './types';
+export type { EventAnnotationConfig, AvailableAnnotationIcon } from './types';

@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
 import { ExpressionAstExpression } from 'src/plugins/expressions';
@@ -19,9 +19,13 @@ import {
   XYAnnotationLayerConfig,
 } from './types';
 import type { ValidXYDataLayerConfig } from './types';
-import { OperationMetadata, DatasourcePublicAPI } from '../types';
+import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type { AxisConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type {
+  AxisConfig,
+  ExtendedYConfig,
+  YConfig,
+} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -50,7 +54,7 @@ export const getSortedAccessors = (
 
 export const toExpression = (
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   datasourceExpressionsByLayers: Record<string, Ast>,
@@ -108,7 +112,7 @@ const simplifiedLayerExpression = {
 
 export function toPreviewExpression(
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
@@ -161,7 +165,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
@@ -244,15 +248,20 @@ export const buildExpression = (
                     showSingleSeries: state.legend.showSingleSeries
                       ? [state.legend.showSingleSeries]
                       : [],
-                    position: [state.legend.position],
+                    position: !state.legend.isInside ? [state.legend.position] : [],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize: state.legend.legendSize ? [state.legend.legendSize] : [],
-                    horizontalAlignment: state.legend.horizontalAlignment
-                      ? [state.legend.horizontalAlignment]
-                      : [],
-                    verticalAlignment: state.legend.verticalAlignment
-                      ? [state.legend.verticalAlignment]
-                      : [],
+                    legendSize:
+                      !state.legend.isInside && state.legend.legendSize
+                        ? [state.legend.legendSize]
+                        : [],
+                    horizontalAlignment:
+                      state.legend.horizontalAlignment && state.legend.isInside
+                        ? [state.legend.horizontalAlignment]
+                        : [],
+                    verticalAlignment:
+                      state.legend.verticalAlignment && state.legend.isInside
+                        ? [state.legend.verticalAlignment]
+                        : [],
                     // ensure that even if the user types more than 5 columns
                     // we will only show 5
                     floatingColumns: state.legend.floatingColumns
@@ -454,7 +463,7 @@ const referenceLineLayerToExpression = (
         arguments: {
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
-                yConfigToExpression(yConfig, axes, defaultReferenceLineColor)
+                extendedYConfigToExpression(yConfig, defaultReferenceLineColor)
               )
             : [],
           accessors: layer.accessors,
@@ -585,6 +594,23 @@ const yConfigToExpression = (yConfig: YConfig, axes: AxisConfig[], defaultColor?
         arguments: {
           axisId: axisId ? [axisId] : [],
           forAccessor: [yConfig.forAccessor],
+          color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
+        },
+      },
+    ],
+  };
+};
+
+const extendedYConfigToExpression = (yConfig: ExtendedYConfig, defaultColor?: string): Ast => {
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'extendedYConfig',
+        arguments: {
+          forAccessor: [yConfig.forAccessor],
+          axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
           color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
           lineStyle: [yConfig.lineStyle || 'solid'],
           lineWidth: [yConfig.lineWidth || 1],

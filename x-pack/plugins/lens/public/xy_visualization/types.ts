@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
+import type { PaletteOutput } from '@kbn/coloring';
 import { LensIconChartArea } from '../assets/chart_area';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
 import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
@@ -19,7 +20,6 @@ import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizo
 import { LensIconChartLine } from '../assets/chart_line';
 
 import type { VisualizationType, Suggestion } from '../types';
-import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import type {
   SeriesType,
   LegendConfig,
@@ -29,6 +29,8 @@ import type {
   FittingFunction,
   LabelsOrientationConfig,
   EndValue,
+  ExtendedYConfig,
+  YConfig,
   YScaleType,
   XScaleType,
   LineStyle,
@@ -77,7 +79,7 @@ export interface XYDataLayerConfig {
 export interface XYReferenceLineLayerConfig {
   layerId: string;
   accessors: string[];
-  yConfig?: YConfig[];
+  yConfig?: ExtendedYConfig[];
   palette?: PaletteOutput;
   layerType: 'referenceLine';
 }
