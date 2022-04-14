@@ -13,7 +13,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 
 export interface ResourceTypeQueryResult {
   aggs_by_resource_type: Aggregation<ResourceTypeBucket>;
@@ -45,7 +45,7 @@ export const resourceTypeAggQuery = {
 };
 
 export const getRisksEsQuery = (query: QueryDslQueryContainer): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+  index: LATEST_FINDINGS_INDEX_PATTERN,
   size: 0,
   query,
   aggs: resourceTypeAggQuery,

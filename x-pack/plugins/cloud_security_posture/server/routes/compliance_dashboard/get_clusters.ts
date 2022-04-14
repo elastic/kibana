@@ -14,7 +14,7 @@ import type {
 import { Cluster } from '../../../common/types';
 import { getResourceTypeFromAggs, resourceTypeAggQuery } from './get_resources_types';
 import type { ResourceTypeQueryResult } from './get_resources_types';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
 
@@ -38,7 +38,7 @@ interface ClustersQueryResult {
 export type ClusterWithoutTrend = Omit<Cluster, 'trend'>;
 
 export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+  index: LATEST_FINDINGS_INDEX_PATTERN,
   size: 0,
   query,
   aggs: {

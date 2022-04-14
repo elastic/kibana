@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import type { ComplianceDashboardData, Score } from '../../../common/types';
 
 /**
@@ -37,7 +37,7 @@ export const findingsEvaluationAggsQuery = {
 };
 
 export const getEvaluationsQuery = (query: QueryDslQueryContainer): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+  index: LATEST_FINDINGS_INDEX_PATTERN,
   query,
   aggs: findingsEvaluationAggsQuery,
 });
