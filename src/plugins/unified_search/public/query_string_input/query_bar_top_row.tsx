@@ -430,7 +430,7 @@ export const QueryBarTopRow = React.memo(
     return (
       <EuiFlexGroup
         className={classes}
-        direction={isMobile ? 'column' : 'row'}
+        direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
         responsive={false}
         gutterSize="s"
         justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
