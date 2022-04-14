@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   // FLAKY: https://github.com/elastic/kibana/issues/128558
-  describe.skip('index pattern filter', function describeIndexTests() {
+  describe('data view filter', function describeIndexTests() {
     before(async function () {
       await esArchiver.emptyKibanaIndex();
       await kibanaServer.uiSettings.replace({});

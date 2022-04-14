@@ -8,6 +8,7 @@
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
+import { firstValueFrom } from 'rxjs';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
@@ -36,8 +37,8 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
   return useQuery(
     ['actionDetails', { actionId, filterQuery }],
     async () => {
-      const responseData = await data.search
-        .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
+      const responseData = await firstValueFrom(
+        data.search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
           {
             actionId,
             factoryQueryType: OsqueryQueries.actionDetails,
@@ -47,7 +48,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
             strategy: 'osquerySearchStrategy',
           }
         )
-        .toPromise();
+      );
 
       if (!responseData.actionDetails) throw new Error();
 

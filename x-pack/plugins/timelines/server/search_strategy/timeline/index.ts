@@ -8,7 +8,6 @@
 import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { from } from 'rxjs';
-
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
@@ -28,6 +27,7 @@ import {
 } from '../../../common/search_strategy/timeline';
 import { timelineFactory } from './factory';
 import { TimelineFactory } from './factory/types';
+import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ISearchOptions,
@@ -205,29 +205,43 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 }) => {
   const indices = request.defaultIndex ?? request.indexType;
 
-  const runtimeMappings = {
-    // TODO: remove once ECS is updated to support process.entry_leader.same_as_process
-    'process.is_entry_leader': {
-      type: 'boolean',
-      script: {
-        source:
-          "emit(doc.containsKey('process.entry_leader.entity_id') && doc['process.entry_leader.entity_id'].size() > 0 && doc['process.entity_id'].value == doc['process.entry_leader.entity_id'].value)",
-      },
-    },
-  };
-
   const requestSessionLeaders = {
     ...request,
     defaultIndex: indices,
     indexName: indices,
   };
 
+  const collapse = {
+    field: 'process.entity_id',
+    inner_hits: {
+      name: 'last_event',
+      size: 1,
+      sort: [{ '@timestamp': 'desc' }],
+    },
+  };
+  const aggs = {
+    total: {
+      cardinality: {
+        field: 'process.entity_id',
+      },
+    },
+  };
+
   const dsl = queryFactory.buildDsl(requestSessionLeaders);
 
-  const params = { ...dsl, runtime_mappings: runtimeMappings };
+  const params = { ...dsl, collapse, aggs };
 
   return es.search({ ...requestSessionLeaders, params }, options, deps).pipe(
     map((response) => {
+      const agg = response.rawResponse.aggregations;
+      const aggTotal = isAggCardinalityAggregate(agg, 'total') && agg.total.value;
+
+      // ES doesn't set the hits.total to the collapsed hits.
+      // so we are overriding hits.total with the total from the aggregation.
+      if (aggTotal) {
+        response.rawResponse.hits.total = aggTotal;
+      }
+
       return {
         ...response,
         rawResponse: shimHitsTotal(response.rawResponse, options),

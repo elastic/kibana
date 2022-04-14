@@ -9,6 +9,7 @@
 import { waitUntilNextSessionCompletes$ } from './session_helpers';
 import { ISessionService, SessionService } from './session_service';
 import { BehaviorSubject } from 'rxjs';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { SearchSessionState } from './search_session_state';
 import { NowProviderInternalContract } from '../../now_provider';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -62,27 +63,30 @@ describe('waitUntilNextSessionCompletes$', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
-  test('emits when next session starts', () => {
-    sessionService.start();
-    let untrackSearch = sessionService.trackSearch({ abort: () => {} });
-    untrackSearch();
+  test(
+    'emits when next session starts',
+    fakeSchedulers((advance) => {
+      sessionService.start();
+      let untrackSearch = sessionService.trackSearch({ abort: () => {} });
+      untrackSearch();
 
-    const next = jest.fn();
-    const complete = jest.fn();
-    waitUntilNextSessionCompletes$(sessionService).subscribe({ next, complete });
-    expect(next).not.toBeCalled();
+      const next = jest.fn();
+      const complete = jest.fn();
+      waitUntilNextSessionCompletes$(sessionService).subscribe({ next, complete });
+      expect(next).not.toBeCalled();
 
-    sessionService.start();
-    expect(next).not.toBeCalled();
+      sessionService.start();
+      expect(next).not.toBeCalled();
 
-    untrackSearch = sessionService.trackSearch({ abort: () => {} });
-    untrackSearch();
+      untrackSearch = sessionService.trackSearch({ abort: () => {} });
+      untrackSearch();
 
-    expect(next).not.toBeCalled();
-    jest.advanceTimersByTime(500);
-    expect(next).not.toBeCalled();
-    jest.advanceTimersByTime(1000);
-    expect(next).toBeCalledTimes(1);
-    expect(complete).toBeCalled();
-  });
+      expect(next).not.toBeCalled();
+      advance(500);
+      expect(next).not.toBeCalled();
+      advance(1000);
+      expect(next).toBeCalledTimes(1);
+      expect(complete).toBeCalled();
+    })
+  );
 });

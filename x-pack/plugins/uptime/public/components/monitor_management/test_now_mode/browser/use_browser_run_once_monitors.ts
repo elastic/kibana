@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { selectDynamicSettings } from '../../../../state/selectors';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { createEsParams, useEsSearch, useFetcher } from '../../../../../../observability/public';
 import { useTickTick } from '../use_tick_tick';
 import { fetchJourneySteps } from '../../../../state/api/journey';
 import { isStepEnd } from '../../../synthetics/check_steps/steps_list';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
 
 export const useBrowserEsResults = ({
   configId,
@@ -23,11 +21,9 @@ export const useBrowserEsResults = ({
   testRunId?: string;
   lastRefresh: number;
 }) => {
-  const { settings } = useSelector(selectDynamicSettings);
-
   return useEsSearch(
     createEsParams({
-      index: settings?.heartbeatIndices,
+      index: SYNTHETICS_INDEX_PATTERN,
       body: {
         sort: [
           {
@@ -60,9 +56,9 @@ export const useBrowserEsResults = ({
           },
         },
       },
-      size: 10,
+      size: 1000,
     }),
-    [configId, settings?.heartbeatIndices, lastRefresh],
+    [configId, lastRefresh],
     { name: 'TestRunData' }
   );
 };

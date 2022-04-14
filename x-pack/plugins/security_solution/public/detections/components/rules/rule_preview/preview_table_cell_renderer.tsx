@@ -18,7 +18,6 @@ import { CellValueElementProps } from '../../../../../../timelines/common';
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
 > = ({
-  browserFields,
   columnId,
   data,
   ecsData,
@@ -38,7 +37,6 @@ export const PreviewRenderCellValue: React.FC<
   truncate,
 }) => (
   <PreviewTableCellRenderer
-    browserFields={browserFields}
     columnId={columnId}
     data={data}
     ecsData={ecsData}
@@ -60,7 +58,6 @@ export const PreviewRenderCellValue: React.FC<
 );
 
 export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
-  browserFields,
   data,
   ecsData,
   eventId,
@@ -89,12 +86,12 @@ export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';
+
   return (
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
           asPlainText,
-          browserFields,
           columnName: header.id,
           ecsData,
           eventId,
