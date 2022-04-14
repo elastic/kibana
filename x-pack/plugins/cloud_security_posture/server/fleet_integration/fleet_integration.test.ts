@@ -41,7 +41,7 @@ describe('create CSP rules with post package create callback', () => {
     logger = loggingSystemMock.createLogger();
     mockSoClient = savedObjectsClientMock.create();
   });
-  it('should create stateful rules based on rules template', async () => {
+  it('should create stateful rules based on rule template', async () => {
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.package!.name = CIS_KUBERNETES_PACKAGE_NAME;
     mockSoClient.find.mockResolvedValueOnce({
