@@ -41,7 +41,7 @@ Retrieve the index pattern object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/saved_objects/index-pattern/my-pattern
+$ curl -X GET api/index_patterns/index-pattern/my-pattern
 --------------------------------------------------
 // KIBANA
 
