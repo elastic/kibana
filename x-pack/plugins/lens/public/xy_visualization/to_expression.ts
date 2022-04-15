@@ -32,8 +32,7 @@ import {
   getAnnotationsLayers,
 } from './visualization_helpers';
 import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
-import { layerTypes } from '../../common';
-import { DEFAULT_LEGEND_SIZE } from '../shared_components/legend_size_settings';
+import { DEFAULT_LEGEND_SIZE, layerTypes } from '../../common';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,

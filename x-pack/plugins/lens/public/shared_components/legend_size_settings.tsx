@@ -8,16 +8,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-
-export enum LegendSizes {
-  AUTO = '0',
-  SMALL = '80',
-  MEDIUM = '130',
-  LARGE = '180',
-  EXTRA_LARGE = '230',
-}
-
-export const DEFAULT_LEGEND_SIZE = LegendSizes.MEDIUM;
+import { DEFAULT_LEGEND_SIZE, LegendSizes } from '../../common';
 
 interface LegendSizeSettingsProps {
   legendSize: number | undefined;
@@ -25,27 +16,27 @@ interface LegendSizeSettingsProps {
   isVerticalLegend: boolean;
 }
 
-const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
+const legendSizeOptions: Array<{ value: string; inputDisplay: string }> = [
   {
-    value: LegendSizes.SMALL,
+    value: LegendSizes.SMALL.toString(),
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.small', {
       defaultMessage: 'Small',
     }),
   },
   {
-    value: LegendSizes.MEDIUM,
+    value: LegendSizes.MEDIUM.toString(),
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.medium', {
       defaultMessage: 'Medium',
     }),
   },
   {
-    value: LegendSizes.LARGE,
+    value: LegendSizes.LARGE.toString(),
     inputDisplay: i18n.translate('xpack.lens.shared.legendSizeSetting.legendSizeOptions.large', {
       defaultMessage: 'Large',
     }),
   },
   {
-    value: LegendSizes.EXTRA_LARGE,
+    value: LegendSizes.EXTRA_LARGE.toString(),
     inputDisplay: i18n.translate(
       'xpack.lens.shared.legendSizeSetting.legendSizeOptions.extraLarge',
       {
@@ -67,14 +58,15 @@ export const LegendSizeSettings = ({
   }, [isVerticalLegend, legendSize, onLegendSizeChange]);
 
   const onLegendSizeOptionChange = useCallback(
-    (option) => onLegendSizeChange(option === DEFAULT_LEGEND_SIZE ? undefined : Number(option)),
+    (option: string) =>
+      onLegendSizeChange(Number(option) === DEFAULT_LEGEND_SIZE ? undefined : Number(option)),
     [onLegendSizeChange]
   );
 
   if (!isVerticalLegend) return null;
 
   const options =
-    legendSize?.toString() !== LegendSizes.AUTO
+    legendSize !== LegendSizes.AUTO
       ? legendSizeOptions
       : [
           {
@@ -99,7 +91,7 @@ export const LegendSizeSettings = ({
     >
       <EuiSuperSelect
         compressed
-        valueOfSelected={legendSize?.toString() || DEFAULT_LEGEND_SIZE}
+        valueOfSelected={legendSize?.toString() || DEFAULT_LEGEND_SIZE.toString()}
         options={options}
         onChange={onLegendSizeOptionChange}
       />

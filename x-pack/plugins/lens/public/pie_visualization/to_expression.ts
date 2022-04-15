@@ -24,6 +24,7 @@ import {
   PieVisualizationState,
   EmptySizeRatios,
   LegendDisplay,
+  DEFAULT_LEGEND_SIZE,
 } from '../../common';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 
@@ -144,7 +145,7 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
   legendPosition: [layer.legendPosition || Position.Right],
   maxLegendLines: [layer.legendMaxLines ?? 1],
-  legendSize: layer.legendSize ? [layer.legendSize] : [],
+  legendSize: [layer.legendSize || DEFAULT_LEGEND_SIZE],
   nestedLegend: [!!layer.nestedLegend],
   truncateLegend: [
     layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,

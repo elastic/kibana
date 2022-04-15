@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { DEFAULT_LEGEND_SIZE, LegendSizes, LegendSizeSettings } from './legend_size_settings';
+import { LegendSizeSettings } from './legend_size_settings';
 import { EuiSuperSelect } from '@elastic/eui';
 import { shallow } from 'enzyme';
+import { DEFAULT_LEGEND_SIZE, LegendSizes } from '../../common';
 
 describe('legend size settings', () => {
   it('renders nothing if not vertical legend', () => {
@@ -32,7 +33,9 @@ describe('legend size settings', () => {
       />
     );
 
-    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(DEFAULT_LEGEND_SIZE);
+    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(
+      DEFAULT_LEGEND_SIZE.toString()
+    );
   });
 
   it('reflects current setting in select', () => {
@@ -46,7 +49,7 @@ describe('legend size settings', () => {
       />
     );
 
-    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(CURRENT_SIZE);
+    expect(instance.find(EuiSuperSelect).props().valueOfSelected).toBe(CURRENT_SIZE.toString());
   });
 
   it('allows user to select a new option', () => {
@@ -70,7 +73,7 @@ describe('legend size settings', () => {
   });
 
   it('hides "auto" option if visualization not using it', () => {
-    const getOptions = (legendSize: number) =>
+    const getOptions = (legendSize: number | undefined) =>
       shallow(
         <LegendSizeSettings
           legendSize={legendSize}
@@ -81,11 +84,10 @@ describe('legend size settings', () => {
         .find(EuiSuperSelect)
         .props().options;
 
-    expect(getOptions(Number(LegendSizes.AUTO))).toContainEqual(
-      expect.objectContaining({ value: LegendSizes.AUTO })
-    );
-    expect(getOptions(Number(LegendSizes.LARGE))).not.toContainEqual(
-      expect.objectContaining({ value: LegendSizes.AUTO })
-    );
+    const autoOption = expect.objectContaining({ value: LegendSizes.AUTO.toString() });
+
+    expect(getOptions(Number(LegendSizes.AUTO))).toContainEqual(autoOption);
+    expect(getOptions(undefined)).not.toContainEqual(autoOption);
+    expect(getOptions(Number(LegendSizes.LARGE))).not.toContainEqual(autoOption);
   });
 });
