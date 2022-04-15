@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import {
@@ -57,7 +57,7 @@ export interface DonutChartProps {
 
 /* Make this position absolute in order to overlap the text onto the donut */
 const DonutTextWrapper = styled(EuiFlexGroup)`
-  top: 35%;
+  top: 34%;
   width: 100%;
   max-width: 77px;
   position: absolute;
@@ -67,6 +67,10 @@ const DonutTextWrapper = styled(EuiFlexGroup)`
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   position: relative;
   align-items: center;
+`;
+
+const EmptyChartLabel = styled(EuiText)`
+  color: #abb4c4;
 `;
 
 export const DonutChart = ({
@@ -99,9 +103,9 @@ export const DonutChart = ({
           <EuiFlexItem>{title}</EuiFlexItem>
           <EuiFlexItem className="eui-textTruncate">
             {!data && (
-              <EuiTextColor color="#ABB4C4" className="eui-textTruncate">
+              <EmptyChartLabel className="eui-textTruncate" size="s">
                 {label}
-              </EuiTextColor>
+              </EmptyChartLabel>
             )}
             {data && !link && (
               <EuiText className="eui-textTruncate" size="s">

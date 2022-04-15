@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 
 import { EMPTY_VALUE_LABEL } from './translation';
 import { hasValueToDisplay } from '../../utils/validators';
@@ -17,14 +18,18 @@ export interface LegendItem {
   value: string | number;
 }
 
+const LegendText = styled.span`
+  font-size: 10.5px;
+`;
+
 /**
  * Renders the value or a placeholder in case the value is empty
  */
 const ValueWrapper = React.memo<{ value: LegendItem['value'] }>(({ value }) =>
   hasValueToDisplay(value) ? (
-    <>{value}</>
+    <LegendText>{value}</LegendText>
   ) : (
-    <em data-test-subj="value-wrapper-empty">{EMPTY_VALUE_LABEL}</em>
+    <LegendText data-test-subj="value-wrapper-empty">{EMPTY_VALUE_LABEL}</LegendText>
   )
 );
 

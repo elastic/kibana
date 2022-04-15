@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 import { ShapeTreeNode } from '@elastic/charts';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DonutChart, FillColor } from '../../../../common/components/charts/donutchart';
@@ -15,9 +14,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useNavigation } from '../../../../common/lib/kibana';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { Panel } from '../../../../common/components/panel';
-import { HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../../../../common/components/visualization_actions';
-import { ViewDetailsButton } from './view_details_button';
+import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LegendItem } from '../../../../common/components/charts/legend_item';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
@@ -39,23 +36,14 @@ import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
+import { LinkButton } from '../../../../common/components/links';
 
-const HistogramPanel = styled(Panel)<{ $height?: number }>`
-  display: flex;
-  flex-direction: column;
-  ${({ $height }) => ($height != null ? `height: ${$height};` : '')}
-`;
-const defaultPanelHeight = 300;
 const donutHeight = 120;
 
 interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
 
-const panelSettings = {
-  panelHeight: `${defaultPanelHeight}px`,
-  paddingSize: 'm',
-};
 const legendField = 'kibana.alert.severity';
 const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
   { key: 'critical', label: STATUS_CRITICAL_LABEL, color: SEVERITY_COLOR.critical },
@@ -121,12 +109,8 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
 
   return (
     <>
-      <HoverVisibilityContainer show={true} targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
-        <HistogramPanel
-          data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}
-          height={toggleStatus ? 'auto' : panelSettings.panelHeight}
-          paddingSize={panelSettings.paddingSize}
-        >
+      <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+        <EuiPanel hasBorder data-test-subj={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-panel`}>
           {loading && (
             <EuiProgress
               data-test-subj="initialLoadingPanelMatrixOverTime"
@@ -145,18 +129,21 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <ViewDetailsButton
+                <LinkButton
+                  data-test-subj="view-details-button"
                   onClick={detailsButtonOptions.onClick}
                   href={detailsButtonOptions.href}
-                  name={detailsButtonOptions.name}
-                />
+                >
+                  {detailsButtonOptions.name}
+                </LinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderSection>
+          <EuiSpacer size="s" />
           {toggleStatus && (
             <>
               {!loading && (
-                <EuiText className="eui-textCenter">
+                <EuiText className="eui-textCenter" size="s">
                   <b>
                     <FormattedCount count={totalAlerts} />
                   </b>
@@ -164,6 +151,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
                   <small>{ALERTS(totalAlerts)}</small>
                 </EuiText>
               )}
+              <EuiSpacer size="l" />
               <EuiFlexGroup>
                 <EuiFlexItem key={`alerts-status-open`}>
                   <DonutChart
@@ -202,7 +190,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
               <EuiSpacer size="m" />
             </>
           )}
-        </HistogramPanel>
+        </EuiPanel>
       </HoverVisibilityContainer>
     </>
   );
