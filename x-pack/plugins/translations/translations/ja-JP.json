@@ -11684,7 +11684,6 @@
     "xpack.fleet.agentEnrollment.stepDownloadAgentForFleetServerTitle": "Fleetサーバーを一元化されたホストにダウンロード",
     "xpack.fleet.agentEnrollment.stepDownloadAgentTitle": "Elasticエージェントをホストにダウンロード",
     "xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle": "Elasticエージェントを登録して実行",
-    "xpack.fleet.agentEnrollment.stepRunAgentDescription": "エージェントのディレクトリから、このコマンドを実行し、Elasticエージェントを、インストール、登録、起動します。このコマンドを再利用すると、複数のホストでエージェントを設定できます。管理者権限が必要です。",
     "xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s": "Kubernetesマニフェストがダウンロードされるディレクトリから適用コマンドを実行します。",
     "xpack.fleet.agentHealth.checkInTooltipText": "前回のチェックイン {lastCheckIn}",
     "xpack.fleet.agentHealth.healthyStatusText": "正常",
