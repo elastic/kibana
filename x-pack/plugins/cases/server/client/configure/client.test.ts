@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { CasesClientArgs } from '../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { getConnectors } from './client';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { ActionType } from '@kbn/actions-plugin/common/types';
+import { CasesClientArgs } from '../types';
+import { getConnectors } from './client';
 
 describe('client', () => {
   describe('getConnectors', () => {
@@ -18,66 +17,77 @@ describe('client', () => {
 
     const args = { actionsClient, logger } as unknown as CasesClientArgs;
 
-    const jiraType: ActionType = {
-      id: '.jira',
-      name: '1',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-    };
+    const actionTypes = [
+      {
+        id: '.jira',
+        name: '1',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+      },
+      {
+        id: '.servicenow',
+        name: '2',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+      },
+      {
+        id: '.unsupported',
+        name: '3',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+      },
+      {
+        id: '.swimlane',
+        name: 'swimlane',
+        enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: false,
+        minimumLicenseRequired: 'basic' as const,
+      },
+    ];
+
+    const connectors = [
+      {
+        id: '1',
+        actionTypeId: '.jira',
+        name: '1',
+        config: {},
+        isPreconfigured: false,
+        referencedByCount: 1,
+      },
+      {
+        id: '2',
+        actionTypeId: '.servicenow',
+        name: '2',
+        config: {},
+        isPreconfigured: false,
+        referencedByCount: 1,
+      },
+      {
+        id: '3',
+        actionTypeId: '.unsupported',
+        name: '3',
+        config: {},
+        isPreconfigured: false,
+        referencedByCount: 1,
+      },
+    ];
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it('removes connectors without a config field defined', async () => {
-      actionsClient.listTypes.mockImplementation(async () => [jiraType]);
+    it('remove unsupported connectors', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes);
+      actionsClient.getAll.mockImplementation(async () => connectors);
 
-      actionsClient.getAll.mockImplementation(async () => [
-        {
-          id: '1',
-          actionTypeId: '.jira',
-          name: '1',
-          isPreconfigured: false,
-          referencedByCount: 1,
-        },
-      ]);
-
-      expect(await getConnectors(args)).toEqual([]);
-    });
-
-    it('removes connectors that are pre configured', async () => {
-      actionsClient.listTypes.mockImplementation(async () => [jiraType]);
-
-      actionsClient.getAll.mockImplementation(async () => [
-        {
-          id: '1',
-          actionTypeId: '.jira',
-          name: '1',
-          config: {},
-          isPreconfigured: true,
-          referencedByCount: 1,
-        },
-      ]);
-
-      expect(await getConnectors(args)).toEqual([]);
-    });
-
-    it('includes connectors that have a config and are not pre configured', async () => {
-      actionsClient.listTypes.mockImplementation(async () => [
-        jiraType,
-        {
-          id: '.servicenow',
-          name: '2',
-          enabled: true,
-          enabledInConfig: true,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'basic',
-        },
-      ]);
-
-      const connectors = [
+      expect(await getConnectors(args)).toEqual([
         {
           id: '1',
           actionTypeId: '.jira',
@@ -94,11 +104,83 @@ describe('client', () => {
           isPreconfigured: false,
           referencedByCount: 1,
         },
-      ];
+      ]);
+    });
 
-      actionsClient.getAll.mockImplementation(async () => connectors);
+    it('returns preconfigured connectors', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes);
+      actionsClient.getAll.mockImplementation(async () => [
+        ...connectors,
+        {
+          id: '4',
+          actionTypeId: '.servicenow',
+          name: 'sn-preconfigured',
+          config: {},
+          isPreconfigured: true,
+          referencedByCount: 1,
+        },
+      ]);
 
-      expect(await getConnectors(args)).toEqual(connectors);
+      expect(await getConnectors(args)).toEqual([
+        {
+          id: '1',
+          actionTypeId: '.jira',
+          name: '1',
+          config: {},
+          isPreconfigured: false,
+          referencedByCount: 1,
+        },
+        {
+          id: '2',
+          actionTypeId: '.servicenow',
+          name: '2',
+          config: {},
+          isPreconfigured: false,
+          referencedByCount: 1,
+        },
+        {
+          id: '4',
+          actionTypeId: '.servicenow',
+          name: 'sn-preconfigured',
+          config: {},
+          isPreconfigured: true,
+          referencedByCount: 1,
+        },
+      ]);
+    });
+
+    it('filter out connectors that are unsupported by the current license', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes);
+      actionsClient.getAll.mockImplementation(async () => [
+        ...connectors,
+        {
+          id: '4',
+          actionTypeId: '.swimlane',
+          name: 'swimlane',
+          config: {},
+          isPreconfigured: false,
+          referencedByCount: 1,
+        },
+      ]);
+
+      expect(await getConnectors(args)).toEqual([
+        {
+          id: '1',
+          actionTypeId: '.jira',
+          name: '1',
+          config: {},
+          isPreconfigured: false,
+          referencedByCount: 1,
+        },
+        {
+          id: '2',
+          actionTypeId: '.servicenow',
+          name: '2',
+          config: {},
+          isPreconfigured: false,
+          referencedByCount: 1,
+        },
+      ]);
     });
   });
 });

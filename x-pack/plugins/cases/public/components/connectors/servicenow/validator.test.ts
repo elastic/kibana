@@ -33,5 +33,16 @@ describe('ServiceNow validator', () => {
 
       expect(connectorValidator(invalidConnector)).toBeFalsy();
     });
+
+    test('it does not returns an error message if the config of the connector is undefined', () => {
+      const { config, ...invalidConnector } = connector;
+
+      // @ts-expect-error
+      expect(connectorValidator(invalidConnector)).toBeFalsy();
+    });
+
+    test('it does not returns an error message if the config of the connector is preconfigured', () => {
+      expect(connectorValidator({ ...connector, isPreconfigured: true })).toBeFalsy();
+    });
   });
 });
