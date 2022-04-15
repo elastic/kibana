@@ -14,6 +14,7 @@ import {
   TimelineEventsAllRequestOptions,
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
+import { getUnmappedType } from '../../helpers/get_unmapped_type';
 import { createQueryFilterClauses } from '../../../../../../server/utils/build_query';
 
 export const buildTimelineEventsAllQuery = ({
@@ -58,7 +59,7 @@ export const buildTimelineEventsAllQuery = ({
       return {
         [field]: {
           order: item.direction,
-          unmapped_type: item.type === 'date' ? 'date' : 'keyword',
+          unmapped_type: getUnmappedType(item.type),
         },
       };
     });
