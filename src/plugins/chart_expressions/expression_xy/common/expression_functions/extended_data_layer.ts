@@ -18,7 +18,11 @@ import {
   YScaleTypes,
   Y_CONFIG,
 } from '../constants';
-import { validateMarkSizeForChartType } from './validate';
+import {
+  validateMarkSizeForChartType,
+  validateLineWidthForChartType,
+  validateShowPointsForChartType,
+} from './validate';
 
 export const extendedDataLayerFunction: ExpressionFunctionDefinition<
   typeof EXTENDED_DATA_LAYER,
@@ -91,6 +95,24 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Mark size accessor',
       }),
     },
+    lineWidth: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.extendedDataLayer.lineWidth.help', {
+        defaultMessage: 'Line width',
+      }),
+    },
+    showPoints: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.extendedDataLayer.showPoints.help', {
+        defaultMessage: 'Show points',
+      }),
+    },
+    pointsRadius: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.extendedDataLayer.pointsRadius.help', {
+        defaultMessage: 'Points radius',
+      }),
+    },
     accessors: {
       types: ['string'],
       help: i18n.translate('expressionXY.extendedDataLayer.accessors.help', {
@@ -130,6 +152,9 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
 
     validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
     validateAccessor(args.markSizeAccessor, table.columns);
+    validateLineWidthForChartType(args.lineWidth, args.seriesType);
+    validateShowPointsForChartType(args.showPoints, args.seriesType);
+    validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
 
     return {
       type: EXTENDED_DATA_LAYER,

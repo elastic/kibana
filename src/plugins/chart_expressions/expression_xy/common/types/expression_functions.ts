@@ -97,6 +97,9 @@ export interface DataLayerArgs {
   hide?: boolean;
   splitAccessor?: string;
   markSizeAccessor?: string;
+  lineWidth?: number;
+  showPoints?: boolean;
+  pointsRadius?: number;
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
@@ -117,6 +120,9 @@ export interface ExtendedDataLayerArgs {
   hide?: boolean;
   splitAccessor?: string;
   markSizeAccessor?: string;
+  lineWidth?: number;
+  showPoints?: boolean;
+  pointsRadius?: number;
   columnToLabel?: string; // Actually a JSON key-value pair
   yScaleType: YScaleType;
   xScaleType: XScaleType;
