@@ -14,7 +14,8 @@ const errors = {
     i18n.translate(
       'expressionXY.reusable.function.dataLayer.errors.markSizeAccessorForNonLineOrAreaChartsError',
       {
-        defaultMessage: 'Dots are applied only for line or area charts',
+        defaultMessage:
+          "`markSizeAccessor` can't be used. Dots are applied only for line or area charts",
       }
     ),
   markSizeRatioLimitsError: () =>
