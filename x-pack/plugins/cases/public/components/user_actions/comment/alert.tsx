@@ -61,6 +61,7 @@ const getSingleAlertUserAction = ({
       type: 'update',
       event: (
         <SingleAlertCommentEvent
+          actionId={userAction.actionId}
           getRuleDetailsHref={getRuleDetailsHref}
           loadingAlertData={loadingAlertData}
           onRuleDetailsClick={onRuleDetailsClick}
@@ -118,6 +119,7 @@ const getMultipleAlertsUserAction = ({
       type: 'update',
       event: (
         <MultipleAlertsCommentEvent
+          actionId={userAction.actionId}
           loadingAlertData={loadingAlertData}
           totalAlerts={totalAlerts}
           ruleId={ruleId}

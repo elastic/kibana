@@ -11,16 +11,13 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { SingleAlertCommentEvent } from './alert_event';
-import { CommentType } from '../../../../common/api';
 
 const props = {
-  alertId: 'alert-id-1',
+  actionId: 'action-id-1',
   getRuleDetailsHref: jest.fn().mockReturnValue('https://example.com'),
   onRuleDetailsClick: jest.fn(),
   ruleId: 'rule-id-1',
   ruleName: 'Awesome rule',
-  alertsCount: 1,
-  commentType: CommentType.alert,
 };
 
 jest.mock('../../../common/lib/kibana');
@@ -43,7 +40,7 @@ describe('UserActionAvatar ', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
+      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
     ).toBeTruthy();
     expect(wrapper.text()).toBe('added an alert from Awesome rule');
   });
@@ -56,7 +53,7 @@ describe('UserActionAvatar ', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
+      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
     ).toBeFalsy();
 
     expect(wrapper.text()).toBe('added an alert from Awesome rule');
@@ -70,7 +67,7 @@ describe('UserActionAvatar ', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
+      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
     ).toBeFalsy();
 
     expect(wrapper.text()).toBe('added an alert from Awesome rule');
@@ -84,7 +81,7 @@ describe('UserActionAvatar ', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
+      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
     ).toBeTruthy();
     expect(wrapper.text()).toBe('added an alert from Unknown rule');
   });
@@ -98,7 +95,7 @@ describe('UserActionAvatar ', () => {
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().simulate('click');
     expect(onRuleDetailsClick).toHaveBeenCalled();
   });
 });

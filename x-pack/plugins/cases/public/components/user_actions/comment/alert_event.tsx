@@ -14,6 +14,7 @@ import { LinkAnchor } from '../../links';
 import { RuleDetailsNavigation } from '../types';
 
 interface SingleAlertProps {
+  actionId: string;
   ruleId?: string | null;
   ruleName?: string | null;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
@@ -26,7 +27,7 @@ interface MultipleAlertsProps extends SingleAlertProps {
 }
 
 const RuleLink: React.FC<SingleAlertProps> = memo(
-  ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, loadingAlertData }) => {
+  ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, loadingAlertData, actionId }) => {
     const onLinkClick = useCallback(
       (ev) => {
         ev.preventDefault();
@@ -43,7 +44,7 @@ const RuleLink: React.FC<SingleAlertProps> = memo(
         <LinkAnchor
           onClick={onLinkClick}
           href={ruleDetailsHref}
-          data-test-subj={`alert-rule-link-${ruleId ?? 'deleted'}`}
+          data-test-subj={`alert-rule-link-${actionId ?? 'deleted'}`}
         >
           {finalRuleName}
         </LinkAnchor>
@@ -57,6 +58,7 @@ const RuleLink: React.FC<SingleAlertProps> = memo(
 RuleLink.displayName = 'RuleLink';
 
 const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
+  actionId,
   getRuleDetailsHref,
   loadingAlertData = false,
   onRuleDetailsClick,
@@ -68,6 +70,7 @@ const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
       {loadingAlertData && <EuiLoadingSpinner size="m" />}
       <RuleLink
+        actionId={actionId}
         ruleId={ruleId}
         ruleName={ruleName}
         getRuleDetailsHref={getRuleDetailsHref}
@@ -83,6 +86,7 @@ SingleAlertCommentEventComponent.displayName = 'SingleAlertCommentEvent';
 export const SingleAlertCommentEvent = memo(SingleAlertCommentEventComponent);
 
 const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
+  actionId,
   getRuleDetailsHref,
   loadingAlertData = false,
   onRuleDetailsClick,
@@ -94,6 +98,7 @@ const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
     <>
       {`${i18n.MULTIPLE_ALERTS_COMMENT_LABEL_TITLE(totalAlerts)}`}{' '}
       <RuleLink
+        actionId={actionId}
         ruleId={ruleId}
         ruleName={ruleName}
         getRuleDetailsHref={getRuleDetailsHref}
