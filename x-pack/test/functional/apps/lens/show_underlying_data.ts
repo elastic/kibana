@@ -68,7 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.closeDocumentExplorerCallout();
 
       await testSubjects.existOrFail('discoverChart');
       expect(await queryBar.getQueryString()).be.eql('');
@@ -106,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.closeDocumentExplorerCallout();
 
       await testSubjects.existOrFail('discoverChart');
       // check the query
@@ -144,7 +142,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.closeDocumentExplorerCallout();
 
       await testSubjects.existOrFail('discoverChart');
       // check the columns
@@ -181,7 +178,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.closeDocumentExplorerCallout();
 
       await testSubjects.existOrFail('discoverChart');
 
