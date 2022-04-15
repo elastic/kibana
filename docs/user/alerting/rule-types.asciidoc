@@ -76,7 +76,7 @@ Security rules detect suspicious source events with pre-built or custom rules an
 
 [NOTE]
 ==============================================
-Alerts associated with Security rules are not visible in the stack management view.
+Alerts associated with security rules are not visible in *{stack-manage-app} > {rules-ui}*.
 ==============================================
 
 include::rule-types/index-threshold.asciidoc[]
