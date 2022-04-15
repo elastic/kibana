@@ -56584,6 +56584,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(342);
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(341);
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(352);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -56591,6 +56592,7 @@ __webpack_require__.r(__webpack_exports__);
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -56621,6 +56623,23 @@ async function isElasticCommitter() {
   }
 }
 
+async function migrateToNewServersIfNeeded(settingsPath) {
+  if (!(await Object(_fs__WEBPACK_IMPORTED_MODULE_5__["isFile"])(settingsPath))) {
+    return false;
+  }
+
+  const readSettingsFile = await Object(_fs__WEBPACK_IMPORTED_MODULE_5__["readFile"])(settingsPath, 'utf8');
+  const newReadSettingsFile = readSettingsFile.replace(/cloud\.buildbuddy\.io/g, 'remote.buildbuddy.io');
+
+  if (newReadSettingsFile === readSettingsFile) {
+    return false;
+  }
+
+  Object(_fs__WEBPACK_IMPORTED_MODULE_5__["writeFile"])(settingsPath, newReadSettingsFile);
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] upgrade remote cache settings to use new server address`);
+  return true;
+}
+
 async function setupRemoteCache(repoRootPath) {
   // The remote cache is only for Elastic employees working locally (CI cache settings are handled elsewhere)
   if (process.env.CI || !(await isElasticCommitter())) {
@@ -56628,7 +56647,11 @@ async function setupRemoteCache(repoRootPath) {
   }
 
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] setting up remote cache settings if necessary`);
-  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache');
+  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade the servers used on .bazelrc.cache
+
+  if (await migrateToNewServersIfNeeded(settingsPath)) {
+    return;
+  }
 
   if (Object(fs__WEBPACK_IMPORTED_MODULE_1__["existsSync"])(settingsPath)) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] remote cache settings already exist, skipping`);

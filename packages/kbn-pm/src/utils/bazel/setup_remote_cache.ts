@@ -10,6 +10,7 @@ import { existsSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { spawn } from '../child_process';
 import { log } from '../log';
+import { isFile, readFile, writeFile } from '../fs';
 
 async function isVaultAvailable() {
   try {
@@ -33,6 +34,26 @@ async function isElasticCommitter() {
   }
 }
 
+async function migrateToNewServersIfNeeded(settingsPath: string) {
+  if (!(await isFile(settingsPath))) {
+    return false;
+  }
+
+  const readSettingsFile = await readFile(settingsPath, 'utf8');
+  const newReadSettingsFile = readSettingsFile.replace(
+    /cloud\.buildbuddy\.io/g,
+    'remote.buildbuddy.io'
+  );
+
+  if (newReadSettingsFile === readSettingsFile) {
+    return false;
+  }
+
+  writeFile(settingsPath, newReadSettingsFile);
+  log.info(`[bazel_tools] upgrade remote cache settings to use new server address`);
+  return true;
+}
+
 export async function setupRemoteCache(repoRootPath: string) {
   // The remote cache is only for Elastic employees working locally (CI cache settings are handled elsewhere)
   if (process.env.CI || !(await isElasticCommitter())) {
@@ -42,6 +63,11 @@ export async function setupRemoteCache(repoRootPath: string) {
   log.debug(`[bazel_tools] setting up remote cache settings if necessary`);
 
   const settingsPath = resolve(repoRootPath, '.bazelrc.cache');
+
+  // Checks if we should upgrade the servers used on .bazelrc.cache
+  if (await migrateToNewServersIfNeeded(settingsPath)) {
+    return;
+  }
 
   if (existsSync(settingsPath)) {
     log.debug(`[bazel_tools] remote cache settings already exist, skipping`);
