@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { from, Observable } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
+import { firstValueFrom, from, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import type { Logger, SharedGlobalConfig } from 'kibana/server';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors';
@@ -37,7 +37,7 @@ export const esSearchStrategyProvider = (
 
     const search = async () => {
       try {
-        const config = await config$.pipe(first()).toPromise();
+        const config = await firstValueFrom(config$);
         // @ts-expect-error params fall back to any, but should be valid SearchRequest params
         const { terminateAfter, ...requestParams } = request.params ?? {};
         const params = {

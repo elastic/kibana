@@ -13,17 +13,25 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverFieldSearch, Props } from './discover_field_search';
 import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
+import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 describe('DiscoverFieldSearch', () => {
   const defaultProps = {
     onChange: jest.fn(),
     value: 'test',
     types: ['any', 'string', '_source'],
+    presentFieldTypes: ['string', 'date', 'boolean', 'number'],
   };
 
   function mountComponent(props?: Props) {
     const compProps = props || defaultProps;
-    return mountWithIntl(<DiscoverFieldSearch {...compProps} />);
+    return mountWithIntl(
+      <KibanaContextProvider
+        services={{ docLinks: { links: { discover: { fieldTypeHelp: '' } } } }}
+      >
+        <DiscoverFieldSearch {...compProps} />
+      </KibanaContextProvider>
+    );
   }
 
   function findButtonGroup(component: ReactWrapper, id: string) {
@@ -131,9 +139,25 @@ describe('DiscoverFieldSearch', () => {
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     let popover = component.find(EuiPopover);
-    expect(popover.prop('isOpen')).toBe(true);
+    expect(popover.get(0).props.isOpen).toBe(true);
     btn.simulate('click');
     popover = component.find(EuiPopover);
-    expect(popover.prop('isOpen')).toBe(false);
+    expect(popover.get(0).props.isOpen).toBe(false);
+  });
+
+  test('click help button should open popover with types of field docs', () => {
+    const component = mountComponent();
+
+    const btn = findTestSubject(component, 'fieldTypesHelpButton');
+    btn.simulate('click');
+    let popover = component.find(EuiPopover);
+    expect(popover.get(1).props.isOpen).toBe(true);
+
+    const rows = component.find('.euiTableRow');
+    expect(rows.length).toBe(4);
+
+    btn.simulate('click');
+    popover = component.find(EuiPopover);
+    expect(popover.get(1).props.isOpen).toBe(false);
   });
 });

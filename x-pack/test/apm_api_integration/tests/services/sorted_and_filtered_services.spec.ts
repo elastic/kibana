@@ -67,19 +67,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const eventsWithinTimerange = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('15m')
           .rate(1)
-          .spans((timestamp) => {
+          .generator((timestamp) => {
             const isInSpike = spikeStart <= timestamp && spikeEnd >= timestamp;
             return [
-              ...serviceA
+              serviceA
                 .transaction('GET /api')
                 .duration(isInSpike ? 1000 : 1100)
-                .timestamp(timestamp)
-                .serialize(),
-              ...serviceB
+                .timestamp(timestamp),
+              serviceB
                 .transaction('GET /api')
                 .duration(isInSpike ? 1000 : 4000)
-                .timestamp(timestamp)
-                .serialize(),
+                .timestamp(timestamp),
             ];
           });
 
@@ -89,15 +87,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )
           .interval('15m')
           .rate(1)
-          .spans((timestamp) => {
-            return serviceC
-              .transaction('GET /api', 'custom')
-              .duration(1000)
-              .timestamp(timestamp)
-              .serialize();
+          .generator((timestamp) => {
+            return serviceC.transaction('GET /api', 'custom').duration(1000).timestamp(timestamp);
           });
 
-        await synthtraceClient.index(eventsWithinTimerange.concat(eventsOutsideOfTimerange));
+        await synthtraceClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));
 
         await Promise.all([
           createAndRunApmMlJob({ environment: 'production', ml }),
