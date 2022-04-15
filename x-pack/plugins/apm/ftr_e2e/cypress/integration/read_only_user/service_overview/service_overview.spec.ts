@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
@@ -23,12 +24,12 @@ const apiRequestsToIntercept = [
   {
     endpoint:
       '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
-    aliasName: 'transactionsGroupsMainStadisticsRequest',
+    aliasName: 'transactionsGroupsMainStatisticsRequest',
   },
   {
     endpoint:
       '/internal/apm/services/opbeans-node/errors/groups/main_statistics?*',
-    aliasName: 'errorsGroupsMainStadisticsRequest',
+    aliasName: 'errorsGroupsMainStatisticsRequest',
   },
   {
     endpoint:
@@ -59,18 +60,18 @@ const apiRequestsToInterceptWithComparison = [
   {
     endpoint:
       '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
-    aliasName: 'transactionsGroupsDetailedStadisticsRequest',
+    aliasName: 'transactionsGroupsDetailedStatisticsRequest',
   },
   {
     endpoint:
       '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
-    aliasName: 'instancesMainStadisticsRequest',
+    aliasName: 'instancesMainStatisticsRequest',
   },
 
   {
     endpoint:
       '/internal/apm/services/opbeans-node/service_overview_instances/detailed_statistics?*',
-    aliasName: 'instancesDetailedStadisticsRequest',
+    aliasName: 'instancesDetailedStatisticsRequest',
   },
 ];
 
@@ -104,37 +105,16 @@ describe('Service Overview', () => {
       cy.visit(baseUrl);
     });
 
-    it('has no detectable a11y violations on load', () => {
+    it('renders all components on the page', () => {
       cy.contains('opbeans-node');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
-    });
-
-    it('transaction latency chart', () => {
       cy.get('[data-test-subj="latencyChart"]');
-    });
-
-    it('throughput chart', () => {
       cy.get('[data-test-subj="throughput"]');
-    });
-
-    it('transactions group table', () => {
       cy.get('[data-test-subj="transactionsGroupTable"]');
-    });
-
-    it('error table', () => {
       cy.get('[data-test-subj="serviceOverviewErrorsTable"]');
-    });
-
-    it('dependencies table', () => {
       cy.get('[data-test-subj="dependenciesTable"]');
-    });
-
-    it('instances latency distribution chart', () => {
       cy.get('[data-test-subj="instancesLatencyDistribution"]');
-    });
-
-    it('instances table', () => {
       cy.get('[data-test-subj="serviceOverviewInstancesTable"]');
     });
   });
@@ -146,6 +126,12 @@ describe('Service Overview', () => {
     });
 
     it('persists transaction type selected when clicking on Transactions tab', () => {
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/opbeans-node/transaction_types?*'
+      ).as('transactionTypesRequest');
+      cy.wait('@transactionTypesRequest');
+
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
@@ -163,6 +149,11 @@ describe('Service Overview', () => {
     });
 
     it('persists transaction type selected when clicking on View Transactions link', () => {
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/opbeans-node/transaction_types?*'
+      ).as('transactionTypesRequest');
+      cy.wait('@transactionTypesRequest');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
@@ -241,28 +232,27 @@ describe('Service Overview', () => {
     it('when selecting a different time range and clicking the update button', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
-      cy.selectAbsoluteTimeRange(
-        'Oct 10, 2021 @ 01:00:00.000',
-        'Oct 10, 2021 @ 01:30:00.000'
-      );
+      const timeStart = moment(start).subtract(5, 'm').toISOString();
+      const timeEnd = moment(end).subtract(5, 'm').toISOString();
+
+      cy.selectAbsoluteTimeRange(timeStart, timeEnd);
+
       cy.contains('Update').click();
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,
-        value:
-          'start=2021-10-10T00%3A00%3A00.000Z&end=2021-10-10T00%3A30%3A00.000Z',
+        value: `start=${encodeURIComponent(
+          new Date(timeStart).toISOString()
+        )}&end=${encodeURIComponent(new Date(timeEnd).toISOString())}`,
       });
     });
 
     it('when selecting a different comparison window', () => {
-      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', 'day');
+      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
 
       // selects another comparison type
-      cy.get('[data-test-subj="comparisonSelect"]').select('week');
-      cy.get('[data-test-subj="comparisonSelect"]').should(
-        'have.value',
-        'week'
-      );
+      cy.get('[data-test-subj="comparisonSelect"]').select('1w');
+      cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1w');
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNamesWithComparison,
         value: 'offset',

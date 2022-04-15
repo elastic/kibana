@@ -6,11 +6,11 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { IIndexPattern } from '../../../../../src/plugins/data/public';
+import { DataView } from '../../../../../src/plugins/data_views/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: IIndexPattern
+  indexPattern: DataView
 ) => {
   try {
     return kueryExpression

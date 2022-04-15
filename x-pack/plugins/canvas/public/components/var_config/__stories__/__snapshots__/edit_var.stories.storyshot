@@ -20,7 +20,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -47,7 +49,9 @@ Array [
             color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
+          >
+            
+          </span>
           <span
             className="euiCallOutHeader__title"
           >
@@ -120,6 +124,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -255,7 +260,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -310,7 +317,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -337,7 +346,9 @@ Array [
             color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
+          >
+            
+          </span>
           <span
             className="euiCallOutHeader__title"
           >
@@ -410,6 +421,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -486,7 +498,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -541,7 +555,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -568,7 +584,9 @@ Array [
             color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
+          >
+            
+          </span>
           <span
             className="euiCallOutHeader__title"
           >
@@ -641,6 +659,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -717,7 +736,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -772,7 +793,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -847,6 +870,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -923,7 +947,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >

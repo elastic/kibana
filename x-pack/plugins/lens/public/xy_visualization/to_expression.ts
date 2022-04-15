@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
 import {
@@ -16,7 +16,7 @@ import {
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
 } from './types';
-import { OperationMetadata, DatasourcePublicAPI } from '../types';
+import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
 import type {
   ValidLayer,
@@ -31,8 +31,7 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { defaultAnnotationLabel } from './annotations/config_panel';
-import { getUniqueLabels } from './annotations/helpers';
+import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
 import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
@@ -51,7 +50,7 @@ export const getSortedAccessors = (
 
 export const toExpression = (
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType
@@ -108,7 +107,7 @@ const simplifiedLayerExpression = {
 
 export function toPreviewExpression(
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   eventAnnotationService: EventAnnotationServiceType
 ) {
@@ -159,7 +158,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType

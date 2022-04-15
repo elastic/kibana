@@ -14,10 +14,11 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { Filter } from '@kbn/es-query';
 import { Query, TimeRange } from 'src/plugins/data/public';
 import { Geometry, Position } from 'geojson';
-import { asyncForEach } from '@kbn/std';
-import { DRAW_MODE, DRAW_SHAPE } from '../../common/constants';
+import { asyncForEach, asyncMap } from '@kbn/std';
+import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { MapStoreState } from '../reducers/store';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import {
   getDataFilters,
   getFilters,
@@ -60,7 +61,13 @@ import {
 } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
-import { DrawState, MapCenterAndZoom, MapExtent, Timeslice } from '../../common/descriptor_types';
+import {
+  CustomIcon,
+  DrawState,
+  MapCenterAndZoom,
+  MapExtent,
+  Timeslice,
+} from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { updateTooltipStateForLayer } from './tooltip_actions';
 import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
@@ -104,6 +111,49 @@ export function updateMapSetting(
 
     if (settingKey === 'autoFitToDataBounds' && settingValue === true) {
       dispatch(autoFitToBounds());
+    }
+  };
+}
+
+export function updateCustomIcons(customIcons: CustomIcon[]) {
+  return {
+    type: UPDATE_MAP_SETTING,
+    settingKey: 'customIcons',
+    settingValue: customIcons,
+  };
+}
+
+export function deleteCustomIcon(value: string) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layersContainingCustomIcon = getLayerList(getState()).filter((layer) => {
+      const style = layer.getCurrentStyle();
+      if (!style || style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
+        return false;
+      }
+      return (style as IVectorStyle).isUsingCustomIcon(value);
+    });
+
+    if (layersContainingCustomIcon.length > 0) {
+      const layerList = await asyncMap(layersContainingCustomIcon, async (layer) => {
+        return await layer.getDisplayName();
+      });
+      getToasts().addWarning(
+        i18n.translate('xpack.maps.mapActions.deleteCustomIconWarning', {
+          defaultMessage: `Unable to delete icon. The icon is in use by the {count, plural, one {layer} other {layers}}: {layerNames}`,
+          values: {
+            count: layerList.length,
+            layerNames: layerList.join(', '),
+          },
+        })
+      );
+    } else {
+      const newIcons = getState().map.settings.customIcons.filter(
+        ({ symbolId }) => symbolId !== value
+      );
+      dispatch(updateMapSetting('customIcons', newIcons));
     }
   };
 }

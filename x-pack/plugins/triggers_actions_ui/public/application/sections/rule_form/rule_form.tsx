@@ -57,7 +57,7 @@ import {
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
 import {
-  AlertActionParam as RuleActionParam,
+  RuleActionParam,
   ALERTS_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
@@ -119,6 +119,8 @@ export const RuleForm = ({
     kibanaFeatures,
     charts,
     data,
+    unifiedSearch,
+    dataViews,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -523,6 +525,8 @@ export const RuleForm = ({
               metadata={metadata}
               charts={charts}
               data={data}
+              dataViews={dataViews}
+              unifiedSearch={unifiedSearch}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -585,7 +589,7 @@ export const RuleForm = ({
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
           defaultMessage:
-            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.rules.minimumScheduleInterval.value setting defines the minimum value. The xpack.alerting.rules.minimumScheduleInterval.enforce setting defines whether this minimum is required or suggested.',
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
         })}
       />
     </>

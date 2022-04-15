@@ -29,7 +29,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           class="euiFormControlLayout__childrenWrapper"
         >
           <select
-            class="euiSelect"
+            class="euiSelect euiFormControlLayout--1icons"
             data-test-subj="urlEditorType"
             id="generated-id"
           >
@@ -179,10 +179,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
             URL template help
           </span>
           <span
-            aria-label="External link"
             class="euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -243,10 +244,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
             Label template help
           </span>
           <span
-            aria-label="External link"
             class="euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >

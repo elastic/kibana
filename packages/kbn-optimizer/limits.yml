@@ -30,7 +30,7 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 148711
   kibanaOverview: 56279
-  lens: 96624
+  lens: 35000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -99,7 +99,6 @@ pageLoadAssetSize:
   visTypeMetric: 23332
   bfetch: 22837
   kibanaUtils: 79713
-  data: 491273
   dataViews: 43532
   expressions: 140958
   fieldFormats: 65209
@@ -124,5 +123,8 @@ pageLoadAssetSize:
   sessionView: 77750
   cloudSecurityPosture: 19109
   visTypeGauge: 24113
-  expressionXY: 41392
+  unifiedSearch: 49195
+  data: 454087
+  expressionXY: 26500
   eventAnnotation: 19334
+  screenshotting: 22870

@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
-import { LocationsCodec } from './locations';
+import { MonitorServiceLocationsCodec, ServiceLocationErrors } from './locations';
 import {
   DataStreamCodec,
   ModeCodec,
@@ -68,7 +68,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.SCHEDULE]: Schedule,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
-    [ConfigKey.LOCATIONS]: LocationsCodec,
+    [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
   }),
   t.partial({
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
@@ -308,11 +308,16 @@ export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
 
 export const MonitorManagementListResultCodec = t.type({
   monitors: t.array(
-    t.interface({ id: t.string, attributes: EncryptedSyntheticsMonitorCodec, updated_at: t.string })
+    t.interface({
+      id: t.string,
+      attributes: EncryptedSyntheticsMonitorCodec,
+      updated_at: t.string,
+    })
   ),
   page: t.number,
   perPage: t.number,
   total: t.union([t.number, t.null]),
+  syncErrors: t.union([ServiceLocationErrors, t.null]),
 });
 
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;

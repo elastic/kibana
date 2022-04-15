@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
+import { unregisterCommands } from '../containers/editor/legacy/console_editor/keyboard_shortcuts';
+import type { SenseEditor } from '../models';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
@@ -62,6 +64,7 @@ interface Props {
   onClose: () => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
+  editorInstance: SenseEditor | null;
 }
 
 export function DevToolsSettingsModal(props: Props) {
@@ -74,7 +77,10 @@ export function DevToolsSettingsModal(props: Props) {
   const [polling, setPolling] = useState(props.settings.polling);
   const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
-  const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
+  const [isHistoryDisabled, setIsHistoryDisabled] = useState(props.settings.isHistoryDisabled);
+  const [isKeyboardShortcutsDisabled, setIsKeyboardShortcutsDisabled] = useState(
+    props.settings.isKeyboardShortcutsDisabled
+  );
 
   const autoCompleteCheckboxes = [
     {
@@ -134,7 +140,8 @@ export function DevToolsSettingsModal(props: Props) {
       polling,
       pollInterval,
       tripleQuotes,
-      historyDisabled,
+      isHistoryDisabled,
+      isKeyboardShortcutsDisabled,
     });
   }
 
@@ -144,6 +151,21 @@ export function DevToolsSettingsModal(props: Props) {
     setPolling(!!sanitizedValue);
     setPollInterval(sanitizedValue);
   }, []);
+
+  const toggleKeyboardShortcuts = useCallback(
+    (isDisabled: boolean) => {
+      if (props.editorInstance) {
+        unregisterCommands(props.editorInstance);
+        setIsKeyboardShortcutsDisabled(isDisabled);
+      }
+    },
+    [props.editorInstance]
+  );
+
+  const toggleSavingToHistory = useCallback(
+    (isDisabled: boolean) => setIsHistoryDisabled(isDisabled),
+    []
+  );
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
@@ -160,7 +182,7 @@ export function DevToolsSettingsModal(props: Props) {
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
               defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-              Less frequent refresh is recommended to reduce bandwith costs."
+              Less frequent refresh is recommended to reduce bandwidth costs."
             />
           }
         >
@@ -267,15 +289,34 @@ export function DevToolsSettingsModal(props: Props) {
           }
         >
           <EuiSwitch
-            checked={historyDisabled}
-            id="historyDisabled"
+            checked={isHistoryDisabled}
             label={
               <FormattedMessage
                 defaultMessage="Disable saving requests to history"
                 id="console.settingsPage.savingRequestsToHistoryMessage"
               />
             }
-            onChange={(e) => setHistoryDisabled(e.target.checked)}
+            onChange={(e) => toggleSavingToHistory(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="console.settingsPage.keyboardShortcutsLabel"
+              defaultMessage="Keyboard shortcuts"
+            />
+          }
+        >
+          <EuiSwitch
+            checked={isKeyboardShortcutsDisabled}
+            label={
+              <FormattedMessage
+                defaultMessage="Disable keyboard shortcuts"
+                id="console.settingsPage.disableKeyboardShortcutsMessage"
+              />
+            }
+            onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
           />
         </EuiFormRow>
 

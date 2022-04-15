@@ -95,7 +95,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -145,7 +145,9 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -181,7 +183,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -211,7 +213,9 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -509,7 +513,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <select
-                className="euiSelect euiSelect--compressed"
+                className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -559,7 +563,9 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
             </div>
@@ -595,7 +601,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <select
-                className="euiSelect euiSelect--compressed"
+                className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -625,7 +631,9 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
             </div>
@@ -933,7 +941,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -983,7 +991,9 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -1019,7 +1029,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1049,7 +1059,9 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>

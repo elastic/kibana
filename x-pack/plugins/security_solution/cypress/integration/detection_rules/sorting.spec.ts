@@ -15,8 +15,6 @@ import {
   pageSelector,
   RULES_ROW,
 } from '../../screens/alerts_detection_rules';
-
-import { goToManageAlertsDetectionRules, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
 import {
   enableRule,
   changeRowsPerPageTo,
@@ -26,9 +24,9 @@ import {
   waitForRulesTableToBeLoaded,
   waitForRuleToChangeStatus,
 } from '../../tasks/alerts_detection_rules';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -41,10 +39,9 @@ import {
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
 describe('Alerts detection rules', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    waitForAlertsPanelToBeLoaded();
+    login();
     createCustomRule(getNewRule(), '1');
     createCustomRule(getExistingRule(), '2');
     createCustomRule(getNewOverrideRule(), '3');
@@ -52,7 +49,7 @@ describe('Alerts detection rules', () => {
   });
 
   it('Sorts by enabled rules', () => {
-    goToManageAlertsDetectionRules();
+    visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
 
     enableRule(SECOND_RULE);
@@ -73,7 +70,7 @@ describe('Alerts detection rules', () => {
     createCustomRule({ ...getNewRule(), name: 'Test a rule' }, '5');
     createCustomRule({ ...getNewRule(), name: 'Not same as first rule' }, '6');
 
-    goToManageAlertsDetectionRules();
+    visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     changeRowsPerPageTo(5);
 
@@ -111,9 +108,10 @@ describe('Alerts detection rules', () => {
      * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
      */
 
+    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+
     cy.clock(Date.now(), ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']);
 
-    goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();
 
     // mock 1 minute passing to make sure refresh

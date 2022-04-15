@@ -11,7 +11,7 @@ import type { DetectionMetrics } from './types';
 
 import { getMlJobMetrics } from './ml_jobs/get_metrics';
 import { getRuleMetrics } from './rules/get_metrics';
-import { getInitialRulesUsage } from './rules/get_initial_usage';
+import { getInitialEventLogUsage, getInitialRulesUsage } from './rules/get_initial_usage';
 import { getInitialMlJobUsage } from './ml_jobs/get_initial_usage';
 
 export interface GetDetectionsMetricsOptions {
@@ -20,9 +20,11 @@ export interface GetDetectionsMetricsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
   mlClient: MlPluginSetup | undefined;
+  eventLogIndex: string;
 }
 
 export const getDetectionsMetrics = async ({
+  eventLogIndex,
   signalsIndex,
   esClient,
   savedObjectsClient,
@@ -31,7 +33,7 @@ export const getDetectionsMetrics = async ({
 }: GetDetectionsMetricsOptions): Promise<DetectionMetrics> => {
   const [mlJobMetrics, detectionRuleMetrics] = await Promise.allSettled([
     getMlJobMetrics({ mlClient, savedObjectsClient, logger }),
-    getRuleMetrics({ signalsIndex, esClient, savedObjectsClient, logger }),
+    getRuleMetrics({ signalsIndex, eventLogIndex, esClient, savedObjectsClient, logger }),
   ]);
 
   return {
@@ -42,6 +44,10 @@ export const getDetectionsMetrics = async ({
     detection_rules:
       detectionRuleMetrics.status === 'fulfilled'
         ? detectionRuleMetrics.value
-        : { detection_rule_detail: [], detection_rule_usage: getInitialRulesUsage() },
+        : {
+            detection_rule_detail: [],
+            detection_rule_usage: getInitialRulesUsage(),
+            detection_rule_status: getInitialEventLogUsage(),
+          },
   };
 };

@@ -6,7 +6,12 @@
  */
 
 import { isNil } from 'lodash';
-import { Alert, AlertTypeParams, RecoveredActionGroup } from '../../common';
+import {
+  Rule,
+  RuleExecutionStatusWarningReasons,
+  RuleTypeParams,
+  RecoveredActionGroup,
+} from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { TaskStatus } from '../../../task_manager/server';
@@ -111,7 +116,7 @@ export const mockRunNowResponse = {
 
 export const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-export const mockedRuleTypeSavedObject: Alert<AlertTypeParams> = {
+export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   id: '1',
   consumer: 'bar',
   createdAt: mockDate,
@@ -322,6 +327,12 @@ const generateMessage = ({
     }
     if (actionGroupId === 'recovered') {
       return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
+    }
+    if (
+      status === 'warning' &&
+      reason === RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS
+    ) {
+      return `The maximum number of actions for this rule type was reached; excess actions were not triggered.`;
     }
     return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
   }

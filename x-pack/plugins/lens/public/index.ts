@@ -66,6 +66,7 @@ export type {
   OverallSumIndexPatternColumn,
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,

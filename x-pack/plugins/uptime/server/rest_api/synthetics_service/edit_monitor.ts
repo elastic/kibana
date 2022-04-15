@@ -91,7 +91,7 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
           monitor.type === 'browser' ? { ...monitorWithRevision, urls: '' } : monitorWithRevision
         );
 
-      const errors = await syntheticsService.pushConfigs(request, [
+      const errors = await syntheticsService.pushConfigs([
         {
           ...editedMonitor,
           id: editMonitor.id,

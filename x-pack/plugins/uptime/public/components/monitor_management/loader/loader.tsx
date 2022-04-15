@@ -44,6 +44,7 @@ export const Loader = ({
           color="subdued"
           icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
           title={<h2>{loadingTitle}</h2>}
+          data-test-subj="uptimeLoader"
         />
       ) : null}
     </>

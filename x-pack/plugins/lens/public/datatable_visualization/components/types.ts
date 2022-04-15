@@ -6,7 +6,8 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { CustomPaletteState, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { CustomPaletteState } from 'src/plugins/charts/public';
 import type { IAggType } from 'src/plugins/data/public';
 import type { Datatable, RenderMode } from 'src/plugins/expressions';
 import type { ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';

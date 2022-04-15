@@ -8,15 +8,17 @@
 
 import { stackMonitoring, timerange } from '../../index';
 import { Scenario } from '../scenario';
-import { getCommonServices } from '../utils/get_common_services';
+import { getLogger } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
-const scenario: Scenario = async (runOptions: RunOptions) => {
-  const { logger } = getCommonServices(runOptions);
+const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
+  const logger = getLogger(runOptions);
 
-  if (!runOptions.writeTarget) {
-    throw new Error('Write target is not defined');
-  }
+  // TODO reintroduce overwrite
+  // if (!runOptions.writeTarget) {
+  //  throw new Error('Write target is not defined');
+  // }
 
   return {
     generate: ({ from, to }) => {
@@ -26,9 +28,9 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
       return range
         .interval('30s')
         .rate(1)
-        .spans((timestamp) => {
+        .generator((timestamp) => {
           const events = logger.perf('generating_sm_events', () => {
-            return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
+            return kibanaStats.timestamp(timestamp).requests(10, 20);
           });
           return events;
         });

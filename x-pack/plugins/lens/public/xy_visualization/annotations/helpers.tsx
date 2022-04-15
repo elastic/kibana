@@ -21,18 +21,22 @@ import {
 import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { generateId } from '../../id_generator';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-import { defaultAnnotationLabel } from './config_panel';
 
 const MAX_DATE = 8640000000000000;
 const MIN_DATE = -8640000000000000;
 
-export function getStaticDate(
-  dataLayers: XYDataLayerConfig[],
-  activeData: FramePublicAPI['activeData']
-) {
-  const fallbackValue = moment().toISOString();
+export const defaultAnnotationLabel = i18n.translate('xpack.lens.xyChart.defaultAnnotationLabel', {
+  defaultMessage: 'Event',
+});
 
+export function getStaticDate(dataLayers: XYDataLayerConfig[], frame: FramePublicAPI) {
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
+  const { activeData, dateRange } = frame;
+
+  const dateRangeMinValue = moment(dateRange.fromDate).valueOf();
+  const dateRangeMaxValue = moment(dateRange.toDate).valueOf();
+  const fallbackValue = moment((dateRangeMinValue + dateRangeMaxValue) / 2).toISOString();
+
   if (
     !activeData ||
     Object.entries(activeData)
@@ -54,7 +58,11 @@ export function getStaticDate(
     return lastTimestamp && lastTimestamp > acc ? lastTimestamp : acc;
   }, MIN_DATE);
   const middleDate = (minDate + maxDate) / 2;
-  return moment(middleDate).toISOString();
+
+  if (dateRangeMinValue < middleDate && dateRangeMaxValue > middleDate) {
+    return moment(middleDate).toISOString();
+  }
+  return fallbackValue;
 }
 
 export const getAnnotationsSupportedLayer = (
@@ -121,7 +129,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
       label: defaultAnnotationLabel,
       key: {
         type: 'point_in_time',
-        timestamp: getStaticDate(getDataLayers(prevState.layers), frame?.activeData),
+        timestamp: getStaticDate(getDataLayers(prevState.layers), frame),
       },
       icon: 'triangle',
       ...previousConfig,
@@ -164,7 +172,7 @@ export const getAnnotationsConfiguration = ({
   layer,
 }: {
   state: XYState;
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'datasourceLayers'>;
   layer: XYAnnotationLayerConfig;
 }) => {
   const dataLayers = getDataLayers(state.layers);
