@@ -180,4 +180,9 @@ type TestSubject =
   | 'transportField.input'
   | 'seedField.input'
   | 'copyFromInput'
-  | 'trimSwitch.input';
+  | 'trimSwitch.input'
+  | 'droppableList.addButton'
+  | 'droppableList.errorIcon'
+  | 'droppableList.input-0'
+  | 'droppableList.input-1'
+  | 'droppableList.input-2';

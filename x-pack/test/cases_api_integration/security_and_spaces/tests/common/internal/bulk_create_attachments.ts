@@ -366,6 +366,105 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await createCaseAndBulkCreateAttachments({ supertest, expectedHttpCode: 400 });
       });
+
+      it('400s when attempting to add more than 1K alerts to a case', async () => {
+        const alerts = [...Array(1001).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertReq,
+              alertId: alerts,
+              index: alerts,
+            },
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when attempting to add more than 1K alerts to a case in the same request', async () => {
+        const alerts = [...Array(1001).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertReq,
+              alertId: alerts.slice(0, 500),
+              index: alerts.slice(0, 500),
+            },
+            {
+              ...postCommentAlertReq,
+              alertId: alerts.slice(500, alerts.length),
+              index: alerts.slice(500, alerts.length),
+            },
+            postCommentAlertReq,
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when attempting to add an alert to a case that already has 1K alerts', async () => {
+        const alerts = [...Array(1000).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertReq,
+              alertId: alerts,
+              index: alerts,
+            },
+          ],
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertReq,
+              alertId: 'test-id',
+              index: 'test-index',
+            },
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when the case already has alerts and the sum of existing and new alerts exceed 1k', async () => {
+        const alerts = [...Array(1200).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertReq,
+              alertId: alerts.slice(0, 500),
+              index: alerts.slice(0, 500),
+            },
+          ],
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              ...postCommentAlertReq,
+              alertId: alerts.slice(500),
+              index: alerts.slice(500),
+            },
+            postCommentAlertReq,
+          ],
+          expectedHttpCode: 400,
+        });
+      });
     });
 
     describe('alerts', () => {
