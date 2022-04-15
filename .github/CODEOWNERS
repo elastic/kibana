@@ -480,6 +480,9 @@
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/signals @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/tags @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detections-response-alerts
+
 
 ## Security Solution sub teams - Detections and Response Rules
 
@@ -488,6 +491,7 @@
 /x-pack/plugins/security_solution/public/detections/components/status @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/rules @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/components/callouts @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/mitre @elastic/security-detections-response-rules
@@ -510,6 +514,7 @@
 /x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-solution-platform
+/x-pack/plugins/security_solution/public/common/components/sourcerer @elastic/security-solution-platform
 
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-solution-platform
 /packages/kbn-securitysolution* @elastic/security-solution-platform
@@ -553,6 +558,7 @@ x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
 x-pack/plugins/session_view @elastic/awp-platform
+x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-platform
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
