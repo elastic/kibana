@@ -267,6 +267,21 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['communications'],
   },
   {
+    id: 'teams',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.teamsName', {
+      defaultMessage: 'Teams',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.teamsDescription',
+      {
+        defaultMessage:
+          'Search over meeting recordings, chats and other communications with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'microsoft_365', 'communications', 'productivity'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/teams',
+  },
+  {
     id: 'zendesk',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.zendeskName', {
       defaultMessage: 'Zendesk',
