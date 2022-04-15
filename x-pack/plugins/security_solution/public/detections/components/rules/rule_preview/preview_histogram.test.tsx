@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import * as i18n from '../rule_preview/translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { TestProviders } from '../../../../common/mock';
 import { usePreviewHistogram } from './use_preview_histogram';
@@ -49,7 +48,7 @@ describe('PreviewHistogram', () => {
       },
     ]);
 
-    test('it renders an empty histogram and table', () => {
+    test('it renders an empty histogram and table', async () => {
       const wrapper = render(
         <TestProviders>
           <PreviewHistogram
@@ -63,37 +62,38 @@ describe('PreviewHistogram', () => {
         </TestProviders>
       );
 
-      expect(wrapper.findByText('hello grid')).toBeTruthy();
-      expect(wrapper.findByText(ALL_VALUES_ZEROS_TITLE)).toBeTruthy();
+      expect(await wrapper.findByText('hello grid')).toBeTruthy();
+      expect(await wrapper.findByText(ALL_VALUES_ZEROS_TITLE)).toBeTruthy();
     });
   });
 
-  test('it renders loader when isLoading is true', () => {
-    (usePreviewHistogram as jest.Mock).mockReturnValue([
-      true,
-      {
-        inspect: { dsl: [], response: [] },
-        totalCount: 1,
-        refetch: jest.fn(),
-        data: [],
-        buckets: [],
-      },
-    ]);
+  describe('when there is data', () => {
+    test('it renders loader when isLoading is true', async () => {
+      (usePreviewHistogram as jest.Mock).mockReturnValue([
+        true,
+        {
+          inspect: { dsl: [], response: [] },
+          totalCount: 1,
+          refetch: jest.fn(),
+          data: [],
+          buckets: [],
+        },
+      ]);
 
-    const wrapper = render(
-      <TestProviders>
-        <PreviewHistogram
-          addNoiseWarning={jest.fn()}
-          timeFrame="M"
-          previewId={'test-preview-id'}
-          spaceId={'default'}
-          ruleType={'query'}
-          index={['']}
-        />
-      </TestProviders>
-    );
+      const wrapper = render(
+        <TestProviders>
+          <PreviewHistogram
+            addNoiseWarning={jest.fn()}
+            timeFrame="M"
+            previewId={'test-preview-id'}
+            spaceId={'default'}
+            ruleType={'query'}
+            index={['']}
+          />
+        </TestProviders>
+      );
 
-    expect(wrapper.findByTestId('preview-histogram-loading')).toBeTruthy();
-    expect(wrapper.findByText(i18n.QUERY_PREVIEW_SUBTITLE_LOADING)).toBeTruthy();
+      expect(await wrapper.findByTestId('preview-histogram-loading')).toBeTruthy();
+    });
   });
 });
