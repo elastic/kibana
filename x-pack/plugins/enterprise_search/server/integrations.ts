@@ -177,6 +177,20 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/one_drive',
   },
   {
+    id: 'outlook',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.outlookName', {
+      defaultMessage: 'Outlook',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.outlookDescription',
+      {
+        defaultMessage: 'Search over your email and calendars with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'microsoft_365', 'communications', 'productivity'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/outlook',
+  },
+  {
     id: 'salesforce',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.salesforceName', {
       defaultMessage: 'Salesforce',
