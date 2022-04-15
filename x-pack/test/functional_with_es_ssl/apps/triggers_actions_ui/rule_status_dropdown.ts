@@ -41,6 +41,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('ruleSnoozeIntervalUnit', 'h');
       await testSubjects.click('ruleSnoozeApply');
 
+      // Wait for the dropdown to finish re-rendering before opening again
+      await new Promise((res) => setTimeout(res, 500));
+
       await testSubjects.click('statusDropdown');
       await testSubjects.click('statusDropdownSnoozeItem');
       await testSubjects.setValue('ruleSnoozeIntervalValue', '3');
