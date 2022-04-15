@@ -22,6 +22,7 @@ import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { RefreshButton } from './header/refresh_button';
 
 const PAGE_TITLE = i18n.translate('xpack.observability.expView.heading.label', {
   defaultMessage: 'Explore data',
@@ -72,13 +73,18 @@ export function ExploratoryViewPage({
       });
 
   return (
-    <ObservabilityPageTemplate pageHeader={{ pageTitle: PAGE_TITLE }}>
-      <DataViewContextProvider>
-        <UrlStorageContextProvider storage={kbnUrlStateStorage}>
+    <UrlStorageContextProvider storage={kbnUrlStateStorage}>
+      <ObservabilityPageTemplate
+        pageHeader={{
+          pageTitle: PAGE_TITLE,
+          rightSideItems: [<RefreshButton />],
+        }}
+      >
+        <DataViewContextProvider>
           <ExploratoryView saveAttributes={saveAttributes} />
-        </UrlStorageContextProvider>
-      </DataViewContextProvider>
-    </ObservabilityPageTemplate>
+        </DataViewContextProvider>
+      </ObservabilityPageTemplate>
+    </UrlStorageContextProvider>
   );
 }
 

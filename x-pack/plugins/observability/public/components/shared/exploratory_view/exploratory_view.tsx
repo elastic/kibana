@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiResizableContainer,
   EuiTitle,
@@ -57,7 +56,7 @@ export function ExploratoryView({
 
   const { loadDataView, loading } = useAppDataViewContext();
 
-  const { firstSeries, allSeries, lastRefresh, reportType, setLastRefresh } = useSeriesStorage();
+  const { firstSeries, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
   const timeRange = useExpViewTimeRange();
@@ -115,7 +114,7 @@ export function ExploratoryView({
 
             return (
               <>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexGroup alignItems="center" gutterSize="none">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       size="xs"
@@ -131,15 +130,6 @@ export function ExploratoryView({
                     <>
                       <EuiFlexItem style={{ textAlign: 'right' }}>
                         <LastUpdated chartTimeRange={chartTimeRangeContext} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          iconType="refresh"
-                          onClick={() => setLastRefresh(Date.now())}
-                          size="s"
-                        >
-                          {REFRESH_LABEL}
-                        </EuiButton>
                       </EuiFlexItem>
                     </>
                   )}
@@ -210,6 +200,9 @@ const ResizableContainer = styled(EuiResizableContainer)`
     > .euiPanel {
       padding-bottom: 0;
     }
+    .expExpressionRenderer__expression {
+      padding-bottom: 0 !important;
+    }
   }
 `;
 
@@ -230,9 +223,12 @@ const PREVIEW_LABEL = i18n.translate('xpack.observability.overview.exploratoryVi
   defaultMessage: 'Preview',
 });
 
-const REFRESH_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.refresh', {
-  defaultMessage: 'Refresh',
-});
+export const REFRESH_LABEL = i18n.translate(
+  'xpack.observability.overview.exploratoryView.refresh',
+  {
+    defaultMessage: 'Refresh',
+  }
+);
 
 const LENS_NOT_AVAILABLE = i18n.translate(
   'xpack.observability.overview.exploratoryView.lensDisabled',
