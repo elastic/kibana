@@ -13,9 +13,11 @@ import { useStartServices, sendGetPermissionsCheck } from '../../../hooks';
 
 import { FleetServerMissingPrivileges } from '../../agents/components/fleet_server_callouts';
 
-import { FleetServerInstructions as OnPremInstructions, Loading } from '../../../components';
+import { Loading } from '../components';
 
-import { CloudInstructions } from './components';
+import { FleetServerInstructions } from '../../../components';
+
+import { CloudInstructions, EnrollmentRecommendation } from './components';
 
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
@@ -27,7 +29,16 @@ const ContentWrapper = styled(EuiFlexGroup)`
   margin: 0 auto;
 `;
 
-export const FleetServerRequirementPage = () => {
+export const FleetServerRequirementPage: React.FunctionComponent<
+  | {
+      showEnrollmentRecommendation?: false;
+      showStandaloneTab?: never;
+    }
+  | {
+      showEnrollmentRecommendation?: true;
+      showStandaloneTab: () => void;
+    }
+> = ({ showStandaloneTab = () => {}, showEnrollmentRecommendation = true }) => {
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
 
@@ -56,12 +67,7 @@ export const FleetServerRequirementPage = () => {
 
   return (
     <>
-      <ContentWrapper
-        gutterSize="none"
-        justifyContent="center"
-        alignItems="center"
-        direction="column"
-      >
+      <ContentWrapper gutterSize="none" justifyContent="center" direction="column">
         <FlexItemWithMinWidth grow={false}>
           {deploymentUrl ? (
             <CloudInstructions deploymentUrl={deploymentUrl} />
@@ -69,8 +75,10 @@ export const FleetServerRequirementPage = () => {
             <Loading />
           ) : permissionsError ? (
             <FleetServerMissingPrivileges />
+          ) : showEnrollmentRecommendation ? (
+            <EnrollmentRecommendation showStandaloneTab={showStandaloneTab} />
           ) : (
-            <OnPremInstructions />
+            <FleetServerInstructions />
           )}
         </FlexItemWithMinWidth>
       </ContentWrapper>

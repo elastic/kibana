@@ -36,6 +36,7 @@ export const Instructions = (props: InstructionProps) => {
     isLoadingAgentPolicies,
     setSelectionType,
     mode,
+    setMode,
     isIntegrationFlow,
   } = props;
   const fleetStatus = useFleetStatus();
@@ -87,7 +88,7 @@ export const Instructions = (props: InstructionProps) => {
 
   if (mode === 'managed') {
     if (showFleetServerEnrollment) {
-      return <FleetServerRequirementPage />;
+      return <FleetServerRequirementPage showStandaloneTab={() => setMode('standalone')} />;
     } else if (showAgentEnrollment) {
       return (
         <>
