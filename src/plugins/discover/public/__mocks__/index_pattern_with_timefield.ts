@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList, DataView } from '../../../data_views/public';
+import { DataView } from '../../../data_views/public';
 
 const fields = [
   {
@@ -49,7 +49,7 @@ const fields = [
     scripted: true,
     filterable: false,
   },
-] as IIndexPatternFieldList;
+] as DataView['fields'];
 
 fields.getByName = (name: string) => {
   return fields.find((field) => field.name === name);
