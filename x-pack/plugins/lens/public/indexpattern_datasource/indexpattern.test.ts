@@ -6,7 +6,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import * as ReactIs from 'react-is';
+import { isFragment } from 'react-is';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../types';
@@ -2368,7 +2368,7 @@ describe('IndexPattern Data Source', () => {
 
     const extractTranslationIdsFromWarnings = (warnings: React.ReactNode[] | undefined) =>
       warnings?.map((item) =>
-        ReactIs.isFragment(item)
+        isFragment(item)
           ? (item as ReactElement).props.children[0].props.id
           : (item as ReactElement).props.id
       );
