@@ -9,7 +9,7 @@ import type { Optional } from '@kbn/utility-types';
 import type { Transaction } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
 import ipaddr from 'ipaddr.js';
-import { sum } from 'lodash';
+import { defaultsDeep, sum } from 'lodash';
 import { from, Observable, of } from 'rxjs';
 import {
   catchError,
@@ -63,7 +63,7 @@ export interface CaptureOptions extends Optional<ScreenshotObservableOptions, 'u
   /**
    * Layout parameters.
    */
-  layout: LayoutParams;
+  layout?: LayoutParams;
 
   /**
    * Source Kibana request object from where the headers will be extracted.
@@ -108,7 +108,7 @@ export class Screenshots {
 
   private createLayout(transaction: Transaction | null, options: CaptureOptions): Layout {
     const apmCreateLayout = transaction?.startSpan('create-layout', 'setup');
-    const layout = createLayout(options.layout);
+    const layout = createLayout(options.layout ?? {});
     this.logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
     apmCreateLayout?.end();
 
@@ -191,30 +191,52 @@ export class Screenshots {
     return `${protocol}://${hostname}:${port}${this.http.basePath.serverBasePath}/app/${SCREENSHOTTING_APP_ID}`;
   }
 
+  private getCaptureOptions({
+    expression,
+    input,
+    request,
+    ...options
+  }: ScreenshotOptions): ScreenshotObservableOptions {
+    const headers = { ...(request?.headers ?? {}), ...(options.headers ?? {}) };
+    const urls = expression
+      ? [
+          [
+            this.getScreenshottingAppUrl(),
+            {
+              [SCREENSHOTTING_EXPRESSION]: expression,
+              [SCREENSHOTTING_EXPRESSION_INPUT]: input,
+            },
+          ] as UrlOrUrlWithContext,
+        ]
+      : options.urls;
+
+    return defaultsDeep(
+      {
+        ...options,
+        headers,
+        urls,
+      },
+      {
+        timeouts: {
+          openUrl: 60000,
+          waitForElements: 30000,
+          renderComplete: 30000,
+          loadDelay: 3000,
+        },
+        urls: [],
+      }
+    );
+  }
+
   getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult>;
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
     const transaction = apm.startTransaction('screenshot-pipeline', 'screenshotting');
     const layout = this.createLayout(transaction, options);
-    const headers = { ...(options.request?.headers ?? {}), ...(options.headers ?? {}) };
-    const urls = options.expression
-      ? [
-          [
-            this.getScreenshottingAppUrl(),
-            {
-              [SCREENSHOTTING_EXPRESSION]: options.expression,
-              [SCREENSHOTTING_EXPRESSION_INPUT]: options.input,
-            },
-          ] as UrlOrUrlWithContext,
-        ]
-      : options.urls ?? [];
+    const captureOptions = this.getCaptureOptions(options);
 
-    return this.captureScreenshots(layout, transaction, {
-      ...options,
-      headers,
-      urls,
-    }).pipe(
+    return this.captureScreenshots(layout, transaction, captureOptions).pipe(
       mergeMap((result) => {
         switch (options.format) {
           case 'pdf':
