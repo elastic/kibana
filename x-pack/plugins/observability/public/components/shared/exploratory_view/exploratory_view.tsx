@@ -29,6 +29,7 @@ import { EmptyView } from './components/empty_view';
 import { ChartTimeRange, LastUpdated } from './header/last_updated';
 import { useExpViewTimeRange } from './hooks/use_time_range';
 import { ExpViewActionMenu } from './components/action_menu';
+import { useExploratoryView } from './contexts/exploratory_view_config';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
 
@@ -45,6 +46,8 @@ export function ExploratoryView({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [height, setHeight] = useState<string>('100vh');
+
+  const { isEditMode } = useExploratoryView();
 
   const [chartTimeRangeContext, setChartTimeRangeContext] = useState<ChartTimeRange | undefined>();
 
@@ -112,9 +115,10 @@ export function ExploratoryView({
 
             return (
               <>
-                <EuiFlexGroup alignItems="center">
+                <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      size="xs"
                       {...(hiddenPanel === 'chartPanel'
                         ? { iconType: 'arrowRight' }
                         : { iconType: 'arrowDown' })}
@@ -129,7 +133,11 @@ export function ExploratoryView({
                         <LastUpdated chartTimeRange={chartTimeRangeContext} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
+                        <EuiButton
+                          iconType="refresh"
+                          onClick={() => setLastRefresh(Date.now())}
+                          size="s"
+                        >
                           {REFRESH_LABEL}
                         </EuiButton>
                       </EuiFlexItem>
@@ -138,10 +146,11 @@ export function ExploratoryView({
                 </EuiFlexGroup>
 
                 <EuiResizablePanel
-                  initialSize={40}
+                  initialSize={isEditMode ? 40 : 60}
                   minSize={'30%'}
                   mode={'collapsible'}
                   id="chartPanel"
+                  paddingSize="s"
                 >
                   {lensAttributes ? (
                     <LensEmbeddable
@@ -154,7 +163,7 @@ export function ExploratoryView({
                 </EuiResizablePanel>
 
                 <EuiResizablePanel
-                  initialSize={60}
+                  initialSize={isEditMode ? 60 : 40}
                   minSize="10%"
                   mode={'main'}
                   id="seriesPanel"
@@ -196,6 +205,11 @@ const ResizableContainer = styled(EuiResizableContainer)`
   height: 100%;
   &&& .paddingTopSmall {
     padding-top: 8px;
+  }
+  #chartPanel {
+    > .euiPanel {
+      padding-bottom: 0;
+    }
   }
 `;
 
