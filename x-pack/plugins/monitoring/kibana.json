@@ -7,7 +7,7 @@
     "githubTeam": "stack-monitoring-ui"
   },
   "configPath": ["monitoring"],
-  "requiredPlugins": ["licensing", "features", "data", "navigation", "observability", "unifiedSearch"],
+  "requiredPlugins": ["licensing", "features", "data", "navigation", "observability", "dataViews", "unifiedSearch"],
   "optionalPlugins": [
     "infra",
     "usageCollection",

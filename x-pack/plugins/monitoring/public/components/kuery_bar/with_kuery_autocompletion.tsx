@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import {
   QuerySuggestion,
   UnifiedSearchPublicPluginStart,
@@ -27,7 +27,7 @@ interface WithKueryAutocompletionLifecycleProps {
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
     suggestions: QuerySuggestion[];
   }>;
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
 }
 
 interface WithKueryAutocompletionLifecycleState {

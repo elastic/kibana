@@ -114,7 +114,6 @@ describe('PreviewTableCellRenderer', () => {
 
     expect(mockImplementation.renderColumn).toBeCalledWith({
       asPlainText: false,
-      browserFields,
       columnName: header.id,
       ecsData,
       eventId,

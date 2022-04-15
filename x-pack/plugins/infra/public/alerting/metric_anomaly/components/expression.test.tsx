@@ -11,6 +11,7 @@ import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import React from 'react';
 import { Expression, AlertContextMeta } from './expression';
 import { act } from 'react-dom/test-utils';
+import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -38,6 +39,8 @@ jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
   }),
 }));
 
+const dataViewMock = dataViewPluginMocks.createStartContract();
+
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
     const ruleParams = {
@@ -55,6 +58,7 @@ describe('Expression', () => {
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
         metadata={currentOptions}
+        dataViews={dataViewMock}
       />
     );
 

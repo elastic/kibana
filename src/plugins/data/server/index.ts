@@ -45,7 +45,7 @@ export {
   getCapabilitiesForRollupIndices,
 } from './data_views';
 
-export type { IFieldType, IndexPatternAttributes } from '../common';
+export type { IndexPatternAttributes } from '../common';
 export {
   IndexPatternField,
   ES_FIELD_TYPES,
