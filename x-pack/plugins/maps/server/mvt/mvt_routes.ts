@@ -138,7 +138,7 @@ function sendResponse(
 
   const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
   const lastModified = `${new Date().toUTCString()}`;
-  if (gzipTileStream && statusCode < 400) {
+  if (gzipTileStream) {
     return response.ok({
       body: gzipTileStream,
       headers: {
