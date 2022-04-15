@@ -56,7 +56,6 @@ steps:
     agents:
       queue: n2-2
     timeout_in_minutes: 30
-    if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
     retry:
       automatic:
         - exit_status: '*'
