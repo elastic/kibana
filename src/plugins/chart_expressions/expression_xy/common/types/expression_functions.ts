@@ -27,10 +27,6 @@ import {
   AxisModes,
   REFERENCE_LINE_LAYER,
   Y_CONFIG,
-  AXIS_TITLES_VISIBILITY_CONFIG,
-  LABELS_ORIENTATION_CONFIG,
-  TICK_LABELS_CONFIG,
-  GRID_LINES_CONFIG,
   LEGEND_CONFIG,
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
@@ -39,7 +35,8 @@ import {
   ANNOTATION_LAYER,
   EndValues,
   EXTENDED_ANNOTATION_LAYER,
-  AXIS_CONFIG,
+  X_AXIS_CONFIG,
+  Y_AXIS_CONFIG,
   EXTENDED_Y_CONFIG,
   AvailableReferenceLineIcons,
 } from '../constants';
@@ -60,7 +57,6 @@ export type FittingFunction = $Values<typeof FittingFunctions>;
 export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
 
 export interface AxesSettingsConfig {
-  x: boolean;
   yLeft: boolean;
   yRight: boolean;
 }
@@ -74,10 +70,8 @@ export interface AxisExtentConfig {
 export interface AxisConfig {
   title?: string;
   hide?: boolean;
-  id: string;
+  id?: string;
   position?: Position;
-  mode?: AxisMode;
-  boundsMargin?: number;
   labelColor?: string;
   showOverlappingLabels?: boolean;
   showDuplicates?: boolean;
@@ -85,6 +79,14 @@ export interface AxisConfig {
   truncate?: number;
   showLabels?: boolean;
   showTitle?: boolean;
+  showGridLines?: boolean;
+}
+
+export interface YAxisConfig extends AxisConfig {
+  mode?: AxisMode;
+  boundsMargin?: number;
+  extent?: AxisExtentConfigResult;
+  scaleType?: YScaleType;
 }
 
 export interface ExtendedYConfig extends YConfig {
@@ -94,12 +96,12 @@ export interface ExtendedYConfig extends YConfig {
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
-  axisId?: string;
 }
 
 export interface YConfig {
   forAccessor: string;
   color?: string;
+  axisId?: string;
 }
 
 export interface DataLayerArgs {
@@ -113,6 +115,8 @@ export interface DataLayerArgs {
   xScaleType: XScaleType;
   isHistogram: boolean;
   isPercentage: boolean;
+  isStacked: boolean;
+  isHorizontal: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
   yConfig?: YConfigResult[];
@@ -134,6 +138,8 @@ export interface ExtendedDataLayerArgs {
   xScaleType: XScaleType;
   isHistogram: boolean;
   isPercentage: boolean;
+  isStacked: boolean;
+  isHorizontal: boolean;
   // palette will always be set on the expression
   palette: PaletteOutput;
   // palette will always be set on the expression
@@ -187,19 +193,8 @@ export interface LegendConfig {
   legendSize?: number;
 }
 
-export interface LabelsOrientationConfig {
-  x: number;
-  yLeft: number;
-  yRight: number;
-}
-
 // Arguments to XY chart expression, with computed properties
 export interface XYArgs {
-  xTitle: string;
-  yTitle: string;
-  yRightTitle: string;
-  yLeftExtent: AxisExtentConfigResult;
-  yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
@@ -208,66 +203,45 @@ export interface XYArgs {
   referenceLineLayers: ReferenceLineLayerConfigResult[];
   annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
-  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
-  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
-  gridlinesVisibilitySettings?: GridlinesConfigResult;
-  labelsOrientation?: LabelsOrientationConfigResult;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  axes?: AxisConfigResult[];
-  xAxisConfig?: AxisConfigResult;
+  axes?: YAxisConfigResult[];
+  xAxisConfig?: XAxisConfigResult;
 }
 
 export interface LayeredXYArgs {
-  xTitle: string;
-  yTitle: string;
-  yRightTitle: string;
-  yLeftExtent: AxisExtentConfigResult;
-  yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   layers?: XYExtendedLayerConfigResult[];
   fittingFunction?: FittingFunction;
-  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
-  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
-  gridlinesVisibilitySettings?: GridlinesConfigResult;
-  labelsOrientation?: LabelsOrientationConfigResult;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  axes?: AxisConfigResult[];
+  axes?: YAxisConfigResult[];
+  xAxisConfig?: XAxisConfigResult;
 }
 
 export interface XYProps {
-  xTitle: string;
-  yTitle: string;
-  yRightTitle: string;
-  yLeftExtent: AxisExtentConfigResult;
-  yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
   layers: CommonXYLayerConfigResult[];
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   fittingFunction?: FittingFunction;
-  axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
-  tickLabelsVisibilitySettings?: TickLabelsConfigResult;
-  gridlinesVisibilitySettings?: GridlinesConfigResult;
-  labelsOrientation?: LabelsOrientationConfigResult;
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  axes?: AxisConfigResult[];
-  xAxisConfig?: AxisConfigResult;
+  axes?: YAxisConfigResult[];
+  xAxisConfig?: XAxisConfigResult;
 }
 
 export interface AnnotationLayerArgs {
@@ -356,20 +330,11 @@ export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette
 export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
 export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
 
-export type AxisConfigResult = AxisConfig & { type: typeof AXIS_CONFIG };
-
-export type AxisTitlesVisibilityConfigResult = AxesSettingsConfig & {
-  type: typeof AXIS_TITLES_VISIBILITY_CONFIG;
-};
-
-export type LabelsOrientationConfigResult = LabelsOrientationConfig & {
-  type: typeof LABELS_ORIENTATION_CONFIG;
-};
+export type XAxisConfigResult = AxisConfig & { type: typeof X_AXIS_CONFIG };
+export type YAxisConfigResult = YAxisConfig & { type: typeof Y_AXIS_CONFIG };
 
 export type LegendConfigResult = LegendConfig & { type: typeof LEGEND_CONFIG };
 export type AxisExtentConfigResult = AxisExtentConfig & { type: typeof AXIS_EXTENT_CONFIG };
-export type GridlinesConfigResult = AxesSettingsConfig & { type: typeof GRID_LINES_CONFIG };
-export type TickLabelsConfigResult = AxesSettingsConfig & { type: typeof TICK_LABELS_CONFIG };
 
 export type CommonXYLayerConfigResult = XYLayerConfigResult | XYExtendedLayerConfigResult;
 export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedDataLayerConfigResult;

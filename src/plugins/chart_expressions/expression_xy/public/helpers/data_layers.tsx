@@ -24,7 +24,7 @@ import {
 } from 'src/plugins/field_formats/common';
 import { Datatable, DatatableRow } from '../../../../expressions';
 import { CommonXYDataLayerConfigResult, XScaleType } from '../../common';
-import { AxisModes } from '../../common/constants';
+import { AxisModes, SeriesTypes } from '../../common/constants';
 import { FormatFactory } from '../types';
 import { PaletteRegistry, SeriesLayer } from '../../../../charts/public';
 import { getSeriesColor } from './state';
@@ -220,14 +220,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   emphasizeFitting,
   fillOpacity,
 }): SeriesSpec => {
-  const { table } = layer;
-  const isStacked = layer.seriesType.includes('stacked');
+  const { table, isStacked } = layer;
   const isPercentage = layer.isPercentage;
   let stackMode: StackMode | undefined = isPercentage ? AxisModes.PERCENTAGE : undefined;
   if (yAxis?.mode) {
     stackMode = yAxis?.mode === AxisModes.NORMAL ? undefined : yAxis?.mode;
   }
-  const isBarChart = layer.seriesType.includes('bar');
+  const scaleType = yAxis?.scaleType || layer.yScaleType;
+  const isBarChart = layer.seriesType === SeriesTypes.BAR;
   const enableHistogramMode =
     layer.isHistogram &&
     (isStacked || !layer.splitAccessor) &&
@@ -275,9 +275,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     data: rows,
     xScaleType: layer.xAccessor ? layer.xScaleType : 'ordinal',
     yScaleType:
-      formatter?.id === 'bytes' && layer.yScaleType === ScaleType.Linear
+      formatter?.id === 'bytes' && scaleType === ScaleType.Linear
         ? ScaleType.LinearBinary
-        : layer.yScaleType,
+        : scaleType,
     color: (series) =>
       getColor(series, {
         layer,

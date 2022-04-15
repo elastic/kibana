@@ -8,7 +8,6 @@
 
 import { partition } from 'lodash';
 import type { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common';
-import { isStackedChart } from './state';
 import { isAnnotationsLayer, isDataLayer } from './visualization';
 
 export function computeOverallDataDomain(
@@ -21,7 +20,7 @@ export function computeOverallDataDomain(
   let max: number | undefined;
   const [stacked, unstacked] = partition(
     layers,
-    (layer) => isDataLayer(layer) && isStackedChart(layer.seriesType) && allowStacking
+    (layer) => isDataLayer(layer) && layer.isStacked && allowStacking
   );
 
   for (const layer of unstacked) {

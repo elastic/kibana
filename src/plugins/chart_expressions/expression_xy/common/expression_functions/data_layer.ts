@@ -61,6 +61,20 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Whether to layout the chart has percentage mode.',
       }),
     },
+    isStacked: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionXY.dataLayer.isPercentage.help', {
+        defaultMessage: 'Layout of the chart in stacked mode.',
+      }),
+    },
+    isHorizontal: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionXY.dataLayer.isPercentage.help', {
+        defaultMessage: 'Layout of the chart is horizontal',
+      }),
+    },
     xScaleType: {
       options: [...Object.values(XScaleTypes)],
       help: i18n.translate('expressionXY.dataLayer.xScaleType.help', {

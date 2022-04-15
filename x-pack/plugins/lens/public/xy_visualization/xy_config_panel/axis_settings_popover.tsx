@@ -17,11 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import {
-  AxesSettingsConfig,
-  AxisExtentConfig,
-} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { XYLayerConfig } from '../types';
+import { AxisExtentConfig } from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { XYLayerConfig, AxesSettingsConfig } from '../types';
 import { ToolbarPopover, useDebouncedValue, AxisTitleSettings } from '../../shared_components';
 import { isHorizontalChart } from '../state_helpers';
 import { EuiIconAxisBottom } from '../../assets/axis_bottom';

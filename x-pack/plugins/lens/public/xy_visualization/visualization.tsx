@@ -28,12 +28,7 @@ import type {
   VisualizationConfigProps,
   VisualizationToolbarProps,
 } from '../types';
-import {
-  FillStyle,
-  SeriesType,
-  YAxisMode,
-  ExtendedYConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { FillStyle } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   State,
   visualizationTypes,
@@ -42,6 +37,7 @@ import {
   XYDataLayerConfig,
   YConfig,
   YAxisMode,
+  SeriesType,
 } from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
@@ -401,7 +397,7 @@ export const getXyVisualization = ({
     }
     const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map<ExtendedYConfig>((metric, idx) => {
+    const yConfig = metrics.map<YConfig>((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],

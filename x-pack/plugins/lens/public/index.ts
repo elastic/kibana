@@ -94,15 +94,10 @@ export type {
   AxisExtentConfig,
   LegendConfigResult,
   AxesSettingsConfig,
-  GridlinesConfigResult,
   DataLayerConfigResult,
-  TickLabelsConfigResult,
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
-  LabelsOrientationConfig,
-  LabelsOrientationConfigResult,
   ReferenceLineLayerConfigResult,
-  AxisTitlesVisibilityConfigResult,
 } from '../../../../src/plugins/chart_expressions/expression_xy/common';
 export type { LensEmbeddableInput } from './embeddable';
 export { layerTypes } from '../common';

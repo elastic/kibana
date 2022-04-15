@@ -8,18 +8,18 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
-import { AxisConfig, AxisConfigResult } from '../types';
-import { AXIS_CONFIG, AxisModes } from '../constants';
+import { AxisConfig, XAxisConfigResult } from '../types';
+import { X_AXIS_CONFIG } from '../constants';
 
-export const axisConfigFunction: ExpressionFunctionDefinition<
-  typeof AXIS_CONFIG,
+export const xAxisConfigFunction: ExpressionFunctionDefinition<
+  typeof X_AXIS_CONFIG,
   null,
   AxisConfig,
-  AxisConfigResult
+  XAxisConfigResult
 > = {
-  name: AXIS_CONFIG,
+  name: X_AXIS_CONFIG,
   aliases: [],
-  type: AXIS_CONFIG,
+  type: X_AXIS_CONFIG,
   help: i18n.translate('expressionXY.axisConfig.help', {
     defaultMessage: `Configure the xy chart's axis config`,
   }),
@@ -36,7 +36,6 @@ export const axisConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.axisConfig.id.help', {
         defaultMessage: 'Id of axis',
       }),
-      required: true,
     },
     position: {
       types: ['string'],
@@ -49,19 +48,6 @@ export const axisConfigFunction: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: i18n.translate('expressionXY.axisConfig.boolean.help', {
         defaultMessage: 'Hide the specified axis',
-      }),
-    },
-    mode: {
-      types: ['string'],
-      options: [...Object.values(AxisModes)],
-      help: i18n.translate('expressionXY.axisConfig.mode.help', {
-        defaultMessage: 'Scale mode. Can be normal, percentage, wiggle or silhouette',
-      }),
-    },
-    boundsMargin: {
-      types: ['number'],
-      help: i18n.translate('expressionXY.axisConfig.boundsMargin.help', {
-        defaultMessage: 'Margin of bounds',
       }),
     },
     labelColor: {
@@ -81,6 +67,13 @@ export const axisConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.axisConfig.showDuplicates.help', {
         defaultMessage: 'Show duplicated ticks',
       }),
+    },
+    showGridLines: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showGridLines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines of the axis are visible.',
+      }),
+      default: false,
     },
     labelsOrientation: {
       types: ['number'],
@@ -112,7 +105,7 @@ export const axisConfigFunction: ExpressionFunctionDefinition<
   },
   fn(input, args) {
     return {
-      type: AXIS_CONFIG,
+      type: X_AXIS_CONFIG,
       ...args,
     };
   },

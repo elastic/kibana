@@ -23,7 +23,7 @@ export interface XYRender {
 
 export interface CollectiveConfig extends Omit<EventAnnotationArgs, 'icon'> {
   roundedTimestamp: number;
-  axisMode: 'bottom';
+  position: 'bottom';
   icon?: AvailableAnnotationIcon | string;
   customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }

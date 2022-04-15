@@ -21,16 +21,11 @@ import { LensIconChartLine } from '../assets/chart_line';
 
 import type { VisualizationType, Suggestion } from '../types';
 import type {
-  SeriesType,
   LegendConfig,
   AxisExtentConfig,
   XYCurveType,
-  AxesSettingsConfig,
   FittingFunction,
-  LabelsOrientationConfig,
   EndValue,
-  ExtendedYConfig,
-  YConfig,
   YScaleType,
   XScaleType,
   LineStyle,
@@ -47,7 +42,33 @@ export const YAxisModes = {
   BOTTOM: 'bottom',
 } as const;
 
+export const SeriesTypes = {
+  BAR: 'bar',
+  LINE: 'line',
+  AREA: 'area',
+  BAR_STACKED: 'bar_stacked',
+  AREA_STACKED: 'area_stacked',
+  BAR_HORIZONTAL: 'bar_horizontal',
+  BAR_PERCENTAGE_STACKED: 'bar_percentage_stacked',
+  BAR_HORIZONTAL_STACKED: 'bar_horizontal_stacked',
+  AREA_PERCENTAGE_STACKED: 'area_percentage_stacked',
+  BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
+} as const;
+
 export type YAxisMode = $Values<typeof YAxisModes>;
+export type SeriesType = $Values<typeof SeriesTypes>;
+export interface AxesSettingsConfig {
+  x: boolean;
+  yRight: boolean;
+  yLeft: boolean;
+}
+
+export interface LabelsOrientationConfig {
+  x: number;
+  yLeft: number;
+  yRight: number;
+}
+
 export interface YConfig {
   forAccessor: string;
   color?: string;
@@ -79,7 +100,7 @@ export interface XYDataLayerConfig {
 export interface XYReferenceLineLayerConfig {
   layerId: string;
   accessors: string[];
-  yConfig?: ExtendedYConfig[];
+  yConfig?: YConfig[];
   palette?: PaletteOutput;
   layerType: 'referenceLine';
 }

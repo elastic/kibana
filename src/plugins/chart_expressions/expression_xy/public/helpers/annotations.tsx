@@ -16,7 +16,7 @@ import { hasIcon, iconSet } from './icon';
 export const LINES_MARKER_SIZE = 20;
 
 type PartialExtendedYConfig = Pick<ExtendedYConfig, 'icon' | 'iconPosition' | 'textVisibility'> & {
-  position: Position;
+  position?: Position;
 };
 
 type PartialCollectiveConfig = Pick<CollectiveConfig, 'position' | 'icon' | 'textVisibility'>;

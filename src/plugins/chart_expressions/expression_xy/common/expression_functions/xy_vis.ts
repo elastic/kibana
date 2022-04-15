@@ -14,7 +14,7 @@ import {
   XYArgs,
   XYLayerConfigResult,
   XYRender,
-  AxisConfigResult,
+  YAxisConfigResult,
 } from '../types';
 import {
   XY_VIS,
@@ -23,24 +23,21 @@ import {
   LEGEND_CONFIG,
   ValueLabelModes,
   FittingFunctions,
-  GRID_LINES_CONFIG,
   XY_VIS_RENDERER,
-  AXIS_EXTENT_CONFIG,
-  TICK_LABELS_CONFIG,
   REFERENCE_LINE_LAYER,
-  LABELS_ORIENTATION_CONFIG,
-  AXIS_TITLES_VISIBILITY_CONFIG,
   EndValues,
   ANNOTATION_LAYER,
   LayerTypes,
-  AXIS_CONFIG,
+  X_AXIS_CONFIG,
+  Y_AXIS_CONFIG,
   AxisModes,
   AxisExtentModes,
+  SeriesTypes,
 } from '../constants';
 import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
 
-function validateLayerMode(layers: DataLayerConfigResult[], axes: AxisConfigResult[]) {
+function validateLayerMode(layers: DataLayerConfigResult[], axes: YAxisConfigResult[]) {
   const isError = layers.some(
     (layer) =>
       layer.isPercentage &&
@@ -82,26 +79,34 @@ const errors = {
     }),
 };
 
-const validateExtent = (
-  extent: AxisExtentConfigResult,
-  hasBarOrArea: boolean,
-  dataLayers: DataLayerConfigResult[]
-) => {
+function areValidBounds(extent: AxisExtentConfigResult) {
   const isValidLowerBound =
     extent.lowerBound === undefined || (extent.lowerBound !== undefined && extent.lowerBound <= 0);
   const isValidUpperBound =
     extent.upperBound === undefined || (extent.upperBound !== undefined && extent.upperBound >= 0);
 
-  const areValidBounds = isValidLowerBound && isValidUpperBound;
+  return isValidLowerBound && isValidUpperBound;
+}
 
-  if (hasBarOrArea && extent.mode === AxisExtentModes.CUSTOM && !areValidBounds) {
-    throw new Error(errors.extendBoundsAreInvalidError());
-  }
+const validateExtents = (dataLayers: DataLayerConfigResult[], axes?: YAxisConfigResult[]) => {
+  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.LINE);
+  const hasBarOrArea =
+    dataLayers.filter(
+      ({ seriesType }) => seriesType === SeriesTypes.BAR || seriesType === SeriesTypes.AREA
+    ).length > 0;
+  axes?.forEach((axis) => {
+    if (
+      hasBarOrArea &&
+      axis.extent?.mode === AxisExtentModes.CUSTOM &&
+      !areValidBounds(axis.extent)
+    ) {
+      throw new Error(errors.extendBoundsAreInvalidError());
+    }
 
-  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType.includes('line'));
-  if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
-    throw new Error(errors.dataBoundsForNotLineChartError());
-  }
+    if (!lineSeries.length && axis.extent?.mode === AxisExtentModes.DATA_BOUNDS) {
+      throw new Error(errors.dataBoundsForNotLineChartError());
+    }
+  });
 };
 
 export const xyVisFunction: ExpressionFunctionDefinition<
@@ -117,38 +122,6 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     defaultMessage: 'An X/Y chart',
   }),
   args: {
-    xTitle: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.xyVis.xTitle.help', {
-        defaultMessage: 'X axis title',
-      }),
-    },
-    yTitle: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.xyVis.yLeftTitle.help', {
-        defaultMessage: 'Y left axis title',
-      }),
-    },
-    yRightTitle: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.xyVis.yRightTitle.help', {
-        defaultMessage: 'Y right axis title',
-      }),
-    },
-    yLeftExtent: {
-      types: [AXIS_EXTENT_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.yLeftExtent.help', {
-        defaultMessage: 'Y left axis extents',
-      }),
-      default: `{${AXIS_EXTENT_CONFIG}}`,
-    },
-    yRightExtent: {
-      types: [AXIS_EXTENT_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.yRightExtent.help', {
-        defaultMessage: 'Y right axis extents',
-      }),
-      default: `{${AXIS_EXTENT_CONFIG}}`,
-    },
     legend: {
       types: [LEGEND_CONFIG],
       help: i18n.translate('expressionXY.xyVis.legend.help', {
@@ -185,30 +158,6 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }),
       strict: true,
       default: ValueLabelModes.HIDE,
-    },
-    tickLabelsVisibilitySettings: {
-      types: [TICK_LABELS_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.tickLabelsVisibilitySettings.help', {
-        defaultMessage: 'Show x and y axes tick labels',
-      }),
-    },
-    labelsOrientation: {
-      types: [LABELS_ORIENTATION_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.labelsOrientation.help', {
-        defaultMessage: 'Defines the rotation of the axis labels',
-      }),
-    },
-    gridlinesVisibilitySettings: {
-      types: [GRID_LINES_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.gridlinesVisibilitySettings.help', {
-        defaultMessage: 'Show x and y axes gridlines',
-      }),
-    },
-    axisTitlesVisibilitySettings: {
-      types: [AXIS_TITLES_VISIBILITY_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.axisTitlesVisibilitySettings.help', {
-        defaultMessage: 'Show x and y axes titles',
-      }),
     },
     dataLayers: {
       types: [DATA_LAYER],
@@ -265,13 +214,13 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       }),
     },
     xAxisConfig: {
-      types: [AXIS_CONFIG],
+      types: [X_AXIS_CONFIG],
       help: i18n.translate('expressionXY.xyVis.xAxisConfig.help', {
         defaultMessage: 'Specifies the configs for x-axis',
       }),
     },
     axes: {
-      types: [AXIS_CONFIG],
+      types: [Y_AXIS_CONFIG],
       help: i18n.translate('expressionXY.xyVis.axes.help', {
         defaultMessage: 'Specifies the configs for y-axes',
       }),
@@ -305,19 +254,20 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
-    const hasBar = dataLayers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
-    const hasArea = dataLayers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
+    const hasBar = dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.BAR).length > 0;
+    const hasArea =
+      dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.AREA).length > 0;
 
-    validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
-    validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
+    validateExtents(dataLayers, args.axes);
 
     if (!hasArea && args.fillOpacity !== undefined) {
       throw new Error(errors.notUsedFillOpacityError());
     }
 
     const hasNotHistogramBars =
-      dataLayers.filter(({ seriesType, isHistogram }) => seriesType.includes('bar') && !isHistogram)
-        .length > 0;
+      dataLayers.filter(
+        ({ seriesType, isHistogram }) => seriesType === SeriesTypes.BAR && !isHistogram
+      ).length > 0;
 
     if ((!hasBar || !hasNotHistogramBars) && args.valueLabels !== ValueLabelModes.HIDE) {
       throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());

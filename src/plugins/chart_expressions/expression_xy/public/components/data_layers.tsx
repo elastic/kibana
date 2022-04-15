@@ -149,11 +149,6 @@ export const DataLayers: FC<Props> = ({
                 />
               );
             case SeriesTypes.BAR:
-            case SeriesTypes.BAR_STACKED:
-            case SeriesTypes.BAR_PERCENTAGE_STACKED:
-            case SeriesTypes.BAR_HORIZONTAL:
-            case SeriesTypes.BAR_HORIZONTAL_STACKED:
-            case SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED:
               const valueLabelsSettings = {
                 displayValueSettings: {
                   // This format double fixes two issues in elastic-chart
@@ -170,22 +165,12 @@ export const DataLayers: FC<Props> = ({
                 },
               };
               return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
-            case SeriesTypes.AREA_STACKED:
-            case SeriesTypes.AREA_PERCENTAGE_STACKED:
-              return (
-                <AreaSeries
-                  key={index}
-                  {...seriesProps}
-                  fit={isPercentage ? 'zero' : getFitOptions(fittingFunction, endValue)}
-                  curve={curve}
-                />
-              );
             case SeriesTypes.AREA:
               return (
                 <AreaSeries
                   key={index}
                   {...seriesProps}
-                  fit={getFitOptions(fittingFunction, endValue)}
+                  fit={isPercentage ? 'zero' : getFitOptions(fittingFunction, endValue)}
                   curve={curve}
                 />
               );

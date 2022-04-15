@@ -156,13 +156,23 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect(
-      (expression.chain[0].arguments.axisTitlesVisibilitySettings[0] as Ast).chain[0].arguments
-    ).toEqual({
-      x: [true],
-      yLeft: [true],
-      yRight: [true],
-    });
+    expect((expression.chain[0].arguments.axes[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showTitle: [true],
+        position: ['left'],
+      })
+    );
+    expect((expression.chain[0].arguments.axes[1] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showTitle: [true],
+        position: ['right'],
+      })
+    );
+    expect((expression.chain[0].arguments.xAxisConfig[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showTitle: [true],
+      })
+    );
   });
 
   it('should generate an expression without x accessor', () => {
@@ -241,9 +251,6 @@ describe('#toExpression', () => {
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('d');
-    expect(expression.chain[0].arguments.xTitle).toEqual(['']);
-    expect(expression.chain[0].arguments.yTitle).toEqual(['']);
-    expect(expression.chain[0].arguments.yRightTitle).toEqual(['']);
     expect(
       (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.columnToLabel
     ).toEqual([
@@ -276,13 +283,23 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect(
-      (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments
-    ).toEqual({
-      x: [true],
-      yLeft: [true],
-      yRight: [true],
-    });
+    expect((expression.chain[0].arguments.axes[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showLabels: [true],
+        position: ['left'],
+      })
+    );
+    expect((expression.chain[0].arguments.axes[1] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showLabels: [true],
+        position: ['right'],
+      })
+    );
+    expect((expression.chain[0].arguments.xAxisConfig[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showLabels: [true],
+      })
+    );
   });
 
   it('should default the tick labels orientation settings to 0', () => {
@@ -306,11 +323,23 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect((expression.chain[0].arguments.labelsOrientation[0] as Ast).chain[0].arguments).toEqual({
-      x: [0],
-      yLeft: [0],
-      yRight: [0],
-    });
+    expect((expression.chain[0].arguments.axes[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        labelsOrientation: [0],
+        position: ['left'],
+      })
+    );
+    expect((expression.chain[0].arguments.axes[1] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        labelsOrientation: [0],
+        position: ['right'],
+      })
+    );
+    expect((expression.chain[0].arguments.xAxisConfig[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        labelsOrientation: [0],
+      })
+    );
   });
 
   it('should default the gridlines visibility settings to true', () => {
@@ -334,13 +363,23 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect(
-      (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments
-    ).toEqual({
-      x: [true],
-      yLeft: [true],
-      yRight: [true],
-    });
+    expect((expression.chain[0].arguments.axes[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showGridLines: [true],
+        position: ['left'],
+      })
+    );
+    expect((expression.chain[0].arguments.axes[1] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showGridLines: [true],
+        position: ['right'],
+      })
+    );
+    expect((expression.chain[0].arguments.xAxisConfig[0] as Ast).chain[0].arguments).toEqual(
+      expect.objectContaining({
+        showGridLines: [true],
+      })
+    );
   });
 
   it('should correctly report the valueLabels visibility settings', () => {

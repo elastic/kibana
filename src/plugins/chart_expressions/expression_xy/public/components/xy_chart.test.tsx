@@ -140,6 +140,9 @@ describe('XYChart component', () => {
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
       seriesType: 'line',
+      isPercentage: false,
+      isHorizontal: false,
+      isStacked: false,
       xAccessor: 'c',
       accessors: ['a', 'b'],
       splitAccessor: 'd',
@@ -236,6 +239,9 @@ describe('XYChart component', () => {
         type: 'dataLayer',
         layerType: LayerTypes.DATA,
         seriesType: 'line',
+        isHorizontal: false,
+        isStacked: false,
+        isPercentage: false,
         xAccessor: 'c',
         accessors: ['a', 'b'],
         splitAccessor: 'd',
@@ -321,7 +327,8 @@ describe('XYChart component', () => {
       test('it should enable the new time axis for a stacked vertical bar with break down dimension', () => {
         const timeLayer: DataLayerConfigResult = {
           ...defaultTimeLayer,
-          seriesType: 'bar_stacked',
+          seriesType: 'bar',
+          isStacked: true,
         };
         const timeLayerArgs = createArgsWithLayers([timeLayer]);
 
@@ -488,12 +495,18 @@ describe('XYChart component', () => {
           {...defaultProps}
           args={{
             ...args,
-            yLeftExtent: {
-              type: 'axisExtentConfig',
-              mode: 'custom',
-              lowerBound: 123,
-              upperBound: 456,
-            },
+            axes: [
+              {
+                type: 'yAxisConfig',
+                position: 'left',
+                extent: {
+                  type: 'axisExtentConfig',
+                  mode: 'custom',
+                  lowerBound: 123,
+                  upperBound: 456,
+                },
+              },
+            ],
           }}
         />
       );
@@ -510,10 +523,16 @@ describe('XYChart component', () => {
           {...defaultProps}
           args={{
             ...args,
-            yLeftExtent: {
-              type: 'axisExtentConfig',
-              mode: 'dataBounds',
-            },
+            axes: [
+              {
+                type: 'yAxisConfig',
+                position: 'left',
+                extent: {
+                  type: 'axisExtentConfig',
+                  mode: 'dataBounds',
+                },
+              },
+            ],
           }}
         />
       );
@@ -530,10 +549,16 @@ describe('XYChart component', () => {
           {...defaultProps}
           args={{
             ...args,
-            yLeftExtent: {
-              type: 'axisExtentConfig',
-              mode: 'dataBounds',
-            },
+            axes: [
+              {
+                type: 'yAxisConfig',
+                position: 'left',
+                extent: {
+                  type: 'axisExtentConfig',
+                  mode: 'dataBounds',
+                },
+              },
+            ],
             layers: [
               {
                 ...(args.layers[0] as DataLayerConfigResult),
@@ -569,12 +594,18 @@ describe('XYChart component', () => {
           {...defaultProps}
           args={{
             ...refArgs,
-            yLeftExtent: {
-              type: 'axisExtentConfig',
-              mode: 'custom',
-              lowerBound: 123,
-              upperBound: 456,
-            },
+            axes: [
+              {
+                type: 'yAxisConfig',
+                position: 'left',
+                extent: {
+                  type: 'axisExtentConfig',
+                  mode: 'custom',
+                  lowerBound: 123,
+                  upperBound: 456,
+                },
+              },
+            ],
           }}
         />
       );
@@ -720,7 +751,9 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          layers: [{ ...(args.layers[0] as DataLayerConfigResult), seriesType: 'bar_horizontal' }],
+          layers: [
+            { ...(args.layers[0] as DataLayerConfigResult), isHorizontal: true, seriesType: 'bar' },
+          ],
         }}
       />
     );
@@ -815,7 +848,10 @@ describe('XYChart component', () => {
       yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
-      seriesType: 'bar_stacked',
+      isHorizontal: false,
+      isStacked: true,
+      seriesType: 'bar',
+      isPercentage: false,
       accessors: ['yAccessorId'],
       palette: mockPaletteOutput,
       table: numberHistogramData,
@@ -885,7 +921,10 @@ describe('XYChart component', () => {
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               isHistogram: true,
-              seriesType: 'bar_stacked',
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: false,
+              isPercentage: false,
               xAccessor: 'b',
               yScaleType: 'linear',
               xScaleType: 'time',
@@ -1011,7 +1050,10 @@ describe('XYChart component', () => {
       yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
-      seriesType: 'bar_stacked',
+      isPercentage: false,
+      seriesType: 'bar',
+      isStacked: true,
+      isHorizontal: false,
       accessors: ['yAccessorId'],
       palette: mockPaletteOutput,
       table: numberHistogramData,
@@ -1083,6 +1125,9 @@ describe('XYChart component', () => {
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
+              isHorizontal: false,
+              isStacked: false,
+              isPercentage: false,
               xAccessor: 'd',
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
@@ -1141,6 +1186,9 @@ describe('XYChart component', () => {
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
+              isHorizontal: false,
+              isStacked: false,
+              isPercentage: false,
               xAccessor: 'd',
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
@@ -1171,6 +1219,9 @@ describe('XYChart component', () => {
               type: 'dataLayer',
               layerType: LayerTypes.DATA,
               seriesType: 'line',
+              isHorizontal: false,
+              isStacked: false,
+              isPercentage: false,
               xAccessor: 'd',
               accessors: ['a', 'b'],
               columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
@@ -1211,7 +1262,9 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          layers: [{ ...(args.layers[0] as DataLayerConfigResult), seriesType: 'bar_stacked' }],
+          layers: [
+            { ...(args.layers[0] as DataLayerConfigResult), seriesType: 'bar', isStacked: true },
+          ],
         }}
       />
     );
@@ -1230,7 +1283,9 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          layers: [{ ...(args.layers[0] as DataLayerConfigResult), seriesType: 'area_stacked' }],
+          layers: [
+            { ...(args.layers[0] as DataLayerConfigResult), seriesType: 'area', isStacked: true },
+          ],
         }}
       />
     );
@@ -1250,7 +1305,12 @@ describe('XYChart component', () => {
         args={{
           ...args,
           layers: [
-            { ...(args.layers[0] as DataLayerConfigResult), seriesType: 'bar_horizontal_stacked' },
+            {
+              ...(args.layers[0] as DataLayerConfigResult),
+              seriesType: 'bar',
+              isStacked: true,
+              isHorizontal: true,
+            },
           ],
         }}
       />
@@ -1277,7 +1337,8 @@ describe('XYChart component', () => {
               ...(args.layers[0] as DataLayerConfigResult),
               xAccessor: undefined,
               splitAccessor: 'e',
-              seriesType: 'bar_stacked',
+              seriesType: 'bar',
+              isStacked: true,
             },
           ],
         }}
@@ -1364,7 +1425,8 @@ describe('XYChart component', () => {
           layers: [
             {
               ...(args.layers[0] as DataLayerConfigResult),
-              seriesType: 'bar_stacked',
+              seriesType: 'bar',
+              isStacked: true,
               isHistogram: true,
             },
           ],
@@ -1437,12 +1499,12 @@ describe('XYChart component', () => {
         ],
         axes: [
           {
-            type: 'axisConfig',
+            type: 'yAxisConfig',
             id: '1',
             position: 'left',
           },
           {
-            type: 'axisConfig',
+            type: 'yAxisConfig',
             id: '2',
             position: 'right',
           },
@@ -1503,7 +1565,7 @@ describe('XYChart component', () => {
         ],
         axes: [
           {
-            type: 'axisConfig',
+            type: 'yAxisConfig',
             id: '1',
             position: 'left',
           },
@@ -1932,11 +1994,20 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
     const { args } = sampleArgs();
 
-    args.tickLabelsVisibilitySettings = {
-      x: false,
-      yLeft: true,
-      yRight: true,
-      type: 'tickLabelsConfig',
+    args.axes = [{
+      type: 'yAxisConfig',
+      position: 'left',
+      showLabels: true
+    }, {
+      type: 'yAxisConfig',
+      position: 'right',
+      showLabels: true
+    }];
+
+    args.xAxisConfig = {
+      type: 'xAxisConfig',
+      id: 'x',
+      showLabels: false,
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -1953,12 +2024,15 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the y axis if the tick labels is hidden', () => {
     const { args } = sampleArgs();
 
-    args.tickLabelsVisibilitySettings = {
-      x: true,
-      yLeft: false,
-      yRight: false,
-      type: 'tickLabelsConfig',
-    };
+    args.axes = [{
+      type: 'yAxisConfig',
+      position: 'left',
+      showLabels: false
+    }, {
+      type: 'yAxisConfig',
+      position: 'right',
+      showLabels: false
+    }];
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
@@ -1974,11 +2048,20 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the x axis if the tick labels is shown', () => {
     const { args } = sampleArgs();
 
-    args.tickLabelsVisibilitySettings = {
-      x: true,
-      yLeft: true,
-      yRight: true,
-      type: 'tickLabelsConfig',
+    args.axes = [{
+      type: 'yAxisConfig',
+      position: 'left',
+      showLabels: true
+    }, {
+      type: 'yAxisConfig',
+      position: 'right',
+      showLabels: true
+    }];
+
+    args.xAxisConfig = {
+      type: 'xAxisConfig',
+      id: 'x',
+      showLabels: true,
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -1995,11 +2078,21 @@ describe('XYChart component', () => {
   test('it should set the tickLabel orientation on the x axis', () => {
     const { args } = sampleArgs();
 
-    args.labelsOrientation = {
-      x: -45,
-      yLeft: 0,
-      yRight: -90,
-      type: 'labelsOrientationConfig',
+    args.axes = [{
+      type: 'yAxisConfig',
+      position: 'left',
+      labelsOrientation: 0
+    }, {
+      type: 'yAxisConfig',
+      position: 'right',
+      labelsOrientation: -90
+    }];
+
+    args.xAxisConfig = {
+      type: 'xAxisConfig',
+      id: 'x',
+      showLabels: true,
+      labelsOrientation: -45,
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2016,11 +2109,20 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the y axis if the tick labels is shown', () => {
     const { args } = sampleArgs();
 
-    args.tickLabelsVisibilitySettings = {
-      x: false,
-      yLeft: true,
-      yRight: true,
-      type: 'tickLabelsConfig',
+    args.axes = [{
+      type: 'yAxisConfig',
+      position: 'left',
+      showLabels: true
+    }, {
+      type: 'yAxisConfig',
+      position: 'right',
+      showLabels: true
+    }];
+
+    args.xAxisConfig = {
+      type: 'xAxisConfig',
+      id: 'x',
+      showLabels: true,
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2037,11 +2139,21 @@ describe('XYChart component', () => {
   test('it should set the tickLabel orientation on the y axis', () => {
     const { args } = sampleArgs();
 
-    args.labelsOrientation = {
-      x: -45,
-      yLeft: -90,
-      yRight: -90,
-      type: 'labelsOrientationConfig',
+    args.axes = [{
+      type: 'yAxisConfig',
+      position: 'left',
+      labelsOrientation: -90
+    }, {
+      type: 'yAxisConfig',
+      position: 'right',
+      labelsOrientation: -90
+    }];
+
+    args.xAxisConfig = {
+      type: 'xAxisConfig',
+      id: 'x',
+      showLabels: true,
+      labelsOrientation: -45,
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2083,42 +2195,46 @@ describe('XYChart component', () => {
     };
 
     const args: XYProps = {
-      xTitle: '',
-      yTitle: '',
-      yRightTitle: '',
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
-      tickLabelsVisibilitySettings: {
-        type: 'tickLabelsConfig',
-        x: true,
-        yLeft: true,
-        yRight: true,
-      },
-      gridlinesVisibilitySettings: {
-        type: 'gridlinesConfig',
-        x: true,
-        yLeft: false,
-        yRight: false,
-      },
-      labelsOrientation: {
-        type: 'labelsOrientationConfig',
-        x: 0,
-        yLeft: 0,
-        yRight: 0,
-      },
-      yLeftExtent: {
-        mode: 'full',
+      axes: [{
+        type: 'yAxisConfig',
+        position: 'left',
+        labelsOrientation: 0,
+        showGridLines: false,
+        showLabels: true,
+        title: '',
+        extent: {
+          mode: 'full',
         type: 'axisExtentConfig',
-      },
-      yRightExtent: {
-        mode: 'full',
+        }
+      }, {
+        type: 'yAxisConfig',
+        position: 'right',
+        labelsOrientation: 0,
+        showGridLines: false,
+        showLabels: true,
+        title: '',
+        extent: {
+          mode: 'full',
         type: 'axisExtentConfig',
+        }
+      }],
+      xAxisConfig: {
+        type: 'xAxisConfig',
+        id: 'x',
+        title: '',
+        showLabels: true,
+        showGridLines: true,
+        labelsOrientation: 0,
       },
       layers: [
         {
           type: 'dataLayer',
           layerType: LayerTypes.DATA,
           seriesType: 'line',
+          isStacked: false,
+          isHorizontal: false,
           xAccessor: 'a',
           accessors: ['c'],
           splitAccessor: 'b',
@@ -2126,6 +2242,7 @@ describe('XYChart component', () => {
           xScaleType: 'ordinal',
           yScaleType: 'linear',
           isHistogram: false,
+          isPercentage: false,
           palette: mockPaletteOutput,
           table: data1,
         },
@@ -2140,6 +2257,9 @@ describe('XYChart component', () => {
           xScaleType: 'ordinal',
           yScaleType: 'linear',
           isHistogram: false,
+          isStacked: false,
+          isHorizontal: false,
+          isPercentage: false,
           palette: mockPaletteOutput,
           table: data2,
         },
@@ -2170,36 +2290,38 @@ describe('XYChart component', () => {
     };
 
     const args: XYProps = {
-      xTitle: '',
-      yTitle: '',
-      yRightTitle: '',
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
-      tickLabelsVisibilitySettings: {
-        type: 'tickLabelsConfig',
-        x: true,
-        yLeft: false,
-        yRight: false,
-      },
-      gridlinesVisibilitySettings: {
-        type: 'gridlinesConfig',
-        x: true,
-        yLeft: false,
-        yRight: false,
-      },
-      labelsOrientation: {
-        type: 'labelsOrientationConfig',
-        x: 0,
-        yLeft: 0,
-        yRight: 0,
-      },
-      yLeftExtent: {
-        mode: 'full',
+      axes: [{
+        type: 'yAxisConfig',
+        position: 'left',
+        labelsOrientation: 0,
+        showGridLines: false,
+        showLabels: false,
+        title: '',
+        extent: {
+          mode: 'full',
         type: 'axisExtentConfig',
-      },
-      yRightExtent: {
-        mode: 'full',
+        }
+      }, {
+        type: 'yAxisConfig',
+        position: 'right',
+        labelsOrientation: 0,
+        showGridLines: false,
+        showLabels: false,
+        title: '',
+        extent: {
+          mode: 'full',
         type: 'axisExtentConfig',
+        }
+      }],
+      xAxisConfig: {
+        type: 'xAxisConfig',
+        id: 'x',
+        title: '',
+        showLabels: true,
+        showGridLines: true,
+        labelsOrientation: 0,
       },
       layers: [
         {
@@ -2213,6 +2335,9 @@ describe('XYChart component', () => {
           xScaleType: 'ordinal',
           yScaleType: 'linear',
           isHistogram: false,
+          isStacked: false,
+          isHorizontal: false,
+          isPercentage: false,
           palette: mockPaletteOutput,
           table: data,
         },
@@ -2241,36 +2366,38 @@ describe('XYChart component', () => {
     };
 
     const args: XYProps = {
-      xTitle: '',
-      yTitle: '',
-      yRightTitle: '',
       legend: { type: 'legendConfig', isVisible: true, position: Position.Top },
       valueLabels: 'hide',
-      tickLabelsVisibilitySettings: {
-        type: 'tickLabelsConfig',
-        x: true,
-        yLeft: false,
-        yRight: false,
-      },
-      gridlinesVisibilitySettings: {
-        type: 'gridlinesConfig',
-        x: true,
-        yLeft: false,
-        yRight: false,
-      },
-      labelsOrientation: {
-        type: 'labelsOrientationConfig',
-        x: 0,
-        yLeft: 0,
-        yRight: 0,
-      },
-      yLeftExtent: {
-        mode: 'full',
+      axes: [{
+        type: 'yAxisConfig',
+        position: 'left',
+        labelsOrientation: 0,
+        showGridLines: false,
+        showLabels: false,
+        title: '',
+        extent: {
+          mode: 'full',
         type: 'axisExtentConfig',
-      },
-      yRightExtent: {
-        mode: 'full',
+        }
+      }, {
+        type: 'yAxisConfig',
+        position: 'right',
+        labelsOrientation: 0,
+        showGridLines: false,
+        showLabels: false,
+        title: '',
+        extent: {
+          mode: 'full',
         type: 'axisExtentConfig',
+        }
+      }],
+      xAxisConfig: {
+        type: 'xAxisConfig',
+        id: 'x',
+        showLabels: true,
+        showGridLines: true,
+        labelsOrientation: 0,
+        title: '',
       },
       layers: [
         {
@@ -2284,6 +2411,9 @@ describe('XYChart component', () => {
           xScaleType: 'ordinal',
           yScaleType: 'linear',
           isHistogram: false,
+          isStacked: false,
+          isHorizontal: false,
+          isPercentage: false,
           palette: mockPaletteOutput,
           table: data,
         },
@@ -2389,7 +2519,7 @@ describe('XYChart component', () => {
       { ...sampleLayer, accessors: ['a'], table: data },
       { ...sampleLayer, seriesType: 'bar', accessors: ['a'], table: data },
       { ...sampleLayer, seriesType: 'area', accessors: ['a'], table: data },
-      { ...sampleLayer, seriesType: 'area_stacked', accessors: ['a'], table: data },
+      { ...sampleLayer, seriesType: 'area', isStacked: true, accessors: ['a'], table: data },
     ]);
 
     const component = shallow(
@@ -2419,7 +2549,12 @@ describe('XYChart component', () => {
   test('it should apply the xTitle if is specified', () => {
     const { args } = sampleArgs();
 
-    args.xTitle = 'My custom x-axis title';
+    args.xAxisConfig = {
+      type: 'xAxisConfig',
+      id: 'x',
+      showLabels: true,
+      title: 'My custom x-axis title',
+    };
 
     const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
@@ -2429,11 +2564,22 @@ describe('XYChart component', () => {
   test('it should hide the X axis title if the corresponding switch is off', () => {
     const { args } = sampleArgs();
 
-    args.axisTitlesVisibilitySettings = {
-      x: false,
-      yLeft: true,
-      yRight: true,
-      type: 'axisTitlesVisibilityConfig',
+    args.axes = [{
+      type: 'yAxisConfig',
+      position: 'left',
+      showTitle: true
+    }, {
+      type: 'yAxisConfig',
+      position: 'right',
+      showTitle: true
+    }];
+
+    args.xAxisConfig = {
+      type: 'xAxisConfig',
+      id: 'x',
+      showLabels: true,
+      showTitle: false,
+      title: 'My custom x-axis title',
     };
 
     const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2450,11 +2596,22 @@ describe('XYChart component', () => {
   test('it should show the X axis gridlines if the setting is on', () => {
     const { args } = sampleArgs();
 
-    args.gridlinesVisibilitySettings = {
-      x: true,
-      yLeft: false,
-      yRight: false,
-      type: 'gridlinesConfig',
+    args.axes = [{
+      type: 'yAxisConfig',
+      position: 'left',
+      showGridLines: false
+    }, {
+      type: 'yAxisConfig',
+      position: 'right',
+      showGridLines: false
+    }];
+
+    args.xAxisConfig = {
+      type: 'xAxisConfig',
+      id: 'x',
+      showLabels: true,
+      showGridLines: true,
+      title: 'My custom x-axis title',
     };
 
     const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2497,11 +2654,14 @@ describe('XYChart component', () => {
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
       seriesType: 'line',
+      isStacked: false,
+      isHorizontal: false,
       xAccessor: 'c',
       accessors: ['a', 'b'],
       xScaleType: 'ordinal',
       yScaleType: 'linear',
       isHistogram: false,
+      isPercentage: false,
       palette: mockPaletteOutput,
       table: data,
     };

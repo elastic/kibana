@@ -18,19 +18,16 @@ import {
   layeredXyVisFunction,
   dataLayerFunction,
   extendedDataLayerFunction,
+  yConfigFunction,
+  xAxisConfigFunction,
   yAxisConfigFunction,
-  axisConfigFunction,
-  extendedYAxisConfigFunction,
+  extendedYConfigFunction,
   legendConfigFunction,
-  gridlinesConfigFunction,
   axisExtentConfigFunction,
-  tickLabelsConfigFunction,
   referenceLineLayerFunction,
   extendedReferenceLineLayerFunction,
   annotationLayerFunction,
   extendedAnnotationLayerFunction,
-  labelsOrientationConfigFunction,
-  axisTitlesVisibilityConfigFunction,
 } from '../common';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 import { EventAnnotationPluginSetup } from '../../../event_annotation/public';
@@ -57,20 +54,17 @@ export class ExpressionXyPlugin {
     { expressions, charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
-    expressions.registerFunction(extendedYAxisConfigFunction);
+    expressions.registerFunction(yConfigFunction);
+    expressions.registerFunction(extendedYConfigFunction);
     expressions.registerFunction(legendConfigFunction);
-    expressions.registerFunction(gridlinesConfigFunction);
     expressions.registerFunction(dataLayerFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
-    expressions.registerFunction(axisConfigFunction);
-    expressions.registerFunction(tickLabelsConfigFunction);
+    expressions.registerFunction(xAxisConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
-    expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(extendedReferenceLineLayerFunction);
-    expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);
 

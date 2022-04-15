@@ -16,9 +16,9 @@ import {
   XYLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
+  SeriesType,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
-import { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '..';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';

@@ -261,7 +261,7 @@ exports[`XYChart component it renders area 1`] = `
     gridLine={
       Object {
         "strokeWidth": 1,
-        "visible": true,
+        "visible": undefined,
       }
     }
     hide={false}
@@ -271,12 +271,13 @@ exports[`XYChart component it renders area 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": 0,
-          "visible": true,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -290,11 +291,12 @@ exports[`XYChart component it renders area 1`] = `
         "fit": false,
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": undefined,
       }
     }
     groupId="left"
@@ -305,12 +307,13 @@ exports[`XYChart component it renders area 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": -90,
-          "visible": false,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -662,7 +665,7 @@ exports[`XYChart component it renders bar 1`] = `
     gridLine={
       Object {
         "strokeWidth": 1,
-        "visible": true,
+        "visible": undefined,
       }
     }
     hide={false}
@@ -672,12 +675,13 @@ exports[`XYChart component it renders bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": 0,
-          "visible": true,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -691,11 +695,12 @@ exports[`XYChart component it renders bar 1`] = `
         "fit": false,
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": undefined,
       }
     }
     groupId="left"
@@ -706,12 +711,13 @@ exports[`XYChart component it renders bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": -90,
-          "visible": false,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -1063,7 +1069,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     gridLine={
       Object {
         "strokeWidth": 1,
-        "visible": true,
+        "visible": undefined,
       }
     }
     hide={false}
@@ -1073,12 +1079,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": 0,
-          "visible": true,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -1092,11 +1099,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         "fit": false,
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": undefined,
       }
     }
     groupId="left"
@@ -1107,12 +1115,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": -90,
-          "visible": false,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -1276,13 +1285,14 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": true,
           "layerType": "data",
           "palette": Object {
             "name": "mock",
             "params": Object {},
             "type": "palette",
           },
-          "seriesType": "bar_horizontal",
+          "seriesType": "bar",
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -1464,7 +1474,7 @@ exports[`XYChart component it renders line 1`] = `
     gridLine={
       Object {
         "strokeWidth": 1,
-        "visible": true,
+        "visible": undefined,
       }
     }
     hide={false}
@@ -1474,12 +1484,13 @@ exports[`XYChart component it renders line 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": 0,
-          "visible": true,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -1493,11 +1504,12 @@ exports[`XYChart component it renders line 1`] = `
         "fit": false,
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": undefined,
       }
     }
     groupId="left"
@@ -1508,12 +1520,13 @@ exports[`XYChart component it renders line 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": -90,
-          "visible": false,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -1865,7 +1878,7 @@ exports[`XYChart component it renders stacked area 1`] = `
     gridLine={
       Object {
         "strokeWidth": 1,
-        "visible": true,
+        "visible": undefined,
       }
     }
     hide={false}
@@ -1875,12 +1888,13 @@ exports[`XYChart component it renders stacked area 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": 0,
-          "visible": true,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -1894,11 +1908,12 @@ exports[`XYChart component it renders stacked area 1`] = `
         "fit": false,
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": undefined,
       }
     }
     groupId="left"
@@ -1909,12 +1924,13 @@ exports[`XYChart component it renders stacked area 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": -90,
-          "visible": false,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -2078,13 +2094,14 @@ exports[`XYChart component it renders stacked area 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isStacked": true,
           "layerType": "data",
           "palette": Object {
             "name": "mock",
             "params": Object {},
             "type": "palette",
           },
-          "seriesType": "area_stacked",
+          "seriesType": "area",
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -2266,7 +2283,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
     gridLine={
       Object {
         "strokeWidth": 1,
-        "visible": true,
+        "visible": undefined,
       }
     }
     hide={false}
@@ -2276,12 +2293,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": 0,
-          "visible": true,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -2295,11 +2313,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
         "fit": false,
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": undefined,
       }
     }
     groupId="left"
@@ -2310,12 +2329,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": -90,
-          "visible": false,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -2479,13 +2499,14 @@ exports[`XYChart component it renders stacked bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isStacked": true,
           "layerType": "data",
           "palette": Object {
             "name": "mock",
             "params": Object {},
             "type": "palette",
           },
-          "seriesType": "bar_stacked",
+          "seriesType": "bar",
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -2667,7 +2688,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     gridLine={
       Object {
         "strokeWidth": 1,
-        "visible": true,
+        "visible": undefined,
       }
     }
     hide={false}
@@ -2677,12 +2698,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": 0,
-          "visible": true,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -2696,11 +2718,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         "fit": false,
         "max": NaN,
         "min": NaN,
+        "padding": undefined,
       }
     }
     gridLine={
       Object {
-        "visible": false,
+        "visible": undefined,
       }
     }
     groupId="left"
@@ -2711,12 +2734,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
       Object {
         "axisTitle": Object {
           "padding": undefined,
-          "visible": true,
+          "visible": undefined,
         },
         "tickLabel": Object {
+          "fill": undefined,
           "padding": undefined,
-          "rotation": -90,
-          "visible": false,
+          "rotation": undefined,
+          "visible": undefined,
         },
       }
     }
@@ -2880,13 +2904,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "isHorizontal": true,
+          "isStacked": true,
           "layerType": "data",
           "palette": Object {
             "name": "mock",
             "params": Object {},
             "type": "palette",
           },
-          "seriesType": "bar_horizontal_stacked",
+          "seriesType": "bar",
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [

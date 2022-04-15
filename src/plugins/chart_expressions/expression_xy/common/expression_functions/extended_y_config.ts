@@ -14,11 +14,10 @@ import {
   FillStyles,
   IconPositions,
   LineStyles,
-  YAxisModes,
 } from '../constants';
 import { ExtendedYConfig, ExtendedYConfigResult } from '../types';
 
-export const extendedYAxisConfigFunction: ExpressionFunctionDefinition<
+export const extendedYConfigFunction: ExpressionFunctionDefinition<
   typeof EXTENDED_Y_CONFIG,
   null,
   ExtendedYConfig,
@@ -37,14 +36,6 @@ export const extendedYAxisConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.yConfig.forAccessor.help', {
         defaultMessage: 'The accessor this configuration is for',
       }),
-    },
-    axisMode: {
-      types: ['string'],
-      options: [...Object.values(YAxisModes)],
-      help: i18n.translate('expressionXY.yConfig.axisMode.help', {
-        defaultMessage: 'The axis mode of the metric',
-      }),
-      strict: true,
     },
     color: {
       types: ['string'],
@@ -95,6 +86,12 @@ export const extendedYAxisConfigFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Fill',
       }),
       strict: true,
+    },
+    axisId: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.yConfig.axisId.help', {
+        defaultMessage: 'An optional id of axis',
+      }),
     },
   },
   fn(input, args) {

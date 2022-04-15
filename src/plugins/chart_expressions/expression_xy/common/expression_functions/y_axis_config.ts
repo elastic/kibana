@@ -8,39 +8,131 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
-import { Y_CONFIG } from '../constants';
-import { YConfig, YConfigResult } from '../types';
+import { YAxisConfig, YAxisConfigResult } from '../types';
+import { Y_AXIS_CONFIG, AxisModes, AXIS_EXTENT_CONFIG, YScaleTypes } from '../constants';
 
 export const yAxisConfigFunction: ExpressionFunctionDefinition<
-  typeof Y_CONFIG,
+  typeof Y_AXIS_CONFIG,
   null,
-  YConfig,
-  YConfigResult
+  YAxisConfig,
+  YAxisConfigResult
 > = {
-  name: Y_CONFIG,
+  name: Y_AXIS_CONFIG,
   aliases: [],
-  type: Y_CONFIG,
-  help: i18n.translate('expressionXY.yConfig.help', {
-    defaultMessage: `Configure the behavior of a xy chart's y axis metric`,
+  type: Y_AXIS_CONFIG,
+  help: i18n.translate('expressionXY.axisConfig.help', {
+    defaultMessage: `Configure the xy chart's axis config`,
   }),
   inputTypes: ['null'],
   args: {
-    forAccessor: {
+    title: {
       types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.forAccessor.help', {
-        defaultMessage: 'The accessor this configuration is for',
+      help: i18n.translate('expressionXY.axisConfig.title.help', {
+        defaultMessage: 'Title of axis',
       }),
     },
-    color: {
+    id: {
       types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.color.help', {
-        defaultMessage: 'The color of the series',
+      help: i18n.translate('expressionXY.axisConfig.id.help', {
+        defaultMessage: 'Id of axis',
       }),
+    },
+    position: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.axisConfig.position.help', {
+        defaultMessage: 'Position of the axis',
+      }),
+      default: 'left',
+    },
+    hide: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.boolean.help', {
+        defaultMessage: 'Hide the specified axis',
+      }),
+    },
+    mode: {
+      types: ['string'],
+      options: [...Object.values(AxisModes)],
+      help: i18n.translate('expressionXY.axisConfig.mode.help', {
+        defaultMessage: 'Scale mode. Can be normal, percentage, wiggle or silhouette',
+      }),
+    },
+    boundsMargin: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.axisConfig.boundsMargin.help', {
+        defaultMessage: 'Margin of bounds',
+      }),
+    },
+    labelColor: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.axisConfig.labelColor.help', {
+        defaultMessage: 'Color of the axis labels',
+      }),
+    },
+    showOverlappingLabels: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showOverlappingLabels.help', {
+        defaultMessage: 'Show overlapping labels',
+      }),
+    },
+    showDuplicates: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showDuplicates.help', {
+        defaultMessage: 'Show duplicated ticks',
+      }),
+    },
+    showGridLines: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showGridLines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines of the axis are visible.',
+      }),
+      default: false,
+    },
+    labelsOrientation: {
+      types: ['number'],
+      options: [0, -90, -45],
+      help: i18n.translate('expressionXY.axisConfig.labelsOrientation.help', {
+        defaultMessage: 'Specifies the labels orientation of the axis.',
+      }),
+    },
+    showLabels: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showLabels.help', {
+        defaultMessage: 'Show labels',
+      }),
+      default: true,
+    },
+    showTitle: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisConfig.showTitle.help', {
+        defaultMessage: 'Show title of the axis',
+      }),
+      default: true,
+    },
+    truncate: {
+      types: ['number'],
+      help: i18n.translate('expressionXY.axisConfig.truncate.help', {
+        defaultMessage: 'The number of symbols before truncating',
+      }),
+    },
+    extent: {
+      types: [AXIS_EXTENT_CONFIG],
+      help: i18n.translate('expressionXY.yAxisConfig.extent.help', {
+        defaultMessage: 'Axis extents',
+      }),
+      default: `{${AXIS_EXTENT_CONFIG}}`,
+    },
+    scaleType: {
+      options: [...Object.values(YScaleTypes)],
+      help: i18n.translate('expressionXY.yAxisConfig.scaleType.help', {
+        defaultMessage: 'The scale type of the axis',
+      }),
+      default: YScaleTypes.LINEAR,
     },
   },
   fn(input, args) {
     return {
-      type: Y_CONFIG,
+      type: Y_AXIS_CONFIG,
       ...args,
     };
   },

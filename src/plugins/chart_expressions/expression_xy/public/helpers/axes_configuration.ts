@@ -9,8 +9,8 @@
 import { Position } from '@elastic/charts';
 import { FormatFactory } from '../types';
 import {
-  AxisConfig,
-  AxisExtentConfig,
+  YAxisConfig,
+  ExtendedYConfigResult,
   CommonXYDataLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
   ExtendedYConfig,
@@ -37,7 +37,7 @@ interface AxesSeries {
   [key: string]: FormattedMetric[];
 }
 
-export interface AxisConfiguration extends Omit<AxisConfig, 'id'> {
+export interface AxisConfiguration extends Omit<YAxisConfig, 'id'> {
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
@@ -55,7 +55,7 @@ export function isFormatterCompatible(
 
 export function groupAxesByType(
   layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
-  axes?: AxisConfig[]
+  axes?: YAxisConfig[]
 ) {
   const series: AxesSeries = {
     auto: [],
@@ -69,7 +69,7 @@ export function groupAxesByType(
       const yConfig: Array<ExtendedYConfig | YConfig> | undefined = layer.yConfig;
       const yConfigByAccessor = yConfig?.find((config) => config.forAccessor === accessor);
       const axisConfigById = axes?.find(
-        (axis) => yConfigByAccessor?.axisId && axis.id === yConfigByAccessor?.axisId
+        (axis) => yConfigByAccessor?.axisId && axis.id && axis.id === yConfigByAccessor?.axisId
       );
       const key = axisConfigById?.id || 'auto';
       let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
@@ -159,70 +159,67 @@ export function getAxisPosition(position: Position, shouldRotate: boolean) {
   return position;
 }
 
+function axisGlobalConfig(position: Position, axes?: YAxisConfig[]) {
+  return axes?.find((axis) => !axis.id && axis.position === position) || {};
+}
+
 export function getAxesConfiguration(
   layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
   shouldRotate: boolean,
-  axes?: AxisConfig[],
+  axes?: YAxisConfig[],
   formatFactory?: FormatFactory
 ): GroupsConfiguration {
   const series = groupAxesByType(layers, axes);
 
   const axisGroups: GroupsConfiguration = [];
+  let position: Position;
 
   axes?.forEach((axis) => {
-    if (series[axis.id] && series[axis.id].length > 0) {
+    if (axis.id && series[axis.id] && series[axis.id].length > 0) {
+      position = getAxisPosition(axis.position || Position.Left, shouldRotate);
       axisGroups.push({
         groupId: `axis-${axis.id}`,
-        position: getAxisPosition(axis.position || Position.Left, shouldRotate),
+        position,
         formatter: formatFactory?.(series[axis.id][0].fieldFormat),
         series: series[axis.id].map(({ fieldFormat, ...currentSeries }) => currentSeries),
+        ...axisGlobalConfig(position, axes),
         ...axis,
       });
     }
   });
 
   if (series.left.length > 0) {
+    position = shouldRotate ? 'bottom' : 'left';
     axisGroups.push({
       groupId: 'left',
-      position: shouldRotate ? 'bottom' : 'left',
+      position,
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      ...axisGlobalConfig(position, axes),
     });
   }
 
   if (series.right.length > 0) {
+    position = shouldRotate ? 'top' : 'right';
     axisGroups.push({
       groupId: 'right',
-      position: shouldRotate ? 'top' : 'right',
+      position,
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      ...axisGlobalConfig(position, axes),
     });
   }
 
   return axisGroups;
 }
-<<<<<<< HEAD
 
-export const getAxisConfig = (axesGroup?: GroupsConfiguration, yConfig?: YConfigResult) => {
+export const getAxisGroupConfig = (
+  axesGroup?: GroupsConfiguration,
+  yConfig?: ExtendedYConfigResult
+) => {
   return axesGroup?.find(
     (axis) =>
       (yConfig?.axisId && yConfig.axisId === axis.groupId) ||
       axis.series.some(({ accessor }) => accessor === yConfig?.forAccessor)
   );
 };
-
-export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  const inclusiveZeroError =
-    extent &&
-    hasBarOrArea &&
-    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
-      (extent.upperBound !== undefined && extent.upperBound) < 0);
-  const boundaryError =
-    extent &&
-    extent.lowerBound !== undefined &&
-    extent.upperBound !== undefined &&
-    extent.upperBound <= extent.lowerBound;
-  return { inclusiveZeroError, boundaryError };
-}
-=======
->>>>>>> Kunzetsov/chart_expressions-xy-extended_layers

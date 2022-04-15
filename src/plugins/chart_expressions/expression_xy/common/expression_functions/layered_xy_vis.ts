@@ -14,13 +14,9 @@ import {
   LEGEND_CONFIG,
   ValueLabelModes,
   FittingFunctions,
-  GRID_LINES_CONFIG,
   XY_VIS_RENDERER,
-  AXIS_CONFIG,
-  AXIS_EXTENT_CONFIG,
-  TICK_LABELS_CONFIG,
-  LABELS_ORIENTATION_CONFIG,
-  AXIS_TITLES_VISIBILITY_CONFIG,
+  X_AXIS_CONFIG,
+  Y_AXIS_CONFIG,
   EXTENDED_DATA_LAYER,
   EXTENDED_REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
@@ -42,36 +38,6 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     defaultMessage: 'An X/Y chart',
   }),
   args: {
-    xTitle: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.layeredXyVis.xTitle.help', {
-        defaultMessage: 'X axis title',
-      }),
-    },
-    yTitle: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.layeredXyVis.yLeftTitle.help', {
-        defaultMessage: 'Y left axis title',
-      }),
-    },
-    yRightTitle: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.layeredXyVis.yRightTitle.help', {
-        defaultMessage: 'Y right axis title',
-      }),
-    },
-    yLeftExtent: {
-      types: [AXIS_EXTENT_CONFIG],
-      help: i18n.translate('expressionXY.layeredXyVis.yLeftExtent.help', {
-        defaultMessage: 'Y left axis extents',
-      }),
-    },
-    yRightExtent: {
-      types: [AXIS_EXTENT_CONFIG],
-      help: i18n.translate('expressionXY.layeredXyVis.yRightExtent.help', {
-        defaultMessage: 'Y right axis extents',
-      }),
-    },
     legend: {
       types: [LEGEND_CONFIG],
       help: i18n.translate('expressionXY.layeredXyVis.legend.help', {
@@ -105,30 +71,6 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Value labels mode',
       }),
       strict: true,
-    },
-    tickLabelsVisibilitySettings: {
-      types: [TICK_LABELS_CONFIG],
-      help: i18n.translate('expressionXY.layeredXyVis.tickLabelsVisibilitySettings.help', {
-        defaultMessage: 'Show x and y axes tick labels',
-      }),
-    },
-    labelsOrientation: {
-      types: [LABELS_ORIENTATION_CONFIG],
-      help: i18n.translate('expressionXY.layeredXyVis.labelsOrientation.help', {
-        defaultMessage: 'Defines the rotation of the axis labels',
-      }),
-    },
-    gridlinesVisibilitySettings: {
-      types: [GRID_LINES_CONFIG],
-      help: i18n.translate('expressionXY.layeredXyVis.gridlinesVisibilitySettings.help', {
-        defaultMessage: 'Show x and y axes gridlines',
-      }),
-    },
-    axisTitlesVisibilitySettings: {
-      types: [AXIS_TITLES_VISIBILITY_CONFIG],
-      help: i18n.translate('expressionXY.layeredXyVis.axisTitlesVisibilitySettings.help', {
-        defaultMessage: 'Show x and y axes titles',
-      }),
     },
     layers: {
       types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER, EXTENDED_ANNOTATION_LAYER],
@@ -173,11 +115,17 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       required: false,
     },
     axes: {
-      types: [AXIS_CONFIG],
+      types: [Y_AXIS_CONFIG],
       help: i18n.translate('expressionXY.layeredXyVis.axes.help', {
         defaultMessage: 'Specifies the configs for axes',
       }),
       multi: true,
+    },
+    xAxisConfig: {
+      types: [X_AXIS_CONFIG],
+      help: i18n.translate('expressionXY.xyVis.xAxisConfig.help', {
+        defaultMessage: 'Specifies the configs for x-axis',
+      }),
     },
   },
   fn(data, args, handlers) {
