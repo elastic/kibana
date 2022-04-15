@@ -18,12 +18,17 @@ import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
-import { AnalyticsIdSelector, AnalyticsSelectorIds } from '../components/analytics_selector';
+import {
+  AnalyticsIdSelector,
+  AnalyticsSelectorIds,
+  AnalyticsIdSelectorControls,
+} from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const [isLoading, setIsLoading] = useState(false);
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(true);
   const [jobsExist, setJobsExist] = useState(true);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const mapJobId = globalState?.ml?.jobId;
@@ -71,7 +76,13 @@ export const Page: FC = () => {
     }
     return (
       <>
-        <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} />
+        <AnalyticsIdSelectorControls setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible} />
+        {isIdSelectorFlyoutVisible ? (
+          <AnalyticsIdSelector
+            setAnalyticsId={setAnalyticsId}
+            setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+          />
+        ) : null}
         <EuiEmptyPrompt
           iconType="alert"
           title={
