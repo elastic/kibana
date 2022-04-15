@@ -27,7 +27,7 @@ export function generatePngObservable(
   options: Omit<PngScreenshotOptions, 'format'>
 ): Rx.Observable<PngResult> {
   const apmTrans = apm.startTransaction('generate-png', REPORTING_TRANSACTION_TYPE);
-  if (!options.layout.dimensions) {
+  if (!options.layout?.dimensions) {
     throw new Error(`LayoutParams.Dimensions is undefined.`);
   }
 

@@ -20732,7 +20732,6 @@
     "xpack.securitySolution.detectionEngine.queryPreview.queryPreviewGraphTitle": "{hits} {hits, plural, =1 {résultat} other {résultats}}",
     "xpack.securitySolution.detectionEngine.queryPreview.queryPreviewHelpText": "Sélectionner une période de temps pour les données afin d'afficher l'aperçu des résultats de requête",
     "xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel": "Aperçu de la recherche rapide",
-    "xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSubtitleLoading": "... en cours de chargement",
     "xpack.securitySolution.detectionEngine.queryPreview.queryThresholdGraphCountLabel": "Compte de seuil cumulé",
     "xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription": "Une entrée est incorrecte dans {countError, plural, one {cet onglet} other {ces onglets}} : {tabHasError}",
     "xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription": "Démarré",
