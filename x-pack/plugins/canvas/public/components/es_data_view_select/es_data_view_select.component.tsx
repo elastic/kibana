@@ -7,7 +7,6 @@
 
 import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { DataViewListItem } from 'src/plugins/data_views/common';
 
 export interface ESDataViewSelectProps {
   loading: boolean;
