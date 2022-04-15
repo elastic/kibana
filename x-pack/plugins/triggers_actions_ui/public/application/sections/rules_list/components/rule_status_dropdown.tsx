@@ -46,6 +46,7 @@ export interface ComponentOpts {
   snoozeRule: (snoozeEndTime: string | -1, interval: string | null) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
   isEditable: boolean;
+  previousSnoozeInterval?: string | null;
   direction?: 'column' | 'row';
 }
 
@@ -56,12 +57,18 @@ const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
   [1, 'd'],
 ];
 
-const PREV_SNOOZE_INTERVAL_KEY = 'previousSnoozeInterval';
-const usePreviousSnoozeInterval: () => [string | null, (n: string) => void] = () => {
-  const interval = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
+const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';
+const usePreviousSnoozeInterval: (p?: string | null) => [string | null, (n: string) => void] = (
+  propsInterval
+) => {
+  const intervalFromStorage = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
+  const usePropsInterval = typeof propsInterval !== 'undefined';
+  const interval = usePropsInterval ? propsInterval : intervalFromStorage;
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(interval);
   const storeAndSetPreviousSnoozeInterval = (newInterval: string) => {
-    localStorage.setItem(PREV_SNOOZE_INTERVAL_KEY, newInterval);
+    if (!usePropsInterval) {
+      localStorage.setItem(PREV_SNOOZE_INTERVAL_KEY, newInterval);
+    }
     setPreviousSnoozeInterval(newInterval);
   };
   return [previousSnoozeInterval, storeAndSetPreviousSnoozeInterval];
@@ -75,11 +82,14 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   snoozeRule,
   unsnoozeRule,
   isEditable,
+  previousSnoozeInterval: propsPreviousSnoozeInterval,
   direction = 'column',
 }: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(isRuleSnoozed(rule));
-  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval();
+  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval(
+    propsPreviousSnoozeInterval
+  );
 
   useEffect(() => {
     setIsEnabled(rule.enabled);
