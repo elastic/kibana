@@ -768,7 +768,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                     <EuiIconTip
                       color="subdued"
                       content={i18n.translate('xpack.lens.indexPattern.terms.accuracyModeHelp', {
-                        defaultMessage: `Can improve accuracy for high cardinality datasets by using more resources in your Elasticsearch cluster.`,
+                        defaultMessage: `Improves results for high-cardinality data, but increases the load on the Elasticsearch cluster.`,
                       })}
                       iconProps={{
                         className: 'eui-alignTop',

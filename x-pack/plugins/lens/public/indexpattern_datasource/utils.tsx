@@ -100,13 +100,13 @@ const accuracyModeDisabledWarning = (
   <>
     <FormattedMessage
       id="xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled"
-      defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. If you need this field to be more exact, try enabling accuracy mode (this may impact performance). To learn more about this limit, {link}."
+      defaultMessage="Top 5 values for {name} might be an approximation. You can enable accuracy mode for more precise results, but note that it increases the load on the Elasticsearch cluster. {learnMoreLink}"
       values={{
         name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
-        link: (
+        learnMoreLink: (
           <EuiLink href={docLink} color="text" target="_blank" external={true}>
             <FormattedMessage
-              defaultMessage="visit the documentation"
+              defaultMessage="Learn more."
               id="xpack.lens.indexPattern.precisionErrorWarning.link"
             />
           </EuiLink>
@@ -125,14 +125,15 @@ const accuracyModeDisabledWarning = (
 const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
   <FormattedMessage
     id="xpack.lens.indexPattern.precisionErrorWarning.accuracyEnabled"
-    defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try increasing the number of {topValues} or use {filters} instead of {topValues} for precise results. To learn more about this limit, {link}."
+    // defaultMessage="{name} for this visualization may be approximate due to how the data is indexed. Try increasing the number of {topValues} or use {filters} instead of {topValues} for precise results. To learn more about this limit, {link}."
+    defaultMessage="Top 5 values for {name} might be an approximation. For more precise results, try increasing the number of {topValues} or using {filters} instead. {learnMoreLink}"
     values={{
       name: <EuiTextColor color="accent">{columnName}</EuiTextColor>,
       topValues: (
         <EuiTextColor color="subdued">
           <FormattedMessage
             id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
-            defaultMessage="Top values"
+            defaultMessage="top values"
           />
         </EuiTextColor>
       ),
@@ -140,14 +141,14 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
         <EuiTextColor color="subdued">
           <FormattedMessage
             id="xpack.lens.indexPattern.precisionErrorWarning.filters"
-            defaultMessage="Filters"
+            defaultMessage="filters"
           />
         </EuiTextColor>
       ),
-      link: (
+      learnMoreLink: (
         <EuiLink href={docLink} color="text" target="_blank" external={true}>
           <FormattedMessage
-            defaultMessage="visit the documentation"
+            defaultMessage="Learn more."
             id="xpack.lens.indexPattern.precisionErrorWarning.link"
           />
         </EuiLink>
