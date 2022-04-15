@@ -436,10 +436,12 @@
 /x-pack/plugins/security_solution/cypress/integration/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/integration/overview @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/integration/pagination @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/integration/users @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/screens/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/screens/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/tasks/hosts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/cypress/tasks/network @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/cypress/upgrade_integration/threat_hunting/cases @elastic/security-threat-hunting-explore
 
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
@@ -484,6 +486,7 @@
 
 
 ## Security Solution sub teams - Detections and Response Rules
+/x-pack/plugins/security_solution/cypress/integration/detection_rules @elastic/security-detections-response-rules
 
 /x-pack/plugins/security_solution/public/detections/components/rules @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/components/severity @elastic/security-detections-response-rules
@@ -524,6 +527,16 @@
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-threat-intelligence
 
 ## Security Solution cross teams ownership
+/x-pack/plugins/security_solution/cypress/downloads @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/cypress/helpers @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/cypress/objects @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/cypress/plugins @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/cypress/support @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-solution-platform
+
+/x-pack/plugins/security_solution/screens/common @elastic/security-detections-response @elastic/security-threat-hunting
+
 /x-pack/plugins/security_solution/common/ecs @elastic/security-detections-response-rules @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/common/test @elastic/security-detections-response-rules @elastic/security-detections-response-alerts
 
