@@ -11,6 +11,7 @@ import { buildExpression, buildExpressionFunction } from '../../../expressions/p
 import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './utils/palette';
 import type { HeatmapVisParams } from './types';
 import { getEsaggsFn } from './to_ast_esaggs';
+import { DEFAULT_LEGEND_SIZE } from '../../../visualizations/public';
 
 const DEFAULT_PERCENT_DECIMALS = 2;
 
@@ -20,7 +21,7 @@ const prepareLegend = (params: HeatmapVisParams) => {
     position: params.legendPosition,
     shouldTruncate: params.truncateLegend ?? true,
     maxLines: params.maxLegendLines ?? 1,
-    legendSize: params.legendSize,
+    legendSize: params.legendSize ?? DEFAULT_LEGEND_SIZE,
   });
 
   return buildExpression([legend]);

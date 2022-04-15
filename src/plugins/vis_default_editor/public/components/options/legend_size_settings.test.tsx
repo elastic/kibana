@@ -7,7 +7,8 @@
  */
 
 import React from 'react';
-import { DEFAULT_LEGEND_SIZE, LegendSizes, LegendSizeSettings } from './legend_size_settings';
+import { LegendSizeSettings } from './legend_size_settings';
+import { LegendSizes, DEFAULT_LEGEND_SIZE } from '../../../../visualizations/public';
 import { EuiSuperSelect } from '@elastic/eui';
 import { shallow } from 'enzyme';
 

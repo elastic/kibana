@@ -8,7 +8,6 @@
 import { cloneDeep, mapValues } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { SerializableRecord } from '@kbn/utility-types';
-import { LegendConfig as XYLegendConfig } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunction,

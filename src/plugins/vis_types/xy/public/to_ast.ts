@@ -13,6 +13,7 @@ import {
   getVisSchemas,
   DateHistogramParams,
   HistogramParams,
+  DEFAULT_LEGEND_SIZE,
 } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 import { BUCKET_TYPES } from '../../../data/public';
@@ -210,7 +211,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     addTimeMarker: vis.params.addTimeMarker,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
-    legendSize: vis.params.legendSize,
+    legendSize: vis.params.legendSize ?? DEFAULT_LEGEND_SIZE,
     addLegend: vis.params.addLegend,
     addTooltip: vis.params.addTooltip,
     legendPosition: vis.params.legendPosition,

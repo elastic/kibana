@@ -26,3 +26,13 @@ export const VisualizeConstants = {
   EDIT_BY_VALUE_PATH: '/edit_by_value',
   APP_ID: 'visualize',
 };
+
+export const LegendSizes = {
+  AUTO: 0,
+  SMALL: 80,
+  MEDIUM: 130,
+  LARGE: 180,
+  EXTRA_LARGE: 230,
+} as const;
+
+export const DEFAULT_LEGEND_SIZE = LegendSizes.MEDIUM;

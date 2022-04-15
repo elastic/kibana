@@ -84,6 +84,7 @@ export interface PieVisConfig extends VisCommonConfig {
   respectSourceOrder?: boolean;
   startFromSecondLargestSlice?: boolean;
   distinctColors?: boolean;
+  legendSize: number;
   nestedLegend: boolean;
 }
 

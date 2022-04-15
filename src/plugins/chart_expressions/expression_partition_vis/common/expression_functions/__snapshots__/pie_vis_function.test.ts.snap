@@ -112,7 +112,7 @@ Object {
       },
       "legendDisplay": "show",
       "legendPosition": "right",
-      "legendSize": undefined,
+      "legendSize": 80,
       "maxLegendLines": 2,
       "metric": Object {
         "accessor": 0,
@@ -246,7 +246,7 @@ Object {
       },
       "legendDisplay": "show",
       "legendPosition": "right",
-      "legendSize": undefined,
+      "legendSize": 80,
       "maxLegendLines": 2,
       "metric": Object {
         "accessor": 0,
