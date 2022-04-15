@@ -13,8 +13,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const esNode = config.get('esTestCluster.ccs')
-    ? getService('esArchiver')
-    : getService('remoteEsArchiver' as 'esArchiver');
+    ? getService('remoteEsArchiver' as 'esArchiver')
+    : getService('esArchiver');
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
