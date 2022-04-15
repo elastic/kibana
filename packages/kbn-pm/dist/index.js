@@ -56648,6 +56648,8 @@ async function setupRemoteCache(repoRootPath) {
 
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] setting up remote cache settings if necessary`);
   const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade the servers used on .bazelrc.cache
+  //
+  // NOTE: this can be removed in the future once everyone is migrated into the new servers
 
   if (await migrateToNewServersIfNeeded(settingsPath)) {
     return;

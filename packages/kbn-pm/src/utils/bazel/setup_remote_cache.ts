@@ -65,6 +65,8 @@ export async function setupRemoteCache(repoRootPath: string) {
   const settingsPath = resolve(repoRootPath, '.bazelrc.cache');
 
   // Checks if we should upgrade the servers used on .bazelrc.cache
+  //
+  // NOTE: this can be removed in the future once everyone is migrated into the new servers
   if (await migrateToNewServersIfNeeded(settingsPath)) {
     return;
   }
