@@ -16,7 +16,7 @@ import type { FullAgentPolicy } from '../../../../common/types/models/agent_poli
 
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
-import { StandaloneInstructions } from '../../enrollment_instructions/standalone';
+import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
 import {
   useGetOneEnrollmentAPIKey,
@@ -162,7 +162,6 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       InstallStandaloneAgentStep({
         installCommand: standaloneInstallCommands,
         isK8s,
-        selectedPolicyId: selectedPolicy?.id,
       })
     );
 
@@ -204,6 +203,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   installedPackagePolicy,
   isFleetServerPolicySelected,
 }) => {
+  const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;
@@ -218,6 +218,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
+  const installManagedCommands = ManualInstructions(enrollToken, fleetServerHosts, kibanaVersion);
 
   const instructionsSteps = useMemo(() => {
     const steps: EuiContainedStepProps[] = !agentPolicy
@@ -251,9 +252,9 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
     steps.push(
       InstallManagedAgentStep({
+        installCommand: installManagedCommands,
         apiKeyData,
         selectedApiKeyId,
-        fleetServerHosts,
         isK8s,
       })
     );
@@ -289,8 +290,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     refreshAgentPolicies,
     selectionType,
     isK8s,
+    installManagedCommands,
     apiKeyData,
-    fleetServerHosts,
     enrolledAgentIds,
     mode,
     setMode,
