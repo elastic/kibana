@@ -2842,7 +2842,7 @@ describe('Task Runner', () => {
     };
 
     const warning = {
-      reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
       message: translations.taskRunner.warning.maxExecutableActions,
     };
 
@@ -2852,9 +2852,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string

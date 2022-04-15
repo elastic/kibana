@@ -43,7 +43,6 @@ import {
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
-import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
