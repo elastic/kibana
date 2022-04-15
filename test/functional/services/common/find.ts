@@ -226,19 +226,25 @@ export class FindService extends FtrService {
       | Promise<WebElementWrapper>,
     timeout: number = this.WAIT_FOR_EXISTS_TIME
   ): Promise<boolean> {
-    await this._withTimeout(timeout);
-    try {
-      const found = await findFunction(this.driver);
-      await this._withTimeout(this.defaultFindTimeout);
-      if (Array.isArray(found)) {
-        return found.length > 0;
-      } else {
-        return found instanceof WebElementWrapper;
+    const TRIES = 10;
+    const tryTimeout = Math.max(1, timeout / TRIES);
+
+    for (let i = 0; i < TRIES; i++) {
+      try {
+        await this._withTimeout(Math.min(tryTimeout, this.WAIT_FOR_EXISTS_TIME));
+        const found = await findFunction(this.driver);
+        await this._withTimeout(this.defaultFindTimeout);
+        if (Array.isArray(found)) {
+          return found.length > 0;
+        } else {
+          return found instanceof WebElementWrapper;
+        }
+      } catch (err) {
+        await this._withTimeout(this.defaultFindTimeout);
       }
-    } catch (err) {
-      await this._withTimeout(this.defaultFindTimeout);
-      return false;
     }
+
+    return false;
   }
 
   public async existsByLinkText(
@@ -257,22 +263,28 @@ export class FindService extends FtrService {
     timeout: number = this.WAIT_FOR_EXISTS_TIME
   ): Promise<boolean> {
     this.log.debug(`Find.existsByDisplayedByCssSelector('${selector}') with timeout=${timeout}`);
-    try {
-      await this.retry.tryForTime(timeout, async () => {
-        // make sure that the find timeout is not longer than the retry timeout
-        await this._withTimeout(Math.min(timeout, this.WAIT_FOR_EXISTS_TIME));
-        const elements = await this.driver.findElements(By.css(selector));
+    const TRIES = 10;
+    const tryTimeout = timeout / TRIES;
+    for (let i = 0; i < TRIES; i++) {
+      try {
+        await this.retry.tryForTime(tryTimeout, async () => {
+          // make sure that the find timeout is not longer than the retry timeout
+          await this._withTimeout(Math.min(tryTimeout, this.WAIT_FOR_EXISTS_TIME));
+          const elements = await this.driver.findElements(By.css(selector));
+          await this._withTimeout(this.defaultFindTimeout);
+          const displayed = await this.filterElementIsDisplayed(this.wrapAll(elements));
+          if (displayed.length === 0) {
+            throw new Error(`${selector} is not displayed`);
+          }
+        });
+      } catch (err) {
         await this._withTimeout(this.defaultFindTimeout);
-        const displayed = await this.filterElementIsDisplayed(this.wrapAll(elements));
-        if (displayed.length === 0) {
-          throw new Error(`${selector} is not displayed`);
-        }
-      });
-    } catch (err) {
-      await this._withTimeout(this.defaultFindTimeout);
-      return false;
+        continue;
+      }
+      return true;
     }
-    return true;
+
+    return false;
   }
 
   public async existsByCssSelector(
