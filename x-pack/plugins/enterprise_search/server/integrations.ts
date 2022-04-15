@@ -163,6 +163,21 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['productivity'],
   },
   {
+    id: 'network_drive',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveName', {
+      defaultMessage: 'Network Drive',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveDescription',
+      {
+        defaultMessage:
+          'Search over your files and folders stored on network drives with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'file_storage'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive',
+  },
+  {
     id: 'onedrive',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.onedriveName', {
       defaultMessage: 'OneDrive',
