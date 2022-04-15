@@ -46,7 +46,7 @@ export interface PdfScreenshotOptions extends CaptureOptions {
   /**
    * We default to the "print" layout if no ID is specified for the layout
    */
-  layout: PdfLayoutParams;
+  layout?: PdfLayoutParams;
 }
 
 export interface PdfScreenshotMetrics extends Partial<CaptureMetrics> {
