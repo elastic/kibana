@@ -16,9 +16,11 @@ import {
   EuiEmptyPrompt,
   EuiHealth,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n-react';
 
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -26,22 +28,26 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
 import { SEVERITY_COLOR } from '../util';
-import { AlertSeverityCounts, useHostAlertsItems } from './host_alerts_items';
+import { AlertSeverityCounts, useHostAlertsItems } from './use_host_alerts_items';
 
 type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;
   navigateTo: NavigateTo;
 }) => Array<EuiBasicTableColumn<AlertSeverityCounts>>;
 
+interface HostAlertsTableProps {
+  signalIndexName: string | null;
+}
+
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
-export const HostAlertsTable = React.memo(() => {
+export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID
   );
 
-  const { data, isLoading } = useHostAlertsItems({
+  const { data, isLoading, updatedAt } = useHostAlertsItems({
     skip: !toggleStatus,
     queryId: DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID,
   });
@@ -51,13 +57,26 @@ export const HostAlertsTable = React.memo(() => {
     [getAppUrl, navigateTo]
   );
 
+  const subtitle = useMemo(
+    () =>
+      !isLoading ? (
+        <>
+          {'Updated '}
+          <FormattedRelative value={updatedAt} format="Updated {updatedAt}" />
+        </>
+      ) : (
+        <EuiLoadingSpinner size="m" />
+      ),
+    [isLoading, updatedAt]
+  );
+
   return (
     <EuiPanel hasBorder data-test-subj="hostSeverityAlertsPanel">
       <HeaderSection
         id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
         title={i18n.HOST_ALERTS_SECTION_TITLE}
         titleSize="s"
-        hideSubtitle
+        subtitle={subtitle}
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
       />

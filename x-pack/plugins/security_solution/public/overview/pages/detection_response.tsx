@@ -86,10 +86,10 @@ const DetectionResponseComponent = () => {
                   <EuiFlexItem>
                     <EuiFlexGroup>
                       <EuiFlexItem>
-                        <HostAlertsTable />
+                        <HostAlertsTable signalIndexName={signalIndexName} />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <UserAlertsTable />
+                        <UserAlertsTable signalIndexName={signalIndexName} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

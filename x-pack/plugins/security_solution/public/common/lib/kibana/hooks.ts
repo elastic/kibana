@@ -165,13 +165,6 @@ export const useGetUserCasesPermissions = () => {
   return casesPermissions;
 };
 
-export type GetAppUrl = (param: {
-  appId?: string;
-  deepLinkId?: string;
-  path?: string;
-  absolute?: boolean;
-}) => string;
-
 /**
  * Returns a full URL to the provided page path by using
  * kibana's `getUrlForApp()`

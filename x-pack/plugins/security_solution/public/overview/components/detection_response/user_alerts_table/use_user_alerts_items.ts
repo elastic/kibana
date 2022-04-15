@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { GenericBuckets } from '../../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const USERS_BY_SEVERITY_AGG = 'usersBySeverity';
 
@@ -23,9 +22,13 @@ interface TimeRange {
 interface UseUserAlertsItemsProps {
   skip: boolean;
   queryId: string;
+  signalIndexName: string | null;
 }
 
-export interface AlertSeverityCounts {
+/**
+ * Formatted table data of vulnerable users
+ */
+export interface UserAlertsItem {
   userName: string;
   totalAlerts: number;
   low: number;
@@ -34,58 +37,42 @@ export interface AlertSeverityCounts {
   critical: number;
 }
 
-interface SeverityContainer {
-  doc_count: number;
-}
-interface AlertBySeverityBucketData extends GenericBuckets {
-  low: SeverityContainer;
-  medium: SeverityContainer;
-  high: SeverityContainer;
-  critical: SeverityContainer;
-}
-
-interface AlertCountersBySeverityAggregation {
-  [USERS_BY_SEVERITY_AGG]: {
-    buckets: AlertBySeverityBucketData[];
-  };
-}
-
-interface UseVulnerableUsersCountersReturnType {
+export type UseUserAlertsItems = (props: UseUserAlertsItemsProps) => {
+  items: UserAlertsItem[];
   isLoading: boolean;
-  data: AlertSeverityCounts[];
-}
+  updatedAt: number;
+};
 
-export const useUserAlertsItems = ({
-  skip,
-  queryId,
-}: UseUserAlertsItemsProps): UseVulnerableUsersCountersReturnType => {
-  const { to, from, setQuery: globalSetQuery, deleteQuery } = useGlobalTime();
-  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+export const useUserAlertsItems: UseUserAlertsItems = ({ skip, queryId, signalIndexName }) => {
+  const [updatedAt, setUpdatedAt] = useState(Date.now());
+  const [items, setItems] = useState<UserAlertsItem[]>([]);
+
+  const { to, from, setQuery: setGlobalQuery, deleteQuery } = useGlobalTime();
 
   const {
     setQuery,
     data,
-    loading: isLoadingData,
-    refetch: refetchQuery,
+    loading,
     request,
     response,
+    refetch: refetchQuery,
   } = useQueryAlerts<{}, AlertCountersBySeverityAggregation>({
     query: buildVulnerableUserAggregationQuery({ from, to }),
     indexName: signalIndexName,
     skip,
   });
 
-  const isLoading = isLoadingData && isSignalIndexLoading;
-
   useEffect(() => {
     setQuery(buildVulnerableUserAggregationQuery({ from, to }));
   }, [setQuery, from, to]);
 
-  const transformedResponse: AlertSeverityCounts[] = useMemo(() => {
-    if (data && !!data.aggregations) {
-      return pickOffCounters(data.aggregations);
+  useEffect(() => {
+    if (data == null || !data.aggregations) {
+      setItems([]);
+    } else {
+      setItems(getUserAlertItemsFromAgg(data.aggregations));
     }
-    return [];
+    setUpdatedAt(Date.now());
   }, [data]);
 
   const refetch = useCallback(() => {
@@ -101,11 +88,11 @@ export const useUserAlertsItems = ({
       response: [response],
     },
     refetch,
-    setQuery: globalSetQuery,
+    setQuery: setGlobalQuery,
     queryId,
-    loading: isLoading,
+    loading,
   });
-  return { isLoading, data: transformedResponse };
+  return { items, isLoading: loading, updatedAt };
 };
 
 export const buildVulnerableUserAggregationQuery = ({ from, to }: TimeRange) => ({
@@ -183,12 +170,28 @@ export const buildVulnerableUserAggregationQuery = ({ from, to }: TimeRange) => 
   },
 });
 
-function pickOffCounters(
+interface SeverityContainer {
+  doc_count: number;
+}
+interface AlertBySeverityBucketData extends GenericBuckets {
+  low: SeverityContainer;
+  medium: SeverityContainer;
+  high: SeverityContainer;
+  critical: SeverityContainer;
+}
+
+interface AlertCountersBySeverityAggregation {
+  [USERS_BY_SEVERITY_AGG]: {
+    buckets: AlertBySeverityBucketData[];
+  };
+}
+
+function getUserAlertItemsFromAgg(
   rawAggregation: AlertCountersBySeverityAggregation
-): AlertSeverityCounts[] {
+): UserAlertsItem[] {
   const buckets = rawAggregation?.[USERS_BY_SEVERITY_AGG].buckets ?? [];
 
-  return buckets.reduce<AlertSeverityCounts[]>((accumalatedAlertsByUser, currentUser) => {
+  return buckets.reduce<UserAlertsItem[]>((accumalatedAlertsByUser, currentUser) => {
     return [
       ...accumalatedAlertsByUser,
       {

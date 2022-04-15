@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -52,12 +52,14 @@ interface AlertCountersBySeverityAndSeverityAggregation {
 interface UseVulnerableHostsCountersReturnType {
   isLoading: boolean;
   data: AlertSeverityCounts[];
+  updatedAt: number;
 }
 
 export const useHostAlertsItems = ({
   skip,
   queryId,
 }: UseHostsAlertsItemsProps): UseVulnerableHostsCountersReturnType => {
+  const [updatedAt, setUpdatedAt] = useState(Date.now());
   const { to, from, setQuery: globalSetQuery, deleteQuery } = useGlobalTime();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const {
@@ -76,7 +78,14 @@ export const useHostAlertsItems = ({
   const isLoading = isLoadingData && isSignalIndexLoading;
 
   useEffect(() => {
+    if (!isLoading) {
+      setUpdatedAt(Date.now());
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
     setQuery(buildVulnerableHostAggregationQuery({ from, to }));
+    setUpdatedAt(Date.now());
   }, [setQuery, from, to]);
 
   const transformedResponse: AlertSeverityCounts[] = useMemo(() => {
@@ -103,7 +112,7 @@ export const useHostAlertsItems = ({
     queryId,
     loading: isLoading,
   });
-  return { isLoading, data: transformedResponse };
+  return { isLoading, data: transformedResponse, updatedAt };
 };
 
 export const buildVulnerableHostAggregationQuery = ({ from, to }: TimeRange) => ({

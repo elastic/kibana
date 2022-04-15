@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { mockVulnerableUsersBySeverityResult } from './mock_data';
-import { useUserAlertsItems } from './user_alerts_items';
+import { useUserAlertsItems } from './use_user_alerts_items';
 
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: () => ({

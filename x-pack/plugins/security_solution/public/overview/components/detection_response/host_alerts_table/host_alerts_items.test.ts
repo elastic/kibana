@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useHostAlertsItems } from './host_alerts_items';
+import { useHostAlertsItems } from './use_host_alerts_items';
 import { mockVulnerableHostsBySeverityResult } from './mock_data';
 
 jest.mock('../../../../common/containers/use_global_time', () => ({
