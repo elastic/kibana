@@ -244,6 +244,15 @@ export class DiscoverPageObject extends FtrService {
     return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
   }
 
+  public async closeDocumentExplorerCallout() {
+    const calloutCloseButton = await this.testSubjects.find(
+      'document-explorer-callout-close-button'
+    );
+    if (calloutCloseButton) {
+      await calloutCloseButton.click();
+    }
+  }
+
   public async getDocTableIndex(index: number) {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {

@@ -113,6 +113,7 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
+          data-test-subj="document-explorer-update-callout-close-button"
           aria-label={i18n.translate('discover.docExplorerUpdateCallout.closeButtonAriaLabel', {
             defaultMessage: 'Close',
           })}

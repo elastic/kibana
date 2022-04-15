@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const browser = getService('browser');
   const fromTime = 'Jan 1, 2019 @ 00:00:00.000';
   const toTime = 'Jan 1, 2019 @ 23:59:59.999';
 
@@ -30,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
+      await PageObjects.discover.closeDocumentExplorerCallout();
     });
 
     after(async () => {

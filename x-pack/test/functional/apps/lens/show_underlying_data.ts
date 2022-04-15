@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
+      await PageObjects.discover.closeDocumentExplorerCallout();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
@@ -67,8 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.closeDocumentExplorerCallout();
+
       await testSubjects.existOrFail('discoverChart');
       expect(await queryBar.getQueryString()).be.eql('');
       await browser.closeCurrentWindow();
@@ -104,8 +105,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.closeDocumentExplorerCallout();
+
       await testSubjects.existOrFail('discoverChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
@@ -141,8 +143,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.closeDocumentExplorerCallout();
+
       await testSubjects.existOrFail('discoverChart');
       // check the columns
       const columns = await PageObjects.discover.getColumnHeaders();
@@ -177,8 +180,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.closeDocumentExplorerCallout();
+
       await testSubjects.existOrFail('discoverChart');
 
       // check the query
