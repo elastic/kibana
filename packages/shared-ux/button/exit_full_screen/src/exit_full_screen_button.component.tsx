@@ -21,15 +21,12 @@ import cx from 'classnames';
 
 import './exit_full_screen_button.scss';
 
-const text = i18n.translate(
-  'sharedUXComponents.exitFullScreenButton.exitFullScreenModeButtonText',
-  {
-    defaultMessage: 'Exit full screen',
-  }
-);
+const text = i18n.translate('sharedUXPackages.exitFullScreenButton.exitFullScreenModeButtonText', {
+  defaultMessage: 'Exit full screen',
+});
 
 const description = i18n.translate(
-  'sharedUXComponents.exitFullScreenButton.fullScreenModeDescription',
+  'sharedUXPackages.exitFullScreenButton.fullScreenModeDescription',
   {
     defaultMessage: 'In full screen mode, press ESC to exit.',
   }
