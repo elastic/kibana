@@ -2095,6 +2095,7 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
       layers: [
         {
           type: 'dataLayer',
@@ -2182,6 +2183,7 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
       layers: [
         {
           type: 'dataLayer',
@@ -2253,6 +2255,7 @@ describe('XYChart component', () => {
         mode: 'full',
         type: 'axisExtentConfig',
       },
+      markSizeRatio: 1,
       layers: [
         {
           type: 'dataLayer',

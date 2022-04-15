@@ -252,7 +252,7 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  markSizeRatio?: number;
+  markSizeRatio: number;
 }
 
 export interface AnnotationLayerArgs {
