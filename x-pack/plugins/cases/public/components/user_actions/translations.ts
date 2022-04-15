@@ -39,7 +39,7 @@ export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
 export const MULTIPLE_ALERTS_COMMENT_LABEL_TITLE = (totalAlerts: number) =>
   i18n.translate('xpack.cases.caseView.generatedAlertCommentLabelTitle', {
     values: { totalAlerts },
-    defaultMessage: '{totalAlerts} alerts were added from',
+    defaultMessage: 'added {totalAlerts} alerts from',
   });
 
 export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlertTooltip', {
