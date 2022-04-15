@@ -9,16 +9,6 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
-/**
- * The Lazily-loaded `ExitFullScreenButton` component.  Consumers should use `React.Suspense` or the
- * `withSuspense` HOC to load this component.
- */
-export const LazyExitFullScreenButton = React.lazy(() =>
-  import('./exit_full_screen_button').then(({ ExitFullScreenButton }) => ({
-    default: ExitFullScreenButton,
-  }))
-);
-
 export const LazyToolbarButton = React.lazy(() =>
   import('./toolbar/index').then(({ ToolbarButton }) => ({
     default: ToolbarButton,
@@ -26,13 +16,6 @@ export const LazyToolbarButton = React.lazy(() =>
 );
 
 export const RedirectAppLinks = React.lazy(() => import('./redirect_app_links'));
-
-/**
- * A `ExitFullScreenButton` component that is wrapped by the `withSuspense` HOC.  This component can
- * be used directly by consumers and will load the `LazyExitFullScreenButton` component lazily with
- * a predefined fallback and error boundary.
- */
-export const ExitFullScreenButton = withSuspense(LazyExitFullScreenButton);
 
 /**
  * A `ToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can

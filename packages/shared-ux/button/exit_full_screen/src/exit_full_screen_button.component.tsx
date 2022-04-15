@@ -36,7 +36,7 @@ const description = i18n.translate(
 );
 
 /**
- * Props for the Exit Full Screen button component.
+ * Props for the `ExitFullScreenButton` component.
  */
 export interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'className'> {
   onClick: MouseEventHandler<HTMLButtonElement>;

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { ExitFullScreenButton } from './exit_full_screen_button';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/button/exit_full_screen'],
+};

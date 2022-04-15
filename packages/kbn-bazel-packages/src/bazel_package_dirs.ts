@@ -11,7 +11,7 @@
  * include `**` in these, one or two `*` segments is acceptable, we need this search
  * to be super fast so please avoid deep recursive searching.
  *
- *   eg. src/vis-editors     => would find a package at src/vis-editors/foo/package.json
- *       src/vis-editors/*   => would find a package at src/vis-editors/foo/bar/package.json
+ *   eg. src/vis_editors     => would find a package at src/vis_editors/foo/package.json
+ *       src/vis_editors/*   => would find a package at src/vis_editors/foo/bar/package.json
  */
-export const BAZEL_PACKAGE_DIRS = ['packages'];
+export const BAZEL_PACKAGE_DIRS = ['packages', 'packages/shared-ux', 'packages/shared-ux/*'];

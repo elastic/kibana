@@ -93,6 +93,7 @@ filegroup(
     "//packages/kbn-ui-theme:build",
     "//packages/kbn-utility-types:build",
     "//packages/kbn-utils:build",
+    "//packages/shared-ux/button/exit_full_screen:build",
   ],
 )
 
@@ -170,6 +171,7 @@ filegroup(
     "//packages/kbn-ui-theme:build_types",
     "//packages/kbn-utility-types:build_types",
     "//packages/kbn-utils:build_types",
+    "//packages/shared-ux/button/exit_full_screen:build_types",
   ],
 )
 
