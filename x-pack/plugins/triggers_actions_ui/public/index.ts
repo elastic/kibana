@@ -30,6 +30,10 @@ export type {
   RuleTypeParams,
   AsApiContract,
   RuleTableItem,
+  AlertsTableProps,
+  AlertsData,
+  BulkActionsObjectProp,
+  RuleSummary,
 } from './types';
 
 export {
@@ -59,6 +63,7 @@ export { muteRule } from './application/lib/rule_api/mute';
 export { unmuteRule } from './application/lib/rule_api/unmute';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
+export { loadRule } from './application/lib/rule_api/get_rule';
 
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 

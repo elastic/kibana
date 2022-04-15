@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
 import { RuleExecutionStatus } from '../../../../alerting/common';
 import { RuleTableItem, Rule } from '../../../../triggers_actions_ui/public';
+
 export interface StatusProps {
   type: RuleStatus;
   disabled: boolean;
@@ -84,4 +85,13 @@ export interface RulesTableProps {
   sort: EuiTableSortingType<RuleTableItem>['sort'];
   onSortChange: (changedSort: EuiTableSortingType<RuleTableItem>['sort']) => void;
   isLoading: boolean;
+}
+export interface FetchRuleSummaryProps {
+  ruleId: string;
+}
+
+export interface RuleSummary {
+  isLoading: boolean;
+  rule: Rule | null;
+  error: boolean;
 }

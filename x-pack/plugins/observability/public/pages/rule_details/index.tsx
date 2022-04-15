@@ -8,18 +8,23 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
+import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { useKibana } from '../../utils/kibana_react';
+
 interface RuleDetailsPathParams {
   ruleId: string;
 }
 export function RuleDetailsPage() {
-  const { ObservabilityPageTemplate } = usePluginContext();
   const { http } = useKibana().services;
-
   const { ruleId } = useParams<RuleDetailsPathParams>();
+  const { ObservabilityPageTemplate } = usePluginContext();
+  const { isLoading, rule, error } = useFetchRule({ ruleId });
+
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
@@ -32,9 +37,26 @@ export function RuleDetailsPage() {
       text: RULES_BREADCRUMB_TEXT,
     },
     {
-      text: ruleId, // replace the ruleId with rule name
+      text: rule && rule.name,
     },
   ]);
-
-  return <ObservabilityPageTemplate />;
+  return (
+    rule &&
+    !error && (
+      <ObservabilityPageTemplate
+        pageHeader={{
+          pageTitle: (
+            <>
+              {rule.name} <ExperimentalBadge />
+              <EuiSpacer size="m" />
+              <EuiText color="subdued" size="s">
+                <b>Last updated</b> by {rule.updatedBy} on {rule.updatedAt} &emsp;
+                <b>Created</b> by {rule.createdBy} on {rule.createdAt}
+              </EuiText>
+            </>
+          ),
+        }}
+      />
+    )
+  );
 }
