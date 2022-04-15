@@ -7,6 +7,7 @@
 
 import { CoreStart, Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { IncomingHttpHeaders } from 'http';
 import { Stream } from 'stream';
 import { isAbortError } from './util';
 import { makeExecutionContext } from '../../common/execution_context';
@@ -36,7 +37,7 @@ export async function getEsTile({
   logger: Logger;
   requestBody: any;
   abortController: AbortController;
-}): Promise<Stream | null> {
+}): Promise<{ stream: Stream | null; headers?: IncomingHttpHeaders }> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
 
@@ -80,7 +81,7 @@ export async function getEsTile({
       }
     );
 
-    return tile.body as Stream;
+    return { stream: tile.body as Stream, headers: tile.headers };
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions
