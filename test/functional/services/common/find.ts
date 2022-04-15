@@ -234,10 +234,10 @@ export class FindService extends FtrService {
         await this._withTimeout(Math.min(tryTimeout, this.WAIT_FOR_EXISTS_TIME));
         const found = await findFunction(this.driver);
         await this._withTimeout(this.defaultFindTimeout);
-        if (Array.isArray(found)) {
-          return found.length > 0;
-        } else {
-          return found instanceof WebElementWrapper;
+        if (Array.isArray(found) && found.length > 0) {
+          return true;
+        } else if (found instanceof WebElementWrapper) {
+          return true;
         }
       } catch (err) {
         await this._withTimeout(this.defaultFindTimeout);
