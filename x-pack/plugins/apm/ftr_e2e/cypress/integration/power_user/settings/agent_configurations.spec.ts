@@ -40,19 +40,17 @@ function generateData({
   return range
     .interval('1m')
     .rate(1)
-    .spans((timestamp, index) => [
-      ...service1
+    .generator((timestamp, index) => [
+      service1
         .transaction('GET /apple 🍎 ')
         .timestamp(timestamp)
         .duration(1000)
-        .success()
-        .serialize(),
-      ...service2
+        .success(),
+      service2
         .transaction('GET /banana 🍌')
         .timestamp(timestamp)
         .duration(500)
-        .success()
-        .serialize(),
+        .success(),
     ]);
 }
 
