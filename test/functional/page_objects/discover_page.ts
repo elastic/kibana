@@ -246,7 +246,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async closeDocumentExplorerCallout() {
     const calloutCloseButton = await this.testSubjects.find(
-      'document-explorer-callout-close-button'
+      'document-explorer-update-callout-close-button'
     );
     if (calloutCloseButton) {
       await calloutCloseButton.click();
