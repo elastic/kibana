@@ -2,9 +2,9 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the deletion of an Amazon Relational Database Service (RDS) Aurora database cluster or global database cluster.",
+  "description": "Identifies the deletion of an Amazon Relational Database Service (RDS) Aurora database cluster, global database cluster, or database instance.",
   "false_positives": [
-    "Clusters may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Cluster deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    "Clusters or instances may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Cluster or instance deletions by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
   ],
   "from": "now-60m",
   "index": [
@@ -14,14 +14,16 @@
   "interval": "10m",
   "language": "kuery",
   "license": "Elastic License v2",
-  "name": "AWS RDS Cluster Deletion",
+  "name": "AWS Deletion of RDS Instance or Cluster",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.action:(DeleteDBCluster or DeleteGlobalCluster) and event.outcome:success\n",
+  "query": "event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.action:(DeleteDBCluster or DeleteGlobalCluster or DeleteDBInstance) \nand event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/delete-db-cluster.html",
     "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DeleteDBCluster.html",
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/delete-global-cluster.html",
-    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DeleteGlobalCluster.html"
+    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DeleteGlobalCluster.html",
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/delete-db-instance.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DeleteDBInstance.html"
   ],
   "risk_score": 47,
   "rule_id": "9055ece6-2689-4224-a0e0-b04881e1f8ad",
@@ -53,5 +55,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 7
 }
