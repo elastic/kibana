@@ -74,7 +74,7 @@ function getKibanaRequestUrl(path: string) {
 
   if (isKibanaApiRequest) {
     // window.location.origin is used as a Kibana public base path for sending requests in cURL commands. E.g. "Copy as cURL".
-    return `${kibanaBasePath}/${trimStart(path.replace(KIBANA_API_KEYWORD, '/'))}`;
+    return `${kibanaBasePath}/${trimStart(path.replace(KIBANA_API_KEYWORD, ''), '/')}`;
   }
 }
 
@@ -84,7 +84,6 @@ export function constructUrl(baseUri: string, path: string) {
   if (kibanaRequestUrl) {
     return kibanaRequestUrl;
   }
-
   baseUri = baseUri.replace(/\/+$/, '');
   path = path.replace(/^\/+/, '');
   return baseUri + '/' + path;
