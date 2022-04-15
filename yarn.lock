@@ -2960,6 +2960,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""
@@ -3053,6 +3065,10 @@
   uid ""
 
 "@kbn/io-ts-utils@link:bazel-bin/packages/kbn-io-ts-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/jest-serializers@link:bazel-bin/packages/kbn-jest-serializers":
   version "0.0.0"
   uid ""
 
@@ -3184,11 +3200,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sort-package-json@link:bazel-bin/packages/kbn-sort-package-json":
+  version "0.0.0"
+  uid ""
+
 "@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
   version "0.0.0"
   uid ""
 
 "@kbn/std@link:bazel-bin/packages/kbn-std":
+  version "0.0.0"
+  uid ""
+
+"@kbn/stdio-dev-helpers@link:bazel-bin/packages/kbn-stdio-dev-helpers":
   version "0.0.0"
   uid ""
 
@@ -3221,6 +3245,10 @@
   uid ""
 
 "@kbn/tinymath@link:bazel-bin/packages/kbn-tinymath":
+  version "0.0.0"
+  uid ""
+
+"@kbn/tooling-log@link:bazel-bin/packages/kbn-tooling-log":
   version "0.0.0"
   uid ""
 
@@ -6008,6 +6036,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ci-stats-config@link:bazel-bin/packages/kbn-ci-stats-core/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6085,6 +6125,10 @@
   uid ""
 
 "@types/kbn__io-ts-utils@link:bazel-bin/packages/kbn-io-ts-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__jest-serializers@link:bazel-bin/packages/kbn-jest-serializers/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6212,7 +6256,15 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__sort-package-json@link:bazel-bin/packages/kbn-sort-package-json/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__std@link:bazel-bin/packages/kbn-std/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__stdio-dev-helpers@link:bazel-bin/packages/kbn-stdio-dev-helpers/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6229,6 +6281,10 @@
   uid ""
 
 "@types/kbn__test@link:bazel-bin/packages/kbn-test/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__tooling-log@link:bazel-bin/packages/kbn-tooling-log/npm_module_types":
   version "0.0.0"
   uid ""
 
