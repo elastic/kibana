@@ -24,6 +24,7 @@ import {
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
   commonUpdatePieVisApi,
+  commonPreserveOldLegendSizeDefault,
 } from './visualization_common_migrations';
 import { VisualizationSavedObjectAttributes } from '../../common';
 
@@ -1154,6 +1155,30 @@ export const updatePieVisApi: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+const preserveOldLegendSizeDefault: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    const newVisState = commonPreserveOldLegendSizeDefault(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  }
+
+  return doc;
+};
+
 const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -1210,6 +1235,7 @@ const visualizationSavedObjectTypeMigrations = {
   '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
   '8.1.0': flow(updatePieVisApi),
+  '8.3.0': preserveOldLegendSizeDefault,
 };
 
 /**

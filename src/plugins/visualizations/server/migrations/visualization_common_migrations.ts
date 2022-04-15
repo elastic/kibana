@@ -215,3 +215,28 @@ export const commonUpdatePieVisApi = (visState: any) => {
 
   return visState;
 };
+
+export const commonPreserveOldLegendSizeDefault = (visState: any) => {
+  const autoLegendSize = 0;
+
+  const visualizationTypesWithLegends = [
+    'pie',
+    'area',
+    'histogram',
+    'horizontal_bar',
+    'line',
+    'heatmap',
+  ];
+
+  if (visualizationTypesWithLegends.includes(visState?.type)) {
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        legendSize: visState.params.legendSize ?? autoLegendSize,
+      },
+    };
+  }
+
+  return visState;
+};
