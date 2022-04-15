@@ -41,7 +41,17 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/artifacts/docker_context.sh
+  - command: DOCKER_CONTEXT=default .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Context Verification'
+    agents:
+      queue: n2-2
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: DOCKER_CONTEXT=cloud .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
       queue: n2-2
