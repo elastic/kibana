@@ -47,7 +47,7 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
     space,
   }: SendOptions): Promise<T> => {
     const spaceUrl = getSpaceUrlPrefix(space);
-    const { body } = await retry.try(async () => {
+    const response = await retry.try(async () => {
       let result;
       const url = `${spaceUrl}/internal/search/${strategy}`;
       if (referer && kibanaVersion) {
@@ -84,6 +84,12 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
       }
       throw new Error('try again');
     });
+
+    // eslint-disable-next-line no-console
+    console.log('*** CHRIS RESPONSE ***');
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(response));
+    const body = response.body;
 
     if (body.isRunning) {
       const result = await retry.try(async () => {
