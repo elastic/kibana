@@ -10,6 +10,7 @@ import { shallow } from 'enzyme';
 import { noop } from 'lodash/fp';
 
 import { useSourcererDataView } from '../../../../../../common/containers/sourcerer';
+import { RuleDetailsContextProvider } from '../rule_details_context';
 import { ExecutionLogTable } from './execution_log_table';
 
 jest.mock('../../../../../containers/detection_engine/rules', () => {
@@ -97,7 +98,11 @@ mockUseSourcererDataView.mockReturnValue({
 describe('ExecutionLogTable', () => {
   describe('snapshots', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<ExecutionLogTable ruleId={'0'} selectAlertsTab={noop} />);
+      const wrapper = shallow(
+        <RuleDetailsContextProvider>
+          <ExecutionLogTable ruleId={'0'} selectAlertsTab={noop} />
+        </RuleDetailsContextProvider>
+      );
       expect(wrapper).toMatchSnapshot();
     });
   });

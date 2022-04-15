@@ -51,7 +51,7 @@ describe('useRuleExecutionEvents', () => {
           start: 'now-30',
           end: 'now',
           queryText: '',
-          statusFilters: '',
+          statusFilters: [],
         }),
       {
         wrapper: createReactQueryWrapper(),

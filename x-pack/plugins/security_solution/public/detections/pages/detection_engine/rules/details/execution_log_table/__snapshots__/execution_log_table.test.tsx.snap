@@ -1,157 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ExecutionLogTable snapshots renders correctly against snapshot 1`] = `
-<Fragment>
-  <EuiFlexGroup
-    gutterSize="s"
-  >
-    <EuiFlexItem
-      grow={true}
-    >
-      <ExecutionLogSearchBar
-        onSearch={[Function]}
-        onStatusFilterChange={[Function]}
-        onlyShowFilters={true}
-      />
-    </EuiFlexItem>
-    <Styled(EuiFlexItem)>
-      <EuiSuperDatePicker
-        end="now"
-        isPaused={true}
-        onRefresh={[Function]}
-        onRefreshChange={[Function]}
-        onTimeChange={[Function]}
-        recentlyUsedRanges={Array []}
-        refreshInterval={1000}
-        start="now-24h"
-        width="full"
-      />
-    </Styled(EuiFlexItem)>
-  </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
+<ContextProvider
+  value={
+    Object {
+      "executionLogs": Object {
+        "actions": Object {
+          "setEnd": [Function],
+          "setIsPaused": [Function],
+          "setPageIndex": [Function],
+          "setPageSize": [Function],
+          "setQueryText": [Function],
+          "setRecentlyUsedRanges": [Function],
+          "setRefreshInterval": [Function],
+          "setShowMetricColumns": [Function],
+          "setSortDirection": [Function],
+          "setSortField": [Function],
+          "setStart": [Function],
+          "setStatusFilters": [Function],
+        },
+        "state": Object {
+          "pagination": Object {
+            "pageIndex": 1,
+            "pageSize": 5,
+          },
+          "queryText": "",
+          "showMetricColumns": false,
+          "sort": Object {
+            "sortDirection": "desc",
+            "sortField": "timestamp",
+          },
+          "statusFilters": Array [],
+          "superDatePicker": Object {
+            "end": "now",
+            "isPaused": true,
+            "recentlyUsedRanges": Array [],
+            "refreshInterval": 1000,
+            "start": "now-24h",
+          },
+        },
+      },
+    }
+  }
+>
+  <ExecutionLogTable
+    ruleId="0"
+    selectAlertsTab={[Function]}
   />
-  <UtilityBar>
-    <UtilityBarSection>
-      <UtilityBarGroup>
-        <UtilityBarText
-          dataTestSubj="executionsShowing"
-        >
-          Showing 0 rule executions
-        </UtilityBarText>
-      </UtilityBarGroup>
-    </UtilityBarSection>
-    <UtilityBarSection>
-      <UtilityBarGroup>
-        <UtilityBarText
-          dataTestSubj="executionsShowing"
-        />
-        <Styled(EuiSwitch)
-          checked={false}
-          compressed={true}
-          label="Show metrics columns"
-          onChange={[Function]}
-        />
-      </UtilityBarGroup>
-    </UtilityBarSection>
-  </UtilityBar>
-  <EuiBasicTable
-    columns={
-      Array [
-        Object {
-          "field": "security_status",
-          "name": <Memo(TableHeaderTooltipCell)
-            title="Status"
-            tooltipContent="Overall status of execution."
-          />,
-          "render": [Function],
-          "sortable": false,
-          "truncateText": false,
-          "width": "10%",
-        },
-        Object {
-          "field": "timestamp",
-          "name": <Memo(TableHeaderTooltipCell)
-            title="Timestamp"
-            tooltipContent="Datetime rule execution initiated."
-          />,
-          "render": [Function],
-          "sortable": true,
-          "truncateText": false,
-          "width": "15%",
-        },
-        Object {
-          "field": "duration_ms",
-          "name": <Memo(TableHeaderTooltipCell)
-            title="Duration"
-            tooltipContent="The length of time it took for the rule to run (hh:mm:ss:SSS)."
-          />,
-          "render": [Function],
-          "sortable": true,
-          "truncateText": false,
-          "width": "10%",
-        },
-        Object {
-          "field": "security_message",
-          "name": <Memo(TableHeaderTooltipCell)
-            title="Message"
-            tooltipContent="Relevant message from execution outcome."
-          />,
-          "render": [Function],
-          "sortable": false,
-          "truncateText": false,
-          "width": "35%",
-        },
-        Object {
-          "actions": Array [
-            Object {
-              "data-test-subj": "action-filter-by-execution-id",
-              "description": "Filter alerts by rule execution ID.",
-              "field": "",
-              "icon": "filter",
-              "isPrimary": true,
-              "name": "Edit",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
-          "field": "kibana.alert.rule.execution.uuid",
-          "name": "Actions",
-          "width": "5%",
-        },
-      ]
-    }
-    items={Array []}
-    noItemsMessage={
-      <EuiI18n
-        default="No items found"
-        token="euiBasicTable.noItemsMessage"
-      />
-    }
-    onChange={[Function]}
-    pagination={
-      Object {
-        "pageIndex": 0,
-        "pageSize": 5,
-        "pageSizeOptions": Array [
-          5,
-          10,
-          25,
-          50,
-        ],
-        "totalItemCount": 0,
-      }
-    }
-    responsive={true}
-    sorting={
-      Object {
-        "sort": Object {
-          "direction": "desc",
-          "field": "timestamp",
-        },
-      }
-    }
-    tableLayout="fixed"
-  />
-</Fragment>
+</ContextProvider>
 `;

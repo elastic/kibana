@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useQuery } from 'react-query';
+import {
+  AggregateRuleExecutionEvent,
+  RuleExecutionStatus,
+} from '../../../../../common/detection_engine/schemas/common';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleExecutionEvents } from './api';
@@ -16,11 +21,11 @@ interface UseRuleExecutionEventsArgs {
   start: string;
   end: string;
   queryText?: string;
-  statusFilters?: string;
+  statusFilters?: RuleExecutionStatus[];
   page?: number;
   perPage?: number;
-  sortField?: string;
-  sortOrder?: string;
+  sortField?: keyof AggregateRuleExecutionEvent;
+  sortOrder?: SortOrder;
 }
 
 export const useRuleExecutionEvents = ({

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   EuiTextColor,
   EuiFlexGroup,
@@ -26,9 +24,13 @@ import {
 } from '@elastic/eui';
 import { buildFilter, Filter, FILTERS, Query } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
+import { RuleDetailTabs } from '../.';
 import { mountReactNode } from '../../../../../../../../../../src/core/public/utils';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../../common/constants';
-import { AggregateRuleExecutionEvent } from '../../../../../../../common/detection_engine/schemas/common';
+import {
+  AggregateRuleExecutionEvent,
+  RuleExecutionStatus,
+} from '../../../../../../../common/detection_engine/schemas/common';
 
 import {
   UtilityBar,
@@ -48,6 +50,7 @@ import {
 import { AbsoluteTimeRange, RelativeTimeRange } from '../../../../../../common/store/inputs/model';
 import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { useRuleExecutionEvents } from '../../../../../containers/detection_engine/rules';
+import { useRuleDetailsContext } from '../rule_details_context';
 import * as i18n from './translations';
 import { EXECUTION_LOG_COLUMNS, GET_EXECUTION_LOG_METRICS_COLUMNS } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
@@ -85,25 +88,34 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     storage,
     timelines,
   } = useKibana().services;
-  // Datepicker state
-  const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<DurationRange[]>([]);
-  const [refreshInterval, setRefreshInterval] = useState(1000);
-  const [isPaused, setIsPaused] = useState(true);
-  const [start, setStart] = useState('now-24h');
-  const [end, setEnd] = useState('now');
 
-  // Searchbar/Filter/Settings state
-  const [queryText, setQueryText] = useState('');
-  const [statusFilters, setStatusFilters] = useState<string | undefined>(undefined);
-  const [showMetricColumns, setShowMetricColumns] = useState<boolean>(
-    storage.get(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY) ?? false
-  );
+  const {
+    [RuleDetailTabs.executionLogs]: {
+      state: {
+        superDatePicker: { recentlyUsedRanges, refreshInterval, isPaused, start, end },
+        queryText,
+        statusFilters,
+        showMetricColumns,
+        pagination: { pageIndex, pageSize },
+        sort: { sortField, sortDirection },
+      },
+      actions: {
+        setEnd,
+        setIsPaused,
+        setPageIndex,
+        setPageSize,
+        setQueryText,
+        setRecentlyUsedRanges,
+        setRefreshInterval,
+        setShowMetricColumns,
+        setSortDirection,
+        setSortField,
+        setStart,
+        setStatusFilters,
+      },
+    },
+  } = useRuleDetailsContext();
 
-  // Pagination state
-  const [pageIndex, setPageIndex] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState<keyof AggregateRuleExecutionEvent>('timestamp');
-  const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
   // Index for `add filter` action and toasts for errors
   const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
   const { addError, addSuccess, remove } = useAppToasts();
@@ -170,15 +182,18 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   }, [indexPattern]);
 
   // Callbacks
-  const onTableChangeCallback = useCallback(({ page = {}, sort = {} }) => {
-    const { index, size } = page;
-    const { field, direction } = sort;
+  const onTableChangeCallback = useCallback(
+    ({ page = {}, sort = {} }) => {
+      const { index, size } = page;
+      const { field, direction } = sort;
 
-    setPageIndex(index + 1);
-    setPageSize(size);
-    setSortField(field);
-    setSortDirection(direction);
-  }, []);
+      setPageIndex(index + 1);
+      setPageSize(size);
+      setSortField(field);
+      setSortDirection(direction);
+    },
+    [setPageIndex, setPageSize, setSortDirection, setSortField]
+  );
 
   const onTimeChangeCallback = useCallback(
     (props: OnTimeChangeProps) => {
@@ -193,14 +208,17 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         recentlyUsedRange.length > 10 ? recentlyUsedRange.slice(0, 9) : recentlyUsedRange
       );
     },
-    [recentlyUsedRanges]
+    [recentlyUsedRanges, setEnd, setRecentlyUsedRanges, setStart]
   );
 
-  const onRefreshChangeCallback = useCallback((props: OnRefreshChangeProps) => {
-    setIsPaused(props.isPaused);
-    // Only support auto-refresh >= 1minute -- no current ability to limit within component
-    setRefreshInterval(props.refreshInterval > 60000 ? props.refreshInterval : 60000);
-  }, []);
+  const onRefreshChangeCallback = useCallback(
+    (props: OnRefreshChangeProps) => {
+      setIsPaused(props.isPaused);
+      // Only support auto-refresh >= 1minute -- no current ability to limit within component
+      setRefreshInterval(props.refreshInterval > 60000 ? props.refreshInterval : 60000);
+    },
+    [setIsPaused, setRefreshInterval]
+  );
 
   const onRefreshCallback = useCallback(
     (props: OnRefreshProps) => {
@@ -209,15 +227,19 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     [refetch]
   );
 
-  const onSearchCallback = useCallback((updatedQueryText: string) => {
-    setQueryText(updatedQueryText);
-  }, []);
+  const onSearchCallback = useCallback(
+    (updatedQueryText: string) => {
+      setQueryText(updatedQueryText);
+    },
+    [setQueryText]
+  );
 
-  const onStatusFilterChangeCallback = useCallback((updatedStatusFilters: string[]) => {
-    setStatusFilters(
-      updatedStatusFilters.length ? updatedStatusFilters.sort().join(',') : undefined
-    );
-  }, []);
+  const onStatusFilterChangeCallback = useCallback(
+    (updatedStatusFilters: RuleExecutionStatus[]) => {
+      setStatusFilters(updatedStatusFilters);
+    },
+    [setStatusFilters]
+  );
 
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
@@ -290,7 +312,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       storage.set(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY, showMetrics);
       setShowMetricColumns(showMetrics);
     },
-    [storage]
+    [setShowMetricColumns, storage]
   );
 
   // Memoized state
@@ -359,6 +381,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             onSearch={onSearchCallback}
             onStatusFilterChange={onStatusFilterChangeCallback}
             onlyShowFilters={true}
+            defaultSelectedStatusFilters={statusFilters}
           />
         </EuiFlexItem>
         <DatePickerEuiFlexItem>
