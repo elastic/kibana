@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 
-import { KIBANA_API_KEYWORD } from '../../../../common/constants';
 import { XJson } from '../../../../../es_ui_shared/public';
 
 import RowParser from '../../../lib/row_parser';
@@ -462,28 +461,23 @@ export class SenseEditor {
 
   getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
-    const kibanaBaseUrl = window.location.origin;
     const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
         // no request block
         return req;
       }
 
-      let path = req.url;
+      const path = req.url;
       const method = req.method;
       const data = req.data;
 
       // this is the first url defined in elasticsearch.hosts
-      let url = constructUrl(elasticsearchBaseUrl, path);
+      const url = constructUrl(elasticsearchBaseUrl, path);
 
-      if (path.includes(KIBANA_API_KEYWORD)) {
-        path = path.replace(KIBANA_API_KEYWORD, '');
-        url = constructUrl(kibanaBaseUrl, path);
-      }
-
-      let ret = `curl -X${method} '${url}' -H 'kbn-xsrf: reporting'`;
+      // Append 'kbn-xsrf' header to bypass (XSRF/CSRF) protections
+      let ret = `curl -X${method.toUpperCase()} "${url}" -H "kbn-xsrf: reporting"`;
       if (data && data.length) {
-        ret += " -H 'Content-Type: application/json' -d'\n";
+        ret += ` -H "Content-Type: application/json" -d'\n`;
         const dataAsString = collapseLiteralStrings(data.join('\n'));
 
         // We escape single quoted strings that that are wrapped in single quoted strings

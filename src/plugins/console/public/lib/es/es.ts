@@ -21,7 +21,7 @@ export function getContentType(body: unknown) {
   return 'application/json';
 }
 
-interface SendProps {
+interface SendConfig {
   http: HttpSetup;
   method: string;
   path: string;
@@ -31,7 +31,7 @@ interface SendProps {
   asResponse?: boolean;
 }
 
-type Method = 'get' | 'post' | 'delete' | 'put' | 'head';
+type Method = 'get' | 'post' | 'delete' | 'put' | 'patch' | 'head';
 
 export async function send({
   http,
@@ -41,17 +41,16 @@ export async function send({
   asSystemRequest = false,
   withProductOrigin = false,
   asResponse = false,
-}: SendProps) {
-  const isKibanaApiRequest = path.includes(KIBANA_API_KEYWORD);
+}: SendConfig) {
+  const kibanaRequestUrl = getKibanaRequestUrl(path);
 
-  if (isKibanaApiRequest) {
+  if (kibanaRequestUrl) {
     const httpMethod = method.toLowerCase() as Method;
-    const uri = new URL(
-      `${window.location.origin}/${trimStart(path.replace(KIBANA_API_KEYWORD, ''), '/')}`
-    );
-    const { pathname, searchParams } = uri;
+    // construct URL object, so we can extract out pathname, searchParams, etc...
+    const url = new URL(kibanaRequestUrl);
+    const { pathname, searchParams } = url;
     const query = Object.fromEntries(searchParams.entries());
-    const body = ['post', 'put'].includes(httpMethod) ? data : null;
+    const body = ['post', 'put', 'patch'].includes(httpMethod) ? data : null;
 
     return await http[httpMethod]<HttpResponse>(pathname, {
       body,
@@ -69,7 +68,23 @@ export async function send({
   });
 }
 
+function getKibanaRequestUrl(path: string) {
+  const isKibanaApiRequest = path.startsWith(KIBANA_API_KEYWORD);
+  const kibanaBasePath = window.location.origin;
+
+  if (isKibanaApiRequest) {
+    // window.location.origin is used as a Kibana public base path for sending requests in cURL commands. E.g. "Copy as cURL".
+    return `${kibanaBasePath}/${trimStart(path.replace(KIBANA_API_KEYWORD, '/'))}`;
+  }
+}
+
 export function constructUrl(baseUri: string, path: string) {
+  const kibanaRequestUrl = getKibanaRequestUrl(path);
+
+  if (kibanaRequestUrl) {
+    return kibanaRequestUrl;
+  }
+
   baseUri = baseUri.replace(/\/+$/, '');
   path = path.replace(/^\/+/, '');
   return baseUri + '/' + path;
