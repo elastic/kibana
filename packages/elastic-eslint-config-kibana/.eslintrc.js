@@ -105,6 +105,97 @@ module.exports = {
       ],
     ],
 
+    /**
+     * ESLint rule to aid with breaking up packages:
+     *
+     *  `fromPacakge` the package name which was broken up
+     *  `toPackage` the package where the removed exports were placed
+     *  `exportNames` the list of exports which used to be found in `fromPacakge` and are now found in `toPackage`
+     *
+     * TODO(@spalger): once packages have types we should be able to filter this rule based on the package type
+     *  of the file being linted so that we could re-route imports from `plugin-client` types to a different package
+     *  than `plugin-server` types.
+     */
+    '@kbn/imports/exports_moved_packages': ['error', [
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/tooling-log',
+        exportNames: [
+          'DEFAULT_LOG_LEVEL',
+          'getLogLevelFlagsHelp',
+          'LOG_LEVEL_FLAGS',
+          'LogLevel',
+          'Message',
+          'ParsedLogLevel',
+          'parseLogLevel',
+          'pickLevelFromFlags',
+          'ToolingLog',
+          'ToolingLogCollectingWriter',
+          'ToolingLogOptions',
+          'ToolingLogTextWriter',
+          'ToolingLogTextWriterConfig',
+          'Writer',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/ci-stats-reporter',
+        exportNames: [
+          'CiStatsMetric',
+          'CiStatsReporter',
+          'CiStatsReportTestsOptions',
+          'CiStatsTestGroupInfo',
+          'CiStatsTestResult',
+          'CiStatsTestRun',
+          'CiStatsTestType',
+          'CiStatsTiming',
+          'getTimeReporter',
+          'MetricsOptions',
+          'TimingsOptions',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/ci-stats-core',
+        exportNames: [
+          'Config',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/ci-stats-client',
+        exportNames: [
+          'CiStatsClient',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/jest-serializers',
+        exportNames: [
+          'createAbsolutePathSerializer',
+          'createStripAnsiSerializer',
+          'createRecursiveSerializer',
+          'createAnyInstanceSerializer',
+          'createReplaceSerializer',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/stdio-dev-helpers',
+        exportNames: [
+          'observeReadable',
+          'observeLines',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/sort-package-json',
+        exportNames: [
+          'sortPackageJson',
+        ]
+      },
+    ]],
+
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',
