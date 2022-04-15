@@ -8,8 +8,8 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
+import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable } from '../../../../expressions';
-import { PaletteOutput } from '../../../../charts/common';
 import { EventAnnotationOutput } from '../../../../event_annotation/common';
 import {
   AxisExtentModes,

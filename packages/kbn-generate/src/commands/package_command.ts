@@ -31,10 +31,12 @@ export const PackageCommand: GenerateCommand = {
       --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
       --web          Build webpack-compatible version of sources for this package. If your package is intended to be
                       used in the browser and Node.js then you need to opt-into these sources being created.
-      --force        If the packageDir already exists, delete it before generation
-      --dir          Directory where this package will live, defaults to [./packages]
-                       Valid Options:
-${BAZEL_PACKAGE_DIRS.map((rel) => `                         ${rel}\n`).join('')}
+      --dir          Specify where this package will be written. The path must be a direct child of one of the
+                      directories selected by the BAZEL_PACKAGE_DIRS const in @kbn/bazel-packages.
+                        Valid locations for packages:
+${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join('')}
+                      defaults to [./packages/{kebab-case-version-of-name}]
+      --force        If the --dir already exists, delete it before generation
     `,
   },
   async run({ log, flags, render }) {
@@ -50,15 +52,16 @@ ${BAZEL_PACKAGE_DIRS.map((rel) => `                         ${rel}\n`).join('')}
     const web = !!flags.web;
     const dev = !!flags.dev;
 
-    const containingDir = flags.dir ? Path.resolve(`${flags.dir}`) : ROOT_PKG_DIR;
-    const relContainingDir = Path.relative(REPO_ROOT, containingDir);
+    const packageDir = flags.dir
+      ? Path.resolve(`${flags.dir}`)
+      : Path.resolve(ROOT_PKG_DIR, name.slice(1).replace('/', '-'));
+    const relContainingDir = Path.relative(REPO_ROOT, Path.dirname(packageDir));
     if (!micromatch.isMatch(relContainingDir, BAZEL_PACKAGE_DIRS)) {
       throw createFlagError(
         'Invalid --dir selection. To setup a new --dir option extend the `BAZEL_PACKAGE_DIRS` const in `@kbn/bazel-packages` and make sure to rebuild.'
       );
     }
 
-    const packageDir = Path.resolve(containingDir, name.slice(1).replace('/', '-'));
     const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
 
     try {
@@ -133,9 +136,13 @@ ${BAZEL_PACKAGE_DIRS.map((rel) => `                         ${rel}\n`).join('')}
       : [packageJson.dependencies, packageJson.devDependencies];
 
     addDeps[name] = `link:bazel-bin/${normalizedRepoRelativeDir}`;
-    addDeps[typePkgName] = `link:bazel-bin/${normalizedRepoRelativeDir}/npm_module_types`;
     delete removeDeps[name];
-    delete removeDeps[typePkgName];
+
+    // for @types packages always remove from deps and add to devDeps
+    packageJson.devDependencies[
+      typePkgName
+    ] = `link:bazel-bin/${normalizedRepoRelativeDir}/npm_module_types`;
+    delete packageJson.dependencies[typePkgName];
 
     await Fsp.writeFile(packageJsonPath, sortPackageJson(JSON.stringify(packageJson)));
     log.info('Updated package.json file');

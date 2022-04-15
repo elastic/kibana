@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Modification of Boot Configuration",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"bcdedit.exe\" or process.pe.original_file_name == \"bcdedit.exe\") and\n  (process.args : \"/set\" and process.args : \"bootstatuspolicy\" and process.args : \"ignoreallfailures\") or\n  (process.args : \"no\" and process.args : \"recoveryenabled\")\n",
   "risk_score": 21,
   "rule_id": "69c251fb-a5d6-4035-b5ec-40438bd829ff",
@@ -42,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

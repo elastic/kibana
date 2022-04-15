@@ -44,9 +44,9 @@ export const createEventSignal = async ({
   threatFilters,
   threatLanguage,
   threatIndex,
-  threatListConfig,
   threatIndicatorPath,
-  perPage,
+  threatPitId,
+  reassignThreatPitId,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -77,7 +77,8 @@ export const createEventSignal = async ({
         _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
         fields: undefined,
       },
-      perPage,
+      pitId: threatPitId,
+      reassignPitId: reassignThreatPitId,
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
@@ -134,7 +135,6 @@ export const createEventSignal = async ({
       logger,
       pageSize: searchAfterSize,
       services,
-      signalsIndex: outputIndex,
       sortOrder: 'desc',
       trackTotalHits: false,
       tuple,

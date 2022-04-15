@@ -1866,8 +1866,11 @@
         "label": "ChromeBreadcrumb",
         "description": [],
         "signature": [
+          "React.HTMLAttributes<HTMLElement> & ",
           "CommonProps",
-          " & { text: React.ReactNode; href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; truncate?: boolean | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: ",
+          "EuiLinkColor",
+          " | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,
@@ -1881,9 +1884,9 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ 'data-test-subj'?: string | undefined; target?: string | undefined; iconType?: ",
+          "{ iconType?: ",
           "IconType",
-          " | undefined; rel?: string | undefined; }"
+          " | undefined; 'data-test-subj'?: string | undefined; rel?: string | undefined; target?: string | undefined; }"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,

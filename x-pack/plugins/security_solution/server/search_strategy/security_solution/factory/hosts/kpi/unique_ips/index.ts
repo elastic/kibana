@@ -17,7 +17,6 @@ import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiUniqueIpsQuery } from './query.hosts_kpi_unique_ips.dsl';
 import { formatGeneralHistogramData } from '../common';
-import { buildHostsKpiUniqueIpsQueryEntities } from './query.hosts_kpi_unique_ips_entities.dsl';
 
 export const hostsKpiUniqueIps: SecuritySolutionFactory<HostsKpiQueries.kpiUniqueIps> = {
   buildDsl: (options: HostsKpiUniqueIpsRequestOptions) => buildHostsKpiUniqueIpsQuery(options),
@@ -27,44 +26,6 @@ export const hostsKpiUniqueIps: SecuritySolutionFactory<HostsKpiQueries.kpiUniqu
   ): Promise<HostsKpiUniqueIpsStrategyResponse> => {
     const inspect = {
       dsl: [inspectStringifyObject(buildHostsKpiUniqueIpsQuery(options))],
-    };
-
-    const uniqueSourceIpsHistogram = getOr(
-      null,
-      'aggregations.unique_source_ips_histogram.buckets',
-      response.rawResponse
-    );
-
-    const uniqueDestinationIpsHistogram = getOr(
-      null,
-      'aggregations.unique_destination_ips_histogram.buckets',
-      response.rawResponse
-    );
-
-    return {
-      ...response,
-      inspect,
-      uniqueSourceIps: getOr(null, 'aggregations.unique_source_ips.value', response.rawResponse),
-      uniqueSourceIpsHistogram: formatGeneralHistogramData(uniqueSourceIpsHistogram),
-      uniqueDestinationIps: getOr(
-        null,
-        'aggregations.unique_destination_ips.value',
-        response.rawResponse
-      ),
-      uniqueDestinationIpsHistogram: formatGeneralHistogramData(uniqueDestinationIpsHistogram),
-    };
-  },
-};
-
-export const hostsKpiUniqueIpsEntities: SecuritySolutionFactory<HostsKpiQueries.kpiUniqueIps> = {
-  buildDsl: (options: HostsKpiUniqueIpsRequestOptions) =>
-    buildHostsKpiUniqueIpsQueryEntities(options),
-  parse: async (
-    options: HostsKpiUniqueIpsRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<HostsKpiUniqueIpsStrategyResponse> => {
-    const inspect = {
-      dsl: [inspectStringifyObject(buildHostsKpiUniqueIpsQueryEntities(options))],
     };
 
     const uniqueSourceIpsHistogram = getOr(

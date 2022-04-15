@@ -171,7 +171,7 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
       values: {
         documentExplorerDocs:
-          `<a href=${docLinks.links.discover.documentExplorer}
+          `<a href=${docLinks.links.discover.documentExplorer} style="font-weight: 600;"
             target="_blank" rel="noopener">` +
           i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
             defaultMessage: 'Document Explorer',
@@ -286,5 +286,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
   },
 });

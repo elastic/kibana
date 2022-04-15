@@ -18,18 +18,12 @@ import {
   Position,
 } from '@elastic/charts';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
-import classnames from 'classnames';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EventAnnotationArgs } from '../../../../event_annotation/common';
 import type { FieldFormat } from '../../../../field_formats/common';
 import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
-import type {
-  AnnotationLayerArgs,
-  AnnotationLayerConfigResult,
-  IconPosition,
-  YAxisMode,
-} from '../../common/types';
-import { annotationsIconSet, hasIcon, isNumericalString } from '../helpers';
+import type { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../../common/types';
+import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
 const getRoundedTimestamp = (timestamp: number, firstTimestamp?: number, minInterval?: number) => {
@@ -176,7 +170,12 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
-        const strokeWidth = annotation.lineWidth || 1;
+        const strokeWidth = hide ? 1 : annotation.lineWidth || 1;
+        const dataValue = isGrouped
+          ? moment(
+              isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
+            ).valueOf()
+          : moment(exactTimestamp).valueOf();
         return (
           <LineAnnotation
             id={id}
@@ -208,9 +207,7 @@ export const Annotations = ({
             markerPosition={markerPosition}
             dataValues={[
               {
-                dataValue: moment(
-                  isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
-                ).valueOf(),
+                dataValue,
                 header,
                 details: annotation.label,
               },
@@ -235,123 +232,3 @@ export const Annotations = ({
     </>
   );
 };
-
-export function MarkerBody({
-  label,
-  isHorizontal,
-}: {
-  label: string | undefined;
-  isHorizontal: boolean;
-}) {
-  if (!label) {
-    return null;
-  }
-  if (isHorizontal) {
-    return (
-      <div className="eui-textTruncate" style={{ maxWidth: LINES_MARKER_SIZE * 3 }}>
-        {label}
-      </div>
-    );
-  }
-  return (
-    <div
-      className="xyDecorationRotatedWrapper"
-      style={{
-        width: LINES_MARKER_SIZE,
-      }}
-    >
-      <div
-        className="eui-textTruncate xyDecorationRotatedWrapper__label"
-        style={{
-          maxWidth: LINES_MARKER_SIZE * 3,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function NumberIcon({ number }: { number: number }) {
-  return (
-    <EuiFlexGroup
-      justifyContent="spaceAround"
-      className="xyAnnotationNumberIcon"
-      gutterSize="none"
-      alignItems="center"
-    >
-      <EuiText color="ghost" className="xyAnnotationNumberIcon__text">
-        {number < 10 ? number : `9+`}
-      </EuiText>
-    </EuiFlexGroup>
-  );
-}
-
-export const AnnotationIcon = ({
-  type,
-  rotateClassName = '',
-  isHorizontal,
-  renderedInChart,
-  ...rest
-}: {
-  type: string;
-  rotateClassName?: string;
-  isHorizontal?: boolean;
-  renderedInChart?: boolean;
-} & EuiIconProps) => {
-  if (isNumericalString(type)) {
-    return <NumberIcon number={Number(type)} />;
-  }
-  const iconConfig = annotationsIconSet.find((i) => i.value === type);
-  if (!iconConfig) {
-    return null;
-  }
-  return (
-    <EuiIcon
-      {...rest}
-      type={iconConfig.icon || type}
-      className={classnames(
-        { [rotateClassName]: iconConfig.shouldRotate },
-        {
-          lensAnnotationIconFill: renderedInChart && iconConfig.canFill,
-        }
-      )}
-    />
-  );
-};
-
-interface MarkerConfig {
-  axisMode?: YAxisMode;
-  icon?: string;
-  textVisibility?: boolean;
-  iconPosition?: IconPosition;
-}
-
-export function Marker({
-  config,
-  isHorizontal,
-  hasReducedPadding,
-  label,
-  rotateClassName,
-}: {
-  config: MarkerConfig;
-  isHorizontal: boolean;
-  hasReducedPadding: boolean;
-  label?: string;
-  rotateClassName?: string;
-}) {
-  if (hasIcon(config.icon)) {
-    return (
-      <AnnotationIcon type={config.icon} rotateClassName={rotateClassName} renderedInChart={true} />
-    );
-  }
-
-  // if there's some text, check whether to show it as marker, or just show some padding for the icon
-  if (config.textVisibility) {
-    if (hasReducedPadding) {
-      return <MarkerBody label={label} isHorizontal={isHorizontal} />;
-    }
-    return <EuiIcon type="empty" />;
-  }
-  return null;
-}

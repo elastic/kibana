@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
@@ -374,7 +374,7 @@ export const reindexServiceFactory = (
        * (i.e., via the licensing plugin). This enables Security to use
        * functionality exposed through Upgrade Assistant.
        */
-      const license = await licensing.license$.pipe(first()).toPromise();
+      const license = await firstValueFrom(licensing.license$);
 
       const securityFeature = license.getFeature('security');
 

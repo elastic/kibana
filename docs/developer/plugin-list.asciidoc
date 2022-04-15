@@ -291,6 +291,10 @@ In general this plugin provides:
 - Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 
+|{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
+|Contains all the components of Kibana's unified search experience. Specifically:
+
+
 |{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
 |This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 
@@ -518,12 +522,6 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/metrics_entities/README.md[metricsEntities]
-|This is the metrics and entities plugin where you add can add transforms for your project
-and group those transforms into modules. You can also re-use existing transforms in your
-newly created modules as well.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]

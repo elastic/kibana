@@ -26,27 +26,19 @@ async function readBazelToolsVersionFile(repoRootPath: string, versionFilename: 
   return version;
 }
 
-export async function isBazelBinAvailable() {
+export async function isBazelBinAvailable(repoRootPath: string) {
   try {
-    await spawn('bazel', ['--version'], { stdio: 'pipe' });
+    const installedVersion = await spawn('bazel', ['--version'], { stdio: 'pipe' });
+    const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion');
 
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function isBazeliskInstalled(bazeliskVersion: string) {
-  try {
-    const { stdout: bazeliskPkgInstallStdout } = await spawn(
-      'npm',
-      ['ls', '--global', '--parseable', '--long', `@bazel/bazelisk@${bazeliskVersion}`],
-      {
-        stdio: 'pipe',
-      }
-    );
-
-    return bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`);
+    if (installedVersion.stdout === `bazel ${bazelVersion}`) {
+      return true;
+    } else {
+      log.info(
+        `[bazel_tools] Bazel is installed (${installedVersion.stdout}), but was expecting ${bazelVersion}`
+      );
+      return false;
+    }
   } catch {
     return false;
   }
@@ -86,14 +78,11 @@ export async function installBazelTools(repoRootPath: string) {
   // Check if we need to remove bazelisk from yarn
   await tryRemoveBazeliskFromYarnGlobal();
 
-  // Test if bazelisk is already installed in the correct version
-  const isBazeliskPkgInstalled = await isBazeliskInstalled(bazeliskVersion);
-
   // Test if bazel bin is available
-  const isBazelBinAlreadyAvailable = await isBazelBinAvailable();
+  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(repoRootPath);
 
   // Install bazelisk if not installed
-  if (!isBazeliskPkgInstalled || !isBazelBinAlreadyAvailable) {
+  if (!isBazelBinAlreadyAvailable) {
     log.info(`[bazel_tools] installing Bazel tools`);
 
     log.debug(
@@ -106,7 +95,7 @@ export async function installBazelTools(repoRootPath: string) {
       stdio: 'pipe',
     });
 
-    const isBazelBinAvailableAfterInstall = await isBazelBinAvailable();
+    const isBazelBinAvailableAfterInstall = await isBazelBinAvailable(repoRootPath);
     if (!isBazelBinAvailableAfterInstall) {
       throw new Error(dedent`
         [bazel_tools] an error occurred when installing the Bazel tools. Please make sure you have access to npm globally installed modules on your $PATH

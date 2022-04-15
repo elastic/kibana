@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep, mapValues } from 'lodash';
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
@@ -28,7 +28,7 @@ import {
   CustomVisualizationMigrations,
   LensDocShape810,
 } from './types';
-import { CustomPaletteParams, DOCUMENT_FIELD_NAME, layerTypes } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, MetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -236,6 +236,21 @@ export const commonSetIncludeEmptyRowsDateHistogram = (
       }
     }
   }
+  return newAttributes;
+};
+
+export const commonLockOldMetricVisSettings = (
+  attributes: LensDocShape810
+): LensDocShape810<VisState820> => {
+  const newAttributes = cloneDeep(attributes);
+  if (newAttributes.visualizationType !== 'lnsMetric') {
+    return newAttributes;
+  }
+
+  const visState = newAttributes.state.visualization as MetricState;
+  visState.textAlign = visState.textAlign ?? 'center';
+  visState.titlePosition = visState.titlePosition ?? 'bottom';
+  visState.size = visState.size ?? 'xl';
   return newAttributes;
 };
 

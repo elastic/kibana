@@ -48,7 +48,7 @@ export const useMonitorManagementBreadcrumbs = ({
 export const MONITOR_MANAGEMENT_CRUMB = i18n.translate(
   'xpack.uptime.monitorManagement.monitorManagementCrumb',
   {
-    defaultMessage: 'Monitor management',
+    defaultMessage: 'Monitor Management',
   }
 );
 

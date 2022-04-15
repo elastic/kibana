@@ -46,6 +46,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-std",
   "//packages/kbn-utils",
+  "//packages/kbn-plugin-discovery",
   "@npm//@babel/core",
   "@npm//axios",
   "@npm//chalk",
@@ -54,7 +55,6 @@ RUNTIME_DEPS = [
   "@npm//execa",
   "@npm//exit-hook",
   "@npm//getopts",
-  "@npm//globby",
   "@npm//jest-diff",
   "@npm//load-json-file",
   "@npm//markdown-it",
@@ -72,6 +72,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-plugin-discovery:npm_module_types",
   "@npm//@babel/parser",
   "@npm//@babel/types",
   "@npm//@types/babel__core",

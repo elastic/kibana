@@ -53,13 +53,15 @@ import {
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
 } from '../errors';
-import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../types';
+import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
   DryRunPackagePolicy,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostCreateCallback,
 } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -869,16 +871,24 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     externalCallbackType: A,
     packagePolicy: A extends 'postPackagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  ): Promise<
+    A extends 'postPackagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
+  >;
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    packagePolicy: NewPackagePolicy | DeletePackagePoliciesResponse,
+    packagePolicy: PackagePolicy | NewPackagePolicy | DeletePackagePoliciesResponse,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<NewPackagePolicy | void> {
+  ): Promise<PackagePolicy | NewPackagePolicy | void> {
     if (externalCallbackType === 'postPackagePolicyDelete') {
       return await this.runDeleteExternalCallbacks(packagePolicy as DeletePackagePoliciesResponse);
     } else {
@@ -888,7 +898,21 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         if (externalCallbacks && externalCallbacks.size > 0) {
           let updatedNewData = newData;
           for (const callback of externalCallbacks) {
-            const result = await callback(updatedNewData, context, request);
+            let result;
+            if (externalCallbackType === 'packagePolicyPostCreate') {
+              result = await (callback as PostPackagePolicyPostCreateCallback)(
+                updatedNewData as PackagePolicy,
+                context,
+                request
+              );
+              updatedNewData = PackagePolicySchema.validate(result);
+            } else {
+              result = await (callback as PostPackagePolicyCreateCallback)(
+                updatedNewData as NewPackagePolicy,
+                context,
+                request
+              );
+            }
             if (externalCallbackType === 'packagePolicyCreate') {
               updatedNewData = NewPackagePolicySchema.validate(result);
             } else if (externalCallbackType === 'packagePolicyUpdate') {
@@ -1276,10 +1300,18 @@ export interface PackagePolicyServiceInterface {
     externalCallbackType: A,
     packagePolicy: A extends 'postPackagePolicyDelete'
       ? DeletePackagePoliciesResponse
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
       : NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
-  ): Promise<A extends 'postPackagePolicyDelete' ? void : NewPackagePolicy>;
+  ): Promise<
+    A extends 'postPackagePolicyDelete'
+      ? void
+      : A extends 'packagePolicyPostCreate'
+      ? PackagePolicy
+      : NewPackagePolicy
+  >;
 
   runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
 
