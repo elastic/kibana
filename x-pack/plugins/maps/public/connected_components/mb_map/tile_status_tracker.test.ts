@@ -61,6 +61,11 @@ function createMockMbDataEvent(mbSourceId: string, tileKey: string): unknown {
     dataType: 'source',
     tile: {
       tileID: {
+        canonical: {
+          x: 80,
+          y: 10,
+          z: 5
+        },
         key: tileKey,
       },
     },
@@ -133,7 +138,7 @@ describe('TileStatusTracker', () => {
       },
     });
 
-    expect(mockMbMap.listeners.length).toBe(3);
+    expect(mockMbMap.listeners.length).toBe(4);
     tileStatusTracker.destroy();
     expect(mockMbMap.listeners.length).toBe(0);
   });

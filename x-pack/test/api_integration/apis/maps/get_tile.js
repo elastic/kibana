@@ -86,7 +86,7 @@ export default function ({ getService }) {
     });
 
     it('should return error when index does not exist', async () => {
-      const resp = await supertest
+      await supertest
         .get(
           `/api/maps/mvt/getTile/2/1/1.pbf\
 ?geometryFieldName=geo.coordinates\
