@@ -193,30 +193,12 @@ export default function ({ getService }) {
       ]);
     });
 
-    it('should 403 when user does not have read access to index', async () => {
-      const IMPORTER_ROLE_NAME = 'importer';
-      const IMPORTER_USER_NAME = 'importer';
-      const IMPORT_USER_PASSWORD = `${IMPORTER_USER_NAME}-password`;
-      try {
-        await security.role.create(IMPORTER_ROLE_NAME, {});
-
-        await security.user.create(IMPORTER_USER_NAME, {
-          password: IMPORT_USER_PASSWORD,
-          roles: [IMPORTER_ROLE_NAME],
-        });
-
-        const resp = await supertestWithoutAuth
-          .get(URL + '&renderAs=point')
-          .auth(IMPORTER_USER_NAME, IMPORT_USER_PASSWORD)
-          .set('kbn-xsrf', 'kibana')
-          .send()
-          .expect(200);
-
-        expect(resp.body.hasImportPermission).to.be(false);
-      } finally {
-        await security.role.delete(IMPORTER_ROLE_NAME);
-        await security.user.delete(IMPORTER_USER_NAME);
-      }
+    it('should return error when index does not exist', async () => {
+      const resp = await supertest
+        .get(URL.replace('index=logstash-*', 'index=notRealIndex') + '&renderAs=point')
+        .set('kbn-xsrf', 'kibana')
+        .responseType('blob')
+        .expect(404);
     });
   });
 }
