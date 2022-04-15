@@ -9869,7 +9869,6 @@
     "xpack.fleet.agentEnrollment.stepConfigurePolicyAuthenticationTitle": "Sélectionner le jeton d'enregistrement",
     "xpack.fleet.agentEnrollment.stepDownloadAgentTitle": "Télécharger l'agent Elastic Agent sur votre hôte",
     "xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle": "Enregistrer et démarrer l'agent Elastic Agent",
-    "xpack.fleet.agentEnrollment.stepRunAgentDescription": "Depuis le répertoire des agents, exécutez cette commande pour installer, enregistrer et démarrer un agent Elastic Agent. Vous pouvez réutiliser cette commande pour configurer des agents sur plusieurs hôtes. Cette action nécessite de disposer de privilèges d'administrateur.",
     "xpack.fleet.agentHealth.checkInTooltipText": "Dernier archivage le {lastCheckIn}",
     "xpack.fleet.agentHealth.healthyStatusText": "Sain",
     "xpack.fleet.agentHealth.inactiveStatusText": "Inactif",
