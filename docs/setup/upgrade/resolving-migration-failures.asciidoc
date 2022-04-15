@@ -131,7 +131,7 @@ In the CLONE_TEMP_TO_TARGET or CREATE_REINDEX_TEMP steps, you might see a log en
 
 [source,sh]
 --------------------------------------------
-Action failed with "Request timed out". Retrying attempt 1 in 2 seconds.
+"Action failed with [index_not_yellow_timeout] Timeout waiting for the status of the [.kibana_8.1.0_001] index to become "yellow". Retrying attempt 1 in 2 seconds."
 --------------------------------------------
 The process is waiting for a yellow index status. There are two known causes:
 
