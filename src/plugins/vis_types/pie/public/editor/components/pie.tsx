@@ -103,8 +103,8 @@ const PieOptions = (props: PieOptionsProps) => {
   );
 
   useEffect(() => {
-    setLegendVisibility(legendUiStateValue);
-  }, [legendUiStateValue]);
+    setLegendVisibility(legendUiStateValue ?? stateParams.legendDisplay === LegendDisplay.SHOW);
+  }, [legendUiStateValue, stateParams.legendDisplay]);
 
   useEffect(() => {
     const fetchPalettes = async () => {

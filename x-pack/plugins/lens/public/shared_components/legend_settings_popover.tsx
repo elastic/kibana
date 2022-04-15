@@ -20,7 +20,6 @@ import { LegendLocationSettings } from './legend_location_settings';
 import { ColumnsNumberSetting } from './columns_number_setting';
 import { LegendSizeSettings } from './legend_size_settings';
 import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
-import { TooltipWrapper } from './tooltip_wrapper';
 import { useDebouncedValue } from './debounced_value';
 
 export interface LegendSettingsPopoverProps {
@@ -137,11 +136,9 @@ const MIN_TRUNCATE_LINES = 1;
 export const MaxLinesInput = ({
   value,
   setValue,
-  isDisabled,
 }: {
   value: number;
   setValue: (value: number) => void;
-  isDisabled: boolean;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
   return (
@@ -152,7 +149,6 @@ export const MaxLinesInput = ({
       max={MAX_TRUNCATE_LINES}
       step={1}
       compressed
-      disabled={isDisabled}
       onChange={(e) => {
         const val = Number(e.target.value);
         // we want to automatically change the values to the limits
@@ -218,146 +214,101 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
           onChange={onDisplayChange}
         />
       </EuiFormRow>
-      <LegendLocationSettings
-        location={location}
-        onLocationChange={onLocationChange}
-        verticalAlignment={verticalAlignment}
-        horizontalAlignment={horizontalAlignment}
-        onAlignmentChange={onAlignmentChange}
-        isDisabled={mode === 'hide'}
-        position={position}
-        onPositionChange={onPositionChange}
-      />
-      <LegendSizeSettings
-        legendSize={legendSize}
-        onLegendSizeChange={onLegendSizeChange}
-        isVerticalLegend={!position || position === Position.Left || position === Position.Right}
-        isDisabled={mode === 'hide'}
-      />
-      {location && (
-        <ColumnsNumberSetting
-          floatingColumns={floatingColumns}
-          onFloatingColumnsChange={onFloatingColumnsChange}
-          isDisabled={mode === 'hide'}
-          isLegendOutside={location === 'outside'}
-        />
-      )}
-      <EuiFormRow
-        display="columnCompressedSwitch"
-        label={i18n.translate('xpack.lens.shared.truncateLegend', {
-          defaultMessage: 'Truncate text',
-        })}
-      >
-        <TooltipWrapper
-          tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-            defaultMessage: 'Requires legend to be shown',
-          })}
-          condition={mode === 'hide'}
-          position="top"
-          delay="regular"
-          display="block"
-        >
-          <EuiSwitch
-            compressed
+      {mode !== 'hide' && (
+        <>
+          <LegendLocationSettings
+            location={location}
+            onLocationChange={onLocationChange}
+            verticalAlignment={verticalAlignment}
+            horizontalAlignment={horizontalAlignment}
+            onAlignmentChange={onAlignmentChange}
+            position={position}
+            onPositionChange={onPositionChange}
+          />
+          <LegendSizeSettings
+            legendSize={legendSize}
+            onLegendSizeChange={onLegendSizeChange}
+            isVerticalLegend={
+              !position || position === Position.Left || position === Position.Right
+            }
+          />
+          {location && (
+            <ColumnsNumberSetting
+              floatingColumns={floatingColumns}
+              onFloatingColumnsChange={onFloatingColumnsChange}
+              isLegendOutside={location === 'outside'}
+            />
+          )}
+          <EuiFormRow
+            display="columnCompressedSwitch"
             label={i18n.translate('xpack.lens.shared.truncateLegend', {
               defaultMessage: 'Truncate text',
             })}
-            data-test-subj="lens-legend-truncate-switch"
-            showLabel={false}
-            disabled={mode === 'hide'}
-            checked={shouldTruncate ?? true}
-            onChange={onTruncateLegendChange}
-          />
-        </TooltipWrapper>
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.shared.maxLinesLabel', {
-          defaultMessage: 'Maximum lines',
-        })}
-        fullWidth
-        display="columnCompressed"
-      >
-        <TooltipWrapper
-          tooltipContent={
-            mode === 'hide'
-              ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                  defaultMessage: 'Requires legend to be shown',
-                })
-              : i18n.translate('xpack.lens.shared.legendIsTruncated', {
-                  defaultMessage: 'Requires text to be truncated',
-                })
-          }
-          condition={mode === 'hide' || !shouldTruncate}
-          position="top"
-          delay="regular"
-          display="block"
-        >
-          <MaxLinesInput
-            value={maxLines ?? DEFAULT_TRUNCATE_LINES}
-            setValue={onMaxLinesChange}
-            isDisabled={mode === 'hide' || !shouldTruncate}
-          />
-        </TooltipWrapper>
-      </EuiFormRow>
-      {renderNestedLegendSwitch && (
-        <EuiFormRow
-          display="columnCompressedSwitch"
-          label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
-            defaultMessage: 'Nested',
-          })}
-        >
-          <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-              defaultMessage: 'Requires legend to be shown',
-            })}
-            condition={mode === 'hide'}
-            position="top"
-            delay="regular"
-            display="block"
           >
             <EuiSwitch
               compressed
-              label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
+              label={i18n.translate('xpack.lens.shared.truncateLegend', {
+                defaultMessage: 'Truncate text',
+              })}
+              data-test-subj="lens-legend-truncate-switch"
+              showLabel={false}
+              checked={shouldTruncate ?? true}
+              onChange={onTruncateLegendChange}
+            />
+          </EuiFormRow>
+          {shouldTruncate && (
+            <EuiFormRow
+              label={i18n.translate('xpack.lens.shared.maxLinesLabel', {
+                defaultMessage: 'Maximum lines',
+              })}
+              fullWidth
+              display="columnCompressed"
+            >
+              <MaxLinesInput
+                value={maxLines ?? DEFAULT_TRUNCATE_LINES}
+                setValue={onMaxLinesChange}
+              />
+            </EuiFormRow>
+          )}
+          {renderNestedLegendSwitch && (
+            <EuiFormRow
+              display="columnCompressedSwitch"
+              label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
                 defaultMessage: 'Nested',
               })}
-              data-test-subj="lens-legend-nested-switch"
-              showLabel={false}
-              disabled={mode === 'hide'}
-              checked={!!nestedLegend}
-              onChange={onNestedLegendChange}
-            />
-          </TooltipWrapper>
-        </EuiFormRow>
-      )}
-      {renderValueInLegendSwitch && (
-        <EuiFormRow
-          display="columnCompressedSwitch"
-          label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
-            defaultMessage: 'Show value',
-          })}
-        >
-          <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-              defaultMessage: 'Requires legend to be shown',
-            })}
-            condition={mode === 'hide'}
-            position="top"
-            delay="regular"
-            display="block"
-          >
-            <EuiSwitch
-              compressed
+            >
+              <EuiSwitch
+                compressed
+                label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
+                  defaultMessage: 'Nested',
+                })}
+                data-test-subj="lens-legend-nested-switch"
+                showLabel={false}
+                checked={!!nestedLegend}
+                onChange={onNestedLegendChange}
+              />
+            </EuiFormRow>
+          )}
+          {renderValueInLegendSwitch && (
+            <EuiFormRow
+              display="columnCompressedSwitch"
               label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
                 defaultMessage: 'Show value',
               })}
-              data-test-subj="lens-legend-show-value"
-              showLabel={false}
-              disabled={mode === 'hide'}
-              checked={!!valueInLegend}
-              onChange={onValueInLegendChange}
-            />
-          </TooltipWrapper>
-        </EuiFormRow>
+            >
+              <EuiSwitch
+                compressed
+                label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
+                  defaultMessage: 'Show value',
+                })}
+                data-test-subj="lens-legend-show-value"
+                showLabel={false}
+                checked={!!valueInLegend}
+                onChange={onValueInLegendChange}
+              />
+            </EuiFormRow>
+          )}
+        </>
       )}
     </ToolbarPopover>
   );

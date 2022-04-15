@@ -63,6 +63,7 @@
         { "id": "kibDevTutorialServerEndpoint" },
         { "id": "kibDevTutorialAdvancedSettings" },
         { "id": "kibDevSharePluginReadme" }
+        { "id": "kibDevTutorialScreenshotting" }
       ]
     },
     {
@@ -146,6 +147,7 @@
         { "id": "kibSavedObjectsTaggingOssPluginApi" },
         { "id": "kibSavedObjectsTaggingPluginApi" },
         { "id": "kibSavedObjectsPluginApi" },
+        { "id": "kibScreenshottingPluginApi" },
         { "id": "kibSecuritySolutionPluginApi" },
         { "id": "kibSecurityPluginApi" },
         { "id": "kibSharePluginApi" },

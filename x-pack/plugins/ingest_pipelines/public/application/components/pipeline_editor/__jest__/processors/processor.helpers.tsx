@@ -7,10 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 import React from 'react';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
+import { HttpSetup } from 'kibana/public';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
@@ -102,7 +101,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
   };
 };
 
-export const setup = async (props: Props): Promise<SetupResult> => {
+export const setup = async (httpSetup: HttpSetup, props: Props): Promise<SetupResult> => {
+  apiService.setup(httpSetup, uiMetricService);
+
   const testBed = testBedSetup(props);
   return {
     ...testBed,
@@ -110,19 +111,11 @@ export const setup = async (props: Props): Promise<SetupResult> => {
   };
 };
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
 export const setupEnvironment = () => {
   // Initialize mock services
   uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  // @ts-ignore
-  apiService.setup(mockHttpClient, uiMetricService);
 
-  const { httpRequestsMockHelpers } = initHttpRequests();
-
-  return {
-    httpRequestsMockHelpers,
-  };
+  return initHttpRequests();
 };
 
 export const getProcessorValue = (onUpdate: jest.Mock, type: string) => {
@@ -187,4 +180,9 @@ type TestSubject =
   | 'transportField.input'
   | 'seedField.input'
   | 'copyFromInput'
-  | 'trimSwitch.input';
+  | 'trimSwitch.input'
+  | 'droppableList.addButton'
+  | 'droppableList.errorIcon'
+  | 'droppableList.input-0'
+  | 'droppableList.input-1'
+  | 'droppableList.input-2';

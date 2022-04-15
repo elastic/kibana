@@ -10,11 +10,12 @@
 
 import { stackMonitoring, timerange } from '../../index';
 import { Scenario } from '../scenario';
-import { getCommonServices } from '../utils/get_common_services';
+import { getLogger } from '../utils/get_common_services';
 import { RunOptions } from '../utils/parse_run_cli_flags';
+import { StackMonitoringFields } from '../../lib/stack_monitoring/stack_monitoring_fields';
 
-const scenario: Scenario = async (runOptions: RunOptions) => {
-  const { logger } = getCommonServices(runOptions);
+const scenario: Scenario<StackMonitoringFields> = async (runOptions: RunOptions) => {
+  const logger = getLogger(runOptions);
 
   return {
     mapToIndex: (data) => {
@@ -28,18 +29,18 @@ const scenario: Scenario = async (runOptions: RunOptions) => {
       const kibanaStats = cluster.kibana('kibana-01').stats();
 
       const range = timerange(from, to);
-      return range
-        .interval('10s')
-        .rate(1)
-        .spans((timestamp) => {
-          const clusterEvents = logger.perf('generating_es_events', () => {
-            return clusterStats.timestamp(timestamp).indices(115).serialize();
-          });
-          const kibanaEvents = logger.perf('generating_kb_events', () => {
-            return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
-          });
-          return [...clusterEvents, ...kibanaEvents];
-        });
+      const interval = range.interval('10s').rate(1);
+      return interval
+        .generator((timestamp) =>
+          logger.perf('generating_es_events', () => clusterStats.timestamp(timestamp).indices(115))
+        )
+        .merge(
+          interval.generator((timestamp) =>
+            logger.perf('generating_kb_events', () =>
+              kibanaStats.timestamp(timestamp).requests(10, 20)
+            )
+          )
+        );
     },
   };
 };
