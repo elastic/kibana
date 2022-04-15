@@ -145,7 +145,9 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       : [];
 
     if (selectionType === 'radio') {
-      steps.push(InstallationModeSelectionStep({ mode, setMode }));
+      steps.push(
+        InstallationModeSelectionStep({ selectedPolicyId: selectedPolicy?.id, mode, setMode })
+      );
     }
 
     steps.push(
@@ -236,7 +238,9 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         ];
 
     if (selectionType === 'radio') {
-      steps.push(InstallationModeSelectionStep({ mode, setMode }));
+      steps.push(
+        InstallationModeSelectionStep({ selectedPolicyId: selectedPolicy?.id, mode, setMode })
+      );
     }
 
     steps.push(
@@ -257,7 +261,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         })
       );
     }
-    if (selectedPolicy && enrolledAgentIds.length) {
+    if (selectedPolicy) {
       steps.push(
         IncomingDataConfirmationStep({
           agentIds: enrolledAgentIds,
