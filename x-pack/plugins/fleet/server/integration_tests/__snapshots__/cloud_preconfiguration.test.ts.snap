@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Fleet preconfiguration reset Preconfigred cloud policy Create correct .fleet-policies 1`] = `
+exports[`Fleet preconfiguration reset Preconfigured cloud policy With a full preconfigured cloud policy Create correct .fleet-policies 1`] = `
 Object {
   "agent": Object {
     "monitoring": Object {

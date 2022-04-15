@@ -169,6 +169,8 @@ export const DataGrid: FC<Props> = memo(
             );
           } else if (schema === 'featureInfluence') {
             return <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>;
+          } else {
+            return <DefaultCellPopover {...popoverProps} />;
           }
         } else {
           return <DefaultCellPopover {...popoverProps} />;
