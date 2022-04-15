@@ -61,7 +61,7 @@ describe('Rules', () => {
           cy.contains('Save').click();
           cy.get(confirmModalButtonSelector).click();
 
-          cy.contains(`Created rule "${ruleName}`);
+          cy.contains(`Rule "${ruleName}" was created`);
         });
       });
     });
@@ -94,7 +94,7 @@ describe('Rules', () => {
         cy.contains('button:not(:disabled)', 'Save').click();
         cy.get(confirmModalButtonSelector).click();
 
-        cy.contains(`Created rule "${ruleName}`);
+        cy.contains(`Rule "${ruleName}" was created`);
       });
     });
   });

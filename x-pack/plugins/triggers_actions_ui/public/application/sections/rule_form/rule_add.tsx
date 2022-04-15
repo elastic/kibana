@@ -208,7 +208,7 @@ const RuleAdd = ({
       const newRule = await createRule({ http, rule: rule as RuleUpdates });
       toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.ruleAdd.saveSuccessNotificationText', {
-          defaultMessage: 'Created rule "{ruleName}"',
+          defaultMessage: 'Rule "{ruleName}" was created',
           values: {
             ruleName: newRule.name,
           },
