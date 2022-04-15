@@ -444,8 +444,6 @@
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/hover_actions/actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting-explore
@@ -474,6 +472,8 @@
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
 
 ## Security Solution sub teams - Detections and Response Alerts
+/x-pack/plugins/security_solution/public/detections/pages/alerts @elastic/security-detections-response-alerts
+
 /x-pack/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/notifications @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/schemas @elastic/security-detections-response-alerts
@@ -487,12 +487,18 @@
 /x-pack/plugins/security_solution/public/detections/components/severity @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/components/status @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/rules @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/detections/components/callouts @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/detections/mitre @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detections-response-rules
 
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_execution_log @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules @elastic/security-detections-response-rules
-/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/factories @elastic/security-detections-response-alerts
-
+/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/factories @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/server/utils @elastic/security-detections-response-rules
 
 ## Security Solution sub teams - Security Platform
 /x-pack/plugins/lists @elastic/security-solution-platform
@@ -503,14 +509,22 @@
 
 /x-pack/plugins/security_solution/public/common/components/exceptions @elastic/security-solution-platform
 /x-pack/plugins/security_solution/public/exceptions @elastic/security-solution-platform
+/x-pack/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-solution-platform
 
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-solution-platform
-/x-pack/plugins/security_solution/server/routes @elastic/security-solution-platform
 /packages/kbn-securitysolution* @elastic/security-solution-platform
 
 
 ## Security Solution sub teams - Security Threat Intelligence
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-threat-intelligence
+
+## Security Solution cross teams ownership
+/x-pack/plugins/security_solution/common/ecs @elastic/security-detections-response-rules @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/common/test @elastic/security-detections-response-rules @elastic/security-detections-response-alerts
+
+/x-pack/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
+
+/x-pack/plugins/security_solution/server/routes @elastic/security-detections-response-alerts @elastic/security-detections-response-rules
 
 
 ## Security Solution sub teams - security-onboarding-and-lifecycle-mgt
