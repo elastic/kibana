@@ -39,12 +39,16 @@ const RuleLink: React.FC<SingleAlertProps> = memo(
     const ruleDetailsHref = getRuleDetailsHref?.(ruleId);
     const finalRuleName = ruleName ?? i18n.UNKNOWN_RULE;
 
-    if (!loadingAlertData && !isEmpty(ruleId) && ruleDetailsHref != null) {
+    if (loadingAlertData) {
+      return <EuiLoadingSpinner size="m" data-test-subj={`alert-loading-spinner-${actionId}`} />;
+    }
+
+    if (!isEmpty(ruleId) && ruleDetailsHref != null) {
       return (
         <LinkAnchor
           onClick={onLinkClick}
           href={ruleDetailsHref}
-          data-test-subj={`alert-rule-link-${actionId ?? 'deleted'}`}
+          data-test-subj={`alert-rule-link-${actionId}`}
         >
           {finalRuleName}
         </LinkAnchor>
@@ -66,9 +70,8 @@ const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
   ruleName,
 }) => {
   return (
-    <>
+    <span data-test-subj={`single-alert-user-action-${actionId}`}>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
-      {loadingAlertData && <EuiLoadingSpinner size="m" />}
       <RuleLink
         actionId={actionId}
         ruleId={ruleId}
@@ -77,7 +80,7 @@ const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
         onRuleDetailsClick={onRuleDetailsClick}
         loadingAlertData={loadingAlertData}
       />
-    </>
+    </span>
   );
 };
 
@@ -95,7 +98,7 @@ const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
   totalAlerts,
 }) => {
   return (
-    <>
+    <span data-test-subj={`multiple-alerts-user-action-${actionId}`}>
       {`${i18n.MULTIPLE_ALERTS_COMMENT_LABEL_TITLE(totalAlerts)}`}{' '}
       <RuleLink
         actionId={actionId}
@@ -105,7 +108,7 @@ const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
         onRuleDetailsClick={onRuleDetailsClick}
         loadingAlertData={loadingAlertData}
       />
-    </>
+    </span>
   );
 };
 

@@ -98,7 +98,6 @@ const getMultipleAlertsUserAction = ({
   getRuleDetailsHref,
   loadingAlertData,
   onRuleDetailsClick,
-  onShowAlertDetails,
 }: BuilderArgs): EuiCommentProps[] => {
   if (!Array.isArray(comment.alertId)) {
     return [];
@@ -205,7 +204,7 @@ function getNonEmptyField(field: string | string[] | undefined | null): string |
   return firstItem;
 }
 
-function getRuleInfo(comment: BuilderArgs['comment'], alertData: BuilderArgs['alertData']) {
+export function getRuleInfo(comment: BuilderArgs['comment'], alertData: BuilderArgs['alertData']) {
   const alertId = getNonEmptyField(comment.alertId);
 
   if (!alertId) {

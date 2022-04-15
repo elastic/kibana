@@ -8,9 +8,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TestProviders } from '../../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { SingleAlertCommentEvent } from './alert_event';
+import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 
 const props = {
   actionId: 'action-id-1',
@@ -23,7 +23,7 @@ const props = {
 jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-describe('UserActionAvatar ', () => {
+describe('Alert events', () => {
   let navigateToApp: jest.Mock;
 
   beforeEach(() => {
@@ -32,70 +32,144 @@ describe('UserActionAvatar ', () => {
     useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 
-  it('it renders', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <SingleAlertCommentEvent {...props} />
-      </TestProviders>
-    );
+  describe('SingleAlertCommentEvent', () => {
+    it('it renders', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SingleAlertCommentEvent {...props} />
+        </TestProviders>
+      );
 
-    expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-    ).toBeTruthy();
-    expect(wrapper.text()).toBe('added an alert from Awesome rule');
+      expect(
+        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
+      ).toBeTruthy();
+      expect(wrapper.text()).toBe('added an alert from Awesome rule');
+    });
+
+    it('does NOT render the link when the rule id is null', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SingleAlertCommentEvent {...props} ruleId={null} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
+      ).toBeFalsy();
+
+      expect(wrapper.text()).toBe('added an alert from Awesome rule');
+    });
+
+    it('does NOT render the link when the href is invalid but it shows the rule name', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SingleAlertCommentEvent {...props} getRuleDetailsHref={undefined} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
+      ).toBeFalsy();
+
+      expect(wrapper.text()).toBe('added an alert from Awesome rule');
+    });
+
+    it('show Unknown rule if the rule name is invalid', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SingleAlertCommentEvent {...props} ruleName={null} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
+      ).toBeTruthy();
+      expect(wrapper.text()).toBe('added an alert from Unknown rule');
+    });
+
+    it('navigate to app on link click', async () => {
+      const onRuleDetailsClick = jest.fn();
+
+      const wrapper = mount(
+        <TestProviders>
+          <SingleAlertCommentEvent {...props} onRuleDetailsClick={onRuleDetailsClick} />
+        </TestProviders>
+      );
+
+      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().simulate('click');
+      expect(onRuleDetailsClick).toHaveBeenCalled();
+    });
+
+    it('shows the loading spinner if the alerts data are loading', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SingleAlertCommentEvent {...props} loadingAlertData={true} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find(`[data-test-subj="alert-loading-spinner-action-id-1"]`).first().exists()
+      ).toBeTruthy();
+    });
   });
 
-  it('does NOT render the link when the rule is null', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <SingleAlertCommentEvent {...props} ruleId={null} />
-      </TestProviders>
-    );
+  describe('MultipleAlertsCommentEvent', () => {
+    let appMock: AppMockRenderer;
 
-    expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-    ).toBeFalsy();
+    beforeEach(() => {
+      appMock = createAppMockRenderer();
+      jest.clearAllMocks();
+    });
 
-    expect(wrapper.text()).toBe('added an alert from Awesome rule');
-  });
+    it('renders correctly', async () => {
+      const result = appMock.render(<MultipleAlertsCommentEvent {...props} totalAlerts={2} />);
 
-  it('does NOT render the link when the href is invalid but it shows the rule name', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <SingleAlertCommentEvent {...props} getRuleDetailsHref={undefined} />
-      </TestProviders>
-    );
+      expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+        'added 2 alerts from Awesome rule'
+      );
+      expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
+    });
 
-    expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-    ).toBeFalsy();
+    it('does NOT render the link when the rule id is null', async () => {
+      const result = appMock.render(
+        <MultipleAlertsCommentEvent {...props} totalAlerts={2} ruleId={null} />
+      );
 
-    expect(wrapper.text()).toBe('added an alert from Awesome rule');
-  });
+      expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+        'added 2 alerts from Awesome rule'
+      );
+      expect(result.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
+    });
 
-  it('show Unknown rule if the rule name is invalid', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <SingleAlertCommentEvent {...props} ruleName={null} />
-      </TestProviders>
-    );
+    it('does NOT render the link when the href is invalid but it shows the rule name', async () => {
+      const result = appMock.render(
+        <MultipleAlertsCommentEvent {...props} totalAlerts={2} getRuleDetailsHref={undefined} />
+      );
 
-    expect(
-      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-    ).toBeTruthy();
-    expect(wrapper.text()).toBe('added an alert from Unknown rule');
-  });
+      expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+        'added 2 alerts from Awesome rule'
+      );
+      expect(result.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
+    });
 
-  it('navigate to app on link click', async () => {
-    const onRuleDetailsClick = jest.fn();
+    it('show Unknown rule if the rule name is invalid', async () => {
+      const result = appMock.render(
+        <MultipleAlertsCommentEvent {...props} totalAlerts={2} ruleName={null} />
+      );
 
-    const wrapper = mount(
-      <TestProviders>
-        <SingleAlertCommentEvent {...props} onRuleDetailsClick={onRuleDetailsClick} />
-      </TestProviders>
-    );
+      expect(result.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+        'added 2 alerts from Unknown rule'
+      );
 
-    wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().simulate('click');
-    expect(onRuleDetailsClick).toHaveBeenCalled();
+      expect(result.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Unknown rule');
+    });
+
+    it('shows the loading spinner if the alerts data are loading', async () => {
+      const result = appMock.render(
+        <MultipleAlertsCommentEvent {...props} totalAlerts={2} loadingAlertData={true} />
+      );
+
+      expect(result.getByTestId('alert-loading-spinner-action-id-1')).toBeTruthy();
+    });
   });
 });
