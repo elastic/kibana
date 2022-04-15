@@ -479,7 +479,6 @@
 /x-pack/plugins/security_solution/server/lib/detection_engine/schemas @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/signals @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/server/lib/detection_engine/tags @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detections-response-alerts
 
@@ -503,6 +502,7 @@
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/factories @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/utils @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/server/lib/detection_engine/tags @elastic/security-detections-response-rules
 
 ## Security Solution sub teams - Security Platform
 /x-pack/plugins/lists @elastic/security-solution-platform
