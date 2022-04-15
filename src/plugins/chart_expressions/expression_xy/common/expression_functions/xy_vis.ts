@@ -36,6 +36,7 @@ import {
 } from '../constants';
 import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
+import { validateMarkSizeRatioLimits } from './validate';
 
 const errors = {
   extendBoundsAreInvalidError: () =>
@@ -248,6 +249,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.xyVis.markSizeRatio.help', {
         defaultMessage: 'Specifies the ratio of the dots at the line and area charts',
       }),
+      default: 1,
     },
   },
   fn(data, args, handlers) {
@@ -292,6 +294,8 @@ export const xyVisFunction: ExpressionFunctionDefinition<
     if ((!hasBar || !hasNotHistogramBars) && args.valueLabels !== ValueLabelModes.HIDE) {
       throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
     }
+
+    validateMarkSizeRatioLimits(args.markSizeRatio);
 
     return {
       type: 'render',

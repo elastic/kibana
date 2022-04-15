@@ -120,8 +120,8 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
     },
   },
   fn(table, args) {
-    validateAccessor(args.markSizeAccessor, table.columns);
     validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
+    validateAccessor(args.markSizeAccessor, table.columns);
 
     return {
       type: DATA_LAYER,

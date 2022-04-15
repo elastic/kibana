@@ -17,6 +17,10 @@ const errors = {
         defaultMessage: 'Dots are applied only for line or area charts',
       }
     ),
+  markSizeRatioLimitsError: () =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeLimitsError', {
+      defaultMessage: 'Mark size ratio must be greater or equal to 1 and less or equal to 100',
+    }),
 };
 
 export const validateMarkSizeForChartType = (
@@ -25,5 +29,11 @@ export const validateMarkSizeForChartType = (
 ) => {
   if (markSizeAccessor && !seriesType.includes('line') && !seriesType.includes('area')) {
     throw new Error(errors.markSizeAccessorForNonLineOrAreaChartsError());
+  }
+};
+
+export const validateMarkSizeRatioLimits = (markSizeRatio: number) => {
+  if (markSizeRatio < 1 || markSizeRatio > 100) {
+    throw new Error(errors.markSizeRatioLimitsError());
   }
 };

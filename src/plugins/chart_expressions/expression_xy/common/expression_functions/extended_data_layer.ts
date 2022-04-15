@@ -128,8 +128,8 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
   fn(input, args) {
     const table = args.table ?? input;
 
-    validateAccessor(args.markSizeAccessor, table.columns);
     validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
+    validateAccessor(args.markSizeAccessor, table.columns);
 
     return {
       type: EXTENDED_DATA_LAYER,

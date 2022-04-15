@@ -238,6 +238,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   const splitFormatter = formatFactory(splitHint);
 
   const markSizeColumn = table?.columns.find((col) => col.id === markSizeAccessor);
+  const markFormatter = formatFactory(markSizeColumn?.meta?.params);
 
   // what if row values are not primitive? That is the case of, for instance, Ranges
   // remaps them to their serialized version with the formatHint metadata
@@ -276,6 +277,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
     markSizeAccessor: markSizeColumn ? markSizeColumn.id : undefined,
+    markFormat: (value) => markFormatter.convert(value),
     data: rows,
     xScaleType: layer.xAccessor ? layer.xScaleType : 'ordinal',
     yScaleType:

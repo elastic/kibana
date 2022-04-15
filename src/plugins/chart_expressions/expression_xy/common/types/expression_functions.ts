@@ -204,7 +204,7 @@ export interface XYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  markSizeRatio?: number;
+  markSizeRatio: number;
 }
 
 export interface LayeredXYArgs {
@@ -228,7 +228,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  markSizeRatio?: number;
+  markSizeRatio: number;
 }
 
 export interface XYProps {

@@ -27,6 +27,7 @@ import {
   EXTENDED_ANNOTATION_LAYER,
 } from '../constants';
 import { logDatatables } from '../utils';
+import { validateMarkSizeRatioLimits } from './validate';
 
 export const layeredXyVisFunction: ExpressionFunctionDefinition<
   typeof LAYERED_XY_VIS,
@@ -184,6 +185,8 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     );
 
     logDatatables(layers, handlers);
+
+    validateMarkSizeRatioLimits(args.markSizeRatio);
 
     return {
       type: 'render',
