@@ -309,6 +309,21 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['communications'],
   },
   {
+    id: 'zoom',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.zoomName', {
+      defaultMessage: 'Zoom',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.zoomDescription',
+      {
+        defaultMessage:
+          'Search over meeting recordings, chats and other communications with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'zoom', 'communications', 'productivity'],
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/zoom',
+  },
+  {
     id: 'custom_api_source',
     title: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceName',

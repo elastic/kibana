@@ -39,6 +39,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   ticketing: 'Ticketing',
   version_control: 'Version control',
   web: 'Web',
+  zoom: 'Zoom',
 
   // Kibana added
   communications: 'Communications',
