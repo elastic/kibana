@@ -10,6 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import IndexThresholdAlertTypeExpression, { DEFAULT_VALUES } from './expression';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { IndexThresholdAlertParams } from './types';
 import { validateExpression } from './validation';
@@ -68,6 +69,7 @@ jest.mock('../../../../triggers_actions_ui/public', () => {
 });
 
 const dataMock = dataPluginMock.createStartContract();
+const dataViewMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
 describe('IndexThresholdAlertTypeExpression', () => {
@@ -95,6 +97,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
         setRuleProperty={() => {}}
         errors={errors}
         data={dataMock}
+        dataViews={dataViewMock}
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}

@@ -51,7 +51,8 @@ export async function setupRemoteCache(repoRootPath: string) {
   if (!(await isVaultAvailable())) {
     log.info('[bazel_tools] vault is not available, unable to setup remote cache settings.');
     log.info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    log.info('[bazel_tools] reach out to Operations if you need assistance with this.');
+    log.info('[bazel_tools] use the following guide or reach out to Operations for assistance');
+    log.info('[bazel_tools] https://github.com/elastic/infra/tree/master/docs/vault');
     return;
   }
 
