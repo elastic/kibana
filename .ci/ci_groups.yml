@@ -39,4 +39,5 @@ xpack:
   - ciGroup25
   - ciGroup26
   - ciGroup27
-  - ciGroupDocker
+  - ciGroup28
+  - ciGroup29

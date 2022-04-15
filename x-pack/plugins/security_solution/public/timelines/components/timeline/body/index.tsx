@@ -260,7 +260,6 @@ export const StatefulBody = React.memo<Props>(
             <Events
               containerRef={containerRef}
               actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
               columnHeaders={columnHeaders}
               data={data}
               eventIdToNoteIds={eventIdToNoteIds}
