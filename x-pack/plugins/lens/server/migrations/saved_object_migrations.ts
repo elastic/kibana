@@ -45,7 +45,7 @@ import {
   commonEnhanceTableRowHeight,
   commonSetIncludeEmptyRowsDateHistogram,
   commonLockOldMetricVisSettings,
-  commonLockOldLegendSizeDefault,
+  commonPreserveOldLegendSizeDefault,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -491,9 +491,9 @@ const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocS
   doc
 ) => ({ ...doc, attributes: commonLockOldMetricVisSettings(doc.attributes) });
 
-const lockOldLegendSizeDefault: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+const preserveOldLegendSizeDefault: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
   doc
-) => ({ ...doc, attributes: commonLockOldLegendSizeDefault(doc.attributes) });
+) => ({ ...doc, attributes: commonPreserveOldLegendSizeDefault(doc.attributes) });
 
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
@@ -514,7 +514,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     setIncludeEmptyRowsDateHistogram,
     enhanceTableRowHeight
   ),
-  '8.3.0': flow(lockOldMetricVisSettings, lockOldLegendSizeDefault),
+  '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault),
 };
 
 export const getAllMigrations = (

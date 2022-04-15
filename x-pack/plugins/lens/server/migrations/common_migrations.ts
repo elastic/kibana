@@ -254,7 +254,7 @@ export const commonLockOldMetricVisSettings = (
   return newAttributes;
 };
 
-export const commonLockOldLegendSizeDefault = (
+export const commonPreserveOldLegendSizeDefault = (
   attributes: LensDocShape810
 ): LensDocShape810<VisState820> => {
   const newAttributes = cloneDeep(attributes);
