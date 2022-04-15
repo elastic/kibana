@@ -57,7 +57,7 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const gzippedTile = await getEsTile({
+      const { stream, statusCode } = await getEsTile({
         url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
@@ -71,7 +71,7 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, gzippedTile);
+      return sendResponse(response, stream, statusCode);
     }
   );
 
@@ -103,7 +103,7 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const gzipTileStream = await getEsGridTile({
+      const { stream, statusCode } = await getEsGridTile({
         url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
@@ -119,15 +119,26 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, gzipTileStream);
+      return sendResponse(response, stream, statusCode);
     }
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, gzipTileStream: Stream | null) {
+function sendResponse(
+  response: KibanaResponseFactory,
+  gzipTileStream: Stream | null,
+  statusCode: number
+) {
+  if (statusCode >= 400) {
+    return response.customError({
+      statusCode,
+      body: gzipTileStream ? gzipTileStream : statusCode.toString(),
+    });
+  }
+
   const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
   const lastModified = `${new Date().toUTCString()}`;
-  if (gzipTileStream) {
+  if (gzipTileStream && statusCode < 400) {
     return response.ok({
       body: gzipTileStream,
       headers: {
