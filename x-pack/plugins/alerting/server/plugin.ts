@@ -8,19 +8,17 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import { pick } from 'lodash';
-import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { SpacesPluginStart } from '../../spaces/server';
-import { RulesClient } from './rules_client';
-import { RuleTypeRegistry } from './rule_type_registry';
-import { TaskRunnerFactory } from './task_runner';
-import { RulesClientFactory } from './rules_client_factory';
-import { ILicenseState, LicenseState } from './lib/license_state';
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   KibanaRequest,
   Logger,
@@ -32,14 +30,31 @@ import {
   ServiceStatus,
   SavedObjectsBulkGetObject,
   ServiceStatusLevels,
-} from '../../../../src/core/server';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
-import { defineRoutes } from './routes';
-import { LICENSE_TYPE, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+} from '@kbn/core/server';
+import {
+  LICENSE_TYPE,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
-} from '../../actions/server';
+} from '@kbn/actions-plugin/server';
+import {
+  IEventLogger,
+  IEventLogService,
+  IEventLogClientService,
+} from '@kbn/event-log-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { RulesClient } from './rules_client';
+import { RuleTypeRegistry } from './rule_type_registry';
+import { TaskRunnerFactory } from './task_runner';
+import { RulesClientFactory } from './rules_client_factory';
+import { ILicenseState, LicenseState } from './lib/license_state';
+import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID } from './types';
+import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -50,8 +65,6 @@ import {
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
@@ -63,8 +76,6 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';

@@ -11,8 +11,8 @@ import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
+import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
-import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
 

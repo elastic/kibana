@@ -7,10 +7,10 @@
 
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { useGetUrlParams } from '../../../hooks';
 import { esKuerySelector } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
-import { useFetcher } from '../../../../../observability/public';
 import { fetchSnapshotCount } from '../../../state/api';
 
 export const useSnapShotCount = () => {

@@ -8,14 +8,14 @@
 import Boom from '@hapi/boom';
 
 // @ts-ignore
+import type { CoreSetup, IBasePath, IRouter } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { kibanaTestUser } from '@kbn/test';
-import type { CoreSetup, IBasePath, IRouter } from 'src/core/server';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import type { KibanaFeature } from '../../../../features/server';
-import { featuresPluginMock } from '../../../../features/server/mocks';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { spacesClientServiceMock } from '../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../spaces_service';

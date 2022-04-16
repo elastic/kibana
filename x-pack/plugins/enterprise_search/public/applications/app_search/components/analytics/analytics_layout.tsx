@@ -20,7 +20,7 @@ import { LogRetentionTooltip, LogRetentionCallout, LogRetentionOptions } from '.
 import { AnalyticsFilters } from './components';
 import { ANALYTICS_TITLE } from './constants';
 
-import { AnalyticsLogic } from './';
+import { AnalyticsLogic } from '.';
 
 interface Props {
   title: string;

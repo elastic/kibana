@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { useEffect, useState } from 'react';
-import { DataView, DataViewsContract } from '../../../data_views/public';
+import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 export const useIndexPattern = (indexPatterns: DataViewsContract, indexPatternId: string) => {
   const [indexPattern, setIndexPattern] = useState<DataView | undefined>(undefined);

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  savedObjectsRepositoryMock,
-  loggingSystemMock,
-} from '../../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getPushedTelemetryData } from './pushes';
 
 describe('pushes', () => {

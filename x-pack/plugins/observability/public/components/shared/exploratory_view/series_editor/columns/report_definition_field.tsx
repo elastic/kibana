@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
-import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
-import { PersistableFilter } from '../../../../../../../lens/common';
 import { buildPhrasesFilter } from '../../configurations/utils';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';

@@ -10,13 +10,13 @@ import {
   coreMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
-} from '../../../core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { cloudDetailsMock } from './mocks';
-import { plugin } from './';
+import { plugin } from '.';
 
 describe('kibana_usage_collection', () => {
   const pluginInstance = plugin(coreMock.createPluginInitializerContext({}));

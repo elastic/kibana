@@ -9,13 +9,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 
-import { ExceptionsViewer } from './';
-import { useKibana } from '../../../../common/lib/kibana';
+import { ExceptionsViewer } from '.';
+import { useKibana } from '../../../lib/kibana';
 import { useExceptionListItems, useApi } from '@kbn/securitysolution-list-hooks';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({
@@ -30,7 +30,7 @@ const mockTheme = getMockTheme({
   },
 });
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/kibana');
 jest.mock('@kbn/securitysolution-list-hooks');
 
 describe('ExceptionsViewer', () => {

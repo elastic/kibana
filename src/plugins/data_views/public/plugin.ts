@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { getIndexPatternLoad } from './expressions';
 import {
   DataViewsPublicPluginSetup,

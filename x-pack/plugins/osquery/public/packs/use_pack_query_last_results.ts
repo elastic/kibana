@@ -8,7 +8,7 @@
 import { useQuery } from 'react-query';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
-import { DataView, SortDirection } from '../../../../../src/plugins/data/common';
+import { DataView, SortDirection } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 
 interface UsePackQueryLastResultsProps {

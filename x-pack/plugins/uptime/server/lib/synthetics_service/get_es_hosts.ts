@@ -12,8 +12,8 @@
  * 2.0.
  */
 
-import { CloudSetup } from '../../../../cloud/server';
-import { decodeCloudId } from '../../../../fleet/common';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { decodeCloudId } from '@kbn/fleet-plugin/common';
 import { ServiceConfig } from '../../../common/config';
 
 export function getEsHosts({

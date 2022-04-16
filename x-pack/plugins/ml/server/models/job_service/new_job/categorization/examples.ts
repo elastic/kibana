@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
 import {

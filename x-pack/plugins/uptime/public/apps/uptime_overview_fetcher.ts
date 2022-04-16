@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { UptimeFetchDataResponse, FetchDataParams } from '../../../observability/public';
+import { CoreStart } from '@kbn/core/public';
+import { UptimeFetchDataResponse, FetchDataParams } from '@kbn/observability-plugin/public';
 import { fetchIndexStatus, fetchPingHistogram, fetchSnapshotCount } from '../state/api';
 import { kibanaService } from '../state/kibana_service';
 

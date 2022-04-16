@@ -12,10 +12,10 @@ import {
   FilterValueLabel,
   fromQuery,
   toQuery,
-} from '../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
+import { IndexPattern } from '@kbn/data-views-plugin/common';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TRANSACTION_URL } from '../../../../../common/elasticsearch_fieldnames';
-import { IndexPattern } from '../../../../../../../../src/plugins/data_views/common';
 
 interface Props {
   indexPattern: IndexPattern;

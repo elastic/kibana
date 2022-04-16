@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/public';
+import { SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   Datasource,
   DatasourceLayers,
@@ -20,7 +21,6 @@ import {
 } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
-import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 import { ErrorMessage } from '../types';
 import {
