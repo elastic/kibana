@@ -9,7 +9,7 @@ import {
   ExpressionValueFilter,
   ExpressionAstExpression,
   ExpressionAstFunction,
-} from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin';
 import { fromExpression } from '@kbn/interpreter';
 import { buildFiltersFunction } from '../../../common/functions';
 import type { FiltersFunction } from '../../../common/functions';

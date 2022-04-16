@@ -9,7 +9,7 @@ import { readPrivilegesRoute } from './read_privileges_route';
 import { serverMock, requestContextMock } from '../__mocks__';
 import { getPrivilegeRequest, getMockPrivilegesResult } from '../__mocks__/request_responses';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 describe('read_privileges route', () => {
   let server: ReturnType<typeof serverMock.create>;

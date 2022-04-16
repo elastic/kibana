@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { SelectRuleType } from './index';
+import { SelectRuleType } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 jest.mock('../../../../common/lib/kibana');
 

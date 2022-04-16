@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  functionWrapper,
-  fontStyle,
-} from '../../../../../../src/plugins/presentation_util/common/lib';
+import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/common/lib';
 import { testTable } from './__fixtures__/test_tables';
 import { table } from './table';
 

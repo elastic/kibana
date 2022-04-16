@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldSpec } from 'src/plugins/data/common';
+import { FieldSpec } from '@kbn/data-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';

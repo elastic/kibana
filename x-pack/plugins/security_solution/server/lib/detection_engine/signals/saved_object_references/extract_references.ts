@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { RuleParamsAndRefs } from '../../../../../../alerting/server';
+import { Logger } from '@kbn/core/server';
+import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { extractExceptionsList } from './extract_exceptions_list';
 

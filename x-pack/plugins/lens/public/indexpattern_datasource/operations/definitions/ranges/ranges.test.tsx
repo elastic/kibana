@@ -9,11 +9,11 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { rangeOperation } from '../index';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { rangeOperation } from '..';
 import { RangeIndexPatternColumn } from './ranges';
 import {
   MODES,

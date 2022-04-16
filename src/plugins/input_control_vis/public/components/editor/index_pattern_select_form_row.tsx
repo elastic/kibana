@@ -9,7 +9,7 @@
 import React, { ComponentType } from 'react';
 import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
 import { EuiFormRow } from '@elastic/eui';
-import { IndexPatternSelectProps } from '../../../../unified_search/public';
+import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
 
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   onChange: (opt: any) => void;

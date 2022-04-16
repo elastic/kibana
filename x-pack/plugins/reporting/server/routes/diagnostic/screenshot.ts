@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
+import { APP_WRAPPER_CLASS } from '@kbn/core/server';
 import { ReportingCore } from '../..';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { DiagnosticResponse } from './';
+import { DiagnosticResponse } from '.';
 
 export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();

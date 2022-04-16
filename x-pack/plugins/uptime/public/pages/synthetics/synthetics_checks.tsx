@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useTrackPageview } from '../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useInitApp } from '../../hooks/use_init_app';
 import { StepsList } from '../../components/synthetics/check_steps/steps_list';
 import { useCheckSteps } from '../../components/synthetics/check_steps/use_check_steps';

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { VisualizeEditorLayersContext } from '../../../../visualizations/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Metric } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import {

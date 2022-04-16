@@ -7,7 +7,7 @@
 
 import { SyntheticsService } from './synthetics_service';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loggerMock } from './../../../../../../src/core/server/logging/logger.mock';
+import { loggerMock } from '@kbn/core/server/logging/logger.mock';
 import { UptimeServerSetup } from '../adapters';
 
 describe('SyntheticsService', () => {

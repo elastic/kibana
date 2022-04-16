@@ -8,12 +8,12 @@
 import { format } from 'url';
 import supertest from 'supertest';
 import request from 'superagent';
-import { parseEndpoint } from '../../../plugins/apm/common/apm_api/parse_endpoint';
+import { parseEndpoint } from '@kbn/apm-plugin/common/apm_api/parse_endpoint';
 import type {
   APIReturnType,
   APIClientRequestParamsOf,
-} from '../../../plugins/apm/public/services/rest/create_call_apm_api';
-import type { APIEndpoint } from '../../../plugins/apm/server';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIEndpoint } from '@kbn/apm-plugin/server';
 
 export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(

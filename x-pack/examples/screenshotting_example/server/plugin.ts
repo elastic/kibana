@@ -7,8 +7,8 @@
 
 import { lastValueFrom } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Plugin } from 'src/core/server';
-import type { ScreenshottingStart } from '../../../plugins/screenshotting/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../common';
 
 interface StartDeps {

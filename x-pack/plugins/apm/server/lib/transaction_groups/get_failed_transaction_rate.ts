@@ -6,17 +6,17 @@
  */
 
 import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
 import {

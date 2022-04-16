@@ -10,7 +10,7 @@ import { getSort, getSortArray } from './get_sort';
 import {
   stubDataView,
   stubDataViewWithoutTimeField,
-} from '../../../../../data_views/common/data_view.stub';
+} from '@kbn/data-views-plugin/common/data_view.stub';
 
 describe('docTable', function () {
   describe('getSort function', function () {

@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -20,10 +20,10 @@ import {
   ConcreteTaskInstance,
   isUnrecoverableError,
   RunNowResult,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
@@ -32,16 +32,16 @@ import {
   savedObjectsServiceMock,
   elasticsearchServiceMock,
   uiSettingsServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
+} from '@kbn/core/server/mocks';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { IEventLogger } from '../../../event_log/server';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { ExecuteOptions } from '../../../actions/server/create_execute_function';
+import { ExecuteOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import moment from 'moment';
 import {
@@ -70,7 +70,7 @@ import {
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

@@ -6,10 +6,10 @@
  */
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger } from 'kibana/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
 import { addMessages, EsQueryAlertActionContext } from './action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { parseDuration } from '../../../../alerting/server';
 import { ExecutorOptions, OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';

@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+
 import type { RegistryVarsEntry } from '../../../../types';
-import { CodeEditor } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { MultiTextInput } from './multi_text_input';
 

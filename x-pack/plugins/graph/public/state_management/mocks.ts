@@ -10,13 +10,13 @@ import {
   HttpStart,
   OverlayStart,
   SavedObjectsClientContract,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
-import { ChromeStart } from 'kibana/public';
+import { ChromeStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace } from '../types';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export interface MockedGraphEnvironment {
   store: GraphStore;

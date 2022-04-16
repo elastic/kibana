@@ -7,6 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy } from 'lodash';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup } from '../../lib/helpers/setup_request';
@@ -14,11 +19,6 @@ import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { calculateImpactBuilder } from './calculate_impact_builder';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '../../../../observability/server';
 import {
   getDurationFieldForTransactions,
   getDocumentTypeFilterForTransactions,

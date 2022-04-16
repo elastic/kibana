@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import type { Location } from 'history';
-import type { AppMountParameters, CoreSetup, ScopedHistory } from 'kibana/public';
-import { coreMock } from '../../../../core/public/mocks';
+import type { AppMountParameters, CoreSetup, ScopedHistory } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { UrlForwardingStart } from '../plugin';
 import { createLegacyUrlForwardApp } from './forward_app';
 

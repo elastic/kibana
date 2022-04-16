@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+import type { NavigateToAppOptions } from '@kbn/core/public';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import {
   BulkAction,

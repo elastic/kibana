@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110901
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import type { PluginInitializerContext } from 'src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { FleetPlugin } from './plugin';
 

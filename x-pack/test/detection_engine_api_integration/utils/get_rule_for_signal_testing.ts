@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryCreateSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+import type { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 /**
  * This is a typical signal testing rule that is easy for most basic testing of output of signals.

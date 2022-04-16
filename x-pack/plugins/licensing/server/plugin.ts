@@ -19,7 +19,7 @@ import {
   Plugin,
   PluginInitializerContext,
   IClusterClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import {
   ILicense,

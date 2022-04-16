@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
-import { pagePathGetters } from '../../../fleet/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';

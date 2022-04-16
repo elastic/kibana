@@ -6,7 +6,7 @@
  */
 
 import { handleActions, Action } from 'redux-actions';
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import {
   getMonitorList,
   getMonitorListSuccess,
@@ -16,7 +16,7 @@ import {
   setUpdatingMonitorId,
 } from '../actions';
 import { MonitorSummariesResult } from '../../../common/runtime_types';
-import { AppState } from '../index';
+import { AppState } from '..';
 import { TestNowResponse } from '../api';
 
 export interface MonitorList {

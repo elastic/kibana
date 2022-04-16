@@ -7,13 +7,13 @@
 
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
-import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
-import { DataPublicPluginStart, ISearchStart } from 'src/plugins/data/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';

@@ -14,11 +14,11 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { getCoreVitalsComponent } from '@kbn/observability-plugin/public';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './key_ux_metrics';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/use_ux_query';
-import { getCoreVitalsComponent } from '../../../../../../observability/public';
 import { CsmSharedContext } from '../csm_shared_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getPercentileLabel } from './translations';

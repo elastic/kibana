@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../../../../contexts/editor_context/editor_registry.ts', () => ({
+jest.mock('../../../../contexts/editor_context/editor_registry', () => ({
   instance: {
     setInputEditor: () => {},
     getInputEditor: () => ({
@@ -15,7 +15,7 @@ jest.mock('../../../../contexts/editor_context/editor_registry.ts', () => ({
     }),
   },
 }));
-jest.mock('../../../../components/editor_example.tsx', () => {});
+jest.mock('../../../../components/editor_example', () => {});
 jest.mock('../../../../../lib/mappings/mappings', () => ({
   retrieveAutoCompleteInfo: () => {},
   clearSubscriptions: () => {},

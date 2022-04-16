@@ -20,6 +20,7 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
   getDataFrameAnalyticsProgressPhase,
@@ -33,7 +34,6 @@ import {
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 
 enum TASK_STATE_COLOR {

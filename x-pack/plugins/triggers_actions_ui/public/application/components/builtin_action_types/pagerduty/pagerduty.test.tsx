@@ -6,9 +6,9 @@
  */
 
 import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '.././index';
+import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
-import { PagerDutyActionConnector } from '.././types';
+import { PagerDutyActionConnector } from '../types';
 
 const ACTION_TYPE_ID = '.pagerduty';
 let actionTypeModel: ActionTypeModel;

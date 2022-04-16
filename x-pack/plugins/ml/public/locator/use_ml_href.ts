@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlPluginStart } from '../index';
+import { MlPluginStart } from '..';
 import { MlLocatorParams } from '../../common/types/locator';
 
 /**

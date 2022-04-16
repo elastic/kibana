@@ -12,7 +12,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
-} from '../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -26,7 +27,6 @@ import {
   waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
-import { DetectionAlert } from '../../../../plugins/security_solution/common/detection_engine/schemas/alerts';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

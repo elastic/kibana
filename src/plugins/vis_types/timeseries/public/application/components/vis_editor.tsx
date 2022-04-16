@@ -11,16 +11,14 @@ import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
-import type { IUiSettingsClient } from 'kibana/public';
-import type { DataView } from 'src/plugins/data_views/public';
-import type {
-  Vis,
-  VisualizeEmbeddableContract,
-} from '../../../../../../plugins/visualizations/public';
-import { KibanaContextProvider } from '../../../../../../plugins/kibana_react/public';
-import { Storage } from '../../../../../../plugins/kibana_utils/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import type { TimeRange } from '../../../../../../plugins/data/public';
+import type { TimeRange } from '@kbn/data-plugin/public';
+import type { EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
 
 // @ts-expect-error
@@ -33,7 +31,6 @@ import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
-import type { EditorRenderProps } from '../../../../../visualizations/public';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';

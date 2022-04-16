@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
 import { getLegacyApmHref } from './apm_link';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { AdministrationSubTab } from '../types';
 import { ENDPOINTS_TAB, EVENT_FILTERS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from './translations';
 import { AdministrationRouteSpyState } from '../../common/utils/route/types';

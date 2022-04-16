@@ -12,7 +12,7 @@ import {
   overallMaxOperation,
   overallMinOperation,
   overallSumOperation,
-} from '../index';
+} from '..';
 
 describe('overall_metric', () => {
   const indexPattern = createMockedIndexPattern();

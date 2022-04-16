@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
-import { DataViewType } from '../../../../../data_views/public';
+import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { FetchDeps } from './fetch_all';
 
 export function fetchTotalHits(

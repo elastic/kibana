@@ -7,7 +7,7 @@
 
 import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import { ILicense } from '../../../../../../../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../../types';
 import {

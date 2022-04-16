@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
 import type { PossibleSchemaTypes } from '@elastic/analytics';
 

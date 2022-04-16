@@ -7,7 +7,7 @@
 
 import { Observable, Subscription } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ILicense } from '../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 export type LicenseState = { valid: false; message: string } | { valid: true };
 

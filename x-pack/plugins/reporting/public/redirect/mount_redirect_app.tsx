@@ -9,8 +9,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 
-import type { AppMountParameters } from 'kibana/public';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import type { SharePluginSetup } from '../shared_imports';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
 

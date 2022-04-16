@@ -9,9 +9,9 @@ import _ from 'lodash';
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
 
 import type { ElasticsearchRole } from '.';
-import type { KibanaFeature } from '../../../../../../features/common';
 import { ALL_SPACES_ID, GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
 import { ResourceSerializer } from '../../../../authorization/resource_serializer';

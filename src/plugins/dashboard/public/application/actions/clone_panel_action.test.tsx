@@ -10,10 +10,10 @@ import { DashboardPanelState } from '../embeddable';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
+import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
 import { ClonePanelAction } from '.';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -22,8 +22,8 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '../../services/embeddable_test_samples';
 import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '../../services/embeddable';
-import { getStubPluginServices } from '../../../../presentation_util/public';
-import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(

@@ -7,10 +7,11 @@
 
 jest.mock('../registry');
 
-import type { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EcsEventOutcome } from 'kibana/server';
+import { EcsEventOutcome } from '@kbn/core/server';
+import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation, OperationDetails } from '.';
-import { AuditEvent, AuditLogger } from '../../../security/server';
 import { OwnerEntity } from './types';
 
 interface CreateAuditMsgParams {

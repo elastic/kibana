@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { InPaginateProps } from './';
+import { InPaginateProps } from '.';
 
 export type PaginateProps = Omit<InPaginateProps, 'startPage'> & {
   pageNumber: number;

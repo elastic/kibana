@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayRef } from 'src/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import {
   createKibanaReactContext,

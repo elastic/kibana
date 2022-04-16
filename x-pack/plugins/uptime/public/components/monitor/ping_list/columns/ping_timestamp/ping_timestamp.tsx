@@ -10,13 +10,13 @@ import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
+import { useFetcher, FETCH_STATUS } from '@kbn/observability-plugin/public';
 import {
   isScreenshotImageBlob,
   isScreenshotRef,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from '../../../../../../common/runtime_types';
-import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
 

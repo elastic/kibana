@@ -16,8 +16,8 @@ import type {
   AlertAttributes,
   AlertSourceHit,
 } from '../types';
-import { SavedObject } from '../../../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
+import { SavedObject } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { RuleParams } from '../../schemas/rule_schemas';

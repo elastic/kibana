@@ -8,7 +8,7 @@
 import { ParamsSchema, Params } from './alert_type_params';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { CoreQueryParams, MAX_GROUPS } from '../../../../triggers_actions_ui/server';
+import { CoreQueryParams, MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
 import { Comparator } from '../../../common/comparator_types';
 
 const DefaultParams: Writable<Partial<Params>> = {

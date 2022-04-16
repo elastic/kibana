@@ -8,8 +8,14 @@
 import expect from '@kbn/expect';
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  toNdJsonString,
+  getImportExceptionsListItemSchemaMock,
+  getImportExceptionsListSchemaMock,
+} from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -22,14 +28,8 @@ import {
   removeServerGeneratedProperties,
   ruleToNdjson,
 } from '../../utils';
-import {
-  toNdJsonString,
-  getImportExceptionsListItemSchemaMock,
-  getImportExceptionsListSchemaMock,
-} from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
 
 const getImportRuleBuffer = (connectorId: string) => {
   const rule1 = {

@@ -8,9 +8,9 @@
 
 import { Subscription } from 'rxjs';
 
-import { IUiSettingsClient } from 'src/core/public';
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { FieldFormatsStart } from '../../../../field_formats/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { calculateBounds, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,

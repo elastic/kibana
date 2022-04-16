@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'src/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 import type { SpacesServiceStart } from '../spaces_service';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';

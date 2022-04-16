@@ -9,7 +9,7 @@
 import {
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { registerVisTypeTableUsageCollector } from './register_usage_collector';
 import { getStats } from './get_stats';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
 

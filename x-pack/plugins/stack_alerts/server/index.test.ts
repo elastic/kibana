@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { config } from './index';
+import { config } from '.';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '../../../../src/core/server/mocks';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.stack_alerts';
 const deprecationContext = configDeprecationsMock.createContext();

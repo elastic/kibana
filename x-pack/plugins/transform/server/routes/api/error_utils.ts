@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 
 import { i18n } from '@kbn/i18n';
 
-import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
+import { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
 
 import { CommonResponseStatusSchema, TransformIdsSchema } from '../../../common/api_schemas/common';
 import { DeleteTransformsResponseSchema } from '../../../common/api_schemas/delete_transforms';

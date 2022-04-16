@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 
 export interface AuthorizationHeader {
   headers?: { 'es-secondary-authorization': string | string[] };

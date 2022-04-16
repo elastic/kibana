@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { HttpSetup, IHttpFetchError } from 'kibana/public';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { extractWarningMessages } from '../../../lib/utils';
-import { XJson } from '../../../../../es_ui_shared/public';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';

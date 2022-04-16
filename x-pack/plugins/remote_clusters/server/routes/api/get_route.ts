@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler } from '@kbn/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';

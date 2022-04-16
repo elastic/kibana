@@ -6,10 +6,10 @@
  */
 
 import { checkPersistedSessionsProgress } from './check_persisted_sessions';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SearchSessionsConfig } from './types';
 import moment from 'moment';
-import { SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('checkPersistedSessionsProgress', () => {
   let mockClient: any;

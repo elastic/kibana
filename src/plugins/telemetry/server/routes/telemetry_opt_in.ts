@@ -8,12 +8,12 @@
 
 import { firstValueFrom, Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from 'kibana/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
-} from 'src/plugins/telemetry_collection_manager/server';
-import { SavedObjectsErrorHelpers } from '../../../../core/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry_config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 

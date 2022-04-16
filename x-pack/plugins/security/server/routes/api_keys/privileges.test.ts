@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import type { LicenseCheck } from '../../../../licensing/server';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineCheckPrivilegesRoutes } from './privileges';

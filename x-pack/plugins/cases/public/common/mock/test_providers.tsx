@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 export const getLinks = ({ links }: DocLinksStart) => {
   const runtimePainless = `${links.runtimeFields.mapping}`;

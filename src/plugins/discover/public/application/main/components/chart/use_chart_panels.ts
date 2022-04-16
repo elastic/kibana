@@ -10,7 +10,7 @@ import type {
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-import { search } from '../../../../../../data/public';
+import { search } from '@kbn/data-plugin/public';
 
 export function useChartPanels(
   toggleHideChart: () => void,

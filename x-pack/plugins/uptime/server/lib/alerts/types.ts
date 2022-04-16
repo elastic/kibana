@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
+import { AlertTypeWithExecutor } from '@kbn/rule-registry-plugin/server';
+import { AlertInstanceContext, RuleTypeState } from '@kbn/alerting-plugin/common';
+import { LifecycleAlertService } from '@kbn/rule-registry-plugin/server';
 import { UMServerLibs } from '../lib';
-import { AlertTypeWithExecutor } from '../../../../rule_registry/server';
-import { AlertInstanceContext, RuleTypeState } from '../../../../alerting/common';
-import { LifecycleAlertService } from '../../../../rule_registry/server';
+import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,

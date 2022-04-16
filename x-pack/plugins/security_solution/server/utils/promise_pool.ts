@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 interface PromisePoolArgs<Item, Result> {
   concurrency?: number;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { ExpressionsStart } from './types';
 import { setExpressions } from './services';
 

@@ -7,7 +7,7 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
 import type { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
 

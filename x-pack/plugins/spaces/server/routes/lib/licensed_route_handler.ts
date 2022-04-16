@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { RequestHandler, RequestHandlerContext } from 'src/core/server';
-
-import type { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
+import type { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 export const createLicensedRouteHandler = <
   P,

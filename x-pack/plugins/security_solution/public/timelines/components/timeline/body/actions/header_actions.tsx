@@ -16,6 +16,7 @@ import {
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import {
   HeaderActionProps,
   SortDirection,
@@ -28,7 +29,6 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
 import { EventsTh, EventsThContent } from '../../styles';
 import { EventsSelect } from '../column_headers/events_select';

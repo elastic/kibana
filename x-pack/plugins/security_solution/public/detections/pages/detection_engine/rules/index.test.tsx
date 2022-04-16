@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow, mount, ReactWrapper } from 'enzyme';
 
 import '../../../../common/mock/match_media';
-import { RulesPage } from './index';
+import { RulesPage } from '.';
 import { useUserData } from '../../../components/user_info';
 import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -27,7 +27,7 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../../pages/detection_engine/rules/all/rules_table/rules_table_context');
+jest.mock('./all/rules_table/rules_table_context');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../containers/detection_engine/rules/use_find_rules_query');
 jest.mock('../../../../common/components/link_to');

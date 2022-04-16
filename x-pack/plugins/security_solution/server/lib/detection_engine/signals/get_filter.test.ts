@@ -6,8 +6,8 @@
  */
 
 import { getFilter } from './get_filter';
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
 describe('get_filter', () => {
   let servicesMock: RuleExecutorServicesMock;

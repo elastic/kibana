@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { CloudStart } from '.';
-import { ServicesProvider } from '../public/services';
+import { ServicesProvider } from './services';
 
 function createSetupMock() {
   return {

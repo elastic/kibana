@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import { RuleType } from '../../../../plugins/alerting/server';
+import { RuleType } from '@kbn/alerting-plugin/server';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {

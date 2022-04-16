@@ -11,7 +11,7 @@ export type {
   SendRequestConfig,
   SendRequestResponse,
   Error,
-} from '../../../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 export {
   sendRequest,
   useRequest,
@@ -26,33 +26,30 @@ export {
   Forms,
   GlobalFlyout,
   attemptToURIDecode,
-} from '../../../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 
 export {
   serializers,
   fieldValidators,
   fieldFormatters,
-} from '../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';
+} from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
-export type {
-  FormSchema,
-  FieldConfig,
-} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+export type { FormSchema, FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 export {
   FIELD_TYPES,
   VALIDATION_TYPES,
   useForm,
   Form,
   getUseField,
-} from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   getFormRow,
   Field,
   JsonEditorField,
-} from '../../../../../../../src/plugins/es_ui_shared/static/forms/components';
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-export { isJSON } from '../../../../../../../src/plugins/es_ui_shared/static/validators/string';
+export { isJSON } from '@kbn/es-ui-shared-plugin/static/validators/string';
 
 export type { CommonWizardSteps } from '../shared';
 export {
@@ -72,7 +69,4 @@ export type {
 
 export { serializeComponentTemplate } from '../../../../common/lib';
 
-export {
-  reactRouterNavigate,
-  useExecutionContext,
-} from '../../../../../../../src/plugins/kibana_react/public';
+export { reactRouterNavigate, useExecutionContext } from '@kbn/kibana-react-plugin/public';

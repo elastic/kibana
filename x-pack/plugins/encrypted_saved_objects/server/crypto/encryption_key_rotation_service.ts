@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ISavedObjectTypeRegistry,
   KibanaRequest,
@@ -13,9 +12,10 @@ import type {
   SavedObject,
   SavedObjectsBulkUpdateObject,
   StartServicesAccessor,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError } from './encryption_error';

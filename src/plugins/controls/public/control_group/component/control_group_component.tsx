@@ -28,11 +28,11 @@ import {
   useSensors,
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
-import { ViewMode } from '../../../../embeddable/public';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
 
 export const ControlGroup = () => {
   // Redux embeddable container Context

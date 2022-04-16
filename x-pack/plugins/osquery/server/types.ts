@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
-import type { ActionsPlugin } from '../../actions/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import type { ActionsPlugin } from '@kbn/actions-plugin/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import type { FleetStartContract } from '../../fleet/server';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import type { PluginSetupContract } from '../../features/server';
-import type { SecurityPluginStart } from '../../security/server';
+} from '@kbn/data-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { PluginSetupContract } from '@kbn/features-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   TaskManagerSetupContract as TaskManagerPluginSetup,
   TaskManagerStartContract as TaskManagerPluginStart,
-} from '../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}

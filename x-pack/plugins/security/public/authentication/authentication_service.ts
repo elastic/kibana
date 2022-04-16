@@ -10,7 +10,7 @@ import type {
   FatalErrorsSetup,
   HttpSetup,
   StartServicesAccessor,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import type { AuthenticatedUser } from '../../common/model';
 import type { ConfigType } from '../config';

@@ -8,7 +8,9 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
+
+import type { CustomIntegrationIcon } from '@kbn/custom-integrations-plugin/common';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -17,9 +19,7 @@ import type {
   monitoringTypes,
   installationStatuses,
 } from '../../constants';
-import type { ValueOf } from '../../types';
-
-import type { CustomIntegrationIcon } from '../../../../../../src/plugins/custom_integrations/common';
+import type { ValueOf } from '..';
 
 import type {
   PackageSpecManifest,

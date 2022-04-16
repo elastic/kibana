@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../../plugins/fleet/server';
+import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isRegistryEnabled,

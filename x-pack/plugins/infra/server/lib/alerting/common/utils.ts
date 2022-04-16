@@ -8,10 +8,10 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { IBasePath } from 'kibana/server';
+import type { IBasePath } from '@kbn/core/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
-import { parseTechnicalFields } from '../../../../../rule_registry/common/parse_technical_fields';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,

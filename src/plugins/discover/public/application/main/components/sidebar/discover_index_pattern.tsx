@@ -7,8 +7,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { SavedObject } from 'kibana/public';
-import type { DataView, DataViewAttributes } from 'src/plugins/data_views/public';
+import { SavedObject } from '@kbn/core/public';
+import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
 

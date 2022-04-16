@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Assign } from 'utility-types';
+import { dateHistogramInterval } from '@kbn/data-plugin/common';
 import { TimeCache } from './time_cache';
 import { SearchAPI } from './search_api';
 import {
@@ -23,7 +24,6 @@ import {
   Query,
   ContextVarsObject,
 } from './types';
-import { dateHistogramInterval } from '../../../../data/common';
 
 const TIMEFILTER: string = '%timefilter%';
 const AUTOINTERVAL: string = '%autointerval%';

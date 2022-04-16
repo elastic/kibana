@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiLoadingSpinner, EuiTextColor } from '@elastic/eui';
 
-import { ComponentLoader } from './';
+import { ComponentLoader } from '.';
 
 describe('ComponentLoader', () => {
   it('renders', () => {

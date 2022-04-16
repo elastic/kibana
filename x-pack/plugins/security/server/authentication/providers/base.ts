@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { deepFreeze } from '@kbn/std';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   Headers,
   HttpServiceSetup,
   IClusterClient,
   KibanaRequest,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { deepFreeze } from '@kbn/std';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser } from '../../../common/model';
 import type { AuthenticationInfo } from '../../elasticsearch';

@@ -7,21 +7,14 @@
 
 import React, { FC, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { trackCanvasUiMetric, METRIC_TYPE } from '../../../../public/lib/ui_metric';
+import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { EmbeddableFactoryDefinition, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 import {
   useEmbeddablesService,
   usePlatformService,
   useVisualizationsService,
 } from '../../../services';
-import {
-  BaseVisType,
-  VisGroups,
-  VisTypeAlias,
-} from '../../../../../../../src/plugins/visualizations/public';
-import {
-  EmbeddableFactoryDefinition,
-  EmbeddableInput,
-} from '../../../../../../../src/plugins/embeddable/public';
 import { CANVAS_APP } from '../../../../common/lib';
 import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { ElementSpec } from '../../../../types';

@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Moment } from 'moment';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../../common/constants';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';

@@ -8,10 +8,10 @@
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { RequestHandler, RouteConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
 import { securityMock } from '../../mocks';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';

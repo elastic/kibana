@@ -9,8 +9,8 @@ import { inspect } from 'util';
 
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
-import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
-import { AgentConfigSearchParams } from '../../../../plugins/apm/server/routes/settings/agent_configuration/route';
+import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
+import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 

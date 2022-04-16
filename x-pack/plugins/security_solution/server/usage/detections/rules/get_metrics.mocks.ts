@@ -6,9 +6,9 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { SavedObjectsFindResponse } from 'kibana/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { CommentAttributes, CommentType } from '@kbn/cases-plugin/common/api/cases/comment';
 import type { AlertAggs, EventLogTypeStatusAggs } from '../../types';
-import { CommentAttributes, CommentType } from '../../../../../cases/common/api/cases/comment';
 import type { EventLogStatusMetric, SingleEventLogStatusMetric } from './types';
 
 export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<never, AlertAggs> => ({

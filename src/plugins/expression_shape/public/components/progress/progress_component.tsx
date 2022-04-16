@@ -8,11 +8,11 @@
 
 import React, { CSSProperties, RefCallback, useCallback, useEffect, useRef, useState } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { IInterpreterRenderHandlers } from '../../../../expressions';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { NodeDimensions, ProgressRendererConfig } from '../../../common/types';
 import { ShapeRef, SvgConfig, SvgTextAttributes } from '../reusable/types';
 import { getShapeContentElement } from '../reusable/shape_factory';
-import { withSuspense } from '../../../../presentation_util/public';
 import { getTextAttributes, getViewBox } from './utils';
 import { getId } from '../../../common/lib';
 import { getDefaultShapeData } from '../reusable';

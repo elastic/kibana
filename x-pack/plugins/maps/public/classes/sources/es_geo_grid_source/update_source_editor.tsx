@@ -10,6 +10,7 @@ import React, { Fragment, Component } from 'react';
 import uuid from 'uuid/v4';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
+import { IndexPatternField, indexPatterns } from '@kbn/data-plugin/public';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import {
   AGG_TYPE,
@@ -22,7 +23,6 @@ import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { isMetricCountable } from '../../util/is_metric_countable';
-import { IndexPatternField, indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { RenderAsSelect } from './render_as_select';
 import { AggDescriptor } from '../../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../source';

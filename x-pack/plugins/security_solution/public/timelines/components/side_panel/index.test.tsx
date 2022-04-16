@@ -17,7 +17,7 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
-import { DetailsPanel } from './index';
+import { DetailsPanel } from '.';
 import {
   TimelineExpandedDetail,
   TimelineId,
@@ -26,7 +26,7 @@ import {
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useKibana } from '../../../common/lib/kibana';
-import { mockCasesContext } from '../../../../../cases/public/mocks/mock_cases_context';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 jest.mock('../../../common/lib/kibana');
 

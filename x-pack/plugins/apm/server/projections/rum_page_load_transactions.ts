@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { SetupUX } from '../routes/rum_client/route';
 import {
   AGENT_NAME,
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../observability/server';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 import { getEsFilter } from '../routes/rum_client/ui_filters/get_es_filter';

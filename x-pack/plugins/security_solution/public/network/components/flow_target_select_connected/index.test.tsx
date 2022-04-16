@@ -11,7 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
-import { FlowTargetSelectConnectedComponent } from './index';
+import { FlowTargetSelectConnectedComponent } from '.';
 import { FlowTarget } from '../../../../common/search_strategy';
 
 describe('Flow Target Select Connected', () => {

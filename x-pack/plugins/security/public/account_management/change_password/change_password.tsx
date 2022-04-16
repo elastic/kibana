@@ -8,9 +8,9 @@
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import React, { Component } from 'react';
 
+import type { NotificationsSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsSetup } from 'src/core/public';
 
 import type { AuthenticatedUser } from '../../../common/model';
 import { canUserChangePassword } from '../../../common/model';

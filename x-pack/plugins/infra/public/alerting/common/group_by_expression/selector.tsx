@@ -7,7 +7,7 @@
 
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { FieldSpec } from 'src/plugins/data_views/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 interface Props {
   selectedGroups?: string[];

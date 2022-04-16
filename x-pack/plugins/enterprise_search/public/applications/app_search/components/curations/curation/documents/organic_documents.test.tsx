@@ -18,7 +18,7 @@ import { mountWithIntl } from '../../../../../test_helpers';
 import { DataPanel } from '../../../data_panel';
 import { CurationResult } from '../results';
 
-import { OrganicDocuments } from './';
+import { OrganicDocuments } from '.';
 
 describe('OrganicDocuments', () => {
   const values = {

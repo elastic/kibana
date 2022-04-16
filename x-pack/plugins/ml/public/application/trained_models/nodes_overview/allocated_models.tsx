@@ -8,12 +8,12 @@ import React, { FC } from 'react';
 import { EuiBadge, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type {
   AllocatedModel,
   NodeDeploymentStatsResponse,
 } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface AllocatedModelsProps {
   models: NodeDeploymentStatsResponse['allocated_models'];

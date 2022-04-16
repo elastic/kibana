@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewField } from '../../../../../../../../../src/plugins/data_views/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import {
   FieldVisConfig,
   FileBasedFieldVisConfig,

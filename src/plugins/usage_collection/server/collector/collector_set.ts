@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
   KibanaExecutionContext,
   ExecutionContextSetup,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { Collector } from './collector';
 import type { ICollector, CollectorOptions } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';

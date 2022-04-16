@@ -12,8 +12,8 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   Render,
-} from '../../../../expressions/common';
-import { prepareLogTable, Dimension } from '../../../../visualizations/public';
+} from '@kbn/expressions-plugin/common';
+import { prepareLogTable, Dimension } from '@kbn/visualizations-plugin/public';
 import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
 

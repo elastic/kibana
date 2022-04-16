@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 // @ts-expect-error
 import { getDefaultWorkpad, getExportedWorkpad } from '../../state/defaults';

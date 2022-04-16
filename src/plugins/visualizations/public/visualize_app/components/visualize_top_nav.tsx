@@ -8,10 +8,11 @@
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
-import { AppMountParameters, OverlayRef } from 'kibana/public';
+import { AppMountParameters, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useKibana } from '../../../../kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   VisualizeServices,
   VisualizeAppState,
@@ -20,8 +21,7 @@ import {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig } from '../utils';
-import type { DataView } from '../../../../data_views/public';
-import type { NavigateToLensContext } from '../../../../visualizations/public';
+import type { NavigateToLensContext } from '../..';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 

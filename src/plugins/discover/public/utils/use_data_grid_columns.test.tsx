@@ -12,7 +12,7 @@ import { indexPatternMock } from '../__mocks__/index_pattern';
 import { configMock } from '../__mocks__/config';
 import { indexPatternsMock } from '../__mocks__/index_patterns';
 import { AppState } from '../application/context/services/context_state';
-import { Capabilities } from '../../../../core/types';
+import { Capabilities } from '@kbn/core/types';
 
 describe('useColumns', () => {
   const defaultProps = {

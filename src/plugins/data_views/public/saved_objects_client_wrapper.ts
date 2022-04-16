@@ -7,7 +7,7 @@
  */
 
 import { omit } from 'lodash';
-import { SavedObjectsClient, SimpleSavedObject } from 'src/core/public';
+import { SavedObjectsClient, SimpleSavedObject } from '@kbn/core/public';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,

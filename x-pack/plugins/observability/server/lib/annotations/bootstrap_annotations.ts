@@ -10,8 +10,8 @@ import {
   PluginInitializerContext,
   KibanaRequest,
   RequestHandlerContext,
-} from 'kibana/server';
-import { LicensingApiRequestHandlerContext } from '../../../../licensing/server';
+} from '@kbn/core/server';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
 

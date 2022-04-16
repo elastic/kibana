@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
 import { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 import { UptimeESClient } from '../../lib';
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { parseRelativeDate } from '../../../../common/lib/get_histogram_interval';
 
 export class QueryContext {

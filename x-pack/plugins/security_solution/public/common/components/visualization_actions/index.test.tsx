@@ -20,7 +20,7 @@ import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
 import { cloneDeep } from 'lodash';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { CASES_FEATURE_ID } from '../../../../common/constants';
-import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return {

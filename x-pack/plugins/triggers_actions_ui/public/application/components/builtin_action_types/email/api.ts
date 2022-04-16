@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../constants';
 import { EmailConfig } from '../types';
 

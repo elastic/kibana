@@ -33,10 +33,7 @@ import { setExtensionsService } from '../../public/application/store/selectors/e
 import { ExtensionsService } from '../../public/services';
 import { kibanaVersion } from '../client_integration/helpers';
 
-import {
-  notificationServiceMock,
-  executionContextServiceMock,
-} from '../../../../../src/core/public/mocks';
+import { notificationServiceMock, executionContextServiceMock } from '@kbn/core/public/mocks';
 
 let store = null;
 const indices = [];

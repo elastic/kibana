@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { pi } = require('../../src/functions/pi.js');
+const { pi } = require('../../src/functions/pi');
 
 describe('PI', () => {
   it('constant', () => {

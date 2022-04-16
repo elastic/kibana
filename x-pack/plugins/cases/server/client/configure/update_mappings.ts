@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ConnectorMappingsAttributes } from '../../../common/api';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { createCaseError } from '../../common/error';
 import { CasesClientArgs } from '..';
 import { UpdateMappingsArgs } from './types';

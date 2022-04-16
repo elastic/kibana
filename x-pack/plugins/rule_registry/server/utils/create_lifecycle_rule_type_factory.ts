@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { Logger } from '@kbn/logging';
-import { IRuleDataClient } from '../rule_data_client';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
-} from '../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
+import { IRuleDataClient } from '../rule_data_client';
 import { AlertTypeWithExecutor } from '../types';
 import { LifecycleAlertService, createLifecycleExecutor } from './create_lifecycle_executor';
 

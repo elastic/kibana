@@ -11,8 +11,8 @@ import {
   DEFAULT_SIGNALS_INDEX,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
-} from '../../../../plugins/security_solution/common/constants';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
+} from '@kbn/security-solution-plugin/common/constants';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteSignalsIndex, getIndexNameFromLoad, waitFor } from '../../utils';
 import { createUserAndRole } from '../../../common/services/security_solution';

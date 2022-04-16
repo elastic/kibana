@@ -12,7 +12,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 
 import { getMlSharedImports, UseIndexDataReturnType } from '../../shared_imports';
 
@@ -27,7 +27,7 @@ jest.mock('./use_api');
 
 import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
-import { RuntimeField } from '../../../../../../src/plugins/data/common';
+import { RuntimeField } from '@kbn/data-plugin/common';
 
 const query: SimpleQuery = {
   query_string: {

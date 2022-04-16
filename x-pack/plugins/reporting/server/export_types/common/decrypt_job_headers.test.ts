@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { cryptoFactory } from '../../lib';
-import { decryptJobHeaders } from './';
+import { decryptJobHeaders } from '.';
 
 const logger = loggingSystemMock.createLogger();
 

@@ -6,8 +6,8 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectReference } from 'kibana/server';
-import type { LegacyRuleActions } from '../../../plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { LegacyRuleActions } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_actions/legacy_types';
 
 interface LegacyActionSO extends LegacyRuleActions {
   references: SavedObjectReference[];

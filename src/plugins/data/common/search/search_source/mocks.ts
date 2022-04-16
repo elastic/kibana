@@ -8,7 +8,7 @@
 
 import { of } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 import { SearchSource } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';

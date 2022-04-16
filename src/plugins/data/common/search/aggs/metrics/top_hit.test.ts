@@ -11,7 +11,7 @@ import { getTopHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;

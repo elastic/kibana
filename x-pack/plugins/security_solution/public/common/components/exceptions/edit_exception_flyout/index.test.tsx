@@ -13,10 +13,10 @@ import { mount, ReactWrapper } from 'enzyme';
 import { EditExceptionFlyout } from '.';
 import { useCurrentUser } from '../../../lib/kibana';
 import { useFetchIndex } from '../../../containers/source';
-import { stubIndexPattern, createStubIndexPattern } from 'src/plugins/data/common/stubs';
+import { stubIndexPattern, createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getRulesEqlSchemaMock,
@@ -24,7 +24,7 @@ import {
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
-import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -37,14 +37,14 @@ const mockTheme = getMockTheme({
   },
 });
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../../../containers/source');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
-jest.mock('../../../../../../lists/public');
+jest.mock('@kbn/lists-plugin/public');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
   ReturnType<typeof getExceptionBuilderComponentLazy>

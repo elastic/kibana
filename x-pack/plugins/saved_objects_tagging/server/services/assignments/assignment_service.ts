@@ -12,8 +12,8 @@ import {
   ISavedObjectTypeRegistry,
   KibanaRequest,
   SavedObjectsBulkGetObject,
-} from 'src/core/server';
-import { SecurityPluginSetup } from '../../../../security/server';
+} from '@kbn/core/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   AssignableObject,
   UpdateTagAssignmentsOptions,

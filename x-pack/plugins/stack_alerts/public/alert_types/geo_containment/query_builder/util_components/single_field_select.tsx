@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
-import { DataViewField } from 'src/plugins/data_views/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 function fieldsToOptions(fields?: DataViewField[]): Array<EuiComboBoxOptionOption<DataViewField>> {
   if (!fields) {

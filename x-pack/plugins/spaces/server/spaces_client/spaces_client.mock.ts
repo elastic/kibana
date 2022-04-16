@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 
 import type { Space } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';

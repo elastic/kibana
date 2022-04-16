@@ -7,9 +7,9 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { AuthStackByField } from '../../../../common/search_strategy';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../mock';
 import { HostsType } from '../../../hosts/store/model';
-import { useAuthentications } from './index';
+import { useAuthentications } from '.';
 
 describe('authentications', () => {
   it('skip = true will cancel any running request', () => {

@@ -7,12 +7,12 @@
  */
 
 import { cloudDetailsMock, detectCloudServiceMock } from './cloud_provider_collector.test.mocks';
-import { loggingSystemMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
 import { registerCloudProviderUsageCollector } from './cloud_provider_collector';
 

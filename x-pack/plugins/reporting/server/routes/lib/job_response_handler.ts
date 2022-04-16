@@ -6,8 +6,8 @@
  */
 
 import { promisify } from 'util';
-import { kibanaResponseFactory } from 'kibana/server';
-import { ReportingCore } from '../../';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { ReportingCore } from '../..';
 import { ALLOWED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { getContentStream } from '../../lib';
 import { ReportingUser } from '../../types';

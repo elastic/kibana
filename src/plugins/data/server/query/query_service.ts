@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { querySavedObjectType } from '../saved_objects';
 import { extract, getAllMigrations, inject, telemetry } from '../../common/query/persistable_state';
 import { registerSavedQueryRoutes } from './routes';

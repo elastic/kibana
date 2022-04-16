@@ -13,7 +13,7 @@ import {
   getPrepackagedRulesStatusRequest,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig } from '../__mocks__';
-import { SecurityPluginSetup } from '../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { checkTimelinesStatus } from '../../../timeline/utils/check_timelines_status';
 import {
   mockCheckTimelinesStatusBeforeInstallResult,

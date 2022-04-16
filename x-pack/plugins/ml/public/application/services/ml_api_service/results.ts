@@ -6,8 +6,9 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { HttpService } from '../http_service';
-import { basePath } from './index';
+import { basePath } from '.';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import type {
   GetStoppedPartitionResult,
@@ -16,10 +17,6 @@ import type {
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../../src/core/types/elasticsearch';
 import type { MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';

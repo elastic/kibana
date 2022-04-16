@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExceptionsListPreImportServerExtension } from '../../../../../lists/server';
+import { ExceptionsListPreImportServerExtension } from '@kbn/lists-plugin/server';
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 

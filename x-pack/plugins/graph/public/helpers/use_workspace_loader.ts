@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
-import type { SavedObjectsResolveResponse } from 'src/core/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core/public';
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
 import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
 import { getEditUrl } from '../services/url';
-import { SpacesApi } from '../../../spaces/public';
 export interface UseWorkspaceLoaderProps {
   store: GraphStore;
   workspaceRef: React.MutableRefObject<Workspace | undefined>;

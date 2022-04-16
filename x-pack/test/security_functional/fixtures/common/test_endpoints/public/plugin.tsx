@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from 'src/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { debounce, filter, first } from 'rxjs/operators';

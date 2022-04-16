@@ -8,10 +8,10 @@
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Case, CommentType } from '../../common';
-import { useToasts } from '../common/lib/kibana';
-import { useCaseViewNavigation } from '../common/navigation';
+import { useToasts } from './lib/kibana';
+import { useCaseViewNavigation } from './navigation';
 import { CaseAttachments } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,

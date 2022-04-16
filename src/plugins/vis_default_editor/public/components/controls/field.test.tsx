@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 
-import { IAggConfig, IndexPatternField, AggParam } from 'src/plugins/data/public';
+import { IAggConfig, IndexPatternField, AggParam } from '@kbn/data-plugin/public';
 import { ComboBoxGroupedOptions } from '../../utils';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { EditorVisState } from '../sidebar/state/reducers';

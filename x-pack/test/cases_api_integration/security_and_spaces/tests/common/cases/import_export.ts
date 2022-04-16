@@ -7,24 +7,14 @@
 
 import expect from '@kbn/expect';
 import { join } from 'path';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import supertest from 'supertest';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
-import {
-  deleteAllCaseItems,
-  createCase,
-  createComment,
-  findCases,
-  getCaseUserActions,
-} from '../../../../common/lib/utils';
-import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   CASES_URL,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
-} from '../../../../../../plugins/cases/common/constants';
+} from '@kbn/cases-plugin/common/constants';
 import {
   AttributesTypeUser,
   CommentsResponse,
@@ -37,7 +27,17 @@ import {
   CommentUserAction,
   CreateCaseUserAction,
   CaseStatuses,
-} from '../../../../../../plugins/cases/common/api';
+} from '@kbn/cases-plugin/common/api';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import {
+  deleteAllCaseItems,
+  createCase,
+  createComment,
+  findCases,
+  getCaseUserActions,
+} from '../../../../common/lib/utils';
+import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
-import { ResolverEntityIndex } from '../../../../plugins/security_solution/common/endpoint/types';
+import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { ResolverEntityIndex } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

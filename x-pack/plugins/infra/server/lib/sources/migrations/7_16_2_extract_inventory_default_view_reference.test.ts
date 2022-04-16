@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { migrationMocks } from 'src/core/server/mocks';
-import { SavedObjectReference } from '../../../../../../../src/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   inventoryDefaultViewReferenceName,
   logIndexPatternReferenceName,

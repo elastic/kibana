@@ -8,7 +8,7 @@
 import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import type { PitId } from '@kbn/securitysolution-io-ts-list-types';
 
 interface ClosePointInTimeOptions {

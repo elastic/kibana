@@ -46,7 +46,7 @@ import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '../../../../../common/constants/annotations';
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
 import { timeFormatter } from '../../../../../common/util/date_utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';

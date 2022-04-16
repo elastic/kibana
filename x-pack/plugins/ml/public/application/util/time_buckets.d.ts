@@ -6,7 +6,7 @@
  */
 
 import { Moment } from 'moment';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 
 export interface TimeRangeBounds {
   min?: Moment;

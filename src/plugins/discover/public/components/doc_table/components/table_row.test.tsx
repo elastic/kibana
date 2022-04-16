@@ -10,16 +10,13 @@ import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
 import { setDocViewsRegistry } from '../../../kibana_services';
-import { createFilterManagerMock } from '../../../../../data/public/query/filter_manager/filter_manager.mock';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 import { DocViewsRegistry } from '../../../services/doc_views/doc_views_registry';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  MAX_DOC_FIELDS_DISPLAYED,
-} from '../../../../../discover/common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
 jest.mock('../lib/row_formatter', () => {
   const originalModule = jest.requireActual('../lib/row_formatter');

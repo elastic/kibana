@@ -7,7 +7,7 @@
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
-import { PivotGroupByConfig } from '../common';
+import { PivotGroupByConfig } from '.';
 
 import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
@@ -29,7 +29,7 @@ import {
   PivotQuery,
 } from './request';
 import { LatestFunctionConfigUI } from '../../../common/types/transform';
-import { RuntimeField } from '../../../../../../src/plugins/data/common';
+import { RuntimeField } from '@kbn/data-plugin/common';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 

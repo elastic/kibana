@@ -23,8 +23,8 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from 'src/core/server';
-import type { ExpressionAstExpression } from 'src/plugins/expressions/common';
+import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from '@kbn/core/server';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import {
   LayoutParams,
   SCREENSHOTTING_APP_ID,

@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ConditionalToolTip } from './conditional_tooltip';
 import { InfraWaffleMapNode } from '../../../../../lib/lib';
 

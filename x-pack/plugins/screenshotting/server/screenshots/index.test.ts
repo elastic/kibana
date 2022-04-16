@@ -6,8 +6,8 @@
  */
 
 import { lastValueFrom, of, throwError } from 'rxjs';
-import type { Logger, PackageInfo } from 'src/core/server';
-import { httpServiceMock } from 'src/core/server/mocks';
+import type { Logger, PackageInfo } from '@kbn/core/server';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import {
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { IRouter, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IRouter, Logger } from 'src/core/server';
 
 import type { ConfigType } from '../config';
 import type { EncryptionKeyRotationService } from '../crypto';

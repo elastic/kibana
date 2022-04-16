@@ -6,12 +6,12 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMRouteHandlerResources } from '../../../../routes/typings';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
+import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   callAsyncWithDebug,
   getDebugBody,

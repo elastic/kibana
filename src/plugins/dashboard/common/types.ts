@@ -10,8 +10,9 @@ import {
   EmbeddableInput,
   EmbeddableStateWithType,
   PanelState,
-} from '../../../../src/plugins/embeddable/common/types';
-import { SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
+} from '@kbn/embeddable-plugin/common/types';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common/lib/saved_object_embeddable';
+import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -22,7 +23,6 @@ import {
 } from './bwc/types';
 
 import { GridData } from './embeddable/types';
-import { ControlGroupInput } from '../../controls/common';
 export type PanelId = string;
 export type SavedObjectId = string;
 

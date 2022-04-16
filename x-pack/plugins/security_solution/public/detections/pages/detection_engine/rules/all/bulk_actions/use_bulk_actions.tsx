@@ -18,8 +18,8 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
-import type { Toast } from '../../../../../../../../../../src/core/public';
-import { mountReactNode } from '../../../../../../../../../../src/core/public/utils';
+import type { Toast } from '@kbn/core/public';
+import { mountReactNode } from '@kbn/core/public/utils';
 import {
   BulkAction,
   BulkActionEditType,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEventCount } from './get_event_count';
 
 describe('getEventCount', () => {

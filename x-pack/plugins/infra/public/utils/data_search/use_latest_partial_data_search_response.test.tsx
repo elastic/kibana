@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-import { IKibanaSearchRequest } from '../../../../../../src/plugins/data/public';
+import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
 import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
 import { useLatestPartialDataSearchResponse } from './use_latest_partial_data_search_response';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
+import { SavedObject, SavedObjectAttributes, SavedObjectsServiceSetup } from '@kbn/core/server';
 
 export interface UICounterSavedObjectAttributes extends SavedObjectAttributes {
   count: number;

@@ -10,7 +10,7 @@ import createSagaMiddleware from 'redux-saga';
 import { createStore as createReduxStore, applyMiddleware } from 'redux';
 
 import { rootReducer } from '../reducers';
-import { fetchJourneyStepsEffect } from '../effects/journey';
+import { fetchJourneyStepsEffect } from './journey';
 
 import { getJourneySteps } from '../actions/journey';
 

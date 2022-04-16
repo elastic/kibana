@@ -27,6 +27,8 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -63,10 +65,8 @@ import { AnomaliesMap } from './anomalies_map';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import { isDefined } from '../../../common/types/guards';
-import type { DataView } from '../../../../../../src/plugins/data_views/common';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import type { ExplorerState } from './reducers';
-import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
 import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsRepository } from 'src/core/server';
+import { SavedObjectsRepository } from '@kbn/core/server';
 
 import { TEMPLATE_TYPE } from '../../common/lib/constants';
 

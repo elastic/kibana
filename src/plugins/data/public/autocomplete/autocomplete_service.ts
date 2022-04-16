@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import moment from 'moment';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { TimefilterSetup } from '../query';
 import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
@@ -17,7 +18,6 @@ import {
 import type { ValueSuggestionsGetFn } from './providers/value_suggestion_provider';
 
 import { ConfigSchema } from '../../config';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { createUsageCollector } from './collectors';
 import {
   KUERY_LANGUAGE_NAME,

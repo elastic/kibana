@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { captureURLApp } from './capture_url_app';
 

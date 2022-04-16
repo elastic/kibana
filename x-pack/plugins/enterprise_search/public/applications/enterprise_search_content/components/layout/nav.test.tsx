@@ -12,7 +12,7 @@ jest.mock('../search_index/index_nav', () => ({
   useSearchIndicesNav: () => [],
 }));
 
-import { useEnterpriseSearchContentNav } from './';
+import { useEnterpriseSearchContentNav } from '.';
 
 describe('useEnterpriseSearchContentNav', () => {
   it('returns an array of top-level Enterprise Search nav items', () => {

@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexItem, EuiStat, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { UXMetrics } from '@kbn/observability-plugin/public';
 import {
   DATA_UNDEFINED_LABEL,
   FCP_LABEL,
@@ -23,7 +24,6 @@ import {
 } from './translations';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/use_ux_query';
-import { UXMetrics } from '../../../../../../observability/public';
 
 export function formatToSec(
   value?: number | string,

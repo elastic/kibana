@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock, httpServerMock } from '../../../../../core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { CachedUiSettingsClient } from './cached_ui_settings_client';
 

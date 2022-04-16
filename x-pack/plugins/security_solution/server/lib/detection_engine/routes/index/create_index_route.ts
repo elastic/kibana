@@ -7,7 +7,7 @@
 
 import { chunk, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   transformError,
   getBootstrapIndexExists,

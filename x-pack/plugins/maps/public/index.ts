@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'kibana/public';
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer } from '@kbn/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 import { MapsXPackConfig } from '../config';
 

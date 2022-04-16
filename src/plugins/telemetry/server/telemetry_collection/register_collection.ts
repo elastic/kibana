@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
 import { getLocalStats } from './get_local_stats';
 import { getClusterUuids } from './get_cluster_stats';
 

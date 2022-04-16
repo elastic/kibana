@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from 'kibana/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import type { MlApiServices } from '../application/services/ml_api_service';

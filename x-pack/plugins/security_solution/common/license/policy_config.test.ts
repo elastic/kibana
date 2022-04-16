@@ -16,7 +16,7 @@ import {
   policyFactoryWithSupportedFeatures,
   policyFactoryWithoutPaidFeatures,
 } from '../endpoint/models/policy_config';
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { ProtectionModes } from '../endpoint/types';
 
 describe('policy_config and licenses', () => {

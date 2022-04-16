@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { TruncatedEnginesList } from './';
+import { TruncatedEnginesList } from '.';
 
 describe('TruncatedEnginesList', () => {
   it('renders a list of engines with links to their schema pages', () => {

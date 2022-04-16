@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';

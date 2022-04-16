@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 import { registerValueSuggestionsRoute } from './value_suggestions_route';
 import { ConfigSchema } from '../../config';
 

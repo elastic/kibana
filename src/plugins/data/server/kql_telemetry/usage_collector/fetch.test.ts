@@ -7,9 +7,9 @@
  */
 
 import { fetchProvider } from './fetch';
-import { ElasticsearchClient } from 'kibana/server';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',

@@ -7,7 +7,7 @@
 
 import type SuperTest from 'supertest';
 
-import { UPDATE_OR_CREATE_LEGACY_ACTIONS } from '../../../plugins/security_solution/common/constants';
+import { UPDATE_OR_CREATE_LEGACY_ACTIONS } from '@kbn/security-solution-plugin/common/constants';
 
 export const createLegacyRuleAction = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

@@ -16,10 +16,11 @@ import type {
   SavedObjectsBatchResponse,
   ApplicationStart,
   DocLinksStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
@@ -31,7 +32,6 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { HomePublicPluginSetup } from '../../home/public';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**

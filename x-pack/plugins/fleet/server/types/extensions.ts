@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import type { DeepReadonly } from 'utility-types';
 

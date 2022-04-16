@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE } from './';
+import { METRIC_TYPE } from '.';
 
 export interface UserAgentMetric {
   type: METRIC_TYPE.USER_AGENT;

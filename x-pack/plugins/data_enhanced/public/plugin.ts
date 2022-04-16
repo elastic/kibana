@@ -7,22 +7,22 @@
 
 import React from 'react';
 import moment from 'moment';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   SearchUsageCollector,
-} from '../../../../src/plugins/data/public';
-import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { SharePluginStart } from '../../../../src/plugins/share/public';
+} from '@kbn/data-plugin/public';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { ScreenshotModePluginStart } from '../../../../src/plugins/screenshot_mode/public';
 
 export interface DataEnhancedSetupDependencies {
   bfetch: BfetchPublicSetup;

@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
-import { Adapters, InspectorViewDescription } from '../../../../inspector/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { Adapters, InspectorViewDescription } from '@kbn/inspector-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { getDataViewComponentWrapper } from './components/data_view_wrapper';
-import { UiActionsStart } from '../../../../ui_actions/public';
-import { FieldFormatsStart } from '../../../../field_formats/public';
-import { DatatableColumn } from '../../../../expressions/common/expression_types/specs';
 
 export const getTableViewDescription = (
   getStartServices: () => {

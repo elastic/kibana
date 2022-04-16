@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 
 import { createSavedQueryRoute } from './create_saved_query_route';
 import { deleteSavedQueryRoute } from './delete_saved_query_route';

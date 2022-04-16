@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from '../../../expressions';
-import { functionWrapper, fontStyle } from '../../../presentation_util/common/lib';
+import { ExecutionContext } from '@kbn/expressions-plugin';
+import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/common/lib';
 import { progressFunction, errors } from './progress_function';
 
 describe('progress', () => {

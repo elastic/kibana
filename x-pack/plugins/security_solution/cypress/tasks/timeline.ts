@@ -73,7 +73,7 @@ import {
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
-import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
+import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 export const hostExistsQuery = 'host.name: *';
 

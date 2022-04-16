@@ -7,7 +7,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
 import { PrebootExamplePlugin } from './plugin';

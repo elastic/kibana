@@ -11,7 +11,7 @@
  * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UiCounterMetricType } from '@kbn/analytics';
 
 import {

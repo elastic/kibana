@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import { UserAPIClient } from '../../management/users';
 import type { ChangePasswordProps } from './change_password';

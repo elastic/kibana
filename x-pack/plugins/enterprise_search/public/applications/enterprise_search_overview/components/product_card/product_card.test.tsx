@@ -16,7 +16,7 @@ import { EuiCard } from '@elastic/eui';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 
-import { ProductCard } from './';
+import { ProductCard } from '.';
 
 describe('ProductCard', () => {
   beforeEach(() => {

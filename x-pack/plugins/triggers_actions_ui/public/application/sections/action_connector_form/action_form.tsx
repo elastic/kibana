@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   EuiLink,
 } from '@elastic/eui';
+import { ActionGroup, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
@@ -35,7 +36,6 @@ import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
-import { ActionGroup, RuleActionParam } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';

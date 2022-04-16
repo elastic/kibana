@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from 'kibana/server';
+import { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { FieldMigrator } from './migrator';
 
 describe('FieldMigrator', () => {

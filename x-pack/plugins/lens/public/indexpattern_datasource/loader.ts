@@ -6,8 +6,11 @@
  */
 
 import { uniq, mapValues, difference } from 'lodash';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { HttpSetup, SavedObjectReference } from 'kibana/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type {
   DatasourceDataPanelProps,
   InitializationOptions,
@@ -25,9 +28,6 @@ import {
 import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
-import type { DataViewsContract, DataView } from '../../../../../src/plugins/data_views/public';
-import { isNestedField } from '../../../../../src/plugins/data_views/common';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';

@@ -16,7 +16,7 @@ import {
   WebhookActionTypeId,
   EmailActionTypeId,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../actions/server/builtin_action_types';
+} from '@kbn/actions-plugin/server/builtin_action_types';
 
 export type ActionTypeId =
   | typeof SlackActionTypeId

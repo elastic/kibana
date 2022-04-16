@@ -6,11 +6,11 @@
  */
 
 import * as Rx from 'rxjs';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
-import type { ScreenshottingStart } from '../../../../../screenshotting/server';
+import { ReportingCore } from '../../..';
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import {
   createMockConfigSchema,
   createMockPluginSetup,

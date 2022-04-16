@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { usageMetricSavedObjectType } from '../../../common/types';
 import { LiveQuerySessionUsage } from '../../usage/types';
 

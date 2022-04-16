@@ -10,8 +10,8 @@ import React, { useCallback } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
-import type { PersistedState } from '../../../../visualizations/public';
-import { ColorPicker } from '../../../../charts/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ColorPicker } from '@kbn/charts-plugin/public';
 
 function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   switch (legendPosition) {

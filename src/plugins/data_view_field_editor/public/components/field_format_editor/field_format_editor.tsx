@@ -11,12 +11,12 @@ import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from 'src/plugins/data/public';
-import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
-import { CoreStart } from 'src/core/public';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
+import { CoreStart } from '@kbn/core/public';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { DataView } from 'src/plugins/data_views/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FormatEditor } from './format_editor';
 import { FormatEditorServiceStart } from '../../service';
 import { FieldFormatConfig } from '../../types';

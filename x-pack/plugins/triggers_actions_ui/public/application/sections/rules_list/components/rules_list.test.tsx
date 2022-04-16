@@ -18,7 +18,7 @@ import {
   RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
   parseDuration,
-} from '../../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
 
 import { useKibana } from '../../../../common/lib/kibana';

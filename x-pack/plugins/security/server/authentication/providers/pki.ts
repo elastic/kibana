@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type { DetailedPeerCertificate } from 'tls';
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';

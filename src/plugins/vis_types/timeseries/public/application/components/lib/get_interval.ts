@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { search } from '../../../../../../../plugins/data/public';
+import { search } from '@kbn/data-plugin/public';
 import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import { AUTO_INTERVAL } from '../../../../common/constants';
 import { isVisTableData } from '../../../../common/vis_data_utils';

@@ -10,7 +10,7 @@ import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiToReactComponent } from '../../../kibana_react/public';
+import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import { Action, ActionExecutionContext } from '../actions';
 import { Trigger } from '../triggers';
 

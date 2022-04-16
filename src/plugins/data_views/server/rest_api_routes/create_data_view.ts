@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { DataViewSpec, DataViewsService } from 'src/plugins/data_views/common';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewSpec, DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, runtimeFieldSchema, serializedFieldFormatSchema } from './util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import {
   DATA_VIEW_PATH,

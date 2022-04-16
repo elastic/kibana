@@ -23,8 +23,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { isTab } from '@kbn/timelines-plugin/public';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { isTab } from '../../../../../timelines/public';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';

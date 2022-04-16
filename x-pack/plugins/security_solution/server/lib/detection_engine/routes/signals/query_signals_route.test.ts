@@ -16,7 +16,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
-import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;

@@ -11,7 +11,15 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
-} from '../../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
+import { ThreatEcs } from '@kbn/security-solution-plugin/common/ecs/threat';
+import {
+  EqlCreateSchema,
+  QueryCreateSchema,
+  SavedQueryCreateSchema,
+  ThreatMatchCreateSchema,
+  ThresholdCreateSchema,
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import {
   createRule,
   createSignalsIndex,
@@ -30,14 +38,6 @@ import {
   waitForSignalsToBePresent,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { ThreatEcs } from '../../../../../plugins/security_solution/common/ecs/threat';
-import {
-  EqlCreateSchema,
-  QueryCreateSchema,
-  SavedQueryCreateSchema,
-  ThreatMatchCreateSchema,
-  ThresholdCreateSchema,
-} from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

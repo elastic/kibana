@@ -7,7 +7,7 @@
  */
 
 import type { ComponentType } from 'react';
-import type { FieldFormat } from '../../../../../field_formats/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FormatSelectEditorProps } from '../field_format_editor';
 
 /**

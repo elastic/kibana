@@ -6,7 +6,7 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import { useUpdatePolicy } from './use_update_policy';
-import { NewPackagePolicy } from '../../../../../fleet/public';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { validate } from '../validation';
 import {
   ConfigKey,

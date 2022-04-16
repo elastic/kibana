@@ -6,8 +6,8 @@
  */
 
 import { canInheritTimeRange } from './can_inherit_time_range';
-import { HelloWorldContainer } from '../../../../src/plugins/embeddable/public/lib/test_samples';
-import { HelloWorldEmbeddable } from '../../../../src/plugins/embeddable/public/tests/fixtures';
+import { HelloWorldContainer } from '@kbn/embeddable-plugin/public/lib/test_samples';
+import { HelloWorldEmbeddable } from '@kbn/embeddable-plugin/public/tests/fixtures';
 import { TimeRangeEmbeddable, TimeRangeContainer } from './test_helpers';
 
 test('canInheritTimeRange returns false if embeddable is inside container without a time range', () => {

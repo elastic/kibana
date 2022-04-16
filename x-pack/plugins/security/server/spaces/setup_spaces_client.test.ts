@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
-import { spacesMock } from '../../../spaces/server/mocks';
 import { auditServiceMock } from '../audit/mocks';
 import { authorizationMock } from '../authorization/index.mock';
 import { setupSpacesClient } from './setup_spaces_client';

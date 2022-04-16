@@ -10,7 +10,7 @@ import { map, takeUntil, catchError } from 'rxjs/operators';
 import { uniq } from 'lodash';
 import { duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'src/core/public';
+import { HttpStart } from '@kbn/core/public';
 import {
   GlobalSearchFindParams,
   GlobalSearchProviderResult,

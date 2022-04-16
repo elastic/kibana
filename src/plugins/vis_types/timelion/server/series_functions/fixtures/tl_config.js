@@ -14,7 +14,7 @@ import esResponse from './es_response';
 export default function () {
   const functions = require('../../lib/load_functions')('series_functions');
 
-  const tlConfig = require('../../handlers/lib/tl_config.js')({
+  const tlConfig = require('../../handlers/lib/tl_config')({
     getFunction: (name) => {
       if (!functions[name]) throw new Error('No such function: ' + name);
       return functions[name];

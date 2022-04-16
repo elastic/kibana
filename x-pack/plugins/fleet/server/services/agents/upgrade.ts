@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent, BulkActionResult } from '../../types';
-import { agentPolicyService } from '../../services';
+import { agentPolicyService } from '..';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,

@@ -6,8 +6,8 @@
  */
 
 import sinon, { stub } from 'sinon';
-import { NotificationsStart } from 'src/core/public';
-import { coreMock, themeServiceMock } from '../../../../../src/core/public/mocks';
+import { NotificationsStart } from '@kbn/core/public';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { JobSummary, ReportApiJSON } from '../../common/types';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';

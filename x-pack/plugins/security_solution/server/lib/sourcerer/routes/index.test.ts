@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSourcererDataViewRoute } from './';
+import { createSourcererDataViewRoute } from '.';
 import {
   requestMock,
   serverMock,
@@ -13,7 +13,7 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 
 import { SOURCERER_API_URL } from '../../../../common/constants';
-import { StartServicesAccessor } from 'kibana/server';
+import { StartServicesAccessor } from '@kbn/core/server';
 import { StartPlugins } from '../../../plugin';
 
 jest.mock('./helpers', () => {

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -14,7 +15,6 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,

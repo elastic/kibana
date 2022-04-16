@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import { HttpResponse } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-
-import { HttpResponse } from 'src/core/public';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
 import { flashErrorToast } from './set_message_helpers';

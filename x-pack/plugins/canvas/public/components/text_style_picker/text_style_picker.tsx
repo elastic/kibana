@@ -9,7 +9,7 @@ import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FontValue } from 'src/plugins/expressions';
+import { FontValue } from '@kbn/expressions-plugin';
 
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';

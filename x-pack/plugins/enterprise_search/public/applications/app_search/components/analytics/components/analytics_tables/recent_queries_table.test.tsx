@@ -17,7 +17,7 @@ import { mountWithIntl } from '../../../../../test_helpers';
 
 import { runActionColumnTests } from './test_helpers/shared_columns_tests';
 
-import { RecentQueriesTable } from './';
+import { RecentQueriesTable } from '.';
 
 describe('RecentQueriesTable', () => {
   const items = [

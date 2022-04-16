@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import { init as initHttpRequests } from './http_requests';
 import { mockContextValue } from './app_context.mock';

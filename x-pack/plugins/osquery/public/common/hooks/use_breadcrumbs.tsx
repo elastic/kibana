@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChromeBreadcrumb } from 'src/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { BASE_PATH } from '../../../common/constants';
 import type { Page, DynamicPagePathValues } from '../page_paths';

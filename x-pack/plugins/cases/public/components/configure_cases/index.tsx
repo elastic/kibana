@@ -11,6 +11,8 @@ import styled, { css } from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SUPPORTED_CONNECTORS } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
@@ -18,9 +20,6 @@ import { useActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 
 import { ClosureType } from '../../containers/configure/types';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionConnectorTableItem } from '../../../../triggers_actions_ui/public/types';
 
 import { SectionWrapper, ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { Connectors } from './connectors';

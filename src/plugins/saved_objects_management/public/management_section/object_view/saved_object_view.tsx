@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { get } from 'lodash';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Capabilities,
   SavedObjectsClientContract,
@@ -20,7 +20,7 @@ import {
   HttpSetup,
   IUiSettingsClient,
   DocLinksStart,
-} from '../../../../../core/public';
+} from '@kbn/core/public';
 import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkGetObjects } from '../../lib/bulk_get_objects';
 import { SavedObjectWithMetadata } from '../../types';

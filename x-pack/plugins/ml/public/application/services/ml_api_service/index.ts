@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
-import type { HttpStart } from 'kibana/public';
+import type { HttpStart } from '@kbn/core/public';
 import { HttpService } from '../http_service';
 
 import { annotations } from './annotations';

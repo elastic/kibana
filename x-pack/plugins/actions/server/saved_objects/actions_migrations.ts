@@ -11,10 +11,10 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
 import { RawAction } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
 
 interface ActionsLogMeta extends LogMeta {
   migrations: { actionDocument: SavedObjectUnsanitizedDoc<RawAction> };

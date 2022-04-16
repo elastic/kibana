@@ -9,6 +9,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiSpacer, EuiForm } from '@elastic/eui';
 import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JobSelectorControl } from './job_selector';
 import { useMlKibana } from '../application/contexts/kibana';
 import { jobsApiProvider } from '../application/services/ml_api_service/jobs';
@@ -29,7 +30,6 @@ import { CombinedJobWithStats } from '../../common/types/anomaly_detection_jobs'
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../common/util/alerts';
 import { isDefined } from '../../common/types/guards';
-import { RuleTypeParamsExpressionProps } from '../../../triggers_actions_ui/public';
 import { parseInterval } from '../../common/util/parse_interval';
 import { BetaBadge } from './beta_badge';
 

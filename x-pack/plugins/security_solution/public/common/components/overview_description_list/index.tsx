@@ -9,7 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { DescriptionList } from '../../../../common/utility_types';
-import { DescriptionListStyled } from '../../../common/components/page';
+import { DescriptionListStyled } from '../page';
 
 export const OverviewDescriptionList = ({
   dataTestSubj,

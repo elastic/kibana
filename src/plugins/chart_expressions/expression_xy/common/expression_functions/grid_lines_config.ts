@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { GRID_LINES_CONFIG } from '../constants';
 import { AxesSettingsConfig, GridlinesConfigResult } from '../types';
 

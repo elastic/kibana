@@ -6,11 +6,11 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import * as Rx from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../../';
-import { LayoutTypes } from '../../../../screenshotting/common';
+import { LayoutTypes } from '@kbn/screenshotting-plugin/common';
+import type { ReportingCore } from '../..';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
 import type { PngMetrics } from '../../../common/types';
 import type { PngScreenshotOptions } from '../../types';

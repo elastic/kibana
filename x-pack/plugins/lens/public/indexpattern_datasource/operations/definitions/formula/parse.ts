@@ -13,7 +13,7 @@ import {
   GenericOperationDefinition,
   GenericIndexPatternColumn,
   operationDefinitionMap,
-} from '../index';
+} from '..';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';

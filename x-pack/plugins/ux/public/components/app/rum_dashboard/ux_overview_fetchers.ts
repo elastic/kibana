@@ -10,7 +10,7 @@ import {
   HasDataParams,
   UxFetchDataResponse,
   UXHasDataResponse,
-} from '../../../../../observability/public/';
+} from '@kbn/observability-plugin/public';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';

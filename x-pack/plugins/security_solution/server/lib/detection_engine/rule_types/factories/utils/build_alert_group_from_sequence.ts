@@ -7,7 +7,7 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 
 import type { ConfigType } from '../../../../../config';
 import { Ancestor, SignalSource, SignalSourceHit } from '../../../signals/types';

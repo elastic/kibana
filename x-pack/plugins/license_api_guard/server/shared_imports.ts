@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export type { ILicense, LicenseType, LicenseCheckState } from '../../licensing/common/types';
+export type { ILicense, LicenseType, LicenseCheckState } from '@kbn/licensing-plugin/common/types';
 
-export type { LicensingPluginStart } from '../../licensing/server';
+export type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
-export { licensingMock } from '../../licensing/server/mocks';
+export { licensingMock } from '@kbn/licensing-plugin/server/mocks';

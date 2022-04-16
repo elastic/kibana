@@ -8,8 +8,8 @@
 import dateMath from '@kbn/datemath';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { MlPluginSetup } from '../../../../../ml/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { AnomalyResults, getAnomalies } from '../../machine_learning';
 
 export const findMlSignals = async ({

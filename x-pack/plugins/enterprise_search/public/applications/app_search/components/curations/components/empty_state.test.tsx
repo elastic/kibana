@@ -13,7 +13,7 @@ import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
 import { docLinks } from '../../../../shared/doc_links';
 
-import { EmptyState } from './';
+import { EmptyState } from '.';
 
 describe('EmptyState', () => {
   it('renders', () => {

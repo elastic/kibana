@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   createManagedConfiguration,
   ADJUST_THROUGHPUT_INTERVAL,

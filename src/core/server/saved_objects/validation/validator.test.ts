@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsTypeValidator, SavedObjectsValidationMap } from './';
+import { SavedObjectsTypeValidator, SavedObjectsValidationMap } from '.';
 import { SavedObjectSanitizedDoc } from '../serialization';
 import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 

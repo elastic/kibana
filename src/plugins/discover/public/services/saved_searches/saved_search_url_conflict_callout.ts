@@ -8,10 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { getSavedSearchUrl } from './saved_searches_utils';
 
 import type { SavedSearch } from './types';
-import type { SpacesApi } from '../../../../../../x-pack/plugins/spaces/public';
 
 interface SavedSearchURLConflictCalloutProps {
   savedSearch?: SavedSearch;

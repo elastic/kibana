@@ -8,7 +8,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { schema as rt } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -16,13 +16,13 @@ import { produce } from 'immer';
 import { unset } from 'lodash';
 import yaml from 'js-yaml';
 
-import { PackagePolicy, PackagePolicyConfigRecord } from '../../../../fleet/common';
+import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { CspAppContext } from '../../plugin';
 import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
 import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
 import { UPDATE_RULES_CONFIG_ROUTE_PATH } from '../../../common/constants';
 import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
-import { PackagePolicyServiceInterface } from '../../../../fleet/server';
 import { CspRouter } from '../../types';
 
 export const getPackagePolicy = async (

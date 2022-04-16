@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
-import { licensingMock } from '../../../../../licensing/server/mocks';
-import { securityMock } from '../../../../../security/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { API_GET_ILM_POLICY_STATUS } from '../../../../common/constants';
 import {
   createMockConfigSchema,

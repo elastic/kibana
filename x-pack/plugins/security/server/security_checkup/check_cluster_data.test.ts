@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createClusterDataCheck } from './check_cluster_data';
 

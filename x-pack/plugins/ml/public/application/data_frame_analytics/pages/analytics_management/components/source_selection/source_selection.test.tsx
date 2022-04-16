@@ -14,7 +14,7 @@ import { getDataViewAndSavedSearch, DataViewAndSavedSearch } from '../../../../.
 
 import { SourceSelection } from './source_selection';
 
-jest.mock('../../../../../../../../../../src/plugins/saved_objects/public', () => {
+jest.mock('@kbn/saved-objects-plugin/public', () => {
   const SavedObjectFinderUi = ({
     onChoose,
   }: {

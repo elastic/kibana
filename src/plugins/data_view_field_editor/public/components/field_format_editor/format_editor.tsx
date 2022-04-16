@@ -9,7 +9,7 @@
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import { memoize } from 'lodash';
 import React, { PureComponent, LazyExoticComponent } from 'react';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { FieldFormatEditorFactory, FieldFormatEditor } from './editors';
 
 export interface FormatEditorProps {

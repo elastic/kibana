@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SerializedFieldFormat } from 'src/plugins/field_formats/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin';
 import { supportedFormats } from './supported_formats';
-import type { DatatableColumn } from '../../../../../../src/plugins/expressions';
-import type { FormatColumnArgs } from './index';
+import type { FormatColumnArgs } from '.';
 import type { FormatColumnExpressionFunction } from './types';
 
 function isNestedFormat(params: DatatableColumn['meta']['params']) {

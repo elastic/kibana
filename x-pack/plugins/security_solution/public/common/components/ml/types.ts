@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Influencer } from '../../../../../ml/public';
+import { Influencer } from '@kbn/ml-plugin/public';
 import { FlowTarget } from '../../../../common/search_strategy';
 
 import { HostsType } from '../../../hosts/store/model';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import { makeLensEmbeddableFactory } from '../../../lens/server/embeddable/make_lens_embeddable_factory';
+import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   CaseResponse,

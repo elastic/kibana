@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 import { Globals } from '../../static_globals';

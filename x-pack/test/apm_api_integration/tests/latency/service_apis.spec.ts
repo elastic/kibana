@@ -7,8 +7,8 @@
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

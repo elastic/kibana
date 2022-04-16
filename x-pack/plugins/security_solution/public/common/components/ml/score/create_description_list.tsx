@@ -13,7 +13,7 @@ import { DescriptionList } from '../../../../../common/utility_types';
 import { Anomaly, NarrowDateRange } from '../types';
 import { getScoreString } from './score_health';
 import { PreferenceFormattedDate } from '../../formatted_date';
-import { createInfluencers } from './../influencers/create_influencers';
+import { createInfluencers } from '../influencers/create_influencers';
 import * as i18n from './translations';
 import { ExplorerLink } from '../links/create_explorer_link';
 

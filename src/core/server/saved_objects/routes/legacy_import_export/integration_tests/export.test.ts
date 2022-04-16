@@ -37,7 +37,7 @@ import { coreUsageStatsClientMock } from '../../../../core_usage_data/core_usage
 import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage_data_service.mock';
 import { registerLegacyExportRoute } from '../export';
 import { setupServer } from '../../test_utils';
-import { loggerMock } from 'src/core/server/logging/logger.mock';
+import { loggerMock } from '../../../../logging/logger.mock';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;

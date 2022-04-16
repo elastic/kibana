@@ -9,11 +9,11 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
-import { DuplicateDataViewError } from '../../../../../../../../../../src/plugins/data/public';
 
 import { useRefreshAnalyticsList, DataFrameAnalyticsConfig } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';

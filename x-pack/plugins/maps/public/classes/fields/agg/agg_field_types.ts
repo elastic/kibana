@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { DataView } from '@kbn/data-plugin/common';
 import { IField } from '../field';
-import { DataView } from '../../../../../../../src/plugins/data/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 

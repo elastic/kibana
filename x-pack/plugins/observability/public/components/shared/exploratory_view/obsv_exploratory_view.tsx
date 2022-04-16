@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { ExploratoryViewPage } from './index';
+import { ExploratoryViewPage } from '.';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 import { AppDataType, ReportViewType } from './types';
 

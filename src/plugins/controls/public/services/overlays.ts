@@ -11,7 +11,7 @@ import {
   OverlayFlyoutOpenOptions,
   OverlayModalConfirmOptions,
   OverlayRef,
-} from '../../../../core/public';
+} from '@kbn/core/public';
 
 export interface ControlsOverlaysService {
   openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;

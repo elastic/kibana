@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { getFunctionHelp } from '../../../i18n';
 
 type Input = number | string;

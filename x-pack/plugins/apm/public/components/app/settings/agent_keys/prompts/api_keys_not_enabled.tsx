@@ -8,7 +8,7 @@ import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export function ApiKeysNotEnabled() {
   const {

@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 import { SavedQueryRouteHandlerContext } from './route_handler_context';
 
 const SAVED_QUERY_PATH = '/api/saved_query';

@@ -16,7 +16,7 @@ import type { ToolingLog } from '@kbn/dev-utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
-import { KIBANA_ROOT } from '../';
+import { KIBANA_ROOT } from '..';
 
 interface TestEsClusterNodesOptions {
   name: string;

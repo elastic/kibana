@@ -9,7 +9,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { SelfChangingComponent } from './self_changing_vis/self_changing_components';
 import { SelfChangingVisRenderValue } from './self_changing_vis_fn';
 

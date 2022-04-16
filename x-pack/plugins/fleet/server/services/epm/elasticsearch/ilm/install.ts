@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { InstallablePackage } from '../../../../types';
 

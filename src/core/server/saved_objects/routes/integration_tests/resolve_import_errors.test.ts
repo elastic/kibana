@@ -10,7 +10,7 @@ jest.mock('uuid');
 
 import supertest from 'supertest';
 import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';

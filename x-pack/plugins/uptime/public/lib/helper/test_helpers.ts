@@ -43,7 +43,7 @@ export function mockDate() {
 }
 
 export function mockDataPlugin() {
-  jest.mock('../../../../../../src/plugins/data/public', () => {
+  jest.mock('@kbn/data-plugin/public', () => {
     return function () {
       return {
         esKuery: {

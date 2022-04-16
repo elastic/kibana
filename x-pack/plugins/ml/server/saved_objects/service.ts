@@ -12,8 +12,8 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
   IScopedClusterClient,
-} from 'kibana/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+} from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type {
   JobType,
   TrainedModelType,

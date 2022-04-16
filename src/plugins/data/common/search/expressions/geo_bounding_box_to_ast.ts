@@ -7,7 +7,7 @@
  */
 
 import { camelCase, chain, isNil, omit } from 'lodash';
-import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { ExpressionFunctionGeoBoundingBox, GeoBoundingBox } from './geo_bounding_box';
 import { geoPointToAst } from './geo_point_to_ast';
 

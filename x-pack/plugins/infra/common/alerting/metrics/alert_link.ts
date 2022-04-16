@@ -8,7 +8,7 @@
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { encode } from 'rison-node';
 import { stringify } from 'query-string';
-import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 
 export const getInventoryViewInAppUrl = (
   fields: ParsedTechnicalFields & Record<string, any>

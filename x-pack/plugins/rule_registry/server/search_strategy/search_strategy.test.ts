@@ -14,11 +14,11 @@ import {
   RULE_SEARCH_STRATEGY_NAME,
 } from './search_strategy';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
-import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server';
-import { alertsMock } from '../../../alerting/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
-import { spacesMock } from '../../../spaces/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { RuleRegistrySearchRequest } from '../../common/search_strategy';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
 import * as getAuthzFilterImport from '../lib/get_authz_filter';

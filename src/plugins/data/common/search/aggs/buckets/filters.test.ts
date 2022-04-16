@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Query } from '../../../../common';
+import { Query } from '../../..';
 import { AggConfigs } from '../agg_configs';
 import { AggTypesDependencies } from '../agg_types';
 import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';

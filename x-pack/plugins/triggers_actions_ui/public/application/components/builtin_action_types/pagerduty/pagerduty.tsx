@@ -19,7 +19,7 @@ import {
   PagerDutySecrets,
   PagerDutyActionParams,
   EventActionOptions,
-} from '.././types';
+} from '../types';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
 export function getActionType(): ActionTypeModel<

@@ -14,7 +14,7 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
   RequestHandlerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   ISearchOptions,
   ISearchStartSearchSource,

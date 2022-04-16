@@ -6,7 +6,7 @@
  */
 
 import pMap from 'p-map';
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/server';
+import { CoreStart } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionsConfig } from '../config';
 import { ActionsPluginsStart } from '../plugin';
-import { spacesMock } from '../../../spaces/server/mocks';
-import { esKuery } from '../../../../../src/plugins/data/server';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { esKuery } from '@kbn/data-plugin/server';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { FindAndCleanupTasksOpts, findAndCleanupTasks } from './find_and_cleanup_tasks';
 

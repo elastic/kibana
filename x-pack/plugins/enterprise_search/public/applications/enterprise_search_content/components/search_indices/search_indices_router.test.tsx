@@ -12,7 +12,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { SearchIndicesRouter } from './';
+import { SearchIndicesRouter } from '.';
 
 describe('SearchIndicesRouter', () => {
   it('renders Search index routes', () => {

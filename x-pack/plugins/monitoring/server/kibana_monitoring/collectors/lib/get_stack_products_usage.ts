@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { MonitoringClusterStackProductUsage } from '../types';
 import { fetchESUsage } from './fetch_es_usage';
 import { MonitoringConfig } from '../../../config';

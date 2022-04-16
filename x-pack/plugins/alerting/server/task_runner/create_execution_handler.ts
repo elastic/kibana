@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { transformActionParams } from './transform_action_params';
-import { asSavedObjectExecutionSource } from '../../../actions/server';
-import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import { AlertInstanceContext, AlertInstanceState, RuleTypeParams, RuleTypeState } from '../types';
 
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 

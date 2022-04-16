@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { fetchIndices } from '../../../lib/fetch_indices';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.maybe(
   schema.object({

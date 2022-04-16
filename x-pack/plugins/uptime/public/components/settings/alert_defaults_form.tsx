@@ -18,14 +18,14 @@ import {
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { SettingsFormProps } from '../../pages/settings';
 import { connectorsSelector } from '../../state/alerts/alerts';
 import { AddConnectorFlyout, ALLOWED_ACTION_TYPES } from './add_connector_flyout';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { alertFormI18n } from './translations';
 import { useInitApp } from '../../hooks/use_init_app';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public/';
 import { ActionTypeId } from './types';
 import { DefaultEmail } from './default_email';
 

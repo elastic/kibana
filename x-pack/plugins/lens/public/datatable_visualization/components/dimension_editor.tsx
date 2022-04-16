@@ -29,7 +29,7 @@ import {
   useDebouncedValue,
   PalettePanelContainer,
   findMinMaxByColumnId,
-} from '../../shared_components/';
+} from '../../shared_components';
 import type { ColumnState } from '../../../common/expressions';
 import {
   isNumericFieldForDatatable,

@@ -8,11 +8,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { getSupportedActions, RuleActionsField } from './index';
+import { getSupportedActions, RuleActionsField } from '.';
 import { useForm, Form } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFormFieldMock } from '../../../../common/mock';
-import { ActionType } from '../../../../../../actions/common';
+import { ActionType } from '@kbn/actions-plugin/common';
 jest.mock('../../../../common/lib/kibana');
 
 describe('RuleActionsField', () => {

@@ -17,7 +17,7 @@ import {
   CaseStatuses,
   CommentRequest,
   CommentRequestActionsType,
-} from '../../../../plugins/cases/common/api';
+} from '@kbn/cases-plugin/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**

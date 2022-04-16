@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CodeEditorProps } from '../../../../kibana_react/public';
+import { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
 
 export const LANGUAGE_CONFIGURATION = {
   autoClosingPairs: [

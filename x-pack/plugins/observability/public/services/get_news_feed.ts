@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 export interface NewsItem {
   title: { en: string };

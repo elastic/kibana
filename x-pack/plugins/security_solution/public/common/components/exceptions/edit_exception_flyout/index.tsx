@@ -31,6 +31,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -39,7 +40,6 @@ import {
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';

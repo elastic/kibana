@@ -15,7 +15,7 @@ import {
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   CommonFields,
   ConfigKey,

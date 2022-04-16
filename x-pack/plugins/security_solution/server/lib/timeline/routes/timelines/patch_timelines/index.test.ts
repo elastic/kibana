@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
   serverMock,
@@ -86,7 +86,7 @@ describe('update timelines', () => {
           };
         });
 
-        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        const patchTimelinesRoute = jest.requireActual('.').patchTimelinesRoute;
         patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getUpdateTimelinesRequest(updateTimelineWithTimelineId);
@@ -150,7 +150,7 @@ describe('update timelines', () => {
           };
         });
 
-        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        const patchTimelinesRoute = jest.requireActual('.').patchTimelinesRoute;
         patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 
@@ -194,7 +194,7 @@ describe('update timelines', () => {
           };
         });
 
-        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        const patchTimelinesRoute = jest.requireActual('.').patchTimelinesRoute;
         patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId);
@@ -270,7 +270,7 @@ describe('update timelines', () => {
           };
         });
 
-        const patchTimelinesRoute = jest.requireActual('./index').patchTimelinesRoute;
+        const patchTimelinesRoute = jest.requireActual('.').patchTimelinesRoute;
         patchTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 

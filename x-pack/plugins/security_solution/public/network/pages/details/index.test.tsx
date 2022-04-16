@@ -20,7 +20,7 @@ import {
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
-import { NetworkDetails } from './index';
+import { NetworkDetails } from '.';
 import { FlowTarget } from '../../../../common/search_strategy';
 
 jest.mock('@elastic/eui', () => {

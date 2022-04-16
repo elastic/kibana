@@ -7,11 +7,11 @@
  */
 
 import { get } from 'lodash';
-import { isNestedField } from '../../../..//data_views/common';
+import { isNestedField } from '@kbn/data-views-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
 import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
-import { KBN_FIELD_TYPES } from '../../../../data/public';
 
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();

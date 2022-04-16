@@ -20,16 +20,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DocumentCreationLogic, ActiveJsonTab } from '..';
 import { FLYOUT_ARIA_LABEL_ID } from '../constants';
 import { Errors } from '../creation_response_components';
-import { DocumentCreationLogic, ActiveJsonTab } from '../index';
 
 import {
   PasteJsonTextTabContent,
   UploadJsonFileTabContent,
   PasteJsonTextFooterContent,
   UploadJsonFileFooterContent,
-} from './';
+} from '.';
 
 import './json_flyout.scss';
 

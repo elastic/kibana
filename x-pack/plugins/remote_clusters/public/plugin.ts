@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 
 import { PLUGIN } from '../common/constants';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';

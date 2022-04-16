@@ -27,11 +27,11 @@ import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { ChartWrapper } from '../chart_wrapper';
 import { I18LABELS } from '../translations';
-import { fromQuery, toQuery } from '../../../../../../observability/public';
 
 interface Props {
   data?: {

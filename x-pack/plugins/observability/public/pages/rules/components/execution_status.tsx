@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiHealth, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RuleExecutionStatusErrorReasons } from '../../../../../alerting/common';
+import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { getHealthColor, rulesStatusesTranslationsMapping } from '../config';
 import { RULE_STATUS_LICENSE_ERROR } from '../translations';
 import { ExecutionStatusProps } from '../types';

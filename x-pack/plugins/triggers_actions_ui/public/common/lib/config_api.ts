@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { BASE_TRIGGERS_ACTIONS_UI_API_PATH } from '../../../common';
 import { TriggersActionsUiConfig } from '../../types';
 

@@ -9,11 +9,12 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters } from 'kibana/public';
-import { Adapters } from 'src/plugins/embeddable/public';
+import { AppLeaveAction, AppMountParameters } from '@kbn/core/public';
+import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore } from '@kbn/es-query';
-import type { Query, TimeRange, DataView } from 'src/plugins/data/common';
+import type { Query, TimeRange, DataView } from '@kbn/data-plugin/common';
+import { SavedQuery, QueryStateChange, QueryState } from '@kbn/data-plugin/public';
 import {
   getData,
   getExecutionContext,
@@ -32,11 +33,6 @@ import {
   startGlobalStateSyncing,
   MapsGlobalState,
 } from '../url_state';
-import {
-  SavedQuery,
-  QueryStateChange,
-  QueryState,
-} from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';

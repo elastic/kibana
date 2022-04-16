@@ -15,7 +15,7 @@ import {
   TimelineType,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
-import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import * as i18n from './translations';

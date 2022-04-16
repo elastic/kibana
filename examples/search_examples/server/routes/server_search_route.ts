@@ -7,11 +7,11 @@
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest } from 'src/plugins/data/server';
+import { IEsSearchRequest } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { IEsSearchResponse } from 'src/plugins/data/common';
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import type { IRouter } from 'src/core/server';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { IRouter } from '@kbn/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
 export function registerServerSearchRoute(router: IRouter<DataRequestHandlerContext>) {

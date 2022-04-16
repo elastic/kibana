@@ -6,18 +6,14 @@
  */
 
 import { Observable, firstValueFrom } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  CoreSetup,
-  Logger,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server';
-import { unwrapEsResponse } from '../../../../observability/server';
-import { APMConfig } from '../..';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CoreSetup, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
+import { APMConfig } from '../..';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,

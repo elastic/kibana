@@ -6,7 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import type { HttpFetchOptions, HttpHandler, HttpStart } from 'kibana/public';
+import type { HttpFetchOptions, HttpHandler, HttpStart } from '@kbn/core/public';
 
 const BASE_PATH = '';
 

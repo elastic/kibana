@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   AggFieldNamePair,
   EVENT_RATE_FIELD_ID,

@@ -7,7 +7,7 @@
  */
 
 import * as esKuery from '@kbn/es-query';
-import type { Logger, SavedObjectsClientContract } from 'src/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 const MAX_OBJECTS_TO_FIND = 10000; // we only expect up to a few dozen, search for 10k to be safe; anything over this is ignored
 

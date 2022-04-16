@@ -8,7 +8,7 @@
 
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
+import { ToastsStart } from '@kbn/core/public';
 
 /**
  * Validates a given time filter range, provided by URL or UI

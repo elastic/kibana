@@ -13,9 +13,9 @@ import {
   ChromeBreadcrumb,
   IBasePath,
   ChromeStart,
-} from '../../../../../src/core/public';
+} from '@kbn/core/public';
 
-import { SpacesPluginStart } from '../../../spaces/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export interface CanvasPlatformService {
   getBasePath: () => string;

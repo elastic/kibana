@@ -9,8 +9,8 @@ import React from 'react';
 import { MLIntegrationComponent } from './ml_integeration';
 import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import * as redux from 'react-redux';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { coreMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const core = coreMock.createStart();
 describe('ML Integrations', () => {

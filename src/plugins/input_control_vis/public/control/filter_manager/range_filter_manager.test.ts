@@ -9,8 +9,8 @@
 import expect from '@kbn/expect';
 
 import { RangeFilterManager } from './range_filter_manager';
-import { FilterManager as QueryFilterManager, DataViewsContract } from '../../../../data/public';
-import { DataView } from '../../../../data_views/public';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { RangeFilter, RangeFilterMeta } from '@kbn/es-query';
 
 describe('RangeFilterManager', function () {

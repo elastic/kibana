@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiSpacer, EuiTextAlign } from '@elastic/eui';
-import type { IndexPatternField } from 'src/plugins/data/public';
+import type { IndexPatternField } from '@kbn/data-plugin/public';
 import { MetricEditor } from './metric_editor';
 import { DEFAULT_METRIC } from '../../classes/sources/es_agg_source';
 import { AggDescriptor, FieldedAggDescriptor } from '../../../common/descriptor_types';

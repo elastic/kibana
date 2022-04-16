@@ -6,8 +6,8 @@
  */
 import React, { useCallback } from 'react';
 import { EuiBasicTable, EuiSpacer, EuiTableSortingType } from '@elastic/eui';
+import { RuleTableItem } from '@kbn/triggers-actions-ui-plugin/public';
 import { RulesTableProps } from '../types';
-import { RuleTableItem } from '../../../../../triggers_actions_ui/public';
 
 export interface Pagination {
   index: number;

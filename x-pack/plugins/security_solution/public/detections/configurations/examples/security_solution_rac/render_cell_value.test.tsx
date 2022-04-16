@@ -19,7 +19,7 @@ import { DefaultCellRenderer } from '../../../../timelines/components/timeline/c
 import { RenderCellValue } from '.';
 import { ColumnHeaderOptions } from '../../../../../common/types';
 
-jest.mock('../../../../common/lib/kibana/');
+jest.mock('../../../../common/lib/kibana');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';

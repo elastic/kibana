@@ -7,13 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Subscription } from 'rxjs';
+import { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { StateContainer, createStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { ActionStorage } from './dynamic_action_storage';
-import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
-import {
-  StateContainer,
-  createStateContainer,
-} from '../../../../../src/plugins/kibana_utils/common';
 import { StartContract } from '../plugin';
 import { SerializedAction, SerializedEvent } from './types';
 import { dynamicActionGrouping } from './dynamic_action_grouping';

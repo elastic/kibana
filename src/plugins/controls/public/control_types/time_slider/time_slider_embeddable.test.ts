@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 import { TimeSliderControlEmbeddableInput } from '.';
 import { TimeSliderControlEmbeddable } from './time_slider_embeddable';
-import { stubLogstashDataView } from '../../../../data_views/common/data_view.stub';
+import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { pluginServices } from '../../services';
 import { TestScheduler } from 'rxjs/testing';
 import { buildRangeFilter } from '@kbn/es-query';

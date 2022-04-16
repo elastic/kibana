@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import Boom from '@hapi/boom';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type {

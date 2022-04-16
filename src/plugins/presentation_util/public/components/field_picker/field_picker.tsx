@@ -13,8 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldSearch } from './field_search';
-import { DataView, DataViewField } from '../../../../data_views/common';
 
 import './field_picker.scss';
 

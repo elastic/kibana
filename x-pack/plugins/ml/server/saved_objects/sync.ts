@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { JobObject, MLSavedObjectService, TrainedModelObject } from './service';
 import type {
   JobType,

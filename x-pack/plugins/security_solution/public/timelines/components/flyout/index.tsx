@@ -10,7 +10,7 @@ import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
 import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { AppLeaveHandler } from '../../../../../../../src/core/public';
+import { AppLeaveHandler } from '@kbn/core/public';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineActions } from '../../store/timeline';

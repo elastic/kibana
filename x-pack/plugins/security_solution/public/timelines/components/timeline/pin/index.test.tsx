@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 
-import { getPinIcon, Pin } from './';
+import { getPinIcon, Pin } from '.';
 
 interface ButtonIcon {
   isDisabled: boolean;

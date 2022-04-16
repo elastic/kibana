@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference, SavedObjectsFindResult } from 'kibana/server';
+import { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ESConnectorFields } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
 import {
@@ -18,7 +19,6 @@ import {
 } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer

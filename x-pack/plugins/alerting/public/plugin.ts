@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart } from 'src/core/public';
+import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './alert_api';

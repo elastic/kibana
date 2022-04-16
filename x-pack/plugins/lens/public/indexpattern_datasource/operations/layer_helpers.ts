@@ -6,10 +6,10 @@
  */
 
 import { partition, mapValues, pickBy, isArray } from 'lodash';
-import { CoreStart } from 'kibana/public';
-import { Query } from 'src/plugins/data/common';
+import { CoreStart } from '@kbn/core/public';
+import { Query } from '@kbn/data-plugin/common';
 import memoizeOne from 'memoize-one';
-import type { VisualizeEditorLayersContext } from '../../../../../../src/plugins/visualizations/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,

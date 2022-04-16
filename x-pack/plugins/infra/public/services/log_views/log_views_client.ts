@@ -6,9 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { HttpStart } from 'src/core/public';
-import { ISearchGeneric } from 'src/plugins/data/public';
-import { DataViewsContract } from 'src/plugins/data_views/public';
+import { HttpStart } from '@kbn/core/public';
+import { ISearchGeneric } from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import {
   getLogViewResponsePayloadRT,

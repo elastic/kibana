@@ -9,7 +9,7 @@ import path from 'path';
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import {
   PreconfiguredPackagesSchema,

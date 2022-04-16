@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -25,7 +26,6 @@ import {
 import { ESQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';

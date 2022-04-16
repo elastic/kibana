@@ -6,7 +6,7 @@
  */
 
 import { get, omit, flow, some } from 'lodash';
-import type { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 const v716RemoveUnusedTelemetry: SavedObjectMigrationFn<any, any> = (doc) => {
   // Dynamically defined in 6.7 (https://github.com/elastic/kibana/pull/28878)

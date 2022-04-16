@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { Headers, Logger } from 'src/core/server';
+import type { Headers, Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { Context } from '../browsers';
 import { DEFAULT_PAGELOAD_SELECTOR } from './constants';

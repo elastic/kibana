@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
 import { getMessages, MessageId, JobValidationMessage } from '../../../common/constants/messages';

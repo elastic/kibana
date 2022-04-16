@@ -8,7 +8,7 @@
 import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useLinkProps } from '../../../../../../observability/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { getNodeDetailUrl } from '../../../../pages/link_to';
 import type { MetricsExplorerTimeOptions } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';

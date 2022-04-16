@@ -11,7 +11,7 @@ import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
-import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
+import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';

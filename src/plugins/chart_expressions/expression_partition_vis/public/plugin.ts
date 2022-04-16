@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsStart } from '../../../field_formats/public';
-import { CoreSetup, CoreStart, ThemeServiceStart } from '../../../../core/public';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { CoreSetup, CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   partitionLabelsFunction,
   pieVisFunction,

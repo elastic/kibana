@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 // @ts-ignore
-import { JobsListView } from './components/jobs_list_view/index';
+import { JobsListView } from './components/jobs_list_view';
 import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';

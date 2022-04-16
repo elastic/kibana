@@ -12,7 +12,7 @@ import type {
   IEsSearchResponse,
   FieldSpec,
   RuntimeField,
-} from '../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 import type { DocValueFields, Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';

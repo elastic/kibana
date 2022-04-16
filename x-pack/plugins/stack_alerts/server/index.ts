@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { AlertingBuiltinsPlugin } from './plugin';
 import { configSchema, Config } from '../common/config';
 export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/alert_type';

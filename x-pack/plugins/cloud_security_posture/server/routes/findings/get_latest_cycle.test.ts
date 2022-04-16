@@ -8,8 +8,8 @@
 import {
   elasticsearchClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'src/core/server/elasticsearch/client/mocks';
-import { loggingSystemMock } from 'src/core/server/mocks';
+} from '@kbn/core/server/elasticsearch/client/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getLatestCycleIds } from './get_latest_cycle_ids';
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;

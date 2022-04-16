@@ -8,8 +8,8 @@
 
 // Inspired by the inspector CSV exporter
 
-import { Datatable } from 'src/plugins/expressions';
-import { FormatFactory } from '../../../field_formats/common';
+import { Datatable } from '@kbn/expressions-plugin';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { createEscapeValue } from './escape_value';
 
 export const LINE_FEED_CHARACTER = '\r\n';

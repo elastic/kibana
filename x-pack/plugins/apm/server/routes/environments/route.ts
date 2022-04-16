@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { maxSuggestions } from '../../../../observability/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getEnvironments } from './get_environments';

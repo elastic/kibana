@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { GetAgentStatusResponse } from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const getAgentStatusForAgentPolicyRoute = (

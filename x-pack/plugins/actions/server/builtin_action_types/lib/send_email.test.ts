@@ -16,9 +16,9 @@ jest.mock('./request_oauth_client_credentials_token', () => ({
   requestOAuthClientCredentialsToken: jest.fn(),
 }));
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
-import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -26,7 +26,7 @@ import { CustomHostSettings } from '../../config';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 import { ConnectorTokenClient } from './connector_token_client';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;

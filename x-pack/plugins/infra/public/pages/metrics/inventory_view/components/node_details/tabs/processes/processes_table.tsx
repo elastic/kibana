@@ -24,9 +24,9 @@ import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { FORMATTERS } from '../../../../../../../../common/formatters';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { SortBy } from '../../../../hooks/use_process_list';
 import { Process } from './types';
 import { ProcessRow } from './process_row';

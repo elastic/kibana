@@ -23,7 +23,7 @@ import { useLoadSnapshotPolicies } from '../../../../../services/api';
 
 import { UseField } from '../../../form';
 
-import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../../';
+import { FieldLoadingError, LearnMoreLink, OptionalLabel } from '../..';
 
 const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
 

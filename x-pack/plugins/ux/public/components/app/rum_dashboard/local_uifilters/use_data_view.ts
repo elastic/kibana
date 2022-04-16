@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataView } from '../../../../../../../../src/plugins/data/common';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { DataView } from '@kbn/data-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 import { useDynamicDataViewFetcher } from '../../../../hooks/use_dynamic_data_view';
 
 export function useDataView() {

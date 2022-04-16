@@ -23,7 +23,7 @@ jest.mock('../../state/api/journey', () => ({
 // We must mock all other API calls because we're using the real store
 // in this test. Using the real store causes actions and effects to actually
 // run, which could trigger API calls.
-jest.mock('../../state/api/utils.ts', () => ({
+jest.mock('../../state/api/utils', () => ({
   apiService: { get: jest.fn().mockResolvedValue([]) },
 }));
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { Writable } from 'stream';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { TaskRunResult } from '../../lib/tasks';

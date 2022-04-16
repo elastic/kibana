@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
 function mockGetSavedObjectsCounts<TBody>(params: TBody) {

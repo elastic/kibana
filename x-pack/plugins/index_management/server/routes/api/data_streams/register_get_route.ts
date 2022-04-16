@@ -7,11 +7,11 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
 import { DataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 interface PrivilegesFromEs {
   username: string;

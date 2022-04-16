@@ -10,8 +10,11 @@ import {
   SavedObjectsServiceStart,
   Logger,
   ElasticsearchClient,
-} from 'kibana/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
+} from '@kbn/core/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import { GetSpaceFn } from '../authorization/types';
@@ -23,9 +26,6 @@ import {
   AttachmentService,
   AlertService,
 } from '../services';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { LensServerPluginSetup } from '../../../lens/server';
 
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';

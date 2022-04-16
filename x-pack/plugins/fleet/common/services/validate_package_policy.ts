@@ -19,7 +19,7 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
-import { isValidNamespace, doesPackageHaveIntegrations } from './';
+import { isValidNamespace, doesPackageHaveIntegrations } from '.';
 
 type Errors = string[] | null;
 

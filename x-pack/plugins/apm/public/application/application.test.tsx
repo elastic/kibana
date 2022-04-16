@@ -9,13 +9,13 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
-import { AppMountParameters, DocLinksStart, HttpStart } from 'src/core/public';
+import { AppMountParameters, DocLinksStart, HttpStart } from '@kbn/core/public';
 import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
-import { renderApp as renderApmApp } from './';
+import { renderApp as renderApmApp } from '.';
 import { disableConsoleWarning } from '../utils/test_helpers';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
 jest.mock('../services/rest/data_view', () => ({

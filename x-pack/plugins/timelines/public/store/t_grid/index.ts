@@ -16,7 +16,7 @@ import {
 } from 'redux';
 
 import { createEpicMiddleware } from 'redux-observable';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TimelineState, TGridEpicDependencies } from '../../types';
 import { tGridReducer } from './reducer';
 import { getTGridByIdSelector } from './selectors';

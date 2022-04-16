@@ -13,9 +13,9 @@ import '@kbn/test-jest-helpers/target_node/stub_web_worker';
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
 import { AllRule, FieldRule } from '../../model';
 import { JSONRuleEditor } from './json_rule_editor';

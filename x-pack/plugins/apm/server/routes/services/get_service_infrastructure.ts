@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { Setup } from '../../lib/helpers/setup_request';
-import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {

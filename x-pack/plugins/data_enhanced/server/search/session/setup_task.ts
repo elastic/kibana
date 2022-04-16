@@ -8,9 +8,9 @@
 import { Duration } from 'moment';
 import { filter, takeUntil } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
-import { RunContext, TaskRunCreatorFunction } from '../../../../task_manager/server';
-import { CoreSetup, SavedObjectsClient } from '../../../../../../src/core/server';
-import { SEARCH_SESSION_TYPE } from '../../../../../../src/plugins/data/common';
+import { RunContext, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import { CoreSetup, SavedObjectsClient } from '@kbn/core/server';
+import { SEARCH_SESSION_TYPE } from '@kbn/data-plugin/common';
 import { DataEnhancedStartDependencies } from '../../type';
 import {
   SearchSessionTaskSetupDeps,

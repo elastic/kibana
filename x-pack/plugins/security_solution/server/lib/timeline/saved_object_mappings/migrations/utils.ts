@@ -9,7 +9,7 @@ import {
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { timelineSavedObjectType } from '../timelines';
 import { TIMELINE_ID_REF_NAME } from '../../constants';
 import { TimelineId } from './types';

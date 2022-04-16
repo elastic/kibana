@@ -9,11 +9,11 @@
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { MountPoint } from 'kibana/public';
+import { MountPoint } from '@kbn/core/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
-import type { UnifiedSearchPublicPluginStart } from '../../../unified_search/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 const unifiedSearch = {
   ui: {

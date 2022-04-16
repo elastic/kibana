@@ -8,9 +8,9 @@
 
 import { Datum, PartitionLayer } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { FieldFormat } from '../../../../../field_formats/common';
-import type { FieldFormatsStart } from '../../../../../field_formats/public';
-import type { Datatable, DatatableRow } from '../../../../../expressions/public';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';

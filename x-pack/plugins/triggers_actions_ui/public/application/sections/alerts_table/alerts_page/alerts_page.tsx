@@ -20,10 +20,10 @@ import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
   RuleRegistrySearchRequestPagination,
-} from '../../../../../../rule_registry/common';
+} from '@kbn/rule-registry-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { AlertsData } from '../../../../types';
 
 const consumers = [

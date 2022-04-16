@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
-import { PercentileRange } from './index';
+import { PercentileRange } from '.';
 
 interface Props {
   percentileRange: PercentileRange;

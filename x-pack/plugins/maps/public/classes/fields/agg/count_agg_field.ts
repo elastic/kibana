@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from '@kbn/data-plugin/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';

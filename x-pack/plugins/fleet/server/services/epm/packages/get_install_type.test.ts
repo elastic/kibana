@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type { Installation } from '../../../types';

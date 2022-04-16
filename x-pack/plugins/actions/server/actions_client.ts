@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
@@ -18,8 +18,9 @@ import {
   SavedObject,
   KibanaRequest,
   SavedObjectsUtils,
-} from '../../../../src/core/server';
-import { AuditLogger } from '../../security/server';
+} from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
+import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract, validateConnector } from './lib';
@@ -43,7 +44,6 @@ import {
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
-import { RunNowResult } from '../../task_manager/server';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 
 // We are assuming there won't be many actions. This is why we will load

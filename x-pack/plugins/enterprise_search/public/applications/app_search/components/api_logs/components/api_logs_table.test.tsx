@@ -23,7 +23,7 @@ import { EuiBasicTable, EuiBadge, EuiHealth, EuiButtonEmpty } from '@elastic/eui
 import { DEFAULT_META } from '../../../../shared/constants';
 import { mountWithIntl } from '../../../../test_helpers';
 
-import { ApiLogsTable } from './';
+import { ApiLogsTable } from '.';
 
 describe('ApiLogsTable', () => {
   const apiLogs = [

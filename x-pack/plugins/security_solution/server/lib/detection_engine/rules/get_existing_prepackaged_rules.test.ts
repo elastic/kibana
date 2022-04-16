@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import {
   getAlertMock,
   getFindResultWithSingleHit,

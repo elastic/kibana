@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { indexPatterns } from '../../../../data/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 
 export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];
 

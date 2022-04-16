@@ -9,12 +9,12 @@ import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart } from 'src/core/public';
-import { themeServiceMock } from 'src/core/public/mocks';
-import { KibanaPageTemplate } from 'src/plugins/kibana_react/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
-import { renderApp } from './';
+import { renderApp } from '.';
 
 describe('renderApp', () => {
   const originalConsole = global.console;

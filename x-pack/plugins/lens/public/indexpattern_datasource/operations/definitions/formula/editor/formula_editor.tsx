@@ -22,10 +22,10 @@ import {
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
-import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
 import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
-import { ParamEditorProps } from '../../index';
+import { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {

@@ -21,7 +21,7 @@ import {
 import { Summary } from './creation_response_components';
 import { DocumentCreationStep } from './types';
 
-import { DocumentCreationLogic } from './';
+import { DocumentCreationLogic } from '.';
 
 export const DocumentCreationFlyout: React.FC = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);

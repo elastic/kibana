@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResult } from 'kibana/server';
+import { SavedObjectsFindResult } from '@kbn/core/server';
 import moment from 'moment';
 import { EMPTY } from 'rxjs';
 import { catchError, concatMap } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import {
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
   KueryNode,
-} from '../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
 import { SearchSessionsConfig, CheckSearchSessionsDeps, SearchStatus } from './types';
 import { bulkUpdateSessions, getAllSessionsStatusUpdates } from './update_session_status';

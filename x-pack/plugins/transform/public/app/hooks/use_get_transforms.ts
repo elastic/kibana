@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchError } from 'src/core/public';
+import { HttpFetchError } from '@kbn/core/public';
 import {
   isGetTransformNodesResponseSchema,
   isGetTransformsResponseSchema,

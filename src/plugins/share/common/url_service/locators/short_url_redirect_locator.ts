@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { KibanaLocation, LocatorDefinition } from '../../url_service';
+import type { KibanaLocation, LocatorDefinition } from '..';
 
 export const SHORT_URL_REDIRECT_LOCATOR = 'SHORT_URL_REDIRECT_LOCATOR';
 

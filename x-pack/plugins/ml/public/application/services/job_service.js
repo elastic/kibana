@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ml } from './ml_api_service';
 
-import { getToastNotificationService } from '../services/toast_notification_service';
+import { getToastNotificationService } from './toast_notification_service';
 import { isWebUrl } from '../util/url_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';

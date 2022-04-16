@@ -6,13 +6,13 @@
  */
 
 import { useMemo } from 'react';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import {
   LogDataViewReference,
   LogIndexNameReference,
   logIndexNameReferenceRT,
 } from '../../../../common/log_views';
-import { SavedObjectNotFound } from '../../../../../../../src/plugins/kibana_utils/common';
-import { useUiTracker } from '../../../../../observability/public';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useFormElement } from './form_elements';
 import {

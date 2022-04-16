@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/dev-utils';
 import type SuperTest from 'supertest';
-import type { DetectionMetrics } from '../../../plugins/security_solution/server/usage/detections/types';
+import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 
 import { getStatsUrl } from './get_stats_url';
 import { getDetectionMetricsFromBody } from './get_detection_metrics_from_body';

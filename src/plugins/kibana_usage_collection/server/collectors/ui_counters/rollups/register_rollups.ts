@@ -8,7 +8,7 @@
 
 import { Subject, timer } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Logger, ISavedObjectsRepository } from 'kibana/server';
+import { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import { ROLL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
 import { rollUiCounterIndices } from './rollups';
 

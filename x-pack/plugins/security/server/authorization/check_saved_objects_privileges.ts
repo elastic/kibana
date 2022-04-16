@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { ALL_SPACES_ID } from '../../common/constants';
 import type { SpacesService } from '../plugin';

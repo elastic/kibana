@@ -8,7 +8,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { chromeServiceMock } from '../../../../../../core/public/mocks';
+import { chromeServiceMock } from '@kbn/core/public/mocks';
 import { useChromeVisibility } from './use_chrome_visibility';
 
 describe('useChromeVisibility', () => {

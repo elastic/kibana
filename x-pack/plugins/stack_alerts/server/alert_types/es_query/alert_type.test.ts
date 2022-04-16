@@ -7,23 +7,23 @@
 
 import uuid from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { RuleExecutorServices } from '../../../../alerting/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import {
   RuleExecutorServicesMock,
   alertsMock,
   AlertInstanceMock,
-} from '../../../../alerting/server/mocks';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+} from '@kbn/alerting-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getAlertType } from './alert_type';
 import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
 import { ActionContext } from './action_context';
-import { ESSearchResponse, ESSearchRequest } from '../../../../../../src/core/types/elasticsearch';
+import { ESSearchResponse, ESSearchRequest } from '@kbn/core/types/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
-import { coreMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
-import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 
 const logger = loggingSystemMock.create().get();

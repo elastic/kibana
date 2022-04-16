@@ -13,7 +13,7 @@ import { fireEvent } from '@testing-library/dom';
 import { MiddlewareActionSpyHelper } from '../../../../common/store/test_utils';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import { TrustedApp } from '../../../../../common/endpoint/types';
-import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
+import { HttpFetchOptions, HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy_select/test_utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';

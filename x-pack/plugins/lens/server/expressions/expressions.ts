@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import {
   counterRate,
   formatColumn,
@@ -17,7 +18,6 @@ import {
 import { getFormatFactory, getTimeZoneFactory } from './utils';
 
 import type { PluginStartContract } from '../plugin';
-import type { ExpressionsServerSetup } from '../../../../../src/plugins/expressions/server';
 
 export const setupExpressions = (
   core: CoreSetup<PluginStartContract>,

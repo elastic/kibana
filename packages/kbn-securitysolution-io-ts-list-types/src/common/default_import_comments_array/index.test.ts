@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { ImportCommentsArray } from '../import_comment';
-import { DefaultImportCommentsArray } from '../default_import_comments_array';
+import { DefaultImportCommentsArray } from '.';
 import { getCommentsArrayMock } from '../comment/index.mock';
 import { getCreateCommentsArrayMock } from '../create_comment/index.mock';
 

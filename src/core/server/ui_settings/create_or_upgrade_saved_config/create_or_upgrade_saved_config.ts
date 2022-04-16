@@ -9,7 +9,7 @@
 import { defaults } from 'lodash';
 
 import { SavedObjectsClientContract } from '../../saved_objects/types';
-import { SavedObjectsErrorHelpers } from '../../saved_objects/';
+import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { Logger, LogMeta } from '../../logging';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';

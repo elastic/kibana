@@ -11,7 +11,7 @@ import { Option, none, some } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { sleep, resolvable, Resolvable } from '../test_utils';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 
 describe('TaskPoller', () => {

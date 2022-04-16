@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { IRouter } from 'kibana/server';
-import type { DataRequestHandlerContext } from '../../../../src/plugins/data/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { IRouter } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+} from '@kbn/data-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 /**
  * @internal

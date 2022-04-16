@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NewAlertParams } from './alerts';
-import { RuleAction as RuleActionOrig } from '../../../../triggers_actions_ui/public';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
-import { MonitorStatusTranslations } from '../../../common/translations';
+import { RuleAction as RuleActionOrig } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   IndexActionParams,
   PagerDutyActionParams,
@@ -19,7 +16,10 @@ import {
   WebhookActionParams,
   EmailActionParams,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../actions/server';
+} from '@kbn/actions-plugin/server';
+import { NewAlertParams } from './alerts';
+import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
+import { MonitorStatusTranslations } from '../../../common/translations';
 import { ActionTypeId } from '../../components/settings/types';
 import { Ping } from '../../../common/runtime_types/ping';
 import { DefaultEmail } from '../../../common/runtime_types';

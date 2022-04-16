@@ -8,9 +8,9 @@
 import { EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 
+import type { Space } from '@kbn/spaces-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { Space } from '../../../../../../../../spaces/public';
 import type { Role } from '../../../../../../../common/model';
 import { createFeature, kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';

@@ -18,14 +18,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import styled from 'styled-components';
+import { Markdown, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AgentRuntimeAttachmentProps,
   CreateAgentInstructions,
 } from './agent_instructions_mappings';
-import {
-  Markdown,
-  useKibana,
-} from '../../../../../../../src/plugins/kibana_react/public';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { AgentIcon } from '../../shared/agent_icon';
 import type {

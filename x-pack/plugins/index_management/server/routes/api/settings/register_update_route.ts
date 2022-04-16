@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.any();
 

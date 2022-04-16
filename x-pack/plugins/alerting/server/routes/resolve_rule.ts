@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext, RewriteResponseCase } from './lib';
 import {

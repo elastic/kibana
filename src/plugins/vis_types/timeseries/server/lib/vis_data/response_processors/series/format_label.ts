@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { BUCKET_TYPES, PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
   createCachedFieldValueFormatter,
@@ -13,7 +14,6 @@ import {
   MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
 import type { Panel, PanelData, Series } from '../../../../../common/types';
-import type { FieldFormatsRegistry } from '../../../../../../../field_formats/common';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
 import type { BaseMeta } from '../../request_processors/types';

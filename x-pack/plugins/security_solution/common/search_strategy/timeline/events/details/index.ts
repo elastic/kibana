@@ -9,4 +9,4 @@ export type {
   TimelineEventsDetailsItem,
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsDetailsRequestOptions,
-} from '../../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';

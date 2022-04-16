@@ -7,8 +7,8 @@
 
 import type { BroadcastChannel } from 'broadcast-channel';
 
-import type { ToastInputFields } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
+import type { ToastInputFields } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import {
   SESSION_CHECK_MS,

@@ -7,6 +7,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -15,7 +17,6 @@ import {
   aggregations,
   mlOnlyAggregations,
 } from '../../../../../../common/constants/aggregation_types';
-import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 import {
   Job,
   Datafeed,
@@ -40,7 +41,6 @@ import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
 

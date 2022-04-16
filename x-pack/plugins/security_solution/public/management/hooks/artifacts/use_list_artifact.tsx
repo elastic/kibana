@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { useMemo } from 'react';
 import {

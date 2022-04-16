@@ -9,7 +9,7 @@ import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
 import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';

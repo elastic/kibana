@@ -15,12 +15,7 @@ import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { LensAppServices } from '../app_plugin/types';
 
-import {
-  makeConfigureStore,
-  LensAppState,
-  LensState,
-  LensStoreDeps,
-} from '../state_management/index';
+import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
 import { getResolvedDateRange } from '../utils';
 import { DatasourceMap, VisualizationMap } from '../types';
 import { mockVisualizationMap } from './visualization_mock';

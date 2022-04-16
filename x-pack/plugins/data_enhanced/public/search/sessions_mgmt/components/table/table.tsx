@@ -7,14 +7,14 @@
 
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
-import { TableText } from '../';
+import { SEARCH_SESSIONS_TABLE_ID } from '@kbn/data-plugin/common';
+import { TableText } from '..';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../../../src/plugins/data/common/';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';

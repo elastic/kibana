@@ -15,7 +15,7 @@ import {
   PreloadedState,
   ReducersMapObject,
 } from 'redux';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { managementReducer } from '../../../../../store/reducer';
 import { appReducer } from '../../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../../common/experimental_features_service';

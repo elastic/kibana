@@ -11,7 +11,7 @@ import React from 'react';
 
 import '../../common/mock/match_media';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
-import { HeaderPage } from './index';
+import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../common/navigation/hooks');

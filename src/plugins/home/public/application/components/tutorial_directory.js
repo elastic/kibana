@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
 import { getServices } from '../kibana_services';
-import { KibanaPageTemplate } from '../../../../kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { getTutorials } from '../load_tutorials';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';

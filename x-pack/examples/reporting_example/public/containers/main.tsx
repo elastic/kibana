@@ -33,14 +33,14 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, useHistory } from 'react-router-dom';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import type {
   JobAppParamsPDF,
   JobParamsPDFV2,
   JobParamsPNGV2,
-} from '../../../../plugins/reporting/common/types';
-import type { ReportingStart } from '../../../../plugins/reporting/public';
-import { LayoutTypes } from '../../../../plugins/screenshotting/public';
+} from '@kbn/reporting-plugin/common/types';
+import type { ReportingStart } from '@kbn/reporting-plugin/public';
+import { LayoutTypes } from '@kbn/screenshotting-plugin/public';
 import { REPORTING_EXAMPLE_LOCATOR_ID } from '../../common';
 import { useApplicationContext } from '../application_context';
 import { ROUTES } from '../constants';

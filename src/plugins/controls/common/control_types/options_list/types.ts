@@ -7,7 +7,7 @@
  */
 
 import { BoolQuery } from '@kbn/es-query';
-import { FieldSpec } from '../../../../data_views/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { ControlInput } from '../../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';

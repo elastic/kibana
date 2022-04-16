@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPattern, PersistedIndexPatternLayer } from '../../../types';
-import type { DataView } from '../../../../../../../../src/plugins/data_views/public';
 
 import { insertOrReplaceFormulaColumn } from './parse';
 import { convertDataViewIntoLensIndexPattern } from '../../../loader';

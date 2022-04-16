@@ -6,14 +6,14 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { DataView } from '../../../../../src/plugins/data/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
-} from '../../../../../src/plugins/embeddable/public';
-import { Query, TimeRange } from '../../../../../src/plugins/data/common';
+} from '@kbn/embeddable-plugin/public';
+import { Query, TimeRange } from '@kbn/data-plugin/common';
 import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapSettings } from '../reducers/map';

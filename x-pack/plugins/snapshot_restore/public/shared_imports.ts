@@ -12,7 +12,7 @@ export type {
   SendRequestResponse,
   UseRequestResponse,
   UseRequestConfig,
-} from '../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 
 export {
   AuthorizationProvider,
@@ -26,12 +26,12 @@ export {
   useRequest,
   WithPrivileges,
   EuiCodeEditor,
-} from '../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
 
-export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+export { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 export {
   reactRouterNavigate,
   KibanaThemeProvider,
   useExecutionContext,
-} from '../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';

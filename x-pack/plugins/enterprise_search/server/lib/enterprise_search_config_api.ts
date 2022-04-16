@@ -8,14 +8,13 @@
 import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { kibanaPackageJson } from '@kbn/utils';
 
-import { KibanaRequest, Logger } from 'src/core/server';
-
+import { ConfigType } from '..';
 import { isVersionMismatch } from '../../common/is_version_mismatch';
 import { stripTrailingSlash } from '../../common/strip_slashes';
 import { InitialAppData } from '../../common/types';
-import { ConfigType } from '../index';
 
 import { entSearchHttpAgent } from './enterprise_search_http_agent';
 

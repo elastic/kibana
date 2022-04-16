@@ -8,8 +8,8 @@
 
 import { gaugeFunction } from './gauge_function';
 import { GaugeArguments, GaugeShapes } from '..';
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import {
   GaugeCentralMajorModes,
   GaugeColorModes,

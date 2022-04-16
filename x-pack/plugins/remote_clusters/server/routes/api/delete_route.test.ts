@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler } from '../../../../../../src/core/server';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import { register } from './delete_route';
 import { API_BASE_PATH } from '../../../common/constants';
 
-import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
-import { httpServerMock, httpServiceMock, coreMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
 
 import { handleEsError } from '../../shared_imports';
 

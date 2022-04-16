@@ -9,10 +9,7 @@ import React, { FC, useCallback } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import {
-  SavedObjectFinderUi,
-  SavedObjectMetaData,
-} from '../../../../../../src/plugins/saved_objects/public/';
+import { SavedObjectFinderUi, SavedObjectMetaData } from '@kbn/saved-objects-plugin/public';
 import { useEmbeddablesService, usePlatformService } from '../../services';
 
 const strings = {

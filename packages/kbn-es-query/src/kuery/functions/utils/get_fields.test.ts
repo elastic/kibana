@@ -9,7 +9,7 @@
 import { DataViewBase } from '../../..';
 import { fields } from '../../../filters/stubs';
 
-import { nodeTypes } from '../../index';
+import { nodeTypes } from '../..';
 import { getFields } from './get_fields';
 
 jest.mock('../../grammar');

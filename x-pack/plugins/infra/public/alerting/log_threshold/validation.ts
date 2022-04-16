@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
 import { isNumber, isFinite } from 'lodash';
-import { IErrorObject, ValidationResult } from '../../../../triggers_actions_ui/public';
+import { IErrorObject, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   PartialCountCriteria,
   isRatioRule,

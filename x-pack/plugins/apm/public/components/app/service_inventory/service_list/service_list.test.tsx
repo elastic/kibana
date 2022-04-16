@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { Breakpoints } from '../../../../hooks/use_breakpoints';
-import { getServiceColumns } from './';
+import { getServiceColumns } from '.';
 import * as stories from './service_list.stories';
 import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
 

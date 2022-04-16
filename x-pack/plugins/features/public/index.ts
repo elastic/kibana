@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import { FeaturesPlugin, FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
 export type {

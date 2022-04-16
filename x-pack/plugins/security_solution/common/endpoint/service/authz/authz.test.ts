@@ -6,7 +6,7 @@
  */
 
 import { calculateEndpointAuthz, getEndpointAuthzInitialState } from './authz';
-import { createFleetAuthzMock, FleetAuthz } from '../../../../../fleet/common';
+import { createFleetAuthzMock, FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createLicenseServiceMock } from '../../../license/mocks';
 import { EndpointAuthzKeyList } from '../../types/authz';
 

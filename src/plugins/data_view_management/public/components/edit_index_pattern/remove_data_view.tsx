@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IUiSettingsClient, OverlayStart } from 'src/core/public';
+import type { IUiSettingsClient, OverlayStart } from '@kbn/core/public';
 import { asyncForEach } from '@kbn/std';
 import { EuiConfirmModalProps } from '@elastic/eui';
-import { toMountPoint } from '../../../../../plugins/kibana_react/public';
-import { DataViewsPublicPluginStart } from '../../../../../plugins/data_views/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 const confirmModalOptionsDelete = {
   confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {

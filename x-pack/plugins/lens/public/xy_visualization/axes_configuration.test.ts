@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataLayerConfigResult } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { DataLayerConfigResult } from '@kbn/expression-xy-plugin/common';
 import { layerTypes } from '../../common';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
 
 describe('axes_configuration', () => {

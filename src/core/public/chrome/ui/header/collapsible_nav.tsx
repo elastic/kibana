@@ -26,7 +26,7 @@ import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { OnIsLockedUpdate } from './';
+import { OnIsLockedUpdate } from '.';
 import {
   createEuiListItem,
   createRecentNavLink,

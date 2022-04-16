@@ -7,8 +7,8 @@
  */
 
 import { DataLayerArgs } from '../types';
-import { dataLayerConfigFunction } from '../expression_functions';
-import { createMockExecutionContext } from '../../../../expressions/common/mocks';
+import { dataLayerConfigFunction } from '.';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { mockPaletteOutput } from '../__mocks__';
 import { LayerTypes } from '../constants';
 

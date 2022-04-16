@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '../../../data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 const fields = [
   {

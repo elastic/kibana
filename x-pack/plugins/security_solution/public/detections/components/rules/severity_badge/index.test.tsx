@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { SeverityBadge } from './index';
+import { SeverityBadge } from '.';
 
 describe('SeverityBadge', () => {
   it('renders correctly', () => {

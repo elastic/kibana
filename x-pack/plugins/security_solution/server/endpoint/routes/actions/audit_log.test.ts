@@ -7,14 +7,14 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
+import { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,

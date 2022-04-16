@@ -20,10 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { IClickActionDescriptor } from '../';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { IClickActionDescriptor } from '..';
 import { OnActionDismiss } from './types';
 import { UISession } from '../../types';
 

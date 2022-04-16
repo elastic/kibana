@@ -10,7 +10,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { getCallApmApiSpy } from '../../../../services/rest/call_apm_api_spy';
 import { CustomLinkOverview } from '.';
-import { License } from '../../../../../../licensing/common/license';
+import { License } from '@kbn/licensing-plugin/common/license';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,

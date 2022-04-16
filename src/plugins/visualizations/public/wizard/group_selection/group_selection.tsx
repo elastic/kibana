@@ -28,7 +28,7 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocLinksStart } from '../../../../../core/public';
+import { DocLinksStart } from '@kbn/core/public';
 import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';

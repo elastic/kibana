@@ -7,7 +7,7 @@
  */
 
 import { apmSystem, fatalErrorMock, i18nLoad } from './kbn_bootstrap.test.mocks';
-import { __kbnBootstrap__ } from './';
+import { __kbnBootstrap__ } from '.';
 
 describe('kbn_bootstrap', () => {
   beforeAll(() => {

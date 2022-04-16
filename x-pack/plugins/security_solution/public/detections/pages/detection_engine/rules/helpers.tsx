@@ -20,7 +20,7 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
-import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
+import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';

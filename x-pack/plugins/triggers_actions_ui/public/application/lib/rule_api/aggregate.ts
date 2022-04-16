@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { RuleAggregations } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteBodyRes: RewriteRequestCase<RuleAggregations> = ({
   rule_execution_status: ruleExecutionStatus,

@@ -7,8 +7,9 @@
 
 import { memoize } from 'lodash';
 
-import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
+import { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import { ConfigType } from './config';
@@ -29,7 +30,6 @@ import {
   getEndpointAuthzInitialState,
 } from '../common/endpoint/service/authz';
 import { licenseService } from './lib/license';
-import { FleetAuthz } from '../../fleet/common';
 
 export interface IRequestContextFactory {
   create(

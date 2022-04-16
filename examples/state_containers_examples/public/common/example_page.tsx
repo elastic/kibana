@@ -8,7 +8,7 @@
 
 import React, { PropsWithChildren } from 'react';
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
-import { CoreStart } from '../../../../src/core/public';
+import { CoreStart } from '@kbn/core/public';
 
 export interface ExampleLink {
   title: string;

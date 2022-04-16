@@ -8,7 +8,7 @@
 
 import React, { ReactElement } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { createFilterManagerMock } from '../../../data/public/query/filter_manager/filter_manager.mock';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import {
   getContextHash,
   HistoryState,
@@ -17,7 +17,7 @@ import {
 } from './use_navigation_props';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const filterManager = createFilterManagerMock();
 const defaultProps = {

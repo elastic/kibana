@@ -10,7 +10,7 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 
 import { performBulkAction } from '../../../containers/detection_engine/rules';
-import { RuleSwitchComponent } from './index';
+import { RuleSwitchComponent } from '.';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRulesTableContextOptional } from '../../../pages/detection_engine/rules/all/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../pages/detection_engine/rules/all/rules_table/__mocks__/rules_table_context';

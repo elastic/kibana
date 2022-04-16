@@ -7,11 +7,11 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../../services/rest/create_call_apm_api';
-import { AgentConfigurationCreateEdit } from './index';
+import { AgentConfigurationCreateEdit } from '.';
 import {
   ApmPluginContext,
   ApmPluginContextValue,

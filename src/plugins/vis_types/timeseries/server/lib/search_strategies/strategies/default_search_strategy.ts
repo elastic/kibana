@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
 
-import type { DataViewsService } from '../../../../../../data_views/common';
 import type { FetchedIndexPattern } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequestHandlerContext,

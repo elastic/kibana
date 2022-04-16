@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/server';
+import { PluginInitializer } from '@kbn/core/server';
 import { BannersPlugin } from './plugin';
 
 export { config } from './config';

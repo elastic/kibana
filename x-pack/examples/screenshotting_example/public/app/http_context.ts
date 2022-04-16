@@ -6,6 +6,6 @@
  */
 
 import { createContext } from 'react';
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 export const HttpContext = createContext<HttpStart | undefined>(undefined);

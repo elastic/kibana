@@ -8,7 +8,7 @@
 
 import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
-import type { Plugin, CoreSetup, TelemetryCounter, CoreStart } from 'src/core/public';
+import type { Plugin, CoreSetup, TelemetryCounter, CoreStart } from '@kbn/core/public';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 import './types';

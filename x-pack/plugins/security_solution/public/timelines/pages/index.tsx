@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 
-import { ChromeBreadcrumb } from '../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { TimelineType } from '../../../common/types/timeline';
 import { TimelineRouteSpyState } from '../../common/utils/route/types';

@@ -8,11 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
-import { DatatableColumn } from 'src/plugins/expressions';
+import { DatatableColumn } from '@kbn/expressions-plugin';
 import { groupBy, escape } from 'lodash';
+import { checkColumnForPrecisionError, Query } from '@kbn/data-plugin/common';
 import type { FramePublicAPI, StateSetter } from '../types';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
@@ -30,7 +31,6 @@ import {
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
 import { FiltersIndexPatternColumn, isQueryValid } from './operations/definitions/filters';
-import { checkColumnForPrecisionError, Query } from '../../../../../src/plugins/data/common';
 import { hasField } from './pure_utils';
 import { mergeLayer } from './state_helpers';
 import { supportsRarityRanking } from './operations/definitions/terms';

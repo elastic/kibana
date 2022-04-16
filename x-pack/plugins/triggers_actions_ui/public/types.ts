@@ -6,12 +6,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import type { ComponentType } from 'react';
-import type { ChartsPluginSetup } from 'src/plugins/charts/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import type { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IconType } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
@@ -26,8 +26,7 @@ import {
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AsApiContract,
-} from '../../actions/common';
-import { TypeRegistry } from './application/type_registry';
+} from '@kbn/actions-plugin/common';
 import {
   ActionGroup,
   RuleActionParam,
@@ -45,8 +44,9 @@ import {
   RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
-} from '../../alerting/common';
-import { RuleRegistrySearchRequestPagination } from '../../rule_registry/common';
+} from '@kbn/alerting-plugin/common';
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { TypeRegistry } from './application/type_registry';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>

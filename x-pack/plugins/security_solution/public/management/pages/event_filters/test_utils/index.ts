@@ -12,6 +12,9 @@ import type {
   ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_summary_schema.mock';
 import { Ecs } from '../../../../../common/ecs';
 
 import {
@@ -24,9 +27,6 @@ import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../../common/mock/endpoint/http_handler_mock_factory';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getSummaryExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_summary_schema.mock';
 
 export const createGlobalNoMiddlewareStore = () => {
   return createStore(

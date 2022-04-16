@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomHttpResponseOptions, KibanaResponseFactory } from 'src/core/server';
+import { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
 
 /**
  * Copied from x-pack/plugins/security_solution/server/lib/detection_engine/routes/utils.ts

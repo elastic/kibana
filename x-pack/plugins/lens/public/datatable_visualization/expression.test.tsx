@@ -7,7 +7,7 @@
 
 import type { DatatableProps } from '../../common/expressions';
 import type { LensMultiTable } from '../../common';
-import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import type { FormatFactory } from '../../common';
 import { getDatatable } from '../../common/expressions';
 

@@ -33,20 +33,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
-import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
+import { DataView, DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { context as contextType, CodeEditor } from '@kbn/kibana-react-plugin/public';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
-import {
-  DataView,
-  DataViewField,
-  DataViewsPublicPluginStart,
-} from '../../../../../plugins/data_views/public';
-import { context as contextType, CodeEditor } from '../../../../kibana_react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,

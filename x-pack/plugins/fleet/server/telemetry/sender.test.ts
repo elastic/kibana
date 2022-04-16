@@ -13,7 +13,7 @@ import axios from 'axios';
 
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { UpdateEventType } from '../services/upgrade_sender';
 

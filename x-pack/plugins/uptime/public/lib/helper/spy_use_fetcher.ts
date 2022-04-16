@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import * as observabilityPublic from '../../../../observability/public';
+import * as observabilityPublic from '@kbn/observability-plugin/public';
 
-jest.mock('../../../../observability/public', () => {
-  const originalModule = jest.requireActual('../../../../observability/public');
+jest.mock('@kbn/observability-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/observability-plugin/public');
 
   return {
     ...originalModule,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from '../../../../core/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 import { createStartServicesGetter } from './create_start_service_getter';
 import { Defer } from '../../common/defer';
 

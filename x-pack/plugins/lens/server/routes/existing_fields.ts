@@ -9,12 +9,12 @@ import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
-import { CoreSetup, Logger } from 'src/core/server';
-import { RuntimeField } from 'src/plugins/data/common';
-import { DataViewsService, DataView, FieldSpec } from 'src/plugins/data_views/common';
+import { RequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { RuntimeField } from '@kbn/data-plugin/common';
+import { DataViewsService, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { BASE_API_URL } from '../../common';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 import { FIELD_EXISTENCE_SETTING } from '../ui_settings';
 import { PluginStartContract } from '../plugin';
 

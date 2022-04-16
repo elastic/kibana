@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   PartialRuleParams,

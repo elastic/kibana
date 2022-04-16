@@ -7,7 +7,7 @@
  */
 
 import { inspect } from 'util';
-import { SavedObjectMigrationContext } from 'kibana/server';
+import { SavedObjectMigrationContext } from '@kbn/core/server';
 import { DashboardDoc730ToLatest } from '../../common';
 import { isDashboardDoc } from './is_dashboard_doc';
 import { moveFiltersToQuery } from './move_filters_to_query';

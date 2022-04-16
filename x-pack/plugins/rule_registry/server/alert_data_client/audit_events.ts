@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EcsEventOutcome, EcsEventType } from 'src/core/server';
-import { AuditEvent } from '../../../security/server';
-import { ReadOperations, WriteOperations } from '../../../alerting/server';
+import { EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import { AuditEvent } from '@kbn/security-plugin/server';
+import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server';
 
 export enum AlertAuditAction {
   GET = 'alert_get',

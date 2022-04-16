@@ -12,7 +12,7 @@ import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import { Annotation, isAnnotations } from '../../../common/types/annotations';
 
 import { DeleteParams, GetResponse, IndexAnnotationArgs } from './annotation';
-import { annotationServiceProvider } from './index';
+import { annotationServiceProvider } from '.';
 
 const acknowledgedResponseMock = { acknowledged: true };
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getInfraHref } from '../../../../shared/links/infra_link';

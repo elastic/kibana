@@ -10,7 +10,7 @@ import { Observable, Subscription, combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { pick } from '@kbn/std';
 
-import type { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from '..';
 import type { InternalExecutionContextSetup } from '../execution_context';
 import { CoreService } from '../../types';
 import { Logger } from '../logging';

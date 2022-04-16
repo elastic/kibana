@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ThemeServiceStart } from 'kibana/public';
-import { createGetterSetter } from '../../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../../data/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export const [getDataActions, setDataActions] =
   createGetterSetter<DataPublicPluginStart['actions']>('vislib data.actions');

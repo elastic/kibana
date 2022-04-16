@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { MlGenericUrlState } from '../../../common/types/locator';
-import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function extractParams<UrlState>(urlState: UrlState) {
   // page should be guaranteed to exist here but <UrlState> is unknown

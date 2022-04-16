@@ -6,11 +6,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { LocatorGetUrlParams } from '@kbn/share-plugin/common/url_service';
 import { useMlKibana } from './kibana_context';
 import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
 import { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
-import { LocatorGetUrlParams } from '../../../../../../../src/plugins/share/common/url_service';
 
 export const useMlLocator = () => {
   const {

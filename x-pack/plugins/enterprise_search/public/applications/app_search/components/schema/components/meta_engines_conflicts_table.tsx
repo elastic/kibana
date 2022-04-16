@@ -24,7 +24,7 @@ import { ENGINES_TITLE } from '../../engines';
 
 import { MetaEngineSchemaLogic } from '../schema_meta_engine_logic';
 
-import { TruncatedEnginesList } from './';
+import { TruncatedEnginesList } from '.';
 
 export const MetaEnginesConflictsTable: React.FC = () => {
   const { conflictingFields } = useValues(MetaEngineSchemaLogic);

@@ -12,8 +12,8 @@ import {
   SavedObjectsRepository,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
-} from 'src/core/server';
-import type { Logger, LogMeta } from 'src/core/server';
+} from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 
 import moment from 'moment';
 import { CounterMetric, UsageCounter } from './usage_counter';

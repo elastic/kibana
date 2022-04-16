@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import { DEFAULT_RULE_INTERVAL } from '../../constants';
-import { parseDuration } from '../../../../../alerting/common';
 
 export function getInitialInterval(minimumScheduleInterval?: string) {
   if (minimumScheduleInterval) {

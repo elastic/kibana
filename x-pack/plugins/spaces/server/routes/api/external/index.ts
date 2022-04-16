@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from 'src/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import type { SpacesServiceStart } from '../../../spaces_service';
 import type { SpacesRouter } from '../../../types';

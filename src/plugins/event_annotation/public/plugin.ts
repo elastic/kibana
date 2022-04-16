@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { ExpressionsSetup } from '../../expressions/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { manualEventAnnotation, eventAnnotationGroup } from '../common';
 import { EventAnnotationService } from './event_annotation_service';
 

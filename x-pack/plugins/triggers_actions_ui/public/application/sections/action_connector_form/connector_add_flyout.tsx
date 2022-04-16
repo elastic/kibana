@@ -22,7 +22,7 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';

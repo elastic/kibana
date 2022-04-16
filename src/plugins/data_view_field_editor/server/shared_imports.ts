@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { handleEsError } from '../../es_ui_shared/server';
+export { handleEsError } from '@kbn/es-ui-shared-plugin/server';

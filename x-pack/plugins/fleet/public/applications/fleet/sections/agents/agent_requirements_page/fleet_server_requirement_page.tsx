@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { useStartServices, sendGetPermissionsCheck } from '../../../hooks';
 
-import { FleetServerMissingPrivileges } from '../../agents/components/fleet_server_callouts';
+import { FleetServerMissingPrivileges } from '../components/fleet_server_callouts';
 
 import { Loading } from '../../../components';
 

@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';

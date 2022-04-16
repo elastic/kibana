@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { xyVisFunction } from '../expression_functions';
-import { createMockExecutionContext } from '../../../../../plugins/expressions/common/mocks';
+import { xyVisFunction } from '.';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { sampleArgs } from '../__mocks__';
 import { XY_VIS } from '../constants';
 

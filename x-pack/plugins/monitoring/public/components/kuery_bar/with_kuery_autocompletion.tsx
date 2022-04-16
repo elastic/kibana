@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { QuerySuggestion, DataPublicPluginStart } from 'src/plugins/data/public';
-import { DataView } from 'src/plugins/data_views/public';
+import { QuerySuggestion, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import {
   withKibana,
   KibanaReactContextValue,
   KibanaServices,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 import { RendererFunction } from '../../lib/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {

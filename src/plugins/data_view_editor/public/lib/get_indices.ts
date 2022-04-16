@@ -7,12 +7,11 @@
  */
 
 import { sortBy } from 'lodash';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { IEsSearchResponse } from '@kbn/data-plugin/public';
 import { Tag, INDEX_PATTERN_TYPE } from '../types';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
-
-import { IEsSearchResponse } from '../../../data/public';
 
 const aliasLabel = i18n.translate('indexPatternEditor.aliasLabel', { defaultMessage: 'Alias' });
 const dataStreamLabel = i18n.translate('indexPatternEditor.dataStreamLabel', {

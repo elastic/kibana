@@ -8,13 +8,14 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
+import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
-} from '../../../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
 
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
   IndexFieldsStrategyResponse,
@@ -23,7 +24,6 @@ import {
   BeatFields,
 } from '../../../common/search_strategy';
 import { StartPlugins } from '../../types';
-import type { FieldSpec } from '../../../../../../src/plugins/data_views/common';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';

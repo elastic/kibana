@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, Logger } from 'kibana/server';
-import type { ReportingCore } from '../../';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ReportingCore } from '../..';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import type { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';

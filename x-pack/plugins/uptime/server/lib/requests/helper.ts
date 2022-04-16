@@ -7,11 +7,8 @@
 
 import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
+import { ElasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { createUptimeESClient, UptimeESClient } from '../lib';
 

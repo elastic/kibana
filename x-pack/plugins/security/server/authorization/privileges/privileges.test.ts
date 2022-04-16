@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../../features/server';
-import { featuresPluginMock } from '../../../../features/server/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';

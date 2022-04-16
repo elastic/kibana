@@ -7,7 +7,7 @@
  */
 
 import { pick } from 'lodash';
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;

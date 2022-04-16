@@ -19,7 +19,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { Observable } from 'rxjs';
-import type { CoreTheme } from 'kibana/public';
+import type { CoreTheme } from '@kbn/core/public';
+
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type {
   GetAgentPoliciesResponse,
@@ -38,7 +40,6 @@ import {
   useAuthz,
   useLink,
 } from '../../../../../hooks';
-import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;

@@ -12,16 +12,16 @@ import { waitFor } from '@testing-library/react';
 
 import { AddExceptionFlyout } from '.';
 import { useCurrentUser } from '../../../lib/kibana';
-import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { useAsync } from '@kbn/securitysolution-hook-utils';
-import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndex } from '../../../containers/source';
-import { stubIndexPattern } from 'src/plugins/data/common/stubs';
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../helpers';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -44,7 +44,7 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../lib/kibana');
 jest.mock('../../../containers/source');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
@@ -54,7 +54,7 @@ jest.mock('@kbn/securitysolution-hook-utils', () => ({
   useAsync: jest.fn(),
 }));
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
-jest.mock('../../../../../../lists/public');
+jest.mock('@kbn/lists-plugin/public');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
   ReturnType<typeof getExceptionBuilderComponentLazy>

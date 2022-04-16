@@ -8,7 +8,18 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '../ftr_provider_context';
+import {
+  METADATA_DATASTREAM,
+  HOST_METADATA_LIST_ROUTE,
+  METADATA_UNITED_INDEX,
+  METADATA_UNITED_TRANSFORM,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
+  metadataTransformPrefix,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
+import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataDatastream,
@@ -20,18 +31,7 @@ import {
   deleteAllDocsFromIndex,
   bulkIndex,
 } from './data_stream_helper';
-import {
-  METADATA_DATASTREAM,
-  HOST_METADATA_LIST_ROUTE,
-  METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
-  metadataTransformPrefix,
-} from '../../../plugins/security_solution/common/endpoint/constants';
-import { AGENTS_INDEX } from '../../../plugins/fleet/common';
-import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
-import { indexFleetEndpointPolicy } from '../../../plugins/security_solution/common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { TRANSFORM_STATES } from '../../../plugins/security_solution/common/constants';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TimelinesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
 import { TimelineModel } from '../../store/timeline/model';

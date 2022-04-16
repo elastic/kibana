@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsContract } from '../../../public';
-import { dataPluginMock } from '../../../public/mocks';
-import { setIndexPatterns, setSearchService } from '../../../public/services';
+import { IndexPatternsContract } from '../..';
+import { dataPluginMock } from '../../mocks';
+import { setIndexPatterns, setSearchService } from '../../services';
 import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
-import { FieldFormatsGetConfigFn, BytesFormat } from '../../../../field_formats/common';
+import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
 import { RangeFilter } from '@kbn/es-query';
 
 const mockField = {

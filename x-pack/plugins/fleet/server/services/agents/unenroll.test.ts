@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-import type { SavedObject } from 'kibana/server';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { SavedObject } from '@kbn/core/server';
 
 import type { AgentPolicy } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';

@@ -15,7 +15,7 @@ import { createFilterFilters } from './create_filter/filters';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggFiltersFnName } from './filters_fn';
-import { getEsQueryConfig, UI_SETTINGS } from '../../../../common';
+import { getEsQueryConfig, UI_SETTINGS } from '../../..';
 import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {

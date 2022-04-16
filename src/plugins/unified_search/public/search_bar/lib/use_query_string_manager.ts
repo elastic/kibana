@@ -8,8 +8,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Subscription } from 'rxjs';
-import { Query } from '../../../../data/public';
-import type { QueryStringContract } from '../../../../data/public';
+import { Query } from '@kbn/data-plugin/public';
+import type { QueryStringContract } from '@kbn/data-plugin/public';
 
 interface UseQueryStringProps {
   query?: Query;

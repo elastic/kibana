@@ -11,8 +11,8 @@ import { useValues } from 'kea';
 
 import { EuiCallOut } from '@elastic/eui';
 
+import { DocumentCreationLogic } from '..';
 import { DOCUMENT_CREATION_ERRORS, DOCUMENT_CREATION_WARNINGS } from '../constants';
-import { DocumentCreationLogic } from '../index';
 
 export const Errors: React.FC = () => {
   const { errors, warnings } = useValues(DocumentCreationLogic);

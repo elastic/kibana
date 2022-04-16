@@ -6,8 +6,8 @@
  */
 import expect from '@kbn/expect';
 import { first } from 'lodash';
+import { PrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { PrivilegeType } from '../../../../../plugins/apm/common/privilege_type';
 import { ApmApiError, ApmApiSupertest } from '../../../common/apm_api_supertest';
 import { ApmUser } from '../../../common/authentication';
 

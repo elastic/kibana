@@ -7,7 +7,7 @@
 
 import { Observable, Subject, Subscription } from 'rxjs';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ILicense } from '../common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';

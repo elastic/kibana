@@ -17,15 +17,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
-import { CoreStart } from 'kibana/public';
-import { useKibana } from '../../../../kibana_react/public';
-import { exporters } from '../../../../data/public';
+import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { exporters } from '@kbn/data-plugin/public';
 import {
   CSV_SEPARATOR_SETTING,
   CSV_QUOTE_VALUES_SETTING,
   downloadFileAs,
-} from '../../../../share/public';
+} from '@kbn/share-plugin/public';
 import { getFormatService } from '../services';
 
 interface TableVisControlsProps {

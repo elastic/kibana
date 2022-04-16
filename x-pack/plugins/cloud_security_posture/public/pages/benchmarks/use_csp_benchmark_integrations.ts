@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from 'react-query';
-import type { ListResult } from '../../../../fleet/common';
+import type { ListResult } from '@kbn/fleet-plugin/common';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import { BenchmarksQuerySchema } from '../../../common/schemas/benchmark';
 import { useKibana } from '../../common/hooks/use_kibana';

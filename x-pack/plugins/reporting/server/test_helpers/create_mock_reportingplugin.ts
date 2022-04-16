@@ -15,18 +15,18 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   statusServiceMock,
-} from 'src/core/server/mocks';
-import { dataPluginMock } from 'src/plugins/data/server/mocks';
-import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
-import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
+} from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DeepPartial } from 'utility-types';
-import { ReportingConfig, ReportingCore } from '../';
-import { featuresPluginMock } from '../../../features/server/mocks';
-import { licensingMock } from '../../../licensing/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createMockScreenshottingStart } from '../../../screenshotting/server/mock';
-import { securityMock } from '../../../security/server/mocks';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ReportingConfig, ReportingCore } from '..';
 import { buildConfig, ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';

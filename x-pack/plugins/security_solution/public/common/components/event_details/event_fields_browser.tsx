@@ -17,7 +17,7 @@ import {
   DATA_ROWINDEX_ATTRIBUTE,
   isTab,
   onKeyDownFocusHandler,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';

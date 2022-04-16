@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import { AggsCommonSetup, AggsStart as Start } from '../../../common';
 
 export type AggsSetup = AggsCommonSetup;

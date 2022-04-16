@@ -9,8 +9,8 @@
 import fn from './first';
 
 const expect = require('chai').expect;
-const seriesList = require('./fixtures/series_list.js')();
-import invoke from './helpers/invoke_series_fn.js';
+const seriesList = require('./fixtures/series_list')();
+import invoke from './helpers/invoke_series_fn';
 
 describe('first.js', function () {
   it('should return exactly the data input', function () {

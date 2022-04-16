@@ -7,7 +7,7 @@
  */
 
 import { FC, createElement as h, useRef, useLayoutEffect, useMemo } from 'react';
-import { UiComponent, UiComponentInstance } from '../../../kibana_utils/public';
+import { UiComponent, UiComponentInstance } from '@kbn/kibana-utils-plugin/public';
 
 /**
  * Transforms `UiComponent` into a React component.

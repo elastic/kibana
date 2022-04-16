@@ -11,4 +11,4 @@ export type {
   TimelineNonEcsData,
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
-} from '../../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';

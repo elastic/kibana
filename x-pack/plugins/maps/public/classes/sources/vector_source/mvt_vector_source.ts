@@ -6,7 +6,7 @@
  */
 
 import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
-import { IVectorSource } from '../vector_source';
+import { IVectorSource } from '.';
 
 export interface IMvtVectorSource extends IVectorSource {
   /*

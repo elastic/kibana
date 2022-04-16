@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { discoverRouter } from './discover_router';
-import { toMountPoint, wrapWithTheme } from '../../../kibana_react/public';
 import { DiscoverServices } from '../build_services';
 
 export const renderApp = (element: HTMLElement, services: DiscoverServices) => {

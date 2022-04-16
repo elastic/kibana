@@ -14,10 +14,7 @@ import {
   EuiFilterSelectItem,
   EuiHealth,
 } from '@elastic/eui';
-import {
-  RuleExecutionStatuses,
-  RuleExecutionStatusValues,
-} from '../../../../../../alerting/common';
+import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
 
 interface RuleStatusFilterProps {

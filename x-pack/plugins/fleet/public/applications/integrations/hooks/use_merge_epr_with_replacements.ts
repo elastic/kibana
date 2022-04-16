@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+import { filterCustomIntegrations } from '@kbn/custom-integrations-plugin/public';
+
 import type { PackageListItem } from '../../../../common/types/models';
-import type { CustomIntegration } from '../../../../../../../src/plugins/custom_integrations/common';
-import { filterCustomIntegrations } from '../../../../../../../src/plugins/custom_integrations/public';
 import { FLEET_APM_PACKAGE } from '../../../../common/constants';
 
 // Export this as a utility to find replacements for a package (e.g. in the overview-page for an EPR package)

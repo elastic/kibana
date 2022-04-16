@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedQueryCreateSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+import type { SavedQueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { getRuleForSignalTesting } from './get_rule_for_signal_testing';
 
 /**

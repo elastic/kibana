@@ -10,7 +10,7 @@
 import sinon from 'sinon';
 import { identity, shuffle, sortBy } from 'lodash';
 
-import { getFieldCapabilities } from '../field_capabilities';
+import { getFieldCapabilities } from '.';
 
 import { callFieldCapsApi } from '../es_api';
 import * as callFieldCapsApiNS from '../es_api';

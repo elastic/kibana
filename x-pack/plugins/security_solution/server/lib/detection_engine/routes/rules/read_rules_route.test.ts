@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { readRulesRoute } from './read_rules_route';

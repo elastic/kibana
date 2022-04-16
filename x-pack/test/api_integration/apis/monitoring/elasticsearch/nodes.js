@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import nodesListingFixtureGreen from './fixtures/nodes_listing_green';
-import nodesListingFixtureRed from './fixtures/nodes_listing_red';
-import nodesListingFixtureCgroup from './fixtures/nodes_listing_cgroup';
-import nodesListingFixturePagination from './fixtures/nodes_listing_pagination';
+import nodesListingFixtureGreen from './fixtures/nodes_listing_green.json';
+import nodesListingFixtureRed from './fixtures/nodes_listing_red.json';
+import nodesListingFixtureCgroup from './fixtures/nodes_listing_cgroup.json';
+import nodesListingFixturePagination from './fixtures/nodes_listing_pagination.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

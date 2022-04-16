@@ -7,8 +7,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from '@kbn/data-plugin/public';
 import {
   CustomIcon,
   DrawState,
@@ -21,7 +22,6 @@ import {
   TooltipState,
 } from '../../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../../common/constants';
-import { TimeRange } from '../../../../../../src/plugins/data/public';
 
 export interface MapExtentState {
   zoom: number;

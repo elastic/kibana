@@ -8,8 +8,8 @@
 
 import React from 'react';
 
+import { CoreStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { CoreStart } from '../../../../../core/public';
 import { KibanaThemeProvider, reactToUiComponent } from '../../services/kibana_react';
 import {
   IEmbeddable,

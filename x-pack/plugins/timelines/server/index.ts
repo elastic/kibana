@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { TimelinesPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

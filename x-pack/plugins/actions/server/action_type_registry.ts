@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
+import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { LicensingPluginSetup } from '../../licensing/server';
 import {
   ExecutorError,
   getActionTypeFeatureUsageName,

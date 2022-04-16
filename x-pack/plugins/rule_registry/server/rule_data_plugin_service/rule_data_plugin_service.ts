@@ -8,7 +8,7 @@
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { INDEX_PREFIX } from '../config';
 import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';

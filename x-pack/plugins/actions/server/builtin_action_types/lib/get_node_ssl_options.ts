@@ -6,8 +6,8 @@
  */
 
 import { PeerCertificate } from 'tls';
+import { Logger } from '@kbn/core/server';
 import { SSLSettings } from '../../types';
-import { Logger } from '../../../../../../src/core/server';
 
 export function getNodeSSLOptions(
   logger: Logger,

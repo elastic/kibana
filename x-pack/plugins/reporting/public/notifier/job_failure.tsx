@@ -9,8 +9,8 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { ThemeServiceStart, ToastInput } from 'src/core/public';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { JobSummary, ManagementLinkFn } from '../../common/types';
 
 export const getFailureToast = (

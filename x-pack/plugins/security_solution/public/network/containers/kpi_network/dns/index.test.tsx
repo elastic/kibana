@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useNetworkKpiDns } from './index';
+import { useNetworkKpiDns } from '.';
 
 describe('kpi network - dns', () => {
   it('skip = true will cancel any running request', () => {

@@ -13,7 +13,7 @@ import {
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName, PluginType } from 'src/core/server';
+import { PluginName, PluginType } from '../../server';
 import { coreMock } from '../mocks';
 import {
   PluginsService,

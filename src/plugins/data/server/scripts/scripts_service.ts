@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { registerScriptsRoute } from './route';
 
 export class ScriptsService implements Plugin<void> {

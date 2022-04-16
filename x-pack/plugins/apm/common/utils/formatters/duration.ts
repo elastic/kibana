@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { memoize } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../i18n';
 import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
 import { TimeUnit } from './datetime';
 import { Maybe } from '../../../typings/common';

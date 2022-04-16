@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
 import { ActionType } from '../types';
-import { LICENSE_TYPE } from '../../../licensing/common/types';
 import { ServerLogActionTypeId, IndexActionTypeId } from '../builtin_action_types';
 import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
 

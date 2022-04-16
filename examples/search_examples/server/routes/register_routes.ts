@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from 'kibana/server';
-import { DataRequestHandlerContext } from 'src/plugins/data/server';
+import type { IRouter } from '@kbn/core/server';
+import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { registerServerSearchRoute } from './server_search_route';
 
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {

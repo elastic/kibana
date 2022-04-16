@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Chart, niceTimeFormatter, PointerEvent } from '@elastic/charts';
 import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { first, last } from 'lodash';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TabContent, TabProps } from '../shared';
 import { useSnapshot } from '../../../../hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
@@ -28,7 +29,6 @@ import {
 } from '../../../../../../../../common/http_api';
 import { createInventoryMetricFormatter } from '../../../../lib/create_inventory_metric_formatter';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { ChartSection } from './chart_section';
 import {
   SYSTEM_METRIC_NAME,

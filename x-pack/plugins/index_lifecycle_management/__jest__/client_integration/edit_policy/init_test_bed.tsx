@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
-import { docLinksServiceMock } from 'src/core/public/mocks';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 import '../helpers/global_mocks';
 
-import { licensingMock } from '../../../../licensing/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { KibanaContextProvider } from '../../../public/shared_imports';
 import { AppServicesContext } from '../../../public/types';

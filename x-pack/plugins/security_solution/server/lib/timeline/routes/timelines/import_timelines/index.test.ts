@@ -14,7 +14,7 @@ import {
 } from '../../../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import { TimelineStatus, TimelineType } from '../../../../../../common/types/timeline';
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
   mockUniqueParsedObjects,
@@ -152,7 +152,7 @@ describe('import timelines', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
@@ -358,7 +358,7 @@ describe('import timelines', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
@@ -472,7 +472,7 @@ describe('import timelines', () => {
         path: TIMELINE_EXPORT_URL,
         body: { id: 'someId' },
       });
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
 
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
       const result = server.validate(request);
@@ -576,7 +576,7 @@ describe('import timeline templates', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
@@ -721,7 +721,7 @@ describe('import timeline templates', () => {
         };
       });
 
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
@@ -891,7 +891,7 @@ describe('import timeline templates', () => {
         path: TIMELINE_EXPORT_URL,
         body: { id: 'someId' },
       });
-      const importTimelinesRoute = jest.requireActual('./index').importTimelinesRoute;
+      const importTimelinesRoute = jest.requireActual('.').importTimelinesRoute;
 
       importTimelinesRoute(server.router, createMockConfig(), securitySetup);
       const result = server.validate(request);

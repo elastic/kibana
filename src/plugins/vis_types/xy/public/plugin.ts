@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../../visualizations/public';
-import { ChartsPluginSetup, ChartsPluginStart } from '../../../charts/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   setDataActions,
   setFormatService,

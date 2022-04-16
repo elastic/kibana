@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { openSans } from '../../../expressions/common/fonts';
+import { openSans } from '@kbn/expressions-plugin/common/fonts';
 import { FONT_FAMILY, FONT_WEIGHT, CSS, NUMERALJS } from '../constants';
 import { ExpressionMetricFunction } from '../types';
 

@@ -16,6 +16,8 @@ import {
   debounceTime,
 } from 'rxjs/operators';
 import { isEqual, sortBy, uniq } from 'lodash';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
@@ -25,8 +27,6 @@ import type {
 } from './explorer_utils';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyExplorerSwimLaneUrlState } from '../../../common/types/locator';
-import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
-import type { TimeRangeBounds } from '../../../../../../src/plugins/data/common';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIMLANE_TYPE,

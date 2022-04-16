@@ -9,5 +9,5 @@
 require('../src/setup_node_env/ensure_node_preserve_symlinks');
 require('source-map-support/register');
 require('@kbn/optimizer').runKbnOptimizerCli({
-  defaultLimitsPath: require.resolve('../packages/kbn-optimizer/limits.yml'),
+  defaultLimitsPath: require.resolve('@kbn/optimizer/limits.yml'),
 });

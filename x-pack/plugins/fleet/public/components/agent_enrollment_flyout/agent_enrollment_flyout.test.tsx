@@ -11,9 +11,9 @@ import React from 'react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { AgentPolicy } from '../../../common';
 import { useGetSettings, sendGetOneAgentPolicy, useGetAgents } from '../../hooks/use_request';

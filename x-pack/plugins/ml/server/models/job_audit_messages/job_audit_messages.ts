@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

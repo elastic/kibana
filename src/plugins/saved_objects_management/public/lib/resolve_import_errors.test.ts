@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsImportUnknownError } from 'src/core/public';
-import { httpServiceMock } from '../../../../core/public/mocks';
+import { SavedObjectsImportUnknownError } from '@kbn/core/public';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { resolveImportErrors } from './resolve_import_errors';
 
 function getFormData(form: Map<string, any>) {

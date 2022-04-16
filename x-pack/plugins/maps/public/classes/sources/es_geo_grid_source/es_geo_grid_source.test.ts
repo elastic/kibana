@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import {
   getExecutionContext,
@@ -20,7 +20,7 @@ import {
   RENDER_AS,
   SOURCE_TYPES,
 } from '../../../../common/constants';
-import { SearchSource } from 'src/plugins/data/public';
+import { SearchSource } from '@kbn/data-plugin/public';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 jest.mock('../../../kibana_services');

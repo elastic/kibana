@@ -7,7 +7,7 @@
  */
 
 import { ReplaySubject, firstValueFrom, filter, take, toArray } from 'rxjs';
-import type { Plugin, CoreSetup, Event } from 'src/core/public';
+import type { Plugin, CoreSetup, Event } from '@kbn/core/public';
 import { CustomShipper } from './custom_shipper';
 import './types';
 

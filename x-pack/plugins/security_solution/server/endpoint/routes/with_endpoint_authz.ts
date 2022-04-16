@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler, Logger } from 'kibana/server';
+import type { RequestHandler, Logger } from '@kbn/core/server';
 import type { EndpointAuthzKeyList } from '../../../common/endpoint/types/authz';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import { EndpointAuthorizationError } from '../errors';

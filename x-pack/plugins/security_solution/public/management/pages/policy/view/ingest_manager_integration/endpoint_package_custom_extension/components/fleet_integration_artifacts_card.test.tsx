@@ -18,7 +18,7 @@ import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_car
 import { EndpointDocGenerator } from '../../../../../../../../common/endpoint/generate_data';
 import { getPolicyEventFiltersPath } from '../../../../../../common/routing';
 import { PolicyData } from '../../../../../../../../common/endpoint/types';
-import { getSummaryExceptionListSchemaMock } from '../../../../../../../../../lists/common/schemas/response/exception_list_summary_schema.mock';
+import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_summary_schema.mock';
 import { EventFiltersApiClient } from '../../../../../event_filters/service/event_filters_api_client';
 import { SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
 import { EVENT_FILTERS_LABELS } from '../../endpoint_policy_edit_extension';

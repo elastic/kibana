@@ -7,8 +7,17 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { StartServicesAccessor } from 'kibana/server';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeState,
+  parseDuration,
+} from '@kbn/alerting-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorType } from '@kbn/alerting-plugin/server/types';
+import { Alert } from '@kbn/alerting-plugin/server';
 import type { StartPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
@@ -32,15 +41,6 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleTypeState,
-  parseDuration,
-} from '../../../../../../alerting/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorType } from '../../../../../../alerting/server/types';
-import { Alert } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';

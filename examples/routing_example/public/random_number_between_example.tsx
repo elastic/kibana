@@ -16,7 +16,7 @@ import {
   EuiCallOut,
   EuiFormRow,
 } from '@elastic/eui';
-import { HttpFetchError } from '../../../src/core/public';
+import { HttpFetchError } from '@kbn/core/public';
 import { isError } from './is_error';
 import { Services } from './services';
 

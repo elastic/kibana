@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'src/plugins/kibana_utils/common';
+import { of } from '@kbn/kibana-utils-plugin/common';
 import { testLocator, TestLocatorState, urlServiceTestSetup } from './setup';
 
 describe('locators', () => {

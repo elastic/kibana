@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -15,7 +16,6 @@ import {
   getEventLog,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
 
 const NANOS_IN_MILLIS = 1000 * 1000;
 

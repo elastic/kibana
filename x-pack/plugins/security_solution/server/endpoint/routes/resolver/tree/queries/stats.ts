@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange } from '../utils/index';
+import { NodeID, TimeRange } from '../utils';
 
 interface AggBucket {
   key: string;

@@ -9,9 +9,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { SavedObjectsFindResponse } from 'src/core/server';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 
-import { ActionResult } from '../../../../../../actions/server';
+import { ActionResult } from '@kbn/actions-plugin/server';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -38,7 +38,7 @@ import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/det
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedRule, ResolvedSanitizedRule } from '../../../../../../alerting/common';
+import { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import {
   getPerformBulkActionSchemaMock,

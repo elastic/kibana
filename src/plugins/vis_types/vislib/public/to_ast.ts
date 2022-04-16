@@ -13,12 +13,12 @@ import {
   VisToExpressionAstParams,
   getVisSchemas,
   VisParams,
-} from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import type { Dimensions } from '../../xy/public';
-import type { DateHistogramParams, HistogramParams } from '../../../visualizations/public';
+} from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
+import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
 
-import { BUCKET_TYPES } from '../../../data/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams, VislibChartType } from './types';

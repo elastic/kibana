@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
 import { TablePluginSetupDependencies, TablePluginStartDependencies } from './plugin';
 import { createTableVisFn } from './table_vis_fn';
 import { getTableVisRenderer } from './table_vis_renderer';

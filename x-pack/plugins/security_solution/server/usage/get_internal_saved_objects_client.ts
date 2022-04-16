@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, SavedObjectsClientContract } from 'kibana/server';
+import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SAVED_OBJECT_TYPES } from '../../../cases/common/constants';
+import { SAVED_OBJECT_TYPES } from '@kbn/cases-plugin/common/constants';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from '../lib/detection_engine/rule_actions/legacy_saved_object_mappings';
 

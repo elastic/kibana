@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
-import { AddResultButton } from './';
+import { AddResultButton } from '.';
 
 describe('AddResultButton', () => {
   const values = {

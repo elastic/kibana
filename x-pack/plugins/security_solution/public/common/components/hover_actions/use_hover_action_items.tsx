@@ -11,6 +11,7 @@ import { DraggableId } from 'react-beautiful-dnd';
 
 import { isEmpty } from 'lodash';
 
+import { FilterManager } from '@kbn/data-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { getAllFieldsByName } from '../../containers/source';
 import { allowTopN } from '../drag_and_drop/helpers';
@@ -20,7 +21,6 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];

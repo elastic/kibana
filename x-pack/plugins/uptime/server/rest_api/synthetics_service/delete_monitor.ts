@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   EncryptedSyntheticsMonitor,
   SyntheticsMonitorWithSecrets,

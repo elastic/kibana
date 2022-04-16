@@ -11,7 +11,7 @@ import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
-import { Sort } from '../../../timelines/components/timeline/body/sort';
+import { Sort } from '../../components/timeline/body/sort';
 import {
   DataProvider,
   QueryOperator,
@@ -19,7 +19,7 @@ import {
   DataProviderType,
   IS_OPERATOR,
   EXISTS_OPERATOR,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
+} from '../../components/timeline/data_providers/data_provider';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   ColumnHeaderOptions,

@@ -7,7 +7,7 @@
 
 import { sum } from 'lodash';
 import { Duration } from 'moment';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import {
   RuleExecutionStatus,

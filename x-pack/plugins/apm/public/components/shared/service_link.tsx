@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { truncate } from '../../utils/style';
 import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';

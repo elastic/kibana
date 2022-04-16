@@ -7,11 +7,11 @@
  */
 
 import React, { Suspense } from 'react';
-import { getTableViewDescription } from '../index';
+import { getTableViewDescription } from '..';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { TablesAdapter } from '../../../../../expressions/common';
+import { TablesAdapter } from '@kbn/expressions-plugin/common';
 
-jest.mock('../../../../../share/public', () => ({
+jest.mock('@kbn/share-plugin/public', () => ({
   downloadMultipleAs: jest.fn(),
 }));
 jest.mock('../../../../common', () => ({

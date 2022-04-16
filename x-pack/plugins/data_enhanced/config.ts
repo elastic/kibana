@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { searchSessionsConfigSchema } from '../../../src/plugins/data/config';
+import { searchSessionsConfigSchema } from '@kbn/data-plugin/config';
 
 export const configSchema = schema.object({
   search: schema.object({

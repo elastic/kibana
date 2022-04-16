@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { EuiFlexGroup, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SolutionPanel } from './solution_panel';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
 
 const sortByOrder = (
   { order: orderA = 0 }: FeatureCatalogueSolution | FeatureCatalogueEntry,

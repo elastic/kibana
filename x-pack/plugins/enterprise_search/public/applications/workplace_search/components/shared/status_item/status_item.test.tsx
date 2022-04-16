@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiPopover, EuiCopy, EuiButton, EuiButtonIcon } from '@elastic/eui';
 
-import { StatusItem } from './';
+import { StatusItem } from '.';
 
 describe('SourceRow', () => {
   const details = ['foo', 'bar'];

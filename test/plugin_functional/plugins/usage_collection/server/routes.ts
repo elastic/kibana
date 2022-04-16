@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { HttpServiceSetup } from 'kibana/server';
-import { UsageCounter } from '../../../../../src/plugins/usage_collection/server';
+import type { HttpServiceSetup } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export function registerRoutes(http: HttpServiceSetup, usageCounter: UsageCounter) {
   const router = http.createRouter();

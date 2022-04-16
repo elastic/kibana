@@ -10,7 +10,7 @@ import fn from './static';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import invoke from './helpers/invoke_series_fn';
 
 describe('static.js', () => {
   it('returns a series in which all numbers are the same', () => {

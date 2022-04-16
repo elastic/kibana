@@ -10,10 +10,10 @@ import {
   EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
-} from '../../../embeddable/common/types';
+} from '@kbn/embeddable-plugin/common/types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { ControlGroupInput, ControlPanelState } from './types';
-import { SavedObjectReference } from '../../../../core/types';
-import { MigrateFunctionsObject } from '../../../kibana_utils/common';
 import { makeControlOrdersZeroBased } from './control_group_migrations';
 
 type ControlGroupInputWithType = Partial<ControlGroupInput> & { type: string };

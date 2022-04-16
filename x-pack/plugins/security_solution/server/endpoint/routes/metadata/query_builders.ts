@@ -7,13 +7,13 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
-import { KibanaRequest } from '../../../../../../../src/core/server';
 import { EndpointAppContext } from '../../types';
 import { buildStatusesKuery } from './support/agent_status';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';

@@ -9,9 +9,9 @@
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { ExtendedBoundsOutput, KibanaTimerangeOutput } from '../../expressions';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggDateHistogramFnName = 'aggDateHistogram';
 

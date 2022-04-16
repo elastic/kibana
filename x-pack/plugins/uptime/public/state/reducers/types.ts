@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 export interface AsyncInitState<ReduceStateType> {
   data: ReduceStateType | null;

@@ -10,8 +10,8 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../alerting/server';
-import { Logger } from '../../../../../../../src/core/server';
+} from '@kbn/alerting-plugin/server';
+import { Logger } from '@kbn/core/server';
 import type { SignalSearchResponse, SignalSource } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';

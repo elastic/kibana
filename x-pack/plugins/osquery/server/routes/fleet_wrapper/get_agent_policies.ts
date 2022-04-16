@@ -13,9 +13,9 @@ import {
   GetAgentPoliciesResponseItem,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
 

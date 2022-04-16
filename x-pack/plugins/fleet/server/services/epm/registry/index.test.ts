@@ -8,7 +8,7 @@
 import type { AssetParts } from '../../../types';
 import { getBufferExtractor, getPathParts, untarBuffer, unzipBuffer } from '../archive';
 
-import { splitPkgKey } from './index';
+import { splitPkgKey } from '.';
 
 const testPaths = [
   {

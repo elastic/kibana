@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { NavigateToAppOptions } from 'kibana/public';
+import { NavigateToAppOptions } from '@kbn/core/public';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 

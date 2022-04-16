@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {

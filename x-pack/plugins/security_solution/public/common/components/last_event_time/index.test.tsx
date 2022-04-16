@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import '../../../common/mock/formatted_relative';
+import '../../mock/formatted_relative';
 import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';

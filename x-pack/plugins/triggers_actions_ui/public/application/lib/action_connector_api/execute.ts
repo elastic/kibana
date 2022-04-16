@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
-import {
-  ActionTypeExecutorResult,
-  RewriteRequestCase,
-} from '../../../../../../plugins/actions/common';
+import { HttpSetup } from '@kbn/core/public';
+import { ActionTypeExecutorResult, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 
 const rewriteBodyRes: RewriteRequestCase<ActionTypeExecutorResult<unknown>> = ({

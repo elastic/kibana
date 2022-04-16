@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '../../../../src/core/public';
-import { coreMock } from '../../../../src/core/public/mocks';
-import { uiActionsPluginMock } from '../../../../src/plugins/ui_actions/public/mocks';
-import { embeddablePluginMock } from '../../../../src/plugins/embeddable/public/mocks';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import { licensingMock } from '../../licensing/public/mocks';
 import { StartDependencies } from './plugin';
 
 export type Setup = jest.Mocked<AdvancedUiActionsSetup>;

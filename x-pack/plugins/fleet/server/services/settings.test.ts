@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { appContextService } from './app_context';
 import { getCloudFleetServersHosts, settingsSetup } from './settings';

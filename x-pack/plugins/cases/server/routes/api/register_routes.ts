@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Headers, RouteRegistrar } from 'kibana/server';
+import { Headers, RouteRegistrar } from '@kbn/core/server';
 import { CasesRequestHandlerContext } from '../../types';
 import { RegisterRoutesDeps } from './types';
 import {

@@ -10,8 +10,8 @@ import {
   ISavedObjectsRepository,
   SavedObjectAttributes,
   SavedObjectsServiceSetup,
-} from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+} from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { uiMetricSchema } from './schema';
 
 interface UIMetricsSavedObjects extends SavedObjectAttributes {

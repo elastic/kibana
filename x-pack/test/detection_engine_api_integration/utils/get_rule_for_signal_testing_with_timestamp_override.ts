@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryCreateSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+import type { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 export const getRuleForSignalTestingWithTimestampOverride = (
   index: string[],

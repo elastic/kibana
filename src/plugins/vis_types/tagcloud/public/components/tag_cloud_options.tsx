@@ -10,9 +10,9 @@ import React, { useState, useEffect } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { VisEditorOptionsProps } from '../../../../visualizations/public';
-import { SelectOption, SwitchOption, PalettePicker } from '../../../../vis_default_editor/public';
-import { ValidatedDualRange } from '../../../../kibana_react/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { SelectOption, SwitchOption, PalettePicker } from '@kbn/vis-default-editor-plugin/public';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { TagCloudVisParams, TagCloudTypeProps } from '../types';
 import { collections } from './collections';
 

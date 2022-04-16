@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KueryNode } from '@kbn/es-query';

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
-import { PartitionVisParams } from '../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/data-plugin/public';
+import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 
 /**
  * Get esaggs expressions function

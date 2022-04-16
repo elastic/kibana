@@ -19,7 +19,7 @@ import { initialEventFiltersPageState } from './builders';
 import { getInitialExceptionFromEvent } from './utils';
 import { createdEventFilterEntryMock, ecsEventMock } from '../test_utils';
 import { EventFiltersListPageState, EventFiltersService } from '../types';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { getListFetchError } from './selector';
 import type {

@@ -15,7 +15,7 @@ import { EuiTableRow, EuiSwitch, EuiIcon } from '@elastic/eui';
 
 import { SourceIcon } from '../source_icon';
 
-import { SourceRow } from './';
+import { SourceRow } from '.';
 
 const onToggle = jest.fn();
 

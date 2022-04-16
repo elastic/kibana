@@ -6,11 +6,11 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { KibanaFeature } from '../../../../../features/server';
-import type { LicenseCheck } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 import { routeDefinitionParamsMock } from '../../index.mock';

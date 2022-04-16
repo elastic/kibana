@@ -12,12 +12,12 @@ import {
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { Filter } from '@kbn/es-query';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from 'src/plugins/data/public';
-import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
-import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
+import { Query } from '@kbn/data-plugin/public';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,

@@ -9,9 +9,9 @@
 import type { Subscription } from 'rxjs';
 import { fromEvent, interval, merge } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
-import { Storage } from '../../../kibana_utils/public';
 import type { EncryptedTelemetryPayload } from '../../common/types';
 import { isReportIntervalExpired } from '../../common/is_report_interval_expired';
 

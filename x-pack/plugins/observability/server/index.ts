@@ -9,7 +9,7 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';

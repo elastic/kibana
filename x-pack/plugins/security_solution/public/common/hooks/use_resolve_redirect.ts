@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
-import { timelineSelectors } from '../../timelines/store/timeline/';
+import { timelineSelectors } from '../../timelines/store/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { decodeRisonUrlState, encodeRisonUrlState } from '../components/url_state/helpers';
 import { useKibana } from '../lib/kibana';

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid/v4';

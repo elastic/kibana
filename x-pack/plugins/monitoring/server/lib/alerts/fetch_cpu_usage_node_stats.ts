@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';

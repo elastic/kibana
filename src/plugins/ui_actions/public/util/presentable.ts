@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { UiComponent } from '@kbn/kibana-utils-plugin/public';
 
 /**
  * Represents something that can be displayed to user in UI.

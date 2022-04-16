@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { KibanaPageTemplateProps, useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplateProps, useKibana } from '@kbn/kibana-react-plugin/public';
 import { UptimeSettingsContext } from '../contexts';
 import { ClientPluginsStart } from './plugin';
 import { indexStatusSelector } from '../state/selectors';

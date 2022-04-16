@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { store } from '../../../state';
 import { AnomalyAlertComponent } from '../../../components/overview/alerts/anomaly_alert/anomaly_alert';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsStart } from '../../../apps/plugin';
 import { kibanaService } from '../../../state/kibana_service';
 

@@ -19,7 +19,7 @@ import { EuiCard, EuiText } from '@elastic/eui';
 
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 
-import { DocumentCreationButtons } from './';
+import { DocumentCreationButtons } from '.';
 
 describe('DocumentCreationButtons', () => {
   const actions = {

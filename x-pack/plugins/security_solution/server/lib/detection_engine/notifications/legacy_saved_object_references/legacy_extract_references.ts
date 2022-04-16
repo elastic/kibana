@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { RuleParamsAndRefs } from '../../../../../../alerting/server';
+import { Logger } from '@kbn/core/server';
+import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesNotificationParams } from '../legacy_types';
 // eslint-disable-next-line no-restricted-imports

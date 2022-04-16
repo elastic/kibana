@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '../../../cloud/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
   const cloud: CloudSetup = {

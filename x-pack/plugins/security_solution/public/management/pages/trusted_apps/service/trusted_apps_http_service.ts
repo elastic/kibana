@@ -16,7 +16,7 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import pMap from 'p-map';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '../../../screenshotting/common';
+import { errors } from '@kbn/screenshotting-plugin/common';
 import {
   UnknownError,
   ReportingError,

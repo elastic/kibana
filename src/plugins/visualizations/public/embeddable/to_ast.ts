@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '../../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
+import { queryToAst, filtersToAst } from '@kbn/data-plugin/common';
 import { VisToExpressionAst } from '../types';
-import { queryToAst, filtersToAst } from '../../../data/common';
 
 /**
  * Creates an ast expression for a visualization based on kibana context (query, filters, timerange)

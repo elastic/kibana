@@ -11,6 +11,9 @@ import React, { useContext } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -27,7 +30,6 @@ import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
 import { SourceLoadingPage } from '../../components/source_loading_page';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
@@ -37,9 +39,7 @@ import { SavedViewProvider } from '../../containers/saved_view/saved_view';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
-import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { useLinkProps } from '../../../../observability/public';
 import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {

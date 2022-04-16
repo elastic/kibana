@@ -7,8 +7,8 @@
  */
 
 import { timer } from 'rxjs';
-import { SavedObjectsServiceSetup, ISavedObjectsRepository, Logger } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SavedObjectsServiceSetup, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { rollDailyData } from './rollups';
 import { registerSavedObjectTypes, EventLoopDelaysDaily } from './saved_objects';
 import { eventLoopDelaysUsageSchema, EventLoopDelaysUsageReport } from './schema';

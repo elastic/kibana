@@ -18,13 +18,13 @@ import { EuiText } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
-import { SharePluginSetup } from '../../../src/plugins/share/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import {
   HelloLocatorV1Params,
   HelloLocatorV2Params,
   HELLO_LOCATOR,
-} from '../../locator_examples/public';
+} from '@kbn/locator-examples-plugin/public';
 
 interface Props {
   share: SharePluginSetup;

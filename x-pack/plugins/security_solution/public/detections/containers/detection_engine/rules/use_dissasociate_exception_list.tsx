@@ -8,7 +8,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpStart } from '../../../../../../../../src/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { patchRule } from './api';
 
 type Func = (lists: List[]) => void;

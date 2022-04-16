@@ -10,9 +10,9 @@ import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { APP_WRAPPER_CLASS } from '../../../core/public';
+import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   App,
   Plugin,
@@ -24,9 +24,10 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   SavedObjectsClientContract,
-} from '../../../core/public';
-import { VisualizationsStart } from '../../visualizations/public';
+} from '@kbn/core/public';
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlTracker } from './services/kibana_utils';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
@@ -76,7 +77,6 @@ import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
-import { replaceUrlHashQuery } from '../../kibana_utils/public';
 import { SpacesPluginStart } from './services/spaces';
 
 export interface DashboardFeatureFlagConfig {

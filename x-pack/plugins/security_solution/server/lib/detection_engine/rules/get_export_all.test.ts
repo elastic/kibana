@@ -11,7 +11,7 @@ import {
   FindHit,
   getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
@@ -21,8 +21,8 @@ import {
 } from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
-import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../routes/__mocks__/request_context';
 
 const exceptionsClient = getExceptionListClientMock();

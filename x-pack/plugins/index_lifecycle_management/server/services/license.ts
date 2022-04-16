@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { LicensingPluginSetup } from '../../../licensing/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { LicenseType, ILicense } from '../shared_imports';
 
 export interface LicenseStatus {

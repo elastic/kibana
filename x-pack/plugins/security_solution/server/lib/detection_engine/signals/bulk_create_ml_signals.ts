@@ -8,12 +8,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
 import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';

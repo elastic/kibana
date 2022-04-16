@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
-import type { ElasticsearchClientMock } from 'src/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 

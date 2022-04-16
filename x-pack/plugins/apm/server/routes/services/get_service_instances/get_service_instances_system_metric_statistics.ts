@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from 'src/core/types/elasticsearch';
+import { AggregationOptionsByType } from '@kbn/core/types/elasticsearch';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
@@ -17,7 +18,6 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup } from '../../../lib/helpers/setup_request';

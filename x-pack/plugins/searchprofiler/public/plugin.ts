@@ -7,10 +7,10 @@
 
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup } from 'src/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import { ILicense } from '../../licensing/common/types';
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { PLUGIN } from '../common';
 import { AppPublicPluginDependencies } from './types';

@@ -6,6 +6,7 @@
  */
 
 import { isNil } from 'lodash';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
   Rule,
   RuleExecutionStatusWarningReasons,
@@ -14,7 +15,6 @@ import {
 } from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { TaskStatus } from '../../../task_manager/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 interface GeneratorParams {

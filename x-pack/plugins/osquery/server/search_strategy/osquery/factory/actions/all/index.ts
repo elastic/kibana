@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
   ActionsStrategyResponse,

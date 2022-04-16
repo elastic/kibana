@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import './add_message_variables.scss';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
-import { ActionVariable } from '../../../../alerting/common';
 import { templateActionVariable } from '../lib';
 
 interface Props {

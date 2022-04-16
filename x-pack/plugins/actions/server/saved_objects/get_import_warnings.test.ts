@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 

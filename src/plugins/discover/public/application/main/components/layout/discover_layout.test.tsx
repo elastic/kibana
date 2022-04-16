@@ -14,9 +14,9 @@ import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
-import type { DataView, DataViewAttributes } from '../../../../../../data_views/public';
-import { SavedObject } from '../../../../../../../core/types';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
+import { SavedObject } from '@kbn/core/types';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
@@ -29,12 +29,12 @@ import {
 } from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { RequestAdapter } from '../../../../../../inspector';
+import { RequestAdapter } from '@kbn/inspector-plugin';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
-import { LocalStorageMock } from 'src/plugins/discover/public/__mocks__/local_storage_mock';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 
 setHeaderActionMenuMounter(jest.fn());

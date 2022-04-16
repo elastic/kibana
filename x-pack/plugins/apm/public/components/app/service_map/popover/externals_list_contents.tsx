@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ContentsProps } from '.';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,

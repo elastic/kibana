@@ -8,7 +8,7 @@ import React from 'react';
 import { EventFiltersForm } from '.';
 import { RenderResult, act } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/dom';
-import { stubIndexPattern } from 'src/plugins/data/common/stubs';
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { ecsEventMock } from '../../../test_utils';

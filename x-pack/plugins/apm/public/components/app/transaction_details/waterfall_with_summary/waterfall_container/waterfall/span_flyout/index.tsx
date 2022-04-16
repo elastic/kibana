@@ -22,8 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { isEmpty } from 'lodash';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';

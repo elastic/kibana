@@ -49,6 +49,7 @@ import {
   Threats,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -70,7 +71,6 @@ import {
 } from '../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
 import { RuleAlertAction, SearchTypes } from '../../../types';
-import { AlertWithCommonFields800 } from '../../../../../../rule_registry/common/schemas/8.0.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.0.0.

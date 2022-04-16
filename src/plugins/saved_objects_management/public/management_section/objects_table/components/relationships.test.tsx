@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { Relationships, RelationshipsProps } from './relationships';
 

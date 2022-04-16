@@ -7,7 +7,7 @@
  */
 
 import { parseSyncOptions } from './active_cursor_utils';
-import type { Datatable } from '../../../../expressions/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 
 describe('active_cursor_utils', () => {
   describe('parseSyncOptions', () => {

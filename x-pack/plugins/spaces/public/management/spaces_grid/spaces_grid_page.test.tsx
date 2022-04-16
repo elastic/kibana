@@ -8,11 +8,15 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import {
+  httpServiceMock,
+  notificationServiceMock,
+  scopedHistoryMock,
+} from '@kbn/core/public/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/public';
+import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { httpServiceMock, notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { KibanaFeature } from '../../../../features/public';
-import { featuresPluginMock } from '../../../../features/public/mocks';
 import { SpaceAvatarInternal } from '../../space_avatar/space_avatar_internal';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';

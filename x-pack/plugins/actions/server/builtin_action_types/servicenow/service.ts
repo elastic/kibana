@@ -7,6 +7,7 @@
 
 import axios, { AxiosResponse } from 'axios';
 
+import { Logger } from '@kbn/core/server';
 import {
   ExternalServiceCredentials,
   ExternalService,
@@ -21,7 +22,6 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { Logger } from '../../../../../../src/core/server';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { request } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';

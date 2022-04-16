@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SerializableRecord } from '@kbn/utility-types';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import {

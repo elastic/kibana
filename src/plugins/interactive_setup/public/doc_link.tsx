@@ -11,7 +11,7 @@ import { EuiLink } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 import { useKibana } from './use_kibana';
 

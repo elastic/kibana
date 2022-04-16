@@ -7,13 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { ConfigSchema } from '.';
-import {
-  App,
-  AppDeepLink,
-  ApplicationStart,
-  AppNavLinkStatus,
-  AppUpdater,
-} from '../../../../src/core/public';
+import { App, AppDeepLink, ApplicationStart, AppNavLinkStatus, AppUpdater } from '@kbn/core/public';
 import { casesFeatureId } from '../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 

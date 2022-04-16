@@ -6,7 +6,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import type { Capabilities as UICapabilities } from 'src/core/types';
+import type { Capabilities as UICapabilities } from '@kbn/core/types';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import { ToolingLog } from '@kbn/dev-utils';

@@ -7,6 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
+import { PartialRule } from '@kbn/alerting-plugin/server';
 import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
 import {
   FullResponseSchema,
@@ -16,7 +17,6 @@ import {
   RulesSchema,
   rulesSchema,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { PartialRule } from '../../../../../../alerting/server';
 import { isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transform } from './utils';

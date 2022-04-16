@@ -8,7 +8,7 @@
 // @ts-expect-error missing type def
 import stringify from 'json-stringify-safe';
 import axios, { AxiosResponse } from 'axios';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { request } from './axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { SendEmailOptions } from './send_email';

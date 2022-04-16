@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { DataViewsContract } from '../../../../data_views/public';
 
 /**
  * After creation or fetching from ES, ensure that the searchSources index indexPattern

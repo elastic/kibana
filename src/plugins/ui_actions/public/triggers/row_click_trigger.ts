@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Datatable } from '@kbn/expressions-plugin';
 import { Trigger } from '.';
-import type { Datatable } from '../../../expressions';
 
 export const ROW_CLICK_TRIGGER = 'ROW_CLICK_TRIGGER';
 

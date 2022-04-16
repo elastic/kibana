@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/dev-utils';
 import type { Client } from '@elastic/elasticsearch';
-import { INTERNAL_RULE_ID_KEY } from '../../../plugins/security_solution/common/constants';
+import { INTERNAL_RULE_ID_KEY } from '@kbn/security-solution-plugin/common/constants';
 import { countDownES } from './count_down_es';
 
 export const downgradeImmutableRule = async (

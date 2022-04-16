@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldSpec } from '../../common';
 import { findIndexPatternById, getFieldByName } from '../data_views';

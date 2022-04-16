@@ -9,8 +9,8 @@ import {
   EmbeddableInput,
   IContainer,
   EmbeddableFactoryDefinition,
-} from '../../../../../src/plugins/embeddable/public';
-import { TimeRange } from '../../../../../src/plugins/data/public';
+} from '@kbn/embeddable-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { TIME_RANGE_EMBEDDABLE, TimeRangeEmbeddable } from './time_range_embeddable';
 
 interface EmbeddableTimeRangeInput extends EmbeddableInput {

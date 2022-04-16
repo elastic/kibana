@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 
 import type { SecurityLicense } from '../../../common/licensing';
 import { licenseMock } from '../../../common/licensing/index.mock';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SimpleSavedObject } from 'src/core/public';
+import { SimpleSavedObject } from '@kbn/core/public';
 import { PartialDashboardAttributes } from './kibana/dashboards';
 
 export interface PresentationDashboardsService {

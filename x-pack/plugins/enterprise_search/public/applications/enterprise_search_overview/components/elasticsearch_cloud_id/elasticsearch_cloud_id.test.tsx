@@ -13,7 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButtonIcon, EuiCopy, EuiFieldText } from '@elastic/eui';
 
-import { ElasticsearchCloudId } from './';
+import { ElasticsearchCloudId } from '.';
 
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});

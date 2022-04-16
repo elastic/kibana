@@ -8,9 +8,9 @@
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
+import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAgentDetails } from './use_agent_details';
-import { PLUGIN_ID } from '../../../fleet/common';
-import { pagePathGetters } from '../../../fleet/public';
 import { useKibana } from '../common/lib/kibana';
 
 interface AgentIdToNameProps {

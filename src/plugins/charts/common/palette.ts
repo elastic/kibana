@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { PaletteContinuity } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { checkIsMaxContinuity, checkIsMinContinuity } from '@kbn/coloring';

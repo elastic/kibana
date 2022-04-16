@@ -7,7 +7,7 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { FilterManager } from '../../../../../../src/plugins/data/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,

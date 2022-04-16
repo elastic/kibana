@@ -8,6 +8,7 @@
 import { curry } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import { Logger } from '@kbn/core/server';
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
@@ -31,7 +32,6 @@ import {
   ExecutorSubActionGetIncidentParams,
 } from './types';
 import * as i18n from './translations';
-import { Logger } from '../../../../../../src/core/server';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 interface GetActionTypeParams {

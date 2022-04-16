@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaReactContextValue } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { StartServices } from '../../types';
 import { DataAccessLayer, TimeRange } from '../types';
 import {

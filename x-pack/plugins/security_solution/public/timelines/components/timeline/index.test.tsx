@@ -23,7 +23,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 
-import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
+import { StatefulTimeline, Props as StatefulTimelineOwnProps } from '.';
 import { useTimelineEvents } from '../../containers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
@@ -32,14 +32,14 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
-jest.mock('../../containers/index', () => ({
+jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
 jest.mock('./tabs_content');
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../common/components/url_state/normalize_time_range');
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');

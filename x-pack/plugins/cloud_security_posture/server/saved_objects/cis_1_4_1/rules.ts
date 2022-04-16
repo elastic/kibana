@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsBulkCreateObject } from 'src/core/server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import type { CspRuleSchema } from '../../../common/schemas/csp_rule';
 import { cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
 

@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { LogStream, LogStreamProps } from '../../../../../infra/public';
+import { LogStream, LogStreamProps } from '@kbn/infra-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 /*
  * EnterpriseSearchLogStream is a light wrapper on top of infra's embeddable LogStream component.

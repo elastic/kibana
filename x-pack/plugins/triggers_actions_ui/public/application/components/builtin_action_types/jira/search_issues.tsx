@@ -8,7 +8,7 @@
 import React, { useMemo, useEffect, useCallback, useState, memo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { HttpSetup, IToasts } from 'kibana/public';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import { ActionConnector } from '../../../../types';
 import { useGetIssues } from './use_get_issues';
 import { useGetSingleIssue } from './use_get_single_issue';

@@ -14,7 +14,7 @@ import {
   DEFAULT_DATE_FORMAT,
 } from './rule_event_log_list_cell_renderer';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
-import { RuleDurationFormat } from '../../../sections/rules_list/components/rule_duration_format';
+import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 
 describe('rule_event_log_list_cell_renderer', () => {
   it('renders primitive values correctly', () => {

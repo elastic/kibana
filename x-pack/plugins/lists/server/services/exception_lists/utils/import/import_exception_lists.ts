@@ -6,8 +6,8 @@
  */
 
 import { ImportExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SavedObjectsClientContract } from '../../../../../../../../src/core/server/';
 import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
 
 import { getAllListTypes } from './find_all_exception_list_types';

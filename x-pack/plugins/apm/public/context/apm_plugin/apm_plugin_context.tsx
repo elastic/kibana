@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createContext } from 'react';
-import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
-import { ConfigSchema } from '../..';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import { MapsStartApi } from '@kbn/maps-plugin/public';
+import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { ApmPluginSetupDeps } from '../../plugin';
-import { MapsStartApi } from '../../../../maps/public';
-import { ObservabilityPublicStart } from '../../../../observability/public';
-import { Start as InspectorPluginStart } from '../../../../../../src/plugins/inspector/public';
+import { ConfigSchema } from '../..';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;

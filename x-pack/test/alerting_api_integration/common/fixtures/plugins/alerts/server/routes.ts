@@ -13,15 +13,15 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
   Logger,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { InvalidatePendingApiKey } from '../../../../../../../plugins/alerting/server/types';
-import { RawRule } from '../../../../../../../plugins/alerting/server/types';
+import { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
 import {
   ConcreteTaskInstance,
   TaskInstance,
   TaskManagerStartContract,
-} from '../../../../../../../plugins/task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 

@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsValidationMap } from './';
+import { SavedObjectsValidationMap } from '.';
 import { SavedObjectSanitizedDoc } from '../serialization';
 import { createSavedObjectSanitizedDocSchema } from './schema';
 

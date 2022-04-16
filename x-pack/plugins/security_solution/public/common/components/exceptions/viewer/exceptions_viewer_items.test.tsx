@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import * as i18n from '../translations';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 

@@ -21,15 +21,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionConnectorFieldsProps } from '../../../../../public/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { snExternalServiceConfig } from '@kbn/actions-plugin/server/builtin_action_types/servicenow/config';
+import { ActionConnectorFieldsProps } from '../../../../types';
 import { ServiceNowActionConnector } from './types';
 import { CredentialsApiUrl } from './credentials_api_url';
 import { isFieldInvalid } from './helpers';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { SNStoreLink } from './sn_store_button';
 import { CredentialsAuth } from './credentials_auth';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 
 const title = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormTitle',

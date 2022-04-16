@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../constants';
 import { batchTelemetryRecords, templateExceptionList } from '../helpers';
 import { ITelemetryEventsSender } from '../sender';

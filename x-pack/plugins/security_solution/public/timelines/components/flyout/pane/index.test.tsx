@@ -13,7 +13,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { Pane } from '.';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../../common/components/url_state/normalize_time_range');
 
 jest.mock('../../../../common/hooks/use_resolve_conflict', () => {
   return {

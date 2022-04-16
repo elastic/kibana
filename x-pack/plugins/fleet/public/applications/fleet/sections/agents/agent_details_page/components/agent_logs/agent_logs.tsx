@@ -27,10 +27,11 @@ import { fromKueryExpression } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
-import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
-import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import type { TimeRange } from '../../../../../../../../../../../src/plugins/data/public';
-import { LogStream } from '../../../../../../../../../infra/public';
+import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import type { TimeRange } from '@kbn/data-plugin/public';
+import { LogStream } from '@kbn/infra-plugin/public';
+
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
 

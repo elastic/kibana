@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { DiscoverStart } from '../../../../src/plugins/discover/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { FleetStart } from '../../fleet/public';
-import { LensPublicStart } from '../../lens/public';
-import { SecurityPluginStart } from '../../security/public';
-import { CoreStart } from '../../../../src/core/public';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FleetStart } from '@kbn/fleet-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

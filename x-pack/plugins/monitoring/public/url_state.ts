@@ -6,15 +6,7 @@
  */
 import { Subscription } from 'rxjs';
 import { History, createHashHistory } from 'history';
-import { MonitoringStartPluginDependencies, MonitoringStartServices } from './types';
-import { Legacy } from './legacy_shims';
-
-import {
-  RefreshInterval,
-  TimeRange,
-  syncQueryStateWithUrl,
-} from '../../../../src/plugins/data/public';
-
+import { RefreshInterval, TimeRange, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -24,7 +16,9 @@ import {
   ISyncStateRef,
   syncState,
   withNotifyOnErrors,
-} from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from './types';
+import { Legacy } from './legacy_shims';
 
 interface RawObject {
   [key: string]: unknown;

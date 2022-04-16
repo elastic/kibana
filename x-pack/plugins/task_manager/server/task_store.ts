@@ -20,7 +20,7 @@ import {
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 
 import { asOk, asErr, Result } from './lib/result_type';
 

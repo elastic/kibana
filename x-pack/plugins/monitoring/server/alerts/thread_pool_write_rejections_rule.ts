@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Rule } from '@kbn/alerting-plugin/common';
 import { ThreadPoolRejectionsRuleBase } from './thread_pool_rejections_rule_base';
 import { RULE_THREAD_POOL_WRITE_REJECTIONS, RULE_DETAILS } from '../../common/constants';
-import { Rule } from '../../../alerting/common';
 
 export class ThreadPoolWriteRejectionsRule extends ThreadPoolRejectionsRuleBase {
   private static TYPE = RULE_THREAD_POOL_WRITE_REJECTIONS;

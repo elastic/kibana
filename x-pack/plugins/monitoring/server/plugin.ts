@@ -19,9 +19,9 @@ import {
   Plugin,
   PluginInitializerContext,
   ResponseError,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { get } from 'lodash';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,

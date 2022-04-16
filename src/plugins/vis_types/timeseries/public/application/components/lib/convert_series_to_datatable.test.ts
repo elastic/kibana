@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView, DataViewField } from 'src/plugins/data_views/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { PanelData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 import { convertSeriesToDataTable, addMetaToColumns } from './convert_series_to_datatable';

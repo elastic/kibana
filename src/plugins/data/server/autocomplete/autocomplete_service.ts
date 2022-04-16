@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import { ConfigSchema } from '../../config';
 

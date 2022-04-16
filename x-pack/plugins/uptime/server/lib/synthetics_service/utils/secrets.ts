@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit, pick } from 'lodash';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { secretKeys } from '../../../../common/constants/monitor_management';
 import {
   SyntheticsMonitor,

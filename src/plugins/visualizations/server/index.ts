@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { VisualizationsPlugin } from './plugin';
 
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';

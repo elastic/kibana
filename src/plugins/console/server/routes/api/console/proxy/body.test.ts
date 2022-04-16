@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IKibanaResponse } from 'src/core/server';
+import { IKibanaResponse } from '@kbn/core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 
 import { Readable } from 'stream';
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { createHandler } from './create_handler';
 import * as requestModule from '../../../../lib/proxy_request';
 import { createResponseStub } from './stubs';

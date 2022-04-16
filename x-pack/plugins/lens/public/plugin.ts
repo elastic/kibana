@@ -5,43 +5,47 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import type { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
-} from 'src/plugins/usage_collection/public';
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
+} from '@kbn/usage-collection-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
-import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
-import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import type { SpacesPluginStart } from '../../spaces/public';
+} from '@kbn/embeddable-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ExpressionsServiceSetup,
   ExpressionsSetup,
   ExpressionsStart,
-} from '../../../../src/plugins/expressions/public';
-import type {
-  VisualizationsSetup,
-  VisualizationsStart,
-} from '../../../../src/plugins/visualizations/public';
-import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-import type { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
-import type { GlobalSearchPluginSetup } from '../../global_search/public';
-import type { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import type { EventAnnotationPluginSetup } from '../../../../src/plugins/event_annotation/public';
-import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
-import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
+} from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
+import {
+  UiActionsStart,
+  ACTION_VISUALIZE_FIELD,
+  VISUALIZE_FIELD_TRIGGER,
+} from '@kbn/ui-actions-plugin/public';
+import { VISUALIZE_EDITOR_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
-import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
@@ -65,16 +69,7 @@ import type {
 } from './pie_visualization';
 import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
 import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
-import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
-import { AppNavLinkStatus } from '../../../../src/core/public';
-
-import {
-  UiActionsStart,
-  ACTION_VISUALIZE_FIELD,
-  VISUALIZE_FIELD_TRIGGER,
-} from '../../../../src/plugins/ui_actions/public';
-import { VISUALIZE_EDITOR_TRIGGER } from '../../../../src/plugins/visualizations/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import type {
@@ -97,10 +92,8 @@ import {
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
-import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
-import type { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;

@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { TestProviders } from '../common/mock';
+import { TestProviders } from './mock';
 import { useIsMainApplication } from './hooks';
 import { useApplication } from '../components/cases_context/use_application';
 

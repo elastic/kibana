@@ -11,8 +11,8 @@ import {
   PutLogViewRequestPayload,
   putLogViewRequestPayloadRT,
   putLogViewResponsePayloadRT,
-} from '../../../plugins/infra/common/http_api/log_views';
-import { decodeOrThrow } from '../../../plugins/infra/common/runtime_types';
+} from '@kbn/infra-plugin/common/http_api/log_views';
+import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraLogViewsServiceProvider({ getService }: FtrProviderContext) {

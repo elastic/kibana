@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from 'src/core/server';
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { CoreStart, Logger } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { Stream } from 'stream';
 import { RENDER_AS } from '../../common/constants';
 import { isAbortError } from './util';

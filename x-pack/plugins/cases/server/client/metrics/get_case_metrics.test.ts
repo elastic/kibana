@@ -10,13 +10,13 @@ import { CaseAttributes, CaseResponse, CaseStatuses } from '../../../common/api'
 import { CasesClientMock, createCasesClientMock } from '../mocks';
 import { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
-import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   createAttachmentServiceMock,
   createCaseServiceMock,
   createUserActionServiceMock,
 } from '../../services/mocks';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { mockAlertsService } from './test_utils/alerts';
 import { createStatusChangeSavedObject } from './test_utils/lifespan';
 

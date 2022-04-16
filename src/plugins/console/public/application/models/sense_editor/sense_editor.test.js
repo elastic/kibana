@@ -12,7 +12,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from './create';
-import { XJson } from '../../../../../es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import editorInput1 from './__fixtures__/editor_input1.txt';
 
 const { collapseLiteralStrings } = XJson;

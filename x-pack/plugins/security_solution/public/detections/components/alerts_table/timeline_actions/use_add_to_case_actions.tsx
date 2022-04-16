@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { CommentType } from '../../../../../../cases/common';
-import { CaseAttachments } from '../../../../../../cases/public';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { CaseAttachments } from '@kbn/cases-plugin/public';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';

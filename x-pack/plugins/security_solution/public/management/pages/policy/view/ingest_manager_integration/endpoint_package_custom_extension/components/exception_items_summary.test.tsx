@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import * as reactTestingLibrary from '@testing-library/react';
-import { getMockTheme } from '../../../../../../../../public/common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../../../../common/lib/kibana/kibana_react.mock';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
 const mockTheme = getMockTheme({

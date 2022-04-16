@@ -18,10 +18,13 @@ import {
   PluginInitializerContext,
   SharedGlobalConfig,
   StartServicesAccessor,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type {
   IScopedSearchClient,
   ISearchSetup,
@@ -34,12 +37,10 @@ import type {
 
 import { AggsService } from './aggs';
 
-import { FieldFormatsStart } from '../../../field_formats/server';
 import { IndexPatternsServiceStart } from '../data_views';
 import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
@@ -87,7 +88,6 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
-import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
 import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';

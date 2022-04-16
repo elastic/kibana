@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { SchemaFieldTypeSelect } from './';
+import { SchemaFieldTypeSelect } from '.';
 
 describe('SchemaFieldTypeSelect', () => {
   const updateExistingFieldType = jest.fn();

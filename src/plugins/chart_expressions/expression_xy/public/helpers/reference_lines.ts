@@ -7,7 +7,7 @@
  */
 
 import { partition } from 'lodash';
-import { Datatable } from '../../../../expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 import type { DataLayerConfigResult } from '../../common';
 import { isStackedChart } from './state';
 

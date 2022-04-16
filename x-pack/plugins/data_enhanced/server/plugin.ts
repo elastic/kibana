@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerSessionRoutes } from './routes';
 import { searchSessionSavedObjectType } from './saved_objects';
 import type {

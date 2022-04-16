@@ -7,7 +7,7 @@
 
 import { getElementStrings } from './element_strings';
 import { initializeElementsSpec } from '../../canvas_plugin_src/elements';
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const elementSpecs = initializeElementsSpec(coreMock.createSetup() as any, {} as any);
 

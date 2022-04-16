@@ -32,7 +32,7 @@ import {
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
-import { Detail } from './index';
+import { Detail } from '.';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';

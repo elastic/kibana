@@ -16,6 +16,7 @@ import {
   EuiFlexGrid,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { AggSelect } from '../agg_select';
 import { FieldSelect } from '../field_select';
 // @ts-ignore
@@ -26,7 +27,6 @@ import { createNumberHandler } from '../../lib/create_number_handler';
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../data/public';
 import type { Metric, Panel, SanitizedFieldType, Series } from '../../../../../common/types';
 import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
 

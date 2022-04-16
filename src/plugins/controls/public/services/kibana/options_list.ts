@@ -10,13 +10,13 @@ import { memoize } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { buildEsQuery } from '@kbn/es-query';
 
-import { TimeRange } from '../../../../data/public';
+import { TimeRange } from '@kbn/data-plugin/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsOptionsListService, OptionsListRequest } from '../options_list';
 import {
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../control_types/options_list/types';
-import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
 import { ControlsPluginStartDeps } from '../../types';
 import { ControlsDataService } from '../data';
 import { ControlsHTTPService } from '../http';

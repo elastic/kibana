@@ -9,7 +9,7 @@ import React, { FC, useCallback, useState, useEffect } from 'react';
 import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';

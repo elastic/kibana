@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { LOADING_STATE_TEST_SUBJECT } from '../../components/csp_page_template';
-import { Rules } from './index';
+import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from 'react-query';
 import { TestProvider } from '../../test/test_provider';

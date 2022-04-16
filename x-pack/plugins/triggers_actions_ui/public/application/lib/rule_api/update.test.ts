@@ -6,7 +6,7 @@
  */
 
 import { Rule, RuleNotifyWhenType } from '../../../types';
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { updateRule } from './update';
 
 const http = httpServiceMock.createStartContract();

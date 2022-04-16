@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
-import { RulePreview, RulePreviewProps } from './';
+import { RulePreview, RulePreviewProps } from '.';
 import { usePreviewRoute } from './use_preview_route';
 import { usePreviewHistogram } from './use_preview_histogram';
 

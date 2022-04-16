@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/public';
+import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/public';
+
 import { KibanaPrivilege } from './kibana_privilege';
 
 export class PrimaryFeaturePrivilege extends KibanaPrivilege {

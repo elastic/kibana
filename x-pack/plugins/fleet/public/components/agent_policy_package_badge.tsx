@@ -8,8 +8,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 
-import { PackageIcon } from '../components';
 import { FLEET_SERVER_PACKAGE } from '../../common/constants';
+
+import { PackageIcon } from '.';
 
 interface Props {
   excludeFleetServer?: boolean;

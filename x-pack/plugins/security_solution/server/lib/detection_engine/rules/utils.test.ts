@@ -14,7 +14,7 @@ import {
   transformFromAlertThrottle,
   transformActions,
 } from './utils';
-import { RuleAction, SanitizedRule } from '../../../../../alerting/common';
+import { RuleAction, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,

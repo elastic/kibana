@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import type { RouteDefinitionParams } from '../index';
 
 export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
   router.get(

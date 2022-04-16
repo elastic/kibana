@@ -10,10 +10,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import * as fetchers from '../../../state/api/monitor_management';
-import {
-  FETCH_STATUS,
-  useFetcher as originalUseFetcher,
-} from '../../../../../observability/public';
+import { FETCH_STATUS, useFetcher as originalUseFetcher } from '@kbn/observability-plugin/public';
 import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
 import { Actions } from './actions';
 import { DeleteMonitor } from './delete_monitor';

@@ -6,10 +6,10 @@
  */
 
 import { useCallback } from 'react';
+import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 import { DashboardItem } from './use_dashboards_table';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDashboardService } from '../../services/dashboard_service';
-import { DashboardConstants } from '../../../../../../../src/plugins/dashboard/public';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,

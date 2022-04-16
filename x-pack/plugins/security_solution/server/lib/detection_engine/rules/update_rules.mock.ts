@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   getUpdateMachineLearningSchemaMock,
   getUpdateRulesSchemaMock,

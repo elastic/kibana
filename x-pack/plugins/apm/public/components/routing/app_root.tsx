@@ -10,17 +10,17 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
   useUiSetting$,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 import {
   HeaderMenuPortal,
   InspectorContextProvider,
-} from '../../../../observability/public';
-import { ScrollToTopOnPathChange } from '../../components/app/main/scroll_to_top_on_path_change';
+} from '@kbn/observability-plugin/public';
+import { ScrollToTopOnPathChange } from '../app/main/scroll_to_top_on_path_change';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,

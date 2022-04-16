@@ -9,7 +9,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { ruleAssetSavedObjectType } from './rule_asset_saved_object_mappings';
 import { IRuleAssetSavedObject } from '../types';
 

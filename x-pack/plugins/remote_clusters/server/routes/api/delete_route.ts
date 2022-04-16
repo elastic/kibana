@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler } from '@kbn/core/server';
 
 import { RouteDependencies } from '../../types';
 import { serializeCluster } from '../../../common/lib';

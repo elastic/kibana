@@ -8,7 +8,7 @@
 import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
 import { lastValueFrom } from 'rxjs';
 
 // @ts-expect-error untyped local

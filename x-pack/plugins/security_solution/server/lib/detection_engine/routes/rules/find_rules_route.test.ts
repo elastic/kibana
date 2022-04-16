@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';

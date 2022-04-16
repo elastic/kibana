@@ -8,9 +8,13 @@
 
 import './index.scss';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  Storage,
+  IStorageWrapper,
+  createStartServicesGetter,
+} from '@kbn/kibana-utils-plugin/public';
 import { ConfigSchema } from '../config';
-import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,

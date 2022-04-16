@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';

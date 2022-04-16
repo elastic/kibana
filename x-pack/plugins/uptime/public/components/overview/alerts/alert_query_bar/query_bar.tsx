@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { QueryStringInput } from '../../../../../../../../src/plugins/unified_search/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
 import { useIndexPattern } from '../../../../hooks';

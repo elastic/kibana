@@ -9,11 +9,12 @@ import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { NotificationsStart } from 'src/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import type { CoreTheme } from 'kibana/public';
+import type { CoreTheme } from '@kbn/core/public';
 
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
 import type { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 import { InstallStatus } from '../../../types';

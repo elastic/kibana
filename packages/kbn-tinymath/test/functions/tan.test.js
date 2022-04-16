@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { tan } = require('../../src/functions/tan.js');
+const { tan } = require('../../src/functions/tan');
 
 describe('Tangent', () => {
   it('numbers', () => {

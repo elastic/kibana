@@ -11,9 +11,9 @@ import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_
 import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { ScopedHistory } from '../../../../../core/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { withNotifyOnErrors } from '../../state_management/url';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('KbnUrlStateStorage', () => {
   describe('useHash: false', () => {

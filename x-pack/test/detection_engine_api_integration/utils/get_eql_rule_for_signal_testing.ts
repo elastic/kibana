@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { EqlCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { getRuleForSignalTesting } from './get_rule_for_signal_testing';
-
-import type { EqlCreateSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 /**
  * This is a typical signal testing rule that is easy for most basic testing of output of EQL signals.

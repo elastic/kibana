@@ -8,11 +8,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { IndicesForm } from '../components/settings/indices_form';
 import {
   CertificateExpirationForm,

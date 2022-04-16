@@ -10,13 +10,10 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import { DatatableRow } from 'src/plugins/expressions';
+import { DatatableRow } from '@kbn/expressions-plugin';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
-import type { GaugeArguments } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
-import {
-  GaugeShapes,
-  EXPRESSION_GAUGE_NAME,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
   getMaxValue,
@@ -24,7 +21,7 @@ import {
   getValueFromAccessor,
   VerticalBulletIcon,
   HorizontalBulletIcon,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
+} from '@kbn/expression-gauge-plugin/public';
 import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {

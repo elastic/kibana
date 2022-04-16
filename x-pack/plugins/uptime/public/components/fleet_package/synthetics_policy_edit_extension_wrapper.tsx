@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
+import { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { PolicyConfig, MonitorFields } from './types';
-import { ConfigKey, DataStream, TLSFields } from '././types';
+import { ConfigKey, DataStream, TLSFields } from './types';
 import { SyntheticsPolicyEditExtension } from './synthetics_policy_edit_extension';
 import {
   PolicyConfigContextProvider,

@@ -11,7 +11,7 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export interface FetchWithPitOptions {
   esClient: ElasticsearchClient;

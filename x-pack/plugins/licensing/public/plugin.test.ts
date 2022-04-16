@@ -14,8 +14,8 @@ import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
 import { License } from '../common/license';
 import { licenseMock } from '../common/licensing.mock';
-import { coreMock } from '../../../../src/core/public/mocks';
-import { HttpInterceptor } from 'src/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { HttpInterceptor } from '@kbn/core/public';
 
 const coreStart = coreMock.createStart();
 describe('licensing plugin', () => {

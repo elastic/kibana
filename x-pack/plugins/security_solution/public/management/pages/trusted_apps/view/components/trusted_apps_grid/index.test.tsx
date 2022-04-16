@@ -19,7 +19,7 @@ import {
   createGlobalNoMiddlewareStore,
 } from '../../../test_utils';
 import { TrustedAppsGrid } from '.';
-import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',

@@ -9,4 +9,4 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/optimizer').registerNodeAutoTranspilation();
 
-require('./create_functional_tests_archive/index.ts');
+require('./create_functional_tests_archive');

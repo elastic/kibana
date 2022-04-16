@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';

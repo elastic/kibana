@@ -18,7 +18,7 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
-} from '../../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 

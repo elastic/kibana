@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCheckbox } from '@elastic/eui';
 
-import { FormKeyReadWriteAccess } from './';
+import { FormKeyReadWriteAccess } from '.';
 
 describe('FormKeyReadWriteAccess', () => {
   const values = {

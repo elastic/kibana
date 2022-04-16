@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsFindResult } from 'kibana/server';
+import type { ElasticsearchClient, Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,

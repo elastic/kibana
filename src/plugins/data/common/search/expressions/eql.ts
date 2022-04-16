@@ -8,11 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
-import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
+import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
 import {
   ISearchGeneric,
   KibanaContext,

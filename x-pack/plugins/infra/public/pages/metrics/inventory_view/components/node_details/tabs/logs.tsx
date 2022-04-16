@@ -13,11 +13,11 @@ import { EuiFieldSearch } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { TabContent, TabProps } from './shared';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useWaffleOptionsContext } from '../../../hooks/use_waffle_options';
 import { findInventoryFields } from '../../../../../../../common/inventory_models';
-import { useLinkProps } from '../../../../../../../../observability/public';
 import { getNodeLogsUrl } from '../../../../../link_to';
 
 const TabComponent = (props: TabProps) => {

@@ -6,9 +6,9 @@
  */
 
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 export function mockHandlerArguments(
   {}: {},

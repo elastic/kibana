@@ -12,7 +12,7 @@ import { RemoteEsProvider } from './services/remote_es/remote_es';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('./config'));
 
   return {
     ...functionalConfig.getAll(),

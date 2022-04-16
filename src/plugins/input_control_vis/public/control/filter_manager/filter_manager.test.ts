@@ -9,8 +9,8 @@
 import expect from '@kbn/expect';
 
 import { FilterManager } from './filter_manager';
-import { coreMock } from '../../../../../core/public/mocks';
-import { FilterManager as QueryFilterManager, DataViewsContract } from '../../../../data/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '@kbn/data-plugin/public';
 import { Filter } from '@kbn/es-query';
 
 const setupMock = coreMock.createSetup();

@@ -12,7 +12,7 @@ import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 

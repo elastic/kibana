@@ -8,24 +8,17 @@
 import React from 'react';
 import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
-import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
-import {
-  reactToUiComponent,
-  toMountPoint,
-} from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  EmbeddableContext,
-  ViewMode,
-  CONTEXT_MENU_TRIGGER,
-} from '../../../../../../../../src/plugins/embeddable/public';
-import { txtDisplayName } from './i18n';
-import { MenuItem } from './menu_item';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { reactToUiComponent, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { EmbeddableContext, ViewMode, CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   isEnhancedEmbeddable,
   embeddableEnhancedDrilldownGrouping,
-} from '../../../../../../embeddable_enhanced/public';
+} from '@kbn/embeddable-enhanced-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { txtDisplayName } from './i18n';
+import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
-import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';

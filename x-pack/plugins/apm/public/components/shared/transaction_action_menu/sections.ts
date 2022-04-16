@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';

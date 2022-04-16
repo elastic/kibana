@@ -7,11 +7,11 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { getState } from './context_state';
 import { createBrowserHistory, History } from 'history';
-import { FilterManager } from '../../../../../data/public';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 const setupMock = coreMock.createSetup();

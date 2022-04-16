@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, KibanaResponseFactory, Logger } from 'kibana/server';
+import { IScopedClusterClient, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
 export async function getMatchingIndexes(
   indexPattern: string,

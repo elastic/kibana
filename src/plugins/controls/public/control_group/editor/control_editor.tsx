@@ -35,6 +35,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import {
   ControlEmbeddable,
@@ -44,7 +45,6 @@ import {
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { pluginServices } from '../../services';
-import { EmbeddableFactoryDefinition } from '../../../../embeddable/public';
 
 interface EditControlProps {
   embeddable?: ControlEmbeddable;

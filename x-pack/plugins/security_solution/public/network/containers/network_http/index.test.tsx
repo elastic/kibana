@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useNetworkHttp } from './index';
+import { useNetworkHttp } from '.';
 import { NetworkType } from '../../store/model';
 
 describe('useNetworkHttp', () => {

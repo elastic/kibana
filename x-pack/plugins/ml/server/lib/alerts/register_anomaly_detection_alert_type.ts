@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
+import {
+  ActionGroup,
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -16,12 +22,6 @@ import {
 } from '../../routes/schemas/alerting_schema';
 import { RegisterAlertParams } from './register_ml_alerts';
 import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
-import {
-  ActionGroup,
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleTypeState,
-} from '../../../../alerting/common';
 
 export type AnomalyDetectionAlertContext = {
   name: string;

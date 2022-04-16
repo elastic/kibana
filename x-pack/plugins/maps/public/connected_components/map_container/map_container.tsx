@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import moment from 'moment';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, PackageInfo } from 'src/core/server';
+import type { Logger, PackageInfo } from '@kbn/core/server';
 import { PdfMaker } from './pdfmaker';
 import type { Layout } from '../../../layouts';
 import { getTracker } from './tracker';

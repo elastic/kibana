@@ -8,13 +8,13 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectOption } from '@elastic/eui';
+import { AdditionalEmailServices } from '@kbn/actions-plugin/common';
 import {
   ActionTypeModel,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
-import { AdditionalEmailServices } from '../../../../../../actions/common';
 
 const emailServices: EuiSelectOption[] = [
   {

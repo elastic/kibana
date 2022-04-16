@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from '../../../../../src/core/server';
-import type { SpacesPluginSetup } from '../../../spaces/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+
 import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';

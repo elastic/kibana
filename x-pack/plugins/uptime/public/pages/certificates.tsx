@@ -8,7 +8,7 @@
 import { useDispatch } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { useTrackPageview } from '../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';

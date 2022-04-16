@@ -7,7 +7,7 @@
 
 import type { PassThrough, Readable } from 'stream';
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
   DescriptionOrUndefined,

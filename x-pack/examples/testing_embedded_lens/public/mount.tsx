@@ -9,9 +9,9 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiCallOut } from '@elastic/eui';
 
-import type { CoreSetup, AppMountParameters } from 'kibana/public';
+import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { StartDependencies } from './plugin';
-import type { TypedLensByValueInput } from '../../../plugins/lens/public';
 
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>

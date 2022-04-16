@@ -8,8 +8,8 @@
 import type { ToolingLog } from '@kbn/dev-utils';
 import type SuperTest from 'supertest';
 
+import { DETECTION_ENGINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/constants';
 import { countDownTest } from './count_down_test';
-import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../plugins/security_solution/common/constants';
 
 export const installPrePackagedRules = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

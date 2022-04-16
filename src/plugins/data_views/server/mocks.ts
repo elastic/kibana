@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsService } from 'src/plugins/data_views/common';
+import { DataViewsService } from '../common';
 
 export function createIndexPatternsStartMock() {
   const dataViewsServiceFactory = jest.fn().mockResolvedValue({ get: jest.fn() });

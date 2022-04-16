@@ -18,6 +18,7 @@ import {
   BrushEndListener,
 } from '@elastic/charts';
 import { EuiPageContentBody } from '@elastic/eui';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { getChartTheme } from '../../metrics_explorer/components/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
 import {
@@ -30,7 +31,6 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-import { useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { VisSectionProps } from '../types';
 
 export const ChartSectionVis = ({

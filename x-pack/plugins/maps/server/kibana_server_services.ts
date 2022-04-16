@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../src/core/server';
+import { CoreStart } from '@kbn/core/server';
 import { StartDeps } from './types';
 
 let coreStart: CoreStart;

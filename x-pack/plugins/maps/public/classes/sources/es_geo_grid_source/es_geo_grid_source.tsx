@@ -10,6 +10,9 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
+import { DataView } from '@kbn/data-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -40,9 +43,6 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
-import { DataView } from '../../../../../../../src/plugins/data/common';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
 import { isMvt } from './is_mvt';

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRules } from './rules';
 
 const http = httpServiceMock.createStartContract();

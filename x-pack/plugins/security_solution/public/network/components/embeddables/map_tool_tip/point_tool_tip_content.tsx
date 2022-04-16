@@ -6,6 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { sourceDestinationFieldMappings } from '../map_config';
 import {
   getEmptyTagValue,
@@ -14,8 +16,6 @@ import {
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../common/components/links';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 import { FlowTarget } from '../../../../../common/search_strategy';
 
 interface PointToolTipContentProps {

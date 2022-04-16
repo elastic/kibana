@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 import type { ChangePasswordProps, PersonalInfoProps } from '../account_management';
 import { getComponents } from './components';

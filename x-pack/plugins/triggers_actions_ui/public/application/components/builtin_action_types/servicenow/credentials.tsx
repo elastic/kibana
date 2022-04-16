@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { ActionConnectorFieldsProps } from '../../../../../public/types';
+import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { CredentialsApiUrl } from './credentials_api_url';

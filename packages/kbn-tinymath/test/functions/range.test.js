@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { range } = require('../../src/functions/range.js');
+const { range } = require('../../src/functions/range');
 
 describe('Range', () => {
   it('numbers', () => {

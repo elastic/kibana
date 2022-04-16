@@ -10,9 +10,9 @@ import { DrilldownManagerState, DrilldownManagerStateDeps } from './drilldown_ma
 import { DynamicActionManager } from '../../../dynamic_actions/dynamic_action_manager';
 import { uiActionsEnhancedPluginMock } from '../../../mocks';
 import { AdvancedUiActionsStart } from '../../..';
-import { Trigger } from 'src/plugins/ui_actions/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { notificationServiceMock } from 'src/core/public/mocks';
+import { Trigger } from '@kbn/ui-actions-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { DrilldownState } from './drilldown_state';
 
 class StorageWrapperMock implements IStorageWrapper {

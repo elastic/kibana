@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 
 import uuid from 'uuid';
@@ -17,7 +17,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
-} from '../../../../../plugins/task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { PerfState, PerfApi, PerfResult } from './types';
 import { initRoutes } from './init_routes';
 

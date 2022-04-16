@@ -75,8 +75,8 @@ jest.mock('react-use/lib/useDebounce', () => {
   };
 });
 
-jest.mock('../../../../kibana_react/public', () => {
-  const original = jest.requireActual('../../../../kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   /**
    * We mock the CodeEditor because it requires the <KibanaReactContextProvider>

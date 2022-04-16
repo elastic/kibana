@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import { CoreStart, IUiSettingsClient } from 'kibana/public';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { MlStartDependencies } from '../../plugin';
 import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 

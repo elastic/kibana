@@ -12,7 +12,10 @@ import {
   Logger,
   SavedObjectsClient,
   SavedObjectsClientContract,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
 import {
@@ -23,9 +26,6 @@ import {
 } from './lib/adapters';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
-import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { experimentalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
-import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './lib/saved_objects/service_api_key';

@@ -18,7 +18,7 @@ import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
-import { RelevanceTuningLogic } from './';
+import { RelevanceTuningLogic } from '.';
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);

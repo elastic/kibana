@@ -17,7 +17,7 @@ import { rerender } from '../../../test_helpers';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 
-import { EnginesOverview } from './';
+import { EnginesOverview } from '.';
 
 describe('EnginesOverview', () => {
   const values = {

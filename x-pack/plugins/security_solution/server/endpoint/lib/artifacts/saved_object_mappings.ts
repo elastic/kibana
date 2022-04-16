@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../../src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 
 import { ArtifactConstants, ManifestConstants } from './common';
 import { migrations } from './migrations';

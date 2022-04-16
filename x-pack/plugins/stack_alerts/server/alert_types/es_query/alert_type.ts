@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger } from 'kibana/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {

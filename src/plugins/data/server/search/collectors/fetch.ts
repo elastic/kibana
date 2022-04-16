@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { CollectedUsage, ReportedUsage } from './register';
 
 interface SearchTelemetry {

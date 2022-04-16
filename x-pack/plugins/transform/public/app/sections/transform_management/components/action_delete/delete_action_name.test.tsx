@@ -11,7 +11,7 @@ import React from 'react';
 import { DeleteActionName, DeleteActionNameProps } from './delete_action_name';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
 describe('Transform: Transform List Actions <DeleteAction />', () => {
   test('Minimal initialization', () => {

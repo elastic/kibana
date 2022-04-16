@@ -8,7 +8,7 @@
 
 import { CustomIntegrationsPlugin } from './plugin';
 
-import { coreMock } from '../../../core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 
 describe('CustomIntegrationsPlugin', () => {
   beforeEach(() => {});

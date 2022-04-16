@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType, memo } from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { StartPlugins } from '../../../../../../types';
 import { createFleetContextReduxStore } from './store';
 import { RenderContextProviders } from './render_context_providers';

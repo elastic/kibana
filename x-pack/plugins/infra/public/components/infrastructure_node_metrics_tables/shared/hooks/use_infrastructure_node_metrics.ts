@@ -8,7 +8,7 @@
 import { parse } from '@kbn/datemath';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEffect, useMemo, useState } from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   MetricsExplorerResponse,
   MetricsExplorerSeries,

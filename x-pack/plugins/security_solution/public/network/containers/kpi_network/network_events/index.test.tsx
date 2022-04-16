@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useNetworkKpiNetworkEvents } from './index';
+import { useNetworkKpiNetworkEvents } from '.';
 
 describe('kpi network - network events', () => {
   it('skip = true will cancel any running request', () => {

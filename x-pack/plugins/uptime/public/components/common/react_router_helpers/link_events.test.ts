@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { letBrowserHandleEvent } from './index';
+import { letBrowserHandleEvent } from '.';
 
 describe('letBrowserHandleEvent', () => {
   const event = {

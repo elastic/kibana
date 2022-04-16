@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { tagcloudRenderer } from '../expression_renderers';
-import { Render } from '../../../../presentation_util/public/__stories__';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 import { palettes } from '../__mocks__/palettes';

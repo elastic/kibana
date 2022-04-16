@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, ANNOTATION_LAYER } from '../constants';
 import { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../types';
 

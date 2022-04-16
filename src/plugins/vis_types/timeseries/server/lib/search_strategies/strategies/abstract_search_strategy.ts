@@ -8,7 +8,7 @@
 import { tap } from 'rxjs/operators';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { DataViewsService } from '../../../../../../data_views/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';

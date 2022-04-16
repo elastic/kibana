@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
 import { layerTypes } from '../../../common';
 import type { FramePublicAPI, Visualization } from '../../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -20,7 +21,6 @@ import {
 } from '../visualization_helpers';
 import { LensIconChartBarAnnotations } from '../../assets/chart_bar_annotations';
 import { generateId } from '../../id_generator';
-import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
 
 const MAX_DATE = 8640000000000000;
 const MIN_DATE = -8640000000000000;

@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent, AgentAction, FleetServerAgentAction } from '../../../common/types/models';
 import { AGENT_ACTIONS_INDEX } from '../../../common/constants';

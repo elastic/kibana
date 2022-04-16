@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
+import { DataView } from '@kbn/data-views-plugin/public';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
@@ -31,7 +32,6 @@ import {
   StepDetailsSummary,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
-import { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import type { RuntimeMappings } from '../step_define/common/types';
 
 enum WIZARD_STEPS {

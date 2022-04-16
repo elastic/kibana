@@ -11,7 +11,7 @@ import { extractErrorMessage } from '../../../../common/util/errors';
 import { EsSorting, UseDataGridReturnType, getProcessedFields } from '../../components/data_grid';
 import { ml } from '../../services/ml_api_service';
 
-import { isKeywordAndTextType } from '../common/fields';
+import { isKeywordAndTextType } from './fields';
 import { SavedSearchQuery } from '../../contexts/ml';
 
 import { INDEX_STATUS } from './analytics';

@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { FieldValueSuggestions } from '@kbn/observability-plugin/public';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels, filterAriaLabels } from './translations';
-import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { useIndexPattern } from '../../../../contexts/uptime_index_pattern_context';
 import { FILTER_FIELDS } from '../../../../../common/constants';
 import { useGetUrlParams } from '../../../../hooks';

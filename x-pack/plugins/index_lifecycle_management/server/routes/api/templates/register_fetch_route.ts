@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   IndexSettings,
   LegacyTemplateSerialized,
   TemplateFromEs,
-} from '../../../../../index_management/common/types';
+} from '@kbn/index-management-plugin/common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 

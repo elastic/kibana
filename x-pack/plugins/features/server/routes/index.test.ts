@@ -6,12 +6,12 @@
  */
 
 import { FeatureRegistry } from '../feature_registry';
-import { defineRoutes } from './index';
+import { defineRoutes } from '.';
 
-import { httpServerMock, httpServiceMock, coreMock } from '../../../../../src/core/server/mocks';
-import { LicenseType } from '../../../licensing/server/';
-import { licensingMock } from '../../../licensing/server/mocks';
-import { RequestHandler } from '../../../../../src/core/server';
+import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
+import { LicenseType } from '@kbn/licensing-plugin/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { RequestHandler } from '@kbn/core/server';
 import { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '../../common';
 
 function createContextMock(licenseType: LicenseType = 'platinum') {

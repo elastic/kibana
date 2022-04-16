@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiNotificationBadge } from '@elastic/eui';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { IndexPattern } from './types';
 import { FieldItem } from './field_item';
 import { FieldsAccordion, FieldsAccordionProps, FieldItemSharedProps } from './fields_accordion';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 describe('Fields Accordion', () => {
   let defaultProps: FieldsAccordionProps;

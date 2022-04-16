@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import type { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import type { DiagnosticResponse } from './';
+import type { DiagnosticResponse } from '.';
 
 const logsToHelpMap = {
   'error while loading shared libraries': i18n.translate(

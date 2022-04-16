@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { IndexPatternsFetcher } from '../../../../src/plugins/data/server';
+export { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
-export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+export { handleEsError } from '@kbn/es-ui-shared-plugin/server';

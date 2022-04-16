@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getBasePath, isIntegrationsPopupOpen } from './index';
+import { getBasePath, isIntegrationsPopupOpen } from '.';
 import { mockState } from '../../lib/__mocks__/uptime_store.mock';
 
 describe('state selectors', () => {

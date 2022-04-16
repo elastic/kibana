@@ -25,7 +25,7 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 
-import { CoreStart, AppMountParameters } from 'kibana/public';
+import { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="dlAppHome">

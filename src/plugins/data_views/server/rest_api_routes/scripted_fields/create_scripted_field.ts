@@ -7,9 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchema } from '../util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,

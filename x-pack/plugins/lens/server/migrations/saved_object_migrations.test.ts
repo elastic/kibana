@@ -12,7 +12,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   LensDocShape715,
   LensDocShape810,

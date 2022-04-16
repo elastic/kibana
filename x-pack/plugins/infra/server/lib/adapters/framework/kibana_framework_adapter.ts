@@ -7,16 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportRequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import {
-  CoreSetup,
-  IRouter,
-  KibanaRequest,
-  RequestHandler,
-  RouteMethod,
-} from '../../../../../../../src/core/server';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
-import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
+import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';

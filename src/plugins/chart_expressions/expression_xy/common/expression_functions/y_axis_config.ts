@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { FillStyles, IconPositions, LineStyles, YAxisModes, Y_CONFIG } from '../constants';
 import { YConfig, YConfigResult } from '../types';
 

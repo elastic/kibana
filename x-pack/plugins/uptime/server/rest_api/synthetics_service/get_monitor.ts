@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from '../../../../../../src/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import { InfraSources } from './sources';
 

@@ -6,8 +6,8 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { PrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
 import { SecurityServiceProvider } from '../../../../test/common/services/security';
-import { PrivilegeType } from '../../../plugins/apm/common/privilege_type';
 
 type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
 

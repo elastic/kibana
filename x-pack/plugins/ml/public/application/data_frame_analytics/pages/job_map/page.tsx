@@ -13,7 +13,7 @@ import { useUrlState } from '../../../util/url_state';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
-import { JobMap } from '../job_map';
+import { JobMap } from '.';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';

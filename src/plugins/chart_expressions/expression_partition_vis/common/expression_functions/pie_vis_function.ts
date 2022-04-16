@@ -7,8 +7,8 @@
  */
 
 import { Position } from '@elastic/charts';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,

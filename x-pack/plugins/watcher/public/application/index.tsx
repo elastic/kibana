@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
-import { SavedObjectsClientContract, CoreTheme } from 'kibana/public';
+import { SavedObjectsClientContract, CoreTheme } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from './shared_imports';
 import { App, AppDeps } from './app';

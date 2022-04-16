@@ -21,11 +21,11 @@ import {
   ReplaySubject,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { now, AbortError } from '../../../kibana_utils/common';
-import { Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstArgument,

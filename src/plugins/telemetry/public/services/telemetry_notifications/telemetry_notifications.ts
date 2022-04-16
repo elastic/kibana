@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart, OverlayStart } from 'kibana/public';
+import { HttpStart, OverlayStart } from '@kbn/core/public';
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
 import { renderOptInBanner } from './render_opt_in_banner';
 import { TelemetryService } from '../telemetry_service';

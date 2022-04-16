@@ -13,7 +13,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { ViewContentHeader } from '../view_content_header';
 
-import { ContentSection } from './';
+import { ContentSection } from '.';
 
 const props = {
   children: <div className="children" />,

@@ -6,7 +6,7 @@
  */
 import { registerAnomalyAlertType } from './register_anomaly_alert_type';
 import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
-import { MlPluginSetup } from '../../../../ml/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
 import { createRuleTypeMocks } from './test_utils';
 import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';

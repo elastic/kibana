@@ -7,7 +7,7 @@
 
 // handlers that handle agent actions request
 
-import type { RequestHandler } from 'kibana/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { PostNewAgentActionRequestSchema } from '../../types/rest_spec';

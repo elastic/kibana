@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '../../../../../src/core/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 
 export const getBaseBreadcrumb = (): ChromeBreadcrumb => ({
   text: 'Canvas',

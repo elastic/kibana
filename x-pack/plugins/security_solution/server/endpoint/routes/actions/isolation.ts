@@ -6,11 +6,12 @@
  */
 
 import moment from 'moment';
-import { RequestHandler, Logger } from 'src/core/server';
+import { RequestHandler, Logger } from '@kbn/core/server';
 import uuid from 'uuid';
 import { TypeOf } from '@kbn/config-schema';
-import { CommentType } from '../../../../../cases/common';
-import { CasesByAlertId } from '../../../../../cases/common/api/cases/case';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { CasesByAlertId } from '@kbn/cases-plugin/common/api/cases/case';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -19,7 +20,6 @@ import {
   UNISOLATE_HOST_ROUTE,
   failedFleetActionErrorCode,
 } from '../../../../common/endpoint/constants';
-import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
 import {
   EndpointAction,
   HostMetadata,

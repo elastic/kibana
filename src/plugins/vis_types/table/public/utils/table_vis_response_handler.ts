@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from 'src/plugins/expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 import { getFormatService } from '../services';
 import { TableVisData, TableGroup, TableVisConfig, TableContext } from '../types';
 import { addPercentageColumn } from './add_percentage_column';

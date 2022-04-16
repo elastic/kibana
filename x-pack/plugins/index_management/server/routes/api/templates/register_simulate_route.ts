@@ -8,7 +8,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.object({}, { unknowns: 'allow' });
 

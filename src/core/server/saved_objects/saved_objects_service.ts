@@ -13,7 +13,7 @@ import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
-} from './';
+} from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';

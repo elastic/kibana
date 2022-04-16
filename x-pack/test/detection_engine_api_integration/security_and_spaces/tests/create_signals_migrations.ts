@@ -11,9 +11,10 @@ import {
   DEFAULT_SIGNALS_INDEX,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
-} from '../../../../plugins/security_solution/common/constants';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+} from '@kbn/security-solution-plugin/common/constants';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { SIGNALS_TEMPLATE_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
+import { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -23,7 +24,6 @@ import {
   waitForIndexToPopulate,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-import { Signal } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 interface CreateResponse {
   index: string;

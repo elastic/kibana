@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useTrackPageview, FETCH_STATUS, useFetcher } from '../../../../observability/public';
+import { useTrackPageview, FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import { MonitorFields } from '../../../common/runtime_types';
 import { EditMonitorConfig } from '../../components/monitor_management/edit_monitor_config';
 import { Loader } from '../../components/monitor_management/loader/loader';

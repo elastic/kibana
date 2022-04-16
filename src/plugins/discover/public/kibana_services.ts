@@ -8,10 +8,10 @@
 
 import { once } from 'lodash';
 import { createHashHistory } from 'history';
-import type { ScopedHistory, AppMountParameters } from 'kibana/public';
-import type { UiActionsStart } from 'src/plugins/ui_actions/public';
+import type { ScopedHistory, AppMountParameters } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { HistoryLocationState } from './build_services';
-import { createGetterSetter } from '../../kibana_utils/public';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 
 let uiActions: UiActionsStart;

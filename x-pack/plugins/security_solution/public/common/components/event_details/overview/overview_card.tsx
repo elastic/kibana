@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ActionCell } from '../table/action_cell';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { EnrichedFieldInfo } from '../types';
 
 const ActionWrapper = euiStyled.div`

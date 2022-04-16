@@ -9,6 +9,7 @@
 
 import { AxiosError, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import {
   ExecutorParamsSchemaITSM,
   ExecutorSubActionCommonFieldsParamsSchema,
@@ -25,7 +26,6 @@ import {
   ExternalIncidentServiceConfigurationBaseSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationBaseType = TypeOf<
   typeof ExternalIncidentServiceConfigurationBaseSchema

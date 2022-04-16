@@ -16,16 +16,19 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
+} from '@kbn/core/server';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from '@kbn/features-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
 import type { AnonymousAccessServiceStart } from './anonymous_access';

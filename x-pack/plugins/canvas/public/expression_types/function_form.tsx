@@ -17,7 +17,7 @@ import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title
 import { BaseForm, BaseFormProps } from './base_form';
 import { Arg, ArgUiConfig, ResolvedArgProps } from './arg';
 import { ArgDisplayType, Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
-import { Model, Transform, View } from '../expression_types';
+import { Model, Transform, View } from '.';
 import {
   AssetType,
   CanvasElement,

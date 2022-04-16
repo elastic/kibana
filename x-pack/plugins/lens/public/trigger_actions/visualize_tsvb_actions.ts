@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import { ACTION_CONVERT_TO_LENS } from '../../../../../src/plugins/visualizations/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { VisualizeEditorContext } from '../types';
-import type { ApplicationStart } from '../../../../../src/core/public';
 
 export const visualizeTSVBAction = (application: ApplicationStart) =>
   createAction<{ [key: string]: VisualizeEditorContext }>({

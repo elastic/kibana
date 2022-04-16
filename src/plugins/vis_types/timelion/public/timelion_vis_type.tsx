@@ -9,15 +9,14 @@
 import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { DefaultEditorSize } from '../../../vis_default_editor/public';
+import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisParams } from '@kbn/visualizations-plugin/public';
 import { TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { getIndexPatterns } from './helpers/plugin_services';
 
 import { parseTimelionExpressionAsync } from '../common/parser_async';
-
-import { VIS_EVENT_TO_TRIGGER, VisParams } from '../../../visualizations/public';
 
 const TimelionOptions = lazy(() => import('./timelion_options'));
 

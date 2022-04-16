@@ -11,8 +11,8 @@ import {
   AggParam,
   IndexPatternField,
   OptionedValueProp,
-} from 'src/plugins/data/public';
-import type { Schema } from 'src/plugins/visualizations/public';
+} from '@kbn/data-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
 import { EditorVisState } from './sidebar/state/reducers';

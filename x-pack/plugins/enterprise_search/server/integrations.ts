@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import type { HttpServiceSetup } from 'src/core/server';
+import type { HttpServiceSetup } from '@kbn/core/server';
 
-import type { IntegrationCategory } from '../../../../src/plugins/custom_integrations/common';
-import type { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { i18n } from '@kbn/i18n';
 
 interface WorkplaceSearchIntegration {
   id: string;

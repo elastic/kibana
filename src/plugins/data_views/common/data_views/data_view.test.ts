@@ -10,12 +10,12 @@ import { map, last } from 'lodash';
 
 import { IndexPattern } from './data_view';
 
-import { CharacterNotAllowedInField } from '../../../kibana_utils/common';
+import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 
 import { IndexPatternField } from '../fields';
 
-import { fieldFormatsMock } from '../../../field_formats/common/mocks';
-import { FieldFormat } from '../../../field_formats/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { RuntimeField, RuntimeTypeExceptComposite } from '../types';
 import { stubLogstashFields } from '../field.stub';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';

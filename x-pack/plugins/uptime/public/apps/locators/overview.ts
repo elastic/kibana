@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uptimeOverviewLocatorID } from '../../../../observability/public';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
 import { OVERVIEW_ROUTE } from '../../../common/constants/ui';
 
 const formatSearchKey = (key: string, value: string) => `${key}: "${value}"`;

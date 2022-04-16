@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationMap } from 'kibana/server';
+import { SavedObjectMigrationMap } from '@kbn/core/server';
 import { migrateTimelineIdToReferences } from './utils';
 
 export const notesMigrations: SavedObjectMigrationMap = {

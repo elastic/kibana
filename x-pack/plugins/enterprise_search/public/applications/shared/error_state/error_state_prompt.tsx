@@ -10,10 +10,9 @@ import React, { useEffect } from 'react';
 import { useValues } from 'kea';
 
 import { EuiEmptyPrompt, EuiCode, EuiLink, EuiCodeBlock } from '@elastic/eui';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { CloudSetup } from '../../../../../cloud/public';
 
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';

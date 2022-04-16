@@ -6,7 +6,7 @@
  */
 
 import { CiStatsReporter } from '@kbn/dev-utils';
-import { FtrProviderContext } from './../functional/ftr_provider_context';
+import { FtrProviderContext } from '../functional/ftr_provider_context';
 
 const IGNORED_FIELDS = [
   // The following fields are returned by the _field_caps API but aren't counted

@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 
-import { getErrorCodeFromErrorReason } from '../../../../src/plugins/data_view_field_editor/public/lib/runtime_field_validation';
+import { getErrorCodeFromErrorReason } from '@kbn/data-view-field-editor-plugin/public/lib/runtime_field_validation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { API_BASE_PATH } from './constants';
 

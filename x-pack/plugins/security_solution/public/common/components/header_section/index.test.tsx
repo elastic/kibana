@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import { HeaderSection } from './index';
+import { HeaderSection } from '.';
 
 describe('HeaderSection', () => {
   test('it renders', () => {

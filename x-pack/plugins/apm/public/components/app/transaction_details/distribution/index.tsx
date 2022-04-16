@@ -19,7 +19,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 

@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import unzipPairs from './unzip_pairs.js';
+import unzipPairs from './unzip_pairs';
 
 export default function asSorted(timeValObject, fn) {
   const data = unzipPairs(timeValObject);

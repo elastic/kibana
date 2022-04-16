@@ -14,7 +14,7 @@ import {
   TimelineEventsAllRequestOptions,
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../../server/utils/build_query';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildTimelineEventsAllQuery = ({
   authFilter,

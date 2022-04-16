@@ -9,11 +9,11 @@ import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
+import type { AppMountParameters, CoreStart, NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { AppMountParameters, CoreStart, NotificationsStart } from 'src/core/public';
 
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { AuthenticatedUser } from '../../common/model';
 import { getUserDisplayName } from '../../common/model';
 import type { AuthenticationServiceSetup } from '../authentication';

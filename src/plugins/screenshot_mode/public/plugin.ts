@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { getScreenshotContext, getScreenshotMode } from '../common';
 import type { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { letBrowserHandleEvent } from '../react_router_helpers';
+import { letBrowserHandleEvent } from '.';
 
 describe('letBrowserHandleEvent', () => {
   const event = {

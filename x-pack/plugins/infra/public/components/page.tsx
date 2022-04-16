@@ -7,7 +7,7 @@
 
 import { EuiPage } from '@elastic/eui';
 
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 export const ColumnarPage = euiStyled.div`
   display: flex;

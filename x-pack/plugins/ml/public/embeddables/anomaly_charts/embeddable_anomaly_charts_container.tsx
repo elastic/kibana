@@ -10,6 +10,7 @@ import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elasti
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
@@ -23,7 +24,6 @@ import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { ANOMALY_THRESHOLD } from '../../../common';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import { MlLocatorParams } from '../../../common/types/locator';

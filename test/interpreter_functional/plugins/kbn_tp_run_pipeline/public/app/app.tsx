@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { Main } from './components/main';
 
 export const renderApp = ({ element }: AppMountParameters) => {

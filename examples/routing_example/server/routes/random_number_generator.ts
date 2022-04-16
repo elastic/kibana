@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IRouter } from '@kbn/core/server';
 import { RANDOM_NUMBER_ROUTE_PATH } from '../../common';
-
-import { IRouter } from '../../../../src/core/server';
 
 /**
  *

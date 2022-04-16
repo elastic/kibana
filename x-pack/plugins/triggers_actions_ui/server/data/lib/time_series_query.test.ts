@@ -8,10 +8,10 @@
 // test error conditions of calling timeSeriesQuery - postive results tested in FT
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { Logger } from '../../../../../../src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { Logger } from '@kbn/core/server';
 import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
-import { alertsMock } from '../../../../alerting/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 
 const DefaultQueryParams: TimeSeriesQuery = {
   index: 'index-name',

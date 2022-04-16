@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasReportingService } from '../reporting';
 

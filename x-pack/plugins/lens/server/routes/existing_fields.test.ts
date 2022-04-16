@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from 'src/plugins/data_views/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { legacyExistingFields, existingFields, Field, buildFieldList } from './existing_fields';
 
 describe('existingFields', () => {

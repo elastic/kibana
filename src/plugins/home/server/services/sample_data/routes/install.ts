@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from 'src/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
 import { getSampleDataInstaller } from './utils';

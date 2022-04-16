@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 import {
   Field,
   Aggregation,
@@ -13,7 +14,6 @@ import {
   RollupFields,
   EVENT_RATE_FIELD_ID,
 } from '../types/fields';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import { ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 
 // cross reference fields and aggs.

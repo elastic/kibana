@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, HttpFetchError } from 'kibana/public';
+import { CoreStart, HttpFetchError } from '@kbn/core/public';
 import {
   RANDOM_NUMBER_ROUTE_PATH,
   RANDOM_NUMBER_BETWEEN_ROUTE_PATH,

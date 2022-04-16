@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { TagsCapabilities } from '../../../common';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
 import { TagBulkAction } from '../types';

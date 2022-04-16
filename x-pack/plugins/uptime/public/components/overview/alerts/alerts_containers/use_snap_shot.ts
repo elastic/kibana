@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { useIndexPattern, generateUpdatedKueryString } from '../../../../hooks';
-import { useFetcher } from '../../../../../../observability/public';
 import { fetchSnapshotCount } from '../../../../state/api';
 
 export const useSnapShotCount = ({ query, filters }: { query: string; filters: [] | string }) => {

@@ -7,6 +7,7 @@
 
 import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
+import { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import {
   ActivityLog,
   HostInfo,
@@ -20,7 +21,6 @@ import {
   EndpointPendingActions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
-import { GetPackagesResponse } from '../../../../../fleet/common';
 import { AsyncResourceState } from '../../state';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 

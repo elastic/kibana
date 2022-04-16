@@ -8,17 +8,12 @@
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { notificationServiceMock, fatalErrorsServiceMock } from '@kbn/core/public/mocks';
 import { init as initHttp } from '../../../public/application/services/http';
 import { init as initHttpRequests } from './http_requests';
 import { init as initUiMetric } from '../../../public/application/services/ui_metric';
 import { init as initNotification } from '../../../public/application/services/notification';
-
-import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
-
-import {
-  notificationServiceMock,
-  fatalErrorsServiceMock,
-} from '../../../../../../src/core/public/mocks';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 

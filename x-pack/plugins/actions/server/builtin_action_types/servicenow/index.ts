@@ -8,6 +8,7 @@
 import { curry } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import { Logger } from '@kbn/core/server';
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
@@ -22,7 +23,6 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 import { createExternalService } from './service';
 import { api as commonAPI } from './api';
 import * as i18n from './translations';
-import { Logger } from '../../../../../../src/core/server';
 import {
   ExecutorParams,
   ExecutorSubActionPushParams,

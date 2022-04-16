@@ -5,11 +5,8 @@
  * 2.0.
  */
 
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
 import { FactoryQueryTypes, RiskScoreAggByFields, RiskSeverity } from '../..';
-import type {
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '../../../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../../../typed_json';
 
 import { Inspect, Maybe } from '../../../common';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { VisParams } from 'src/plugins/visualizations/public';
-import { IAggConfig } from 'src/plugins/data/public';
+import { VisParams } from '@kbn/visualizations-plugin/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 export interface AggControlProps {

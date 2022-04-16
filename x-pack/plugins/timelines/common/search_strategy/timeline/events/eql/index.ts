@@ -6,10 +6,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import type {
-  EqlSearchStrategyRequest,
-  EqlSearchStrategyResponse,
-} from '../../../../../../../../src/plugins/data/common';
+import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { EqlSearchResponse, Inspect, Maybe, PaginationInputPaginated } from '../../..';
 import { TimelineEdges, TimelineEventsAllRequestOptions } from '../..';
 

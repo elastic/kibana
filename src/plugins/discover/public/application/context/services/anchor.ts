@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, EsQuerySortValue } from '../../../../../data/public';
-import { DataView } from '../../../../../data_views/public';
+import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { EsHitRecord } from '../../types';
 
 export async function fetchAnchor(

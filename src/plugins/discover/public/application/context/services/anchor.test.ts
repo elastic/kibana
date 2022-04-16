@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataView } from '../../../../../data_views/public';
-import { SortDirection } from '../../../../../data/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';

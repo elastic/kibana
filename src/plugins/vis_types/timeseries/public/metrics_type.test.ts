@@ -7,12 +7,12 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { DataView } from 'src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { setDataViewsStart } from './services';
 import type { TimeseriesVisParams } from './types';
-import type { Vis } from 'src/plugins/visualizations/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { metricsVisDefinition } from './metrics_type';
-import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 describe('metricsVisDefinition', () => {
   describe('getUsedIndexPattern', () => {
     const indexPattern1 = { id: '1', title: 'pattern1' } as unknown as DataView;

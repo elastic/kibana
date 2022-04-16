@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
 export function createFilebeatConfig(
   index: string,

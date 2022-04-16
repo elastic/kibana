@@ -9,10 +9,10 @@ import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { getConnectorsAction } from '../../state/alerts/alerts';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { useFetcher } from '../../../../observability/public';
 import { fetchActionTypes } from '../../state/api/alerts';
 
 import { ActionTypeId } from './types';

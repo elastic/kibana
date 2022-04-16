@@ -22,13 +22,13 @@ import classNames from 'classnames';
 import React, { useState, useRef } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FilterEditor } from './filter_editor';
-import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterOptions } from './filter_options';
-import { useKibana } from '../../../kibana_react/public';
-import { UI_SETTINGS } from '../../../data/common';
-import { IDataPluginServices } from '../../../data/public';
-import { DataView } from '../../../data_views/public';
+import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
+import { FilterEditor } from './filter_editor';
 
 export interface Props {
   filters: Filter[];

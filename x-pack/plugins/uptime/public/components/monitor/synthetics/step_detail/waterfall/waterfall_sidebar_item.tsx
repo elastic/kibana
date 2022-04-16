@@ -7,7 +7,7 @@
 
 import React, { RefObject, useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { SidebarItem } from '../waterfall/types';
+import { SidebarItem } from './types';
 import { MiddleTruncatedText } from '../../waterfall';
 import { SideBarItemHighlighter } from '../../waterfall/components/styles';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';

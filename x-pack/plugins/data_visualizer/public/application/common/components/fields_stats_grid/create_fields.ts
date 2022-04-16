@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { getFieldNames, getSupportedFieldType } from './get_field_names';
 import { FileBasedFieldVisConfig } from '../stats_table/types';
 import { JOB_FIELD_TYPES } from '../../../../../common/constants';

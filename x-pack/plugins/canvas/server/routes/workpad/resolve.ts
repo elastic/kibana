@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 import { catchErrorHandler } from '../catch_error_handler';
 import { shimWorkpad } from './shim_workpad';

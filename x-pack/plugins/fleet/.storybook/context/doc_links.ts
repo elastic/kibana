@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 export const getDocLinks = () => {
   const docLinks: DocLinksStart = {

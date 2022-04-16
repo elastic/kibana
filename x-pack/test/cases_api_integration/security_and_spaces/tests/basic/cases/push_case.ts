@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -20,7 +21,6 @@ import {
   createCase,
   pushCase,
 } from '../../../../common/lib/utils';
-import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

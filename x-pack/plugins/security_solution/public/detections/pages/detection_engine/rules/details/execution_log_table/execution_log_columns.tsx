@@ -8,7 +8,7 @@
 import { EuiBasicTableColumn, EuiHealth, EuiLink, EuiText } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 import React from 'react';
 import {
   AggregateRuleExecutionEvent,

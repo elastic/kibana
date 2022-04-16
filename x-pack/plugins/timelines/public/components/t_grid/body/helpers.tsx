@@ -9,6 +9,7 @@ import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { Ecs } from '../../../../common/ecs';
 import type {
   BrowserField,
@@ -21,8 +22,6 @@ import type {
   SortDirection,
   TimelineEventsType,
 } from '../../../../common/types/timeline';
-
-import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from 'src/core/server';
-import type { SanitizedRule } from '../../../alerting/common/';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RuleParams } from '../lib/detection_engine/schemas/rule_schemas';
 import type { SetupPlugins } from '../plugin';
 

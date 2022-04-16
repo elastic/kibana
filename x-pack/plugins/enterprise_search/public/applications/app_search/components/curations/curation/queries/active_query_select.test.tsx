@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { ActiveQuerySelect } from './';
+import { ActiveQuerySelect } from '.';
 
 describe('ActiveQuerySelect', () => {
   const values = {

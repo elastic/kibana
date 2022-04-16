@@ -7,7 +7,7 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
-import { IBasePath } from 'kibana/server';
+import { IBasePath } from '@kbn/core/server';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../common/runtime_types';
 
 export type UpdateUptimeAlertState = (

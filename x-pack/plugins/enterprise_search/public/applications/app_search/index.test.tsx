@@ -33,7 +33,7 @@ import { RoleMappings } from './components/role_mappings';
 import { Settings } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 
-import { AppSearch, AppSearchUnconfigured, AppSearchConfigured } from './';
+import { AppSearch, AppSearchUnconfigured, AppSearchConfigured } from '.';
 
 describe('AppSearch', () => {
   it('always renders the Setup Guide', () => {

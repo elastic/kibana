@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { mountWithRouter } from '../lib';
 import { OVERVIEW_ROUTE } from '../../common/constants';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { UptimeUrlParams, getSupportedUrlParams, MountWithReduxProvider } from '../lib/helper';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 

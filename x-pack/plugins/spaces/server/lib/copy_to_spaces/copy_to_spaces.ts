@@ -7,7 +7,7 @@
 
 import type { Readable } from 'stream';
 
-import type { CoreStart, KibanaRequest, SavedObject } from 'src/core/server';
+import type { CoreStart, KibanaRequest, SavedObject } from '@kbn/core/server';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { spaceIdToNamespace } from '../utils/namespace';

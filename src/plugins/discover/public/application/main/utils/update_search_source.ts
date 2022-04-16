@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
-import { ISearchSource } from '../../../../../data/public';
-import { DataViewType, DataView } from '../../../../../data_views/public';
 import type { SortOrder } from '../../../services/saved_searches';
 import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../components/doc_table';

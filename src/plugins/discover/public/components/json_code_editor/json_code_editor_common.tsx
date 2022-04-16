@@ -12,7 +12,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '../../../../kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',

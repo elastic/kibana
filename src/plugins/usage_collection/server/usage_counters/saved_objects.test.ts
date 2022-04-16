@@ -7,7 +7,7 @@
  */
 
 import { serializeCounterKey, storeCounter } from './saved_objects';
-import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CounterMetric } from './usage_counter';
 import moment from 'moment';
 

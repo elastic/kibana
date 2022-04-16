@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getMappedNonEcsValue } from './render_cell_value';
+import { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
+import { TGridCellAction } from '@kbn/timelines-plugin/common/types/timeline';
+import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import FilterForValueButton from './filter_for_value';
-import { TimelineNonEcsData } from '../../../../../timelines/common/search_strategy';
-import { TGridCellAction } from '../../../../../timelines/common/types/timeline';
-import { getPageRowIndex } from '../../../../../timelines/public';
+import { getMappedNonEcsValue } from './render_cell_value';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.observability.hoverActions.filterForValue', {
   defaultMessage: 'Filter for value',

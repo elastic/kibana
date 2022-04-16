@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { AuthenticatedUser } from '../../../../../../security/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import {
   TimelineType,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/server';
-import { ILicense } from '../../../licensing/server';
+import { IUiSettingsClient } from '@kbn/core/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import { BannersConfigType } from '../config';
 import { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
 import { BannersRouter } from '../types';

@@ -13,7 +13,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DiscoverFieldSearch, Props } from './discover_field_search';
 import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 describe('DiscoverFieldSearch', () => {
   const defaultProps = {

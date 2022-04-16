@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
 import { transformError } from '@kbn/securitysolution-es-utils';

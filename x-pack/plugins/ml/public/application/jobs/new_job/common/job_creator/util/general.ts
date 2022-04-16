@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
@@ -19,7 +20,6 @@ import {
   DOC_COUNT,
   _DOC_COUNT,
 } from '../../../../../../../common/constants/field_types';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   EVENT_RATE_FIELD_ID,
   Field,
@@ -27,7 +27,7 @@ import {
   mlCategory,
 } from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import { JobCreatorType } from '../index';
+import { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {

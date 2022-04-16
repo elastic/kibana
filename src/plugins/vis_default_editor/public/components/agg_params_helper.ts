@@ -15,8 +15,8 @@ import {
   IAggType,
   IndexPattern,
   IndexPatternField,
-} from '../../../data/public';
-import type { Schema } from '../../../visualizations/public';
+} from '@kbn/data-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';

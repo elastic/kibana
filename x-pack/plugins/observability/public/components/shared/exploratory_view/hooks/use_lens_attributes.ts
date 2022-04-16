@@ -7,7 +7,8 @@
 
 import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import {
   AllSeries,
@@ -22,7 +23,6 @@ import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import { DataViewState, useAppDataViewContext } from './use_app_data_view';
 import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 import { useTheme } from '../../../../hooks/use_theme';
-import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
 import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 

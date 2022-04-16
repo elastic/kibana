@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
+import { IEsSearchRequest } from '@kbn/data-plugin/common';
 import { ESQuery } from '../../typed_json';
 import {
   ActionsStrategyResponse,

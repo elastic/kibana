@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/public';
-import { useTrackPageview } from '../../../../observability/public';
+import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { DataStream } from './types';
 import { PolicyConfig } from './types';
 import {

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DatatableColumn } from '../../../../expressions/public';
+import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { getFilterClickData, getFilterEventData } from './filter_helpers';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
 

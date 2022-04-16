@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
-import { WatchStatus } from '../../../../models/watch_status/index';
+import { WatchStatus } from '../../../../models/watch_status';
 import { RouteDependencies } from '../../../../types';
 
 const paramsSchema = schema.object({

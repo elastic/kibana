@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import { collectDashboardTelemetry, DashboardCollectorData } from './dashboard_telemetry';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { TodoSavedObjectAttributes, BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../common';
 
 export async function createSampleData(client: SavedObjectsClientContract, overwrite = true) {

@@ -7,6 +7,7 @@
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState, generateAlertMessage } from './common';
 import { TLS } from '../../../common/constants/alerts';
@@ -14,8 +15,6 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { TlsTranslations } from '../../../common/translations';
-
-import { ActionGroupIdsOf } from '../../../../alerting/common';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { createUptimeESClient } from '../lib';

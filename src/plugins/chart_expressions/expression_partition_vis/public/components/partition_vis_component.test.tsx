@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';

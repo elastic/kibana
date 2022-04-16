@@ -11,7 +11,7 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { SelectOption } from '../../../../../../../vis_default_editor/public';
+import { SelectOption } from '@kbn/vis-default-editor-plugin/public';
 
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { LineOptions } from './line_options';

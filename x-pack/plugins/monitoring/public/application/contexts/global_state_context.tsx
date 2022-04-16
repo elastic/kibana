@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React, { createContext } from 'react';
+import { TimeRange, RefreshInterval } from '@kbn/data-plugin/public';
 import { GlobalState } from '../../url_state';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
-import { TimeRange, RefreshInterval } from '../../../../../../src/plugins/data/public';
 import { Legacy } from '../../legacy_shims';
 import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
 

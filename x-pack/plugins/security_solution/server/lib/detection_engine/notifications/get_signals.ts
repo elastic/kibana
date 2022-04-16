@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { SignalSearchResponse, SignalSource } from '../signals/types';
 import { buildSignalsSearchQuery } from './build_signals_query';
 

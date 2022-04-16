@@ -10,7 +10,7 @@ import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
-import { RedirectAppLinks } from '../../../../../../../kibana_react/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
@@ -21,7 +21,7 @@ import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
-import { FIELD_FORMAT_IDS } from '../../../../../../../../plugins/field_formats/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 
 import {
   createCachedFieldValueFormatter,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { StartDeps, SetupDeps } from './types';
 import { registerWithCustomIntegrations } from './register_custom_integration';
 

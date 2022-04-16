@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IStorage, Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { IStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};

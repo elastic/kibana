@@ -7,7 +7,7 @@
 
 import { getImportRulesSchemaDecodedMock } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
-import { getExceptionListSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 describe('checkRuleExceptionReferences', () => {
   it('returns empty array if rule has no exception list references', () => {

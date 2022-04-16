@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { createMemoryHistory } from 'history';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { DataPublicPluginStart } from '../../../data/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverSearchSessionManager } from '../application/main/services/discover_search_session';
 
 export function createSearchSessionMock() {

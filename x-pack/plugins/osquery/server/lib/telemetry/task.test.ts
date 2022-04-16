@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { SuccessfulRunResult } from '../../../../task_manager/server/task';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { SuccessfulRunResult } from '@kbn/task-manager-plugin/server/task';
 import { OsqueryTelemetryTask } from './task';
 import {
   createMockTaskInstance,

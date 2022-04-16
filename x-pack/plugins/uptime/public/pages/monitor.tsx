@@ -8,7 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useTrackPageview } from '../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useMonitorId } from '../hooks';
 import { MonitorCharts } from '../components/monitor';
 import { MonitorStatusDetails, PingList } from '../components/monitor';

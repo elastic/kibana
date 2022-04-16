@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { IAggConfig } from '../agg_config';
-import { FilterFieldFn, GenericBucket, IAggConfigs } from '../../../../common';
+import { FilterFieldFn, GenericBucket, IAggConfigs } from '../../..';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import type { FieldTypes } from '../param_types/field';

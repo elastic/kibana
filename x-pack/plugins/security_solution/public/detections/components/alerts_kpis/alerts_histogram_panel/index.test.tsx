@@ -14,7 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 import { SecurityPageName } from '../../../../app/types';
 import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
 
-import { AlertsHistogramPanel } from './index';
+import { AlertsHistogramPanel } from '.';
 import * as helpers from './helpers';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 

@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionValueCategoryAxis } from './category_axis';
-import type { CategoryAxis } from '../types';
 import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
-} from '../../../../expressions/public';
+} from '@kbn/expressions-plugin/public';
+import type { ExpressionValueCategoryAxis } from './category_axis';
+import type { CategoryAxis } from '../types';
 
 interface Arguments {
   name: string;

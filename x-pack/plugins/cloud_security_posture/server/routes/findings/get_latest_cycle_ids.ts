@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import { AggregationsFiltersAggregate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { AGENT_LOGS_INDEX_PATTERN } from '../../../common/constants';
 
 const getAgentLogsEsQuery = (): SearchRequest => ({

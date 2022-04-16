@@ -8,7 +8,7 @@
 import React from 'react';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessTreeAlertDeps, ProcessTreeAlert } from './index';
+import { ProcessTreeAlertDeps, ProcessTreeAlert } from '.';
 
 const mockAlert = mockAlerts[0];
 const TEST_ID = `sessionView:sessionViewAlertDetail-${mockAlert.kibana?.alert?.uuid}`;

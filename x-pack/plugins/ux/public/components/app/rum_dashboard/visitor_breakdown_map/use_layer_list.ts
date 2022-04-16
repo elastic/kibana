@@ -19,7 +19,7 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-} from '../../../../../../maps/common';
+} from '@kbn/maps-plugin/common';
 
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {

@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { getSavedObjectsClient, getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
 import { APP_ID, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
 
 export class LoadListAndRender extends React.Component<{ stateTransfer: EmbeddableStateTransfer }> {
   _isMounted: boolean = false;

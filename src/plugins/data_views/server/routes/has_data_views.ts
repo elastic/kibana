@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../../../core/server';
+import { IRouter } from '@kbn/core/server';
 import { getIndexPattern, hasUserIndexPattern } from '../has_user_index_pattern';
 
 export const registerHasDataViewsRoute = (router: IRouter): void => {

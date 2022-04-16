@@ -16,8 +16,8 @@ import { plainColumnRenderer } from './plain_column_renderer';
 import { RowRendererId, ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../../../../timelines/public/mock';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../../timelines/public/components';
+import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
 import { cloneDeep } from 'lodash';
 jest.mock('./plain_column_renderer');
 

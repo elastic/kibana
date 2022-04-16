@@ -8,7 +8,7 @@
 
 import { extract, inject } from './persistable_state';
 import { Filter } from '@kbn/es-query';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 
 describe('filter manager persistable state tests', () => {
   const filters: Filter[] = [

@@ -9,11 +9,11 @@ import { EuiComboBoxOptionOption, EuiSpacer, EuiTitle, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 import { FindingsTable } from './findings_table';
 import { FindingsSearchBar } from './findings_search_bar';
 import * as TEST_SUBJECTS from './test_subjects';
-import type { DataView } from '../../../../../../src/plugins/data/common';
-import { SortDirection } from '../../../../../../src/plugins/data/common';
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 import { useFindings, type CspFindingsRequest } from './use_findings';
 import { FindingsGroupBySelector } from './findings_group_by_selector';

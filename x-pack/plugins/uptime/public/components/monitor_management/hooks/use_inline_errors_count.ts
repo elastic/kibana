@@ -7,8 +7,8 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
+import { useEsSearch } from '@kbn/observability-plugin/public';
 import { monitorManagementListSelector } from '../../../state/selectors';
-import { useEsSearch } from '../../../../../observability/public';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 import { getInlineErrorFilters } from './use_inline_errors';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';

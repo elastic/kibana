@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { RequestStatus } from '@kbn/inspector-plugin';
+import { getInspectResponse } from '@kbn/observability-plugin/server';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
 import { savedObjectsAdapter } from './saved_objects/saved_objects';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
-import { RequestStatus } from '../../../../../src/plugins/inspector';
-import { getInspectResponse } from '../../../observability/server';
-import { InspectResponse } from '../../../observability/typings/common';
 
 export interface UMDomainLibs {
   requests: UptimeRequests;

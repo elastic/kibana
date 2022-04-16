@@ -8,7 +8,7 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { License } from '../../../../../licensing/common/license';
+import { License } from '@kbn/licensing-plugin/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {

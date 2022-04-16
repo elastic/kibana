@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   TransformLatestConfig,
   TransformPivotConfig,
-} from '../../../../plugins/transform/common/types/transform';
+} from '@kbn/transform-plugin/common/types/transform';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

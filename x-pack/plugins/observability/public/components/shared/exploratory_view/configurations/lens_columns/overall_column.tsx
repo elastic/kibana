@@ -11,7 +11,7 @@ import {
   MathIndexPatternColumn,
   FormulaIndexPatternColumn,
   OverallSumIndexPatternColumn,
-} from '../../../../../../../lens/public';
+} from '@kbn/lens-plugin/public';
 import { RECORDS_FIELD } from '../constants';
 
 export function getDistributionInPercentageColumn({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpResources, IBasePath, Logger } from 'src/core/server';
+import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
 
 import { ENTER_SPACE_PATH } from '../../../common';
 import { wrapError } from '../../lib/errors';

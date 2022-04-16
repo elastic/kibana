@@ -9,7 +9,7 @@
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { CustomHostSettings } from '../../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';

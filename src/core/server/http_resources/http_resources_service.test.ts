@@ -17,7 +17,7 @@ import { httpServerMock } from '../http/http_server.mocks';
 import { renderingMock } from '../rendering/rendering_service.mock';
 import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
 import { httpResourcesMock } from './http_resources_service.mock';
-import { HttpResources } from 'kibana/server';
+import { HttpResources } from '..';
 
 const coreContext = mockCoreContext.create();
 

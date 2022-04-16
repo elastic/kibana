@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
+import { CoreStart } from '@kbn/core/public';
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
 import { initTlsLegacyAlertType } from './tls_legacy';

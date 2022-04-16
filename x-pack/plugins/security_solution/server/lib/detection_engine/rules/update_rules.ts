@@ -7,9 +7,9 @@
 
 /* eslint-disable complexity */
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { PartialRule } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { PartialRule } from '../../../../../alerting/server';
 
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';

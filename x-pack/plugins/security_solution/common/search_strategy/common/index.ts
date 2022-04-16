@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IEsSearchResponse } from '../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 export type {
   Inspect,
   SortField,
@@ -13,8 +13,8 @@ export type {
   DocValueFields,
   CursorType,
   TotalValue,
-} from '../../../../timelines/common';
-export { Direction } from '../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
+export { Direction } from '@kbn/timelines-plugin/common';
 
 export type Maybe<T> = T | null;
 

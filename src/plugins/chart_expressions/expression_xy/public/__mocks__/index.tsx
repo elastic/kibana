@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { DataLayerConfigResult, LensMultiTable, XYArgs } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { mockPaletteOutput, sampleArgs } from '../../common/__mocks__';

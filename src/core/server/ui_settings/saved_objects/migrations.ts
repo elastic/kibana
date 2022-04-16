@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../..';
 
 export const migrations = {
   '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({

@@ -12,9 +12,8 @@ import { useValues, useActions } from 'kea';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { LogRetentionLogic, LogRetentionMessage, LogRetentionOptions } from '..';
 import { AppLogic } from '../../../app_logic';
-
-import { LogRetentionLogic, LogRetentionMessage, LogRetentionOptions } from '../index';
 
 interface Props {
   type: LogRetentionOptions;

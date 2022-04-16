@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview } from '../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { ScheduleUnit } from '../../../common/runtime_types';
 import { SyntheticsProviders } from '../../components/fleet_package/contexts';
 import { Loader } from '../../components/monitor_management/loader/loader';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NotificationsStart, CoreStart, ThemeServiceStart } from 'src/core/public';
-import { createGetterSetter } from '../../kibana_utils/public';
+import { NotificationsStart, CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { IndexPatternsContract } from './data_views';
 import { DataPublicPluginStart } from './types';
 

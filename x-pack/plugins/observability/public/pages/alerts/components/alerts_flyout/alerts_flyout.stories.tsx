@@ -7,7 +7,7 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import React, { ComponentType } from 'react';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { PluginContext, PluginContextValue } from '../../../../context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 import { apmAlertResponseExample } from './example_data';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import { HttpSetup } from '@kbn/core/public';
+import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { getExecuteConnectorUrl } from '../../../../common/utils';
 import {
   ConnectorExecutorResult,

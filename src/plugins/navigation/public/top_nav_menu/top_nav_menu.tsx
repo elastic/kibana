@@ -10,10 +10,10 @@ import React, { ReactElement } from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { MountPoint } from '../../../../core/public';
-import { MountPointPortal } from '../../../kibana_react/public';
-import { UnifiedSearchPublicPluginStart } from '../../../unified_search/public';
-import { StatefulSearchBarProps, SearchBarProps } from '../../../unified_search/public';
+import { MountPoint } from '@kbn/core/public';
+import { MountPointPortal } from '@kbn/kibana-react-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { StatefulSearchBarProps, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 

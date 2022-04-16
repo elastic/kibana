@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
-import { IUiSettingsClient } from 'kibana/public';
-import type { EmbeddableFactory } from 'src/plugins/embeddable/public';
-import type { Datatable } from 'src/plugins/expressions/public';
-import type { FormatFactory } from 'src/plugins/field_formats/common';
+import { IUiSettingsClient } from '@kbn/core/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,

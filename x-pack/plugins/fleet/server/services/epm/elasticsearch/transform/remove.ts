@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';

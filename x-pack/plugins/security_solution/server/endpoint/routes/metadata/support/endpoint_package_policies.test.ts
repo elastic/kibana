@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
-import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
-import { PackagePolicy } from '../../../../../../fleet/common/types/models';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { getAllEndpointPackagePolicies } from './endpoint_package_policies';
 
 describe('endpoint_package_policies', () => {

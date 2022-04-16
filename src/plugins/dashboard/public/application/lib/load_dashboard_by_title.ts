@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import { DashboardSavedObject } from '../..';
-import { SavedObjectsClientContract } from '../../../../../core/public';
 
 export async function attemptLoadDashboardByTitle(
   title: string,

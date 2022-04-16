@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/server';
+import { IUiSettingsClient } from '@kbn/core/server';
 import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';

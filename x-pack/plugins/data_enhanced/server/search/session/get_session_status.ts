@@ -6,10 +6,7 @@
  */
 
 import moment from 'moment';
-import {
-  SearchSessionSavedObjectAttributes,
-  SearchSessionStatus,
-} from '../../../../../../src/plugins/data/common/';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '@kbn/data-plugin/common';
 import { SearchSessionsConfig, SearchStatus } from './types';
 
 export function getSessionStatus(

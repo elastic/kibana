@@ -11,10 +11,10 @@ import {
   Logger,
   SavedObjectsClientContract,
   KibanaRequest,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { LicensingPluginSetup } from '../../../../licensing/server';
-import { SecurityPluginStart } from '../../../../security/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import { ReindexOperation, ReindexStatus } from '../../../common/types';
 

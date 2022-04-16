@@ -13,15 +13,15 @@ import {
   KibanaRequest,
   CoreStart,
   IContextProvider,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import { PluginStartContract as AlertingStart } from '../../alerting/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginStart } from '../../spaces/server';
+import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
-} from '../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
 
 import { RuleRegistryPluginConfig } from './config';
 import { IRuleDataService, RuleDataService } from './rule_data_plugin_service';

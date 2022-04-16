@@ -10,13 +10,13 @@ import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID } from '@kbn/rule-data-utils';
 
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
-import { listMock } from '../../../../../lists/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
 moment.suppressDeprecationWarnings = true;
 

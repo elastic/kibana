@@ -12,12 +12,12 @@ import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
-import { wrapWithTheme } from '../../../kibana_react/public';
-import { ManagementAppMountParams } from '../../../management/public';
+import { CoreSetup } from '@kbn/core/public';
+import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
-import { getAllowedTypes } from './../lib';
+import { getAllowedTypes } from '../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;

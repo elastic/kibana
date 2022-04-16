@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { sortBy, take } from 'lodash';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { getNodeName } from '../../../common/connections';
-import { kqlQuery } from '../../../../observability/server';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Setup } from '../../lib/helpers/setup_request';

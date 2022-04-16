@@ -10,8 +10,8 @@ import type {
   SavedObjectMigrationMap,
   SavedObjectsServiceSetup,
   SavedObjectsType,
-} from 'kibana/server';
-import type { LocatorData } from 'src/plugins/share/common/url_service';
+} from '@kbn/core/server';
+import type { LocatorData } from '../../../common/url_service';
 import type { ServerUrlService } from '..';
 
 export const registerUrlServiceSavedObjectType = (

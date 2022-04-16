@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';

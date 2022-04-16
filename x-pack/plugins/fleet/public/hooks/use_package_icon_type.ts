@@ -14,7 +14,7 @@ import type { PackageInfo, PackageListItem } from '../types';
 // Import the specific hook to avoid a circular dependency in Babel
 import { useLinks as useEPMLinks } from '../applications/integrations/hooks/use_links';
 
-import { sendGetPackageInfoByKey } from './index';
+import { sendGetPackageInfoByKey } from '.';
 
 type Package = PackageInfo | PackageListItem;
 

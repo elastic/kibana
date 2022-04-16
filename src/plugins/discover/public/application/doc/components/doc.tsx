@@ -9,7 +9,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../utils/use_es_doc_search';

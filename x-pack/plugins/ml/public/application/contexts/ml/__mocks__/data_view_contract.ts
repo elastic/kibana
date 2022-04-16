@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewsContract } from '../../../../../../../../src/plugins/data_views/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 export const dataViewsContractMock = new (class {
   fieldFormats = [];

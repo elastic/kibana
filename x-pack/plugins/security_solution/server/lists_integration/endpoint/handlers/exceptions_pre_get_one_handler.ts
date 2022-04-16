@@ -6,8 +6,8 @@
  */
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionsListPreGetOneItemServerExtension } from '@kbn/lists-plugin/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExceptionsListPreGetOneItemServerExtension } from '../../../../../lists/server';
 import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,

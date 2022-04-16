@@ -16,12 +16,12 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 import { MonitorStatusTranslations } from '../../../common/translations';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
-import { ObservabilityRuleTypeModel } from '../../../../observability/public';
-import { ValidationResult } from '../../../../triggers_actions_ui/public';
 
 const { defaultActionMessage, description } = MonitorStatusTranslations;
 

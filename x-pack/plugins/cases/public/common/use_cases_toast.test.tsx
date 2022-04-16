@@ -6,15 +6,15 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useToasts } from '../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../common/mock';
+import { useToasts } from './lib/kibana';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from './mock';
 import { CaseToastSuccessContent, useCasesToast } from './use_cases_toast';
 import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { SupportedCaseAttachment } from '../types';
 
-jest.mock('../common/lib/kibana');
+jest.mock('./lib/kibana');
 
 const useToastsMock = useToasts as jest.Mock;
 

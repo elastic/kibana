@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';

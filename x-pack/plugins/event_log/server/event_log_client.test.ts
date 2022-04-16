@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { EventLogClient } from './event_log_client';
 import { EsContext } from './es';
 import { contextMock } from './es/context.mock';

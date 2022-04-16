@@ -25,10 +25,10 @@ import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
-import type { DataViewField, DataView } from '../../../../../../data_views/public';
 import { getFieldTypeName } from './lib/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
 

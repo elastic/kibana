@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,

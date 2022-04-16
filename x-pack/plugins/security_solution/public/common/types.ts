@@ -6,9 +6,9 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ResponseErrorAttributes } from 'kibana/server';
+import { ResponseErrorAttributes } from '@kbn/core/server';
 import type { DataViewBase } from '@kbn/es-query';
-import { FieldSpec } from '../../../../../src/plugins/data_views/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 export interface ServerApiError {
   statusCode: number;

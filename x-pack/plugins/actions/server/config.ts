@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 
 export enum AllowedHosts {
   Any = '*',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory } from '../../../../../../src/core/server';
+import { KibanaResponseFactory } from '@kbn/core/server';
 import { ErrorThatHandlesItsOwnResponse } from './types';
 
 export type RuleTypeDisabledReason =

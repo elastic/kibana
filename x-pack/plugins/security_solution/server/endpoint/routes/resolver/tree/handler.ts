@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { validateTree } from '../../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';

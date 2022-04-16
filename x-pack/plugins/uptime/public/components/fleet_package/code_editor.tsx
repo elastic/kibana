@@ -9,8 +9,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { EuiPanel } from '@elastic/eui';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
-import { CodeEditor as MonacoCodeEditor } from '../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { CodeEditor as MonacoCodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { MonacoEditorLangId } from './types';
 

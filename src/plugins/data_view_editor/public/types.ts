@@ -13,11 +13,11 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { DataView, DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {

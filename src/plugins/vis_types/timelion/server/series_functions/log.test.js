@@ -10,12 +10,12 @@ import fn from './log';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import invoke from './helpers/invoke_series_fn';
 
 describe('log.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list.js')();
+    seriesList = require('./fixtures/series_list')();
   });
 
   it('should return the log10 value of every value', () => {

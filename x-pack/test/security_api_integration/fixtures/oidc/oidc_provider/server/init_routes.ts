@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '../../../../../../../src/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { createTokens } from '../../oidc_tools';
 
 export function initRoutes(router: IRouter) {

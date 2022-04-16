@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'src/core/server';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../../../../src/plugins/data_views/common';
+import { SavedObjectReference } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { LogViewAttributes } from '../../../../common/log_views';
 import {
   SavedObjectAttributesWithReferences,

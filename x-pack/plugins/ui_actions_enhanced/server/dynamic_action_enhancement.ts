@@ -6,8 +6,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { EnhancementRegistryDefinition } from '../../../../src/plugins/embeddable/server';
-import { SavedObjectReference } from '../../../../src/core/types';
+import { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import { SavedObjectReference } from '@kbn/core/types';
 import { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
 import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
 import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';

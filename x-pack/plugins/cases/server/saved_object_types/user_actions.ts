@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
 import { userActionsMigrations } from './migrations';
 

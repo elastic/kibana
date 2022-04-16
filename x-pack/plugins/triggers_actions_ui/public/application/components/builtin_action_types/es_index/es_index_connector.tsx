@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { EsIndexActionConnector } from '.././types';
+import { EsIndexActionConnector } from '../types';
 import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import { firstFieldOption, getFields, getIndexOptions } from '../../../../common/index_controls';
 import { useKibana } from '../../../../common/lib/kibana';

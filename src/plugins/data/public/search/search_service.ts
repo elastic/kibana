@@ -12,9 +12,11 @@ import {
   CoreStart,
   PluginInitializerContext,
   StartServicesAccessor,
-} from 'src/core/public';
+} from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
@@ -50,9 +52,7 @@ import { AggsService, AggsStartDependencies } from './aggs';
 import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { getEsaggs, getEsdsl, getEql } from './expressions';
-import { ExpressionsSetup } from '../../../expressions/public';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
 import {

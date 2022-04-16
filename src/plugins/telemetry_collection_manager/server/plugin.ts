@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -17,7 +17,7 @@ import type {
   SavedObjectsServiceStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type {
   TelemetryCollectionManagerPluginSetup,

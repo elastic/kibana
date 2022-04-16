@@ -7,7 +7,7 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { ControlGroupInput, getDefaultControlGroupInput } from '../../../controls/common';
+import { ControlGroupInput, getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { RawControlGroupAttributes } from '../types';
 
 export const getDefaultDashboardControlGroupInput = getDefaultControlGroupInput;

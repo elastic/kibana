@@ -8,7 +8,7 @@
 import { EuiModal } from '@elastic/eui';
 import React from 'react';
 
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../../store/timeline/model';
 
 import * as i18n from '../translations';
 import { ActionTimelineToShow } from '../types';

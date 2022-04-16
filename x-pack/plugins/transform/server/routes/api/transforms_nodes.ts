@@ -12,7 +12,7 @@ import { isPopulatedObject } from '../../../common/shared_imports';
 
 import { RouteDependencies } from '../../types';
 
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 import { wrapError, wrapEsError } from './error_utils';
 

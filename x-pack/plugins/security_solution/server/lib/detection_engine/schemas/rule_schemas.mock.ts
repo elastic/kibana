@@ -18,7 +18,7 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from './rule_schemas';
-import { SanitizedRuleConfig } from '../../../../../alerting/common';
+import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../signals/__mocks__/es_results';
 
 const getBaseRuleParams = (): BaseRuleParams => {

@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, IToasts } from 'kibana/public';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import { ActionConnector } from '../../../../types';
 import { Issue } from './types';
 import { getIssue } from './api';

@@ -9,7 +9,7 @@ import { ExportRulesDetails } from './export_rules_details_schema';
 import {
   ExportExceptionDetailsMock,
   getExceptionExportDetailsMock,
-} from '../../../../../lists/common/schemas/response/exception_export_details_schema.mock';
+} from '@kbn/lists-plugin/common/schemas/response/exception_export_details_schema.mock';
 
 interface RuleDetailsMock {
   totalCount?: number;

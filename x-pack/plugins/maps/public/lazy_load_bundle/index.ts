@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndexPatternsContract } from 'src/plugins/data/public';
-import { AppMountParameters } from 'kibana/public';
-import { IContainer } from '../../../../../src/plugins/embeddable/public';
+import { IndexPatternsContract } from '@kbn/data-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { IContainer } from '@kbn/embeddable-plugin/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import type {
   MapEmbeddableConfig,

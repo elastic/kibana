@@ -7,12 +7,12 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useContext, useEffect } from 'react';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { selectPingList } from '../../../state/selectors';
 import { GetPingsParams, Ping } from '../../../../common/runtime_types/ping';
 import { getPings as getPingsAction } from '../../../state/actions';
 import { useGetUrlParams, useMonitorId } from '../../../hooks';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
-import { useFetcher } from '../../../../../observability/public';
 import { fetchJourneysFailedSteps } from '../../../state/api/journey';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { MONITOR_TYPES } from '../../../../common/constants';

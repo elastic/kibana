@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AcknowledgeResponse } from './index';
+import { AcknowledgeResponse } from '.';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import {

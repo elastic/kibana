@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./log_query_and_deprecation.ts', () => ({
+jest.mock('./log_query_and_deprecation', () => ({
   __esModule: true,
   instrumentEsQueryAndDeprecationLogger: jest.fn(),
 }));

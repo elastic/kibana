@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup, UiSettingsParams } from '../../../../src/core/server';
+import { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,

@@ -7,8 +7,8 @@
  */
 
 import type supertest from 'supertest';
-import type { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 import type { Client } from '@elastic/elasticsearch';
+import type { SavedObjectsClientContract, IUiSettingsClient } from '../../..';
 
 import {
   createTestServers,

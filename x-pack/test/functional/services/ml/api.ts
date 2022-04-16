@@ -10,21 +10,21 @@ import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';
-import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
-import { Annotation } from '../../../../plugins/ml/common/types/annotations';
-import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
-import { DataFrameTaskStateType } from '../../../../plugins/ml/common/types/data_frame_analytics';
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/common/constants/data_frame_analytics';
-import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
+import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
+import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
+import { DataFrameTaskStateType } from '@kbn/ml-plugin/common/types/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
+import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-} from '../../../../plugins/ml/common/constants/index_patterns';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
-import { PutTrainedModelConfig } from '../../../../plugins/ml/common/types/trained_models';
+} from '@kbn/ml-plugin/common/constants/index_patterns';
+import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
+import { COMMON_REQUEST_HEADERS } from './common_api';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 

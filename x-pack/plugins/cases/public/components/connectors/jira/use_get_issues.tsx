@@ -7,7 +7,7 @@
 
 import { isEmpty, debounce } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi } from '@kbn/core/public';
 import { ActionConnector } from '../../../../common/api';
 import { getIssues } from './api';
 import { Issues } from './types';

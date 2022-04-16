@@ -15,11 +15,11 @@ import {
 } from '../types';
 import { SavedObjectDecorator } from './decorators';
 
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
-import { createStubIndexPattern } from '../../../../plugins/data/common/stubs';
-import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
-import { DataView } from '../../../data/common';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock, createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { SavedObjectAttributes, SimpleSavedObject } from '@kbn/core/public';
+import { DataView } from '@kbn/data-plugin/common';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 describe('Saved Object', () => {

@@ -7,9 +7,9 @@
 
 import { queryByLabelText } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
@@ -22,7 +22,7 @@ import {
   renderWithTheme,
 } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
-import { TransactionOverview } from './';
+import { TransactionOverview } from '.';
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },

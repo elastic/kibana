@@ -7,7 +7,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import type { PersistedState } from 'src/plugins/visualizations/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { TableVisUiState } from '../../types';
 import { useUiState } from './use_ui_state';
 

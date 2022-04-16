@@ -8,8 +8,8 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { OverlayStart, ThemeServiceStart } from 'src/core/public';
-import { DataViewField, DataView } from '../../../../../../plugins/data_views/public';
+import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
 

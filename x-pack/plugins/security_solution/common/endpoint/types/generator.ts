@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStream } from './index';
+import { DataStream } from '.';
 
 /**
  * The configuration options for generating an event.

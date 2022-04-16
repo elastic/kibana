@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import {
   PieVisConfig,
   EmptySizeRatios,
@@ -14,8 +14,8 @@ import {
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';
 import { PARTITION_LABELS_VALUE } from '../constants';
 

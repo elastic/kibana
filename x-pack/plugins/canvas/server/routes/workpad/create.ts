@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD, TEMPLATE_TYPE } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
 import { WorkpadSchema } from './workpad_schema';

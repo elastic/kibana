@@ -7,12 +7,12 @@
  */
 
 import expect from '@kbn/expect';
-import { ExecutionContext } from 'src/plugins/expressions';
+import { ExecutionContext } from '@kbn/expressions-plugin';
 import {
   functionWrapper,
   getElasticLogo,
   getElasticOutline,
-} from '../../../presentation_util/common/lib';
+} from '@kbn/presentation-util-plugin/common/lib';
 import { imageFunction as image } from './image_function';
 
 describe('image', () => {

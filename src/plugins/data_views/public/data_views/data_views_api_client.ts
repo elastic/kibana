@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient, GetFieldsOptionsTimePattern } from '../../common';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type {
   TrainedModelsNodesUrlState,
   TrainedModelsUrlState,
 } from '../../../common/types/locator';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { AppPageState, ListingPageUrlState } from '../../../common/types/common';
-import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function formatTrainedModelsManagementUrl(
   appBasePath: string,

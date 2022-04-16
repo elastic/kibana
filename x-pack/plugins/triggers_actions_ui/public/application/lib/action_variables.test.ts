@@ -7,7 +7,7 @@
 
 import { RuleType, ActionVariables } from '../../types';
 import { transformActionVariables } from './action_variables';
-import { ALERTS_FEATURE_ID } from '../../../../alerting/common';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 beforeEach(() => jest.resetAllMocks());
 

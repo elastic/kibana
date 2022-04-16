@@ -16,7 +16,7 @@ import {
 } from '../mocks/resolver_tree';
 import { ResolverNode } from '../../../common/endpoint/types';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
-import { endpointSourceSchema } from './../mocks/tree_schema';
+import { endpointSourceSchema } from '../mocks/tree_schema';
 
 describe('resolver selectors', () => {
   const actions: ResolverAction[] = [];

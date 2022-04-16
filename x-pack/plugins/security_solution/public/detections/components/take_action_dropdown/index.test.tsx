@@ -17,7 +17,7 @@ import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 

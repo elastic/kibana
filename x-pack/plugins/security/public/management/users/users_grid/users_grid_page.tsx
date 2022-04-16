@@ -20,12 +20,12 @@ import {
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
+import type { ApplicationStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ApplicationStart, NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { Role, User } from '../../../../common/model';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';

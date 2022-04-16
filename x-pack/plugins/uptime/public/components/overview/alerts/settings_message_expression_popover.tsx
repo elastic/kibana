@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface SettingsMessageExpressionPopoverProps {
   'aria-label': string;

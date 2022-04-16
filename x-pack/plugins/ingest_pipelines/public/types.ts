@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ManagementSetup } from 'src/plugins/management/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { SharePluginStart, SharePluginSetup } from 'src/plugins/share/public';
-import type { FileUploadPluginStart } from '../../file_upload/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 
 export interface SetupDependencies {
   management: ManagementSetup;

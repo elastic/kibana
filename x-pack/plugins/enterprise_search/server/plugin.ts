@@ -14,13 +14,13 @@ import {
   IRouter,
   KibanaRequest,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
-import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { InfraPluginSetup } from '../../infra/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/core/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
@@ -53,7 +53,7 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
-import { ConfigType } from './';
+import { ConfigType } from '.';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;

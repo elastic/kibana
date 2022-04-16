@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   exportRulesQuerySchema,
   ExportRulesQuerySchemaDecoded,

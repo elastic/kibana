@@ -8,11 +8,11 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import type { DataView } from 'src/plugins/data_views/public';
-import { SortDirection } from 'src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { DataPublicPluginStart, Query } from '../../../../../data/public';
+import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;

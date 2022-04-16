@@ -8,19 +8,19 @@
 import { Request } from '@hapi/hapi';
 import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { KibanaRequest } from '../../../../src/core/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   loggingSystemMock,
-} from '../../../../src/core/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { AuthenticatedUser } from '../../security/common/model';
-import { securityMock } from '../../security/server/mocks';
-import { PluginStartContract as ActionsStartContract } from '../../actions/server';
-import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
-import { eventLogMock } from '../../event_log/server/mocks';
+} from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { PluginStartContract as ActionsStartContract } from '@kbn/actions-plugin/server';
+import { actionsMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
 import { AlertingAuthorization } from './authorization';

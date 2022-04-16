@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/dev-utils';
 import type SuperTest from 'supertest';
 
-import { SECURITY_TELEMETRY_URL } from '../../../plugins/security_solution/common/constants';
+import { SECURITY_TELEMETRY_URL } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Gets the stats from the stats endpoint within specifically the security_solutions application.

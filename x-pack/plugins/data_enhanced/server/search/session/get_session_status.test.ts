@@ -7,7 +7,7 @@
 
 import { SearchSessionsConfig, SearchStatus } from './types';
 import { getSessionStatus } from './get_session_status';
-import { SearchSessionStatus } from '../../../../../../src/plugins/data/common';
+import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import moment from 'moment';
 
 describe('getSessionStatus', () => {

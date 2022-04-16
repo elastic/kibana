@@ -9,9 +9,9 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { SpacesManager } from '../spaces_manager';
 
 export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {

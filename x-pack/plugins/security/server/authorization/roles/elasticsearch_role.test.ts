@@ -6,7 +6,8 @@
  */
 import { omit, pick } from 'lodash';
 
-import { KibanaFeature } from '../../../../features/server';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+
 import { transformElasticsearchRoleToRole } from './elasticsearch_role';
 import type { ElasticsearchRole } from './elasticsearch_role';
 

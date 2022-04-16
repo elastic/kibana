@@ -9,15 +9,15 @@
 
 import React from 'react';
 
-import { PublicAppInfo } from 'kibana/public';
+import { PublicAppInfo } from '@kbn/core/public';
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { StartServices } from '../../../types';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { securityMock } from '../../../../../security/public/mocks';
-import { spacesPluginMock } from '../../../../../spaces/public/mocks';
-import { triggersActionsUiMock } from '../../../../../triggers_actions_ui/public/mocks';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
 import { connectorsMock } from '../../mock/connectors';

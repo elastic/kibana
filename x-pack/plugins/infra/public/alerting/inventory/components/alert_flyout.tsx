@@ -11,7 +11,7 @@ import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
-import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
+import { useAlertPrefillContext } from '../../use_alert_prefill';
 
 interface Props {
   visible?: boolean;

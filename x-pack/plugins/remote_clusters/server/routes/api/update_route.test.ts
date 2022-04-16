@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RequestHandler } from 'src/core/server';
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
+import { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
-import { httpServerMock, httpServiceMock, coreMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
 
-import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 import { API_BASE_PATH } from '../../../common/constants';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'src/core/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { EditorFrameSetup } from '../types';
-import type { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;

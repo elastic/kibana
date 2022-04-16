@@ -9,7 +9,7 @@ import { difference, without } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { ToastsStart } from 'kibana/public';
+import { ToastsStart } from '@kbn/core/public';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { mlJobService } from '../../services/job_service';

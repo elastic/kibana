@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogAlertTests({ getService }: FtrProviderContext) {

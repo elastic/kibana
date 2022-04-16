@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumn } from '../../../expressions/common';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '../expression_functions';
 
 const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>

@@ -8,8 +8,8 @@
 
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
-import { coreMock, httpServiceMock } from '../../../core/server/mocks';
-import { customIntegrationsMock } from '../../custom_integrations/server/mocks';
+import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 describe('HomeServerPlugin', () => {
   let homeServerPluginSetupDependenciesMock: HomeServerPluginSetupDependencies;

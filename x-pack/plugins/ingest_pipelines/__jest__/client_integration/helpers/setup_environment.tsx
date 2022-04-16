@@ -7,21 +7,21 @@
 
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 
-import { ApplicationStart } from 'src/core/public';
-import { MockUrlService } from 'src/plugins/share/common/mocks';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { sharePluginMock } from '../../../../../../src/plugins/share/public/mocks';
+import { ApplicationStart } from '@kbn/core/public';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   notificationServiceMock,
   docLinksServiceMock,
   scopedHistoryMock,
   uiSettingsServiceMock,
   applicationServiceMock,
-} from '../../../../../../src/core/public/mocks';
+} from '@kbn/core/public/mocks';
 
-import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import {
   breadcrumbService,

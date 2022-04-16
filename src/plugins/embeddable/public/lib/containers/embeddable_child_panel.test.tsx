@@ -16,7 +16,7 @@ import {
   ContactCardEmbeddableOutput,
   ContactCardEmbeddable,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { inspectorPluginMock } from '../../../../inspector/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { mount } from 'enzyme';
 import { embeddablePluginMock, createEmbeddablePanelMock } from '../../mocks';
 

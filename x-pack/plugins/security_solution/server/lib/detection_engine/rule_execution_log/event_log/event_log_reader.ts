@@ -7,7 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { IEventLogClient } from '../../../../../../event_log/server';
+import { IEventLogClient } from '@kbn/event-log-plugin/server';
 
 import {
   RuleExecutionEvent,

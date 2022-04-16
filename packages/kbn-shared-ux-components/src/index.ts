@@ -10,7 +10,7 @@ import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 export const LazyToolbarButton = React.lazy(() =>
-  import('./toolbar/index').then(({ ToolbarButton }) => ({
+  import('./toolbar').then(({ ToolbarButton }) => ({
     default: ToolbarButton,
   }))
 );
@@ -68,7 +68,7 @@ export const NoDataViewsComponent = withSuspense(LazyNoDataViewsComponent);
  * `withSuspense` HOC to load this component.
  */
 export const LazyIconButtonGroup = React.lazy(() =>
-  import('./toolbar/index').then(({ IconButtonGroup }) => ({
+  import('./toolbar').then(({ IconButtonGroup }) => ({
     default: IconButtonGroup,
   }))
 );

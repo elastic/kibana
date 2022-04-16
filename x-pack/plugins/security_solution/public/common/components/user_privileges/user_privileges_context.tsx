@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useEffect, useState } from 'react';
-import { Capabilities } from '../../../../../../../src/core/types';
+import { Capabilities } from '@kbn/core/types';
 import { SERVER_APP_ID } from '../../../../common/constants';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';

@@ -17,7 +17,7 @@ import {
   UiSettingsParams,
   UserProvidedValues,
 } from '../../server/types';
-import { AppCategory } from '../';
+import { AppCategory } from '..';
 
 export interface InjectedPluginMetadata {
   id: PluginName;

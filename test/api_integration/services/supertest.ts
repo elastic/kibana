@@ -8,10 +8,10 @@
 
 import { systemIndicesSuperuser } from '@kbn/test';
 
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { format as formatUrl } from 'url';
 
 import supertest from 'supertest';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');

@@ -12,8 +12,8 @@ import {
   PluginInitializerContext,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,

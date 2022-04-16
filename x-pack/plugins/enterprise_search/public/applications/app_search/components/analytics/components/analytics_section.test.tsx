@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiIcon } from '@elastic/eui';
 
-import { AnalyticsSection } from './';
+import { AnalyticsSection } from '.';
 
 describe('AnalyticsSection', () => {
   it('renders', () => {

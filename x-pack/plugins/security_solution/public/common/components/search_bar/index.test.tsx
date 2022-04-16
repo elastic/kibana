@@ -10,8 +10,8 @@ import { render, fireEvent } from '@testing-library/react';
 import { InputsModelId } from '../../store/inputs/constants';
 import { SearchBarComponent } from '.';
 import { TestProviders } from '../../mock';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);
 jest.mock('../../lib/kibana', () => {

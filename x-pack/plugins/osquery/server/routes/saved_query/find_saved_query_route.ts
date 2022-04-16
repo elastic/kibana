@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { convertECSMappingToObject } from '../utils';
 

@@ -15,7 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import { nodeBuilder } from '@kbn/es-query';
 

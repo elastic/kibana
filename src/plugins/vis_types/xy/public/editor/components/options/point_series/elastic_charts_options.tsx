@@ -11,11 +11,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
-import {
-  SelectOption,
-  SwitchOption,
-  PalettePicker,
-} from '../../../../../../../vis_default_editor/public';
+import { SelectOption, SwitchOption, PalettePicker } from '@kbn/vis-default-editor-plugin/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';

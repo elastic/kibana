@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { VisTypeDefinition } from '../../../../visualizations/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { ChartType } from '../../common';
 
 import { VisParams } from './param';

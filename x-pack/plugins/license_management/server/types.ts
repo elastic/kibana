@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, IRouter } from 'kibana/server';
+import { IScopedClusterClient, IRouter } from '@kbn/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginStart } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { handleEsError } from './shared_imports';
 
 export interface SetupDependencies {

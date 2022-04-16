@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { CollectorOptions } from './types';
 import { Collector } from './collector';
 

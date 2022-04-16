@@ -7,7 +7,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
-import type { SearchResponse } from 'kibana/server';
+import type { SearchResponse } from '@kbn/core/server';
 import { overwrite } from '../../helpers';
 import type { Annotation } from '../../../../../common/types';
 

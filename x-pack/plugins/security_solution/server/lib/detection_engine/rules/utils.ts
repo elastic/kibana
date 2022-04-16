@@ -28,7 +28,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { RuleAction, RuleNotifyWhenType, SanitizedRule } from '../../../../../alerting/common';
+import { RuleAction, RuleNotifyWhenType, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
@@ -61,7 +62,6 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
-import { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleActions } from '../rule_actions/legacy_types';
 import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';

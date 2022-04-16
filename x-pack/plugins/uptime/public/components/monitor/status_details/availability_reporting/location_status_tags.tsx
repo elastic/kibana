@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { UptimeThemeContext } from '../../../../contexts';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../../common/constants';
-import { AvailabilityReporting } from '../index';
+import { AvailabilityReporting } from '..';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
 // Set height so that it remains within panel, enough height to display 7 locations tags

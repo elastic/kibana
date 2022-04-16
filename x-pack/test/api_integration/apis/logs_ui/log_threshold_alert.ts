@@ -10,14 +10,14 @@ import sinon from 'sinon';
 import {
   executeAlert,
   executeRatioAlert,
-} from '../../../../plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor';
-import { DATES } from '../metrics_ui/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+} from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import {
   Comparator,
   TimeUnit,
   RatioCriteria,
-} from '../../../../plugins/infra/common/alerting/logs/log_threshold/types';
+} from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
+import { DATES } from '../metrics_ui/constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

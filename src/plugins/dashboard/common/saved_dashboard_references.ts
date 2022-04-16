@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 import semverGt from 'semver/functions/gt';
-import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
+import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 import {
   DashboardContainerControlGroupInput,
   DashboardContainerStateWithType,
   DashboardPanelState,
   RawControlGroupAttributes,
 } from './types';
-import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,

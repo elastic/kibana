@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import {
   useInspectorContext,
   FETCH_STATUS,
-} from '../../../observability/public';
+} from '@kbn/observability-plugin/public';
 import {
   AutoAbortedAPMClient,
   callApmApi,

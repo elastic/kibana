@@ -10,9 +10,9 @@ import { filterEventsAgainstList } from './filter_events_against_list';
 import { buildRuleMessageMock as buildRuleMessage } from '../rule_messages.mock';
 import { mockLogger, repeatedSearchResultsWithSortId } from '../__mocks__/es_results';
 
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { getSearchListItemResponseMock } from '../../../../../../lists/common/schemas/response/search_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 
 const someGuids = Array.from({ length: 13 }).map((x) => uuid.v4());
 

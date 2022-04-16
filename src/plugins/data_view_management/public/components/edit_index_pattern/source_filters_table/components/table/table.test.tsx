@@ -11,7 +11,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Table, TableProps, TableState } from './table';
 import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
-import { DataView } from 'src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const indexPattern = {} as DataView;

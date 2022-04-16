@@ -8,8 +8,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
+import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { IndexPattern } from '../..';
-import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
 type ValidMetaFieldNames = keyof Pick<
   estypes.SearchHit,

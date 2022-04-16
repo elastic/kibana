@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DetectionMetrics } from '../../../plugins/security_solution/server/usage/detections/types';
+import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 
 /**
  * Given a body this will return the detection metrics from it.

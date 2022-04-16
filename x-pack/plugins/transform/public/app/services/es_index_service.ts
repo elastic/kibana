@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup, SavedObjectsClientContract } from 'kibana/public';
+import { HttpSetup, SavedObjectsClientContract } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { API_BASE_PATH } from '../../../common/constants';
-import { DataView } from '../../../../../../src/plugins/data_views/public';
 
 export class IndexService {
   async canDeleteIndex(http: HttpSetup) {

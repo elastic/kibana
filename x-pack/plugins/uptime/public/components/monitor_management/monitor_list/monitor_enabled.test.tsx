@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConfigKey, DataStream, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { FETCH_STATUS } from '../../../../../observability/public';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { spyOnUseFetcher } from '../../../lib/helper/spy_use_fetcher';
 import { MonitorEnabled } from './monitor_enabled';
 

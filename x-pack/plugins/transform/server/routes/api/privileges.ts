@@ -9,7 +9,7 @@ import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/co
 import { Privileges } from '../../../common/types/privileges';
 
 import { RouteDependencies } from '../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerPrivilegesRoute({ router, license }: RouteDependencies) {
   router.get(

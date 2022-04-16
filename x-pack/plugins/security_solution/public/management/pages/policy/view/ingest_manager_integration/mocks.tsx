@@ -10,6 +10,9 @@ import { Action, Reducer } from 'redux';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactRender, RenderOptions } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { PackageInfo } from '@kbn/fleet-plugin/common/types';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -27,9 +30,6 @@ import { appReducer } from '../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import { RenderContextProviders } from './with_security_context/render_context_providers';
 import { AppAction } from '../../../../../common/store/actions';
-import type { PackageInfo } from '../../../../../../../fleet/common/types';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 // Defined a private custom reducer that reacts to an action that enables us to update the
 // store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,

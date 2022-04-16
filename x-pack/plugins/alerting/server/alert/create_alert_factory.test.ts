@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory } from './create_alert_factory';
 import { getRecoveredAlerts } from '../lib';

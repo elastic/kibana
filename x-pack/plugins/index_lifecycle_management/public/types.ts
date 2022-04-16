@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { DocLinksStart } from 'src/core/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { IndexManagementPluginSetup } from '../../index_management/public';
-import { SharePluginSetup } from '../../../../src/plugins/share/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { DocLinksStart } from '@kbn/core/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 
-import { CloudSetup } from '../../cloud/public';
-import { LicensingPluginStart, ILicense } from '../../licensing/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
 
 import { BreadcrumbService } from './application/services/breadcrumbs';
 

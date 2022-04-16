@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '../../../../../task_manager/server/mocks';
-import { TaskStatus } from '../../../../../task_manager/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { createMockEndpointAppContext } from '../../mocks';
 
@@ -17,7 +17,7 @@ import { buildManifestManagerMock } from '../../services/artifacts/manifest_mana
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { getMockArtifacts } from './mocks';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
-import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('task', () => {
   const MOCK_TASK_INSTANCE = {

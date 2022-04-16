@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Trigger } from '../../../ui_actions/public';
+import { Trigger } from '@kbn/ui-actions-plugin/public';
 
 export const VISUALIZE_EDITOR_TRIGGER = 'VISUALIZE_EDITOR_TRIGGER';
 export const visualizeEditorTrigger: Trigger = {

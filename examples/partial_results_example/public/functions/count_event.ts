@@ -8,7 +8,7 @@
 
 import { Observable, fromEvent } from 'rxjs';
 import { scan, startWith } from 'rxjs/operators';
-import type { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 
 export interface CountEventArguments {
   event: string;

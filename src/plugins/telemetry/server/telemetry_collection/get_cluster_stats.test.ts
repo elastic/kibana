@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getClusterStats } from './get_cluster_stats';
 import { TIMEOUT } from './constants';
 

@@ -8,10 +8,10 @@
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
-import type { Unmount } from 'src/plugins/management/public/types';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
+import type { Unmount } from '@kbn/management-plugin/public/types';
 
-import { featuresPluginMock } from '../../../../features/public/mocks';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { rolesManagementApp } from './roles_management_app';
 

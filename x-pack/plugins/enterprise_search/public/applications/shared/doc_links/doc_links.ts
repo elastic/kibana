@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 class DocLinks {
   public appSearchApis: string;

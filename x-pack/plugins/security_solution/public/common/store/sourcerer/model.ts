@@ -12,7 +12,7 @@ import {
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_FIELDS,
-} from '../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
 import { SecuritySolutionDataViewBase } from '../../types';
 /** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {

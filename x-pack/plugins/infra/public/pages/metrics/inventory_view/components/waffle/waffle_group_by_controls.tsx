@@ -15,9 +15,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
 import { DropdownButton } from '../dropdown_button';

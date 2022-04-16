@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  projectIDs,
-  PresentationLabsService,
-} from '../../../../../src/plugins/presentation_util/public';
+import { projectIDs, PresentationLabsService } from '@kbn/presentation-util-plugin/public';
 
 export interface CanvasLabsService extends PresentationLabsService {
   projectIDs: typeof projectIDs;

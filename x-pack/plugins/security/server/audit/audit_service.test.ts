@@ -12,7 +12,7 @@ import {
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';

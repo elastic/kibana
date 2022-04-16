@@ -6,8 +6,8 @@
  */
 
 import { uniq } from 'lodash';
-import type { SavedObjectsClientContract } from 'src/core/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryAppContext } from './osquery_app_context_services';
 

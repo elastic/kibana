@@ -10,9 +10,9 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { debounce } from 'lodash';
 
-import { IInterpreterRenderHandlers } from '../../../expressions/public';
-import type { PersistedState } from '../../../visualizations/public';
-import { ChartsPluginSetup } from '../../../charts/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { createVislibVisController, VislibVisController } from './vis_controller';

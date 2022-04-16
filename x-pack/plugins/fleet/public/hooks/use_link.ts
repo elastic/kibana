@@ -8,7 +8,7 @@
 import { pagePathGetters, PLUGIN_ID } from '../constants';
 import type { StaticPage, DynamicPage, DynamicPagePathValues } from '../constants';
 
-import { useStartServices } from './';
+import { useStartServices } from '.';
 
 const getSeparatePaths = (
   page: StaticPage | DynamicPage,

@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { ILicense } from '../../../../../licensing/common/types';
+import { CoreStart } from '@kbn/core/public';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
+import {
+  GetAgentStatusResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  UpdatePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import {
   AppLocation,
   Immutable,
@@ -19,12 +25,6 @@ import {
   PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
-import {
-  GetAgentStatusResponse,
-  GetOnePackagePolicyResponse,
-  GetPackagePoliciesResponse,
-  UpdatePackagePolicyResponse,
-} from '../../../../../fleet/common';
 import { ImmutableMiddlewareAPI } from '../../../common/store';
 import { AppAction } from '../../../common/store/actions';
 

@@ -8,8 +8,8 @@
 
 import { Duration } from 'moment';
 
-import type { Dimension, Dimensions } from '../../../../../xy/public';
-import type { DateHistogramParams, HistogramParams } from '../../../../../../visualizations/public';
+import type { Dimension, Dimensions } from '@kbn/vis-type-xy-plugin/public';
+import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
 
 import { getSeries } from './_get_series';
 import { getAspects } from './_get_aspects';

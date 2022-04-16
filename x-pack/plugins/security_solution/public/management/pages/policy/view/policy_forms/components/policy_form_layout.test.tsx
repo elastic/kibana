@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { PolicyFormLayout } from './policy_form_layout';
-import '../../../../../../common/mock/match_media.ts';
+import '../../../../../../common/mock/match_media';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import {
   AppContextTestRender,
@@ -18,7 +18,7 @@ import {
 import { getPolicyDetailPath, getEndpointListPath } from '../../../../../common/routing';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
 import { licenseService } from '../../../../../../common/hooks/use_license';
-import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '../../../../../../../../fleet/common';
+import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
 
 jest.mock('../../../../../../common/hooks/use_license');
 

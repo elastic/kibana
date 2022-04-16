@@ -29,7 +29,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useChartTheme } from '../../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { HistogramItem } from '../../../../../common/correlations/types';

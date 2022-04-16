@@ -7,8 +7,8 @@
 
 /* eslint-disable dot-notation */
 import { TelemetryEventsSender } from './sender';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { URL } from 'url';
 
 describe('TelemetryEventsSender', () => {

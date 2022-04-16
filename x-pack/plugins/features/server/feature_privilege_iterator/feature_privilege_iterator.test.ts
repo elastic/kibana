@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { LicenseType } from '../../../licensing/common/types';
-import { LICENSE_TYPE } from '../../../licensing/server';
-import { KibanaFeature } from '../';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LICENSE_TYPE } from '@kbn/licensing-plugin/server';
+import { KibanaFeature } from '..';
 import { SubFeaturePrivilegeConfig } from '../../common';
 import type { FeaturePrivilegeIteratorOptions } from './feature_privilege_iterator';
 import { featurePrivilegeIterator } from './feature_privilege_iterator';

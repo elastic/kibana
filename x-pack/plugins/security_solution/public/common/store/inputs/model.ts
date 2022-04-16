@@ -7,9 +7,9 @@
 
 import { Dispatch } from 'redux';
 import type { Filter, Query } from '@kbn/es-query';
+import type { SavedQuery } from '@kbn/data-plugin/public';
 import { InputsModelId } from './constants';
 import { CONSTANTS } from '../../components/url_state/constants';
-import type { SavedQuery } from '../../../../../../../src/plugins/data/public';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';

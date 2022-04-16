@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaFeatureConfig } from '../../../../features/public';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
+
 import { getEnabledFeatures } from './feature_utils';
 
 const buildFeatures = () =>

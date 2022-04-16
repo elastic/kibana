@@ -18,7 +18,7 @@ import {
   SavedObjectsClientContract,
   ServiceStatus,
   ServiceStatusLevels,
-} from '../../../../../core/server';
+} from '@kbn/core/server';
 import { CollectorSet } from '../../collector';
 const SNAPSHOT_REGEX = /-snapshot/i;
 

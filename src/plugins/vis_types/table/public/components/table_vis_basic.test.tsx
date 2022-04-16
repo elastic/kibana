@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { TableVisBasic } from './table_vis_basic';
 import { FormattedColumn, TableVisConfig, TableVisUiState } from '../types';
-import { DatatableColumn } from 'src/plugins/expressions';
+import { DatatableColumn } from '@kbn/expressions-plugin';
 import { createTableVisCell } from './table_vis_cell';
 import { createGridColumns } from './table_vis_columns';
 

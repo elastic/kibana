@@ -7,9 +7,9 @@
 
 import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.mocks';
 
-import { coreMock } from '../../../../src/core/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { savedObjectsTaggingFeature } from './features';
 

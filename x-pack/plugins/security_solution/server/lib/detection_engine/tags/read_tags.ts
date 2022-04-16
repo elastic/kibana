@@ -6,8 +6,8 @@
  */
 
 import { has } from 'lodash/fp';
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
-import { RulesClient } from '../../../../../alerting/server';
 import { findRules } from '../rules/find_rules';
 
 export interface TagType {

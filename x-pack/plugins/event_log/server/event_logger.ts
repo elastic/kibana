@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
 
 import { coerce } from 'semver';

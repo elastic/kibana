@@ -19,7 +19,7 @@ import {
   IFieldParamType,
   IndexPatternField,
   KBN_FIELD_TYPES,
-} from '../../../../../plugins/data/public';
+} from '@kbn/data-plugin/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';

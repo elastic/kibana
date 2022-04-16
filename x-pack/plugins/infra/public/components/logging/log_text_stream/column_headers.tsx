@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { transparentize } from 'polished';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   LogEntryColumn,
   LogEntryColumnContent,

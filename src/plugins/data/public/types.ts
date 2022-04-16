@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'src/core/public';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
-import { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { CoreStart } from '@kbn/core/public';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
 import { DatatableUtilitiesService } from '../common';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
-import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
-import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
 
 export interface DataSetupDependencies {

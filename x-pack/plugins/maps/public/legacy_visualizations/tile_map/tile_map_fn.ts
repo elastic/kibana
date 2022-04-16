@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import type { Query, TimeRange } from '../../../../../../src/plugins/data/common';
-import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common/search/expressions/kibana_context_type';
-import type {
-  ExpressionFunctionDefinition,
-  Render,
-} from '../../../../../../src/plugins/expressions/public';
+import type { Query, TimeRange } from '@kbn/data-plugin/common';
+import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common/search/expressions/kibana_context_type';
+import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 import { TILE_MAP_RENDER, TILE_MAP_VIS_TYPE, TileMapVisConfig } from './types';
 
 interface Arguments {

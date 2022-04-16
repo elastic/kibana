@@ -12,7 +12,7 @@ import * as selectors from './selectors';
 import { DataState, GeneratedTreeMetadata } from '../../types';
 import { DataAction } from './action';
 import { generateTreeWithDAL } from '../../data_access_layer/mocks/generator_tree';
-import { endpointSourceSchema, winlogSourceSchema } from './../../mocks/tree_schema';
+import { endpointSourceSchema, winlogSourceSchema } from '../../mocks/tree_schema';
 import { NewResolverTree, ResolverSchema } from '../../../../common/endpoint/types';
 import { ancestorsWithAncestryField, descendantsLimit } from '../../models/resolver_tree';
 

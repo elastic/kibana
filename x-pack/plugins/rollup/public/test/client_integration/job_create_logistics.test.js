@@ -8,8 +8,8 @@
 import { mockHttpRequest, pageHelpers } from './helpers';
 
 import { act } from 'react-dom/test-utils';
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
+import { indexPatterns } from '@kbn/data-plugin/public';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { setHttp, init as initDocumentation } from '../../crud_app/services';
 
 const { setup } = pageHelpers.jobCreate;

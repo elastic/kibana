@@ -9,7 +9,7 @@
 import React, { FunctionComponent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { IAggConfig } from 'src/plugins/data/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 import {
   safeMakeLabel,
   useAvailableOptions,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../../core/server/mocks';
-import { SavedObjectsErrorHelpers } from '../../../../../../core/server';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SAVED_OBJECTS_DAILY_TYPE, SAVED_OBJECTS_TRANSACTIONAL_TYPE } from '../saved_objects_types';
 import { rollDailyData } from './daily';
 

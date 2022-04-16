@@ -9,6 +9,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import {
   TimelineId,
@@ -20,7 +21,6 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;

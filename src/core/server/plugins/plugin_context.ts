@@ -7,7 +7,7 @@
  */
 
 import { shareReplay } from 'rxjs/operators';
-import type { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from '..';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import {

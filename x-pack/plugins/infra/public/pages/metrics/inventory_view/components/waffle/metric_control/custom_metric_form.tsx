@@ -22,13 +22,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
-import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
 
 interface SelectedOption {

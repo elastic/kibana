@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import { mockCasesContract } from '../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../lib/kibana';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToExistingCase } from './use_add_to_existing_case';

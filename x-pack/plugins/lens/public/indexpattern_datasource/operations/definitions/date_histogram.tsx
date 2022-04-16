@@ -23,18 +23,18 @@ import {
   EuiSwitchEvent,
   EuiTextColor,
 } from '@elastic/eui';
-import { updateColumnParam } from '../layer_helpers';
-import { OperationDefinition, ParamEditorProps } from './index';
-import { FieldBasedIndexPatternColumn } from './column_types';
 import {
   AggFunctionsMapping,
   DataPublicPluginStart,
   IndexPatternAggRestrictions,
   search,
   UI_SETTINGS,
-} from '../../../../../../../src/plugins/data/public';
-import { extendedBoundsToAst } from '../../../../../../../src/plugins/data/common';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
+} from '@kbn/data-plugin/public';
+import { extendedBoundsToAst } from '@kbn/data-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { updateColumnParam } from '../layer_helpers';
+import { OperationDefinition, ParamEditorProps } from '.';
+import { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { HelpPopover, HelpPopoverButton } from '../../help_popover';
 import { IndexPatternLayer } from '../../types';

@@ -18,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
 import {
   FILTER_REQUESTS_LABEL,
   FILTER_SCREENREADER_LABEL,
@@ -26,7 +27,6 @@ import {
   FILTER_COLLAPSE_REQUESTS_LABEL,
 } from '../../waterfall/components/translations';
 import { MimeType, FriendlyMimetypeLabels } from './types';
-import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
 
 interface Props {
   query: string;

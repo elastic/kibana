@@ -11,7 +11,7 @@ import {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
   ExecutionContext,
-} from 'src/plugins/expressions/common';
+} from '@kbn/expressions-plugin/common';
 
 /**
  * Takes a function spec and passes in default args,

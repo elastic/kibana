@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 // eslint-disable-next-line no-restricted-imports

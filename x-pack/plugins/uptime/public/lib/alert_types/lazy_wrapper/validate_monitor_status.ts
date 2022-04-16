@@ -7,12 +7,12 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
+import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   AtomicStatusCheckParamsType,
   MonitorAvailabilityType,
   StatusCheckParamsType,
 } from '../../../../common/runtime_types/alerts';
-import { ValidationResult } from '../../../../../triggers_actions_ui/public';
 
 export function validateMonitorStatusParams(ruleParams: any): ValidationResult {
   const errors: Record<string, any> = {};

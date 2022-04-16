@@ -9,7 +9,7 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 import { defaultTableState } from './reducers/table_state';
 
-import { getReducer } from './reducers/';
+import { getReducer } from './reducers';
 
 export function indexManagementStore(services) {
   const toggleNameToVisibleMap = {};

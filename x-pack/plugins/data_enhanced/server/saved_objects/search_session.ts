@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'kibana/server';
-import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
+import { SavedObjectsType } from '@kbn/core/server';
+import { SEARCH_SESSION_TYPE } from '@kbn/data-plugin/common';
 import { searchSessionSavedObjectMigrations } from './search_session_migration';
 
 export const searchSessionSavedObjectType: SavedObjectsType = {

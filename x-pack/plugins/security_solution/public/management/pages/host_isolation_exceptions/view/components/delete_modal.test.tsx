@@ -9,7 +9,7 @@ import { waitFor } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import uuid from 'uuid';
-import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,

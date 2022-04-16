@@ -13,7 +13,7 @@ import {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import type { Datatable, DatatableColumn, DatatableColumnMeta } from 'src/plugins/expressions';
+import type { Datatable, DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin';
 import type { FormatFactory } from '../../../common';
 import type { ColumnConfig } from '../../../common/expressions';
 

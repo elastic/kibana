@@ -8,7 +8,7 @@
 import type {
   CreateRulesSchema,
   UpdateRulesSchema,
-} from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { getSimpleRule } from './get_simple_rule';
 
 export const getRuleWithWebHookAction = (

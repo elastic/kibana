@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { StartServicesAccessor } from 'src/core/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,

@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
-import { CoreSetup } from 'kibana/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import type { ManagementSetup } from 'src/plugins/management/public';
-import type { SharePluginStart } from 'src/plugins/share/public';
+import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from '@kbn/core/public';
+import { CoreSetup } from '@kbn/core/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '@kbn/data-plugin/public';
 import type { ConfigSchema } from '../../../config';
 import type { DataEnhancedStartDependencies } from '../../plugin';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/public';
 
 export interface IManagementSectionsPluginsSetup {
   data: DataPublicPluginSetup;

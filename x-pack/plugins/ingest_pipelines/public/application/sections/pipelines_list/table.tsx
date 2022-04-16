@@ -17,7 +17,7 @@ import {
   EuiPopover,
   EuiContextMenu,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';

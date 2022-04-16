@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { DeprecationsGetResponse } from 'src/core/server/types';
+import type { DeprecationsGetResponse } from '@kbn/core/server/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

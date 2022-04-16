@@ -14,8 +14,8 @@ import {
   EnabledActionTypes,
 } from './actions_config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
-import { Logger } from '../../../../src/core/server';
-import { loggingSystemMock } from '../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import moment from 'moment';
 

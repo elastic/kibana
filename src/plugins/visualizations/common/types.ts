@@ -7,9 +7,9 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttributes } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { AggConfigSerialized, SerializedSearchSourceFields } from 'src/plugins/data/common';
+import { AggConfigSerialized, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 export interface VisParams {
   [key: string]: any;

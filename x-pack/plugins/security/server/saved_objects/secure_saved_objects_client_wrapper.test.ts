@@ -14,8 +14,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
-} from 'src/core/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { AuditEvent } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
@@ -23,9 +23,9 @@ import { Actions } from '../authorization';
 import type { SavedObjectActions } from '../authorization/actions/saved_object';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
-jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(
-    'src/core/server/saved_objects/service/lib/utils'
+    '@kbn/core/server/saved_objects/service/lib/utils'
   );
   return {
     SavedObjectsUtils: {

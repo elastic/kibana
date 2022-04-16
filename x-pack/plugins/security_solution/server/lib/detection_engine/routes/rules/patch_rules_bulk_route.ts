@@ -6,6 +6,7 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { Logger } from '@kbn/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   patchRulesBulkSchema,
@@ -26,7 +27,6 @@ import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 import { legacyMigrate } from '../../rules/utils';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
-import { Logger } from '../../../../../../../../src/core/server';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead

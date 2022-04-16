@@ -6,7 +6,7 @@
  */
 
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import { FrameworkRequest } from '../../../../framework';
 import {

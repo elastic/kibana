@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexThresholdAlertParams } from './types';
 import {
   ValidationResult,
   builtInGroupByTypes,
   builtInAggregationTypes,
   builtInComparators,
-} from '../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { IndexThresholdAlertParams } from './types';
 
 export const validateExpression = (alertParams: IndexThresholdAlertParams): ValidationResult => {
   const {

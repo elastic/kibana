@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreStart } from 'kibana/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { FrameDatasourceAPI } from '../../../../types';
-import type { CountIndexPatternColumn } from '../index';
+import type { CountIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import type { GenericIndexPatternColumn } from '../../../indexpattern';
 import { createMockedIndexPattern } from '../../../mocks';

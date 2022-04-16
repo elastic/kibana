@@ -13,7 +13,7 @@ import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
 import { docLinks } from '../../../../shared/doc_links';
 
-import { EmptyState, SynonymModal } from './';
+import { EmptyState, SynonymModal } from '.';
 
 describe('EmptyState', () => {
   it('renders', () => {

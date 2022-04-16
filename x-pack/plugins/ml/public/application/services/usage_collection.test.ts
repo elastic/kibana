@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { mlUsageCollectionProvider } from './usage_collection';
 

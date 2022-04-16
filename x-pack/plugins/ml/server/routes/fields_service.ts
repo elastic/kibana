@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {

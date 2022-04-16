@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';

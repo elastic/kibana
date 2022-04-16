@@ -8,14 +8,14 @@
 import React from 'react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render, data as dataMock } from '../../../../utils/test_helper';
-import { APMSection } from './';
+import { APMSection } from '.';
 import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({

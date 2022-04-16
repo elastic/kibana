@@ -7,10 +7,10 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { CoreSetup, DocLinksStart } from '../../../../core/public';
-import { createGetterSetter } from '../../../kibana_utils/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { ChartsPluginSetup, ChartsPluginStart } from '../../../charts/public';
+import { CoreSetup, DocLinksStart } from '@kbn/core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 export const [getUISettings, setUISettings] =
   createGetterSetter<CoreSetup['uiSettings']>('xy core.uiSettings');

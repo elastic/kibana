@@ -8,7 +8,7 @@
 import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { getLegacyApmHref } from '../../shared/links/apm/apm_link';

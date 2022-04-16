@@ -20,4 +20,4 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/optimizer').registerNodeAutoTranspilation();
 
-require('./create_apm_users_and_roles/create_apm_users_and_roles_cli.ts');
+require('./create_apm_users_and_roles/create_apm_users_and_roles_cli');

@@ -11,9 +11,9 @@ import {
   isPreconfiguredAction,
 } from './action_task_params_migrations';
 import { ActionTaskParams } from '../types';
-import { SavedObjectReference, SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();

@@ -12,9 +12,9 @@ import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
-import { PercentileRange } from './index';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { PercentileRange } from '.';
 import { useBreakdowns } from './use_breakdowns';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   field: string;

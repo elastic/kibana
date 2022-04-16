@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
+import { Rule, RuleTypeIndex, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 import { Status, RuleStatus } from './types';
 import {
   RULE_STATUS_OK,
@@ -17,8 +19,6 @@ import {
   RULE_STATUS_DISABLED,
   RULE_STATUS_SNOOZED_INDEFINITELY,
 } from './translations';
-import { RuleExecutionStatuses } from '../../../../alerting/common';
-import { Rule, RuleTypeIndex, RuleType } from '../../../../triggers_actions_ui/public';
 
 export const statusMap: Status = {
   [RuleStatus.enabled]: {

@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
-import type { ReportingCore } from '../../../';
+import type { ReportingCore } from '../../..';
 import type { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../../common/types';
 import type { PdfScreenshotOptions } from '../../../types';
 import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';

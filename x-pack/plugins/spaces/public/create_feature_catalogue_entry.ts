@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { FeatureCatalogueEntry } from 'src/plugins/home/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { getSpacesFeatureDescription } from './constants';
 
 export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {

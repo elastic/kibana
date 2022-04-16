@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 
 export function defineRoutes(router: IRouter) {
   router.get(

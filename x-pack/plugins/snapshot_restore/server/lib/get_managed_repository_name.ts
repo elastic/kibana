@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 // Cloud has its own system for managing snapshots and we want to make
 // this clear when Snapshot and Restore is used in a Cloud deployment.

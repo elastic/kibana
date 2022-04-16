@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory, RequestHandler, RouteMethod } from 'src/core/server';
+import type { KibanaResponseFactory, RequestHandler, RouteMethod } from '@kbn/core/server';
 
 import type { SecurityRequestHandlerContext } from '../types';
 

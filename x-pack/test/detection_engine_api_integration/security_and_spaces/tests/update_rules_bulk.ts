@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { FullResponseSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_BULK_UPDATE,
-} from '../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,

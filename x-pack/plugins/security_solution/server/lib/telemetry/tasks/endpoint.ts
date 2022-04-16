@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
+import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import { ITelemetryEventsSender } from '../sender';
 import type {
   EndpointMetricsAggregation,
@@ -25,7 +26,6 @@ import {
   isPackagePolicyList,
 } from '../helpers';
 import { PolicyData } from '../../../../common/endpoint/types';
-import { FLEET_ENDPOINT_PACKAGE } from '../../../../../fleet/common';
 import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 
 // Endpoint agent uses this Policy ID while it's installing.

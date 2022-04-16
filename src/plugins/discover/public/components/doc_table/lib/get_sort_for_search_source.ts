@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from 'src/plugins/data_views/public';
-import type { EsQuerySortValue } from 'src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { EsQuerySortValue } from '@kbn/data-plugin/public';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 

@@ -7,11 +7,11 @@
 
 import http from 'http';
 import https from 'https';
-import { Plugin, CoreSetup, IRouter } from 'kibana/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
-import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../../../../plugins/actions/server/plugin';
-import { ActionType } from '../../../../../../../plugins/actions/server';
+import { Plugin, CoreSetup, IRouter } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server/plugin';
+import { ActionType } from '@kbn/actions-plugin/server';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';

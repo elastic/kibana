@@ -10,7 +10,7 @@ import 'jest-canvas-mock';
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
-import { NewPackagePolicy } from '../../../../fleet/public';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { SyntheticsPolicyCreateExtensionWrapper } from './synthetics_policy_create_extension_wrapper';
 import { defaultConfig } from './synthetics_policy_create_extension';
 import { ConfigKey, DataStream, ScheduleUnit, VerificationMode } from './types';
@@ -27,8 +27,8 @@ jest.mock('@elastic/eui/lib/services/accessibility', () => ({
   useGeneratedHtmlId: () => `id-${Math.random()}`,
 }));
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood

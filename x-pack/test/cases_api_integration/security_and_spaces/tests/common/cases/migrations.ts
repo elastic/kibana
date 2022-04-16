@@ -6,11 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import {
-  CASES_URL,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../../../plugins/cases/common/constants';
 import {
   deleteAllCaseItems,
   getCase,
@@ -18,7 +16,6 @@ import {
   resolveCase,
 } from '../../../../common/lib/utils';
 import { superUser } from '../../../../common/lib/authentication/users';
-import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {

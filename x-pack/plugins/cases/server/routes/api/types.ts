@@ -12,9 +12,9 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   RouteValidatorConfig,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 
 type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;

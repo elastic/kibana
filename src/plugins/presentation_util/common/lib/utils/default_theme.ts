@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreTheme } from 'kibana/public';
+import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 
 export const defaultTheme$: Observable<CoreTheme> = new Observable((subscriber) =>

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 
-export type { TelemetryPluginStart } from '../../../../../../src/plugins/telemetry/public';
+export type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 export { shouldShowTelemetryOptIn };
 
 function shouldShowTelemetryOptIn(

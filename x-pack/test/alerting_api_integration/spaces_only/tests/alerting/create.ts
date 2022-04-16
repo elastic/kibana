@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { Spaces } from '../../scenarios';
 import {
   checkAAD,
@@ -17,7 +18,6 @@ import {
   TaskManagerDoc,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { RawRule } from '../../../../../plugins/alerting/server/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {

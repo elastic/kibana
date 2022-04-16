@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { DataView } from 'src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';
 import { Table, renderFieldName, getConflictModalContent, showDelete } from './table';
-import { overlayServiceMock, themeServiceMock } from 'src/core/public/mocks';
+import { overlayServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 const theme = themeServiceMock.createStartContract();
 

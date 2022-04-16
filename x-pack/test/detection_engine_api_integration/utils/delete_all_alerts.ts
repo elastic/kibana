@@ -11,7 +11,7 @@ import type SuperTest from 'supertest';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
-} from '../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
 import { countDownTest } from './count_down_test';
 
 /**

@@ -9,7 +9,7 @@
 import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { registerSavedObjectsCountUsageCollector } from './saved_objects_count_collector';
 
 describe('saved_objects_count_collector', () => {

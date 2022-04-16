@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { isRegistryEnabled, getRegistryUrlFromTestEnv } from '../registry';
-import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../plugins/fleet/server';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
@@ -29,7 +29,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     before(async () => {
       await ingestManager.setup();
     });
-    loadTestFile(require.resolve('./resolver/index'));
+    loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./policy'));
     loadTestFile(require.resolve('./package'));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReportingConfig } from '../../';
+import { ReportingConfig } from '../..';
 import { createMockConfig } from '../../test_helpers';
 import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';

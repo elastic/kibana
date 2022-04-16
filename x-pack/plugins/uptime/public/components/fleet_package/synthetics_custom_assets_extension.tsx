@@ -12,8 +12,8 @@ import {
   PackageAssetsComponent,
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
-} from '../../../../fleet/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/fleet-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsStart } from '../../apps/plugin';
 import { PLUGIN } from '../../../common/constants/plugin';
 

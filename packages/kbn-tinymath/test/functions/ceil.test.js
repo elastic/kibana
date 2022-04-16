@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { ceil } = require('../../src/functions/ceil.js');
+const { ceil } = require('../../src/functions/ceil');
 
 describe('Ceil', () => {
   it('numbers', () => {

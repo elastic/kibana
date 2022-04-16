@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaUtilsPublicPlugin } from './plugin';
 
 export type { Get, Set, UiComponent, UiComponentInstance } from '../common';

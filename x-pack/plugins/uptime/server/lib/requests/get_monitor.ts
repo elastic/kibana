@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
-import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
   SyntheticsMonitorWithSecrets,
   EncryptedSyntheticsMonitor,
 } from '../../../common/runtime_types';
-import {
-  syntheticsMonitor,
-  syntheticsMonitorType,
-} from '../../lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitor, syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 
 export const getSyntheticsMonitor = async ({
   monitorId,

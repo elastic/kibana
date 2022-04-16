@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from 'src/core/public';
-import { SavedObjectMetaData } from '../../../../saved_objects/public';
+import { SavedObjectAttributes } from '@kbn/core/public';
+import { SavedObjectMetaData } from '@kbn/saved-objects-plugin/public';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
 import { PropertySpec } from '../types';
-import { PersistableState } from '../../../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../../../common/types';
-import { UiActionsPresentableGrouping } from '../../../../ui_actions/public';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;

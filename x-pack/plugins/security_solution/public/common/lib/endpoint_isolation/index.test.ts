@@ -6,8 +6,8 @@
  */
 
 import { KibanaServices } from '../kibana';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { isolateHost, unIsolateHost } from './index';
+import { coreMock } from '@kbn/core/public/mocks';
+import { isolateHost, unIsolateHost } from '.';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
 import { hostIsolationRequestBodyMock } from './mocks';
 

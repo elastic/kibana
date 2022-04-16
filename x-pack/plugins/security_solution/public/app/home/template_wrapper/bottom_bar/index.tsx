@@ -8,8 +8,8 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
-import { AppLeaveHandler } from '../../../../../../../../src/core/public';
+import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { AppLeaveHandler } from '@kbn/core/public';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TimelineId } from '../../../../../common/types/timeline';

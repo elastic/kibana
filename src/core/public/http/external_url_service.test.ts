@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExternalUrlConfig } from 'src/core/server/types';
+import { ExternalUrlConfig } from '../../server/types';
 
 import { injectedMetadataServiceMock } from '../mocks';
 import { Sha256 } from '../utils';

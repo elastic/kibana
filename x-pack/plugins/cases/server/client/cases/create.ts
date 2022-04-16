@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsUtils } from '../../../../../../src/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 import {
   throwErrors,

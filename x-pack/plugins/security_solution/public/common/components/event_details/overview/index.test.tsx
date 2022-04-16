@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Overview } from './';
-import { TestProviders } from '../../../../common/mock';
+import { Overview } from '.';
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../utils', () => ({

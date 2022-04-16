@@ -11,7 +11,7 @@ import {
   KibanaPluginServiceParams,
   PluginServiceProvider,
   PluginServiceRegistry,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 import { ControlsPluginStartDeps } from '../../types';
 import { ControlsServices } from '..';
 

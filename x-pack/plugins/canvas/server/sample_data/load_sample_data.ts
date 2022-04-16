@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SampleDataRegistrySetup } from 'src/plugins/home/server';
+import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { CANVAS as label } from '../../i18n';
-import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from './index';
+import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from '.';
 
 export function loadSampleData(
   addSavedObjectsToSampleDataset: SampleDataRegistrySetup['addSavedObjectsToSampleDataset'],

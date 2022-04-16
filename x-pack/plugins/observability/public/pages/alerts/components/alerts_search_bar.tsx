@@ -7,10 +7,10 @@
 
 import { DataViewBase } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
-import { TimeHistory } from '../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
-import { SearchBar } from '../../../../../../../src/plugins/unified_search/public';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { TimeHistory } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { translations } from '../../../config';
 
 type QueryLanguageType = 'lucene' | 'kuery';

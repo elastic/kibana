@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
+import { snExternalServiceConfig } from '@kbn/actions-plugin/server/builtin_action_types/servicenow/config';
+import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError } from './types';
 import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
-import { ActionTypeExecutorResult } from '../../../../../../actions/common';
 import { Choice } from './types';
 
 export async function getChoices({

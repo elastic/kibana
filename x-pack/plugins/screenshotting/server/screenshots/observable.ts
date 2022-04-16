@@ -8,7 +8,7 @@
 import type { Transaction } from 'elastic-apm-node';
 import { defer, forkJoin, throwError, Observable } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import type { Headers, Logger } from 'src/core/server';
+import type { Headers, Logger } from '@kbn/core/server';
 import { errors } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';

@@ -15,7 +15,6 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 
 import type SuperTest from 'supertest';
-import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
@@ -24,7 +23,7 @@ import {
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
-} from '../../../../plugins/cases/common/constants';
+} from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
@@ -52,15 +51,16 @@ import {
   CaseMetricsResponse,
   BulkCreateCommentRequest,
   CommentType,
-} from '../../../../plugins/cases/common/api';
-import { getPostCaseRequest, postCaseReq } from './mock';
-import { getCaseUserActionUrl } from '../../../../plugins/cases/common/api/helpers';
-import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
-import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
+} from '@kbn/cases-plugin/common/api';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
+import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
+import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
+import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
-import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
-import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
+import { getPostCaseRequest, postCaseReq } from './mock';
+import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 function toArray<T>(input: T | T[]): T[] {

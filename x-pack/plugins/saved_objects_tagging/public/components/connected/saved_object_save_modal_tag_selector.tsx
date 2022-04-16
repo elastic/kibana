@@ -9,7 +9,7 @@ import React, { FC, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModalTagSelectorComponentProps } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
+import { SavedObjectSaveModalTagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { TagsCapabilities } from '../../../common';
 import { TagSelector } from '../base';
 import { ITagsCache } from '../../services';

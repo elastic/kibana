@@ -19,15 +19,12 @@ import {
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaPageTemplate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-components';
-import type { AppMountParameters, CoreStart } from 'src/core/public';
 
-import {
-  KibanaPageTemplate,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';

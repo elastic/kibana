@@ -16,14 +16,19 @@ import {
   EuiSelect,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
 } from './dimension_panel';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpSetup,
+  CoreSetup,
+} from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { generateId } from '../../id_generator';
 import { IndexPatternPrivateState } from '../types';
 import {

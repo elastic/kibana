@@ -8,8 +8,8 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useContext } from 'react';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';

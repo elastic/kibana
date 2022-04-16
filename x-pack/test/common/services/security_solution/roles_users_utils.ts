@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../plugins/security_solution/common/utility_types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { assertUnreachable } from '@kbn/security-solution-plugin/common/utility_types';
 import {
   t1AnalystUser,
   t2AnalystUser,
@@ -26,9 +25,10 @@ import {
   platformEngineerRole,
   detectionsAdminRole,
   readerRole,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/scripts/roles_users';
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/scripts/roles_users';
 
-import { ROLES } from '../../../../plugins/security_solution/common/test';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export { ROLES };
 

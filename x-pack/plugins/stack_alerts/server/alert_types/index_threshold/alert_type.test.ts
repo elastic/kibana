@@ -7,12 +7,12 @@
 
 import uuid from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { RuleExecutorServices } from '../../../../alerting/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { getAlertType, ActionGroupId } from './alert_type';
 import { ActionContext } from './action_context';
 import { Params } from './alert_type_params';
-import { RuleExecutorServicesMock, alertsMock } from '../../../../alerting/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
 
 describe('alertType', () => {

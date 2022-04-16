@@ -23,10 +23,10 @@ import _ from 'lodash';
 import type { ChangeEvent, ReactElement } from 'react';
 import React, { Component } from 'react';
 
+import type { AppCategory } from '@kbn/core/public';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { AppCategory } from 'src/core/public';
 
-import type { KibanaFeatureConfig } from '../../../../../features/public';
 import type { Space } from '../../../../common';
 import { getEnabledFeatures } from '../../lib/feature_utils';
 

@@ -36,7 +36,7 @@ import {
   MULTILAYER_TIME_AXIS_STYLE,
   renderEndzoneTooltip,
   useActiveCursor,
-} from '../../../../../../../charts/public';
+} from '@kbn/charts-plugin/public';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { spacesPluginMock } from '../../../../../x-pack/plugins/spaces/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,

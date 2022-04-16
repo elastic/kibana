@@ -11,6 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { NoDataViewsComponent } from '@kbn/shared-ux-components';
 import { EuiFlyoutBody } from '@elastic/eui';
+import { DEFAULT_ASSETS_TO_IGNORE } from '@kbn/data-plugin/common';
 import { useKibana } from '../../shared_imports';
 
 import { MatchedItem, DataViewEditorContext } from '../../types';
@@ -19,7 +20,6 @@ import { getIndices } from '../../lib';
 
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { PromptFooter } from './prompt_footer';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../../../data/common';
 
 const removeAliases = (mItem: MatchedItem) => !mItem.item.indices;
 

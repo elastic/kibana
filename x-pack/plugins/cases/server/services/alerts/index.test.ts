@@ -7,7 +7,7 @@
 
 import { CaseStatuses } from '../../../common/api';
 import { AlertService } from '.';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('updateAlertsStatus', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

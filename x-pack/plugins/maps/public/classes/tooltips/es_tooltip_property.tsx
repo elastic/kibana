@@ -8,9 +8,9 @@
 import React, { ReactNode } from 'react';
 import _ from 'lodash';
 import { type Filter, buildExistsFilter, buildPhraseFilter } from '@kbn/es-query';
+import { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
-import { DataView, DataViewField } from '../../../../../../src/plugins/data/common';
 
 export class ESTooltipProperty implements ITooltipProperty {
   private readonly _tooltipProperty: ITooltipProperty;

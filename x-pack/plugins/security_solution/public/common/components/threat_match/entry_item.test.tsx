@@ -10,10 +10,10 @@ import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { EntryItem } from './entry_item';
-import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import type { DataViewBase } from '@kbn/es-query';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
 describe('EntryItem', () => {
   test('it renders field labels if "showLabel" is "true"', () => {

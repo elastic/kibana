@@ -10,9 +10,9 @@ import type SuperTest from 'supertest';
 import type {
   CreateRulesSchema,
   FullResponseSchema,
-} from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { deleteRule } from './delete_rule';
 
 /**

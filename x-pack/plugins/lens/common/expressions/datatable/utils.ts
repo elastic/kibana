@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Datatable } from '../../../../../../src/plugins/expressions/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { getOriginalId } from './transpose_helpers';
 
 function isValidNumber(value: unknown): boolean {

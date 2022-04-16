@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   Rule,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { UptimeAlertTypeParams } from '../../../state/alerts/alerts';
 
 interface Props {

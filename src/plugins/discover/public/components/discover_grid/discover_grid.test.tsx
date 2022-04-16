@@ -16,7 +16,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { getDocId } from './discover_grid_document_selection';
 import { ElasticSearchHit } from '../../types';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
 
 function getProps() {

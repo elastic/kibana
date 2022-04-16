@@ -8,11 +8,6 @@
 
 import { Readable } from 'stream';
 import {
-  RequestHandlerWrapper,
-  SavedObject,
-  SavedObjectsExportResultDetails,
-} from 'src/core/server';
-import {
   createSplitStream,
   createMapStream,
   createFilterStream,
@@ -21,6 +16,7 @@ import {
   createConcatStream,
 } from '@kbn/utils';
 import Boom from '@hapi/boom';
+import { RequestHandlerWrapper, SavedObject, SavedObjectsExportResultDetails } from '../..';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([

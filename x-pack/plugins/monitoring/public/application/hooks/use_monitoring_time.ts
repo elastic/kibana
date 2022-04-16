@@ -6,7 +6,7 @@
  */
 import { useCallback, useState, useContext, useEffect } from 'react';
 import createContainer from 'constate';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Legacy } from '../../legacy_shims';
 import { GlobalStateContext } from '../contexts/global_state_context';
 

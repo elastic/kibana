@@ -18,17 +18,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { EmbeddableRenderer, ViewMode } from '../../../src/plugins/embeddable/public';
+import { EmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
   TODO_EMBEDDABLE,
   ListContainerFactory,
   SearchableListContainerFactory,
-} from '../../embeddable_examples/public';
-import { SearchableContainerInput } from '../../embeddable_examples/public/searchable_list_container/searchable_list_container';
-import { TodoInput } from '../../embeddable_examples/public/todo';
-import { MultiTaskTodoInput } from '../../embeddable_examples/public/multi_task_todo';
+} from '@kbn/embeddable-examples-plugin/public';
+import { SearchableContainerInput } from '@kbn/embeddable-examples-plugin/public/searchable_list_container/searchable_list_container';
+import { TodoInput } from '@kbn/embeddable-examples-plugin/public/todo';
+import { MultiTaskTodoInput } from '@kbn/embeddable-examples-plugin/public/multi_task_todo';
 
 interface Props {
   listContainerEmbeddableFactory: ListContainerFactory;

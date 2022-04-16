@@ -8,7 +8,7 @@
 import type {
   Status,
   SignalIds,
-} from '../../../plugins/security_solution/common/detection_engine/schemas/common';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 
 export const setSignalStatus = ({
   signalIds,

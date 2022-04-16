@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from '@kbn/core/server';
 import { License } from '../../shared_imports';
 
 export function mockRouteContext(mockedFunctions: unknown): RequestHandlerContext {

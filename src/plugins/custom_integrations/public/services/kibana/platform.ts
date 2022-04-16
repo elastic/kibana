@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import type { CustomIntegrationsPlatformService } from '../platform';
 import type { CustomIntegrationsStartDependencies } from '../../types';

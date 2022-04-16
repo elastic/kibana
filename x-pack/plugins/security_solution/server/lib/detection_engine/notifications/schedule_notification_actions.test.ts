@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleExecutorServicesMock, alertsMock } from '../../../../../alerting/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { sampleThresholdAlert } from '../rule_types/__mocks__/threshold';
 import {
   NotificationRuleTypeParams,

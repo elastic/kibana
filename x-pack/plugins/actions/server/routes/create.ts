@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ActionResult, ActionsRequestHandlerContext } from '../types';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteRequestCase, RewriteResponseCase } from '../../common';

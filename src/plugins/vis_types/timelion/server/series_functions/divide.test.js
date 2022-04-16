@@ -10,12 +10,12 @@ import fn from './divide';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import invoke from './helpers/invoke_series_fn';
 
 describe('divide.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list.js')();
+    seriesList = require('./fixtures/series_list')();
   });
 
   it('divides by a single number', () => {

@@ -15,7 +15,7 @@ import { EuiButton, EuiModal } from '@elastic/eui';
 
 import { MultiInputRows } from '../../../multi_input_rows';
 
-import { ManageQueriesModal } from './';
+import { ManageQueriesModal } from '.';
 
 describe('ManageQueriesModal', () => {
   const values = {

@@ -8,7 +8,7 @@
 import type SuperTest from 'supertest';
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { DETECTION_ENGINE_INDEX_URL } from '../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_INDEX_URL } from '@kbn/security-solution-plugin/common/constants';
 import { countDownTest } from './count_down_test';
 
 /**

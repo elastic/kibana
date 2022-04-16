@@ -6,7 +6,7 @@
  */
 
 import { ReportDocumentHead, ReportSource } from '../../../common/types';
-import { Report } from './';
+import { Report } from '.';
 
 /*
  * Class for a report document that is saved in Elasticsearch

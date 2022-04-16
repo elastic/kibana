@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { getInputIndex, GetInputIndex } from './get_input_output_index';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';

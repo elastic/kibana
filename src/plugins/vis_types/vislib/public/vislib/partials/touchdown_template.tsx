@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { EuiIcon } from '@elastic/eui';
-import { KibanaThemeProvider } from '../../../../../kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getTheme } from '../../services';
 
 interface Props {

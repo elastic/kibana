@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ErrorToastOptions, Toast } from 'kibana/public';
+import { ErrorToastOptions, Toast } from '@kbn/core/public';
 import { useState } from 'react';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../lib/kibana';
 
 export const useErrorToast = () => {
   const [errorToast, setErrorToast] = useState<Toast>();

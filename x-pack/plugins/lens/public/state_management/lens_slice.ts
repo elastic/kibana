@@ -6,7 +6,7 @@
  */
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues } from 'lodash';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';

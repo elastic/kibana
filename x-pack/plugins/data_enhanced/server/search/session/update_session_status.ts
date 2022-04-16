@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResult, SavedObjectsUpdateResponse } from 'kibana/server';
+import { SavedObjectsFindResult, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
-} from '../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
 import {

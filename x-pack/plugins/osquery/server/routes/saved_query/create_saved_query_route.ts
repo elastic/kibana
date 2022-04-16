@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, pickBy } from 'lodash';
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
 import {
   createSavedQueryRequestSchema,

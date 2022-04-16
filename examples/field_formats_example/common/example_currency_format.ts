@@ -7,7 +7,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { FieldFormat } from '../../../src/plugins/field_formats/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 // 1. Create a custom formatter by extending {@link FieldFormat}
 export class ExampleCurrencyFormat extends FieldFormat {

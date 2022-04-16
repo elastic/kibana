@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import { getUiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import { getSavedSearchObjectType } from './saved_objects';
-import type { PluginSetup as DataPluginSetup } from '../../data/server';
 
 export class DiscoverServerPlugin implements Plugin<object, object> {
   public setup(

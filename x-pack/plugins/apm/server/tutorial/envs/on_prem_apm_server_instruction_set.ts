@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '../..';
 import {
   InstructionsSchema,
   INSTRUCTION_VARIANT,
-} from '../../../../../../src/plugins/home/server';
+} from '@kbn/home-plugin/server';
+import { APMConfig } from '../..';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,

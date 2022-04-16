@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleTypeParams, SanitizedRule } from '../../../../../alerting/common';
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyReadNotificationParams, legacyIsAlertType } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports

@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { KibanaFeatureConfig } from '../../features/common';
-import { ReportingSetup } from '../../reporting/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { ReportingSetup } from '@kbn/reporting-plugin/server';
 
 /*
  * Register Canvas as a Kibana feature,

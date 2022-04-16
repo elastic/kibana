@@ -7,9 +7,9 @@
 
 import React, { Component } from 'react';
 
-import type { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
-import type { Space, SpacesApiUi } from '../../../../../../../spaces/public';
 import type { Role } from '../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../model';
 import { CollapsiblePanel } from '../../collapsible_panel';

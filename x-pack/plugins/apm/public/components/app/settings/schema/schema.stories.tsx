@@ -8,10 +8,10 @@
 import type { Meta, Story } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../../../src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import { Schema } from './';
+import { Schema } from '.';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 
 interface Args {

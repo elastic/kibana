@@ -8,9 +8,10 @@
 import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { FieldSpec } from '../../../../../../../../../../../src/plugins/data/common';
-import { QueryStringInput } from '../../../../../../../../../../../src/plugins/unified_search/public';
-import type { DataView } from '../../../../../../../../../../../src/plugins/data_views/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import { useStartServices } from '../../../../../hooks';
 
 import {

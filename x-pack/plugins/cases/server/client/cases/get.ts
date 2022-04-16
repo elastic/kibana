@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsResolveResponse } from 'kibana/server';
+import { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
 import {
   CaseResponseRt,
   CaseResponse,

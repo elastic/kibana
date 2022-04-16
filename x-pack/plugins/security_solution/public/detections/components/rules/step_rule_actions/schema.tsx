@@ -9,10 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  RuleAction,
-  ActionTypeRegistryContract,
-} from '../../../../../../triggers_actions_ui/public';
+import { RuleAction, ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   FormSchema,
   ValidationFunc,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EcsEventOutcome, EcsEventType } from 'src/core/server';
-import { AuditEvent } from '../../../security/server';
+import { EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import { AuditEvent } from '@kbn/security-plugin/server';
 
 export enum RuleAuditAction {
   CREATE = 'rule_create',

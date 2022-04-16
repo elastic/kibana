@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { calculateBucketSize } from './';
+import { calculateBucketSize } from '.';
 import moment from 'moment';
 
 const timerange = {

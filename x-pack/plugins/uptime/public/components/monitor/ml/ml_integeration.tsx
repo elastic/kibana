@@ -7,6 +7,8 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { JobStat } from '@kbn/ml-plugin/public';
 import { MachineLearningFlyout } from './ml_flyout_container';
 import {
   hasMLFeatureSelector,
@@ -18,9 +20,7 @@ import { deleteMLJobAction, getExistingMLJobAction, resetMLState } from '../../.
 import { ConfirmJobDeletion } from './confirm_delete';
 import { UptimeRefreshContext } from '../../../contexts';
 import * as labels from './translations';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ManageMLJobComponent } from './manage_ml_job';
-import { JobStat } from '../../../../../../plugins/ml/public';
 import { useMonitorId } from '../../../hooks';
 import { getMLJobId } from '../../../../common/lib';
 

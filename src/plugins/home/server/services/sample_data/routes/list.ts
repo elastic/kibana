@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { AppLinkData, SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import type { FindSampleObjectsResponseObject } from '../lib/find_sample_objects';

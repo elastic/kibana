@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { ConcreteTaskInstance } from '../../../task_manager/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   SanitizedRule,
   RuleTaskState,

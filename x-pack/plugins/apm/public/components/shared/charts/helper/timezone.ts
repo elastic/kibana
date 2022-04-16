@@ -6,9 +6,9 @@
  */
 
 import d3 from 'd3';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
-import { IUiSettingsClient } from '../../../../../../../../src/core/public';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 
 interface Params {
   domain: [number, number];

@@ -25,7 +25,7 @@ import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/tab
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiTracker } from '../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';

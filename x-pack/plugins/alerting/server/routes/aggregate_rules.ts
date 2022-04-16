@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../lib';
 import { AggregateResult, AggregateOptions } from '../rules_client';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';

@@ -7,12 +7,9 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, AppMountParameters, APP_WRAPPER_CLASS } from '../../../../src/core/public';
+import { CoreSetup, AppMountParameters, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { StartDependencies } from './plugin';
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../src/plugins/kibana_react/public';
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
   async ({ element }: AppMountParameters) => {

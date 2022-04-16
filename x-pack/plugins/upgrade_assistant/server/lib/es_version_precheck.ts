@@ -13,7 +13,7 @@ import {
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { versionService } from './version';
 
 /**

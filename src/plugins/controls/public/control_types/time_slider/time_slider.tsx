@@ -9,8 +9,8 @@
 import React, { FC, useCallback, useState, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { debounce } from 'lodash';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { useStateObservable } from '../../hooks/use_state_observable';
-import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
 import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 import { timeSliderReducers } from './time_slider_reducers';
 import { TimeSlider as Component } from './time_slider.component';

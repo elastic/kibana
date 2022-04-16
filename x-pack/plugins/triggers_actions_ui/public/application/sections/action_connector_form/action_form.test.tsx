@@ -8,7 +8,7 @@
 import React, { lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiAccordion } from '@elastic/eui';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
@@ -23,7 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({

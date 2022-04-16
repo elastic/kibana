@@ -11,7 +11,7 @@ import {
   serializeSnapshotConfig,
   deserializeSnapshotRetention,
   serializeSnapshotRetention,
-} from './';
+} from '.';
 
 export const deserializePolicy = (
   name: string,

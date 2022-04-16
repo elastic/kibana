@@ -10,7 +10,7 @@ import {
   AppStatus,
   PublicAppInfo,
   DEFAULT_APP_CATEGORIES,
-} from 'src/core/public';
+} from '@kbn/core/public';
 import {
   AppLink,
   appToResult,

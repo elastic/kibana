@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert } from './alert';
 import { getRecoveredAlerts } from '../lib';

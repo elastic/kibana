@@ -6,7 +6,7 @@
  */
 
 import { asyncForEach } from '@kbn/std';
-import { ISavedObjectsRepository } from 'kibana/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 

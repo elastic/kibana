@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SyntheticsIntegrationPageProvider({

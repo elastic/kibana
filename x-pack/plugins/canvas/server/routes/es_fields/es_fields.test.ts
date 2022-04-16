@@ -6,8 +6,8 @@
  */
 
 import { initializeESFieldsRoute } from './es_fields';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { httpServerMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {

@@ -19,7 +19,7 @@ import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { themeServiceMock } from '../../theme/theme_service.mock';
 import { AppMountParameters, AppUpdater } from '../types';
 import { Observable } from 'rxjs';
-import { MountPoint } from 'kibana/public';
+import { MountPoint } from '../..';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

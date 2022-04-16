@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'src/core/public';
-import type { TelemetryPluginSetup } from '../../../../../src/plugins/telemetry/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
 
 interface TelemetryTestPluginSetupDependencies {
   telemetry: TelemetryPluginSetup;

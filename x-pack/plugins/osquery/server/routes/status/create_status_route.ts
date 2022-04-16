@@ -8,13 +8,13 @@
 import { produce } from 'immer';
 import { satisfies } from 'semver';
 import { filter, reduce, mapKeys, each, set, unset, uniq, map, has } from 'lodash';
-import { packSavedObjectType } from '../../../common/types';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
+import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertPackQueriesToSO } from '../pack/utils';
 import { getInternalSavedObjectsClient } from '../../usage/collector';

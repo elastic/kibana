@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../hooks';
 import { monitorLocationsSelector } from '../../../state/selectors';
 import { getMonitorLocationsAction } from '../../../state/actions/monitor';
-import { MonitorStatusDetailsComponent } from './index';
+import { MonitorStatusDetailsComponent } from '.';
 import { UptimeRefreshContext } from '../../../contexts';
 import { AppState } from '../../../state';
 import { MonitorIdParam } from '../../../../common/types';

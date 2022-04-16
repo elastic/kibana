@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-
 import { ByteSizeValue } from '@kbn/config-schema';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ElasticsearchIndex } from '../../common/types';
 

@@ -9,7 +9,7 @@ import React from 'react';
 import type {
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
-} from 'src/plugins/home/public';
+} from '@kbn/home-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 const TutorialDirectoryHeaderLinkLazy = React.lazy(

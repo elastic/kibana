@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
-import '../__mocks__/http_agent.mock.ts';
+import '../__mocks__/http_agent.mock';
 
 jest.mock('node-fetch');
 import fetch from 'node-fetch';
@@ -17,7 +17,7 @@ jest.mock('@kbn/utils', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import {
   callEnterpriseSearchConfigAPI,

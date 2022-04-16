@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
-import { InfraTimerangeInput } from '../../../../plugins/infra/common/http_api/snapshot_api';
-import { InventoryMetric } from '../../../../plugins/infra/common/inventory_models/types';
+import { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
+import { InventoryMetric } from '@kbn/infra-plugin/common/inventory_models/types';
+import { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
 
-import { NodeDetailsMetricDataResponse } from '../../../../plugins/infra/common/http_api/node_details_api';
 const { min, max } = DATES['7.0.0'].hosts;
 
 interface NodeDetailsRequest {

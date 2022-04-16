@@ -16,8 +16,8 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
   executionContextServiceMock,
-} from '../../../../core/server/mocks';
-import type { ExecutionContextSetup, Logger } from 'src/core/server';
+} from '@kbn/core/server/mocks';
+import type { ExecutionContextSetup, Logger } from '@kbn/core/server';
 
 describe('CollectorSet', () => {
   let logger: jest.Mocked<Logger>;

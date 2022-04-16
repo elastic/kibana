@@ -16,7 +16,8 @@ import {
 } from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
@@ -31,8 +32,7 @@ import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
 import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
-import { HeaderMenuPortal } from '../../../../observability/public';
-import { HeaderActionMenuContext } from '../../application/contexts/header_action_menu_context';
+import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
 
 export interface TabMenuItem {
   id: string;

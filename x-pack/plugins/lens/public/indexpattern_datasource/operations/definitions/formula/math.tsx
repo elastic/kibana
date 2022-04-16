@@ -6,7 +6,7 @@
  */
 
 import type { TinymathAST } from '@kbn/tinymath';
-import { OperationDefinition } from '../index';
+import { OperationDefinition } from '..';
 import { ValueFormatConfig, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 

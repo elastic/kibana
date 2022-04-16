@@ -8,16 +8,11 @@
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
 
-import type {
-  RouteMethod,
-  KibanaResponseFactory,
-  RequestHandler,
-  IRouter,
-} from '../../../../src/core/server';
+import type { RouteMethod, KibanaResponseFactory, RequestHandler, IRouter } from '@kbn/core/server';
 
-import type { FleetStartContract, FleetRequestHandlerContext } from '../../fleet/server';
+import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}

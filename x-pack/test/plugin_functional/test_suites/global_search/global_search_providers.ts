@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
+import { GlobalSearchTestApi } from '@kbn/global-search-test-plugin/public/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { GlobalSearchResult } from '../../../../plugins/global_search/common/types';
-import { GlobalSearchTestApi } from '../../plugins/global_search_test/public/types';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);

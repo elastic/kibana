@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
 import { saveInstalledEsRefs } from '../../packages/install';

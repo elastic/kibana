@@ -11,9 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import React from 'react';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { useTrackPageview } from '../../../observability/public';
 
 export const MappingErrorPage = () => {
   useTrackPageview({ app: 'uptime', path: 'mapping-error' });

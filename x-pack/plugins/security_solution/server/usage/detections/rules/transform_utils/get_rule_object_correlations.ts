@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResult } from 'kibana/server';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { RuleMetric } from '../types';
 import type { RuleSearchResult } from '../../../types';
 

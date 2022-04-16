@@ -7,7 +7,7 @@
  */
 
 import { runIBazel } from '../utils/bazel';
-import { ICommand } from './';
+import { ICommand } from '.';
 
 export const WatchCommand: ICommand = {
   description: 'Runs a build in the Bazel built packages and keeps watching them for changes',

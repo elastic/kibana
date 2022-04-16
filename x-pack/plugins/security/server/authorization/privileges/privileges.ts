@@ -10,7 +10,8 @@ import { uniq } from 'lodash';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   KibanaFeature,
-} from '../../../../features/server';
+} from '@kbn/features-plugin/server';
+
 import type { SecurityLicense } from '../../../common/licensing';
 import type { RawKibanaPrivileges } from '../../../common/model';
 import type { Actions } from '../actions';

@@ -21,7 +21,7 @@ import {
   Section,
   SectionSubtitle,
   SectionTitle,
-} from '../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import {
   CustomLink,

@@ -19,7 +19,7 @@ import {
   getPaletteStops,
   CUSTOM_PALETTE,
 } from '@kbn/coloring';
-import { Datatable } from '../../../../../../src/plugins/expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 
 export function getContrastColor(
   color: string,

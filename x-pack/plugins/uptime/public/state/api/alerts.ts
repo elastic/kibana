@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { ActionType, AsApiContract, Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
-import type { ActionType, AsApiContract, Rule } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { RuleTypeParams } from '../../../../alerting/common';
 import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions, RuleAction } from './alert_actions';

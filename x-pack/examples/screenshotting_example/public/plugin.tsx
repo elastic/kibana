@@ -7,9 +7,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { AppMountParameters, CoreSetup, Plugin } from 'src/core/public';
-import type { DeveloperExamplesSetup } from 'examples/developer_examples/public';
-import { AppNavLinkStatus } from '../../../../src/core/public';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
 
 import { App, HttpContext } from './app';
 

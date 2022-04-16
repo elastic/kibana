@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 

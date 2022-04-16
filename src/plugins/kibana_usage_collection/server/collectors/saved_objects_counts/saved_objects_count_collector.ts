@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
 interface SavedObjectsCountUsageByType {

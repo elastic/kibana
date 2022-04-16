@@ -9,14 +9,14 @@ import { flatten } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
-import { TimeRange } from 'src/plugins/data/common';
-import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressions/public';
+import { TimeRange } from '@kbn/data-plugin/common';
+import { ExpressionFunctionDefinition, DatatableRow } from '@kbn/expressions-plugin/public';
 import { fetch } from '../../common/lib/fetch';
 // @ts-expect-error untyped local
 import { buildBoolArray } from '../../common/lib/build_bool_array';
 import { Datatable, ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
-import { InitializeArguments } from './';
+import { InitializeArguments } from '.';
 
 const errors = {
   timelionError: () =>

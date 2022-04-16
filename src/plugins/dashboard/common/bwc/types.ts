@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from 'kibana/public';
+import { SavedObjectReference } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 
-import { GridData } from '../';
+import { GridData } from '..';
 
 interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {

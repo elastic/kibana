@@ -6,9 +6,8 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
-import { ImportListItemsToStreamOptions, WriteBufferToItemsOptions } from '../items';
 import {
   LIST_ID,
   LIST_INDEX,
@@ -21,6 +20,8 @@ import {
 import { getConfigMockDecoded } from '../../config.mock';
 
 import { TestReadable } from './test_readable.mock';
+
+import { ImportListItemsToStreamOptions, WriteBufferToItemsOptions } from '.';
 
 export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStreamOptions => ({
   config: getConfigMockDecoded(),

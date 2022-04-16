@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BaseIndexPatternColumn, OperationDefinition } from '../index';
+import type { BaseIndexPatternColumn, OperationDefinition } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';

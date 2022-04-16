@@ -7,7 +7,7 @@
 
 import { interval, throwError, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
 import { ScreenshotObservableHandler, ScreenshotObservableOptions } from './observable';

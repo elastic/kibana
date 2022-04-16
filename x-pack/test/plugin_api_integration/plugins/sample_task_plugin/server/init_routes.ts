@@ -13,9 +13,9 @@ import {
   IKibanaResponse,
   IRouter,
   IScopedClusterClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { EventEmitter } from 'events';
-import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const scope = 'testing';
 const taskManagerQuery = {

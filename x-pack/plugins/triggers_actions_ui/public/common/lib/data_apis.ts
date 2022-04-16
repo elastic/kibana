@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 
 const DATA_API_ROOT = '/api/triggers_actions_ui/data';
 

@@ -7,13 +7,13 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import {
   OPTIONS_LIST_CONTROL,
   ControlWidth,
   RANGE_SLIDER_CONTROL,
-} from '../../../src/plugins/controls/common';
-import { ControlGroupChainingSystem } from '../../../src/plugins/controls/common/control_group/types';
+} from '@kbn/controls-plugin/common';
+import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 import { FtrService } from '../ftr_provider_context';
 

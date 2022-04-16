@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { AppDataType, ReportViewType, BuilderItem } from '../types';
 import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
 import { DataViewState, useAppDataViewContext } from '../hooks/use_app_data_view';

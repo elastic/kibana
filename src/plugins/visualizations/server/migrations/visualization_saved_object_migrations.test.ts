@@ -11,7 +11,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 

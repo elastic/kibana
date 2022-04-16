@@ -12,7 +12,7 @@ import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
-import { UiActionsStart } from '../../../../../../ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
 
 interface Props {

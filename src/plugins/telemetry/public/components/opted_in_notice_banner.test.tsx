@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OptedInNoticeBanner } from './opted_in_notice_banner';
-import { httpServiceMock } from '../../../../core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { mockTelemetryConstants } from '../mocks';
 
 const mockHttp = httpServiceMock.createStartContract();

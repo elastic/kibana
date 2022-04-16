@@ -11,7 +11,7 @@ jest.mock('../../../kibana_services');
 jest.mock('./util/load_index_settings');
 
 import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
-import { SearchSource } from 'src/plugins/data/public';
+import { SearchSource } from '@kbn/data-plugin/public';
 
 import { loadIndexSettings } from './util/load_index_settings';
 

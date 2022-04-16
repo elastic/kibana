@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import type { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';

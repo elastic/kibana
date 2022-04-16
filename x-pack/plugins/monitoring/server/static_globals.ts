@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from '@kbn/core/server';
 import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringConfig } from './config';

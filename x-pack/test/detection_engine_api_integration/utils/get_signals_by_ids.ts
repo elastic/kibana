@@ -8,11 +8,11 @@
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ToolingLog } from '@kbn/dev-utils';
 import type SuperTest from 'supertest';
-import type { DetectionAlert } from '../../../plugins/security_solution/common/detection_engine/schemas/alerts';
+import type { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { countDownTest } from './count_down_test';
 import { getQuerySignalsId } from './get_query_signals_ids';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../plugins/security_solution/common/constants';
 
 /**
  * Given an array of rule ids this will return only signals based on that rule id both

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { serializeComponentTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 import { componentTemplateSchema } from './schema_validation';
 
 export const registerCreateRoute = ({

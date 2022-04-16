@@ -10,16 +10,18 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
-import { Start as InspectorStart } from '../../inspector/public';
+import { getSavedObjectFinder, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   PublicAppInfo,
-} from '../../../core/public';
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,
@@ -40,8 +42,6 @@ import {
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
-import { Storage } from '../../kibana_utils/public';
-import { migrateToLatest, PersistableStateService } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
 import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';

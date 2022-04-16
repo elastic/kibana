@@ -12,9 +12,9 @@ import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
-} from 'src/plugins/embeddable/public';
-import { Action, IncompatibleActionError } from '../../../../src/plugins/ui_actions/public';
-import { TimeRange } from '../../../../src/plugins/data/public';
+} from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { OpenModal, CommonlyUsedRange } from './types';
 
 export const CUSTOM_TIME_RANGE = 'CUSTOM_TIME_RANGE';

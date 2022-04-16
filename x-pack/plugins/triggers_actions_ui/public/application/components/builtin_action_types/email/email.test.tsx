@@ -6,7 +6,7 @@
  */
 
 import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '../index';
+import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { getEmailServices } from './email';

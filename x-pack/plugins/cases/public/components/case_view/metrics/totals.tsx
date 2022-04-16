@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
@@ -15,7 +16,6 @@ import {
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { CaseViewMetricsProps } from './types';
 
 export const CaseViewMetricItems: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Vis, VisToExpressionAstParams } from '../../../visualizations/public';
+import { Vis, VisToExpressionAstParams } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
 import { TagCloudVisParams } from './types';
 
@@ -30,7 +30,7 @@ const mockedSchemas = {
   ],
 };
 
-jest.mock('../../../visualizations/public', () => ({
+jest.mock('@kbn/visualizations-plugin/public', () => ({
   getVisSchemas: () => mockedSchemas,
 }));
 

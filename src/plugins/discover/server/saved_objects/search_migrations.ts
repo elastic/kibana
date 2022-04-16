@@ -13,11 +13,11 @@ import type {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
-} from 'kibana/server';
-import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../data/server';
-import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
-import type { SerializedSearchSourceFields } from '../../../data/common';
+} from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/server';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 export interface SavedSearchMigrationAttributes extends SavedObjectAttributes {
   kibanaSavedObjectMeta: {

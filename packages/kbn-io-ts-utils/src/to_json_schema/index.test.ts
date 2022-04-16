@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import * as t from 'io-ts';
-import { toJsonSchema } from './';
+import { toJsonSchema } from '.';
 
 describe('toJsonSchema', () => {
   it('converts simple types to JSON schema', () => {

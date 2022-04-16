@@ -8,11 +8,11 @@
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import { coreMock } from '@kbn/core/public/mocks';
+import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
+import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
-import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
-import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
 import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';

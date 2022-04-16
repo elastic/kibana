@@ -7,7 +7,7 @@
  */
 
 import { savedObjectsClientMock } from '../../../mocks';
-import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
+import { SavedObjectReference, SavedObjectsImportRetry } from '../../../../public';
 import { SavedObjectsClientContract, SavedObject } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
 import { checkConflicts } from './check_conflicts';

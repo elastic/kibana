@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Rule } from '../../../../../../triggers_actions_ui/public';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';

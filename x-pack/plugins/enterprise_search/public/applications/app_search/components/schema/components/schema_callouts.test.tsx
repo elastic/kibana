@@ -20,7 +20,7 @@ import {
   ConfirmSchemaButton,
 } from './schema_callouts';
 
-import { SchemaCallouts } from './';
+import { SchemaCallouts } from '.';
 
 describe('SchemaCallouts', () => {
   const values = {

@@ -7,11 +7,8 @@
  */
 
 import { getStats } from './get_usage_collector';
-import { createCollectorFetchContextMock } from '../../../../usage_collection/server/mocks';
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from '../../../../../core/server';
+import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { TIME_RANGE_DATA_MODES } from '../../common/enums';
 
 const mockedSavedObject = {

@@ -8,13 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useKibana } from '../../../../../common/lib/kibana';
-import { APP_PATH } from '../../../../../../common/constants';
 import {
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
   PackageAssetsComponent,
-} from '../../../../../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { APP_PATH } from '../../../../../../common/constants';
 
 export const EndpointCustomAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useKibana().services;

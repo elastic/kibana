@@ -6,6 +6,7 @@
  */
 
 import { Feature, FeatureCollection } from 'geojson';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { AbstractVectorSource, BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import {
@@ -16,7 +17,6 @@ import {
 import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { InlineField } from '../../fields/inline_field';
 
 function getFeatureCollection(

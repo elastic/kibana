@@ -12,8 +12,8 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { Router, useLocation } from 'react-router-dom';
 import qs from 'query-string';
-import { DatePicker } from './';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { DatePicker } from '.';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { of } from 'rxjs';
 import { DatePickerContextProvider } from '../../../context/date_picker_context';
 

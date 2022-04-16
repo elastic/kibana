@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 // import directly to support examples functional tests (@kbn-test/src/functional_tests/lib/babel_register_for_test_plugins.js)
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils/default_app_categories';
-import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/utils/default_app_categories';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';

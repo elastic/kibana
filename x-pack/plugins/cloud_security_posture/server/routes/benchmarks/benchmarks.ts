@@ -6,19 +6,19 @@
  */
 
 import { uniq, map } from 'lodash';
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   PackagePolicyServiceInterface,
   AgentPolicyServiceInterface,
   AgentService,
-} from '../../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import type {
   GetAgentPoliciesResponseItem,
   PackagePolicy,
   AgentPolicy,
   ListResult,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,

@@ -6,14 +6,11 @@
  */
 
 import sinon from 'sinon';
-import {
-  elasticsearchServiceMock,
-  savedObjectsRepositoryMock,
-} from '../../../../../src/core/server/mocks';
-import { SavedObjectsErrorHelpers, Logger } from '../../../../../src/core/server';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
-import { coreMock } from '../../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from '../config';
 
 // FAILING: https://github.com/elastic/kibana/issues/120269

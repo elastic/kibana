@@ -14,7 +14,7 @@ import { shallow } from 'enzyme';
 import { EmptyEngineOverview } from './engine_overview_empty';
 import { EngineOverviewMetrics } from './engine_overview_metrics';
 
-import { EngineOverview } from './';
+import { EngineOverview } from '.';
 
 describe('EngineOverview', () => {
   const values = {

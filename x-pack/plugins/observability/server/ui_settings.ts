@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { UiSettingsParams } from '../../../../src/core/types';
+import { UiSettingsParams } from '@kbn/core/types';
 import { observabilityFeatureId } from '../common';
 import {
   enableComparisonByDefault,

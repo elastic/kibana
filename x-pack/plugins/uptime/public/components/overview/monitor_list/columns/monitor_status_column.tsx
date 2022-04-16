@@ -19,6 +19,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { parseTimestamp } from '../parse_timestamp';
 import { DataStream, Ping, PingError } from '../../../../../common/runtime_types';
 import {
@@ -28,7 +29,6 @@ import {
   SHORT_TS_LOCALE,
 } from '../../../../../common/constants';
 
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../../common/translations';
 import { MonitorProgress } from './progress/monitor_progress';
 import { refreshedMonitorSelector } from '../../../../state/reducers/monitor_list';

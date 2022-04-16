@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsUtils } from '../../../../../../../../src/core/server';
-import { IEventLogService, SAVED_OBJECT_REL_PRIMARY } from '../../../../../../event_log/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
+import { IEventLogService, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import {
   RuleExecutionStatus,
   ruleExecutionStatusOrderByStatus,

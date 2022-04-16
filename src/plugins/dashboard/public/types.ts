@@ -15,17 +15,18 @@ import type {
   IUiSettingsClient,
   PluginInitializerContext,
   KibanaExecutionContext,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { History } from 'history';
 import type { Filter } from '@kbn/es-query';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
-import { UrlForwardingStart } from '../../url_forwarding/public';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
 import { Query, RefreshInterval, TimeRange } from './services/data';
@@ -41,7 +42,6 @@ import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
 import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer, DashboardSavedObject } from '.';
-import { VisualizationsStart } from '../../visualizations/public';
 import { DashboardAppLocatorParams } from './locator';
 import { SpacesPluginStart } from './services/spaces';
 

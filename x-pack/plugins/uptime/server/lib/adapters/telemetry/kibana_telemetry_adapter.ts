@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { savedObjectsAdapter } from '../../saved_objects/saved_objects';
 import { UptimeESClient, createUptimeESClient } from '../../lib';

@@ -10,7 +10,7 @@ import {
   PluginServiceProviders,
   PluginServiceProvider,
   PluginServiceRegistry,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 
 import { CustomIntegrationsServices } from '..';
 import { findServiceFactory } from './find';

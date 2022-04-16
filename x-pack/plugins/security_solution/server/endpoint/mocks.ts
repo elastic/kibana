@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsServiceMock } from '../../../../../src/core/server/mocks';
-import { IScopedClusterClient, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { listMock } from '../../../lists/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
-import { alertsMock } from '../../../alerting/server/mocks';
-import { xpackMocks } from '../fixtures';
-import { FleetStartContract, ExternalCallback } from '../../../fleet/server';
+import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { FleetStartContract, ExternalCallback } from '@kbn/fleet-plugin/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
   createArtifactsClientMock,
   createMockPackageService,
-} from '../../../fleet/server/mocks';
+} from '@kbn/fleet-plugin/server/mocks';
+// A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
+// plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
+// file and not bundled with the application, adding a eslint disable below and using import from
+// a restricted path.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
@@ -31,15 +38,8 @@ import { EndpointAppContext } from './types';
 import { MetadataRequestContext } from './routes/metadata/handlers';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
-// A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
-// plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
-// file and not bundled with the application, adding a eslint disable below and using import from
-// a restricted path.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createCasesClientMock } from '../../../cases/server/client/mocks';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
-import { createFleetAuthzMock } from '../../../fleet/common';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
 import { createEndpointMetadataServiceTestContextMock } from './services/metadata/mocks';
 

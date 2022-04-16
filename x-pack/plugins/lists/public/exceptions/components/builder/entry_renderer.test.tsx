@@ -22,11 +22,11 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { validateFilePathInput } from '@kbn/securitysolution-utils';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
-import type { FieldSpec } from 'src/plugins/data/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
 
 import { BuilderEntryItem } from './entry_renderer';

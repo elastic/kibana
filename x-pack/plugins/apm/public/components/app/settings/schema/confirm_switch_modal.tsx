@@ -15,7 +15,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { ElasticDocsLink } from '../../../shared/links/elastic_docs_link';
 
 interface Props {

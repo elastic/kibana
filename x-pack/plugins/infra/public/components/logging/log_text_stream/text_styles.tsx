@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 
-import { euiStyled, css } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 import { TextScale } from '../../../../common/log_text_scale';
 
 export type WrapMode = 'none' | 'pre-wrapped' | 'long';

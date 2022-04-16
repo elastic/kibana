@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
 import { EuiButton } from '@elastic/eui';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
@@ -27,7 +28,6 @@ import {
   eventsStackByOptions,
   histogramConfigs,
 } from '../../../common/components/events_tab/events_query_tab_body';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { HostsTableType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';

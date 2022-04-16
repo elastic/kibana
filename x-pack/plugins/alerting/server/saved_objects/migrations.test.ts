@@ -8,9 +8,9 @@
 import uuid from 'uuid';
 import { getMigrations, isAnyActionSupportIncidents } from './migrations';
 import { RawRule } from '../types';
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 const migrationContext = migrationMocks.createContext();

@@ -22,11 +22,11 @@ import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
 
-import { ExpressionInputEditorRef } from 'src/plugins/presentation_util/public';
+import { ExpressionInputEditorRef } from '@kbn/presentation-util-plugin/public';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { ExpressionFunction } from '../../../types';
-import { FormState } from './';
+import { FormState } from '.';
 
 const strings = {
   getCancelButtonLabel: () =>

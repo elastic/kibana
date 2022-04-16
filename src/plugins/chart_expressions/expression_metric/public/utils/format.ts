@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsContentType, IFieldFormat } from '../../../../field_formats/common';
+import { FieldFormatsContentType, IFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export const formatValue = (
   value: number | string,

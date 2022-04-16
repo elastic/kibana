@@ -15,15 +15,15 @@ import {
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
 } from './task';
-import { elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { TaskStore, SearchOpts } from './task_store';
-import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
   SavedObjectAttributes,
   SavedObjectsErrorHelpers,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 

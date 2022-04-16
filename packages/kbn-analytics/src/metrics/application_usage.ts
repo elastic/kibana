@@ -7,7 +7,7 @@
  */
 
 import moment, { Moment } from 'moment-timezone';
-import { METRIC_TYPE } from './';
+import { METRIC_TYPE } from '.';
 
 export interface ApplicationUsageMetric {
   type: METRIC_TYPE.APPLICATION_USAGE;

@@ -12,7 +12,7 @@ import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-const
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
-} from '../../../../../lists/server';
+} from '@kbn/lists-plugin/server';
 import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 
 import { ExceptionItemLikeOptions } from '../types';

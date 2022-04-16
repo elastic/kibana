@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, CoreStart, Capabilities } from 'kibana/public';
+import { CoreSetup, Plugin, CoreStart, Capabilities } from '@kbn/core/public';
 import { first, map, skip } from 'rxjs/operators';
 import { Subject, combineLatest } from 'rxjs';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import { ILicense } from '../../licensing/public';
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { LicenseStatus } from '../common/types/license_status';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';

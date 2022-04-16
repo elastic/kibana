@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { InvalidJSONProperty } from '@kbn/kibana-utils-plugin/common';
 import { SerializedSearchSourceFields } from './types';
-import { InvalidJSONProperty } from '../../../../kibana_utils/common';
 
 export const parseSearchSourceJSON = (searchSourceJSON: string) => {
   // if we have a searchSource, set its values based on the searchSourceJson field

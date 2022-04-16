@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
 import { MlApi } from './api';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
 
 export enum SavedObjectType {
   CONFIG = 'config',

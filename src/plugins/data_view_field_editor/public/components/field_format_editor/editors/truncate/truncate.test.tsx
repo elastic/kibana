@@ -9,7 +9,7 @@
 import React, { ChangeEvent } from 'react';
 import { shallow } from 'enzyme';
 import { EuiFieldNumber } from '@elastic/eui';
-import { FieldFormat } from 'src/plugins/field_formats/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { TruncateFormatEditor } from './truncate';
 

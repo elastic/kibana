@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from 'kibana/public';
+import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import React from 'react';
 import { KibanaPageTemplate } from '../page_template';

@@ -17,10 +17,10 @@ import { i18n } from '@kbn/i18n';
 import {
   useKibana,
   KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
-import { enableServiceGroups } from '../../../../../observability/public';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';

@@ -10,10 +10,7 @@ import './main.scss';
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@elastic/eui';
 import { first, pluck } from 'rxjs/operators';
-import {
-  IInterpreterRenderHandlers,
-  ExpressionValue,
-} from '../../../../../../../src/plugins/expressions/public';
+import { IInterpreterRenderHandlers, ExpressionValue } from '@kbn/expressions-plugin/public';
 import { ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
 

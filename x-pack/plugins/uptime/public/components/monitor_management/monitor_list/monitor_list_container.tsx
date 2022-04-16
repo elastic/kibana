@@ -8,7 +8,7 @@
 import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { getMonitors } from '../../../state/actions';
 import { monitorManagementListSelector } from '../../../state/selectors';

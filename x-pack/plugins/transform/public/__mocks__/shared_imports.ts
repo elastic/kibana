@@ -16,4 +16,4 @@ export const useRequest = jest.fn(() => ({
 export const getSavedSearch = jest.fn();
 
 // just passing through the reimports
-export { getMlSharedImports, ES_CLIENT_TOTAL_HITS_RELATION } from '../../../ml/public';
+export { getMlSharedImports, ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-plugin/public';

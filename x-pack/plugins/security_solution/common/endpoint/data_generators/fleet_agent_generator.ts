@@ -8,8 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
+import { Agent, AGENTS_INDEX, AgentStatus, FleetServerAgent } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
-import { Agent, AGENTS_INDEX, AgentStatus, FleetServerAgent } from '../../../../fleet/common';
 
 const agentStatusList: readonly AgentStatus[] = [
   'offline',

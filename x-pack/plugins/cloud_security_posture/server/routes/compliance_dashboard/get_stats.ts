@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import type { ComplianceDashboardData, Score } from '../../../common/types';

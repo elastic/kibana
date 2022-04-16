@@ -8,7 +8,7 @@
 
 /* eslint-disable dot-notation */
 import { UsageCountersService } from './usage_counters_service';
-import { loggingSystemMock, coreMock } from '../../../../core/server/mocks';
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import * as rxOp from 'rxjs/operators';
 import moment from 'moment';
 

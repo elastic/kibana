@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, Logger } from 'kibana/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { SemVer } from 'semver';
 
 import { EsLegacyConfigService, SpecDefinitionsService } from '../services';

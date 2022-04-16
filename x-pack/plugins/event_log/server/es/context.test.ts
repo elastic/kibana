@@ -6,8 +6,8 @@
  */
 
 import { createEsContext } from './context';
-import { Logger } from '../../../../../src/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');

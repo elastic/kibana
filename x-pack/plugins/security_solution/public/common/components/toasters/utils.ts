@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { isError } from 'lodash/fp';
 import { isAppError } from '@kbn/securitysolution-t-grid';
 
-import { AppToast, ActionToaster } from './';
+import { AppToast, ActionToaster } from '.';
 import { isToasterError } from './errors';
 
 /**

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { sha256 } from 'js-sha256';
-import type { Logger } from 'src/core/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { SavedObject } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObject } from '@kbn/core/server';
 import {
   SyntheticsMonitor,
   ConfigKey,

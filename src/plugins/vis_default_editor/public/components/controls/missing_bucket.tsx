@@ -8,9 +8,9 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { search } from '@kbn/data-plugin/public';
 import { SwitchParamEditor } from './switch';
 
-import { search } from '../../../../data/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {

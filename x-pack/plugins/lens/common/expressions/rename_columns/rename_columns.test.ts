@@ -6,8 +6,8 @@
  */
 
 import { renameColumns } from './rename_columns';
-import { Datatable } from '../../../../../../src/plugins/expressions/common';
-import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 
 describe('rename_columns', () => {
   it('should rename columns of a given datatable', async () => {

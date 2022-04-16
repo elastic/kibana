@@ -18,7 +18,7 @@ import { ErrorConnecting } from './components/error_connecting';
 import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
 
-import { EnterpriseSearchOverview } from './';
+import { EnterpriseSearchOverview } from '.';
 
 describe('EnterpriseSearchOverview', () => {
   it('renders the Setup Guide and Product Selector', () => {

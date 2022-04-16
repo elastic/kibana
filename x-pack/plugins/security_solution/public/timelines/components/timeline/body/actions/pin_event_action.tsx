@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { EventsTdContent } from '../../styles';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import { Pin } from '../../pin';
 import { TimelineType } from '../../../../../../common/types/timeline';

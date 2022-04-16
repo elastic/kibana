@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
-import type { SavedObjectsClientContract } from '../../../../../../../../src/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+
 import { findExceptionList } from '../../find_exception_list';
 
 import { findAllListTypes, getAllListTypes, getListFilter } from './find_all_exception_list_types';

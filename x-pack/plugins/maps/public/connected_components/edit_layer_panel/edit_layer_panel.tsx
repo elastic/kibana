@@ -22,14 +22,14 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FilterEditor } from './filter_editor';
 import { JoinEditor, JoinField } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
 
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';

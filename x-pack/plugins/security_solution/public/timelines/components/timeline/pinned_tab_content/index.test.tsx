@@ -17,25 +17,25 @@ import { defaultRowRenderers } from '../body/renderers';
 import { Sort } from '../body/sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { useTimelineEvents } from '../../../containers/index';
-import { useTimelineEventsDetails } from '../../../containers/details/index';
+import { useTimelineEvents } from '../../../containers';
+import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
 import { Direction } from '../../../../../common/search_strategy';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../timelines/public/components';
-import { mockCasesContext } from '../../../../../../cases/public/mocks/mock_cases_context';
+import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
-jest.mock('../../../containers/index', () => ({
+jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../../containers/details/index', () => ({
+jest.mock('../../../containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
 jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
-jest.mock('../body/events/index', () => ({
+jest.mock('../body/events', () => ({
   Events: () => <></>,
 }));
 

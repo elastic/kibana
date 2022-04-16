@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import type { QueryDslQueryContainer } from '../../common/types';
 

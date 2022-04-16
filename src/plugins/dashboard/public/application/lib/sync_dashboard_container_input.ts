@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DashboardContainer } from '../embeddable';
 import { Query } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';
@@ -23,7 +24,6 @@ import {
   setTimeRange,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
-import { replaceUrlHashQuery } from '../../../../kibana_utils/public';
 import { DashboardBuildContext, DashboardContainerInput } from '../../types';
 import {
   getSearchSessionIdFromURL,

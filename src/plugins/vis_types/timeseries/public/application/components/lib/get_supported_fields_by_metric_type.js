@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import { METRIC_TYPES } from '../../../../../../data/common';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 export function getSupportedFieldsByMetricType(type) {

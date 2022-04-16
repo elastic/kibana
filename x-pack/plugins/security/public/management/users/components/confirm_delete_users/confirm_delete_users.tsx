@@ -8,11 +8,11 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { asyncForEach } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart } from 'src/core/public';
 
 import type { UserAPIClient } from '../../user_api_client';
 

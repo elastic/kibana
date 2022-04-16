@@ -22,13 +22,13 @@ import {
   ESCalendarIntervalUnit,
   PartialTheme,
 } from '@elastic/charts';
-import type { CustomPaletteState } from '../../../../charts/public';
-import { search } from '../../../../data/public';
-import { LegendToggle, EmptyPlaceholder } from '../../../../charts/public';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { search } from '@kbn/data-plugin/public';
+import { LegendToggle, EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
   getAccessorByDimension,
   getFormatByAccessor,
-} from '../../../../visualizations/common/utils';
+} from '@kbn/visualizations-plugin/common/utils';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import {

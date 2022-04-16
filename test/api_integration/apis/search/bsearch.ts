@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import request from 'superagent';
-import { inflateResponse } from '../../../../src/plugins/bfetch/public/streaming';
+import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';

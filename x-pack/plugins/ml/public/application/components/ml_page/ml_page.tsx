@@ -9,7 +9,8 @@ import React, { createContext, FC, useCallback, useMemo, useReducer } from 'reac
 import { EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route } from 'react-router-dom';
-import type { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from '@kbn/core/public';
+import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
@@ -17,10 +18,6 @@ import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { MlRoute, PageDependencies } from '../../routing/router';
 import { DatePickerWrapper } from '../navigation_menu/date_picker_wrapper';
 import { useActiveRoute } from '../../routing/use_active_route';
-import {
-  KibanaPageTemplate,
-  RedirectAppLinks,
-} from '../../../../../../../src/plugins/kibana_react/public';
 import { useDocTitle } from '../../routing/use_doc_title';
 
 export const MlPageControlsContext = createContext<{

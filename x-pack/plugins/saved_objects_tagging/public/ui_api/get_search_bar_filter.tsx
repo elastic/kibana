@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   SavedObjectsTaggingApiUi,
   GetSearchBarFilterOptions,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { ITagsCache } from '../services';
 import { TagSearchBarOption } from '../components';
 import { byNameTagSorter } from '../utils';

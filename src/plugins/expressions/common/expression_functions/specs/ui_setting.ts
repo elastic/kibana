@@ -7,9 +7,9 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '../..';
 import { UiSetting } from '../../expression_types/specs/ui_setting';
 
 interface UiSettingsClient {

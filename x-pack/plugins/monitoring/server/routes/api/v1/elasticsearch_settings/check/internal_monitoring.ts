@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandlerContext } from 'kibana/server';
+import { RequestHandlerContext } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   INDEX_PATTERN_ELASTICSEARCH,

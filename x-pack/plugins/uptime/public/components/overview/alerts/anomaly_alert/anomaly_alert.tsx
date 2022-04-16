@@ -15,11 +15,11 @@ import {
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
+import { getSeverityColor, getSeverity } from '@kbn/ml-plugin/public';
 import { AnomalyTranslations } from './translations';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import { DEFAULT_SEVERITY, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
 import { monitorIdSelector } from '../../../../state/selectors';
-import { getSeverityColor, getSeverity } from '../../../../../../ml/public';
 
 interface Props {
   ruleParams: { [key: string]: any };

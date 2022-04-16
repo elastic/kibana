@@ -8,10 +8,10 @@
 
 import supertest from 'supertest';
 import { registerDeleteUnknownTypesRoute } from '../deprecations';
-import { elasticsearchServiceMock } from '../../../../../core/server/elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '../../../elasticsearch/elasticsearch_service.mock';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { setupServer } from '../test_utils';
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '../../..';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

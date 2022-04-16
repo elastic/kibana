@@ -6,8 +6,8 @@
  */
 
 import { GeoJsonProperties } from 'geojson';
+import { Query } from '@kbn/data-plugin/common/query';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 import { VectorJoinSourceRequestMeta } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';

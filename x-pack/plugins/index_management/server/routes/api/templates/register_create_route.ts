@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 import { templateSchema } from './validate_schemas';
 import { saveTemplate, doesTemplateExist } from './lib';
 

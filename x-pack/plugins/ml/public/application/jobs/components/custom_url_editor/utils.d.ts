@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
 import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 import { TimeRangeType } from './constants';

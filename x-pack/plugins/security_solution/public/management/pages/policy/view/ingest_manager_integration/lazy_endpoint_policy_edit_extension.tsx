@@ -6,11 +6,11 @@
  */
 
 import { lazy } from 'react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   PackagePolicyEditExtensionComponent,
   PackagePolicyEditExtensionComponentProps,
-} from '../../../../../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
 import { StartPlugins } from '../../../../../types';
 
 export const getLazyEndpointPolicyEditExtension = (

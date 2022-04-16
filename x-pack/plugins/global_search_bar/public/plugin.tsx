@@ -9,11 +9,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ApplicationStart } from 'kibana/public';
-import { CoreStart, Plugin } from 'src/core/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { GlobalSearchPluginStart } from '../../global_search/public';
-import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { SearchBar } from './components/search_bar';
 
 export interface GlobalSearchBarPluginStartDeps {

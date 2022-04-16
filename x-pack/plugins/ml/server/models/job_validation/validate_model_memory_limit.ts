@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '../../../../common';
-import { DataView } from '../../../../../data_views/public';
 
 export function getIndexPatternFromFilter(
   filter: Filter,

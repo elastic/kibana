@@ -13,7 +13,7 @@ import {
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
-} from '../../../../usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
 
 interface UsageCounterEvent {
   domainId: string;

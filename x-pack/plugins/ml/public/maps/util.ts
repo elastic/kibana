@@ -8,11 +8,11 @@
 import { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
-import { VectorSourceRequestMeta } from '../../../maps/common';
 import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
 import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
 

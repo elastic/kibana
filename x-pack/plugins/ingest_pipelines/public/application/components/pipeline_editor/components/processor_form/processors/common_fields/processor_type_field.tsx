@@ -12,6 +12,10 @@ import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
 
 import {
+  FieldValidateResponse,
+  VALIDATION_TYPES,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
   FIELD_TYPES,
   FieldConfig,
   UseField,
@@ -20,10 +24,6 @@ import {
 } from '../../../../../../../shared_imports';
 
 import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../shared';
-import {
-  FieldValidateResponse,
-  VALIDATION_TYPES,
-} from '../../../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 const extractProcessorTypesAndLabels = flow(
   Object.entries,

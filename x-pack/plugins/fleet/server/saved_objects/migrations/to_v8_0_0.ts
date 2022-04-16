@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 import type { Installation, Output } from '../../../common';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../common';

@@ -12,8 +12,8 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   RequestHandlerContext,
-} from 'src/core/server';
-import type { KibanaRequest } from 'src/core/server';
+} from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { appContextService } from '../services';
 
@@ -27,7 +27,7 @@ import {
   RegistryConnectionError,
   RegistryError,
   RegistryResponseError,
-} from './index';
+} from '.';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams

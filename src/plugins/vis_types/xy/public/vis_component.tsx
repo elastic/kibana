@@ -30,9 +30,9 @@ import {
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
   useActiveCursor,
-} from '../../../charts/public';
-import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
-import type { PersistedState } from '../../../visualizations/public';
+} from '@kbn/charts-plugin/public';
+import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { VisParams } from './types';
 import {
   getAdjustedDomain,

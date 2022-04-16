@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import { range, omit } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
+import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
+import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
-import { ServiceAnomalyTimeseries } from '../../../../plugins/apm/common/anomaly_detection/service_anomaly_timeseries';
-import { ApmMlDetectorType } from '../../../../plugins/apm/common/anomaly_detection/apm_ml_detectors';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

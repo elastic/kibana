@@ -8,11 +8,11 @@
 import { has, filter, unset } from 'lodash';
 import { produce } from 'immer';
 import { schema } from '@kbn/config-schema';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 
-import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 

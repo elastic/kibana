@@ -9,13 +9,13 @@ import React, { useEffect } from 'react';
 import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
-import { EntityType, TimelineId } from '../../../../../timelines/common';
+import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
 import { SessionsComponentsProps } from './types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
-jest.mock('../../components/url_state/normalize_time_range.ts');
+jest.mock('../url_state/normalize_time_range');
 
 const startDate = '2022-03-22T22:10:56.794Z';
 const endDate = '2022-03-21T22:10:56.791Z';
@@ -62,8 +62,8 @@ const SessionsViewerTGrid: React.FC<Props> = ({ columns, start, end, id, filters
   );
 };
 
-jest.mock('../../../../../timelines/public/mock/plugin_mock.tsx', () => {
-  const originalModule = jest.requireActual('../../../../../timelines/public/mock/plugin_mock.tsx');
+jest.mock('@kbn/timelines-plugin/public/mock/plugin_mock', () => {
+  const originalModule = jest.requireActual('@kbn/timelines-plugin/public/mock/plugin_mock');
   return {
     ...originalModule,
     createTGridMocks: () => ({

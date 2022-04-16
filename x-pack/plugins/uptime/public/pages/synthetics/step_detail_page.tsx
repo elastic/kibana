@@ -8,14 +8,14 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTrackPageview } from '../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useInitApp } from '../../hooks/use_init_app';
 import { StepDetailContainer } from '../../components/monitor/synthetics/step_detail/step_detail_container';
 import { journeySelector } from '../../state/selectors';
 import { JourneyState } from '../../state/reducers/journey';
 import { JourneyStep } from '../../../common/runtime_types/ping/synthetics';
 import { StepPageNavigation } from '../../components/monitor/synthetics/step_detail/step_page_nav';
-import { useUiSetting$ } from '../../../../../../src/plugins/kibana_react/public';
 import { StepPageTitleContent } from '../../components/monitor/synthetics/step_detail/step_page_title';
 import { getJourneySteps } from '../../state/actions/journey';
 

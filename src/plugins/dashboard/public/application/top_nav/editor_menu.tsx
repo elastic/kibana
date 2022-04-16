@@ -14,8 +14,8 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { BaseVisType, VisGroups, VisTypeAlias } from '../../../../visualizations/public';
-import { SolutionToolbarPopover } from '../../../../presentation_util/public';
+import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { DashboardAppServices } from '../../types';

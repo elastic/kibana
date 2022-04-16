@@ -12,7 +12,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { asyncForEach } from '@kbn/std';
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 

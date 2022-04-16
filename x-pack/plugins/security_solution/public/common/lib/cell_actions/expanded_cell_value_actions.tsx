@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import React, { useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import { BrowserFields } from '../../../../../timelines/common/search_strategy';
+import { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
 import { allowTopN } from '../../components/drag_and_drop/helpers';
 import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
 import { getAllFieldsByName } from '../../containers/source';

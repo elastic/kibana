@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { from, Observable, EMPTY } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 import {
   SearchSessionSavedObjectAttributes,
   SEARCH_SESSION_TYPE,
   KueryNode,
-} from '../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 import { CheckSearchSessionsDeps, CheckSearchSessionsFn, SearchSessionsConfig } from './types';
 
 export interface GetSessionsDeps {

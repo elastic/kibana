@@ -9,6 +9,13 @@ import seedrandom from 'seedrandom';
 import semverLte from 'semver/functions/lte';
 import { assertNever } from '@kbn/std';
 import {
+  GetAgentPoliciesResponseItem,
+  GetPackagesResponse,
+  EsAssetReference,
+  KibanaAssetReference,
+  agentPolicyStatuses,
+} from '@kbn/fleet-plugin/common';
+import {
   AlertEvent,
   DataStream,
   EndpointStatus,
@@ -28,13 +35,6 @@ import {
   processNameSafeVersion,
   timestampSafeVersion,
 } from './models/event';
-import {
-  GetAgentPoliciesResponseItem,
-  GetPackagesResponse,
-  EsAssetReference,
-  KibanaAssetReference,
-  agentPolicyStatuses,
-} from '../../../fleet/common';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';

@@ -15,7 +15,7 @@ export default async function ({ readConfigFile }) {
   const certificateAuthorities = [readFileSync(CA1_CERT_PATH), readFileSync(CA2_CERT_PATH)];
 
   return {
-    testFiles: [require.resolve('./')],
+    testFiles: [require.resolve('.')],
     services: {
       ...httpConfig.get('services'),
       supertest: createKibanaSupertestProvider({

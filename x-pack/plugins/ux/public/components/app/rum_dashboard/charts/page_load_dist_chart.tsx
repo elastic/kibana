@@ -28,11 +28,11 @@ import {
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
 import styled from 'styled-components';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { PercentileAnnotations } from '../page_load_distribution/percentile_annotations';
 import { I18LABELS } from '../translations';
 import { ChartWrapper } from '../chart_wrapper';
 import { PercentileRange } from '../page_load_distribution';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { BreakdownSeries } from '../page_load_distribution/breakdown_series';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 

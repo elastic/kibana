@@ -28,7 +28,7 @@ import * as utils from '../utils';
 import { populateContext } from './engine';
 import { AutoCompleteContext, ResultTerm } from './types';
 // @ts-ignore
-import { URL_PATH_END_MARKER } from './components/index';
+import { URL_PATH_END_MARKER } from './components';
 
 let lastEvaluatedToken: Token | null = null;
 

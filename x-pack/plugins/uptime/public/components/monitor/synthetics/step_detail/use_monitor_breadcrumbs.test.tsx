@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { of } from 'rxjs';
@@ -14,7 +14,7 @@ import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { OVERVIEW_ROUTE } from '../../../../../common/constants';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { JourneyState } from '../../../../state/reducers/journey';
-import { chromeServiceMock, uiSettingsServiceMock } from 'src/core/public/mocks';
+import { chromeServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 describe('useMonitorBreadcrumbs', () => {
   it('sets the given breadcrumbs for steps list view', () => {

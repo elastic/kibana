@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
-import { IEventLogClient, IEventLogService } from '../../../../../event_log/server';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { IEventLogClient, IEventLogService } from '@kbn/event-log-plugin/server';
 
 import { IRuleExecutionLogForRoutes } from './client_for_routes/client_interface';
 import { createClientForRoutes } from './client_for_routes/client';

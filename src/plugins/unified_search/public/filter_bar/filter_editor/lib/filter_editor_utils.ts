@@ -10,9 +10,9 @@ import dateMath from '@kbn/datemath';
 import { Filter, FieldFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
+import { isFilterable, IFieldType, IpAddress } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import { isFilterable, IFieldType, IpAddress } from '../../../../../data/common';
-import { DataView } from '../../../../../data_views/common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: DataView) {
   return indexPattern.fields.find((field) => field.name === filter.meta.key);

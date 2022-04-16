@@ -13,7 +13,7 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { AuditLogger } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';

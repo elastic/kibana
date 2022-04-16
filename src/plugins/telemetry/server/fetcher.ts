@@ -8,14 +8,14 @@
 
 import { firstValueFrom, Observable, Subscription, timer } from 'rxjs';
 import fetch from 'node-fetch';
-import type { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
+import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
 import {
   PluginInitializerContext,
   Logger,
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-} from '../../../core/server';
+} from '@kbn/core/server';
 import {
   getTelemetryChannelEndpoint,
   getTelemetryOptIn,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { abs } = require('../../src/functions/abs.js');
+const { abs } = require('../../src/functions/abs');
 
 describe('Abs', () => {
   it('numbers', () => {

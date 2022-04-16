@@ -10,7 +10,7 @@ import React from 'react';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 
-import { letBrowserHandleEvent, createHref } from './';
+import { letBrowserHandleEvent, createHref } from '.';
 
 /**
  * Generates the `href` and `onClick` props for React-Router-friendly links

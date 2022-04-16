@@ -10,11 +10,11 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
-import { useUptimeStartPlugins } from '../../../contexts/uptime_startup_plugins_context';
+import { AllSeries, createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JourneyStep } from '../../../../common/runtime_types';
-import { AllSeries, createExploratoryViewUrl } from '../../../../../observability/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useUptimeStartPlugins } from '../../../contexts/uptime_startup_plugins_context';
 import { selectDynamicSettings } from '../../../state/selectors';
 
 export const getLast48Intervals = (activeStep: JourneyStep) => {

@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
   SavedObject,
   SavedObjectsImportRetry,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import { spaceIdToNamespace } from '../utils/namespace';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';

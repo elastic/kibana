@@ -9,12 +9,9 @@ import React, { memo, useMemo } from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  PackageCustomExtensionComponentProps,
-  pagePathGetters,
-} from '../../../../../../../../../fleet/public';
+import { PackageCustomExtensionComponentProps, pagePathGetters } from '@kbn/fleet-plugin/public';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { ListPageRouteState } from '../../../../../../../../common/endpoint/types';
-import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../../fleet/common';
 import { useToasts } from '../../../../../../../common/lib/kibana';
 import { useAppUrl } from '../../../../../../../common/lib/kibana/hooks';
 import { LinkWithIcon } from './link_with_icon';

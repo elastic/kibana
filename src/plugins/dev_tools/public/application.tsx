@@ -27,8 +27,8 @@ import type {
   ScopedHistory,
   CoreTheme,
   ExecutionContextStart,
-} from 'src/core/public';
-import { KibanaThemeProvider, useExecutionContext } from '../../kibana_react/public';
+} from '@kbn/core/public';
+import { KibanaThemeProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';

@@ -7,9 +7,9 @@
 
 import { isString } from 'lodash';
 import { JsonValue } from '@kbn/utility-types';
+import { Logger } from '@kbn/core/server';
 import { HealthStatus, RawMonitoringStats } from '../monitoring';
 import { TaskManagerConfig } from '../config';
-import { Logger } from '../../../../../src/core/server';
 
 export function calculateHealthStatus(
   summarizedStats: RawMonitoringStats,

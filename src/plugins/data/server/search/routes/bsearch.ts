@@ -8,8 +8,8 @@
 
 import { firstValueFrom } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-import type { ExecutionContextSetup } from 'src/core/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import type { ExecutionContextSetup } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
 import {
   IKibanaSearchRequest,

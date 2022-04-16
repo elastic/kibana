@@ -8,13 +8,13 @@
 
 import { firstValueFrom, from, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import type { Logger, SharedGlobalConfig } from 'kibana/server';
+import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
+import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
 import type { SearchUsage } from '../../collectors';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../../collectors/usage';
-import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,

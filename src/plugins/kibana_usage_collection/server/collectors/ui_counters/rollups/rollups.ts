@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, Logger } from 'kibana/server';
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import moment from 'moment';
 import type { Subject } from 'rxjs';
 

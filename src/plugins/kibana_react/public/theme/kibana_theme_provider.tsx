@@ -10,7 +10,7 @@ import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { EuiThemeProvider } from '@elastic/eui';
-import type { CoreTheme } from '../../../../core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { getColorMode } from './utils';
 
 interface KibanaThemeProviderProps {

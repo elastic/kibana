@@ -13,8 +13,9 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { ScopedHistory } from '../../../../../src/core/public';
-import { getStorybookContextProvider } from '../../../../../src/plugins/custom_integrations/storybook';
+import { ScopedHistory } from '@kbn/core/public';
+import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
+
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
 

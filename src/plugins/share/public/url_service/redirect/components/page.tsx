@@ -9,11 +9,11 @@
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiPageTemplate } from '@elastic/eui';
-import { ThemeServiceSetup } from 'kibana/public';
+import { ThemeServiceSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Error } from './error';
 import { RedirectManager } from '../redirect_manager';
 import { Spinner } from './spinner';
-import { KibanaThemeProvider } from '../../../../../kibana_react/public';
 
 export interface PageProps {
   manager: Pick<RedirectManager, 'error$'>;

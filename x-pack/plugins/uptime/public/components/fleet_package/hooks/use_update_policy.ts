@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useRef, useState } from 'react';
-import { NewPackagePolicy } from '../../../../../fleet/public';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { ConfigKey, DataStream, Validation, MonitorFields } from '../types';
 import { formatters } from '../helpers/formatters';
 

@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useVisibilityState } from '../../utils/use_visibility_state';
 
 interface LogHighlightsMenuProps {

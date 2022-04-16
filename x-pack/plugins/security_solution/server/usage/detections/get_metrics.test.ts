@@ -11,7 +11,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockMlJobSummaryResponse,

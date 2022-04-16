@@ -6,15 +6,20 @@
  */
 
 import expect from '@kbn/expect';
-import type { MlJobUsageMetric } from '../../../../../../plugins/security_solution/server/usage/detections/ml_jobs/types';
-import type { RulesTypeUsage } from '../../../../../../plugins/security_solution/server/usage/detections/rules/types';
-import type { DetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/types';
+import type { MlJobUsageMetric } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/types';
+import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
+import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import type {
   ThreatMatchCreateSchema,
   ThresholdCreateSchema,
-} from '../../../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getInitialMlJobUsage } from '../../../../../../plugins/security_solution/server/usage/detections/ml_jobs/get_initial_usage';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { getInitialMlJobUsage } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/get_initial_usage';
+import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
+import {
+  getInitialMaxAvgMin,
+  getInitialSingleEventLogUsage,
+  getInitialSingleEventMetric,
+} from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import {
   createRule,
   createSignalsIndex,
@@ -29,12 +34,7 @@ import {
   waitForSignalsToBePresent,
   deleteAllEventLogExecutionEvents,
 } from '../../../../utils';
-import { getInitialDetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/get_initial_usage';
-import {
-  getInitialMaxAvgMin,
-  getInitialSingleEventLogUsage,
-  getInitialSingleEventMetric,
-} from '../../../../../../plugins/security_solution/server/usage/detections/rules/get_initial_usage';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

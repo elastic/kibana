@@ -11,11 +11,11 @@ import {
   SavedObjectsClientContract,
   ElasticsearchClient,
   KibanaRequest,
-} from 'kibana/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+} from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
-import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 
 type ServiceFactory = (
   savedObjectsClient: SavedObjectsClientContract,

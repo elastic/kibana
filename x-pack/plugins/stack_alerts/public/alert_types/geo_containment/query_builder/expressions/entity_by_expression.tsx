@@ -9,8 +9,8 @@ import React, { FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { DataViewField } from 'src/plugins/data_views/public';
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
 

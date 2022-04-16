@@ -10,9 +10,9 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { IUiSettingsClient, SavedObjectsStart } from '../../../../../core/public';
+import { IUiSettingsClient, SavedObjectsStart } from '@kbn/core/public';
 
-import { SavedObjectFinderUi } from '../../../../../plugins/saved_objects/public';
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 

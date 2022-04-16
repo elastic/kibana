@@ -8,7 +8,7 @@
 import { patchRules } from './patch_rules';
 import { getPatchRulesOptionsMock, getPatchMlRulesOptionsMock } from './patch_rules.mock';
 import { PatchRulesOptions } from './types';
-import { RulesClientMock } from '../../../../../alerting/server/rules_client.mock';
+import { RulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 

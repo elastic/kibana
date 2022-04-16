@@ -6,15 +6,15 @@
  */
 
 import moment from 'moment';
-import { mergeTables } from './index';
+import { mergeTables } from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExpressionValueSearchContext } from 'src/plugins/data/public';
+import { ExpressionValueSearchContext } from '@kbn/data-plugin/public';
 import {
   Datatable,
   ExecutionContext,
   DefaultInspectorAdapters,
   TablesAdapter,
-} from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin';
 
 describe('lens_merge_tables', () => {
   const sampleTable1: Datatable = {

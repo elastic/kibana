@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import {
   CasesByAlertId,
   CasesByAlertIDRequest,

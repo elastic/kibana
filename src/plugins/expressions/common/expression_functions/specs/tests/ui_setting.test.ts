@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../../../../common');
+jest.mock('../../..');
 
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { getUiSettingFn } from '../ui_setting';
 import { functionWrapper } from './utils';
 

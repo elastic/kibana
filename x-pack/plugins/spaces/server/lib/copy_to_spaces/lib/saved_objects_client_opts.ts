@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientProviderOptions } from 'src/core/server';
+import type { SavedObjectsClientProviderOptions } from '@kbn/core/server';
 
 export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
   excludedWrappers: ['spaces'],

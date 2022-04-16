@@ -8,10 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
+import { VisGroups, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { MarkdownOptions } from './markdown_options';
 import { SettingsOptions } from './settings_options_lazy';
-import { DefaultEditorSize } from '../../vis_default_editor/public';
-import { VisGroups, VisTypeDefinition } from '../../visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { MarkdownVisParams } from './types';
 

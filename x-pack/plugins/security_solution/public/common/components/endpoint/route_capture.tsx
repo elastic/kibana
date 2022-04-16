@@ -8,9 +8,9 @@
 import React, { memo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { TimelineId } from '@kbn/timelines-plugin/common';
 import { AppLocation } from '../../../../common/endpoint/types';
 import { timelineActions } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../../timelines/common';
 
 /**
  * This component should be used above all routes, but below the Provider.

@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { duration as momentDuration } from 'moment';
 
 import { CoreContext } from '../../core_context';
-import { HttpService } from './../http_service';
+import { HttpService } from '../http_service';
 import { Env } from '../../config';
 
 import { contextServiceMock } from '../../context/context_service.mock';

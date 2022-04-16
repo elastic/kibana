@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiCard, EuiFlexItem, EuiBadge, EuiToolTip, EuiSpacer } from '@elastic/eui';
 
-import { TrackApplicationView } from '../../../../../../../../../src/plugins/usage_collection/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';

@@ -8,17 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
-import {
-  extendedBoundsToAst,
-  numericalRangeToAst,
-} from '../../../../../../../../src/plugins/data/common';
-import {
-  buildExpressionFunction,
-  Range,
-} from '../../../../../../../../src/plugins/expressions/public';
+import { AggFunctionsMapping, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
+import { buildExpressionFunction, Range } from '@kbn/expressions-plugin/public';
 import { RangeEditor } from './range_editor';
-import { OperationDefinition } from '../index';
+import { OperationDefinition } from '..';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../common/expressions/format_column/supported_formats';

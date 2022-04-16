@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
 import { UrlDrilldownGlobalScope } from './types';
 
 interface UrlDrilldownGlobalScopeDeps {

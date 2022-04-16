@@ -6,7 +6,7 @@
  */
 import { JsonObject } from '@kbn/utility-types';
 import { schema } from '@kbn/config-schema';
-import { IRouter, ServiceStatus } from '../../../../../src/core/server';
+import { IRouter, ServiceStatus } from '@kbn/core/server';
 import { getESClusterUuid, getKibanaStats } from '../lib';
 import { MetricResult } from '../plugin';
 

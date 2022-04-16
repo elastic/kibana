@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectSanitizedDoc } from 'kibana/server';
+import { SavedObjectSanitizedDoc } from '@kbn/core/server';
 import {
   CaseAttributes,
   CaseFullExternalService,

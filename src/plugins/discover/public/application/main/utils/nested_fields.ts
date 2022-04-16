@@ -7,8 +7,8 @@
  */
 
 import { escapeRegExp } from 'lodash/fp';
-import { getFieldSubtypeNested } from '../../../../../data_views/public';
-import type { DataView } from '../../../../../data_views/public';
+import { getFieldSubtypeNested } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 /**
  * This function checks if the given field in a given index pattern is a nested field's parent.

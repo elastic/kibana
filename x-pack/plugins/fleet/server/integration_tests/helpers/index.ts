@@ -7,8 +7,8 @@
 
 import { adminTestUser } from '@kbn/test';
 
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
-import type { HttpMethod } from 'src/core/test_helpers/kbn_server';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import type { HttpMethod } from '@kbn/core/test_helpers/kbn_server';
 
 type Root = ReturnType<typeof kbnTestServer.createRoot>;
 

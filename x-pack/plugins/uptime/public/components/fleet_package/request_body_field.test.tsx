@@ -17,8 +17,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood

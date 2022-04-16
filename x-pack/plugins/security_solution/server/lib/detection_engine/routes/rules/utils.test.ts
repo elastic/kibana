@@ -27,7 +27,7 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { PartialFilter } from '../../types';
 import { BulkError, createBulkErrorObject } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { PartialRule } from '../../../../../../alerting/server';
+import { PartialRule } from '@kbn/alerting-plugin/server';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';

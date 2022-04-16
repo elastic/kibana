@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
-import { SavedObjectAttributes } from 'kibana/public';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { SavedObjectAttributes } from '@kbn/core/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
@@ -18,17 +18,17 @@ import {
   defaultEmbeddableFactoryProvider,
   EmbeddableContext,
   PANEL_NOTIFICATION_TRIGGER,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import {
+  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
+} from '@kbn/ui-actions-enhanced-plugin/public';
 import { EnhancedEmbeddable } from './types';
 import {
   EmbeddableActionStorage,
   EmbeddableWithDynamicActions,
 } from './embeddables/embeddable_action_storage';
-import {
-  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
-  AdvancedUiActionsSetup,
-  AdvancedUiActionsStart,
-} from '../../ui_actions_enhanced/public';
 import { PanelNotificationsAction } from './actions';
 
 export interface SetupDependencies {

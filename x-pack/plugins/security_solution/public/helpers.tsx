@@ -10,7 +10,7 @@ import { has, get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { matchPath, RouteProps, Redirect } from 'react-router-dom';
 
-import { Capabilities, CoreStart } from '../../../../src/core/public';
+import { Capabilities, CoreStart } from '@kbn/core/public';
 import {
   ALERTS_PATH,
   APP_UI_ID,

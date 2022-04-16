@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable } from 'src/plugins/expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { inferTimeField } from './utils';
 
 const table: Datatable = {

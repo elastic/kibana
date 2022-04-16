@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import { IField } from '../fields/field';

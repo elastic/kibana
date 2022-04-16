@@ -18,8 +18,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
   ElasticsearchClient,
-} from 'kibana/server';
-import { Logger } from '../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 const bodySchema = schema.object({
   pattern: schema.string(),

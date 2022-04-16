@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { ConnectorTokenClient } from './connector_token_client';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ConnectorToken } from '../../types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },

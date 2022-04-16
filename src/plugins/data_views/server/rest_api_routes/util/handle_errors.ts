@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandler, RouteMethod, RequestHandlerContext } from 'src/core/server';
+import type { RequestHandler, RouteMethod, RequestHandlerContext } from '@kbn/core/server';
 import { ErrorIndexPatternNotFound } from '../../error';
 
 interface ErrorResponseBody {

@@ -7,11 +7,11 @@
  */
 
 import { TelemetryPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
-import { homePluginMock } from '../../home/public/mocks';
-import { screenshotModePluginMock } from '../../screenshot_mode/public/mocks';
-import { HomePublicPluginSetup } from '../../home/public';
-import { ScreenshotModePluginSetup } from '../../screenshot_mode/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { homePluginMock } from '@kbn/home-plugin/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
 let screenshotMode: ScreenshotModePluginSetup;
 let home: HomePublicPluginSetup;

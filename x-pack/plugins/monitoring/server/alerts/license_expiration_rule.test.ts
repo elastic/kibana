@@ -10,7 +10,7 @@ import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 

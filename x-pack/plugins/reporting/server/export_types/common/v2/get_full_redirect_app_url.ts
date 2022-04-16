@@ -6,7 +6,7 @@
  */
 
 import { format } from 'url';
-import { ReportingConfig } from '../../../';
+import { ReportingConfig } from '../../..';
 import { getRedirectAppPath } from '../../../../common/constants';
 import { buildKibanaPath } from '../../../../common/build_kibana_path';
 

@@ -7,6 +7,7 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
+import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
@@ -14,7 +15,6 @@ import {
   QueryRulesBulkSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import type { RouteConfig, RequestHandler, Logger } from '../../../../../../../../src/core/server';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,

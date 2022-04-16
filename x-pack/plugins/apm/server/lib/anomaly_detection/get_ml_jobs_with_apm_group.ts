@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlPluginSetup } from '../../../../ml/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
 import { Environment } from '../../../common/environment_rt';
 import { withApmSpan } from '../../utils/with_apm_span';

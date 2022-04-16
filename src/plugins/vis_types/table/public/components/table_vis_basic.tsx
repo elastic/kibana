@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { createTableVisCell } from './table_vis_cell';
 import { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { usePagination } from '../utils';

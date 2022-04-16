@@ -9,7 +9,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsOpenPointInTimeResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 

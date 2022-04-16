@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '../types';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { MlStartDependencies } from '../../plugin';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import { EmbeddableAnomalyChartsContainerProps } from './embeddable_anomaly_charts_container';

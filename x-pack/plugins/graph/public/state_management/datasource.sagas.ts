@@ -8,6 +8,7 @@
 import { takeLatest, put, call, select } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
 import { Action } from 'typescript-fsa';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { GraphStoreDependencies } from './store';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
@@ -18,7 +19,6 @@ import {
   setDatasource,
   requestDatasource,
 } from './datasource';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings

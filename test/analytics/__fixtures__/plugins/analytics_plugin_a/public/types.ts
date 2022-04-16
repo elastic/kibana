@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TelemetryCounter } from 'src/core/public';
+import type { TelemetryCounter } from '@kbn/core/public';
 import type { Action } from './custom_shipper';
 
 declare global {

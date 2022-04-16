@@ -9,7 +9,7 @@ import { HostStatus } from '../../../../common/endpoint/types';
 import { createMockMetadataRequestContext } from '../../mocks';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { enrichHostMetadata, MetadataRequestContext } from './handlers';
-import { AgentClient } from '../../../../../fleet/server';
+import { AgentClient } from '@kbn/fleet-plugin/server';
 
 describe('test document enrichment', () => {
   let metaReqCtx: jest.Mocked<MetadataRequestContext>;

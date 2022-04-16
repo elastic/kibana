@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Datatable } from '@kbn/expressions-plugin/public';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
 import { AxisExtentConfig, DataLayerConfigResult } from '../../common';
-import { Datatable } from '../../../../../plugins/expressions/public';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../plugins/field_formats/common';
 
 interface FormattedMetric {
   layer: string;

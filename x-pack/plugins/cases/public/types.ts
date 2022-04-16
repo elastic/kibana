@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { ReactElement, ReactNode } from 'react';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import {
-  ManagementSetup,
-  ManagementAppMountParams,
-} from '../../../../src/plugins/management/public';
-import { FeaturesPluginStart } from '../..//features/public';
-import type { LensPublicStart } from '../../lens/public';
-import type { SecurityPluginSetup } from '../../security/public';
-import type { SpacesPluginStart } from '../../spaces/public';
-import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '../../triggers_actions_ui/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   CasesByAlertId,
   CasesByAlertIDRequest,

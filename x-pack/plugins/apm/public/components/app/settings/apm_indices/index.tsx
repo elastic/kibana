@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../../plugin';

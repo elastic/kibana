@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../../common/types';
-import { StepProps } from '../';
+import { StepProps } from '..';
 
 import { IndicesAndDataStreamsField } from './fields';
 import { useCore } from '../../../../app_context';

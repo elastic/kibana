@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 
-import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
-import type { StopTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/stop_transforms';
-import { isStopTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/type_guards';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { StopTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/stop_transforms';
+import { isStopTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';

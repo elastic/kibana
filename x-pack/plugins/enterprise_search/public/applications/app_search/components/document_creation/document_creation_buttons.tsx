@@ -33,7 +33,7 @@ import { generateEnginePath } from '../engine';
 
 import illustration from './illustration.svg';
 
-import { DocumentCreationLogic } from './';
+import { DocumentCreationLogic } from '.';
 
 interface Props {
   isFlyout?: boolean;

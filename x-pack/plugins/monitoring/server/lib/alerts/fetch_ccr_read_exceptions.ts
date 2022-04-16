@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';

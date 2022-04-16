@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { coreMock } from '../../../../src/core/server/mocks';
-import { createFleetRequestHandlerContextMock } from '../../fleet/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { createFleetRequestHandlerContextMock } from '@kbn/fleet-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 function createCoreRequestHandlerContextMock() {
   return {

@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { PackagePolicyEditExtensionComponentProps } from '../../../../fleet/public';
-import { useTrackPageview } from '../../../../observability/public';
+import { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { usePolicyConfigContext } from './contexts';
 import { MonitorFields, PolicyConfig } from './types';
 import { CustomFields } from './custom_fields';

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseStatuses } from '../../../../plugins/cases/common';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function CasesCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {

@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from 'react-query';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComplianceDashboardData } from '../../../common/types';
 import { STATS_ROUTE_PATH } from '../../../common/constants';
 

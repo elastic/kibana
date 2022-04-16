@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const useDeleteSavedObject = (type: string) => {
   const kibana = useKibana();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentName } from '../../apm/typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 
 export const RUM_AGENT_NAMES: AgentName[] = [
   'js-base',

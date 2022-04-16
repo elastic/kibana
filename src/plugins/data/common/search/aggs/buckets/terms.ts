@@ -19,7 +19,7 @@ import {
 import { aggTermsFnName } from './terms_fn';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 
 import {
   createOtherBucketPostFlightRequest,

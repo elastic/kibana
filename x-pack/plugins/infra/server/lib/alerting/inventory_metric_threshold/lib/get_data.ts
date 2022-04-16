@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';

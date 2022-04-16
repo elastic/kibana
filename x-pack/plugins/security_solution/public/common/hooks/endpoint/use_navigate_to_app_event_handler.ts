@@ -6,7 +6,7 @@
  */
 
 import { MouseEventHandler, useCallback } from 'react';
-import { ApplicationStart, NavigateToAppOptions } from 'kibana/public';
+import { ApplicationStart, NavigateToAppOptions } from '@kbn/core/public';
 import { useKibana } from '../../lib/kibana';
 
 type NavigateToAppHandlerOptions<S = unknown> = NavigateToAppOptions & {

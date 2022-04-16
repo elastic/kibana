@@ -19,13 +19,13 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ListClient } from '../../../../../../lists/server';
+import { ListClient } from '@kbn/lists-plugin/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../../alerting/server';
-import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
+} from '@kbn/alerting-plugin/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import {

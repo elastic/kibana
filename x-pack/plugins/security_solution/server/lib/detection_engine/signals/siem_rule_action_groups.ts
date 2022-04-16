@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionGroup } from '../../../../../alerting/common';
+import { ActionGroup } from '@kbn/alerting-plugin/common';
 
 export const siemRuleActionGroups: Array<ActionGroup<'default'>> = [
   {

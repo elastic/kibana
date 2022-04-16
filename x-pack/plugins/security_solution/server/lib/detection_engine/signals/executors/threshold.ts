@@ -8,13 +8,14 @@
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
+import { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
@@ -41,7 +42,6 @@ import { BuildRuleMessage } from '../rule_messages';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
-import { IRuleDataReader } from '../../../../../../rule_registry/server';
 
 export const thresholdExecutor = async ({
   completeRule,

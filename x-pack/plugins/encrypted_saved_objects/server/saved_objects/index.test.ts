@@ -9,20 +9,20 @@ import type {
   ISavedObjectsRepository,
   ISavedObjectTypeRegistry,
   SavedObject,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import { securityMock } from '../../../security/server/mocks';
+import type { ClientInstanciator } from '.';
+import { setupSavedObjects } from '.';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
-import type { ClientInstanciator } from './';
-import { setupSavedObjects } from './';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 describe('#setupSavedObjects', () => {

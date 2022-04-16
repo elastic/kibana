@@ -14,7 +14,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { MetaEngineCreation } from './';
+import { MetaEngineCreation } from '.';
 
 const DEFAULT_VALUES = {
   // MetaEngineLogic

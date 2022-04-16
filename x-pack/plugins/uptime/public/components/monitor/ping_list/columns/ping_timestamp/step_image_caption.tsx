@@ -8,7 +8,7 @@
 import React, { MouseEvent, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
 import { useBreakpoints } from '../../../../../hooks';
 

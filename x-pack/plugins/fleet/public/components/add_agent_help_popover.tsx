@@ -13,7 +13,7 @@ import type { NoArgCallback } from '@elastic/eui';
 import { EuiTourStep, EuiLink, EuiText } from '@elastic/eui';
 import { useTheme } from 'styled-components';
 
-import type { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
 import { useStartServices } from '../hooks';
 

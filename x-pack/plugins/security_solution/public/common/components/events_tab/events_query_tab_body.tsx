@@ -24,7 +24,7 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { getEventsHistogramLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/hosts/events';
+import { getEventsHistogramLensAttributes } from '../visualization_actions/lens_attributes/hosts/events';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { MatrixHistogramConfigs, MatrixHistogramOption } from '../matrix_histogram/types';

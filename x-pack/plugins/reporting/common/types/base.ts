@@ -6,7 +6,7 @@
  */
 
 import type { Ensure, SerializableRecord } from '@kbn/utility-types';
-import type { LayoutParams } from '../../../screenshotting/common';
+import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { LocatorParams } from './url';
 
 export type JobId = string;

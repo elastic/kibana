@@ -8,8 +8,8 @@
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { useMemo } from 'react';
+import { useEsSearch } from '@kbn/observability-plugin/public';
 import { monitorManagementListSelector } from '../../../state/selectors';
-import { useEsSearch } from '../../../../../observability/public';
 import { Ping } from '../../../../common/runtime_types';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { MlNodeCount } from '../../common/types/ml_server_info';
 
 export async function getMlNodeCount(client: IScopedClusterClient): Promise<MlNodeCount> {

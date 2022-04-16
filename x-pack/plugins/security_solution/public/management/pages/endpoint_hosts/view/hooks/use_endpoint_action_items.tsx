@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { APP_UI_ID } from '../../../../../../common/constants';
-import { pagePathGetters } from '../../../../../../../fleet/public';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';

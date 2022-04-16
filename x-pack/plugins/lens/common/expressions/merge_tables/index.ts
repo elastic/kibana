@@ -10,12 +10,12 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExecutionContext,
-} from '../../../../../../src/plugins/expressions/common';
-import { toAbsoluteDates } from '../../../../../../src/plugins/data/common';
-import type { ExpressionValueSearchContext } from '../../../../../../src/plugins/data/common';
+} from '@kbn/expressions-plugin/common';
+import { toAbsoluteDates } from '@kbn/data-plugin/common';
+import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common';
 
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { LensMultiTable } from '../../types';
-import type { Adapters } from '../../../../../../src/plugins/inspector/common';
 
 interface MergeTables {
   layerIds: string[];

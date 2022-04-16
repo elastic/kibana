@@ -10,10 +10,7 @@ import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  ShareToSpaceFlyoutProps,
-  SpacesApiUi,
-} from '../../../../../../x-pack/plugins/spaces/public';
+import type { ShareToSpaceFlyoutProps, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsManagementRecord } from '../types';
 import { SavedObjectsManagementAction } from '../types';
 

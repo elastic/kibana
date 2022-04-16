@@ -20,7 +20,7 @@ import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 

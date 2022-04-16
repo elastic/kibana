@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { OpenRuntimeFieldEditorProps } from './load_editor';
