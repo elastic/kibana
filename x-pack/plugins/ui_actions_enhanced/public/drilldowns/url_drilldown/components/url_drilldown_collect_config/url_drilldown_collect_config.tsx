@@ -27,10 +27,7 @@ import {
   txtUrlTemplateEncodeDescription,
 } from './i18n';
 import { VariablePopover } from '../variable_popover';
-import {
-  UrlTemplateEditor,
-  UrlTemplateEditorVariable,
-} from '../../../../../../../../src/plugins/kibana_react/public';
+import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;

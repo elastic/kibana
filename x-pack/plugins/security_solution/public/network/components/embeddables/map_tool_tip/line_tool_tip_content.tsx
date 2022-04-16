@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { SourceDestinationArrows } from '../../source_destination/source_destination_arrows';
 import {
   SUM_OF_CLIENT_BYTES,
@@ -18,7 +19,6 @@ import {
 
 import * as i18n from '../translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 const FlowBadge = styled(EuiBadge)`
   height: 45px;

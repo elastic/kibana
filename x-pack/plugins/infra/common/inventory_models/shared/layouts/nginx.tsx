@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { withTheme } from '@kbn/kibana-react-plugin/common';
 import { LayoutPropsWithTheme } from '../../../../public/pages/metrics/metric_detail/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Section } from '../../../../public/pages/metrics/metric_detail/components/section';
@@ -15,7 +16,6 @@ import { Section } from '../../../../public/pages/metrics/metric_detail/componen
 import { SubSection } from '../../../../public/pages/metrics/metric_detail/components/sub_section';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartSectionVis } from '../../../../public/pages/metrics/metric_detail/components/chart_section_vis';
-import { withTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
 export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>

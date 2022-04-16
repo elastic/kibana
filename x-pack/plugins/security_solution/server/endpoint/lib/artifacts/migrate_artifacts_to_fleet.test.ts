@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   Logger,
   SavedObjectsClient,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-} from 'kibana/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { migrateArtifactsToFleet } from './migrate_artifacts_to_fleet';
 import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks';
 import { InternalArtifactCompleteSchema } from '../../schemas';
-import { generateArtifactEsGetSingleHitMock } from '../../../../../fleet/server/services/artifacts/mocks';
-import { NewArtifact } from '../../../../../fleet/server/services';
+import { generateArtifactEsGetSingleHitMock } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
+import { NewArtifact } from '@kbn/fleet-plugin/server/services';
 import { CreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('When migrating artifacts to fleet', () => {

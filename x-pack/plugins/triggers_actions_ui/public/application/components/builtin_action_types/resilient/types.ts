@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ExecutorSubActionPushParams } from '@kbn/actions-plugin/server/builtin_action_types/resilient/types';
 import { UserConfiguredActionConnector } from '../../../../types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/resilient/types';
 
 export type ResilientActionConnector = UserConfiguredActionConnector<
   ResilientConfig,

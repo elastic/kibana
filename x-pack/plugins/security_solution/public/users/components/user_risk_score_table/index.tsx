@@ -29,7 +29,7 @@ import { SeverityCount } from '../../../common/components/severity/types';
 import { SeverityBadges } from '../../../common/components/severity/severity_badges';
 import { SeverityBar } from '../../../common/components/severity/severity_bar';
 import { SeverityFilterGroup } from '../../../common/components/severity/severity_filter_group';
-import { usersActions } from '../../../users/store';
+import { usersActions } from '../../store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { State } from '../../../common/store';
 import {

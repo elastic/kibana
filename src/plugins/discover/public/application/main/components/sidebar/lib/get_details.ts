@@ -7,8 +7,8 @@
  */
 
 // @ts-expect-error
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { fieldCalculator } from './field_calculator';
-import { DataView, DataViewField } from '../../../../../../../data_views/public';
 import { ElasticSearchHit } from '../../../../../types';
 
 export function getDetails(

@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { StepDefineRule } from './index';
+import { StepDefineRule } from '.';
 import mockBrowserFields from './mock_browser_fields.json';
 
 import { aggregatableFields } from '.';

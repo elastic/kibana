@@ -11,11 +11,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  SavedObject,
-  SavedObjectsFindResponse,
-  SavedObjectsUtils,
-} from '../../../../../../src/core/server';
+import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from '@kbn/core/server';
+import { FindActionResult } from '@kbn/actions-plugin/server/types';
+import { ActionType } from '@kbn/actions-plugin/common';
 import {
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
@@ -39,8 +37,6 @@ import { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FindActionResult } from '../../../../actions/server/types';
-import { ActionType } from '../../../../actions/common';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';

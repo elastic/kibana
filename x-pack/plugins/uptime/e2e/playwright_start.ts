@@ -12,7 +12,7 @@ import { run as playwrightRun } from '@elastic/synthetics';
 import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
-import { createApmAndObsUsersAndRoles } from '../../apm/scripts/create_apm_users_and_roles/create_apm_users_and_roles';
+import { createApmAndObsUsersAndRoles } from '@kbn/apm-plugin/scripts/create_apm_users_and_roles/create_apm_users_and_roles';
 import { importMonitors } from './tasks/import_monitors';
 
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {

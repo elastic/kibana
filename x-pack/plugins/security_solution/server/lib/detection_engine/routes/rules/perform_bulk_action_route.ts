@@ -8,13 +8,13 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import { KibanaResponseFactory, Logger } from 'src/core/server';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { RuleAlertType } from '../../rules/types';
-
-import type { RulesClient } from '../../../../../../alerting/server';
-import { SanitizedRule } from '../../../../../../alerting/common';
 
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -42,7 +42,6 @@ import { editRule } from '../../rules/edit_rule';
 import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
 import { RuleParams } from '../../schemas/rule_schemas';

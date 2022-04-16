@@ -7,8 +7,8 @@
  */
 
 // @ts-expect-error not typed yet
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { getAggValue } from './get_agg_value';
-import { METRIC_TYPES } from '../../../../../../data/common';
 import type { Metric } from '../../../../common/types';
 import type { PanelDataArray } from '../../../../common/types/vis_data';
 

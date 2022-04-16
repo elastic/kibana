@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import type { CoreSetup, CoreStart } from 'src/core/server';
-
-import type { SecurityPluginStart } from '../../security/server';
-import type { SpacesServiceStart } from '../../spaces/server';
+import { Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, CoreStart } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';

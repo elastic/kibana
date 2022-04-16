@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsFindOptionsReference } from 'kibana/server';
-import { Logger } from 'src/core/server';
-import { RuleExecutorServices } from '../../../../../alerting/server';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';

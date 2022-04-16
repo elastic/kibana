@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from 'src/core/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEqlFn } from '../../../common/search/expressions/eql';
 import { UiSettingsCommon } from '../../../common';

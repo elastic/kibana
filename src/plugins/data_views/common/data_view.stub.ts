@@ -12,7 +12,7 @@ export {
   createStubDataView,
   createStubDataView as createStubIndexPattern,
 } from './data_views/data_view.stub';
-import { SavedObject } from '../../../core/types';
+import { SavedObject } from '@kbn/core/types';
 import { DataViewAttributes } from './types';
 
 export const stubDataView = createStubDataView({

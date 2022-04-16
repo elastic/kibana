@@ -13,21 +13,21 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 // @ts-ignore
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 // @ts-ignore
-import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
+import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
 // @ts-ignore
-import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
+import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
 import { MapsXPackConfig } from '../config';
 import { setStartServices } from './kibana_server_services';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 import { initRoutes } from './routes';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import type { EMSSettings } from '../../../../src/plugins/maps_ems/server';
 import { setupEmbeddable } from './embeddable';
 import { setupSavedObjects } from './saved_objects';
 import { registerIntegrations } from './register_integrations';

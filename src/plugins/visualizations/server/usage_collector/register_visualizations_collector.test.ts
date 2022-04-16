@@ -8,7 +8,7 @@
 import {
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { mockStats, mockGetStats } from './get_usage_collector.mock';
 import { registerVisualizationsCollector } from './register_visualizations_collector';
 

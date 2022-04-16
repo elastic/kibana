@@ -7,7 +7,7 @@
 
 import { difference, isEqual, isEqualWith } from 'lodash';
 
-import type { IClusterClient, Logger } from 'src/core/server';
+import type { IClusterClient, Logger } from '@kbn/core/server';
 
 import type { PrivilegesService } from './privileges';
 import { serializePrivileges } from './privileges_serializer';

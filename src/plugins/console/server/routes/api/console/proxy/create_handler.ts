@@ -11,8 +11,9 @@ import * as url from 'url';
 import { pick, trimStart, trimEnd } from 'lodash';
 import { SemVer } from 'semver';
 
-import { KibanaRequest, RequestHandler } from 'kibana/server';
+import { KibanaRequest, RequestHandler } from '@kbn/core/server';
 
+import { ensureRawRequest } from '@kbn/core/server/http/router';
 import { ESConfigForProxy } from '../../../../types';
 import {
   getElasticsearchProxyConfig,
@@ -24,9 +25,8 @@ import {
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../../core/server/http/router';
 
-import { RouteDependencies } from '../../../';
+import { RouteDependencies } from '../../..';
 
 import { Body, Query } from './validation_config';
 

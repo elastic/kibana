@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { ManifestClient } from './manifest_client';
-import { EndpointArtifactClient, EndpointArtifactClientInterface } from './artifact_client';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { ElasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 // Because mocks are for testing only, should be ok to import the FleetArtifactsClient directly
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FleetArtifactsClient } from '../../../../../fleet/server/services';
-import { createArtifactsClientMock } from '../../../../../fleet/server/mocks';
+import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
+import { createArtifactsClientMock } from '@kbn/fleet-plugin/server/mocks';
+import { EndpointArtifactClient, EndpointArtifactClientInterface } from './artifact_client';
+import { ManifestClient } from './manifest_client';
 
 export const getManifestClientMock = (
   savedObjectsClient?: SavedObjectsClientContract

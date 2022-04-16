@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaResponse } from '@kbn/core/server/http/router';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { UMKibanaRouteWrapper } from './types';
 import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaResponse } from '../../../../../src/core/server/http/router';
-import { enableInspectEsQueries } from '../../../observability/common';
 import { syntheticsServiceApiKey } from '../lib/saved_objects/service_api_key';
 import { API_URLS } from '../../common/constants';
 

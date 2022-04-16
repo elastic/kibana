@@ -10,13 +10,13 @@ import usePromise from 'react-use/lib/usePromise';
 import { History } from 'history';
 
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'src/core/public';
+import { ToastsStart } from '@kbn/core/public';
 
 // @ts-ignore
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { PipelineEditor } from './components/pipeline_editor';
 // @ts-ignore
 import { Pipeline } from '../models/pipeline';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 // @ts-ignore
 import * as Breadcrumbs from './breadcrumbs';
 

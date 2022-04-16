@@ -10,8 +10,10 @@ import type {
   RequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -21,7 +23,7 @@ import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 import {
   Rule,
   RuleTypeParams,
@@ -41,8 +43,6 @@ import {
   RuleMonitoring,
   MappedParams,
 } from '../common';
-import { LicenseType } from '../../licensing/server';
-import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
 import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;

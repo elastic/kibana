@@ -13,11 +13,11 @@ import {
   buildPhrasesFilter as esBuildPhrasesFilter,
   buildExistsFilter as esBuildExistsFilter,
 } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
-import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
 import { URL_KEYS } from './constants/url_constants';
-import { PersistableFilter } from '../../../../../../lens/common';
 
 export function convertToShortUrl(series: SeriesUrl) {
   const {

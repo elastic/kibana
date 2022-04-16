@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResolverNode, SafeResolverEvent } from './../../../../common/endpoint/types/index';
+import { ResolverNode, SafeResolverEvent } from '../../../../common/endpoint/types';
 
 import { ResolverRelatedEvents, ResolverEntityIndex } from '../../../../common/endpoint/types';
 import { DataAccessLayer } from '../../types';

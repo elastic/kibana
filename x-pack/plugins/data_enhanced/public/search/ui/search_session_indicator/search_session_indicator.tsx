@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import './search_session_indicator.scss';
-import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
+import { SearchSessionState } from '@kbn/data-plugin/public';
 import { SearchSessionName } from './components';
 
 export interface SearchSessionIndicatorProps {

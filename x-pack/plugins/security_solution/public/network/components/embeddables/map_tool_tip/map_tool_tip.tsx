@@ -13,6 +13,7 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { Geometry } from 'geojson';
+import { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { MapToolTipProps } from '../types';
 import { ToolTipFooter } from './tooltip_footer';
 import { LineToolTipContent } from './line_tool_tip_content';
@@ -20,7 +21,6 @@ import { PointToolTipContent } from './point_tool_tip_content';
 import { Loader } from '../../../../common/components/loader';
 import * as i18n from '../translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 export const MapToolTipComponent = ({
   closeTooltip,

@@ -12,10 +12,8 @@ import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
 import type { Filter, Query } from '@kbn/es-query';
-import {
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-} from '../../../../../../../src/plugins/embeddable/public';
+import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { MapEmbeddable } from '@kbn/maps-plugin/public/embeddable';
 import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -25,7 +23,6 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
 import { useKibana } from '../../../common/lib/kibana';
 import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../common/store/sourcerer';

@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HttpHandler } from 'src/core/public';
+import { HttpHandler } from '@kbn/core/public';
+import MemoryJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_memory_usage.json';
+import MemoryDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_memory_usage.json';
+import NetworkInJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_network_in.json';
+import NetworkInDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_network_in.json';
+import NetworkOutJob from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_network_out.json';
+import NetworkOutDatafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_network_out.json';
 import { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
 import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
@@ -20,17 +26,11 @@ import {
 } from '../../../../../common/infra_ml';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import MemoryJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_memory_usage.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import MemoryDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_memory_usage.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import NetworkInJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_network_in.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import NetworkInDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_network_in.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import NetworkOutJob from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/k8s_network_out.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import NetworkOutDatafeed from '../../../../../../ml/server/models/data_recognizer/modules/metrics_ui_k8s/ml/datafeed_k8s_network_out.json';
 
 type JobType = 'k8s_memory_usage' | 'k8s_network_in' | 'k8s_network_out';
 export const DEFAULT_K8S_PARTITION_FIELD = 'kubernetes.namespace';

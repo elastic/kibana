@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
+import { snExternalServiceConfig } from '@kbn/actions-plugin/server/builtin_action_types/servicenow/config';
 import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
@@ -27,7 +28,6 @@ import { checkConnectorIsDeprecated } from '../../../../common/connectors_select
 export { ServiceNowConnectorFields as default };
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
