@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {

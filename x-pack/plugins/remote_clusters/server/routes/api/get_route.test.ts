@@ -7,12 +7,12 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler } from '@kbn/core/server';
 
-import { httpServerMock, httpServiceMock, coreMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
 
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
-import { licensingMock } from '../../../../../plugins/licensing/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 import { API_BASE_PATH } from '../../../common/constants';
 

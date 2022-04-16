@@ -8,7 +8,8 @@
 import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
-import { Query } from 'src/plugins/data/common';
+import { Query } from '@kbn/data-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useGetUrlParams,
   useIndexPattern,
@@ -16,7 +17,6 @@ import {
   useUrlParams,
 } from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { UptimePluginServices } from '../../../apps/plugin';
 
 export enum SyntaxType {

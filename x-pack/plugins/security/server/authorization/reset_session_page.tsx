@@ -9,9 +9,9 @@
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui/lib/components/button';
 import React from 'react';
 
+import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IBasePath } from 'src/core/server';
 
 import { PromptPage } from '../prompt_page';
 

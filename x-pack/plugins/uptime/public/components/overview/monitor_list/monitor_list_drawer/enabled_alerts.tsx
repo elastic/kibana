@@ -17,8 +17,8 @@ import {
 import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { UptimeSettingsContext } from '../../../../contexts';
-import { Rule } from '../../../../../../triggers_actions_ui/public';
 import { getUrlForAlert } from '../../../../lib/alert_types/common';
 
 interface Props {

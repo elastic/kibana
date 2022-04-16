@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from 'kibana/server';
-import { Logger } from 'src/core/server';
-import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
+import { StartServicesAccessor, Logger } from '@kbn/core/server';
+import { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 

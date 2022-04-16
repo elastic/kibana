@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig, IndexPatternField } from '../../../data/public';
+import { IAggConfig, IndexPatternField } from '@kbn/data-plugin/public';
 
 type AggTypeFieldFilter = (field: IndexPatternField, aggConfig: IAggConfig) => boolean;
 

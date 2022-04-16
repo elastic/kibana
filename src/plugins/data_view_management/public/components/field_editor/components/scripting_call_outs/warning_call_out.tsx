@@ -12,7 +12,7 @@ import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useKibana } from '../../../../../../../plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export interface ScriptingWarningCallOutProps {

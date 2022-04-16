@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { Logger } from '@kbn/logging';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';

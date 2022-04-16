@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, REFERENCE_LINE_LAYER, Y_CONFIG } from '../constants';
 import { ReferenceLineLayerArgs, ReferenceLineLayerConfigResult } from '../types';
 
