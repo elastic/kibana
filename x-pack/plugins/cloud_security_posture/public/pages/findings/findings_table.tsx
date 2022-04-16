@@ -16,13 +16,13 @@ import {
   EuiBasicTableProps,
 } from '@elastic/eui';
 import moment from 'moment';
+import { SortDirection } from '@kbn/data-plugin/common';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
 import type { CspFinding } from './types';
 import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
 import type { CspFindingsRequest, CspFindingsResponse } from './use_findings';
-import { SortDirection } from '../../../../../../src/plugins/data/common';
 import { FindingsRuleFlyout } from './findings_flyout';
 
 type TableQueryProps = Pick<CspFindingsRequest, 'sort' | 'from' | 'size'>;

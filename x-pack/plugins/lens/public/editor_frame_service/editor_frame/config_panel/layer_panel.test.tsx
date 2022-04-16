@@ -11,7 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { FramePublicAPI, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import {
   createMockVisualization,

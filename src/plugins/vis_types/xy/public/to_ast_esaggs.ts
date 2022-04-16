@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
+} from '@kbn/data-plugin/public';
 
 import { VisParams } from './types';
 

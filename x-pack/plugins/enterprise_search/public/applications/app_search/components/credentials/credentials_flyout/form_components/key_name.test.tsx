@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { FormKeyName } from './';
+import { FormKeyName } from '.';
 
 describe('FormKeyName', () => {
   const values = {

@@ -9,14 +9,14 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '../../mock/match_media';
 
-import { TestProviders } from '../../../common/mock';
-import { useAuthentications } from '../../../common/containers/authentications';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { TestProviders } from '../../mock';
+import { useAuthentications } from '../../containers/authentications';
+import { useQueryToggle } from '../../containers/query_toggle';
 import { AuthenticationsUserTable } from './authentications_user_table';
 import { usersModel } from '../../../users/store';
 import { AuthStackByField } from '../../../../common/search_strategy';
 
-jest.mock('../../../common/containers/query_toggle', () => ({
+jest.mock('../../containers/query_toggle', () => ({
   useQueryToggle: jest.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() }),
 }));
 jest.mock('../../containers/authentications', () => ({

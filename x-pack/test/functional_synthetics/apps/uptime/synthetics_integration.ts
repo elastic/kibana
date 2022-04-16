@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { FullAgentPolicy } from '../../../../plugins/fleet/common';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
