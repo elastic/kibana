@@ -6,6 +6,7 @@
  */
 
 import { Stream } from 'stream';
+import { IncomingHttpHeaders } from 'http';
 import { schema } from '@kbn/config-schema';
 import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { IRouter } from '@kbn/core/server';
@@ -57,7 +58,7 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const gzippedTile = await getEsTile({
+      const { stream, headers } = await getEsTile({
         url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
@@ -71,7 +72,7 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, gzippedTile);
+      return sendResponse(response, stream, headers);
     }
   );
 
@@ -103,7 +104,7 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const gzipTileStream = await getEsGridTile({
+      const { stream, headers } = await getEsGridTile({
         url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
@@ -119,20 +120,27 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, gzipTileStream);
+      return sendResponse(response, stream, headers);
     }
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, gzipTileStream: Stream | null) {
+function sendResponse(
+  response: KibanaResponseFactory,
+  gzipTileStream: Stream | null,
+  headers?: IncomingHttpHeaders
+) {
   const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
   const lastModified = `${new Date().toUTCString()}`;
-  if (gzipTileStream) {
+  if (gzipTileStream && headers) {
+    // use the content-encoding and content-length headers from elasticsearch if they exist
+    const { 'content-length': contentLength, 'content-encoding': contentEncoding } = headers;
     return response.ok({
       body: gzipTileStream,
       headers: {
         'content-disposition': 'inline',
-        'content-encoding': 'gzip',
+        ...(contentLength && { 'content-length': contentLength }),
+        ...(contentEncoding && { 'content-encoding': contentEncoding }),
         'Content-Type': 'application/x-protobuf',
         'Cache-Control': cacheControl,
         'Last-Modified': lastModified,
