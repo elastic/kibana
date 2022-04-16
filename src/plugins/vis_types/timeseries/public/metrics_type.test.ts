@@ -24,7 +24,10 @@ describe('metricsVisDefinition', () => {
         async getDefault() {
           return indexPattern1;
         },
-        async find(title: string) {
+        async find(title: string, size: number) {
+          if (size !== 1) {
+            throw new Error('trying to fetch too many data views');
+          }
           if (title === 'pattern1') return [indexPattern1];
           if (title === 'pattern2') return [indexPattern2];
           return [];
