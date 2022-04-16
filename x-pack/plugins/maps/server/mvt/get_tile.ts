@@ -88,6 +88,6 @@ export async function getEsTile({
       // Should return a tile with some error message
       logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
     }
-    return null;
+    return { stream: null };
   }
 }
