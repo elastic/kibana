@@ -64,7 +64,6 @@ export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
 export const getTheme = () => coreStart.theme;
 export const getUsageCollection = () => pluginsStart.usageCollection;
-export const getSharedUXPluginContext = () => pluginsStart.sharedUX;
 export const getApplication = () => coreStart.application;
 
 // xpack.maps.* kibana.yml settings from this plugin

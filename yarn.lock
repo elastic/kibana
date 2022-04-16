@@ -3156,6 +3156,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components":
   version "0.0.0"
   uid ""
@@ -6165,6 +6169,10 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/npm_module_types":
   version "0.0.0"
   uid ""
 
