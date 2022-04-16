@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { I18nStart } from 'kibana/public';
-import { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
+import { I18nStart } from '@kbn/core/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 

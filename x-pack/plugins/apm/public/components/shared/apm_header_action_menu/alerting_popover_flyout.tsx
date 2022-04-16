@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { IBasePath } from '../../../../../../../src/core/public';
+import { IBasePath } from '@kbn/core/public';
 import { AlertType } from '../../../../common/alert_types';
 import { AlertingFlyout } from '../../alerting/alerting_flyout';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';

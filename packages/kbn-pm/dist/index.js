@@ -44227,7 +44227,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "resolveDepsForProject", function() { return resolveDepsForProject; });
 /* harmony import */ var _yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(531);
 /* harmony import */ var _yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(352);
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(352);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -44240,7 +44240,7 @@ __webpack_require__.r(__webpack_exports__);
 
 async function readYarnLock(kbn) {
   try {
-    const contents = await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_1__["readFile"])(kbn.getAbsolute('yarn.lock'), 'utf8');
+    const contents = await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["readFile"])(kbn.getAbsolute('yarn.lock'), 'utf8');
     const yarnLock = Object(_yarnpkg_lockfile__WEBPACK_IMPORTED_MODULE_0__["parse"])(contents);
 
     if (yarnLock.type === 'success') {

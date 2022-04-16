@@ -7,9 +7,9 @@
 
 import { Stream } from 'stream';
 import { schema } from '@kbn/config-schema';
-import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
-import { IRouter } from 'src/core/server';
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,

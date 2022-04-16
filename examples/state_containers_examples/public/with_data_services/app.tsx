@@ -19,8 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { Filter, FilterStateStore } from '@kbn/es-query';
-import { CoreStart } from 'kibana/public';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { CoreStart } from '@kbn/core/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
   connectToQueryState,
@@ -28,15 +28,15 @@ import {
   Query,
   QueryState,
   syncQueryStateWithUrl,
-} from '../../../../src/plugins/data/public';
-import type { DataView } from '../../../../src/plugins/data_views/public';
+} from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   BaseStateContainer,
   createStateContainer,
   IKbnUrlStateStorage,
   syncState,
   useContainerState,
-} from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import { ExampleLink, StateContainersExamplesPage } from '../common/example_page';
 
 interface StateDemoAppDeps {

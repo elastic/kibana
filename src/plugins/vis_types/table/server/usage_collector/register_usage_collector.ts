@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getStats, VisTypeTableUsage } from './get_stats';
-import type { UsageCollectionSetup } from '../../../../usage_collection/server';
 
 export function registerVisTypeTableUsageCollector(collectorSet: UsageCollectionSetup) {
   const collector = collectorSet.makeUsageCollector<VisTypeTableUsage | undefined>({
