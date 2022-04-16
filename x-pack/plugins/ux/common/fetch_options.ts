@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchOptions } from 'kibana/public';
+import { HttpFetchOptions } from '@kbn/core/public';
 
 export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   pathname: string;

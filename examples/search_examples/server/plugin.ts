@@ -12,9 +12,9 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import {
   SearchExamplesPluginSetup,

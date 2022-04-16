@@ -9,17 +9,17 @@ import { type UseQueryResult, useQuery } from 'react-query';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
-import { extractErrorMessage } from '../../../common/utils/helpers';
 import type {
   DataView,
   EsQuerySortValue,
   IKibanaSearchResponse,
   SerializedSearchSourceFields,
-} from '../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { extractErrorMessage } from '../../../common/utils/helpers';
 import type { CspClientPluginStartDeps } from '../../types';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import * as TEXT from './translations';
-import type { CoreStart } from '../../../../../../src/core/public';
 import type { CspFinding } from './types';
 
 interface CspFindings {

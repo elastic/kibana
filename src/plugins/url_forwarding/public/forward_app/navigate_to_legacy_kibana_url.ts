@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationStart, IBasePath } from 'kibana/public';
-import { ForwardDefinition } from '../index';
+import { ApplicationStart, IBasePath } from '@kbn/core/public';
+import { ForwardDefinition } from '..';
 import { normalizePath } from './normalize_path';
 
 export const navigateToLegacyKibanaUrl = (

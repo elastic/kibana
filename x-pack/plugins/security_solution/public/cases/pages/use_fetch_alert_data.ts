@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import { Ecs } from '@kbn/cases-plugin/common';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useQueryAlerts } from '../../detections/containers/detection_engine/alerts/use_query';
-import { Ecs } from '../../../../cases/common';
 import { buildAlertsQuery, formatAlertToEcsSignal, SignalHit } from '../../common/utils/alerts';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {

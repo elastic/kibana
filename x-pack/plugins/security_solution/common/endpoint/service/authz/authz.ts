@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { LicenseService } from '../../../license';
-import { FleetAuthz } from '../../../../../fleet/common';
 import { EndpointAuthz } from '../../types/authz';
 import { MaybeImmutable } from '../../types';
 

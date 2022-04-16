@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DATAFEED_STATE, JOB_STATE } from '../../../ml/common';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 import { Environment } from '../environment_rt';
 
 export interface ApmMlJob {
