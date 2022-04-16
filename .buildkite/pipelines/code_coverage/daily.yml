@@ -1,0 +1,46 @@
+steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
+
+  - wait
+  
+  - command: .buildkite/scripts/steps/code_coverage/jest.sh
+    label: 'Jest Tests'
+    parallelism: 8
+    agents:
+      queue: ci-group-4d
+    timeout_in_minutes: 180
+    key: jest
+    
+  - command: .buildkite/scripts/steps/code_coverage/oss_cigroup.sh
+    label: 'OSS CI Group'
+    parallelism: 11
+    agents:
+      queue: c2-16
+    timeout_in_minutes: 120
+    key: oss-cigroup
+
+  - command: .buildkite/scripts/steps/code_coverage/xpack_cigroup.sh
+    label: 'Default CI Group'
+    parallelism: 27
+    agents:
+      queue: c2-16
+    timeout_in_minutes: 250
+    key: default-cigroup
+   
+  - command: .buildkite/scripts/steps/code_coverage/ingest.sh
+    label: 'Merge and Ingest'
+    agents:
+      queue: n2-4
+    depends_on:
+      - jest
+      - oss-cigroup
+      - default-cigroup
+    timeout_in_minutes: 60
+    key: ingest
+          
+  - wait: ~
+    continue_on_failure: true
