@@ -140,7 +140,8 @@ const EventRenderedViewComponent = ({
             </ActionsContainer>
           );
         },
-        width: '152px',
+        // TODO: derive this from ACTION_BUTTON_COUNT as other columns are done
+        width: '184px',
       },
       {
         field: 'ecs.timestamp',
