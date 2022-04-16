@@ -11,6 +11,7 @@ export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 import expect from '@kbn/expect';
+import { getServiceName } from 'elastic-apm-node';
 import { FtrService } from '../ftr_provider_context';
 
 interface SaveDashboardOptions {
@@ -43,16 +44,19 @@ export class DashboardPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+  private readonly esNode = this.config.get('esTestCluster.ccs')
+    ? this.ctx.getService('remoteEsArchiver' as 'esArchiver')
+    : this.ctx.getService('esArchiver');
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
+  private readonly kibanaIndex = this.config.get('esTestCluster.ccs')
+    ? 'test/functional/fixtures/es_archiver/dashboard/legacy/ccs'
+    : 'test/functional/fixtures/es_archiver/dashboard/legacy';
 
-  async initTests({
-    kibanaIndex = 'test/functional/fixtures/es_archiver/dashboard/legacy',
-    defaultIndex = this.logstashIndex,
-  } = {}) {
+  async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
-    await this.esArchiver.load(kibanaIndex);
+    await this.esNode.load(kibanaIndex);
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
   }
