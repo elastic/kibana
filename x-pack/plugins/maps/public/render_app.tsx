@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import type { AppMountParameters } from 'kibana/public';
-import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
 import {
   getCoreChrome,
@@ -19,7 +19,7 @@ import {
   getToasts,
   getEmbeddableService,
   getDocLinks,
-  getSharedUXPluginContext,
+  getCore,
 } from './kibana_services';
 import {
   createKbnUrlStateStorage,
@@ -96,7 +96,7 @@ export async function renderApp(
     }
 
     return (
-      <SharedUxServicesProvider {...getSharedUXPluginContext().getContextServices()}>
+      <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
         <MapPage
           mapEmbeddableInput={mapEmbeddableInput}
           embeddableId={embeddableId}
@@ -108,7 +108,7 @@ export async function renderApp(
           history={history}
           key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
         />
-      </SharedUxServicesProvider>
+      </ExitFullScreenButtonKibanaProvider>
     );
   }
 

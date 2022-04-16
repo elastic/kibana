@@ -9,9 +9,10 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
+import { ExitFullScreenButtonProvider } from './services';
 import { ExitFullScreenButton as ExitFullScreenButtonComponent } from './exit_full_screen_button.component';
 import { ExitFullScreenButton } from './exit_full_screen_button';
-import mdx from './exit_full_screen_button.mdx';
+import mdx from '../README.mdx';
 
 export default {
   title: 'Exit Full Screen Button',
@@ -25,7 +26,11 @@ export default {
 };
 
 export const ConnectedComponent = ({ toggleChrome = true }: { toggleChrome: boolean }) => {
-  return <ExitFullScreenButton onExit={action('onExit')} toggleChrome={toggleChrome} />;
+  return (
+    <ExitFullScreenButtonProvider setIsFullscreen={action('setIsFullscreen')}>
+      <ExitFullScreenButton onExit={action('onExit')} toggleChrome={toggleChrome} />
+    </ExitFullScreenButtonProvider>
+  );
 };
 
 ConnectedComponent.argTypes = {

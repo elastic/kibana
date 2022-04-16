@@ -15,7 +15,7 @@ import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { Observable } from 'rxjs';
 import moment from 'moment';
-import { ExitFullScreenButton } from '@kbn/shared-ux-components';
+import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';

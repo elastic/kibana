@@ -11,12 +11,11 @@ import { useEuiTheme, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useMountedState from 'react-use/lib/useMountedState';
 
-import { usePlatformService } from '@kbn/shared-ux-services';
-
 import { ExitFullScreenButton as Component } from './exit_full_screen_button.component';
+import { useServices } from './services';
 
 /**
- * Props for the service-enabled Exit Full Screen button component.
+ * Props for the service-enabled `ExitFullScreenButton` component.
  */
 export interface Props {
   /** Optional handler to call when one exits full-screen mode. */
@@ -27,16 +26,11 @@ export interface Props {
 
 /**
  * A service-enabled component that provides Kibana-specific functionality to the `ExitFullScreenButton`
- * component.
- *
- * Use of this component requires both the `EuiTheme` context as well as either a configured Shared UX
- * `ServicesProvider` or the `ServicesContext` provided by the Shared UX public plugin contract.
- *
- * See shared-ux/public/services for information.
+ * pure component.
  */
 export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const { setIsFullscreen } = usePlatformService();
+  const { setIsFullscreen } = useServices();
   const isMounted = useMountedState();
 
   const onClick = useCallback(() => {

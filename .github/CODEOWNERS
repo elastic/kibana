@@ -630,6 +630,7 @@ x-pack/plugins/security_solution/public/common/components/sessions_viewer @elast
 
 ## Shared UX
 /src/plugins/shared_ux/ @elastic/shared-ux
+/packages/shared-ux/ @elastic/shared-ux
 /packages/shared-ux-*/ @elastic/shared-ux
 /src/plugins/kibana_react/ @elastic/shared-ux
 /src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation

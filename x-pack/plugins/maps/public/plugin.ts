@@ -79,7 +79,6 @@ import type { CloudSetup } from '../../cloud/public';
 import type { LensPublicSetup } from '../../lens/public';
 
 import { setupLensChoroplethChart } from './lens';
-import { SharedUXPluginStart } from '../../../../src/plugins/shared_ux/public';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -115,7 +114,6 @@ export interface MapsPluginStartDependencies {
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   usageCollection?: UsageCollectionSetup;
-  sharedUX: SharedUXPluginStart;
 }
 
 /**
