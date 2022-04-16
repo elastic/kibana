@@ -616,12 +616,13 @@ describe('Create Execution Handler', () => {
 
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(4);
     expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(5);
-    expect(alertExecutionStore.getNumberOfTriggeredActionsByConnectorType('test')).toBe(1);
+    expect(alertExecutionStore.getStatusByConnectorType('test').numberOfTriggeredActions).toBe(1);
     expect(
-      alertExecutionStore.getNumberOfTriggeredActionsByConnectorType('test-action-type-id')
+      alertExecutionStore.getStatusByConnectorType('test-action-type-id').numberOfTriggeredActions
     ).toBe(1);
     expect(
-      alertExecutionStore.getNumberOfTriggeredActionsByConnectorType('another-action-type-id')
+      alertExecutionStore.getStatusByConnectorType('another-action-type-id')
+        .numberOfTriggeredActions
     ).toBe(2);
     expect(alertExecutionStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(4);

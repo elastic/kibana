@@ -2749,6 +2749,15 @@ describe('Task Runner', () => {
         },
       })
     );
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(5);
+
+    expect(logger.debug).nthCalledWith(
+      3,
+      'The maximum number of actions (3) for this rule type (ruleId:1) has been reached'
+    );
+
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(7);
 
@@ -2950,6 +2959,15 @@ describe('Task Runner', () => {
         },
       })
     );
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    expect(logger.debug).toHaveBeenCalledTimes(5);
+
+    expect(logger.debug).nthCalledWith(
+      3,
+      'The maximum number of actions (1) for the connector ".server-log" has been reached'
+    );
+
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(11);
   });

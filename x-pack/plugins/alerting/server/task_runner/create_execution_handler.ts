@@ -117,27 +117,40 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
+      const { actionTypeId } = action;
+
+      alertExecutionStore.incrementNumberOfScheduledActionsByConnectorType(actionTypeId);
+
       if (alertExecutionStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
-        alertExecutionStore.setTriggeredActionsStatus(ActionsCompletion.PARTIAL);
+        alertExecutionStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
         logger.debug(
-          `The maximum number of actions (${actionsConfigMap.default.max}) for this rule type with ruleId:${ruleId} has been reached:`
+          `The maximum number of actions (${actionsConfigMap.default.max}) for this rule type (ruleId:${ruleId}) has been reached`
         );
         break;
       }
 
       if (
         alertExecutionStore.hasReachedTheExecutableActionsLimitByConnectorType({
-          actionTypeId: action.actionTypeId,
+          actionTypeId,
           actionsConfigMap,
         })
       ) {
-        alertExecutionStore.setTriggeredActionsStatus(ActionsCompletion.PARTIAL);
+        if (!alertExecutionStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
+          logger.debug(
+            `The maximum number of actions (${actionsConfigMap[actionTypeId].max}) for the connector "${actionTypeId}" has been reached`
+          );
+        }
+        alertExecutionStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
         continue;
       }
 
-      if (
-        !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
-      ) {
+      if (!actionsPlugin.isActionExecutable(action.id, actionTypeId, { notifyUsage: true })) {
         logger.warn(
           `Rule "${ruleId}" skipped scheduling action "${action.id}" because it is disabled`
         );
@@ -145,7 +158,7 @@ export function createExecutionHandler<
       }
 
       alertExecutionStore.incrementNumberOfTriggeredActions();
-      alertExecutionStore.incrementNumberOfTriggeredActionsByConnectorType(action.actionTypeId);
+      alertExecutionStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
@@ -171,7 +184,7 @@ export function createExecutionHandler<
       };
 
       // TODO would be nice  to add the action name here, but it's not available
-      const actionLabel = `${action.actionTypeId}:${action.id}`;
+      const actionLabel = `${actionTypeId}:${action.id}`;
       if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
         ephemeralActionsToSchedule--;
         try {
@@ -206,7 +219,7 @@ export function createExecutionHandler<
           {
             type: 'action',
             id: action.id,
-            typeId: action.actionTypeId,
+            typeId: actionTypeId,
           },
         ],
         ...namespace,

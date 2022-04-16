@@ -5,52 +5,68 @@
  * 2.0.
  */
 
+import { set } from 'lodash';
 import { ActionsConfigMap } from './get_actions_config_map';
 import { ActionsCompletion } from '../task_runner/types';
 
-export class AlertExecutionStore {
-  private numberOfTriggeredActions = 0;
-  private numberOfScheduledActions = 0;
-  private numberOfTriggeredActionsByConnectorType: {
-    [key: string]: number;
-  } = {};
-  private triggeredActionsStatus: ActionsCompletion = ActionsCompletion.COMPLETE;
+interface State {
+  numberOfTriggeredActions: number;
+  numberOfScheduledActions: number;
+  connectorTypes: {
+    [key: string]: {
+      triggeredActionsStatus: ActionsCompletion;
+      numberOfTriggeredActions: number;
+      numberOfScheduledActions: number;
+    };
+  };
+}
 
+export class AlertExecutionStore {
+  private state: State = {
+    numberOfTriggeredActions: 0,
+    numberOfScheduledActions: 0,
+    connectorTypes: {},
+  };
+
+  // Getters
+  public getTriggeredActionsStatus = () => {
+    const hasPartial = Object.values(this.state.connectorTypes).some(
+      (connectorType) => connectorType?.triggeredActionsStatus === ActionsCompletion.PARTIAL
+    );
+    return hasPartial ? ActionsCompletion.PARTIAL : ActionsCompletion.COMPLETE;
+  };
   public getNumberOfTriggeredActions = () => {
-    return this.numberOfTriggeredActions;
+    return this.state.numberOfTriggeredActions;
   };
   public getNumberOfScheduledActions = () => {
-    return this.numberOfScheduledActions;
+    return this.state.numberOfScheduledActions;
   };
-  public getNumberOfTriggeredActionsByConnectorType = (actionTypeId: string) => {
-    return this.numberOfTriggeredActionsByConnectorType[actionTypeId];
+  public getStatusByConnectorType = (actionTypeId: string) => {
+    return this.state.connectorTypes[actionTypeId];
   };
-  public getTriggeredActionsStatus = () => {
-    return this.triggeredActionsStatus;
+
+  // Setters
+  public setNumberOfTriggeredActions = (numberOfScheduledActions: number) => {
+    this.state.numberOfTriggeredActions = numberOfScheduledActions;
   };
 
   public setNumberOfScheduledActions = (numberOfScheduledActions: number) => {
-    this.numberOfScheduledActions = numberOfScheduledActions;
-  };
-  public setNumberOfTriggeredActions = (numberOfTriggeredActions: number) => {
-    this.numberOfTriggeredActions = numberOfTriggeredActions;
-  };
-  public setNumberOfTriggeredActionsByConnectorType = ({
-    actionTypeId,
-    numberOfTriggeredActionsByConnectorType,
-  }: {
-    actionTypeId: string;
-    numberOfTriggeredActionsByConnectorType: number;
-  }) => {
-    this.numberOfTriggeredActionsByConnectorType[actionTypeId] =
-      numberOfTriggeredActionsByConnectorType;
-  };
-  public setTriggeredActionsStatus = (status: ActionsCompletion) => {
-    return (this.triggeredActionsStatus = status);
+    this.state.numberOfScheduledActions = numberOfScheduledActions;
   };
 
+  public setTriggeredActionsStatusByConnectorType = ({
+    actionTypeId,
+    status,
+  }: {
+    actionTypeId: string;
+    status: ActionsCompletion;
+  }) => {
+    set(this.state, `connectorTypes["${actionTypeId}"].triggeredActionsStatus`, status);
+  };
+
+  // Checkers
   public hasReachedTheExecutableActionsLimit = (actionsConfigMap: ActionsConfigMap): boolean =>
-    this.numberOfTriggeredActions >= actionsConfigMap.default.max;
+    this.state.numberOfTriggeredActions >= actionsConfigMap.default.max;
 
   public hasReachedTheExecutableActionsLimitByConnectorType = ({
     actionsConfigMap,
@@ -60,23 +76,31 @@ export class AlertExecutionStore {
     actionTypeId: string;
   }): boolean => {
     const numberOfTriggeredActionsByConnectorType =
-      this.numberOfTriggeredActionsByConnectorType[actionTypeId] || 0;
+      this.state.connectorTypes[actionTypeId]?.numberOfTriggeredActions || 0;
     const executableActionsLimitByConnectorType =
       actionsConfigMap[actionTypeId]?.max || actionsConfigMap.default.max;
 
     return numberOfTriggeredActionsByConnectorType >= executableActionsLimitByConnectorType;
   };
 
+  public hasConnectorTypeReachedTheLimit = (actionTypeId: string) =>
+    this.state.connectorTypes[actionTypeId]?.triggeredActionsStatus === ActionsCompletion.PARTIAL;
+
+  // Incrementer
   public incrementNumberOfTriggeredActions = () => {
-    this.numberOfTriggeredActions++;
+    this.state.numberOfTriggeredActions++;
   };
 
   public incrementNumberOfScheduledActions = (incrementBy: number) => {
-    this.numberOfScheduledActions += incrementBy;
+    this.state.numberOfScheduledActions += incrementBy;
   };
 
   public incrementNumberOfTriggeredActionsByConnectorType = (actionTypeId: string) => {
-    this.numberOfTriggeredActionsByConnectorType[actionTypeId] =
-      (this.numberOfTriggeredActionsByConnectorType[actionTypeId] || 0) + 1;
+    const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfTriggeredActions || 0;
+    set(this.state, `connectorTypes["${actionTypeId}"].numberOfTriggeredActions`, currentVal + 1);
+  };
+  public incrementNumberOfScheduledActionsByConnectorType = (actionTypeId: string) => {
+    const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfScheduledActions || 0;
+    set(this.state, `connectorTypes["${actionTypeId}"].numberOfScheduledActions`, currentVal + 1);
   };
 }
