@@ -18,19 +18,20 @@ export const syntheticsMonitor: SavedObjectsType = {
     dynamic: false,
     properties: {
       name: {
-        type: 'keyword',
+        type: 'text',
+        fielddata: true,
       },
       id: {
         type: 'keyword',
       },
       type: {
-        type: 'keyword',
+        type: 'text',
       },
       urls: {
-        type: 'keyword',
+        type: 'text',
       },
       tags: {
-        type: 'keyword',
+        type: 'text',
       },
       secrets: {
         type: 'text',
@@ -38,7 +39,7 @@ export const syntheticsMonitor: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
     icon: 'uptimeApp',
     getTitle: (savedObject) =>
       savedObject.attributes.name +
