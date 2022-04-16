@@ -91,7 +91,7 @@ interface BulkCreateBulkUpdateCaseUserActions extends ClientArgs {
   user: User;
 }
 
-interface BulkCreateAttachmentDeletionUserAction extends Omit<CommonUserActionArgs, 'owner'> {
+interface BulkCreateAttachmentUserAction extends Omit<CommonUserActionArgs, 'owner'> {
   attachments: Array<{ id: string; owner: string; attachment: CommentRequest }>;
 }
 
@@ -241,18 +241,19 @@ export class CaseUserActionService {
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
   }
 
-  public async bulkCreateAttachmentDeletion({
+  private async bulkCreateAttachment({
     unsecuredSavedObjectsClient,
     caseId,
     attachments,
     user,
-  }: BulkCreateAttachmentDeletionUserAction): Promise<void> {
-    this.log.debug(`Attempting to create a create case user action`);
+    action = Actions.create,
+  }: BulkCreateAttachmentUserAction): Promise<void> {
+    this.log.debug(`Attempting to create a bulk create case user action`);
     const userActionsWithReferences = attachments.reduce<BuilderReturnValue[]>(
       (acc, attachment) => {
         const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.comment);
-        const deleteCommentUserAction = userActionBuilder?.build({
-          action: Actions.delete,
+        const commentUserAction = userActionBuilder?.build({
+          action,
           caseId,
           user,
           owner: attachment.owner,
@@ -260,16 +261,46 @@ export class CaseUserActionService {
           payload: { attachment: attachment.attachment },
         });
 
-        if (deleteCommentUserAction == null) {
+        if (commentUserAction == null) {
           return acc;
         }
 
-        return [...acc, deleteCommentUserAction];
+        return [...acc, commentUserAction];
       },
       []
     );
 
     await this.bulkCreate({ unsecuredSavedObjectsClient, actions: userActionsWithReferences });
+  }
+
+  public async bulkCreateAttachmentDeletion({
+    unsecuredSavedObjectsClient,
+    caseId,
+    attachments,
+    user,
+  }: BulkCreateAttachmentUserAction): Promise<void> {
+    await this.bulkCreateAttachment({
+      unsecuredSavedObjectsClient,
+      caseId,
+      attachments,
+      user,
+      action: Actions.delete,
+    });
+  }
+
+  public async bulkCreateAttachmentCreation({
+    unsecuredSavedObjectsClient,
+    caseId,
+    attachments,
+    user,
+  }: BulkCreateAttachmentUserAction): Promise<void> {
+    await this.bulkCreateAttachment({
+      unsecuredSavedObjectsClient,
+      caseId,
+      attachments,
+      user,
+      action: Actions.create,
+    });
   }
 
   public async createUserAction<T extends keyof BuilderParameters>({

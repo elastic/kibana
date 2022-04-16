@@ -8,95 +8,95 @@
 import { i18n } from '@kbn/i18n';
 import { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 
-export const DETAILS_HEADER = i18n.translate('xpack.securitySolution.blocklists.details.header', {
+export const DETAILS_HEADER = i18n.translate('xpack.securitySolution.blocklist.details.header', {
   defaultMessage: 'Details',
 });
 
 export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.blocklists.details.header.description',
+  'xpack.securitySolution.blocklist.details.header.description',
   {
     defaultMessage:
       'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
   }
 );
 
-export const NAME_LABEL = i18n.translate('xpack.securitySolution.blocklists.name.label', {
+export const NAME_LABEL = i18n.translate('xpack.securitySolution.blocklist.name.label', {
   defaultMessage: 'Name',
 });
 
 export const DESCRIPTION_LABEL = i18n.translate(
-  'xpack.securitySolution.blocklists.description.label',
+  'xpack.securitySolution.blocklist.description.label',
   {
     defaultMessage: 'Description',
   }
 );
 
 export const CONDITIONS_HEADER = i18n.translate(
-  'xpack.securitySolution.blocklists.conditions.header',
+  'xpack.securitySolution.blocklist.conditions.header',
   {
     defaultMessage: 'Conditions',
   }
 );
 
 export const CONDITIONS_HEADER_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.blocklists.conditions.header.description',
+  'xpack.securitySolution.blocklist.conditions.header.description',
   {
     defaultMessage:
       'Select an operating system and add conditions. Availability of conditions may depend on your chosen OS.',
   }
 );
 
-export const SELECT_OS_LABEL = i18n.translate('xpack.securitySolution.blocklists.os.label', {
+export const SELECT_OS_LABEL = i18n.translate('xpack.securitySolution.blocklist.os.label', {
   defaultMessage: 'Select operating system',
 });
 
-export const FIELD_LABEL = i18n.translate('xpack.securitySolution.blocklists.field.label', {
+export const FIELD_LABEL = i18n.translate('xpack.securitySolution.blocklist.field.label', {
   defaultMessage: 'Field',
 });
 
-export const OPERATOR_LABEL = i18n.translate('xpack.securitySolution.blocklists.operator.label', {
+export const OPERATOR_LABEL = i18n.translate('xpack.securitySolution.blocklist.operator.label', {
   defaultMessage: 'Operator',
 });
 
-export const VALUE_LABEL = i18n.translate('xpack.securitySolution.blocklists.value.label', {
+export const VALUE_LABEL = i18n.translate('xpack.securitySolution.blocklist.value.label', {
   defaultMessage: 'Value',
 });
 
 export const VALUE_LABEL_HELPER = i18n.translate(
-  'xpack.securitySolution.blocklists.value.label.helper',
+  'xpack.securitySolution.blocklist.value.label.helper',
   {
     defaultMessage: 'Type or copy & paste one or multiple comma delimited values',
   }
 );
 
 export const CONDITION_FIELD_TITLE: { [K in BlocklistConditionEntryField]: string } = {
-  'file.hash.*': i18n.translate('xpack.securitySolution.blocklists.entry.field.hash', {
+  'file.hash.*': i18n.translate('xpack.securitySolution.blocklist.entry.field.hash', {
     defaultMessage: 'Hash',
   }),
-  'file.path': i18n.translate('xpack.securitySolution.blocklists.entry.field.path', {
+  'file.path': i18n.translate('xpack.securitySolution.blocklist.entry.field.path', {
     defaultMessage: 'Path',
   }),
   'file.Ext.code_signature': i18n.translate(
-    'xpack.securitySolution.blocklists.entry.field.signature',
+    'xpack.securitySolution.blocklist.entry.field.signature',
     { defaultMessage: 'Signature' }
   ),
 };
 
 export const CONDITION_FIELD_DESCRIPTION: { [K in BlocklistConditionEntryField]: string } = {
-  'file.hash.*': i18n.translate('xpack.securitySolution.blocklists.entry.field.description.hash', {
+  'file.hash.*': i18n.translate('xpack.securitySolution.blocklist.entry.field.description.hash', {
     defaultMessage: 'md5, sha1, or sha256',
   }),
-  'file.path': i18n.translate('xpack.securitySolution.blocklists.entry.field.description.path', {
+  'file.path': i18n.translate('xpack.securitySolution.blocklist.entry.field.description.path', {
     defaultMessage: 'The full path of the application',
   }),
   'file.Ext.code_signature': i18n.translate(
-    'xpack.securitySolution.blocklists.entry.field.description.signature',
+    'xpack.securitySolution.blocklist.entry.field.description.signature',
     { defaultMessage: 'The signer of the application' }
   ),
 };
 
 export const POLICY_SELECT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.blocklists.policyAssignmentSectionDescription',
+  'xpack.securitySolution.blocklist.policyAssignmentSectionDescription',
   {
     defaultMessage:
       'Assign this blocklist globally across all policies, or assign it to specific policies.',
@@ -104,32 +104,32 @@ export const POLICY_SELECT_DESCRIPTION = i18n.translate(
 );
 
 export const ERRORS = {
-  NAME_REQUIRED: i18n.translate('xpack.securitySolution.blocklists.errors.name.required', {
+  NAME_REQUIRED: i18n.translate('xpack.securitySolution.blocklist.errors.name.required', {
     defaultMessage: 'Name is required',
   }),
-  VALUE_REQUIRED: i18n.translate('xpack.securitySolution.blocklists.errors.values.required', {
+  VALUE_REQUIRED: i18n.translate('xpack.securitySolution.blocklist.errors.values.required', {
     defaultMessage: 'Field entry must have a value',
   }),
-  INVALID_HASH: i18n.translate('xpack.securitySolution.blocklists.errors.values.invalidHash', {
+  INVALID_HASH: i18n.translate('xpack.securitySolution.blocklist.errors.values.invalidHash', {
     defaultMessage: 'Invalid hash value',
   }),
-  INVALID_PATH: i18n.translate('xpack.securitySolution.blocklists.warnings.values.invalidPath', {
+  INVALID_PATH: i18n.translate('xpack.securitySolution.blocklist.warnings.values.invalidPath', {
     defaultMessage: 'Path may be formed incorrectly; verify value',
   }),
   WILDCARD_PRESENT: i18n.translate(
-    'xpack.securitySolution.blocklists.warnings.values.wildcardPresent',
+    'xpack.securitySolution.blocklist.warnings.values.wildcardPresent',
     {
       defaultMessage: "A wildcard in the filename will affect the endpoint's performance",
     }
   ),
   DUPLICATE_VALUE: i18n.translate(
-    'xpack.securitySolution.blocklists.warnings.values.duplicateValue',
+    'xpack.securitySolution.blocklist.warnings.values.duplicateValue',
     {
       defaultMessage: 'This value already exists',
     }
   ),
   DUPLICATE_VALUES: i18n.translate(
-    'xpack.securitySolution.blocklists.warnings.values.duplicateValues',
+    'xpack.securitySolution.blocklist.warnings.values.duplicateValues',
     {
       defaultMessage: 'One or more duplicate values removed',
     }

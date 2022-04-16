@@ -58,7 +58,7 @@ Update an existing {data-source} object,`my-pattern`, with a different title:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/saved_objects/index-pattern/my-pattern
+$ curl -X PUT api/index_patterns/index-pattern/my-pattern
 {
   "attributes": {
     "title": "some-other-pattern-*"

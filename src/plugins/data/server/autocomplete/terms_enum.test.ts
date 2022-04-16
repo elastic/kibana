@@ -39,7 +39,7 @@ describe('_terms_enum suggestions', () => {
       'fieldName',
       'query',
       [],
-      { name: 'field_name', type: 'string' }
+      { name: 'field_name', type: 'string', searchable: true, aggregatable: true }
     );
 
     const [[args]] = esClientMock.termsEnum.mock.calls;

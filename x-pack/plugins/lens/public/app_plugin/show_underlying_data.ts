@@ -20,11 +20,6 @@ import { partition } from 'lodash';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource } from '../types';
 
-export const getShowUnderlyingDataLabel = () =>
-  i18n.translate('xpack.lens.app.exploreRawData', {
-    defaultMessage: 'Explore raw data',
-  });
-
 /**
  * Joins a series of queries.
  *

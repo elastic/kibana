@@ -27,7 +27,7 @@ export const RULE_FAILED = `failed`;
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
   showBenchmarks: false,
-  showTrendLineMock: false,
   showManageRulesMock: false,
   showRisksMock: false,
+  showFindingsGroupBy: false,
 } as const;

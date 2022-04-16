@@ -76,13 +76,9 @@ export interface AuthenticationBucket {
   doc_count: number;
   failures: {
     doc_count: number;
-    // TODO: Keep this or make a new structure?
-    value?: number;
   };
   successes: {
     doc_count: number;
-    // TODO: Keep this or make a new structure?
-    value?: number;
   };
   authentication: {
     hits: {
