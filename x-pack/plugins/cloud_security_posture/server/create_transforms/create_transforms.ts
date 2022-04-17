@@ -6,7 +6,7 @@
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { latestFindingsTransform } from './latest_findings_transform';
 import { benchmarkScoreTransform } from './benchmark_score_transform';
 
