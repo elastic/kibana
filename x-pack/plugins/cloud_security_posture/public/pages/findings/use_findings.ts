@@ -71,8 +71,13 @@ export const showErrorToast = (
   else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
 };
 
-export const getFindingsQuery = ({ index, query, size, from, sort }: UseFindingsOptions) => ({
+export const getFindingsQuery = ({
   index,
+  query,
+  size,
+  from,
+  sort,
+}: Omit<UseFindingsOptions, 'error'>) => ({
   query,
   size,
   from,
@@ -90,13 +95,7 @@ export const useFindings = ({ error, index, query, sort, from, size }: UseFindin
     () =>
       lastValueFrom<IEsSearchResponse<CspFinding>>(
         data.search.search({
-          params: {
-            index,
-            query,
-            size,
-            from,
-            sort: mapEsQuerySortKey(sort),
-          },
+          params: getFindingsQuery({ index, query, sort, from, size }),
         })
       ),
     {
