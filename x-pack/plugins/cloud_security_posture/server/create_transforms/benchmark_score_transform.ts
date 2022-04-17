@@ -12,7 +12,7 @@ import {
 } from '../../common/constants';
 
 export const benchmarkScoreTransform: TransformPutTransformRequest = {
-  transform_id: 'cis_kubernetes_benchmark.score-default-0.0.1',
+  transform_id: 'cloud_security_posture.score-default-0.0.1',
   description: 'Calculate latest findings score',
   source: {
     index: LATEST_FINDINGS_INDEX_PATTERN,

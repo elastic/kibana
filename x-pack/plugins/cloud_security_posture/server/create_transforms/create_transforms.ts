@@ -22,17 +22,25 @@ export const createTransformIfNotExists = async (
   logger: Logger
 ) => {
   try {
-    const isTransformExist = await esClient.transform.getTransform({
+    await esClient.transform.getTransform({
       transform_id: transform.transform_id,
-      allow_no_match: false,
+      allow_no_match: true,
     });
-
-    if (!isTransformExist) {
-      await esClient.transform.putTransform(transform);
+  } catch (existErr) {
+    const existError = transformError(existErr);
+    if (existError.statusCode === 404) {
+      try {
+        await esClient.transform.putTransform(transform);
+      } catch (createErr) {
+        const createError = transformError(createErr);
+        logger.error(
+          `Failed to create transform ${transform.transform_id}: ${createError.message}`
+        );
+      }
+    } else {
+      logger.error(
+        `Failed to check if transform ${transform.transform_id} exists: ${existError.message}`
+      );
     }
-  } catch (err) {
-    const error = transformError(err);
-    logger.error(`Failed to create transform ${transform.transform_id}`);
-    logger.error(error.message);
   }
 };
