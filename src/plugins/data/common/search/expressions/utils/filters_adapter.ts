@@ -7,7 +7,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { ExpressionValueFilter } from 'src/plugins/expressions/common';
+import { ExpressionValueFilter } from '@kbn/expressions-plugin/common';
 
 function getGroupFromFilter(filter: Filter) {
   const { meta } = filter;

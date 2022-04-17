@@ -10,8 +10,8 @@ import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { Query } from 'src/plugins/data/public';
-import { parseTimeShift } from '../../../../../../src/plugins/data/common';
+import { Query } from '@kbn/data-plugin/public';
+import { parseTimeShift } from '@kbn/data-plugin/common';
 import {
   adjustTimeScaleLabelSuffix,
   GenericIndexPatternColumn,

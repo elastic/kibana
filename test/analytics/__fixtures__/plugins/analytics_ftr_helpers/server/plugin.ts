@@ -8,7 +8,7 @@
 
 import { firstValueFrom, ReplaySubject, filter, take, toArray } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, Event } from 'src/core/server';
+import type { Plugin, CoreSetup, Event } from '@kbn/core/server';
 import { CustomShipper } from './custom_shipper';
 
 export class AnalyticsFTRHelpers implements Plugin {

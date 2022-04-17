@@ -6,8 +6,9 @@
  */
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { Serializable } from '@kbn/utility-types';
-import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { flowRight, mapValues } from 'lodash';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import {
   CanvasElement,
   CanvasTemplateElement,
@@ -16,10 +17,6 @@ import {
   CustomElementContent,
   CustomElementNode,
 } from '../../../types';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
 import { WorkpadAttributes } from '../../routes/workpad/workpad_attributes';
 import { CanvasSavedObjectTypeMigrationsDeps } from './types';
 

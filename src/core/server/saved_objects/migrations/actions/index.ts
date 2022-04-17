@@ -7,7 +7,7 @@
  */
 
 import { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import { DocumentsTransformFailed } from '../../migrations/core/migrate_raw_docs';
+import { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
 export {
   BATCH_SIZE,

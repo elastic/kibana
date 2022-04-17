@@ -14,7 +14,7 @@ import {
   indexPatterns as indexPatternsUtils,
   QuerySuggestionField,
   QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../..';
 import { KqlQuerySuggestionProvider } from './types';
 
 const keywordComparator = (first: IFieldType, second: IFieldType) => {

@@ -13,7 +13,6 @@ import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
-import { DocLinksServiceStart } from '../../doc_links';
 
 /**
  * Construct the initial state for the model

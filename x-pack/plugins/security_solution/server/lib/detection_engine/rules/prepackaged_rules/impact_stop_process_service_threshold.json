@@ -12,6 +12,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "High Number of Process and/or Service Terminations",
+  "note": "## Triage and analysis\n\n### Investigating High Number of Process and/or Service Terminations\n\nAttackers can stop services and kill processes for a variety of purposes. For example, they can stop services associated\nwith business applications and databases to release the lock on files used by these applications so they may be encrypted,\nor stop security and backup solutions, etc.\n\nThis rule identifies a high number (10) of service and/or process terminations (stop, delete, or suspend) from the same\nhost within a short time period.\n\n#### Possible investigation steps\n\n- Investigate the script execution chain (parent process tree).\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Confirm whether the account owner is aware of the operation, and why it was performed.\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Check for similar behavior in other hosts on the environment.\n- Check if any files on the host machine have been encrypted.\n\n### False positive analysis\n\n- This activity is unlikely to happen legitimately. Benign true positives (B-TPs) can be added as exceptions if necessary.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further destructive behavior, which is commonly associated with this activity.\n- Reset the password of the involved accounts.\n- Reimage the host operating system or restore it to the operational state.\n- If any other destructive action was identified on the host, it is recommended to prioritize the investigation and look\nfor ransomware preparation and execution activities.\n",
   "query": "event.category:process and event.type:start and process.name:(net.exe or sc.exe or taskkill.exe) and\n process.args:(stop or pause or delete or \"/PID\" or \"/IM\" or \"/T\" or \"/F\" or \"/t\" or \"/f\" or \"/im\" or \"/pid\")\n",
   "risk_score": 47,
   "rule_id": "035889c4-2686-4583-a7df-67f89c292f2c",
@@ -47,5 +48,5 @@
     "value": 10
   },
   "type": "threshold",
-  "version": 3
+  "version": 4
 }
