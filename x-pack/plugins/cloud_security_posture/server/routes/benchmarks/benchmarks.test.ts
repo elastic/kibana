@@ -88,7 +88,7 @@ describe('benchmarks API', () => {
 
     const [config] = router.get.mock.calls[0];
 
-    expect(config.path).toEqual('/api/csp/benchmarks');
+    expect(config.path).toEqual('/internal/cloud_security_posture/benchmarks');
   });
 
   it('should accept to a user with fleet.all privilege', async () => {
