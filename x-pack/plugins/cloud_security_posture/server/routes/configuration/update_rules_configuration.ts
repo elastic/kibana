@@ -22,7 +22,7 @@ import { CspAppContext } from '../../plugin';
 import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
 import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
 import { UPDATE_RULES_CONFIG_ROUTE_PATH } from '../../../common/constants';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
+import { CLOUD_SECURITY_PACKAGE_NAME } from '../../../common/constants';
 import { CspRouter } from '../../types';
 
 export const getPackagePolicy = async (
@@ -36,9 +36,8 @@ export const getPackagePolicy = async (
   if (!packagePolicies || !packagePolicies[0].version) {
     throw new Error(`package policy Id '${packagePolicyId}' is not exist`);
   }
-  if (packagePolicies[0].package?.name !== CIS_KUBERNETES_PACKAGE_NAME) {
-    // TODO: improve this validator to support any future CSP package
-    throw new Error(`Package Policy Id '${packagePolicyId}' is not CSP package`);
+  if (packagePolicies[0].package?.name !== CLOUD_SECURITY_PACKAGE_NAME) {
+    throw new Error(`Package Policy Id '${packagePolicyId}' is not of type cloud security posture package`);
   }
 
   return packagePolicies![0];

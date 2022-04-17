@@ -11,7 +11,7 @@ import {
   type GetInfoResponse,
   type DefaultPackagesInstallationError,
 } from '@kbn/fleet-plugin/common';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
+import { CLOUD_SECURITY_PACKAGE_NAME } from '../../../common/constants';
 import { useKibana } from '../hooks/use_kibana';
 
 /**
@@ -21,7 +21,7 @@ export const useCisKubernetesIntegration = () => {
   const { http } = useKibana().services;
 
   return useQuery<GetInfoResponse, DefaultPackagesInstallationError>(['integrations'], () =>
-    http.get<GetInfoResponse>(epmRouteService.getInfoPath(CIS_KUBERNETES_PACKAGE_NAME), {
+    http.get<GetInfoResponse>(epmRouteService.getInfoPath(CLOUD_SECURITY_PACKAGE_NAME), {
       query: { experimental: true },
     })
   );

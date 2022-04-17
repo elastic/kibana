@@ -10,9 +10,9 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsMapping } from './latest_findings_mapping';
 import {
-  LATEST_FINDINGS_INDEX_PATTERN,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_NAME,
-  BENCHMARK_SCORE_INDEX_PATTERN,
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_NAME,
 } from '../../common/constants';
 
@@ -25,14 +25,14 @@ export const initializeCspTransformsIndices = async (
     createIndexIfNotExists(
       esClient,
       LATEST_FINDINGS_INDEX_NAME,
-      LATEST_FINDINGS_INDEX_PATTERN,
+      LATEST_FINDINGS_INDEX_DEFAULT_NS,
       latestFindingsMapping,
       logger
     ),
     createIndexIfNotExists(
       esClient,
       BENCHMARK_SCORE_INDEX_NAME,
-      BENCHMARK_SCORE_INDEX_PATTERN,
+      BENCHMARK_SCORE_INDEX_DEFAULT_NS,
       benchmarkScoreMapping,
       logger
     ),
@@ -65,7 +65,7 @@ export const createIndexIfNotExists = async (
     }
   } catch (err) {
     const error = transformError(err);
-    logger.error(`Failed to create ${LATEST_FINDINGS_INDEX_PATTERN}`);
+    logger.error(`Failed to create ${LATEST_FINDINGS_INDEX_DEFAULT_NS}`);
     logger.error(error.message);
   }
 };
