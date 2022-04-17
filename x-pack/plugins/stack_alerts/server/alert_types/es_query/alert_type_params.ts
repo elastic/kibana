@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
-import { RuleTypeState } from '../../../../alerting/server';
+import { validateTimeWindowUnits } from '@kbn/triggers-actions-ui-plugin/server';
+import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { Comparator } from '../../../common/comparator_types';
 import { ComparatorFnNames } from '../lib';
 import { getComparatorSchemaType } from '../lib/comparator';

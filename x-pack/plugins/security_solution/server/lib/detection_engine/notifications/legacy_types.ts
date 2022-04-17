@@ -16,8 +16,8 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   RuleExecutorOptions,
-} from '../../../../../alerting/server';
-import { Rule, RuleAction } from '../../../../../alerting/common';
+} from '@kbn/alerting-plugin/server';
+import { Rule, RuleAction } from '@kbn/alerting-plugin/common';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 
 /**

@@ -8,7 +8,7 @@
 import { buildOSSFeatures } from './oss_features';
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
 import { KibanaFeature } from '.';
-import { LicenseType, LICENSE_TYPE } from '../../licensing/server';
+import { LicenseType, LICENSE_TYPE } from '@kbn/licensing-plugin/server';
 
 describe('buildOSSFeatures', () => {
   it('returns features including reporting subfeatures', () => {

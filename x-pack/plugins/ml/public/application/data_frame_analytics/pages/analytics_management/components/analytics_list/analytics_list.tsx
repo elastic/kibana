@@ -16,6 +16,7 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
@@ -31,7 +32,6 @@ import {
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
-import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';

@@ -7,7 +7,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ThemeService } from '../../../../charts/public/services';
+import { ThemeService } from '@kbn/charts-plugin/public/services';
 import { uiSettings } from './ui_settings';
 
 const theme = new ThemeService();

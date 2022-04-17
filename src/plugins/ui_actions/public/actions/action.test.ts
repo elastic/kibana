@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ActionExecutionContext, createAction } from '../../../ui_actions/public';
+import { ActionExecutionContext, createAction } from '..';
 import { defaultTrigger } from '../triggers';
 
 const sayHelloAction = createAction<{ amICompatible: boolean }>({

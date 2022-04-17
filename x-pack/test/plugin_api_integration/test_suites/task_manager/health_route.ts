@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import url from 'url';
 import { keyBy, mapValues } from 'lodash';
 import supertest from 'supertest';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 interface MonitoringStats {
   last_update: string;

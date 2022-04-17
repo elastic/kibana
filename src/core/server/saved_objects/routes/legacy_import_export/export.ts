@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { InternalCoreUsageDataSetup } from 'src/core/server/core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../../core_usage_data';
 import { IRouter, Logger } from '../../..';
 import { exportDashboards } from './lib';
 
