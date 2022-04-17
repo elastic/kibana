@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { VisTypeTimeseriesSetup } from 'src/plugins/vis_types/timeseries/server';
+import { IRouter } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
 
-import { getCapabilitiesForRollupIndices } from 'src/plugins/data/server';
-import { IndexManagementPluginSetup } from '../../index_management/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { License } from './services';
 import { IndexPatternsFetcher } from './shared_imports';
 import { handleEsError } from './shared_imports';

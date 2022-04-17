@@ -11,18 +11,18 @@
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
-import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
-import { CharacterNotAllowedInField } from '../../../kibana_utils/common';
-
-import { IIndexPattern, IFieldType } from '../../common';
-import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
-import { flattenHitWrapper } from './flatten_hit';
+import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import {
   FieldFormatsStartCommon,
   FieldFormat,
   SerializedFieldFormat,
-} from '../../../field_formats/common';
+} from '@kbn/field-formats-plugin/common';
+import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
+import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
+
+import { IIndexPattern, IFieldType } from '..';
+import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
+import { flattenHitWrapper } from './flatten_hit';
 import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
 import { removeFieldAttrs } from './utils';
 

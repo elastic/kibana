@@ -19,10 +19,10 @@ import {
   AnnotationDomainType,
 } from '@elastic/charts';
 import { EuiIcon, euiPaletteGray } from '@elastic/eui';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useCurrentEuiTheme } from '../../components/color_range_legend';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 
 interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];

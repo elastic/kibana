@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { TransformHealthTests } from './types/alerting';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;

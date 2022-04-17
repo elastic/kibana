@@ -10,7 +10,7 @@ import React, { ReactNode, Suspense, lazy } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { IInterpreterRenderHandlers } from '../../../expressions/common';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 
 export interface VisualizationContainerProps {
   'data-test-subj'?: string;

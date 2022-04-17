@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
@@ -25,7 +26,6 @@ import { IS_OPERATOR } from '../../../timelines/components/timeline/data_provide
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { HoverActions } from '../hover_actions';
 import { DataProvider, QueryOperator } from '../../../../common/types';
-import { TimelineContext } from '../../../../../timelines/public';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};

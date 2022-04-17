@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { readHashOfPackageMap } from '@kbn/synthetic-package-map';
+
 import { CacheableWorkerConfig, Hashes } from '../common';
 import { OptimizerConfig } from './optimizer_config';
 import { getOptimizerBuiltPaths } from './optimizer_built_paths';
@@ -13,6 +15,7 @@ import { getOptimizerBuiltPaths } from './optimizer_built_paths';
 export interface OptimizerCacheKey {
   readonly workerConfig: CacheableWorkerConfig;
   readonly checksums: Record<string, string>;
+  readonly synthPackages: string;
 }
 
 /**
@@ -25,5 +28,6 @@ export async function getOptimizerCacheKey(config: OptimizerConfig): Promise<Opt
   return {
     checksums: hashes.cacheToJson(),
     workerConfig: config.getCacheableWorkerConfig(),
+    synthPackages: readHashOfPackageMap(),
   };
 }

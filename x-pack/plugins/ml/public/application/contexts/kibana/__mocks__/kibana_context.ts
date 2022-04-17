@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 
 export const chartsServiceMock = {

@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Margins } from '../../../../../shared/charts/timeline';
 import {
   IWaterfall,

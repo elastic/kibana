@@ -21,7 +21,6 @@ const SystemFileExampleComponent: React.FC = () => {
   return (
     <>
       {systemFileRowRenderer.renderRow({
-        browserFields: {},
         data: mockEndgameFileDeleteEvent,
         isDraggable: false,
         timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,

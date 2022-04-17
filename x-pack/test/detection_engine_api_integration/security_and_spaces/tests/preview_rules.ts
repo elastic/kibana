@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllAlerts, getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../utils';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
@@ -89,6 +89,38 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send(getSimplePreviewRule())
             .expect(403);
+        });
+      });
+
+      describe('hunter', () => {
+        const role = ROLES.hunter;
+
+        beforeEach(async () => {
+          await createUserAndRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+
+        it('should return with an error about not having correct permissions', async () => {
+          const { body } = await supertestWithoutAuth
+            .post(DETECTION_ENGINE_RULES_PREVIEW)
+            .auth(role, 'changeme')
+            .set('kbn-xsrf', 'true')
+            .send(getSimplePreviewRule())
+            .expect(200);
+
+          const { logs } = getSimpleRulePreviewOutput(undefined, [
+            {
+              errors: [
+                'Missing "read" privileges for the ".preview.alerts-security.alerts" or ".internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
+              ],
+              warnings: [],
+              duration: 0,
+            },
+          ]);
+          expect(body).to.eql({ logs });
         });
       });
     });

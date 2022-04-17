@@ -14,9 +14,9 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import { ConfigType } from '../';
+import { ConfigType } from '..';
 
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,

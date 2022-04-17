@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildPreviousThresholdAlertRequest should generate a proper request when bucketByFields contains multiple fields 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "must": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "strict_date_optional_time",
+                "gte": "now-6m",
+                "lte": "now",
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "signal.rule.rule_id": "threshold-rule",
+            },
+          },
+          Object {
+            "range": Object {
+              "signal.original_time": Object {
+                "gte": "now-6m",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "term": Object {
+                    "signal.rule.threshold.field": "host.name",
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "kibana.alert.rule.parameters.threshold.field": "host.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "term": Object {
+                    "signal.rule.threshold.field": "user.name",
+                  },
+                },
+                Object {
+                  "term": Object {
+                    "kibana.alert.rule.parameters.threshold.field": "user.name",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "sort": Array [
+      Object {
+        "@timestamp": "desc",
+      },
+    ],
+  },
+  "size": 10000,
+}
+`;
+
+exports[`buildPreviousThresholdAlertRequest should generate a proper request when bucketByFields is empty 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "must": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "strict_date_optional_time",
+                "gte": "now-6m",
+                "lte": "now",
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "signal.rule.rule_id": "threshold-rule",
+            },
+          },
+          Object {
+            "range": Object {
+              "signal.original_time": Object {
+                "gte": "now-6m",
+              },
+            },
+          },
+        ],
+      },
+    },
+    "sort": Array [
+      Object {
+        "@timestamp": "desc",
+      },
+    ],
+  },
+  "size": 10000,
+}
+`;

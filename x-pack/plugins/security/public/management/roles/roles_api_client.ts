@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import type { Role, RoleIndexPrivilege } from '../../../common/model';
 import { copyRole } from '../../../common/model';

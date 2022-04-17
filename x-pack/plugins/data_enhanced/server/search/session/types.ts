@@ -10,13 +10,13 @@ import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { Observable } from 'rxjs';
-import { KueryNode, SearchSessionSavedObjectAttributes } from 'src/plugins/data/common';
+import { KueryNode, SearchSessionSavedObjectAttributes } from '@kbn/data-plugin/common';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../../x-pack/plugins/task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { ConfigSchema } from '../../../config';
 
 export enum SearchStatus {

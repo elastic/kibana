@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { Logger } from '../../../../../src/core/server';
 import { postXmatters } from './lib/post_xmatters';
 
 export type XmattersActionType = ActionType<

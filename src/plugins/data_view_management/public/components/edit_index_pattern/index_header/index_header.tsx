@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPopover } from '@elastic/eui';
-import { DataView } from 'src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 interface IndexHeaderProps {
   indexPattern: DataView;

@@ -6,14 +6,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { EnrichedDeprecationInfo, ESUpgradeStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 import {
   getESSystemIndicesMigrationStatus,
   convertFeaturesToIndicesArray,
-} from '../lib/es_system_indices_migration';
+} from './es_system_indices_migration';
 
 export async function getESUpgradeStatus(
   dataClient: IScopedClusterClient

@@ -8,13 +8,13 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { getDataViewsStart } from '../../../../services';
 
 import { SwitchModePopover } from './switch_mode_popover';
 
 import type { SelectIndexComponentProps } from './types';
 import type { IndexPatternValue } from '../../../../../common/types';
-import type { DataViewsService } from '../../../../../../../data_views/public';
 
 /** @internal **/
 type IdsWithTitle = Awaited<ReturnType<DataViewsService['getIdsWithTitle']>>;
