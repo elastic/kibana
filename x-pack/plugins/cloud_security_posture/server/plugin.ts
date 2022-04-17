@@ -11,7 +11,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,

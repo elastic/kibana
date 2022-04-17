@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryColorPalette } from '../../../../../lib/lib';
 import { getColorPalette } from '../../lib/get_color_palette';
 

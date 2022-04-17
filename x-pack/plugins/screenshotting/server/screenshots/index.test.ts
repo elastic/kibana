@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { of, throwError } from 'rxjs';
-import type { Logger } from 'src/core/server';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { lastValueFrom, of, throwError } from 'rxjs';
+import type { Logger, PackageInfo } from '@kbn/core/server';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import {
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
@@ -31,6 +31,7 @@ describe('Screenshot Observable Pipeline', () => {
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
   let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
+  let packageInfo: Readonly<PackageInfo>;
   let options: ScreenshotOptions;
   let screenshots: Screenshots;
 
@@ -44,6 +45,13 @@ describe('Screenshot Observable Pipeline', () => {
       error: jest.fn(),
       info: jest.fn(),
     } as unknown as jest.Mocked<Logger>;
+    packageInfo = {
+      branch: 'screenshot-test',
+      buildNum: 567891011,
+      buildSha: 'screenshot-dfdfed0a',
+      dist: false,
+      version: '5000.0.0',
+    };
     options = {
       browserTimezone: 'UTC',
       headers: {},
@@ -56,7 +64,9 @@ describe('Screenshot Observable Pipeline', () => {
       },
       urls: ['/welcome/home/start/index.htm'],
     } as unknown as typeof options;
-    screenshots = new Screenshots(driverFactory, logger, http, { poolSize: 1 } as ConfigType);
+    screenshots = new Screenshots(driverFactory, logger, packageInfo, http, {
+      poolSize: 1,
+    } as ConfigType);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 
@@ -68,7 +78,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await screenshots.getScreenshots(options as PngScreenshotOptions).toPromise();
+    const result = await lastValueFrom(screenshots.getScreenshots(options as PngScreenshotOptions));
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -125,12 +135,12 @@ describe('Screenshot Observable Pipeline', () => {
 
   it('pipelines multiple urls into', async () => {
     driver.screenshot.mockResolvedValue(Buffer.from('some screenshots'));
-    const result = await screenshots
-      .getScreenshots({
+    const result = await lastValueFrom(
+      screenshots.getScreenshots({
         ...options,
         urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
       } as PngScreenshotOptions)
-      .toPromise();
+    );
 
     expect(result).toHaveProperty('results');
     expect(result.results).toMatchInlineSnapshot(`
@@ -284,15 +294,15 @@ describe('Screenshot Observable Pipeline', () => {
       driver.waitForSelector.mockImplementation((selectorArg: string) => {
         throw new Error('Mock error!');
       });
-      const result = await screenshots
-        .getScreenshots({
+      const result = await lastValueFrom(
+        screenshots.getScreenshots({
           ...options,
           urls: [
             '/welcome/home/start/index2.htm',
             '/welcome/home/start/index.php3?page=./home.php3',
           ],
         } as PngScreenshotOptions)
-        .toPromise();
+      );
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`
@@ -407,7 +417,9 @@ describe('Screenshot Observable Pipeline', () => {
       );
 
       layout.getViewport = () => null;
-      const result = await screenshots.getScreenshots(options as PngScreenshotOptions).toPromise();
+      const result = await lastValueFrom(
+        screenshots.getScreenshots(options as PngScreenshotOptions)
+      );
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchInlineSnapshot(`

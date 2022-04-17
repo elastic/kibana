@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery } from '../../../../observability/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,

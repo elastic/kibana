@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 

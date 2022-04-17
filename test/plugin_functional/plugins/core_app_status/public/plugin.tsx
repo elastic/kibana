@@ -14,7 +14,7 @@ import {
   AppUpdatableFields,
   CoreStart,
   AppMountParameters,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { renderApp } from './application';
 import './types';
 

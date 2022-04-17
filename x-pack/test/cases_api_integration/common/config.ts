@@ -94,7 +94,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     return {
-      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
+      testFiles,
       servers,
       services,
       junit: {

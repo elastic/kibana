@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '../../../../../alerting/common';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
 import { CreateNotificationParams, LegacyRuleNotificationAlertTypeParams } from './legacy_types';

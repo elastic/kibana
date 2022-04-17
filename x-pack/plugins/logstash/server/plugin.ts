@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { registerRoutes } from './routes';
 
 interface SetupDeps {

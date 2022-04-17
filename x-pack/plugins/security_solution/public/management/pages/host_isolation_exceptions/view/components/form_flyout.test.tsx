@@ -24,7 +24,7 @@ import {
 import { createEmptyHostIsolationException } from '../../utils';
 import { HostIsolationExceptionsFormFlyout } from './form_flyout';
 
-jest.mock('../../service.ts');
+jest.mock('../../service');
 jest.mock('../../../../../common/hooks/use_license');
 jest.mock('../../../../services/policies/policies');
 

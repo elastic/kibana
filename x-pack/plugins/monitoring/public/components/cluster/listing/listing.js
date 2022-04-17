@@ -28,7 +28,7 @@ import { AlertsStatus } from '../../../alerts/status';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import './listing.scss';
-import { toMountPoint, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';

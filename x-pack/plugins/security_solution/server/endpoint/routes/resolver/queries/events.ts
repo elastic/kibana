@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';

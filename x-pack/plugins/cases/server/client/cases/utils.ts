@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import {
   ActionConnector,
@@ -23,8 +24,7 @@ import {
   CommentRequestActionsType,
   ActionTypes,
 } from '../../../common/api';
-import { ActionsClient } from '../../../../actions/server';
-import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
+import { CasesClientGetAlertsResponse } from '../alerts/types';
 import {
   BasicParams,
   EntityInformation,

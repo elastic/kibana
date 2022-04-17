@@ -8,7 +8,7 @@
 // @ts-expect-error
 import { formatRequest } from '@kbn/server-route-repository/target_node/format_request';
 import type { formatRequest as formatRequestType } from '@kbn/server-route-repository/target_types/format_request';
-import type { HttpSetup } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { AbstractObservabilityClient, ObservabilityClient } from './types';
 
 export let callObservabilityApi: ObservabilityClient = () => {

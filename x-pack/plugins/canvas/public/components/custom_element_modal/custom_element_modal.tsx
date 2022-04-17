@@ -28,8 +28,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { encode } from '@kbn/presentation-util-plugin/public';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
-import { encode } from '../../../../../../src/plugins/presentation_util/public';
 import { ElementCard } from '../element_card';
 
 const MAX_NAME_LENGTH = 40;
