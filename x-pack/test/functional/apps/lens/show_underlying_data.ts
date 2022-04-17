@@ -39,9 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await PageObjects.discover.closeDocumentExplorerCallout();
-
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.dismissDocumentExplorerCallout();
+
       await testSubjects.existOrFail('discoverChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();

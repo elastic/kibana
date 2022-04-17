@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.discover.closeDocumentExplorerCallout();
+      await PageObjects.discover.dismissDocumentExplorerCallout();
     });
 
     after(async () => {

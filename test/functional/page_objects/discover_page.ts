@@ -244,9 +244,9 @@ export class DiscoverPageObject extends FtrService {
     return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
   }
 
-  public async closeDocumentExplorerCallout() {
-    if (await this.testSubjects.exists('document-explorer-update-callout-close-button')) {
-      await this.testSubjects.click('document-explorer-update-callout-close-button');
+  public async dismissDocumentExplorerCallout() {
+    if (await this.testSubjects.exists('document-explorer-update-callout-dismiss-button')) {
+      await this.testSubjects.click('document-explorer-update-callout-dismiss-button');
     }
   }
 

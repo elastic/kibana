@@ -92,7 +92,12 @@ export const DocumentExplorerUpdateCallout = () => {
           }}
         />
       </p>
-      <EuiButton iconType="tableDensityNormal" size="s" onClick={onCloseCallout}>
+      <EuiButton
+        data-test-subj="document-explorer-update-callout-dismiss-button"
+        iconType="tableDensityNormal"
+        size="s"
+        onClick={onCloseCallout}
+      >
         <FormattedMessage
           id="discover.docExplorerUpdateCallout.dismissButtonLabel"
           defaultMessage="Dismiss"
@@ -113,7 +118,6 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          data-test-subj="document-explorer-update-callout-close-button"
           aria-label={i18n.translate('discover.docExplorerUpdateCallout.closeButtonAriaLabel', {
             defaultMessage: 'Close',
           })}
