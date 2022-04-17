@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IEvent, IEventLogger, IEventLogService } from './index';
+import { IEvent, IEventLogger, IEventLogService } from '.';
 import { ECS_VERSION } from './types';
 import { EventLogService } from './event_log_service';
 import { EsContext } from './es/context';
 import { contextMock } from './es/context.mock';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { delay } from './lib/delay';
 import { EVENT_LOGGED_PREFIX } from './event_logger';
 import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';

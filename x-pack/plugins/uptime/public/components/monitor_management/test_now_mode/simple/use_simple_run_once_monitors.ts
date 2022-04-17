@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-import { selectDynamicSettings } from '../../../../state/selectors';
+import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
 import { Ping } from '../../../../../common/runtime_types';
-import { createEsParams, useEsSearch } from '../../../../../../observability/public';
 import { useTickTick } from '../use_tick_tick';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
 
 export const useSimpleRunOnceMonitors = ({
   configId,
@@ -21,11 +20,9 @@ export const useSimpleRunOnceMonitors = ({
 }) => {
   const { refreshTimer, lastRefresh } = useTickTick(2 * 1000, false);
 
-  const { settings } = useSelector(selectDynamicSettings);
-
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: settings?.heartbeatIndices,
+      index: SYNTHETICS_INDEX_PATTERN,
       body: {
         sort: [
           {
@@ -58,9 +55,9 @@ export const useSimpleRunOnceMonitors = ({
           },
         },
       },
-      size: 10,
+      size: 1000,
     }),
-    [configId, settings?.heartbeatIndices, lastRefresh],
+    [configId, lastRefresh],
     { name: 'TestRunData' }
   );
 

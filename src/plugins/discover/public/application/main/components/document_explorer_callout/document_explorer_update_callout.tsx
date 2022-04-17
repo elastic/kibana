@@ -20,8 +20,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { Storage } from '../../../../../../kibana_utils/public';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerUpdateCalloutClosed';
 

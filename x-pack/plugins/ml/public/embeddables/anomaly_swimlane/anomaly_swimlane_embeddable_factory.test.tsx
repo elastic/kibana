@@ -6,8 +6,8 @@
  */
 
 import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { AnomalySwimlaneEmbeddableInput } from '..';
 

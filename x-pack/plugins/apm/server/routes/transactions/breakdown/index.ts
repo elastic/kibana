@@ -6,6 +6,7 @@
  */
 
 import { flatten, orderBy, last } from 'lodash';
+import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { asPercent } from '../../../../common/utils/formatters';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
@@ -17,7 +18,6 @@ import {
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { MAX_KPIS } from './constants';

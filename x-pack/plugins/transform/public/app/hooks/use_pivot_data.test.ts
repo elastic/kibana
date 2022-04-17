@@ -6,7 +6,7 @@
  */
 
 import { getCombinedProperties } from './use_pivot_data';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 describe('getCombinedProperties', () => {
   test('extracts missing mappings from docs', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResult } from 'kibana/server';
-import type { CommentAttributes } from '../../../../../../cases/common/api/cases/comment';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
 
 export const getRuleIdToCasesMap = (
   cases: Array<SavedObjectsFindResult<CommentAttributes>>

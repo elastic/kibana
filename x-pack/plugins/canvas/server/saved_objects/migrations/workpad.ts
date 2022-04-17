@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { removeAttributesId } from './remove_attributes_id';
 import { CanvasSavedObjectTypeMigrationsDeps } from './types';
 

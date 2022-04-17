@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 
 import {
   ActionConnector,

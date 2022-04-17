@@ -11,7 +11,7 @@ import { SuperTest } from 'supertest';
 import {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import {

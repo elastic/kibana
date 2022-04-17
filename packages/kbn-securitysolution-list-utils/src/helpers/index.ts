@@ -701,7 +701,7 @@ export const getOperatorOptions = (
  * to find it's corresponding keyword type (if available) which does
  * generate autocomplete values
  *
- * @param fields IFieldType fields
+ * @param fields DataViewFieldBase fields
  * @param selectedField the field name that was selected
  * @param isTextType we only want a corresponding keyword field if
  * the selected field is of type 'text'
