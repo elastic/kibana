@@ -36,7 +36,6 @@ export const createTransformIfNotExists = async (
   try {
     await esClient.transform.getTransform({
       transform_id: transform.transform_id,
-      allow_no_match: true,
     });
   } catch (existErr) {
     const existError = transformError(existErr);
@@ -66,6 +65,10 @@ export const startTransformIfNotStarted = async (
     const transformStats = await esClient.transform.getTransformStats({
       transform_id: transformId,
     });
+    if (transformStats.count <= 0) {
+      logger.error(`Failed starting transform ${transformId}: couldn't find transform`);
+      return;
+    }
     const fetchedTransformStats = transformStats.transforms[0];
     if (fetchedTransformStats.state === 'stopped') {
       try {
