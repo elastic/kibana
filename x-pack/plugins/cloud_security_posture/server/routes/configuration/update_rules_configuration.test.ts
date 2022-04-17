@@ -58,7 +58,7 @@ describe('Update rules configuration API', () => {
 
     const [config, _] = router.post.mock.calls[0];
 
-    expect(config.path).toEqual('/api/csp/update_rules_config');
+    expect(config.path).toEqual('/internal/cloud_security_posture/update_rules_config');
   });
 
   it('should accept to a user with fleet.all privilege', async () => {
