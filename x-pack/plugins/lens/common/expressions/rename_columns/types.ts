@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 
 export type OriginalColumn = { id: string; label: string } & (
   | { operationType: 'date_histogram'; sourceField: string }

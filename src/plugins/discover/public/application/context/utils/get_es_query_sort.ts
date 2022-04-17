@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { EsQuerySortValue, SortDirection } from 'src/plugins/data/public';
+import type { EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 
 /**
  * Returns `EsQuerySort` which is used to sort records in the ES query

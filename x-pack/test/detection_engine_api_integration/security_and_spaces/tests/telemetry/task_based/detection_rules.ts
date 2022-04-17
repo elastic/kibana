@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
@@ -22,7 +23,6 @@ import {
   createExceptionListItem,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../plugins/security_solution/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

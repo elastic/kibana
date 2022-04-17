@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { savedObjectsClientMock } from '../../../../../../../../../src/core/server/mocks';
-import { findExceptionList } from '../../../../../../../lists/server/services/exception_lists/find_exception_list';
-import { getExceptionListSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { findExceptionList } from '@kbn/lists-plugin/server/services/exception_lists/find_exception_list';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
 import { getImportRulesSchemaDecodedMock } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
 
-jest.mock('../../../../../../../lists/server/services/exception_lists/find_exception_list');
+jest.mock('@kbn/lists-plugin/server/services/exception_lists/find_exception_list');
 
 describe('getReferencedExceptionLists', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;

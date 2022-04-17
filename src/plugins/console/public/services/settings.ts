@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Storage } from './index';
+import { Storage } from '.';
 
 export const DEFAULT_SETTINGS = Object.freeze({
   fontSize: 14,

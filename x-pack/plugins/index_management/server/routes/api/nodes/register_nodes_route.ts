@@ -6,7 +6,7 @@
  */
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerNodesRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   // Retrieve the es plugins installed on the cluster nodes

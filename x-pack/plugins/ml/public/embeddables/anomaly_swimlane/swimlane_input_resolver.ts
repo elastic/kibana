@@ -19,7 +19,9 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
 import {
@@ -28,10 +30,8 @@ import {
   SWIMLANE_TYPE,
   SwimlaneType,
 } from '../../application/explorer/explorer_constants';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,

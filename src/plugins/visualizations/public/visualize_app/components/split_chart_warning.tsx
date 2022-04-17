@@ -9,7 +9,7 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { useKibana } from '../../../../kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeServices } from '../types';
 import { CHARTS_WITHOUT_SMALL_MULTIPLES } from '../utils/split_chart_warning_helpers';
 import type { CHARTS_WITHOUT_SMALL_MULTIPLES as CHART_WITHOUT_SMALL_MULTIPLES } from '../utils/split_chart_warning_helpers';

@@ -7,7 +7,7 @@
  */
 
 import { migrateMatchAllQuery } from './migrate_match_all_query';
-import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationContext, SavedObjectMigrationFn } from '@kbn/core/server';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 

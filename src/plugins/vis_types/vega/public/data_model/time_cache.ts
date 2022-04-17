@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TimefilterContract } from '../../../../data/public';
-import { TimeRange } from '../../../../data/common';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/common';
 import { CacheBounds } from './types';
 
 /**

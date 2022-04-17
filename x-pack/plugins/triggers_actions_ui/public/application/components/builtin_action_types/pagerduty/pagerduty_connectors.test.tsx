@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { PagerDutyActionConnector } from '.././types';
+import { PagerDutyActionConnector } from '../types';
 import PagerDutyActionConnectorFields from './pagerduty_connectors';
 jest.mock('../../../../common/lib/kibana');
 

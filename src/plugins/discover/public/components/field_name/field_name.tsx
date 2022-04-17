@@ -12,9 +12,9 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
+import { getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getFieldTypeName } from './field_type_name';
-import { getFieldSubtypeMulti } from '../../../../data_views/public';
-import type { DataViewField } from '../../../../data_views/public';
 
 interface Props {
   fieldName: string;

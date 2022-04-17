@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DatatableColumn } from 'src/plugins/expressions/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { AggParamsHistogram } from '../buckets';
 import { BUCKET_TYPES } from '../buckets/bucket_agg_types';
 
