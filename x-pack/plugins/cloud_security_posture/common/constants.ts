@@ -16,8 +16,7 @@ export const LATEST_FINDINGS_INDEX_NAME = 'cloud_security_posture.findings_lates
 export const BENCHMARK_SCORE_INDEX_NAME = 'cloud_security_posture.scores';
 
 export const AGENT_LOGS_INDEX_PATTERN = '.logs-cis_kubernetes_benchmark.metadata*';
-export const CSP_KUBEBEAT_INDEX_PATTERN = 'logs-cis_kubernetes_benchmark.findings*';
-export const PRIVILEGED_CSP_KUBEBEAT_INDEX_PATTERN = 'logs-cis_kubernetes_benchmark.findings-*';
+export const CSP_KUBEBEAT_INDEX_PATTERN = 'logs-cis_kubernetes_benchmark.findings-*';
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-' + LATEST_FINDINGS_INDEX_NAME + '-default';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-' + BENCHMARK_SCORE_INDEX_NAME + '-default';
 
