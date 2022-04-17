@@ -15,7 +15,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse } from '.';
+import type { IndexNotFound, AcknowledgeResponse, IndexNotYellowTimeout } from '.';
 import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 import {
   DEFAULT_TIMEOUT,
