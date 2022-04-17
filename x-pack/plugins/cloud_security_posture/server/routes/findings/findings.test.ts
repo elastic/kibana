@@ -54,7 +54,7 @@ describe('findings API', () => {
 
     const [config, _] = router.get.mock.calls[0];
 
-    expect(config.path).toEqual('/api/csp/findings');
+    expect(config.path).toEqual('/internal/cloud_security_posture/findings');
   });
 
   it('should accept to a user with fleet.all privilege', async () => {

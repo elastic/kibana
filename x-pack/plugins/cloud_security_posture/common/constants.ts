@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export const STATS_ROUTE_PATH = '/api/csp/stats';
-export const FINDINGS_ROUTE_PATH = '/api/csp/findings';
-export const BENCHMARKS_ROUTE_PATH = '/api/csp/benchmarks';
-export const UPDATE_RULES_CONFIG_ROUTE_PATH = '/api/csp/update_rules_config';
+export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats';
+export const FINDINGS_ROUTE_PATH = '/internal/cloud_security_posture/findings';
+export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
+export const UPDATE_RULES_CONFIG_ROUTE_PATH =
+  '/internal/cloud_security_posture/update_rules_config';
 
 export const CSP_FINDINGS_INDEX_NAME = 'findings';
 export const CIS_KUBERNETES_PACKAGE_NAME = 'cis_kubernetes_benchmark';
