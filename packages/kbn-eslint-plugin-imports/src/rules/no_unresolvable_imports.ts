@@ -25,10 +25,10 @@ export const NoUnresolvableImportsRule: Rule.RuleModule = {
       throw new Error('unable to determine sourceFilename for file being linted');
     }
 
-    return visitAllImportStatements((req, importer) => {
+    return visitAllImportStatements((req, { node }) => {
       if (req !== null && !resolver.resolve(req, Path.dirname(sourceFilename))) {
         report(context, {
-          node: importer,
+          node,
           message: `Unable to resolve import [${req}]`,
         });
       }
