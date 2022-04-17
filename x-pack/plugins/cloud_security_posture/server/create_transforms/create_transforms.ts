@@ -12,8 +12,20 @@ import { benchmarkScoreTransform } from './benchmark_score_transform';
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (esClient: ElasticsearchClient, logger: Logger) => {
-  createTransformIfNotExists(esClient, latestFindingsTransform, logger);
-  createTransformIfNotExists(esClient, benchmarkScoreTransform, logger);
+  return Promise.all([
+    initializeTransform(esClient, latestFindingsTransform, logger),
+    initializeTransform(esClient, benchmarkScoreTransform, logger),
+  ]);
+};
+
+export const initializeTransform = async (
+  esClient: ElasticsearchClient,
+  transform: TransformPutTransformRequest,
+  logger: Logger
+) => {
+  return createTransformIfNotExists(esClient, transform, logger).then(() =>
+    startTransformIfNotStarted(esClient, transform.transform_id, logger)
+  );
 };
 
 export const createTransformIfNotExists = async (
@@ -42,5 +54,37 @@ export const createTransformIfNotExists = async (
         `Failed to check if transform ${transform.transform_id} exists: ${existError.message}`
       );
     }
+  }
+};
+
+export const startTransformIfNotStarted = async (
+  esClient: ElasticsearchClient,
+  transformId: string,
+  logger: Logger
+) => {
+  try {
+    const transformStats = await esClient.transform.getTransformStats({
+      transform_id: transformId,
+    });
+    const fetchedTransformStats = transformStats.transforms[0];
+    if (fetchedTransformStats.state === 'stopped') {
+      try {
+        return esClient.transform.startTransform({ transform_id: transformId });
+      } catch (startErr) {
+        const startError = transformError(startErr);
+        logger.error(`Failed starting transform ${transformId}: ${startError.message}`);
+      }
+    } else if (
+      fetchedTransformStats.state === 'stopping' ||
+      fetchedTransformStats.state === 'aborting' ||
+      fetchedTransformStats.state === 'failed'
+    ) {
+      logger.error(
+        `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
+      );
+    }
+  } catch (statsErr) {
+    const statsError = transformError(statsErr);
+    logger.error(`Failed to check if transform ${transformId} is started: ${statsError.message}`);
   }
 };
