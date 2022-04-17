@@ -42,7 +42,7 @@ export const createTransformIfNotExists = async (
     const existError = transformError(existErr);
     if (existError.statusCode === 404) {
       try {
-        await esClient.transform.putTransform(transform);
+        return await esClient.transform.putTransform(transform);
       } catch (createErr) {
         const createError = transformError(createErr);
         logger.error(
@@ -69,7 +69,7 @@ export const startTransformIfNotStarted = async (
     const fetchedTransformStats = transformStats.transforms[0];
     if (fetchedTransformStats.state === 'stopped') {
       try {
-        return esClient.transform.startTransform({ transform_id: transformId });
+        return await esClient.transform.startTransform({ transform_id: transformId });
       } catch (startErr) {
         const startError = transformError(startErr);
         logger.error(`Failed starting transform ${transformId}: ${startError.message}`);
