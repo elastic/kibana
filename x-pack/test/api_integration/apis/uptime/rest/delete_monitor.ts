@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { HTTPFields, MonitorFields } from '@kbn/uptime-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+import { HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
