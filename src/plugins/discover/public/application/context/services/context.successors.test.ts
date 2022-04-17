@@ -8,10 +8,10 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import { SortDirection } from 'src/plugins/data/public';
-import type { DataView } from 'src/plugins/data_views/public';
+import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
-import { DataPublicPluginStart, Query } from '../../../../../data/public';
+import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { EsHitRecord, EsHitRecordList } from '../../types';
 

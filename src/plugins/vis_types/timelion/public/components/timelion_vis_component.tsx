@@ -20,9 +20,10 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
 
-import { useKibana } from '../../../../kibana_react/public';
-import { useActiveCursor } from '../../../../charts/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -37,7 +38,6 @@ import { colors } from '../helpers/chart_constants';
 import { getCharts, getFieldFormats } from '../helpers/plugin_services';
 
 import type { Series, Sheet } from '../helpers/timelion_request_handler';
-import type { IInterpreterRenderHandlers } from '../../../../expressions';
 import type { TimelionVisDependencies } from '../plugin';
 
 import './timelion_vis.scss';

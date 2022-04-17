@@ -51,9 +51,10 @@ run(
     if (flags.run) {
       log.info('Starting Webpack Dev Server...');
       execa.sync(
-        'yarn',
+        process.execPath,
         [
-          'webpack-dev-server',
+          '--preserve-symlinks',
+          require.resolve('webpack-dev-server/bin/webpack-dev-server'),
           '--config',
           webpackConfig,
           ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
@@ -87,9 +88,10 @@ run(
     clean();
     log.info('Building Canvas Shareable Workpad Runtime...');
     execa.sync(
-      'yarn',
+      process.execPath,
       [
-        'webpack',
+        '--preserve-symlinks',
+        require.resolve('webpack/bin/webpack'),
         '--config',
         webpackConfig,
         '--hide-modules',

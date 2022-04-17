@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { ActionVariables, REQUIRED_ACTION_VARIABLES, CONTEXT_ACTION_VARIABLES } from '../../types';
-import { ActionVariable } from '../../../../alerting/common';
 
 export type OmitMessageVariablesType = 'all' | 'keepContext';
 

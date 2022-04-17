@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   MonitorSummariesResult,
   MonitorSummariesResultType,
-} from '../../../../../plugins/synthetics/common/runtime_types';
-import { API_URLS } from '../../../../../plugins/synthetics/common/constants';
+} from '@kbn/uptime-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 interface ExpectedMonitorStatesPage {
   response: any;

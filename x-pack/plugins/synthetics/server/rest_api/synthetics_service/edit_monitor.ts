@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,

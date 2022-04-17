@@ -9,8 +9,8 @@
 import fs from 'fs';
 import path from 'path';
 
+import type { Logger } from '@kbn/core/server';
 import { getDataPath } from '@kbn/utils';
-import type { Logger } from 'src/core/server';
 
 import { getDetailedErrorMessage } from './errors';
 import { VerificationCode } from './verification_code';

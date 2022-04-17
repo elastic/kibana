@@ -6,7 +6,7 @@
  */
 
 import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '.././index';
+import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel, UserConfiguredActionConnector } from '../../../../types';
 
 const ACTION_TYPE_ID = '.server-log';

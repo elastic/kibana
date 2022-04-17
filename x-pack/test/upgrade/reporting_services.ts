@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexTimestamp } from '../../plugins/reporting/server/lib/store/index_timestamp';
+import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
 import { services as xpackServices } from '../functional/services';
 import { services as apiIntegrationServices } from '../api_integration/services';
 import { FtrProviderContext } from './ftr_provider_context';

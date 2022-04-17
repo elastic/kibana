@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createListStream } from './index';
+import { createListStream } from '.';
 
 describe('listStream', () => {
   test('provides the values in the initial list', async () => {

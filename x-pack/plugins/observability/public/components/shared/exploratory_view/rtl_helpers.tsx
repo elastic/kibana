@@ -16,16 +16,20 @@ import {
 } from '@testing-library/react';
 import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { coreMock, themeServiceMock } from 'src/core/public/mocks';
-import {
-  KibanaContextProvider,
-  KibanaServices,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { lensPluginMock } from '../../../../../lens/public/mocks';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
 import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
 import {
@@ -41,20 +45,10 @@ import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
 
 import dataViewData from './configurations/test_data/test_data_view.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setIndexPatterns } from '../../../../../../../src/plugins/unified_search/public/services';
-import type {
-  DataView,
-  DataViewsContract,
-} from '../../../../../../../src/plugins/data_views/public';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
-import { createStubDataView } from '../../../../../../../src/plugins/data_views/common/stubs';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { dataViewPluginMocks } from '../../../../../../../src/plugins/data_views/public/mocks';
 import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
-import { casesPluginMock } from '../../../../../cases/public/mocks';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 

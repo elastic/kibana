@@ -11,6 +11,12 @@ import { catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/data-plugin/common';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import {
   MAX_PERCENT,
   PERCENTILE_SPACING,
   SAMPLER_TOP_TERMS_SHARD_SIZE,
@@ -29,12 +35,6 @@ import type {
   FieldStatsError,
 } from '../../../../../common/types/field_stats';
 import { processDistributionData } from '../../utils/process_distribution_data';
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '../../../../../../../../src/plugins/data/common';
-import type { ISearchStart } from '../../../../../../../../src/plugins/data/public';
 import { extractErrorProperties } from '../../utils/error_utils';
 import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 

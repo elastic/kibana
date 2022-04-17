@@ -7,12 +7,12 @@
 
 import { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ChromeBreadcrumb } from 'src/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import type { Page, DynamicPagePathValues } from '../constants';
 import { INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
 
-import { useStartServices } from './index';
+import { useStartServices } from '.';
 
 const BASE_BREADCRUMB: ChromeBreadcrumb = {
   href: pagePathGetters.integrations()[1],

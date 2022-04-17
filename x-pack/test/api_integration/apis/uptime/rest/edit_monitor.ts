@@ -6,15 +6,11 @@
  */
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { SimpleSavedObject } from 'kibana/public';
-import { secretKeys } from '../../../../../plugins/synthetics/common/constants/monitor_management';
-import {
-  ConfigKey,
-  HTTPFields,
-  MonitorFields,
-} from '../../../../../plugins/synthetics/common/runtime_types';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { secretKeys } from '@kbn/uptime-plugin/common/constants/monitor_management';
+import { ConfigKey, HTTPFields, MonitorFields } from '@kbn/uptime-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/synthetics/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 export default function ({ getService }: FtrProviderContext) {
   describe('[PUT] /internal/uptime/service/monitors', () => {

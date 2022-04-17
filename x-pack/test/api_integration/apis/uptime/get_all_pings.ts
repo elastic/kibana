@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { PINGS_DATE_RANGE_START, PINGS_DATE_RANGE_END } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { API_URLS } from '../../../../plugins/synthetics/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

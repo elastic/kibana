@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import agent from 'elastic-apm-node';
 
-import { createPersistenceRuleTypeWrapper } from '../../../../../rule_registry/server';
+import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildRuleMessageFactory } from './factories/build_rule_message_factory';
 import {
   checkPrivilegesFromEsClient,
@@ -261,6 +261,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   tuple,
                   wrapHits,
                   wrapSequences,
+                  ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
                 },
               });
 

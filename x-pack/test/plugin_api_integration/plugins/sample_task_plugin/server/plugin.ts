@@ -6,18 +6,17 @@
  */
 
 import _ from 'lodash';
-import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { EventEmitter } from 'events';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { initRoutes } from './init_routes';
+import { firstValueFrom, Subject } from 'rxjs';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
   EphemeralTask,
-} from '../../../../../plugins/task_manager/server';
-import { DEFAULT_MAX_WORKERS } from '../../../../../plugins/task_manager/server/config';
+} from '@kbn/task-manager-plugin/server';
+import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
+import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
 export interface SampleTaskManagerFixtureSetupDeps {
@@ -32,9 +31,7 @@ export class SampleTaskManagerFixturePlugin
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
-  taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
-    .pipe(first())
-    .toPromise();
+  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
