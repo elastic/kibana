@@ -114,7 +114,7 @@ image::images/highlights-maps-region.png[Apply changes to render visualization]
 ==== Custom icons
 
 Upload an SVG image and use it as icons in your maps.
-Edit your maps layer,and then select
+Edit your maps layer, and then select
 *Layer Style> Symbol style > Icon > Add custom icon*.
 
 [role="screenshot"]
