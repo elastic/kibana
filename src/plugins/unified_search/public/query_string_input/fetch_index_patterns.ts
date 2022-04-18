@@ -7,7 +7,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { DataViewsContract } from '../../../data_views/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 export async function fetchIndexPatterns(
   indexPatternsService: DataViewsContract,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FieldFormat as IFieldFormat } from 'src/plugins/field_formats/common';
-import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/public';
+import type { FieldFormat as IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type {
   DataViewsPublicPluginStart,
   DataView,
   DataViewSpec,
-} from '../../../../../../src/plugins/data_views/public';
+} from '@kbn/data-views-plugin/public';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../../components/shared/exploratory_view/configurations/synthetics/field_formats';
 import {

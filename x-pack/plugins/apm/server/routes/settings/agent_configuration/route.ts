@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { maxSuggestions } from '../../../../../observability/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { createOrUpdateConfiguration } from './create_or_update_configuration';
 import { searchConfigurations } from './search_configurations';

@@ -7,8 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useHttp } from '../../../../../../common/lib/kibana';
-import { PackageCustomExtensionComponentProps } from '../../../../../../../../fleet/public';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../host_isolation_exceptions/view/hooks';
 import { TrustedAppsApiClient } from '../../../../trusted_apps/service/trusted_apps_api_client';
 import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';

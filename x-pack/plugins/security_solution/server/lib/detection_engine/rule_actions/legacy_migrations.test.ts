@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrateRuleAlertId, legacyMigrateAlertId } from './legacy_migrations';
 // eslint-disable-next-line no-restricted-imports

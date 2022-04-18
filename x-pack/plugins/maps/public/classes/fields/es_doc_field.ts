@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IndexPatternField } from 'src/plugins/data/public';
+import type { IndexPatternField } from '@kbn/data-plugin/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import { IField, AbstractField } from './field';
 import { IESSource } from '../sources/es_source';
 import { IVectorSource } from '../sources/vector_source';

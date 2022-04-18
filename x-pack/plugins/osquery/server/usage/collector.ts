@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsClient } from '../../../../../src/core/server';
-import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
+import { CoreSetup, SavedObjectsClient } from '@kbn/core/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { getBeatUsage, getLiveQueryUsage, getPolicyLevelUsage } from './fetchers';
 import { CollectorDependencies, usageSchema, UsageData } from './types';
 

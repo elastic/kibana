@@ -11,8 +11,8 @@ import {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'src/core/server';
-import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
+} from '@kbn/core/server';
+import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   LogView,
   LogViewAttributes,

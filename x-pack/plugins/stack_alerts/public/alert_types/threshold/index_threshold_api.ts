@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
-import { TimeSeriesResult } from '../../../../triggers_actions_ui/common';
+import { HttpSetup } from '@kbn/core/public';
+import { TimeSeriesResult } from '@kbn/triggers-actions-ui-plugin/common';
 import { IndexThresholdAlertParams } from './types';
 
 const INDEX_THRESHOLD_DATA_API_ROOT = '/api/triggers_actions_ui/data';
