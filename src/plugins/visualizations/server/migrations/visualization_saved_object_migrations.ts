@@ -11,7 +11,11 @@ import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
-import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import {
+  DEFAULT_QUERY_LANGUAGE,
+  isSerializedSearchSource,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
@@ -1227,23 +1231,19 @@ const getVisualizationSearchSourceMigrations = (
         const parsedSearchSourceJSON = JSON.parse(
           _state.attributes.kibanaSavedObjectMeta.searchSourceJSON
         );
-
-        const isNotSerializedSearchSource =
-          typeof parsedSearchSourceJSON !== 'object' ||
-          parsedSearchSourceJSON === null ||
-          Array.isArray(parsedSearchSourceJSON);
-        if (isNotSerializedSearchSource) return _state;
-
-        return {
-          ..._state,
-          attributes: {
-            ..._state.attributes,
-            kibanaSavedObjectMeta: {
-              ..._state.attributes.kibanaSavedObjectMeta,
-              searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
+        if (isSerializedSearchSource(parsedSearchSourceJSON)) {
+          return {
+            ..._state,
+            attributes: {
+              ..._state.attributes,
+              kibanaSavedObjectMeta: {
+                ..._state.attributes.kibanaSavedObjectMeta,
+                searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
+              },
             },
-          },
-        };
+          };
+        }
+        return _state;
       }
   );
 

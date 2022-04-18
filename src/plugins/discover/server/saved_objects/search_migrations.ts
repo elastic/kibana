@@ -17,7 +17,7 @@ import type {
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/server';
 import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 export interface SavedSearchMigrationAttributes extends SavedObjectAttributes {
   kibanaSavedObjectMeta: {
@@ -147,22 +147,19 @@ const getSearchSourceMigrations = (
         const parsedSearchSourceJSON = JSON.parse(
           _state.attributes.kibanaSavedObjectMeta.searchSourceJSON
         );
-        const isNotSerializedSearchSource =
-          typeof parsedSearchSourceJSON !== 'object' ||
-          parsedSearchSourceJSON === null ||
-          Array.isArray(parsedSearchSourceJSON);
-        if (isNotSerializedSearchSource) return _state;
-
-        return {
-          ..._state,
-          attributes: {
-            ..._state.attributes,
-            kibanaSavedObjectMeta: {
-              ..._state.attributes.kibanaSavedObjectMeta,
-              searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
+        if (isSerializedSearchSource(parsedSearchSourceJSON)) {
+          return {
+            ..._state,
+            attributes: {
+              ..._state.attributes,
+              kibanaSavedObjectMeta: {
+                ..._state.attributes.kibanaSavedObjectMeta,
+                searchSourceJSON: JSON.stringify(migrate(parsedSearchSourceJSON)),
+              },
             },
-          },
-        };
+          };
+        }
+        return _state;
       }
   );
 

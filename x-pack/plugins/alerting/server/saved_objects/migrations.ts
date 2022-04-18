@@ -22,7 +22,7 @@ import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-p
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
 import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
 import { getMappedParams } from '../rules_client/lib/mapped_params_utils';
@@ -912,25 +912,21 @@ function getEsQueryAlertSearchSourceMigrations(
       (state) => {
         const _state = state as { attributes: RawRule };
 
-        const serializedSearchSource = _state.attributes.params
-          .searchConfiguration as SerializedSearchSourceFields;
+        const serializedSearchSource = _state.attributes.params.searchConfiguration;
 
-        const isNotSerializedSearchSource =
-          typeof serializedSearchSource !== 'object' ||
-          serializedSearchSource === null ||
-          Array.isArray(serializedSearchSource);
-        if (isNotSerializedSearchSource) return _state;
-
-        return {
-          ..._state,
-          attributes: {
-            ..._state.attributes,
-            params: {
-              ..._state.attributes.params,
-              searchConfiguration: migrateSerializedSearchSourceFields(serializedSearchSource),
+        if (isSerializedSearchSource(serializedSearchSource)) {
+          return {
+            ..._state,
+            attributes: {
+              ..._state.attributes,
+              params: {
+                ..._state.attributes.params,
+                searchConfiguration: migrateSerializedSearchSourceFields(serializedSearchSource),
+              },
             },
-          },
-        };
+          };
+        }
+        return _state;
       }
   );
 }
