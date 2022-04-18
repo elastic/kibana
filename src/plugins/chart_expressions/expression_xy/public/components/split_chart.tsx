@@ -8,9 +8,9 @@
 
 import React, { useCallback } from 'react';
 import { GroupBy, SmallMultiples } from '@elastic/charts';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { getColumnByAccessor, getFormatByAccessor } from '../../../../visualizations/common/utils';
-import { Datatable } from '../../../../expressions/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { FormatFactory } from '../types';
 
 interface SplitChartProps {
