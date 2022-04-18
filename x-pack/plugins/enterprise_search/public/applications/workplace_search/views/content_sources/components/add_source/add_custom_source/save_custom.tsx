@@ -19,11 +19,12 @@ import {
   EuiTitle,
   EuiPanel,
   EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButtonTo, EuiLinkTo } from '../../../../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../../app_logic';
 import { SOURCES_PATH, getSourcesPath } from '../../../../../routes';
 
@@ -104,13 +105,13 @@ export const SaveCustom: React.FC = () => {
                 heading="h3"
                 size="s"
                 title={
-                  <EuiLinkTo target="_blank" to={'https://www.elastic.co/kibana/feedback'}>
+                  <EuiLink href={'https://www.elastic.co/kibana/feedback'} external>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.workplaceSearch.sources.feedbackLinkLabel"
                       defaultMessage="Have feedback about deploying a {name} connector? Let us know."
                       values={{ name }}
                     />
-                  </EuiLinkTo>
+                  </EuiLink>
                 }
                 iconType="email"
               />
