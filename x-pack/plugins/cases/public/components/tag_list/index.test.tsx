@@ -12,13 +12,13 @@ import { TagList, TagListProps } from '.';
 import { getFormMock } from '../__mock__/form';
 import { TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
-import { useForm } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
+import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form';
 import { useGetTags } from '../../containers/use_get_tags';
 
-jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
 jest.mock('../../containers/use_get_tags');
 jest.mock(
-  '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/components/form_data_provider',
+  '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/components/form_data_provider',
   () => ({
     FormDataProvider: ({ children }: { children: ({ tags }: { tags: string[] }) => void }) =>
       children({ tags: ['rad', 'dude'] }),

@@ -21,7 +21,7 @@ import {
   connectorsMock,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
-import { SpacesApi } from '../../../../spaces/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';

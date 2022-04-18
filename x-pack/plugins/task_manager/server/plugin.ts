@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
-import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -16,7 +16,7 @@ import {
   CoreStart,
   ServiceStatusLevels,
   CoreStatus,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';

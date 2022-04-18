@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
 import { RemoteClustersFormField } from '../../app/components';

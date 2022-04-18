@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LegendDisplay } from '../../../chart_expressions/expression_partition_vis/common';
+import { LegendDisplay } from '@kbn/expression-partition-vis-plugin/common';
 
 export const samplePieVis = {
   type: {

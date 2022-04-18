@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { CASE_STATUS_URL } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CaseStatuses } from '../../../../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCaseReq } from '../../../../../common/lib/mock';
 import {
   createCase,
@@ -27,7 +28,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../../common/lib/authentication/users';
-import { CASE_STATUS_URL } from '../../../../../../../plugins/cases/common/constants';
 import { assertWarningHeader } from '../../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

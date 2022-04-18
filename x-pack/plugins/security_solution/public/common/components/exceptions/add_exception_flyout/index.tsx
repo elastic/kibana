@@ -34,13 +34,13 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';

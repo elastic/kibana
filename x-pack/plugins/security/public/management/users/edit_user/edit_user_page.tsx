@@ -27,8 +27,8 @@ import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { getUserDisplayName } from '../../../../common/model';
 import { UserAPIClient } from '../user_api_client';
 import { isUserDeprecated, isUserReserved } from '../user_utils';

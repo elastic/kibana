@@ -8,7 +8,7 @@
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
-import { DetailPanelProcessTab } from './index';
+import { DetailPanelProcessTab } from '.';
 
 const getLeaderDetail = (leader: string): DetailPanelProcessLeader => ({
   id: `${leader}-id`,

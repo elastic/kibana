@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,

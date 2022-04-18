@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ColorSchemas, getHeatmapColors } from '../../../../charts/common';
-import { Range } from '../../../../expressions';
+import { ColorSchemas, getHeatmapColors } from '@kbn/charts-plugin/common';
+import { Range } from '@kbn/expressions-plugin';
 
 export interface PaletteConfig {
   color: Array<string | undefined>;

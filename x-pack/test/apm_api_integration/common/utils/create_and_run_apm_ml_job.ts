@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import job from '../../../../plugins/ml/server/models/data_recognizer/modules/apm_transaction/ml/apm_tx_metrics.json';
-import datafeed from '../../../../plugins/ml/server/models/data_recognizer/modules/apm_transaction/ml/datafeed_apm_tx_metrics.json';
+import job from '@kbn/ml-plugin/server/models/data_recognizer/modules/apm_transaction/ml/apm_tx_metrics.json';
+import datafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/apm_transaction/ml/datafeed_apm_tx_metrics.json';
 import { MlApi } from '../../../functional/services/ml/api';
 
 export function createAndRunApmMlJob({ ml, environment }: { ml: MlApi; environment: string }) {

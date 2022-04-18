@@ -23,7 +23,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { Percentiles, newPercentile } from './percentile_ui';
 import { PercentileHdr } from './percentile_hdr';
 
