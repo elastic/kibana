@@ -11,9 +11,9 @@ import moment from 'moment';
 import { stringify } from 'query-string';
 import React, { useCallback, useMemo } from 'react';
 import { encode, RisonValue } from 'rison-node';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { MLJobsAwaitingNodeWarning } from '../../../../../ml/public';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {

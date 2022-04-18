@@ -8,8 +8,8 @@
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { workpads } from '../../../__fixtures__/workpads';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';

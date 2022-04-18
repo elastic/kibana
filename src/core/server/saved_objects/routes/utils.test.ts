@@ -17,7 +17,7 @@ import {
   RequestHandlerContext,
   KibanaResponseFactory,
   kibanaResponseFactory,
-} from '../../';
+} from '../..';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);

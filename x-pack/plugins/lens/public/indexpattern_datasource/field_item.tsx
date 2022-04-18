@@ -37,23 +37,18 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FieldButton } from '@kbn/react-field';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EuiHighlight } from '@elastic/eui';
 import { Filter, buildEsQuery } from '@kbn/es-query';
-import {
-  Query,
-  KBN_FIELD_TYPES,
-  ES_FIELD_TYPES,
-  getEsQueryConfig,
-} from '../../../../../src/plugins/data/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { Query, KBN_FIELD_TYPES, ES_FIELD_TYPES, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import { getVisualizeGeoFieldMessage } from '../utils';
 

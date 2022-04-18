@@ -7,7 +7,7 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { defaults } from 'lodash/fp';
-import { PartialRule } from '../../../../../alerting/server';
+import { PartialRule } from '@kbn/alerting-plugin/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import {
   normalizeMachineLearningJobIds,

@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
-import { Sourcerer } from './index';
+import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
   createSecuritySolutionStorageMock,
@@ -43,8 +43,8 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,

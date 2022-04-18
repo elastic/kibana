@@ -8,7 +8,7 @@
 import { kibanaPackageJson } from '@kbn/utils';
 
 import { isEmpty } from 'lodash';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { HealthStatus } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 import { MonitoredHealth } from '../routes/health';

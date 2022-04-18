@@ -7,7 +7,7 @@
  */
 
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
-import { overlayServiceMock, httpServiceMock } from '../../../../../core/public/mocks';
+import { overlayServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { mockTelemetryConstants } from '../../mocks';
 
 describe('renderOptedInNoticeBanner', () => {

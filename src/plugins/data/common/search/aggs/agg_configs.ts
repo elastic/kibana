@@ -19,13 +19,13 @@ import {
   ISearchSource,
   RangeFilter,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'src/plugins/data/public';
+} from '../../../public';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { IndexPattern } from '../..';
-import { TimeRange, getTime, calculateBounds } from '../../../common';
+import { TimeRange, getTime, calculateBounds } from '../..';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 
