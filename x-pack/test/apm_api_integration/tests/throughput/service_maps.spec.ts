@@ -89,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .rate(GO_PROD_RATE)
               .generator((timestamp) =>
                 serviceGoProdInstance
-                  .transaction('GET /apple 🍎 ')
+                  .transaction('GET /apple 🍎 ', 'Worker')
                   .duration(1000)
                   .timestamp(timestamp)
               ),
@@ -119,13 +119,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             [
               ...Object.values(throughputTransactionValues),
               ...Object.values(throughputMetricValues),
-            ].forEach((value) =>
-              expect(roundNumber(value)).to.be.equal(roundNumber(GO_DEV_RATE + GO_PROD_RATE))
-            );
+            ].forEach((value) => expect(roundNumber(value)).to.be.equal(roundNumber(GO_DEV_RATE)));
           });
         });
 
-        describe('when calling service maps API', () => {
+        describe('when calling service maps transactions stats api', () => {
           let serviceMapsNodeThroughput: number | null | undefined;
           before(async () => {
             const response = await callApi();
@@ -134,9 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns expected throughput value', () => {
-            expect(roundNumber(serviceMapsNodeThroughput)).to.be.equal(
-              roundNumber(GO_DEV_RATE + GO_PROD_RATE)
-            );
+            expect(roundNumber(serviceMapsNodeThroughput)).to.be.equal(roundNumber(GO_DEV_RATE));
           });
         });
       });

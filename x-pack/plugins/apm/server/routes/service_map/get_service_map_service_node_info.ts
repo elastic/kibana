@@ -193,7 +193,6 @@ async function getTransactionStats({
           ],
         },
       },
-      track_total_hits: true,
       aggs: {
         duration: { avg: { field: durationField } },
         timeseries: {
