@@ -355,7 +355,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     shouldBulkCloseAlert,
     alertData,
     signalIndexName,
-    handleRuleChange,
   ]);
 
   const isSubmitButtonDisabled = useMemo(
