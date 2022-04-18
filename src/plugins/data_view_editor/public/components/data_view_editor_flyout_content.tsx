@@ -179,7 +179,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     });
   }, [http, allowHidden]);
 
-  // loading list of data views
+  // loading list of index patterns
   useEffect(() => {
     loadSources();
     const getTitles = async () => {

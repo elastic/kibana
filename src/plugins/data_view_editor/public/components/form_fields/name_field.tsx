@@ -23,7 +23,7 @@ export const NameField = ({ editData }: NameFieldProps) => {
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.nameAriaLabel', {
-            defaultMessage: 'Title field optional',
+            defaultMessage: 'Name field optional',
           }),
         },
       }}

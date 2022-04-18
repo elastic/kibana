@@ -30,13 +30,13 @@ export const schema = {
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
       defaultMessage:
-        'Enter a data view that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+        'Enter an index pattern that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
     }),
     validations: [
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'A Data View is required.',
+            defaultMessage: 'An Index pattern is required.',
           })
         ),
       },
