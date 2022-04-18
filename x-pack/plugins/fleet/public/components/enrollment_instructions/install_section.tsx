@@ -7,13 +7,12 @@
 
 import React from 'react';
 
+import type { CommandsByPlatform } from '../../applications/fleet/components/fleet_server_instructions/utils';
+
 import { InstallationMessage } from '../agent_enrollment_flyout/installation_message';
 
 import type { K8sMode } from '../agent_enrollment_flyout/types';
-
-import type { CommandsByPlatform } from '../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
-
-import { PlatformSelector } from './manual/platform_selector';
+import { PlatformSelector } from '../platform_selector';
 
 interface Props {
   installCommand: CommandsByPlatform;
