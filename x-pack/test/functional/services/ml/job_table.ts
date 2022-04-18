@@ -8,15 +8,14 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
-import { MlCustomUrls } from './custom_urls';
-
 import {
   TimeRangeType,
   TIME_RANGE_TYPE,
   URL_TYPE,
-} from '../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
+} from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
+import { MlCustomUrls } from './custom_urls';
 
 export type MlADJobTable = ProvidedType<typeof MachineLearningJobTableProvider>;
 

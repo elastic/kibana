@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 
 import type {
@@ -27,7 +27,7 @@ import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
-import { storedPackagePoliciesToAgentInputs } from './';
+import { storedPackagePoliciesToAgentInputs } from '.';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,

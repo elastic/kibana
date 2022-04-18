@@ -8,7 +8,7 @@
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { camelCase } from 'lodash';
 import dateMath from '@kbn/datemath';
-import { HttpStart } from 'src/core/public';
+import { HttpStart } from '@kbn/core/public';
 
 import {
   DETECTION_ENGINE_RULES_URL,

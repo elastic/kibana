@@ -14,8 +14,9 @@ import {
   RequestHandler,
   RequestHandlerContext,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import { TRANSFORM_STATE } from '../../../common/constants';
 import {
   transformIdParamSchema,
@@ -56,12 +57,11 @@ import {
 
 import { RouteDependencies } from '../../types';
 
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { registerTransformNodesRoutes } from './transforms_nodes';
-import { DataView } from '../../../../../../src/plugins/data_views/common';
 import { isLatestTransform } from '../../../common/types/transform';
 import { isKeywordDuplicate } from '../../../common/utils/field_utils';
 import { transformHealthServiceProvider } from '../../lib/alerting/transform_health_rule_type/transform_health_service';

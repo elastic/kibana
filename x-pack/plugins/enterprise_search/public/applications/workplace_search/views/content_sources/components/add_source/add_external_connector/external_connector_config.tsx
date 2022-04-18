@@ -31,9 +31,10 @@ import { SourceDataItem } from '../../../../../types';
 
 import { staticExternalSourceData } from '../../../source_data';
 
-import { AddSourceHeader } from './../add_source_header';
-import { ConfigDocsLinks } from './../config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './../constants';
+import { AddSourceHeader } from '../add_source_header';
+import { ConfigDocsLinks } from '../config_docs_links';
+import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from '../constants';
+
 import { ExternalConnectorDocumentation } from './external_connector_documentation';
 import { ExternalConnectorFormFields } from './external_connector_form_fields';
 import { ExternalConnectorLogic } from './external_connector_logic';

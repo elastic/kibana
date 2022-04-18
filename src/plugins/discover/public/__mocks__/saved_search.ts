@@ -7,7 +7,7 @@
  */
 
 import { SavedSearch } from '../services/saved_searches';
-import { createSearchSourceMock } from '../../../data/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternMock } from './index_pattern';
 import { indexPatternWithTimefieldMock } from './index_pattern_with_timefield';
 

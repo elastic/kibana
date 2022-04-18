@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { licensingMock } from '../../../../../licensing/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { setupEnvironment } from '../../helpers';
 import { getDefaultHotPhasePolicy } from '../constants';
 import {

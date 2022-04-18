@@ -33,7 +33,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { Dispatch } from 'redux';
-import { isTab } from '../../../../../../../timelines/public';
+import { isTab } from '@kbn/timelines-plugin/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,

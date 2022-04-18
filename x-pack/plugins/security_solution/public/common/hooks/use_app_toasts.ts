@@ -14,9 +14,9 @@ import {
   isSecurityAppError,
 } from '@kbn/securitysolution-t-grid';
 
-import { IEsError, isEsError } from '../../../../../../src/plugins/data/public';
+import { IEsError, isEsError } from '@kbn/data-plugin/public';
 
-import { ErrorToastOptions, ToastsStart, Toast } from '../../../../../../src/core/public';
+import { ErrorToastOptions, ToastsStart, Toast } from '@kbn/core/public';
 import { useToasts } from '../lib/kibana';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning' | 'remove'> & {

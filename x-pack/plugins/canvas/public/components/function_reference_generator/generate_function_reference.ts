@@ -7,11 +7,11 @@
 
 // @ts-expect-error untyped lib
 import pluralize from 'pluralize';
-import { ExpressionFunction, ExpressionFunctionParameter } from 'src/plugins/expressions';
+import { ExpressionFunction, ExpressionFunctionParameter } from '@kbn/expressions-plugin';
+import { isValidDataUrl } from '@kbn/presentation-util-plugin/public';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../../../canvas_plugin_src/functions/server';
 import { DATATABLE_COLUMN_TYPES } from '../../../common/lib';
-import { isValidDataUrl } from '../../../../../../src/plugins/presentation_util/public';
 import { getFunctionExamples, FunctionExample } from './function_examples';
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
