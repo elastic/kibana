@@ -34,6 +34,8 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   findCases,
   superUserSpace1Auth,
+  delay,
+  calculateDuration,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
@@ -197,6 +199,65 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           updated_by: defaultUser,
         });
+      });
+
+      describe('duration', () => {
+        it('updates the duration correctly when the case closes', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await delay(1000);
+
+          const patchedCases = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  status: CaseStatuses.closed,
+                },
+              ],
+            },
+          });
+
+          const duration = calculateDuration(patchedCases[0].closed_at, postedCase.created_at);
+          expect(duration).to.be(patchedCases[0].duration);
+        });
+
+        for (const status of [CaseStatuses.open, CaseStatuses['in-progress']]) {
+          it(`sets the duration to null when the case status changes to ${status}`, async () => {
+            const postedCase = await createCase(supertest, postCaseReq);
+
+            const closedCases = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: postedCase.id,
+                    version: postedCase.version,
+                    status: CaseStatuses.closed,
+                  },
+                ],
+              },
+            });
+
+            expect(closedCases[0].duration).to.not.be(null);
+
+            const openCases = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: postedCase.id,
+                    version: closedCases[0].version,
+                    status,
+                  },
+                ],
+              },
+            });
+
+            expect(openCases[0].duration).to.be(null);
+          });
+        }
       });
     });
 
