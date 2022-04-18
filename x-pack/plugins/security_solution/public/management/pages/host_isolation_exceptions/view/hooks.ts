@@ -17,23 +17,26 @@ import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_a
 export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   const http = useHttp();
   const privileges = useEndpointPrivileges();
-  const {
-    data: summary,
-    isError: isApiError,
-    refetch: checkIfHasExceptions,
-  } = useSummaryArtifact(HostIsolationExceptionsApiClient.getInstance(http), undefined, undefined, {
-    enabled: false,
-  });
+  const apiQuery = useSummaryArtifact(
+    HostIsolationExceptionsApiClient.getInstance(http),
+    undefined,
+    undefined,
+    {
+      enabled: false,
+    }
+  );
+
+  const { data: summary, isFetching, refetch: checkIfHasExceptions, isFetched } = apiQuery;
 
   const canSeeMenu = useMemo(() => {
-    return privileges.canIsolateHost || (!isApiError && Boolean(summary?.total));
-  }, [isApiError, privileges.canIsolateHost, summary?.total]);
+    return privileges.canIsolateHost || Boolean(summary?.total);
+  }, [privileges.canIsolateHost, summary?.total]);
 
   useEffect(() => {
-    if (!canSeeMenu && !privileges.loading) {
+    if (!privileges.canIsolateHost && !privileges.loading && !isFetched && !isFetching) {
       checkIfHasExceptions();
     }
-  }, [canSeeMenu, checkIfHasExceptions, http, privileges.canIsolateHost, privileges.loading]);
+  }, [checkIfHasExceptions, isFetched, isFetching, privileges.canIsolateHost, privileges.loading]);
 
   return canSeeMenu;
 }
