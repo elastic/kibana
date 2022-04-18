@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
-import type { HttpFetchError } from 'kibana/public';
+import type { HttpFetchError } from '@kbn/core/public';
 
 const isHttpFetchError = (error: Error | HttpFetchError): error is HttpFetchError => {
   return 'body' in error && 'req' in error && 'res' in error && 'response' in error;

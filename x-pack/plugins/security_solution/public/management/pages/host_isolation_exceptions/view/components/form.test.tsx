@@ -27,7 +27,7 @@ import {
   isEffectedPolicySelected,
 } from '../../../../components/effected_policy_select/test_utils';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../common/endpoint/service/artifacts';
-import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 
 jest.mock('../../../../../common/components/user_privileges');
 

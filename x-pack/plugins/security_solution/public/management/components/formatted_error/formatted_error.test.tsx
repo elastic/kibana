@@ -8,7 +8,7 @@
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { FormattedError } from './formatted_error';
 import React from 'react';
-import type { HttpFetchError } from 'kibana/public';
+import type { HttpFetchError } from '@kbn/core/public';
 
 describe('When using the `FormattedError` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
