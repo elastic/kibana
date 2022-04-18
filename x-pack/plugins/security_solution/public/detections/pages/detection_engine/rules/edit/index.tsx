@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -57,7 +58,6 @@ import { ruleStepsOrder } from '../utils';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { HeaderPage } from '../../../../../common/components/header_page';
-import { useExecutionContext } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 

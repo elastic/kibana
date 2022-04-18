@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { MANAGEMENT_PATH } from '../../common/constants';
 import { ManagementContainer } from './pages';
 import { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
-import { useExecutionContext } from '../../../../../src/plugins/kibana_react/public';
 import { useKibana } from '../common/lib/kibana';
 
 /**

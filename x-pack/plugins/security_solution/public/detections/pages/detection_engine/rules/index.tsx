@@ -8,6 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -41,7 +42,6 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { RulesTableContextProvider } from './all/rules_table/rules_table_context';
 import { useInvalidateRules } from '../../../containers/detection_engine/rules/use_find_rules_query';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
-import { useExecutionContext } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();

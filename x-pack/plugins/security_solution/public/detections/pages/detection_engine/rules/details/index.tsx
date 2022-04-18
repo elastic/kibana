@@ -34,6 +34,7 @@ import {
 
 import { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -121,7 +122,6 @@ import {
 } from '../../../../components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
 import { HeaderPage } from '../../../../../common/components/header_page';
-import { useExecutionContext } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
