@@ -26,6 +26,9 @@ const KBN_PM_SCRIPT = Path.resolve(REPO_ROOT, 'packages/kbn-pm/dist/index.js');
 export const UniformImportsRule: Eslint.Rule.RuleModule = {
   meta: {
     fixable: 'code',
+    docs: {
+      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.md#kbnimportsuniform_imports',
+    },
   },
 
   create(context) {

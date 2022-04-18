@@ -14,6 +14,11 @@ import { getImportResolver } from '../get_import_resolver';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 
 export const NoUnresolvableImportsRule: Rule.RuleModule = {
+  meta: {
+    docs: {
+      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.md#kbnimportsno_unresolvable_imports',
+    },
+  },
   create(context) {
     const resolver = getImportResolver(context);
 
