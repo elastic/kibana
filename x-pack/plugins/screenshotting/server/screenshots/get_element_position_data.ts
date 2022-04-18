@@ -90,7 +90,7 @@ export const getElementPositionAndAttributes = async (
     elementsPositionAndAttributes = null;
   }
 
-  eventLogger.getElementPositionsEnd({ elementsPositions: elementsPositionAndAttributes?.length });
+  eventLogger.getElementPositionsEnd({ elementPositions: elementsPositionAndAttributes?.length });
 
   return elementsPositionAndAttributes;
 };

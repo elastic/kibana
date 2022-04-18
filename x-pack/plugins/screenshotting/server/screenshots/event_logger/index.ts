@@ -288,7 +288,7 @@ export class EventLogger {
     this.startTiming(Actions.GET_ELEMENT_POSITION_DATA);
   }
 
-  public getElementPositionsEnd({ elementPositions }: { elementPositions: number }) {
+  public getElementPositionsEnd({ elementPositions }: { elementPositions?: number }) {
     this.spans.getElementPositionData?.end();
     this.logEventEnd(
       'element position data read',

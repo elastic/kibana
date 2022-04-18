@@ -13,7 +13,7 @@ import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
 import { ConfigType, durationToNumber as toNumber } from '../config';
 import type { Layout } from '../layouts';
-import { EventLogger } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -229,6 +229,7 @@ export class ScreenshotObservableHandler {
           try {
             screenshots = await getScreenshots(this.driver, this.eventLogger, elements);
           } catch (e) {
+            this.eventLogger.error(e, Actions.GET_SCREENSHOT);
             throw new errors.FailedToCaptureScreenshot(e.message);
           }
           const { timeRange, error: setupError, renderErrors } = data;

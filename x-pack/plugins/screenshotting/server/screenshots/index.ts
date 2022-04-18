@@ -41,7 +41,7 @@ import {
 } from '../formats';
 import type { Layout } from '../layouts';
 import { createLayout } from '../layouts';
-import { EventLogger } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
 import { ScreenshotObservableHandler, UrlOrUrlWithContext } from './observable';
 import { Semaphore } from './semaphore';
@@ -145,7 +145,7 @@ export class Screenshots {
                 catchError((error) => {
                   screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
-                  this.logger.error(error);
+                  eventLogger.error(error, Actions.SCREENSHOTTING);
                   return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
                 }),
                 takeUntil(unexpectedExit$),
