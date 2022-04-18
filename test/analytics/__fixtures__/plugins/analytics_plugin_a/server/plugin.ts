@@ -9,7 +9,7 @@
 import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, CoreStart, TelemetryCounter } from 'src/core/server';
+import type { Plugin, CoreSetup, CoreStart, TelemetryCounter } from '@kbn/core/server';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 
@@ -61,13 +61,18 @@ export class AnalyticsPluginAPlugin implements Plugin {
         validate: {
           query: schema.object({
             takeNumberOfCounters: schema.number({ min: 1 }),
+            eventType: schema.string(),
           }),
         },
       },
       async (context, req, res) => {
-        const { takeNumberOfCounters } = req.query;
+        const { takeNumberOfCounters, eventType } = req.query;
 
-        return res.ok({ body: stats.slice(-takeNumberOfCounters) });
+        return res.ok({
+          body: stats
+            .filter((counter) => counter.event_type === eventType)
+            .slice(-takeNumberOfCounters),
+        });
       }
     );
 

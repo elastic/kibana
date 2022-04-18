@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '../../../data/public';
+export * from '@kbn/data-plugin/public';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'kibana/public';
+import { PluginInitializer } from '@kbn/core/public';
 import {
   TimelinesTestPlugin,
   TimelinesTestPluginSetupDependencies,

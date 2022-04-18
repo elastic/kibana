@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RequestAdapter } from '../../../inspector/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { TablesAdapter } from './tables_adapter';
 import { ExpressionsInspectorAdapter } from './expressions_inspector_adapter';
 

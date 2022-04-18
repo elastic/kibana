@@ -22,7 +22,12 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { MachineLearningCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { MachineLearningCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_TIME,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -36,11 +41,6 @@ import {
   deleteListsIndex,
   importFile,
 } from '../../../lists_api_integration/utils';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

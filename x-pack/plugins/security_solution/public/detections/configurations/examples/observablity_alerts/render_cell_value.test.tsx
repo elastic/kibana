@@ -21,7 +21,7 @@ import { ColumnHeaderOptions } from '../../../../../common/types';
 
 import { RenderCellValue } from '.';
 
-jest.mock('../../../../common/lib/kibana/');
+jest.mock('../../../../common/lib/kibana');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';

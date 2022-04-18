@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import * as Registry from '../registry';
 
@@ -19,7 +19,7 @@ import { licenseService } from '../../license';
 
 import { installPackage } from './install';
 import * as install from './_install_package';
-import * as obj from './index';
+import * as obj from '.';
 import { getBundledPackages } from './bundled_packages';
 
 jest.mock('../../app_context', () => {
@@ -35,7 +35,7 @@ jest.mock('../../app_context', () => {
     },
   };
 });
-jest.mock('./index');
+jest.mock('.');
 jest.mock('../registry');
 jest.mock('../../upgrade_sender');
 jest.mock('../../license');

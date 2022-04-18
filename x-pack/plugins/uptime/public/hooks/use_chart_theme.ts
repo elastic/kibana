@@ -7,7 +7,7 @@
 
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { useMemo } from 'react';
-import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
 export const useChartTheme = () => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');

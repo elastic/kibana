@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/data-plugin/public';
 import type { Operation } from '../../../types';
 import type { TimeScaleUnit } from '../../../../common/expressions';
-import type { OperationType } from '../definitions';
+import type { OperationType } from '.';
 
 export interface BaseIndexPatternColumn extends Operation {
   // Private

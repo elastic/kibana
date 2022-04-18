@@ -1,0 +1,163 @@
+[[cases-api-set-configuration]]
+== Set case configuration API
+++++
+<titleabbrev>Set configuration</titleabbrev>
+++++
+
+Sets external connection details, such as the closure type and
+default connector for cases.
+
+=== {api-request-title}
+
+`POST <kibana host>:<port>/api/cases/configure`
+
+`POST <kibana host>:<port>/s/<space_id>/api/cases/configure`
+
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the case configuration.
+
+=== {api-description-title}
+
+Connectors are used to interface with external systems. You must create a
+connector before you can use it in your cases. Refer to <<add-case-connectors>>.
+
+If you set a default connector, it is automatically selected when you create
+cases in {kib}. If you use the <<cases-api-create,create case API>>, however,
+you must still specify all of the connector details.
+
+=== {api-path-parms-title}
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== {api-request-body-title}
+
+`closure_type`::
+(Required, string) Specifies whether a case is automatically closed when it is
+pushed to external systems.
++
+--
+Valid values are:
+
+* `close-by-pushing`: Cases are automatically closed when they are pushed.
+* `close-by-user`: Cases are not automatically closed.
+--
+
+`connector`::
+(Required, object) An object that contains the connector configuration.
++
+.Properties of `connector`
+[%collapsible%open]
+====
+`fields`::
+(Required, object) An object that contains the connector fields.
++
+--
+TIP: The fields specified in the case configuration are not used and are not
+propagated to individual cases, therefore it is recommended to set it to `null`.
+--
+
+`id`::
+(Required, string) The identifier for the connector. If you do not want a
+default connector, use `none`. To retrieve connector IDs, use
+<<cases-api-find-connectors>>.
+
+`name`::
+(Required, string) The name of the connector. If you do not want a default
+connector, use `none`. To retrieve connector names, use
+<<cases-api-find-connectors>>.
+
+`type`::
+(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
+`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+====
+
+`owner`::
+(Required, string) The application that owns the case configuration. Valid
+values are: `cases`, `observability`, or `securitySolution`. This value affects
+whether you're setting case configuration details for {stack-manage-app},
+{observability}, or {security-app}.
+
+`settings`::
+(Optional, object)
+An object that contains the case settings.
++
+.Properties of `settings`
+[%collapsible%open]
+====
+`syncAlerts`:: 
+(Required, boolean) Turns alert syncing on or off.
+====
+
+=== {api-response-codes-title}
+
+`200`::
+   Indicates a successful call.
+
+=== {api-example-title}
+
+Sets the closure type and default connector for cases in **{stack-manage-app}**:
+
+[source,sh]
+--------------------------------------------------
+POST api/cases/configure
+{
+  "owner": "cases",
+  "connector": {
+    "id": "131d4448-abe0-4789-939d-8ef60680b498",
+    "name": "my-serviceNow",
+    "type": ".servicenow",
+    "fields": null,
+  },
+  "closure_type": "close-by-user"
+}
+--------------------------------------------------
+
+The API returns the following response:
+
+[source,json]
+--------------------------------------------------
+{
+  "owner": "cases",
+  "closure_type": "close-by-user",
+  "created_at": "2022-04-02T01:09:02.303Z",
+  "created_by": {
+    "email": "moneypenny@hms.gov.uk",
+    "full_name": "Ms Moneypenny",
+    "username": "moneypenny"
+  },
+  "updated_at": null,
+  "updated_by": null,
+  "connector": {
+    "id": "131d4448-abe0-4789-939d-8ef60680b498",
+    "name": "my-serviceNow",
+    "type": ".servicenow",
+    "fields": null,
+  },
+  "mappings": [
+    {
+      "source": "title", 
+      "target": "short_description",
+      "action_type": "overwrite"
+    },
+    {
+      "source":"description",
+      "target":"description",
+      "action_type":"overwrite"
+    },
+    {
+      "source":"comments",
+      "target":"work_notes",
+      "action_type":"append"
+    }
+  ],
+  "version": "WzE3NywxXQ==",
+  "error": null,
+  "id": "7349772f-421a-4de3-b8bb-2d9b22ccee30",
+}
+--------------------------------------------------

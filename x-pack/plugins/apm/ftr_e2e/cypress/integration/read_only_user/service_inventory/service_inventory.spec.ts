@@ -44,6 +44,9 @@ const mainAliasNames = mainApiRequestsToIntercept.map(
 
 describe('When navigating to the service inventory', () => {
   before(async () => {
+    cy.loginAsReadOnlyUser();
+    cy.visit(serviceInventoryHref);
+
     const { rangeFrom, rangeTo } = timeRange;
     await synthtrace.index(
       opbeans({
@@ -55,11 +58,6 @@ describe('When navigating to the service inventory', () => {
 
   after(async () => {
     await synthtrace.clean();
-  });
-
-  beforeEach(() => {
-    cy.loginAsReadOnlyUser();
-    cy.visit(serviceInventoryHref);
   });
 
   it('has no detectable a11y violations on load', () => {
@@ -84,13 +82,16 @@ describe('When navigating to the service inventory', () => {
     cy.contains('h1', 'opbeans-node');
   });
 
-  describe('Calls APIs', () => {
+  describe.skip('Calls APIs', () => {
     beforeEach(() => {
       [...mainApiRequestsToIntercept, ...secondaryApiRequestsToIntercept].map(
         ({ endpoint, aliasName }) => {
           cy.intercept('GET', endpoint).as(aliasName);
         }
       );
+
+      cy.loginAsReadOnlyUser();
+      cy.visit(serviceInventoryHref);
     });
 
     it('with the correct environment when changing the environment', () => {
