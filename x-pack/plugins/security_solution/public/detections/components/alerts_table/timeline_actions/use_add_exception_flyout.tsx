@@ -41,10 +41,12 @@ export const useExceptionFlyout = ({
   }, [ruleIndex]);
 
   const onAddExceptionTypeClick = useCallback((exceptionListType: ExceptionListType): void => {
+    debugger;
     setOpenAddExceptionFlyout(exceptionListType);
   }, []);
 
   const onAddExceptionCancel = useCallback(() => {
+    debugger;
     setOpenAddExceptionFlyout(null);
   }, []);
 
@@ -53,6 +55,7 @@ export const useExceptionFlyout = ({
       if (refetch && (timelineId !== TimelineId.active || didBulkCloseAlert)) {
         refetch();
       }
+      debugger;
       setOpenAddExceptionFlyout(null);
     },
     [refetch, timelineId]
