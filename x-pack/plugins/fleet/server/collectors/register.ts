@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import type { CoreSetup } from 'kibana/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 import type { FleetConfigType } from '..';
 

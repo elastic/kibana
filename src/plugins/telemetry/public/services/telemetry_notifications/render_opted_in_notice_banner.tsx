@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { HttpStart, OverlayStart } from 'kibana/public';
+import { HttpStart, OverlayStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { OptedInNoticeBanner } from '../../components/opted_in_notice_banner';
-import { toMountPoint } from '../../../../kibana_react/public';
 import { TelemetryConstants } from '../..';
 
 interface RenderBannerConfig {

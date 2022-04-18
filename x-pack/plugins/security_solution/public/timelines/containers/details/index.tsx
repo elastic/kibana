@@ -11,6 +11,8 @@ import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { EntityType } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
@@ -19,10 +21,8 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { EntityType } from '../../../../../timelines/common';
 import { Ecs } from '../../../../common/ecs';
 
 export interface EventsArgs {

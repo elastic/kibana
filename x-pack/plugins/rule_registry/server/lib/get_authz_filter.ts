@@ -11,7 +11,7 @@ import {
   AlertingAuthorization,
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
-} from '../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
 import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,

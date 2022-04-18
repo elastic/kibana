@@ -10,9 +10,9 @@ import './app.scss';
 import React, { useEffect } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
 
-import { AppMountParameters } from 'kibana/public';
-import { syncQueryStateWithUrl } from '../../../data/public';
-import { useKibana } from '../../../kibana_react/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,

@@ -9,7 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
+import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';

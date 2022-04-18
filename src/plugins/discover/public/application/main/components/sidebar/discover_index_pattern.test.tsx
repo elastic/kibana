@@ -12,10 +12,10 @@ import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
-import type { DataView, DataViewAttributes } from 'src/plugins/data_views/public';
+import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { indexPatternsMock } from '../../../../__mocks__/index_patterns';
 
 const indexPattern = {

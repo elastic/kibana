@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import { range, omit } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
+import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
+import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
-import { ServiceAnomalyTimeseries } from '../../../../plugins/apm/common/anomaly_detection/service_anomaly_timeseries';
-import { ApmMlDetectorType } from '../../../../plugins/apm/common/anomaly_detection/apm_ml_detectors';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -103,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
           .rate(1)
-          .spans((timestamp) => {
+          .generator((timestamp) => {
             const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
             const count = isInSpike ? 4 : NORMAL_RATE;
             const duration = isInSpike ? 1000 : NORMAL_DURATION;
@@ -116,14 +116,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
-                  .serialize()
               ),
-              ...serviceB
+              serviceB
                 .transaction('tx', 'Worker')
                 .timestamp(timestamp)
                 .duration(duration)
-                .success()
-                .serialize(),
+                .success(),
             ];
           });
 

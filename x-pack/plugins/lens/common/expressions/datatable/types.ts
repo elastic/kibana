@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import type { LensMultiTable } from '../../types';
 import type { DatatableArgs } from './datatable';
 

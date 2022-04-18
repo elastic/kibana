@@ -16,7 +16,7 @@ export {
 } from './fetcher';
 export type { IndexPatternsServiceStart } from './types';
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { DataViewsServerPlugin } from './plugin';
 import { DataViewsServerPluginSetup, DataViewsServerPluginStart } from './types';
 export type { dataViewsServiceFactory } from './data_views_service_factory';

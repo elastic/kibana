@@ -8,8 +8,8 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
-import { SecurityServiceProvider } from 'test/common/services/security';
 import { Client } from '@elastic/elasticsearch';
+import { SecurityServiceProvider } from '../../../../test/common/services/security';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';

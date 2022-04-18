@@ -6,11 +6,11 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup } from '../../../plugins/licensing/public';
+import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { PLUGIN } from '../common/constants';
 import { ClientConfigType } from './types';
 import { AppDependencies } from './application';

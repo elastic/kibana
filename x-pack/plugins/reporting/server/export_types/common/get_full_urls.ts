@@ -11,7 +11,7 @@ import {
   UrlWithParsedQuery,
   UrlWithStringQuery,
 } from 'url';
-import { ReportingConfig } from '../../';
+import { ReportingConfig } from '../..';
 import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';

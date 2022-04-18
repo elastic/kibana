@@ -6,6 +6,7 @@
  */
 import axios from 'axios';
 
+import { Logger } from '@kbn/core/server';
 import {
   ExternalServiceCredentials,
   SNProductsConfigValue,
@@ -14,7 +15,6 @@ import {
   ExecutorSubActionAddEventParams,
 } from './types';
 
-import { Logger } from '../../../../../../src/core/server';
 import { ServiceNowSecretConfigurationType } from './types';
 import { request } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
