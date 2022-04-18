@@ -6,10 +6,10 @@
  */
 
 import { buildStatusesKuery, findAgentIdsByStatus } from './agent_status';
-import { AgentClient } from '../../../../../../fleet/server/services';
-import { createMockAgentClient } from '../../../../../../fleet/server/mocks';
-import { Agent } from '../../../../../../fleet/common/types/models';
-import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
+import { AgentClient } from '@kbn/fleet-plugin/server/services';
+import { createMockAgentClient } from '@kbn/fleet-plugin/server/mocks';
+import { Agent } from '@kbn/fleet-plugin/common/types/models';
+import { AgentStatusKueryHelper } from '@kbn/fleet-plugin/common/services';
 
 describe('test filtering endpoint hosts by agent status', () => {
   let mockAgentClient: jest.Mocked<AgentClient>;

@@ -6,10 +6,14 @@
  */
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { SyntheticsMonitor } from '../../../common/runtime_types';
+import { SyntheticsMonitor, SyntheticsMonitorWithSecrets } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import {
+  syntheticsMonitor,
+  syntheticsMonitorType,
+} from '../../lib/saved_objects/synthetics_monitor';
+import { normalizeSecrets } from '../../lib/synthetics_service/utils/secrets';
 
 export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'GET',
@@ -26,12 +30,21 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId
     );
 
+    const encryptedClient = server.encryptedSavedObjects.getClient();
+
+    const monitorWithSecrets =
+      await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+        syntheticsMonitor.name,
+        monitorId
+      );
+
     const { syntheticsService } = server;
 
     const testRunId = uuidv4();
 
     const errors = await syntheticsService.triggerConfigs(request, [
       {
+        ...normalizeSecrets(monitorWithSecrets).attributes,
         ...monitor.attributes,
         id: monitorId,
         fields_under_root: true,

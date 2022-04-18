@@ -7,12 +7,9 @@
 
 import type { Direction } from '@elastic/eui';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { SortingHint } from '../..';
-import type { CustomPaletteState } from '../../../../../../src/plugins/charts/common';
-import type {
-  ExpressionFunctionDefinition,
-  DatatableColumn,
-} from '../../../../../../src/plugins/expressions/common';
 
 export type LensGridDirection = 'none' | Direction;
 

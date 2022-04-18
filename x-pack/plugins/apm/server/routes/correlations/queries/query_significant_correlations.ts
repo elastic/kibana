@@ -7,7 +7,7 @@
 
 import { range } from 'lodash';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type {
   FieldValuePair,
@@ -26,7 +26,7 @@ import {
   fetchTransactionDurationHistogramRangeSteps,
   fetchTransactionDurationPercentiles,
   fetchTransactionDurationRanges,
-} from './index';
+} from '.';
 
 export const fetchSignificantCorrelations = async (
   esClient: ElasticsearchClient,

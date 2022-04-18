@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import normalizePosixPath from 'normalize-path';
 // @ts-ignore
 import { transformDependencies } from '@kbn/pm';
 import { findUsedDependencies } from './find_used_dependencies';
@@ -18,10 +17,7 @@ export const CreatePackageJson: Task = {
   async run(config, log, build) {
     const pkg = config.getKibanaPkg();
     const transformedDeps = transformDependencies(pkg.dependencies as { [key: string]: string });
-    const foundPkgDeps = await findUsedDependencies(
-      transformedDeps,
-      normalizePosixPath(build.resolvePath('.'))
-    );
+    const foundPkgDeps = await findUsedDependencies(transformedDeps, build.resolvePath('.'));
 
     const newPkg = {
       name: pkg.name,

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { coreMock } from 'src/core/public/mocks';
-import { CoreSetup } from '../../../../../src/core/server';
-import { monitoringCollectionMock } from '../../../monitoring_collection/server/mocks';
-import { Metric } from '../../../monitoring_collection/server';
+import { coreMock } from '@kbn/core/public/mocks';
+import { CoreSetup } from '@kbn/core/server';
+import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
+import { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { registerClusterCollector } from './register_cluster_collector';
 import { AlertingPluginsStart } from '../plugin';
 import { ClusterRulesMetric } from './types';

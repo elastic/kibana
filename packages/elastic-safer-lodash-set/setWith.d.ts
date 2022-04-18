@@ -5,5 +5,5 @@
  * See `packages/elastic-safer-lodash-set/LICENSE` for more information.
  */
 
-import { setWith } from './index';
+import { setWith } from '.';
 export = setWith;

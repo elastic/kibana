@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { KBN_SCREENSHOT_MODE_ENABLED_KEY } from '@kbn/screenshot-mode-plugin/public';
 import { PluginFunctionalProviderContext } from '../../services';
-import { KBN_SCREENSHOT_MODE_ENABLED_KEY } from '../../../../src/plugins/screenshot_mode/public';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const browser = getService('browser');
