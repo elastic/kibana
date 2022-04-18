@@ -21,9 +21,6 @@ import {
 import { SuggestionsSelect } from '../shared/suggestions_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
-const start = moment().subtract(24, 'h').toISOString();
-const end = moment().toISOString();
-
 export function ServiceField({
   allowAll = true,
   currentValue,
@@ -54,8 +51,8 @@ export function ServiceField({
         placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {
           defaultMessage: 'Select service name',
         })}
-        start={start}
-        end={end}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
       />
     </PopoverExpression>
   );
@@ -89,8 +86,8 @@ export function EnvironmentField({
         placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
           defaultMessage: 'Select environment',
         })}
-        start={start}
-        end={end}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
       />
     </PopoverExpression>
   );
@@ -125,8 +122,8 @@ export function TransactionTypeField({
             defaultMessage: 'Select transaction type',
           }
         )}
-        start={start}
-        end={end}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
       />
     </PopoverExpression>
   );

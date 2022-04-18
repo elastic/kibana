@@ -35,9 +35,6 @@ export function FiltersSection({
   filters: Filter[];
   onChangeFilters: (filters: Filter[]) => void;
 }) {
-  const start = moment().subtract(24, 'h').toISOString();
-  const end = moment().toISOString();
-
   const onChangeFilter = (
     key: Filter['key'],
     value: Filter['value'],
@@ -132,8 +129,8 @@ export function FiltersSection({
                 }
                 defaultValue={value}
                 isInvalid={!isEmpty(key) && isEmpty(value)}
-                start={start}
-                end={end}
+                start={moment().subtract(24, 'h').toISOString()}
+                end={moment().toISOString()}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

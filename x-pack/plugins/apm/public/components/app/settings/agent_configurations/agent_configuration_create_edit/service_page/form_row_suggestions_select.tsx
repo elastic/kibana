@@ -32,9 +32,6 @@ export function FormRowSuggestionsSelect({
   onChange,
   dataTestSubj,
 }: Props) {
-  const start = moment().subtract(24, 'h').toISOString();
-  const end = moment().toISOString();
-
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -53,8 +50,8 @@ export function FormRowSuggestionsSelect({
             { defaultMessage: 'Select Option' }
           )}
           dataTestSubj={dataTestSubj}
-          start={start}
-          end={end}
+          start={moment().subtract(24, 'h').toISOString()}
+          end={moment().toISOString()}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>
