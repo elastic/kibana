@@ -9,9 +9,9 @@
 import { uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
-import { Endzones } from '../../../../../plugins/charts/public';
+import { Endzones } from '@kbn/charts-plugin/public';
+import { search } from '@kbn/data-plugin/public';
 import type { CommonXYDataLayerConfigResult } from '../../common';
-import { search } from '../../../../../plugins/data/public';
 
 export interface XDomain {
   min?: number;

@@ -7,9 +7,9 @@
  */
 
 import { DataLayerArgs } from '../types';
-import { dataLayerFunction } from '.';
-import { createMockExecutionContext } from '../../../../expressions/common/mocks';
-import { mockPaletteOutput, sampleArgs } from '../__mocks__';
+import { dataLayerConfigFunction } from '.';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
+import { mockPaletteOutput } from '../__mocks__';
 import { LayerTypes } from '../constants';
 
 describe('dataLayerConfig', () => {

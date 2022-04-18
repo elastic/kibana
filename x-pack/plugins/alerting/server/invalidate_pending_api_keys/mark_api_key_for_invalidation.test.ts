@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { markApiKeyForInvalidation } from './mark_api_key_for_invalidation';
 
 describe('markApiKeyForInvalidation', () => {

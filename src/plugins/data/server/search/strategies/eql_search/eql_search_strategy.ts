@@ -8,7 +8,7 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 import { tap } from 'rxjs/operators';
-import type { IScopedClusterClient, Logger } from 'kibana/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,

@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
-import { ML_PAGES, MlSummaryJob, useMlHref } from '../../../../../../ml/public';
+import { ML_PAGES, MlSummaryJob, useMlHref } from '@kbn/ml-plugin/public';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';

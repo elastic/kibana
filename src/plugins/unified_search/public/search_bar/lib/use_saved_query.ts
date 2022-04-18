@@ -9,9 +9,9 @@
 import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { CoreStart } from 'kibana/public';
-import { SavedQuery } from '../../../../data/public';
-import { DataPublicPluginStart } from '../../../../data/public';
+import { CoreStart } from '@kbn/core/public';
+import { SavedQuery } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 import { clearStateFromSavedQuery } from './clear_saved_query';
 

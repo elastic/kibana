@@ -9,15 +9,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import { I18nStart, NotificationsStart } from 'src/core/public';
-import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '../../../../saved_objects/public';
+import { I18nStart, NotificationsStart } from '@kbn/core/public';
+import { SavedObjectSaveModal, OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
-} from '../index';
+} from '..';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality

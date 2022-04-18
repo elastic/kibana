@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '../../../../expressions';
-import { chartPluginMock } from '../../../../charts/public/mocks';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { DataLayerConfigResult, LensMultiTable } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { XYProps } from '../../common/types';

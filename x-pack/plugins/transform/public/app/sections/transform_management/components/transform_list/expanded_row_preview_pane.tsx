@@ -17,7 +17,7 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import {
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
-} from '../../../create_transform/components/step_define/';
+} from '../../../create_transform/components/step_define';
 
 interface ExpandedRowPreviewPaneProps {
   transformConfig: TransformConfigUnion;

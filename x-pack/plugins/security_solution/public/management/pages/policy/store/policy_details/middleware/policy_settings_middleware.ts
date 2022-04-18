@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
