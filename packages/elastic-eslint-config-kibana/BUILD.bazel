@@ -28,6 +28,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-babel-preset",
   "//packages/kbn-dev-utils",
+  "//packages/kbn-eslint-plugin-imports",
   "@npm//eslint-config-prettier",
   "@npm//semver",
 ]
