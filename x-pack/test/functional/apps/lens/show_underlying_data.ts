@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await browser.setLocalStorageItem('discover:docExplorerUpdateCalloutClosed', 'true');
+      await PageObjects.discover.dismissDocumentExplorerCallout();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.existOrFail('discoverChart');
