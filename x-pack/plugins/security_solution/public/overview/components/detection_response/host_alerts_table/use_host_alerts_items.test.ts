@@ -8,19 +8,17 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import {
-  from,
-  mockSeverityRuleAlertsResponse,
-  severityRuleAlertsQuery,
-  severityRuleAlertsResponseParsed,
-  to,
+  mockQuery,
+  mockVulnerableHostsBySeverityResult,
+  parsedVulnerableHostsAlertsResult,
 } from './mock_data';
-import {
-  useRuleAlertsItems,
-  UseRuleAlertsItems,
-  UseRuleAlertsItemsProps,
-} from './use_rule_alerts_items';
+import { useHostAlertsItems } from './use_host_alerts_items';
 
-const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
+import type { UseHostAlertsItems, UseHostAlertsItemsProps } from './use_host_alerts_items';
+
+const signalIndexName = 'signal-alerts';
+
+const dateNow = new Date('2022-04-15T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
 Date.now = jest.fn(() => mockDateNow()) as unknown as DateConstructor['now'];
 
@@ -32,12 +30,16 @@ const defaultUseQueryAlertsReturn = {
   request: '',
   refetch: () => {},
 };
+
 const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => {
   return {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
+
+const from = '2020-07-07T08:20:18.966Z';
+const to = '2020-07-08T08:20:18.966Z';
 
 const mockUseGlobalTime = jest
   .fn()
@@ -48,17 +50,17 @@ jest.mock('../../../../common/containers/use_global_time', () => {
   };
 });
 
-// helper function to render the hook
-const renderUseRuleAlertsItems = (props: Partial<UseRuleAlertsItemsProps> = {}) =>
-  renderHook<UseRuleAlertsItemsProps, ReturnType<UseRuleAlertsItems>>(() =>
-    useRuleAlertsItems({
-      queryId: 'test',
-      signalIndexName: 'signal-alerts',
-      ...props,
+const renderUseHostAlertsItems = (overrides: Partial<UseHostAlertsItemsProps> = {}) =>
+  renderHook<UseHostAlertsItemsProps, ReturnType<UseHostAlertsItems>>(() =>
+    useHostAlertsItems({
+      skip: false,
+      signalIndexName,
+      queryId: 'testing',
+      ...overrides,
     })
   );
 
-describe('useRuleAlertsItems', () => {
+describe('useVulnerableHostsCounters', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
@@ -66,30 +68,27 @@ describe('useRuleAlertsItems', () => {
   });
 
   it('should return default values', () => {
-    const { result } = renderUseRuleAlertsItems();
+    const { result } = renderUseHostAlertsItems();
 
     expect(result.current).toEqual({
       items: [],
       isLoading: false,
       updatedAt: dateNow,
     });
-    expect(mockUseQueryAlerts).toBeCalledWith({
-      query: severityRuleAlertsQuery,
-      indexName: 'signal-alerts',
-      skip: false,
-    });
+
+    expect(mockUseQueryAlerts).toBeCalledWith(mockQuery());
   });
 
   it('should return parsed items', () => {
     mockUseQueryAlerts.mockReturnValue({
       ...defaultUseQueryAlertsReturn,
-      data: mockSeverityRuleAlertsResponse,
+      data: mockVulnerableHostsBySeverityResult,
     });
 
-    const { result } = renderUseRuleAlertsItems();
+    const { result } = renderUseHostAlertsItems();
 
     expect(result.current).toEqual({
-      items: severityRuleAlertsResponseParsed,
+      items: parsedVulnerableHostsAlertsResult,
       isLoading: false,
       updatedAt: dateNow,
     });
@@ -98,30 +97,26 @@ describe('useRuleAlertsItems', () => {
   it('should return new updatedAt', () => {
     const newDateNow = new Date('2022-04-08T14:00:00.000Z').valueOf();
     mockDateNow.mockReturnValue(newDateNow); // setUpdatedAt call
+    mockDateNow.mockReturnValueOnce(dateNow); // initialization call
 
     mockUseQueryAlerts.mockReturnValue({
       ...defaultUseQueryAlertsReturn,
-      data: mockSeverityRuleAlertsResponse,
+      data: mockVulnerableHostsBySeverityResult,
     });
 
-    const { result } = renderUseRuleAlertsItems();
-
+    const { result } = renderUseHostAlertsItems();
     expect(mockDateNow).toHaveBeenCalled();
     expect(result.current).toEqual({
-      items: severityRuleAlertsResponseParsed,
+      items: parsedVulnerableHostsAlertsResult,
       isLoading: false,
       updatedAt: newDateNow,
     });
   });
 
   it('should skip the query', () => {
-    const { result } = renderUseRuleAlertsItems({ skip: true });
+    const { result } = renderUseHostAlertsItems({ skip: true });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({
-      query: severityRuleAlertsQuery,
-      indexName: 'signal-alerts',
-      skip: true,
-    });
+    expect(mockUseQueryAlerts).toBeCalledWith({ ...mockQuery(), skip: true });
 
     expect(result.current).toEqual({
       items: [],

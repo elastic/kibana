@@ -19,15 +19,12 @@ interface TimeRange {
   to: string;
 }
 
-interface UseUserAlertsItemsProps {
+export interface UseUserAlertsItemsProps {
   skip: boolean;
   queryId: string;
   signalIndexName: string | null;
 }
 
-/**
- * Formatted table data of vulnerable users
- */
 export interface UserAlertsItem {
   userName: string;
   totalAlerts: number;

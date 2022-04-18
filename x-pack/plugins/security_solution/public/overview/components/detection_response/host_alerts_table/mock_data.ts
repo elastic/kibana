@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { buildVulnerableHostAggregationQuery } from './use_host_alerts_items';
+
 export const mockVulnerableHostsBySeverityResult = {
   aggregations: {
     hostsBySeverity: {
@@ -77,3 +79,47 @@ export const mockVulnerableHostsBySeverityResult = {
     },
   },
 };
+
+export const parsedVulnerableHostsAlertsResult = [
+  {
+    hostName: 'Host-342m5gl1g2',
+    totalAlerts: 100,
+    critical: 5,
+    high: 50,
+    low: 40,
+    medium: 5,
+  },
+  {
+    hostName: 'Host-vns3hyykhu',
+    totalAlerts: 104,
+    critical: 4,
+    high: 100,
+    low: 0,
+    medium: 0,
+  },
+  {
+    hostName: 'Host-awafztonav',
+    totalAlerts: 108,
+    critical: 4,
+    high: 50,
+    low: 50,
+    medium: 4,
+  },
+  {
+    hostName: 'Host-56k7zf5kne',
+    totalAlerts: 128,
+    critical: 1,
+    high: 6,
+    low: 59,
+    medium: 62,
+  },
+];
+
+export const mockQuery = () => ({
+  query: buildVulnerableHostAggregationQuery({
+    from: '2020-07-07T08:20:18.966Z',
+    to: '2020-07-08T08:20:18.966Z',
+  }),
+  indexName: 'signal-alerts',
+  skip: false,
+});

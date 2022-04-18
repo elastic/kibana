@@ -8,17 +8,15 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import {
-  from,
-  mockSeverityRuleAlertsResponse,
-  severityRuleAlertsQuery,
-  severityRuleAlertsResponseParsed,
-  to,
+  mockQuery,
+  mockVulnerableUsersBySeverityResult,
+  parsedVulnerableUserAlertsResult,
 } from './mock_data';
-import {
-  useRuleAlertsItems,
-  UseRuleAlertsItems,
-  UseRuleAlertsItemsProps,
-} from './use_rule_alerts_items';
+import { useUserAlertsItems } from './use_user_alerts_items';
+
+import type { UseUserAlertsItems, UseUserAlertsItemsProps } from './use_user_alerts_items';
+
+const signalIndexName = 'signal-alerts';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -39,6 +37,9 @@ jest.mock('../../../../detections/containers/detection_engine/alerts/use_query',
   };
 });
 
+const from = '2020-07-07T08:20:18.966Z';
+const to = '2020-07-08T08:20:18.966Z';
+
 const mockUseGlobalTime = jest
   .fn()
   .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() });
@@ -48,17 +49,17 @@ jest.mock('../../../../common/containers/use_global_time', () => {
   };
 });
 
-// helper function to render the hook
-const renderUseRuleAlertsItems = (props: Partial<UseRuleAlertsItemsProps> = {}) =>
-  renderHook<UseRuleAlertsItemsProps, ReturnType<UseRuleAlertsItems>>(() =>
-    useRuleAlertsItems({
-      queryId: 'test',
-      signalIndexName: 'signal-alerts',
-      ...props,
+const renderUseUserAlertsItems = (overrides: Partial<UseUserAlertsItemsProps> = {}) =>
+  renderHook<UseUserAlertsItemsProps, ReturnType<UseUserAlertsItems>>(() =>
+    useUserAlertsItems({
+      skip: false,
+      signalIndexName,
+      queryId: 'testing',
+      ...overrides,
     })
   );
 
-describe('useRuleAlertsItems', () => {
+describe('useUserAlertsItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
@@ -66,30 +67,27 @@ describe('useRuleAlertsItems', () => {
   });
 
   it('should return default values', () => {
-    const { result } = renderUseRuleAlertsItems();
+    const { result } = renderUseUserAlertsItems();
 
     expect(result.current).toEqual({
       items: [],
       isLoading: false,
       updatedAt: dateNow,
     });
-    expect(mockUseQueryAlerts).toBeCalledWith({
-      query: severityRuleAlertsQuery,
-      indexName: 'signal-alerts',
-      skip: false,
-    });
+
+    expect(mockUseQueryAlerts).toBeCalledWith(mockQuery());
   });
 
   it('should return parsed items', () => {
     mockUseQueryAlerts.mockReturnValue({
       ...defaultUseQueryAlertsReturn,
-      data: mockSeverityRuleAlertsResponse,
+      data: mockVulnerableUsersBySeverityResult,
     });
 
-    const { result } = renderUseRuleAlertsItems();
+    const { result } = renderUseUserAlertsItems();
 
     expect(result.current).toEqual({
-      items: severityRuleAlertsResponseParsed,
+      items: parsedVulnerableUserAlertsResult,
       isLoading: false,
       updatedAt: dateNow,
     });
@@ -98,30 +96,26 @@ describe('useRuleAlertsItems', () => {
   it('should return new updatedAt', () => {
     const newDateNow = new Date('2022-04-08T14:00:00.000Z').valueOf();
     mockDateNow.mockReturnValue(newDateNow); // setUpdatedAt call
+    mockDateNow.mockReturnValueOnce(dateNow); // initialization call
 
     mockUseQueryAlerts.mockReturnValue({
       ...defaultUseQueryAlertsReturn,
-      data: mockSeverityRuleAlertsResponse,
+      data: mockVulnerableUsersBySeverityResult,
     });
 
-    const { result } = renderUseRuleAlertsItems();
-
+    const { result } = renderUseUserAlertsItems();
     expect(mockDateNow).toHaveBeenCalled();
     expect(result.current).toEqual({
-      items: severityRuleAlertsResponseParsed,
+      items: parsedVulnerableUserAlertsResult,
       isLoading: false,
       updatedAt: newDateNow,
     });
   });
 
   it('should skip the query', () => {
-    const { result } = renderUseRuleAlertsItems({ skip: true });
+    const { result } = renderUseUserAlertsItems({ skip: true });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({
-      query: severityRuleAlertsQuery,
-      indexName: 'signal-alerts',
-      skip: true,
-    });
+    expect(mockUseQueryAlerts).toBeCalledWith({ ...mockQuery(), skip: true });
 
     expect(result.current).toEqual({
       items: [],

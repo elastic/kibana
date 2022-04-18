@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { buildVulnerableUserAggregationQuery } from './use_user_alerts_items';
+
 export const mockVulnerableUsersBySeverityResult = {
   aggregations: {
     usersBySeverity: {
@@ -77,3 +79,48 @@ export const mockVulnerableUsersBySeverityResult = {
     },
   },
 };
+
+export const parsedVulnerableUserAlertsResult = [
+  {
+    totalAlerts: 4,
+    critical: 4,
+    high: 1,
+    userName: 'crffn20qcs',
+
+    low: 1,
+    medium: 1,
+  },
+  {
+    totalAlerts: 4,
+    critical: 1,
+    high: 11,
+    userName: 'd058hziijl',
+    low: 1,
+    medium: 1,
+  },
+  {
+    totalAlerts: 4,
+    critical: 1,
+    high: 1,
+    userName: 'nenha4bdhv',
+    low: 3,
+    medium: 3,
+  },
+  {
+    totalAlerts: 2,
+    critical: 0,
+    high: 1,
+    userName: 'u68nq414uw',
+    low: 10,
+    medium: 0,
+  },
+];
+
+export const mockQuery = () => ({
+  query: buildVulnerableUserAggregationQuery({
+    from: '2020-07-07T08:20:18.966Z',
+    to: '2020-07-08T08:20:18.966Z',
+  }),
+  indexName: 'signal-alerts',
+  skip: false,
+});

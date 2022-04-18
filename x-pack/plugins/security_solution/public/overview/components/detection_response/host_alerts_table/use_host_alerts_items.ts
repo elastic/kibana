@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { GenericBuckets } from '../../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const HOSTS_BY_SEVERITY_AGG = 'hostsBySeverity';
 
@@ -20,11 +19,12 @@ interface TimeRange {
   to: string;
 }
 
-interface UseHostsAlertsItemsProps {
+export interface UseHostAlertsItemsProps {
   skip: boolean;
   queryId: string;
+  signalIndexName: string;
 }
-export interface AlertSeverityCounts {
+export interface HostAlertsItem {
   hostName: string;
   totalAlerts: number;
   low: number;
@@ -33,66 +33,42 @@ export interface AlertSeverityCounts {
   critical: number;
 }
 
-interface SeverityContainer {
-  doc_count: number;
-}
-interface AlertBySeverityBucketData extends GenericBuckets {
-  low: SeverityContainer;
-  medium: SeverityContainer;
-  high: SeverityContainer;
-  critical: SeverityContainer;
-}
-
-interface AlertCountersBySeverityAndSeverityAggregation {
-  [HOSTS_BY_SEVERITY_AGG]: {
-    buckets: AlertBySeverityBucketData[];
-  };
-}
-
-interface UseVulnerableHostsCountersReturnType {
+export type UseHostAlertsItems = (props: UseHostAlertsItemsProps) => {
+  items: HostAlertsItem[];
   isLoading: boolean;
-  data: AlertSeverityCounts[];
   updatedAt: number;
-}
+};
 
-export const useHostAlertsItems = ({
-  skip,
-  queryId,
-}: UseHostsAlertsItemsProps): UseVulnerableHostsCountersReturnType => {
+export const useHostAlertsItems: UseHostAlertsItems = ({ skip, queryId, signalIndexName }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  const { to, from, setQuery: globalSetQuery, deleteQuery } = useGlobalTime();
-  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const [items, setItems] = useState<HostAlertsItem[]>([]);
+
+  const { to, from, setQuery: setGlobalQuery, deleteQuery } = useGlobalTime();
+
   const {
     data,
     request,
     response,
     setQuery,
-    loading: isLoadingData,
+    loading,
     refetch: refetchQuery,
-  } = useQueryAlerts<{}, AlertCountersBySeverityAndSeverityAggregation>({
+  } = useQueryAlerts<{}, AlertCountersBySeverityAndHostAggregation>({
     query: buildVulnerableHostAggregationQuery({ from, to }),
     indexName: signalIndexName,
     skip,
   });
 
-  const isLoading = isLoadingData && isSignalIndexLoading;
-
-  useEffect(() => {
-    if (!isLoading) {
-      setUpdatedAt(Date.now());
-    }
-  }, [isLoading]);
-
   useEffect(() => {
     setQuery(buildVulnerableHostAggregationQuery({ from, to }));
-    setUpdatedAt(Date.now());
   }, [setQuery, from, to]);
 
-  const transformedResponse: AlertSeverityCounts[] = useMemo(() => {
-    if (data && !!data.aggregations) {
-      return pickOffCounters(data.aggregations);
+  useEffect(() => {
+    if (data == null || !data.aggregations) {
+      setItems([]);
+    } else {
+      setItems(getHostAlertItemsFromAgg(data.aggregations));
     }
-    return [];
+    setUpdatedAt(Date.now());
   }, [data]);
 
   const refetch = useCallback(() => {
@@ -108,11 +84,11 @@ export const useHostAlertsItems = ({
       response: [response],
     },
     refetch,
-    setQuery: globalSetQuery,
+    setQuery: setGlobalQuery,
     queryId,
-    loading: isLoading,
+    loading,
   });
-  return { isLoading, data: transformedResponse, updatedAt };
+  return { items, isLoading: loading, updatedAt };
 };
 
 export const buildVulnerableHostAggregationQuery = ({ from, to }: TimeRange) => ({
@@ -190,12 +166,28 @@ export const buildVulnerableHostAggregationQuery = ({ from, to }: TimeRange) => 
   },
 });
 
-function pickOffCounters(
-  rawAggregation: AlertCountersBySeverityAndSeverityAggregation
-): AlertSeverityCounts[] {
+interface SeverityContainer {
+  doc_count: number;
+}
+interface AlertBySeverityBucketData extends GenericBuckets {
+  low: SeverityContainer;
+  medium: SeverityContainer;
+  high: SeverityContainer;
+  critical: SeverityContainer;
+}
+
+interface AlertCountersBySeverityAndHostAggregation {
+  [HOSTS_BY_SEVERITY_AGG]: {
+    buckets: AlertBySeverityBucketData[];
+  };
+}
+
+function getHostAlertItemsFromAgg(
+  rawAggregation: AlertCountersBySeverityAndHostAggregation
+): HostAlertsItem[] {
   const buckets = rawAggregation?.[HOSTS_BY_SEVERITY_AGG].buckets ?? [];
 
-  return buckets.reduce<AlertSeverityCounts[]>((accumalatedAlertsByHost, currentHost) => {
+  return buckets.reduce<HostAlertsItem[]>((accumalatedAlertsByHost, currentHost) => {
     return [
       ...accumalatedAlertsByHost,
       {
