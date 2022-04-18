@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, EXTENDED_ANNOTATION_LAYER } from '../constants';
 import { ExtendedAnnotationLayerArgs, ExtendedAnnotationLayerConfigResult } from '../types';
 
