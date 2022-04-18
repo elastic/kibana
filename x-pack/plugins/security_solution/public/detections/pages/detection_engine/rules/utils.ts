@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import {
   getRulesUrl,
   getRuleDetailsUrl,

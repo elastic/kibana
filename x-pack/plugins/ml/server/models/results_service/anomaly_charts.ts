@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
@@ -48,7 +48,7 @@ import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
 import { CHART_TYPE, ChartType } from '../../../common/constants/charts';
 import { getChartType } from '../../../common/util/chart_utils';
-import { MlJob } from '../../index';
+import { MlJob } from '../..';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {

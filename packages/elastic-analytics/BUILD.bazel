@@ -36,6 +36,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//moment",
   "@npm//rxjs",
 ]
 
@@ -51,6 +52,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//moment",
   "@npm//rxjs",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-logging-mocks:npm_module_types",

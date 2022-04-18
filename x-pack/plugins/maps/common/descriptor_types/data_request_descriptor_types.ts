@@ -7,10 +7,10 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { TimeRange } from '@kbn/data-plugin/common';
 import { MapExtent } from './map_descriptor';
-import { TimeRange } from '../../../../../src/plugins/data/common';
 
 export type Timeslice = {
   from: number;

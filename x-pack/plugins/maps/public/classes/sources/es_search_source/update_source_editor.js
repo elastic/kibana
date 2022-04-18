@@ -20,7 +20,7 @@ import {
   getSourceFields,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
-import { SortDirection, indexPatterns } from '../../../../../../../src/plugins/data/public';
+import { SortDirection, indexPatterns } from '@kbn/data-plugin/public';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n-react';
 

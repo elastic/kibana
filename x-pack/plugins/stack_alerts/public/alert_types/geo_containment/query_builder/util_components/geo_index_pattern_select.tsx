@@ -9,9 +9,9 @@ import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewsContract } from 'src/plugins/data/public';
-import { HttpSetup } from 'kibana/public';
-import { DataView } from '../../../../../../../../src/plugins/data/common';
+import { DataViewsContract } from '@kbn/data-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
+import { DataView } from '@kbn/data-plugin/common';
 
 interface Props {
   onChange: (indexPattern: DataView) => void;

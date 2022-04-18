@@ -22,12 +22,12 @@ import {
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
 import { ToolingLog } from '@kbn/dev-utils';
-import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
+import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { countDownTest } from '../detection_engine_api_integration/utils';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
@@ -37,7 +37,9 @@ export const createListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'createListsIndex',
     log
@@ -55,7 +57,9 @@ export const deleteListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.delete(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'deleteListsIndex',
     log
@@ -64,7 +68,7 @@ export const deleteListsIndex = async (
 
 /**
  * Creates the exception lists and lists items index for use inside of beforeEach blocks of tests
- * This will retry 20 times before giving up and hopefully still not interfere with other tests
+ * This will retry 50 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
@@ -74,7 +78,9 @@ export const createExceptionListsIndex = async (
   return countDownTest(
     async () => {
       await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').send();
-      return true;
+      return {
+        passed: true,
+      };
     },
     'createListsIndex',
     log
@@ -223,7 +229,9 @@ export const deleteAllExceptionsByType = async (
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
         .send();
-      return finalCheck.data.length === 0;
+      return {
+        passed: finalCheck.data.length === 0,
+      };
     },
     `deleteAllExceptions by type: "${type}"`,
     log,

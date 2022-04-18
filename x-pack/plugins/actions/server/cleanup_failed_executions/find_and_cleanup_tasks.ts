@@ -6,12 +6,12 @@
  */
 
 import { nodeBuilder } from '@kbn/es-query';
-import { Logger, CoreStart } from 'kibana/server';
+import { Logger, CoreStart } from '@kbn/core/server';
+import { TaskInstance } from '@kbn/task-manager-plugin/server';
 import { ActionsConfig } from '../config';
 import { ActionsPluginsStart } from '../plugin';
 import { ActionTypeRegistryContract } from '../types';
 import { cleanupTasks, CleanupTasksResult } from './cleanup_tasks';
-import { TaskInstance } from '../../../task_manager/server';
 
 export interface FindAndCleanupTasksOpts {
   logger: Logger;

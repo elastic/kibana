@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useKibana } from '../../../kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export interface QueryLanguageSwitcherProps {
   language: string;

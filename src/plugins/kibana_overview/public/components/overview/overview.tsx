@@ -19,7 +19,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   RedirectAppLinks,
@@ -29,13 +29,13 @@ import {
   KibanaPageTemplateProps,
   overviewPageActions,
   OverviewPageFooter,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
+} from '@kbn/kibana-react-plugin/public';
+import { FetchResult } from '@kbn/newsfeed-plugin/public';
 import {
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
-} from '../../../../../../src/plugins/home/public';
+} from '@kbn/home-plugin/public';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
@@ -98,6 +98,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           defaultMessage:
             'Use Elastic Agent or Beats to collect data and build out Analytics solutions.',
         }),
+        'data-test-subj': 'kbnOverviewAddIntegrations',
       },
     },
     docsLink: docLinks.links.kibana.guide,

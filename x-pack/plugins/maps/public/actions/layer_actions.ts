@@ -7,7 +7,7 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { Query } from 'src/plugins/data/public';
+import { Query } from '@kbn/data-plugin/public';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,

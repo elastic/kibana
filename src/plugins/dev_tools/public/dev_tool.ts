@@ -9,7 +9,7 @@
 import { Observable } from 'rxjs';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { AppUnmount, CoreTheme } from 'src/core/public';
+import { AppUnmount, CoreTheme } from '@kbn/core/public';
 
 /**
  * Descriptor for a dev tool. A dev tool works similar to an application

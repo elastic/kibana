@@ -11,22 +11,22 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import * as i18n from '../translations';
-import { useKibana } from '../../../common/lib/kibana';
 import {
   isCompleteResponse,
   isErrorResponse,
   isPartialResponse,
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-} from '../../../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/data-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { EQL_SEARCH_STRATEGY } from '@kbn/data-enhanced-plugin/public';
+import * as i18n from '../translations';
+import { useKibana } from '../../lib/kibana';
 import { formatInspect, getEqlAggsData } from './helpers';
 import { EqlPreviewResponse, EqlPreviewRequest, Source } from './types';
 import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
-import { inputsModel } from '../../../common/store';
-import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
+import { inputsModel } from '../../store';
 import { useAppToasts } from '../use_app_toasts';
 
 export const useEqlPreview = (): [
@@ -37,7 +37,7 @@ export const useEqlPreview = (): [
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const unsubscribeStream = useRef(new Subject());
+  const unsubscribeStream = useRef(new Subject<void>());
   const [loading, setLoading] = useState(false);
   const didCancel = useRef(false);
   const { addError, addWarning } = useAppToasts();

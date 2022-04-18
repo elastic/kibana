@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from 'src/plugins/data_views/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 /**
  * Extracts the type from a data view field that will match the right icon.

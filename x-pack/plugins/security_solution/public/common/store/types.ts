@@ -7,7 +7,7 @@
 
 import { Dispatch, Action, Middleware, CombinedState } from 'redux';
 
-import { CoreStart } from '../../../../../../src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { StartPlugins } from '../../types';
 import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
