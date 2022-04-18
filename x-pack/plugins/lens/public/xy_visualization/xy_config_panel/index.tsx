@@ -9,12 +9,9 @@ import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
-import {
-  AxesSettingsConfig,
-  AxisExtentConfig,
-} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
 import { LegendSettingsPopover } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -299,14 +296,15 @@ export const XyToolbar = memo(function XyToolbar(
   ).truncateText;
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <VisualOptionsPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}
           />
+
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
@@ -412,8 +410,9 @@ export const XyToolbar = memo(function XyToolbar(
           />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -451,6 +450,7 @@ export const XyToolbar = memo(function XyToolbar(
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
             />
           </TooltipWrapper>
+
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
@@ -472,6 +472,7 @@ export const XyToolbar = memo(function XyToolbar(
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
           />
+
           <TooltipWrapper
             tooltipContent={
               shouldRotate

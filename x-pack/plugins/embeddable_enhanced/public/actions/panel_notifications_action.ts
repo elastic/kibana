@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
-import { ViewMode } from '../../../../../src/plugins/embeddable/public';
+import { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EnhancedEmbeddableContext, EnhancedEmbeddable } from '../types';
 
 export const txtOneDrilldown = i18n.translate(

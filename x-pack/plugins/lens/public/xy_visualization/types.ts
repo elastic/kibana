@@ -7,18 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { PaletteOutput } from '@kbn/coloring';
-import { LensIconChartArea } from '../assets/chart_area';
-import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
-import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
-import { LensIconChartBar } from '../assets/chart_bar';
-import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
-import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
-import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
-import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
-import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
-import { LensIconChartLine } from '../assets/chart_line';
-
-import type { VisualizationType, Suggestion } from '../types';
 import type {
   SeriesType,
   LegendConfig,
@@ -32,8 +20,20 @@ import type {
   YConfig,
   YScaleType,
   XScaleType,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
+} from '@kbn/expression-xy-plugin/common';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { LensIconChartArea } from '../assets/chart_area';
+import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
+import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
+import { LensIconChartBar } from '../assets/chart_bar';
+import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
+import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
+import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
+import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
+import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
+import { LensIconChartLine } from '../assets/chart_line';
+
+import type { VisualizationType, Suggestion } from '../types';
 import type { ValueLabelConfig } from '../../common/types';
 
 export interface XYDataLayerConfig {

@@ -9,9 +9,10 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable } from '../../../../expressions';
-import { EventAnnotationOutput } from '../../../../event_annotation/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { Datatable } from '@kbn/expressions-plugin';
+import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+
 import {
   AxisExtentModes,
   FillStyles,

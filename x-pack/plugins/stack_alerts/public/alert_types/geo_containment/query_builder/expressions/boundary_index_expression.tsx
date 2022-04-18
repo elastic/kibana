@@ -8,16 +8,16 @@
 import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
-import { HttpSetup } from 'kibana/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { ES_GEO_SHAPE_TYPES, GeoContainmentAlertParams } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { DataViewField, DataView } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   ruleParams: GeoContainmentAlertParams;

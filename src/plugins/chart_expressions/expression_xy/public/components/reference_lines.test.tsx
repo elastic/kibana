@@ -9,8 +9,8 @@
 import { LineAnnotation, RectAnnotation } from '@elastic/charts';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { Datatable } from '../../../../expressions';
-import { FieldFormat } from '../../../../field_formats/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { LayerTypes } from '../../common/constants';
 import {
   ReferenceLineLayerArgs,

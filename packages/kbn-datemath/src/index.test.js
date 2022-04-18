@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const dateMath = require('./index');
+const dateMath = require('.');
 const moment = require('moment');
 
 /**

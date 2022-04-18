@@ -10,7 +10,7 @@ import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import { render, data as dataMock } from '../../../../utils/test_helper';
-import { UXSection } from './';
+import { UXSection } from '.';
 import { response } from './mock_data/ux.mock';
 
 jest.mock('react-router-dom', () => ({

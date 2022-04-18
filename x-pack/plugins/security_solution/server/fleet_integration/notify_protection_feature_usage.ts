@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewPackagePolicy } from '../../../fleet/common';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { PolicyConfig, PolicyOperatingSystem, ProtectionModes } from '../../common/endpoint/types';
 import { EndpointMetadataService } from '../endpoint/services/metadata';
 import { FeatureUsageService } from '../endpoint/services/feature_usage/service';

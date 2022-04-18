@@ -9,7 +9,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { getFetch$ } from './get_fetch_observable';
 import { FetchStatus } from '../../types';
-import { DataPublicPluginStart } from '../../../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { DataRefetch$ } from './use_saved_search';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';

@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 
 import './add_message_variables.scss';
-import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
-import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
-import { ActionVariable } from '../../../../alerting/common';
 import { templateActionVariable } from '../lib';
 
 const NO_EDITOR_ERROR_TITLE = i18n.translate(

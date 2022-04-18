@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { StatusPopoverButton } from './status_popover_button';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../mock';
 
 const props = {
   eventId: 'testid',

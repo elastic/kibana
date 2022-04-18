@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionTypeDefinition } from '../../../../../src/plugins/expressions';
+import { ExpressionTypeDefinition } from '@kbn/expressions-plugin';
 import { EmbeddableInput } from '../../types';
 import { EmbeddableTypes } from './embeddable_types';
 

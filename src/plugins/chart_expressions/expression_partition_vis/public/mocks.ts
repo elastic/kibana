@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '../../../expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import {
   BucketColumns,
   PartitionVisParams,

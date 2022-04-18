@@ -16,8 +16,8 @@ import {
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapperContextType,
 } from './get_color_picker';
-import { ColorPicker } from '../../../../charts/public';
-import type { PersistedState } from '../../../../visualizations/public';
+import { ColorPicker } from '@kbn/charts-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
 
 const bucketColumns = createMockBucketColumns();

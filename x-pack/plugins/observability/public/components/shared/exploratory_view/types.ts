@@ -14,10 +14,10 @@ import type {
   SeriesType,
   OperationType,
   ExtendedYConfig,
-} from '../../../../../lens/public';
+} from '@kbn/lens-plugin/public';
 
-import type { PersistableFilter } from '../../../../../lens/common';
-import type { DataView } from '../../../../../../../src/plugins/data_views/common';
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',

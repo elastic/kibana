@@ -7,12 +7,9 @@
 
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { YAxisMode, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { layerTypes } from '../../common';
-import type {
-  YAxisMode,
-  ExtendedYConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';

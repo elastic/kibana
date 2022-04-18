@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
 import {
   CommonXYDataLayerConfigResult,
@@ -13,10 +14,6 @@ import {
   ExtendedYConfig,
   YConfig,
 } from '../../common';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../plugins/field_formats/common';
 import { isDataLayer } from './visualization';
 
 export interface Series {

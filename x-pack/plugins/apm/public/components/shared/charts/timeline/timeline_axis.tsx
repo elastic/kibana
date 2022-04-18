@@ -10,7 +10,7 @@ import React, { ReactNode } from 'react';
 import { XAxis, XYPlot } from 'react-vis';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { Mark } from './';
+import { Mark } from '.';
 import { LastTickValue } from './last_tick_value';
 import { Marker } from './marker';
 import { PlotValues } from './plot_utils';

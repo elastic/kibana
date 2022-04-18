@@ -6,8 +6,8 @@
  */
 
 import { snakeCase } from 'lodash';
+import { SavedObjectAttribute } from '@kbn/core/server';
 import { RuleTypeParams, MappedParams, MappedParamsProperties } from '../../types';
-import { SavedObjectAttribute } from '../../../../../../src/core/server';
 import {
   iterateFilterKureyNode,
   IterateFilterKureyNodeParams,

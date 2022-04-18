@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datatable } from '../../../../expressions';
-import { Trigger, RowClickContext } from '../../../../ui_actions/public';
+import { Datatable } from '@kbn/expressions-plugin';
+import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
