@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { AxisConfig, XAxisConfigResult } from '../types';
 import { X_AXIS_CONFIG } from '../constants';
 
