@@ -22,7 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { Datatable } from 'src/plugins/expressions';
+import type { Datatable } from '@kbn/expressions-plugin';
 import { ExpressionsContext } from './expressions_context';
 
 const expression = `getEvents

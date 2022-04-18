@@ -16,8 +16,8 @@ import {
   IMetricAggType,
   search,
   TimeRange,
-} from '../../../../data/public';
-import type { ISchemas } from '../../../../visualizations/public';
+} from '@kbn/data-plugin/public';
+import type { ISchemas } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorAggGroup } from '../agg_group';
 import {
   EditorAction,

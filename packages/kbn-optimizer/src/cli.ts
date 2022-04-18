@@ -68,6 +68,11 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         throw createFlagError('expected --no-examples to have no value');
       }
 
+      const testPlugins = flags['test-plugins'] ?? false;
+      if (typeof testPlugins !== 'boolean') {
+        throw createFlagError('expected --test-plugins to have no value');
+      }
+
       const profileWebpack = flags.profile ?? false;
       if (typeof profileWebpack !== 'boolean') {
         throw createFlagError('expected --profile to have no value');
@@ -133,6 +138,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         dist: dist || updateLimits,
         cache,
         examples: examples && !(validateLimits || updateLimits),
+        testPlugins: testPlugins && !(validateLimits || updateLimits),
         profileWebpack,
         extraPluginScanDirs,
         inspectWorkers,
@@ -173,6 +179,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           'watch',
           'oss',
           'examples',
+          'test-plugins',
           'dist',
           'cache',
           'profile',
@@ -202,6 +209,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
           --focus            just like --filter, except dependencies are automatically included, --filter applies to result
           --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
           --no-examples      don't build the example plugins
+          --test-plugins     build test plugins too
           --dist             create bundles that are suitable for inclusion in the Kibana distributable, enabled when running with --update-limits
           --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
           --no-inspect-workers  when inspecting the parent process, don't inspect the workers

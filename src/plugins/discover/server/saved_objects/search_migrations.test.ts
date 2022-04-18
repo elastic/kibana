@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { getAllMigrations, searchMigrations } from './search_migrations';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;

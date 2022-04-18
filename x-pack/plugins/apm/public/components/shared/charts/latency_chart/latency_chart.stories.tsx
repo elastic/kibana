@@ -8,7 +8,7 @@
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -19,7 +19,7 @@ import {
   APIReturnType,
   createCallApmApi,
 } from '../../../../services/rest/create_call_apm_api';
-import { LatencyChart } from './';
+import { LatencyChart } from '.';
 
 interface Args {
   latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;

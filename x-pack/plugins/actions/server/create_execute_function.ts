@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../src/core/server';
-import { RunNowResult, TaskManagerStartContract } from '../../task_manager/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   RawAction,
   ActionTypeRegistryContract,

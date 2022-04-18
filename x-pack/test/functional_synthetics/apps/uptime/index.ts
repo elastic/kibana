@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   describe('Uptime app', function () {
+    this.tags('ciGroup8');
     describe('with generated data', () => {
       loadTestFile(require.resolve('./synthetics_integration'));
     });

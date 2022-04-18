@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { sslSchema } from '@kbn/server-http-tools';
 

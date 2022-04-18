@@ -13,7 +13,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 export const LazyDataViewIllustration = React.lazy(() =>
-  import('../assets/data_view_illustration').then(({ DataViewIllustration }) => ({
+  import('./data_view_illustration').then(({ DataViewIllustration }) => ({
     default: DataViewIllustration,
   }))
 );

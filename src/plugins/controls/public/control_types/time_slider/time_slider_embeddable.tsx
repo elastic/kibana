@@ -14,19 +14,18 @@ import deepEqual from 'fast-deep-equal';
 import { merge, Subscription, BehaviorSubject, Observable } from 'rxjs';
 import { map, distinctUntilChanged, skip, take, mergeMap } from 'rxjs/operators';
 
-import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
-
 import {
   withSuspense,
   LazyReduxEmbeddableWrapper,
   ReduxEmbeddableWrapperPropsWithChildren,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { TimeSliderControlEmbeddableInput } from '../../../common/control_types/time_slider/types';
 
-import { TIME_SLIDER_CONTROL } from '../../';
+import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlsSettingsService } from '../../services/settings';
-import { Embeddable, IContainer } from '../../../../embeddable/public';
 import { ControlsDataService } from '../../services/data';
-import { DataView } from '../../../../data_views/public';
 import { ControlOutput } from '../..';
 import { pluginServices } from '../../services';
 

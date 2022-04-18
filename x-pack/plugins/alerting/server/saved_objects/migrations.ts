@@ -17,18 +17,15 @@ import {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectReference,
-} from '../../../../../src/core/server';
-import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
-import {
-  MigrateFunctionsObject,
-  MigrateFunction,
-} from '../../../../../src/plugins/kibana_utils/common';
-import { mergeSavedObjectMigrationMaps } from '../../../../../src/core/server';
-import { getMappedParams } from '../../server/rules_client/lib/mapped_params_utils';
-import { SerializedSearchSourceFields } from '../../../../../src/plugins/data/common';
+import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
+import { getMappedParams } from '../rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';

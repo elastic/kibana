@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { MlCapabilitiesResponse } from '../../../../../../ml/public';
+import { MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
 import { emptyMlCapabilities } from '../../../../../common/machine_learning/empty_ml_capabilities';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useHttp } from '../../../lib/kibana';

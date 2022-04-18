@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from 'kibana/public';
-import { DataViewsContract } from '../../../data/public';
-import { DataView } from '../../../data_views/public';
+import type { Capabilities } from '@kbn/core/public';
+import { DataViewsContract } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 async function popularizeField(
   indexPattern: DataView,

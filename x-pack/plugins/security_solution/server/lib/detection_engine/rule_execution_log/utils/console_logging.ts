@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogMeta } from 'src/core/server';
+import { LogMeta } from '@kbn/core/server';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
 /**

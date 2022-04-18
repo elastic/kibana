@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
-} from '../../../../../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
 import { useHttp } from '../../../../../common/lib/kibana/hooks';
 import {
   getPolicyDetailPath,
@@ -41,6 +41,7 @@ import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../block
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
+import { useEndpointPrivileges } from '../../../../../common/components/user_privileges/endpoint';
 
 export const BLOCKLISTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>
@@ -158,6 +159,7 @@ const WrappedPolicyDetailsForm = memo<{
 
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
+  const { canAccessEndpointManagement } = useEndpointPrivileges();
 
   const hostIsolationExceptionsApiClientInstance = useMemo(
     () => HostIsolationExceptionsApiClient.getInstance(http),
@@ -225,8 +227,8 @@ const WrappedPolicyDetailsForm = memo<{
     });
   }, [onChange, updatedPolicy]);
 
-  return (
-    <div data-test-subj="endpointIntegrationPolicyForm">
+  const artifactCards = useMemo(
+    () => (
       <>
         <div>
           <EuiText>
@@ -276,6 +278,22 @@ const WrappedPolicyDetailsForm = memo<{
           />
         </div>
         <EuiSpacer size="l" />
+      </>
+    ),
+    [
+      blocklistsApiClientInstance,
+      eventFiltersApiClientInstance,
+      hostIsolationExceptionsApiClientInstance,
+      policyId,
+      privileges.canIsolateHost,
+      trustedAppsApiClientInstance,
+    ]
+  );
+
+  return (
+    <div data-test-subj="endpointIntegrationPolicyForm">
+      <>
+        {canAccessEndpointManagement && artifactCards}
         <div>
           <EuiText>
             <h5>
