@@ -212,15 +212,17 @@ export const IndexPatternTable = ({
         <div>
           <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
             {dataView.getName()}
-            <>
-              &nbsp;
-              <EuiIconTip
-                type="iInCircle"
-                color="text"
-                aria-label={dataView.title}
-                content={dataView.title}
-              />{' '}
-            </>
+            {dataView.name ? (
+              <>
+                &nbsp;
+                <EuiIconTip
+                  type="iInCircle"
+                  color="text"
+                  aria-label={dataView.title}
+                  content={dataView.title}
+                />
+              </>
+            ) : null}
           </EuiLink>
           {dataView?.id?.indexOf(securitySolution) === 0 && (
             <>

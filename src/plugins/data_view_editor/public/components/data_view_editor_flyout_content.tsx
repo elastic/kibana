@@ -24,6 +24,7 @@ import {
 
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
+import { EditDataViewChangedModal } from './confirm_modals/edit_data_view_changed_modal';
 
 import {
   MatchedItem,
@@ -122,7 +123,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      await onSave(indexPatternStub);
+      if (editData && !editDataViewChangedModal) {
+        setEditDataViewChangedModal(true);
+      } else {
+        await onSave(indexPatternStub);
+      }
     },
   });
 
@@ -157,6 +162,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     partialMatchedIndices: [],
     visibleIndices: [],
   });
+  const [editDataViewChangedModal, setEditDataViewChangedModal] = useState(false);
 
   // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
@@ -349,6 +355,24 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
+  const renderModal = () => {
+    if (editDataViewChangedModal) {
+      return (
+        <EditDataViewChangedModal
+          dataViewName={form.getFields().name.value as string}
+          onConfirm={() => {
+            form.submit();
+          }}
+          onCancel={() => {
+            setEditDataViewChangedModal(false);
+          }}
+        />
+      );
+    }
+
+    return null;
+  };
+
   return (
     <EmptyPrompts onCancel={onCancel} allSources={allSources} loadSources={loadSources}>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
@@ -410,6 +434,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           )}
         </FlyoutPanels.Item>
       </FlyoutPanels.Group>
+      {renderModal()}
     </EmptyPrompts>
   );
 };

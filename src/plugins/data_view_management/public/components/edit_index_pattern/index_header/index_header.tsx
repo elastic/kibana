@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPageHeader, EuiPopover } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 interface IndexHeaderProps {
@@ -59,78 +59,73 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
 }) => {
   const [openActions, setOpenActions] = useState<boolean>(false);
 
+  const panelItems = [
+    {
+      name: editTooltip,
+      icon: 'pencil',
+      onClick: () => {
+        if (editIndexPatternClick) editIndexPatternClick();
+        setOpenActions(false);
+      },
+      'data-test-subj': 'editIndexPatternButton',
+      'aria-label': editAriaLabel,
+    },
+    {
+      name: removeTooltip,
+      icon: <EuiIcon type="trash" size="m" color="danger" />,
+      onClick: () => {
+        if (deleteIndexPatternClick) deleteIndexPatternClick();
+        setOpenActions(false);
+      },
+      'data-test-subj': 'deleteIndexPatternButton',
+      'aria-label': removeAriaLabel,
+    },
+  ];
+  if (defaultIndex !== indexPattern.id) {
+    panelItems.unshift({
+      name: setDefaultTooltip,
+      icon: 'starFilled',
+      onClick: () => {
+        if (setDefault) setDefault();
+        setOpenActions(false);
+      },
+      'data-test-subj': 'setDefaultIndexPatternButton',
+      'aria-label': setDefaultAriaLabel,
+    });
+  }
+
   return (
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
       rightSideItems={[
-        <EuiPopover
-          button={
-            <EuiButtonEmpty
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={() => setOpenActions(true)}
-              aria-label={openActionsAriaLabel}
-              data-test-subj="openDataViewActions"
-            >
-              Actions
-            </EuiButtonEmpty>
-          }
-          isOpen={openActions}
-          closePopover={() => setOpenActions(false)}
-          anchorPosition="downRight"
-        >
-          <EuiFlexGroup
-            alignItems="flexStart"
-            direction="column"
-            onClick={() => setOpenActions(false)}
+        canSave && (
+          <EuiPopover
+            button={
+              <EuiButtonEmpty
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={() => setOpenActions(!openActions)}
+                aria-label={openActionsAriaLabel}
+                data-test-subj="openDataViewActions"
+              >
+                Actions
+              </EuiButtonEmpty>
+            }
+            isOpen={openActions}
+            closePopover={() => setOpenActions(false)}
+            anchorPosition="downRight"
           >
-            {defaultIndex !== indexPattern.id && setDefault && canSave && (
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  color="text"
-                  onClick={setDefault}
-                  iconSide="left"
-                  iconType="starFilled"
-                  aria-label={setDefaultAriaLabel}
-                  data-test-subj="setDefaultIndexPatternButton"
-                  size="s"
-                >
-                  {setDefaultTooltip}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            {canSave && (
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  color="text"
-                  onClick={editIndexPatternClick}
-                  iconSide="left"
-                  iconType="pencil"
-                  aria-label={editAriaLabel}
-                  data-test-subj="editIndexPatternButton"
-                  size="s"
-                >
-                  {editTooltip}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            {canSave && (
-              <EuiFlexItem>
-                <EuiButtonEmpty
-                  color="danger"
-                  onClick={deleteIndexPatternClick}
-                  iconSide="left"
-                  iconType="trash"
-                  aria-label={removeAriaLabel}
-                  data-test-subj="deleteIndexPatternButton"
-                  size="s"
-                >
-                  {removeTooltip}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPopover>,
+            <EuiContextMenu
+              initialPanelId={0}
+              panels={[
+                {
+                  id: 0,
+                  items: panelItems,
+                },
+              ]}
+            />
+          </EuiPopover>
+        ),
       ].filter(Boolean)}
     >
       {children}

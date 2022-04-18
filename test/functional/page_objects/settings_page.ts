@@ -503,6 +503,9 @@ export class SettingsPageObject extends FtrService {
     }
     await (await this.getSaveIndexPatternButton()).click();
 
+    await this.testSubjects.find('changeWarning');
+    await this.confirmSave();
+
     await this.header.waitUntilLoadingHasFinished();
     return await this.getIndexPatternIdFromUrl();
   }
