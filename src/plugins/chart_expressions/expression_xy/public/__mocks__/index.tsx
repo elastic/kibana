@@ -171,6 +171,7 @@ export const dateHistogramData: LensMultiTable = {
 export const dateHistogramLayer: DataLayerConfigResult = {
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
+  showLines: true,
   hide: false,
   xAccessor: 'xAccessorId',
   yScaleType: 'linear',

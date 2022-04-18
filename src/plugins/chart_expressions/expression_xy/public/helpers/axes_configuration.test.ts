@@ -223,6 +223,7 @@ describe('axes_configuration', () => {
   const sampleLayer: DataLayerConfigResult = {
     type: 'dataLayer',
     layerType: LayerTypes.DATA,
+    showLines: true,
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],

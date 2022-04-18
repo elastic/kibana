@@ -49,6 +49,7 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
 export const sampleLayer: DataLayerConfigResult = {
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
+  showLines: true,
   seriesType: 'line',
   xAccessor: 'c',
   accessors: ['a', 'b'],

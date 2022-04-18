@@ -17,6 +17,7 @@ describe('dataLayerConfig', () => {
     const { data } = sampleArgs();
     const args: DataLayerArgs = {
       seriesType: 'line',
+      showLines: true,
       xAccessor: 'c',
       accessors: ['a', 'b'],
       splitAccessor: 'd',

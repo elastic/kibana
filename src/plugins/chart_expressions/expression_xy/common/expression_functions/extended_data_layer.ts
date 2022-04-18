@@ -114,6 +114,13 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Points radius',
       }),
     },
+    showLines: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.extendedDataLayer.showLines.help', {
+        defaultMessage: 'Show lines between points',
+      }),
+      default: true,
+    },
     accessors: {
       types: ['string'],
       help: i18n.translate('expressionXY.extendedDataLayer.accessors.help', {

@@ -51,6 +51,7 @@ describe('color_assignment', () => {
   const layers: DataLayerConfigResult[] = [
     {
       type: 'dataLayer',
+      showLines: true,
       yScaleType: 'linear',
       xScaleType: 'linear',
       isHistogram: true,
@@ -64,6 +65,7 @@ describe('color_assignment', () => {
     {
       type: 'dataLayer',
       yScaleType: 'linear',
+      showLines: true,
       xScaleType: 'linear',
       isHistogram: true,
       seriesType: 'bar',
