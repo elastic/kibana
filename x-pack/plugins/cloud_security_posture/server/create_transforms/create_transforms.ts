@@ -30,6 +30,13 @@ export const initializeTransform = async (
   });
 };
 
+/**
+ * Checks if a transform exists, And if not creates it
+ *
+ * @param transform - the transform to create. If a transform with the same transform_id already exists, nothing is created or updated.
+ *
+ * @return true if the transform exits or created, false otherwise.
+ */
 export const createTransformIfNotExists = async (
   esClient: ElasticsearchClient,
   transform: TransformPutTransformRequest,
