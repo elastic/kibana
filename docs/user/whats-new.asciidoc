@@ -23,7 +23,7 @@ Previous versions: {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8
 *Document Explorer*, the powerful new way to analyze and explore your data with *Discover*,
 is now on by default. *Document Explorer* helps you quickly sort, select, and compare data,
 resize columns, and view documents in fullscreen. For more information,
-check {kibana-ref}/document-explorer.html[Document Explorer].
+check {kibana-ref}/document-explorer.html[Explore your documents].
 
 [role="screenshot"]
 image::images/highlights-discover.png[A view of the the Document Explorer in Discover]
@@ -80,10 +80,13 @@ image::images/highlights-lens-discover.gif[Seamlessly move from Lens to Discover
 ==== Enhancements to visualization editors
 
 {kib} offers even more ways to create visualizations:
+
 * **Metric visualization.** Use the new Metric visualization type in **Lens**
 to show the latest or earliest data, or the last value.
+
 * **Group by multiple fields in TSVB.** When you select **Terms** from the **Group by**
 dropdown in **TSVB**, you can calculate the top values for multiple fields.
+
 * **Customize the legend size.** In all visualization editors,
 you can now increase or decrease the visibility of your legend by changing the size.
 
@@ -91,7 +94,7 @@ you can now increase or decrease the visibility of your legend by changing the s
 === Maps
 
 [float]
-==== Hexagons
+==== Display clusters as hexagons
 
 In *Maps*, you can now display your clusters as hexagons
 instead of rectangles. This feature adds another beautiful, and more precise way, to
@@ -102,7 +105,7 @@ a https://www.elastic.co/subscriptions[subscription feature].
 image::images/highlights-maps-hexagon.png[region map created in Lens]
 
 [float]
-==== Region Maps in Lens
+==== Create region maps from Lens
 
 You can now create region maps
 (also called choropleth maps) from *Lens*.
@@ -111,7 +114,7 @@ You can now create region maps
 image::images/highlights-maps-region.png[Apply changes to render visualization]
 
 [float]
-==== Custom icons
+==== Add custom icons
 
 Upload an SVG image and use it as icons in your maps.
 Edit your maps layer, and then select
@@ -127,7 +130,7 @@ image::images/highlights-maps-custom-icon-2.png[custom phone icon added to a map
 === Alerting
 
 [float]
-==== Snooze rules
+==== Temporarily pause rules
 
 *Alerting* introduces the ability to snooze rules to suppress notifications
 and actions for a user-defined duration. You'll never miss an
@@ -138,7 +141,7 @@ unexpectedly or during known downtimes.
 image::images/highlights-alerting-snooze.png["UI for enabling snooze mode", width=50%]
 
 [float]
-==== Rule history
+==== View rule history
 
 For better observability and monitoring of your rules, {kib} now
 displays the execution history of your rules and actions. You can customize the
@@ -155,19 +158,23 @@ image::images/highlights-alerts-rule-history.png[Rule history table in Alerting]
 
 *Alerting* introduces configurable guardrails so that as an admin,
 you can apply your policies on a level deeper than RBAC and fully stay on top of
-the stress that the alerting system may put on your instance in case your users misconfigured rules.
+the stress that the alerting system may put on your instance, in case your users misconfigured rules.
 This way you have peace of mind that your instance remains performant.
 
 Specifically, in the kibana.yml file:
 
 * Configure your rule queries to timeout after a custom time expires without the query returning.
-You can do this on a per rule type basis too. Refer to {kibana-ref}/alert-action-settings-kb.html[documentation] for the `rules.execution.timeout` setting.
+You can also do this on a per rule type basis.
+Check the {kibana-ref}/alert-action-settings-kb.html#action-settings[documentation] for the `xpack.alerting.run.timeout` setting.
 
 * Configure a minimum value for the interval with which your rules run. Strictly enforce the
-minimum interval or just display warnings on the UI. Check the documentation for `the minimumScheduleInterval` setting.
+minimum interval or just display warnings on the UI. Check the
+ {kibana-ref}/alert-action-settings-kb.html#action-settings[documentation] for the
+`xpack.alerting.rules.minimumScheduleInterval` settings.
 
 * Configure the maximum number of actions that a rule can generate. Specify a different cap for your
-different rule types, depending on your needs. See the documentation for the `rules.execution.actions.max setting`.
+different rule types, depending on your needs.
+Check the {kibana-ref}/alert-action-settings-kb.html#action-settings[documentation] for the `xpack.alerting.run.actions.max` setting.
 
 [float]
 ==== New xMatters connector
@@ -179,11 +186,12 @@ you can leverage schedules and escalations to engage with the right resources.
 The xMatters connector supports Basic and URL authentication.
 
 [float]
-==== Cases now part of the Stack
+==== Cases now in the Stack (technical preview)
 
-This release brings {kib} Cases into the Stack,
-so that you can open and track issues outside Elastic Solutions as well.
-Access them in *Stack Management* under *Alerts and Insights*.
+This release brings *Cases* into the Stack,
+so that you can open and track issues outside Elastic Solutions.
+Access *Cases* in *Stack Management* under *Alerts and Insights*.
+For more information, check {kibana-ref}/cases.html[Cases].
 
 
 // end::notable-highlights[]
