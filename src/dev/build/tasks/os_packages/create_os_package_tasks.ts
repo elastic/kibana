@@ -65,16 +65,16 @@ export const CreateDockerUbuntu: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
+      baseImage: 'ubuntu',
       context: false,
       image: true,
-      ubuntu: true,
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
+      baseImage: 'ubuntu',
       context: false,
       image: true,
-      ubuntu: true,
       dockerBuildDate,
     });
   },
@@ -86,8 +86,8 @@ export const CreateDockerUBI: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
+      baseImage: 'ubi',
       context: false,
-      ubi: true,
       image: true,
     });
   },
@@ -99,16 +99,16 @@ export const CreateDockerCloud: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
+      baseImage: 'ubuntu',
       context: false,
       cloud: true,
-      ubuntu: true,
       image: true,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
+      baseImage: 'ubuntu',
       context: false,
       cloud: true,
-      ubuntu: true,
       image: true,
     });
   },
@@ -119,25 +119,26 @@ export const CreateDockerContexts: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      ubuntu: true,
+      baseImage: 'ubuntu',
       context: true,
       image: false,
       dockerBuildDate,
     });
 
     await runDockerGenerator(config, log, build, {
-      ubi: true,
+      baseImage: 'ubi',
       context: true,
       image: false,
     });
     await runDockerGenerator(config, log, build, {
       ironbank: true,
+      baseImage: 'none',
       context: true,
       image: false,
     });
     await runDockerGenerator(config, log, build, {
+      baseImage: 'ubuntu',
       cloud: true,
-      ubuntu: true,
       context: true,
       image: false,
     });

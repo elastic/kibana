@@ -29,22 +29,21 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
+    baseImage: 'none' | 'ubi' | 'ubuntu';
     context: boolean;
     image: boolean;
-    ubi?: boolean;
-    ubuntu?: boolean;
     ironbank?: boolean;
     cloud?: boolean;
     dockerBuildDate?: string;
   }
 ) {
   let baseOSImage = '';
-  if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
-  if (flags.ubi) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
+  if (flags.baseImage === 'ubuntu') baseOSImage = 'ubuntu:20.04';
+  if (flags.baseImage === 'ubi') baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   const ubiVersionTag = 'ubi8';
 
   let imageFlavor = '';
-  if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
+  if (flags.baseImage === 'ubi') imageFlavor += `-${ubiVersionTag}`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
 
@@ -61,7 +60,6 @@ export async function runDockerGenerator(
   const artifactsDir = config.resolveFromTarget('.');
   const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
-  // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
   const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
@@ -95,8 +93,7 @@ export async function runDockerGenerator(
     dockerCrossCompile,
     baseOSImage,
     dockerBuildDate,
-    ubi: flags.ubi,
-    ubuntu: flags.ubuntu,
+    baseImage: flags.baseImage,
     cloud: flags.cloud,
     metricbeatTarball,
     filebeatTarball,
