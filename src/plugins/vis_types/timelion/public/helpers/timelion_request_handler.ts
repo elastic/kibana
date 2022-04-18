@@ -7,14 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaExecutionContext } from 'kibana/public';
-import { DataView } from 'src/plugins/data/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { DataView } from '@kbn/data-plugin/common';
 import { Filter, buildEsQuery } from '@kbn/es-query';
-import { KibanaContext, TimeRange, Query, getEsQueryConfig } from '../../../../data/public';
+import { KibanaContext, TimeRange, Query, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
-import { getDataSearch, getIndexPatterns } from '../helpers/plugin_services';
+import { getDataSearch, getIndexPatterns } from './plugin_services';
 import { VisSeries } from '../../common/vis_data';
 
 interface Stats {

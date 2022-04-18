@@ -9,9 +9,10 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
-import type { IStorage } from '../../../../../src/plugins/kibana_utils/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { IStorage } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+
 import { setHttpClient } from '../hooks/use_request';
 
 import type { FleetAuthz } from '../../common';

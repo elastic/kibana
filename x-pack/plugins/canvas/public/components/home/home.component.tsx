@@ -7,8 +7,8 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
-import { withSuspense } from '../../../../../../src/plugins/presentation_util/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { WorkpadCreate } from './workpad_create';
 import { LazyWorkpadTemplates } from './workpad_templates';

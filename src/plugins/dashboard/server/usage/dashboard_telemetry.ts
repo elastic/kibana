@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, SavedObjectAttributes } from 'src/core/server';
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
+import { ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
 

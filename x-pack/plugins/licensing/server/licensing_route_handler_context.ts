@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IContextProvider, StartServicesAccessor } from 'src/core/server';
+import type { IContextProvider, StartServicesAccessor } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
 
 import type { ILicense } from '../common/types';

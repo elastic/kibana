@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
 import { Ping } from '../../../../../common/runtime_types';
-import { createEsParams, useEsSearch } from '../../../../../../observability/public';
 import { useTickTick } from '../use_tick_tick';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
 

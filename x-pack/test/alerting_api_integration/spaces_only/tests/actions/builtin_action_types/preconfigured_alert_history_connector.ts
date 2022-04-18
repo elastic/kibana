@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { AlertHistoryDefaultIndexName } from '@kbn/actions-plugin/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { AlertHistoryDefaultIndexName } from '../../../../../../plugins/actions/common';
 
 const ALERT_HISTORY_OVERRIDE_INDEX = 'kibana-alert-history-not-the-default';
 

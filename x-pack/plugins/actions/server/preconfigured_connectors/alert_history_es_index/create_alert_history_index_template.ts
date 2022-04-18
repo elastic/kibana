@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_HISTORY_PREFIX } from '../../../common';
 import mappings from './mappings.json';
 

@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 
+import {
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+} from '@kbn/ml-plugin/common/util/analytics_utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
 import { MlApi } from './api';
-import {
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-} from '../../../../plugins/ml/common/util/analytics_utils';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getPageObject, getService }: FtrProviderContext,

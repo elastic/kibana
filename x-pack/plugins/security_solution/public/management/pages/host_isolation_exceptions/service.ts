@@ -14,7 +14,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { transformNewItemOutput, transformOutput } from '@kbn/securitysolution-list-hooks';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../event_filters/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from './constants';
 

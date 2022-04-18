@@ -17,22 +17,22 @@ import {
   TimefilterContract,
   TimeRange,
   FilterManager,
-} from 'src/plugins/data/public';
-import type { Start as InspectorStart } from 'src/plugins/inspector/public';
+} from '@kbn/data-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
-import { RenderMode } from 'src/plugins/expressions';
+import { RenderMode } from '@kbn/expressions-plugin';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
-} from '../../../../../src/plugins/expressions/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+} from '@kbn/expressions-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import {
   Embeddable as AbstractEmbeddable,
@@ -41,10 +41,18 @@ import {
   IContainer,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
-} from '../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type {
+  Capabilities,
+  IBasePath,
+  KibanaExecutionContext,
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
@@ -59,19 +67,11 @@ import {
   Datasource,
 } from '../types';
 
-import type { DataViewsContract, DataView } from '../../../../../src/plugins/data_views/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
-import type {
-  Capabilities,
-  IBasePath,
-  KibanaExecutionContext,
-  ThemeServiceStart,
-} from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps } from '../types';
-import type { SpacesPluginStart } from '../../../spaces/public';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 

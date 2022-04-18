@@ -13,7 +13,7 @@
  * 2.0.
  */
 
-import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
+import { FetchDataParams, MetricsFetchDataResponse } from '@kbn/observability-plugin/public';
 import { TopNodesRequest, TopNodesResponse } from '../common/http_api/overview_api';
 import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { InfraClientStartServicesAccessor } from './types';

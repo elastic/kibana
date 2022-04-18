@@ -9,7 +9,7 @@ import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { TimelineId } from '../../../../../public/types';
+import { TimelineId } from '../../../../types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
 import { ColumnHeaderOptions } from '../../../../../common';

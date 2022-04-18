@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { ElasticsearchConfig } from 'kibana/server';
+import { ElasticsearchConfig } from '@kbn/core/server';
 
 export class EsLegacyConfigService {
   /**

@@ -11,11 +11,11 @@ import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
-import { useKibana } from '../../../../kibana_react/public';
-import { urlFor } from '../../../../visualizations/public';
+import { urlFor } from '../..';
 import { getUISettings } from '../../services';
 import { SplitChartWarning } from './split_chart_warning';
 import {
