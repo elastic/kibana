@@ -24,13 +24,15 @@ import {
 
 import {
   createIncident,
+  getClosedInfoForUpdate,
+  getDurationForUpdate,
   getLatestPushInfo,
   prepareFieldsForTransformation,
   transformComments,
   transformers,
   transformFields,
 } from './utils';
-import { Actions } from '../../../common/api';
+import { Actions, CaseStatuses } from '../../../common/api';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
@@ -833,6 +835,122 @@ describe('utils', () => {
               username: 'elastic',
             },
           },
+        });
+      });
+    });
+
+    describe('getClosedInfoForUpdate', () => {
+      const date = '2021-02-03T17:41:26.108Z';
+      const user = { full_name: 'Elastic', username: 'elastic', email: 'elastic@elastic.co' };
+
+      it('returns the correct closed info when the case closes', async () => {
+        expect(
+          getClosedInfoForUpdate({ status: CaseStatuses.closed, closedDate: date, user })
+        ).toEqual({
+          closed_at: date,
+          closed_by: user,
+        });
+      });
+
+      it.each([[CaseStatuses.open], [CaseStatuses['in-progress']]])(
+        'returns the correct closed info when the case %s',
+        async (status) => {
+          expect(getClosedInfoForUpdate({ status, closedDate: date, user })).toEqual({
+            closed_at: null,
+            closed_by: null,
+          });
+        }
+      );
+
+      it('returns undefined if the status is not provided', async () => {
+        expect(getClosedInfoForUpdate({ closedDate: date, user })).toBe(undefined);
+      });
+    });
+
+    describe('getDurationForUpdate', () => {
+      const createdAt = '2021-11-23T19:00:00Z';
+      const closedAt = '2021-11-23T19:02:00Z';
+
+      it('returns the correct duration when the case closes', () => {
+        expect(getDurationForUpdate({ status: CaseStatuses.closed, closedAt, createdAt })).toEqual({
+          duration: 120,
+        });
+      });
+
+      it.each([[CaseStatuses.open], [CaseStatuses['in-progress']]])(
+        'returns the correct duration when the case %s',
+        (status) => {
+          expect(
+            getDurationForUpdate({ status: CaseStatuses.closed, closedAt, createdAt })
+          ).toEqual({
+            duration: 120,
+          });
+        }
+      );
+
+      it('returns undefined if the status is not provided', async () => {
+        expect(getDurationForUpdate({ closedAt, createdAt })).toBe(undefined);
+      });
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the createdAt date is %s',
+        (createdAtInvalid) => {
+          expect(
+            getDurationForUpdate({
+              status: CaseStatuses.closed,
+              closedAt,
+              // @ts-expect-error
+              createdAt: createdAtInvalid,
+            })
+          ).toBe(undefined);
+        }
+      );
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the createdAt date is %s',
+        (closedAtInvalid) => {
+          expect(
+            getDurationForUpdate({
+              status: CaseStatuses.closed,
+              // @ts-expect-error
+              closedAt: closedAtInvalid,
+              createdAt,
+            })
+          ).toBe(undefined);
+        }
+      );
+
+      it('returns undefined if if created_at > closed_at', async () => {
+        expect(
+          getDurationForUpdate({
+            status: CaseStatuses.closed,
+            closedAt: '2021-11-23T19:00:00Z',
+            createdAt: '2021-11-23T19:05:00Z',
+          })
+        ).toBe(undefined);
+      });
+
+      it('rounds the seconds correctly', () => {
+        expect(
+          getDurationForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2022-04-11T15:56:00.087Z',
+            closedAt: '2022-04-11T15:58:56.187Z',
+          })
+        ).toEqual({
+          duration: 176,
+        });
+      });
+
+      it('rounds the zero correctly', () => {
+        expect(
+          getDurationForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2022-04-11T15:56:00.087Z',
+            closedAt: '2022-04-11T15:56:00.187Z',
+          })
+        ).toEqual({
+          duration: 0,
         });
       });
     });

@@ -55,6 +55,7 @@ export const transformNewCase = ({
   newCase: CasePostRequest;
 }): CaseAttributes => ({
   ...newCase,
+  duration: null,
   closed_at: null,
   closed_by: null,
   created_at: new Date().toISOString(),

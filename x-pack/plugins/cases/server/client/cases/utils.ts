@@ -23,6 +23,9 @@ import {
   CommentRequestAlertType,
   CommentRequestActionsType,
   ActionTypes,
+  CaseStatuses,
+  User,
+  CaseAttributes,
 } from '../../../common/api';
 import { CasesClientGetAlertsResponse } from '../alerts/types';
 import {
@@ -403,5 +406,64 @@ export const getCommentContextFromAttributes = (
         comment: '',
         owner,
       };
+  }
+};
+
+export const getClosedInfoForUpdate = ({
+  user,
+  status,
+  closedDate,
+}: {
+  closedDate: string;
+  user: User;
+  status?: CaseStatuses;
+}): Pick<CaseAttributes, 'closed_at' | 'closed_by'> | undefined => {
+  if (status && status === CaseStatuses.closed) {
+    return {
+      closed_at: closedDate,
+      closed_by: user,
+    };
+  }
+
+  if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {
+    return {
+      closed_at: null,
+      closed_by: null,
+    };
+  }
+};
+
+export const getDurationForUpdate = ({
+  status,
+  closedAt,
+  createdAt,
+}: {
+  closedAt: string;
+  createdAt: CaseAttributes['created_at'];
+  status?: CaseStatuses;
+}): Pick<CaseAttributes, 'duration'> | undefined => {
+  if (status && status === CaseStatuses.closed) {
+    try {
+      if (createdAt != null && closedAt != null) {
+        const createdAtMillis = new Date(createdAt).getTime();
+        const closedAtMillis = new Date(closedAt).getTime();
+
+        if (
+          !isNaN(createdAtMillis) &&
+          !isNaN(closedAtMillis) &&
+          closedAtMillis >= createdAtMillis
+        ) {
+          return { duration: Math.floor((closedAtMillis - createdAtMillis) / 1000) };
+        }
+      }
+    } catch (err) {
+      // Silence date errors
+    }
+  }
+
+  if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {
+    return {
+      duration: null,
+    };
   }
 };

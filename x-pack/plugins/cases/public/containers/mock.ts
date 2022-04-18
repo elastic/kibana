@@ -383,6 +383,7 @@ export const basicCaseSnake: CaseResponse = {
   connector: { id: 'none', name: 'My Connector', type: ConnectorTypes.none, fields: null },
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
+  duration: null,
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
