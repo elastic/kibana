@@ -8,7 +8,7 @@
 export type ExperimentalFeatures = typeof allowedExperimentalValues;
 
 /**
- * A list of allowed values that can be used in `xpack.triggersActionsUi.enableExperimental`.
+ * A list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
@@ -24,7 +24,7 @@ const TriggersActionsUIInvalidExperimentalValue = class extends Error {};
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
- * Parses the string value used in `xpack.triggersActionsUi.enableExperimental` kibana configuration,
+ * Parses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,
  * which should be a string of values delimited by a comma (`,`)
  *
  * @param configValue
