@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('dashboard', function () {
     describe('', function () {
-      this.tags('ciGroup31');
+      this.tags('ciGroup19');
       loadTestFile(require.resolve('./feature_controls'));
       loadTestFile(require.resolve('./preserve_url'));
       loadTestFile(require.resolve('./reporting'));
@@ -18,7 +18,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     });
 
     describe('', function () {
-      this.tags('ciGroup19');
+      this.tags('ciGroup31');
       loadTestFile(require.resolve('./sync_colors'));
       loadTestFile(require.resolve('./_async_dashboard'));
       loadTestFile(require.resolve('./dashboard_tagging'));
