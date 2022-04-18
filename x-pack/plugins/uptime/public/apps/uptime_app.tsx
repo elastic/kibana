@@ -17,7 +17,6 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { InspectorContextProvider } from '@kbn/observability-plugin/public';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
 import { UMUpdateBadge } from '../lib/lib';
@@ -31,7 +30,7 @@ import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { setBasePath } from '../state/actions';
 import { PageRouter } from '../routes';
 import { UptimeAlertsFlyoutWrapper } from '../components/overview';
-import { store } from '../state';
+import { store, storage } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
 import { UptimeIndexPatternContextProvider } from '../contexts/uptime_index_pattern_context';
@@ -101,8 +100,6 @@ const Application = (props: UptimeAppProps) => {
   kibanaService.theme = props.appMountParameters.theme$;
 
   store.dispatch(setBasePath(basePath));
-
-  const storage = new Storage(window.localStorage);
 
   return (
     <EuiErrorBoundary>

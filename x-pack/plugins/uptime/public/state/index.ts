@@ -9,7 +9,7 @@ import { createStore, applyMiddleware } from 'redux';
 import type { Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { rootEffect } from './effects';
 import { rootReducer } from './reducers';
 
