@@ -30,13 +30,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { catchError, map, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 
-import { CoreStart } from '../../../../src/core/public';
-import { mountReactNode } from '../../../../src/core/public/utils';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-
-import { PLUGIN_ID } from '../../common';
+import { CoreStart } from '@kbn/core/public';
+import { mountReactNode } from '@kbn/core/public/utils';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
   connectToQueryState,
@@ -48,13 +46,11 @@ import {
   QueryState,
   SearchSessionState,
   TimeRange,
-} from '../../../../src/plugins/data/public';
-import { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
-import type { DataView, DataViewField } from '../../../../src/plugins/data_views/public';
-import {
-  createStateContainer,
-  useContainerState,
-} from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
+import { PLUGIN_ID } from '../../common';
 import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './app_locator';
 
 interface SearchSessionsExampleAppDeps {
@@ -693,9 +689,8 @@ function doSearch(
   const startTs = performance.now();
 
   // Submit the search request using the `data.search` service.
-  return data.search
-    .search(req, { sessionId })
-    .pipe(
+  return lastValueFrom(
+    data.search.search(req, { sessionId }).pipe(
       tap((res) => {
         if (isCompleteResponse(res)) {
           const avgResult: number | undefined = res.rawResponse.aggregations
@@ -724,7 +719,7 @@ function doSearch(
         return of({ request: req, response: e });
       })
     )
-    .toPromise();
+  );
 }
 
 function getNumeric(fields?: DataViewField[]) {

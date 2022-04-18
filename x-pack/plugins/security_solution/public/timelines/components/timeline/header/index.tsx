@@ -7,7 +7,7 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import type { FilterManager } from 'src/plugins/data/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 
 import { DataProviders } from '../data_providers';
 import { StatefulSearchOrFilter } from '../search_or_filter';

@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LensMultiTable, XYArgs, XYRender } from '../types';
-import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
 import {
   XY_VIS,
   DATA_LAYER,

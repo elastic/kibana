@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 
-import '../../plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
@@ -129,6 +129,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.banner (boolean)',
         'telemetry.enabled (boolean)',
+        'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (any)',
         'telemetry.sendUsageFrom (alternatives)',
         'telemetry.sendUsageTo (any)',

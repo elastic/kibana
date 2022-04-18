@@ -10,7 +10,7 @@ import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntriesSummaryBucket } from '../../../../common/http_api';
 
 interface DensityChartProps {

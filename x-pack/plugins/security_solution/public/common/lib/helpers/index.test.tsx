@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { asArrayIfExists, decodeIpv6, encodeIpv6 } from '../helpers';
+import { asArrayIfExists, decodeIpv6, encodeIpv6 } from '.';
 
 describe('Helpers', () => {
   describe('#encodeIpv6', () => {

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import apmInstanceFixture from './fixtures/instance';
+import apmInstanceFixture from './fixtures/instance.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {

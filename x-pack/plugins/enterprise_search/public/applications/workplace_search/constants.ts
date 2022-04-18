@@ -173,8 +173,17 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.jiraServer',
     { defaultMessage: 'Jira (Server)' }
   ),
+  NETWORK_DRVE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.networkDrive',
+    {
+      defaultMessage: 'Network Drive',
+    }
+  ),
   ONEDRIVE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.oneDrive', {
     defaultMessage: 'OneDrive',
+  }),
+  OUTLOOK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.outlook', {
+    defaultMessage: 'Outlook',
   }),
   SALESFORCE: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.salesforce',
@@ -199,8 +208,14 @@ export const SOURCE_NAMES = {
   SLACK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.slack', {
     defaultMessage: 'Slack',
   }),
+  TEAMS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.teams', {
+    defaultMessage: 'Teams',
+  }),
   ZENDESK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.zendesk', {
     defaultMessage: 'Zendesk',
+  }),
+  ZOOM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.zoom', {
+    defaultMessage: 'Zoom',
   }),
   CUSTOM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.custom', {
     defaultMessage: 'Custom API Source',
@@ -334,6 +349,39 @@ export const SOURCE_OBJ_TYPES = {
       defaultMessage: 'Direct messages',
     }
   ),
+};
+
+export const SOURCE_CATEGORIES = {
+  CLOUD: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
+    defaultMessage: 'Cloud',
+  }),
+  COMMUNICATIONS: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.communications',
+    {
+      defaultMessage: 'Communications',
+    }
+  ),
+  FILE_SHARING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing',
+    {
+      defaultMessage: 'File Sharing',
+    }
+  ),
+  MICROSOFT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
+    defaultMessage: 'Microsoft',
+  }),
+  OFFICE_365: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.office', {
+    defaultMessage: 'Office 365',
+  }),
+  PRODUCTIVITY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.productivity',
+    {
+      defaultMessage: 'Productivity',
+    }
+  ),
+  STORAGE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
+    defaultMessage: 'Storage',
+  }),
 };
 
 export const API_KEYS_TITLE = i18n.translate(

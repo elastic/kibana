@@ -69,9 +69,21 @@ export class ContextService {
       [...this.contextProvidersRegistry.values()].reduce((acc, context) => {
         return {
           ...acc,
-          ...context,
+          ...this.removeEmptyValues(context),
         };
       }, {} as Partial<EventContext>)
     );
+  }
+
+  private removeEmptyValues(context?: Partial<EventContext>) {
+    if (!context) {
+      return {};
+    }
+    return Object.keys(context).reduce((acc, key) => {
+      if (context[key] !== undefined) {
+        acc[key] = context[key];
+      }
+      return acc;
+    }, {} as Partial<EventContext>);
   }
 }

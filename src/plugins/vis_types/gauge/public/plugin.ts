@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { CoreSetup } from '../../../../core/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
 import { VisTypeGaugePluginSetup } from './types';
 import { gaugeVisType, goalVisType } from './vis_type';

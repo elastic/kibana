@@ -119,6 +119,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
           />
         )}
       </EuiText>
+      <EuiSpacer size="m" />
       <AgentPolicyFormRow
         fullWidth={true}
         label={
@@ -165,14 +166,14 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
           />
         </>
       )}
-      {props.withKeySelection && props.onKeyChange && (
+      {props.withKeySelection && props.onKeyChange && selectedPolicy?.id && (
         <>
-          <EuiSpacer />
+          <EuiSpacer size="m" />
           <AdvancedAgentAuthenticationSettings
             selectedApiKeyId={props.selectedApiKeyId}
             onKeyChange={props.onKeyChange}
             initialAuthenticationSettingsOpen={!props.selectedApiKeyId}
-            agentPolicyId={selectedPolicy?.id}
+            agentPolicyId={selectedPolicy.id}
           />
         </>
       )}

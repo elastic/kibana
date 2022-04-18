@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Filter, IIndexPattern } from '../../../../common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { Filter } from '../../../../common';
 
 export function getIndexPatternFromFilter(
   filter: Filter,
-  indexPatterns: IIndexPattern[]
-): IIndexPattern | undefined {
+  indexPatterns: DataView[]
+): DataView | undefined {
   return indexPatterns.find((indexPattern) => indexPattern.id === filter.meta.index);
 }

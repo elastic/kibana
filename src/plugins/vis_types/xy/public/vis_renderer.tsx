@@ -9,17 +9,17 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
+import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { VisualizationContainer } from '../../../visualizations/public';
-import type { PersistedState } from '../../../visualizations/public';
-import type { ExpressionRenderDefinition } from '../../../expressions/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import type { XyVisType } from '../common';
 import type { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './expression_functions/xy_vis_fn';
-import { LEGACY_TIME_AXIS } from '../../../charts/common';
 
 // @ts-ignore
 const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));

@@ -11,10 +11,10 @@ import {
 } from '@kbn/rule-data-utils';
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
-import { AnomaliesTableRecord, AnomalyRecordDoc } from '../../../../ml/common/types/anomalies';
+import { AnomaliesTableRecord, AnomalyRecordDoc } from '@kbn/ml-plugin/common/types/anomalies';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
-import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
+import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
 import { Ping } from '../../../common/runtime_types/ping';
 import { ALERT_REASON_MSG, VIEW_IN_APP_URL } from './action_variables';
 

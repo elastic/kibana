@@ -6,12 +6,12 @@
  */
 import { Subject } from 'rxjs';
 import { merge } from 'lodash';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
-} from 'src/plugins/usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { HealthStatus } from '../monitoring';
 import { MonitoredHealth } from '../routes/health';
 import { TaskPersistence } from '../task_events';

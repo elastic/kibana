@@ -12,6 +12,10 @@ import { FieldValueCell } from './field_value_cell';
 import { AlertSummaryRow } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
 
+import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+
+const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = { [AGENT_STATUS_FIELD_NAME]: true };
+
 export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   data,
   eventId,
@@ -33,7 +37,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
       style={{ flexGrow: 0 }}
       values={values}
     />
-    {timelineId !== TimelineId.active && !isReadOnly && (
+    {timelineId !== TimelineId.active && !isReadOnly && !FIELDS_WITHOUT_ACTIONS[data.field] && (
       <ActionCell
         contextId={timelineId}
         data={data}

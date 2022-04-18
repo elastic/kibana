@@ -9,16 +9,16 @@ import {
   savedObjectsClientMock,
   httpServerMock,
   uiSettingsServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   RuleExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
-} from '../../../alerting/server';
-import { alertsMock } from '../../../alerting/server/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
+} from '@kbn/alerting-plugin/server';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
