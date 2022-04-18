@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type {
-  EmbeddablePersistableStateService,
-  EmbeddableRegistryDefinition,
-} from '@kbn/embeddable-plugin/common';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import {
   createExtract,
   createInject,

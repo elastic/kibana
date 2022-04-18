@@ -12,4 +12,6 @@ export type { EmbeddableSetup, EmbeddableStart };
 
 export type { EnhancementRegistryDefinition } from './types';
 
+export type { EmbeddableRegistryDefinition } from '../common';
+
 export const plugin = () => new EmbeddableServerPlugin();
