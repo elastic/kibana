@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
 import type { OutputSOAttributes } from '../types';
 
 import { outputService, outputIdToUuid } from './output';
@@ -161,6 +162,8 @@ function getMockedSoClient(
     };
   });
 
+  mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
+
   return soClient;
 }
 
@@ -169,6 +172,8 @@ describe('Output Service', () => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.removeOutputFromAll.mockReset();
+    mockedAppContextService.getInternalUserSOClient.mockReset();
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
   });
   describe('create', () => {
     it('work with a predefined id', async () => {
@@ -320,6 +325,42 @@ describe('Output Service', () => {
         outputIdToUuid('existing-preconfigured-default-output'),
         { is_default: false }
       );
+    });
+
+    // With logstash output
+    it('should throw if encryptedSavedObject is not configured', async () => {
+      const soClient = getMockedSoClient({});
+
+      await expect(
+        outputService.create(
+          soClient,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'logstash',
+          },
+          { id: 'output-test' }
+        )
+      ).rejects.toThrow(`Logstash output needs encrypted saved object api key to be set`);
+    });
+
+    it('should work if encryptedSavedObject is  configured', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      await outputService.create(
+        soClient,
+        {
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'logstash',
+        },
+        { id: 'output-test' }
+      );
+      expect(soClient.create).toBeCalled();
     });
   });
 

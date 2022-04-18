@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
+import { HttpSetup, HttpFetchQuery } from '@kbn/core/public';
 
 export interface SendRequestConfig {
   path: string;

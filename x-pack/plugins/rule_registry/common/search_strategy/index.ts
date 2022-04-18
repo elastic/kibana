@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { Ecs } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Ecs } from '@kbn/core/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchRequest, IEsSearchResponse } from 'src/plugins/data/common';
+import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];

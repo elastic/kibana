@@ -6,42 +6,37 @@
  * Side Public License, v 1.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
-import { API_BASE_PATH } from '../../../common/constants';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 type HttpResponse = Record<string, any> | any[];
 
-// Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setFieldPreviewResponse = (response?: HttpResponse, error?: any) => {
-    const status = error ? error.body.status || 400 : 200;
-    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+) => {
+  const setFieldPreviewResponse = (response?: HttpResponse, error?: any, delayResponse = false) => {
+    const body = error ? JSON.stringify(error.body) : response;
 
-    server.respondWith('POST', `${API_BASE_PATH}/field_preview`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      body,
-    ]);
+    httpSetup.post.mockImplementation(() => {
+      if (delayResponse) {
+        return new Promise((resolve) => {
+          setTimeout(() => resolve({ data: body }), 1000);
+        });
+      } else {
+        return Promise.resolve({ data: body });
+      }
+    });
   };
-
   return {
     setFieldPreviewResponse,
   };
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
-
-  // Define default response for unhandled requests.
-  // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultSinonMockServerResponse']);
-
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
 
   return {
-    server,
+    httpSetup,
     httpRequestsMockHelpers,
   };
 };

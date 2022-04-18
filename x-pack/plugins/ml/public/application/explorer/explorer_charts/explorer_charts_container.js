@@ -33,17 +33,17 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { AnomalySource } from '../../../maps/anomaly_source';
 import { CUSTOM_COLOR_RAMP } from '../../../maps/anomaly_layer_wizard_factory';
-import { LAYER_TYPE, APP_ID as MAPS_APP_ID } from '../../../../../maps/common';
-import { MAPS_APP_LOCATOR } from '../../../../../maps/public';
+import { LAYER_TYPE, APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
+import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
-import { useActiveCursor } from '../../../../../../../src/plugins/charts/public';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { ML_ANOMALY_LAYERS } from '../../../maps/util';
 import { Chart, Settings } from '@elastic/charts';
 import useObservable from 'react-use/lib/useObservable';
@@ -198,20 +198,21 @@ function ExplorerChartContainer({
 
   useEffect(
     function getMapsPluginLink() {
-      if (!series) return;
       let isCancelled = false;
-      const generateLink = async () => {
-        if (!isCancelled) {
+      if (series && getChartType(series) === CHART_TYPE.GEO_MAP) {
+        const generateLink = async () => {
           try {
             const mapsLink = await getMapsLink();
-            setMapsLink(mapsLink?.path);
+            if (!isCancelled) {
+              setMapsLink(mapsLink?.path);
+            }
           } catch (error) {
             console.error(error);
             setMapsLink('');
           }
-        }
-      };
-      generateLink().catch(console.error);
+        };
+        generateLink().catch(console.error);
+      }
       return () => {
         isCancelled = true;
       };

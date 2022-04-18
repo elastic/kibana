@@ -8,22 +8,22 @@ these APIs:
 * <<cases-api-create>>
 * <<cases-api-delete-cases>>
 * <<cases-api-delete-comments>>
-* {security-guide}/cases-api-find-alert.html[Find all alerts attached to a case]
 * <<cases-api-find-cases>>
-* {security-guide}/cases-api-find-cases-by-alert.html[Find cases by alert]
 * <<cases-api-find-connectors>>
-* {security-guide}/cases-api-get-case-activity.html[Get all case activity]
+* <<cases-api-get-alerts>>
+* <<cases-api-get-case-activity>>
 * <<cases-api-get-case>>
 * <<cases-api-get-status>>
+* <<cases-api-get-cases-by-alert>>
 * <<cases-api-get-comments>>
-* {security-guide}/cases-get-connector.html[Get current connector]
-* {security-guide}/cases-api-get-reporters.html[Get reporters]
-* {security-guide}/cases-api-get-tag.html[Get tags]
-* {security-guide}/cases-api-push.html[Push case]
-* {security-guide}/assign-connector.html[Set default Elastic Security UI connector]
-* {security-guide}/case-api-update-connector.html[Update case configurations]
+* <<cases-get-configuration>>
+* <<cases-api-get-reporters>>
+* <<cases-api-get-tag>>
+* <<cases-api-push>>
+* <<cases-api-set-configuration>>
 * <<cases-api-update>>
 * <<cases-api-update-comment>>
+* <<cases-api-update-configuration>>
 
 //ADD
 include::cases/cases-api-add-comment.asciidoc[leveloffset=+1]
@@ -36,9 +36,20 @@ include::cases/cases-api-delete-comments.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
 //GET
+include::cases/cases-api-get-alerts.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-case-activity.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-case.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-status.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-cases-by-alert.asciidoc[leveloffset=+1]
 include::cases/cases-api-get-comments.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-configuration.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-reporters.asciidoc[leveloffset=+1]
+include::cases/cases-api-get-tags.asciidoc[leveloffset=+1]
+//PUSH
+include::cases/cases-api-push.asciidoc[leveloffset=+1]
+//SET
+include::cases/cases-api-set-configuration.asciidoc[leveloffset=+1]
 //UPDATE
 include::cases/cases-api-update.asciidoc[leveloffset=+1]
 include::cases/cases-api-update-comment.asciidoc[leveloffset=+1]
+include::cases/cases-api-update-configuration.asciidoc[leveloffset=+1]

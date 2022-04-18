@@ -6,8 +6,11 @@
  */
 
 import { uniq, mapValues, difference } from 'lodash';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { HttpSetup, SavedObjectReference } from 'kibana/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { HttpSetup, SavedObjectReference } from '@kbn/core/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type {
   DatasourceDataPanelProps,
   InitializationOptions,
@@ -25,9 +28,6 @@ import {
 import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
-import type { DataViewsContract, DataView } from '../../../../../src/plugins/data_views/public';
-import { isNestedField } from '../../../../../src/plugins/data_views/common';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
@@ -165,18 +165,12 @@ const setLastUsedIndexPatternId = (storage: IStorageWrapper, value: string) => {
   writeToStorage(storage, 'indexPatternId', value);
 };
 
-const CURRENT_PATTERN_REFERENCE_NAME = 'indexpattern-datasource-current-indexpattern';
 function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
 }
 
-export function extractReferences({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
+export function extractReferences({ layers }: IndexPatternPrivateState) {
   const savedObjectReferences: SavedObjectReference[] = [];
-  savedObjectReferences.push({
-    type: 'index-pattern',
-    id: currentIndexPatternId,
-    name: CURRENT_PATTERN_REFERENCE_NAME,
-  });
   const persistableLayers: Record<string, Omit<IndexPatternLayer, 'indexPatternId'>> = {};
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
     savedObjectReferences.push({
@@ -201,8 +195,6 @@ export function injectReferences(
     };
   });
   return {
-    currentIndexPatternId: references.find(({ name }) => name === CURRENT_PATTERN_REFERENCE_NAME)!
-      .id,
     layers,
   };
 }
@@ -246,13 +238,7 @@ export async function loadInitialState({
   const usedPatterns = (
     initialContext
       ? indexPatternIds
-      : uniq(
-          state
-            ? Object.values(state.layers)
-                .map((l) => l.indexPatternId)
-                .concat(state.currentIndexPatternId)
-            : [fallbackId]
-        )
+      : uniq(state ? Object.values(state.layers).map((l) => l.indexPatternId) : [fallbackId])
   )
     // take out the undefined from the list
     .filter(Boolean);

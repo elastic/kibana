@@ -6,15 +6,15 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ElasticsearchClientMock } from '../../../../../src/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
-} from 'src/plugins/usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
-import { FeaturesAvailability } from './';
+import { FeaturesAvailability } from '.';
 import {
   getReportingUsageCollector,
   registerReportingUsageCollector,
@@ -23,7 +23,7 @@ import {
 const exportTypesRegistry = getExportTypesRegistry();
 
 const getLicenseMock =
-  (licenseType = 'platinum') =>
+  (licenseType = 'gold') =>
   () => {
     return Promise.resolve({
       isAvailable: () => true,
@@ -96,12 +96,12 @@ describe('license checks', () => {
     });
   });
 
-  describe('with platinum license', () => {
+  describe('with gold license', () => {
     let usageStats: any;
     beforeAll(async () => {
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
-        getLicenseMock('platinum'),
+        getLicenseMock('gold'),
         exportTypesRegistry,
         function isReady() {
           return Promise.resolve(true);

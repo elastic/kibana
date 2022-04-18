@@ -6,10 +6,11 @@
  */
 import React, { useMemo } from 'react';
 import { EuiIcon, EuiText, EuiAccordion, EuiNotificationBadge } from '@elastic/eui';
-import { Process, ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent } from '../../../common/types/process_tree';
+import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
+import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from '../detail_panel_alert_list_item/styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
-import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 export const ALERT_GROUP_ITEM_TEST_ID = 'sessionView:detailPanelAlertGroupItem';
 export const ALERT_GROUP_ITEM_COUNT_TEST_ID = 'sessionView:detailPanelAlertGroupCount';
@@ -17,7 +18,7 @@ export const ALERT_GROUP_ITEM_TITLE_TEST_ID = 'sessionView:detailPanelAlertGroup
 
 interface DetailPanelAlertsGroupItemDeps {
   alerts: ProcessEvent[];
-  onProcessSelected: (process: Process) => void;
+  onJumpToEvent: (event: ProcessEvent) => void;
   onShowAlertDetails: (alertId: string) => void;
 }
 
@@ -26,7 +27,7 @@ interface DetailPanelAlertsGroupItemDeps {
  */
 export const DetailPanelAlertGroupItem = ({
   alerts,
-  onProcessSelected,
+  onJumpToEvent,
   onShowAlertDetails,
 }: DetailPanelAlertsGroupItemDeps) => {
   const styles = useStyles();
@@ -39,23 +40,27 @@ export const DetailPanelAlertGroupItem = ({
     return null;
   }
 
-  const { rule } = alerts[0].kibana.alert;
+  const { rule } = alerts[0]?.kibana?.alert ?? {};
 
   return (
     <EuiAccordion
-      id={rule.uuid}
+      id={rule?.uuid ?? ''}
       data-test-subj={ALERT_GROUP_ITEM_TEST_ID}
       arrowDisplay="right"
       initialIsOpen={false}
       buttonContent={
-        <EuiText data-test-subj={ALERT_GROUP_ITEM_TITLE_TEST_ID} css={styles.alertTitle} size="s">
-          <p>
+        <EuiText
+          data-test-subj={ALERT_GROUP_ITEM_TITLE_TEST_ID}
+          css={styles.alertTitleContainer}
+          size="s"
+        >
+          <p css={styles.alertTitle}>
             <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
-            {rule.name}
+            {dataOrDash(rule?.name)}
           </p>
         </EuiText>
       }
-      css={styles.alertItem}
+      css={styles.alertGroupItem}
       extraAction={
         <EuiNotificationBadge
           data-test-subj={ALERT_GROUP_ITEM_COUNT_TEST_ID}
@@ -67,14 +72,14 @@ export const DetailPanelAlertGroupItem = ({
       }
     >
       {alerts.map((event) => {
-        const key = 'minimal_' + event.kibana?.alert.uuid;
+        const key = 'minimal_' + event.kibana?.alert?.uuid;
 
         return (
           <DetailPanelAlertListItem
             key={key}
             minimal
             event={event}
-            onProcessSelected={onProcessSelected}
+            onJumpToEvent={onJumpToEvent}
             onShowAlertDetails={onShowAlertDetails}
           />
         );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import {
   AppCounts,
   AvailableTotal,
@@ -74,6 +74,32 @@ const metricsSchemaPdf: MakeSchemaFrom<Pick<MetricsStats, 'pdf_cpu' | 'pdf_memor
     pdf_pages: metricsPercentilesSchema,
   };
 
+const errorCodesSchemaCsv: MakeSchemaFrom<JobTypes['csv_searchsource']['error_codes']> = {
+  authentication_expired_error: { type: 'long' },
+  queue_timeout_error: { type: 'long' },
+  unknown_error: { type: 'long' },
+  kibana_shutting_down_error: { type: 'long' },
+};
+const errorCodesSchemaPng: MakeSchemaFrom<JobTypes['PNGV2']['error_codes']> = {
+  authentication_expired_error: { type: 'long' },
+  queue_timeout_error: { type: 'long' },
+  unknown_error: { type: 'long' },
+  kibana_shutting_down_error: { type: 'long' },
+  browser_could_not_launch_error: { type: 'long' },
+  browser_unexpectedly_closed_error: { type: 'long' },
+  browser_screenshot_error: { type: 'long' },
+};
+const errorCodesSchemaPdf: MakeSchemaFrom<JobTypes['printable_pdf_v2']['error_codes']> = {
+  pdf_worker_out_of_memory_error: { type: 'long' },
+  authentication_expired_error: { type: 'long' },
+  queue_timeout_error: { type: 'long' },
+  unknown_error: { type: 'long' },
+  kibana_shutting_down_error: { type: 'long' },
+  browser_could_not_launch_error: { type: 'long' },
+  browser_unexpectedly_closed_error: { type: 'long' },
+  browser_screenshot_error: { type: 'long' },
+};
+
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
   available: { type: 'boolean' },
   total: { type: 'long' },
@@ -83,15 +109,29 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
-  csv_searchsource: { ...availableTotalSchema, metrics: metricsSchemaCsv },
-  csv_searchsource_immediate: { ...availableTotalSchema, metrics: metricsSchemaCsv },
-  PNG: { ...availableTotalSchema, metrics: metricsSchemaPng },
-  PNGV2: { ...availableTotalSchema, metrics: metricsSchemaPng },
-  printable_pdf: { ...availableTotalSchema, layout: layoutCountsSchema, metrics: metricsSchemaPdf },
+  csv_searchsource: {
+    ...availableTotalSchema,
+    metrics: metricsSchemaCsv,
+    error_codes: errorCodesSchemaCsv,
+  },
+  csv_searchsource_immediate: {
+    ...availableTotalSchema,
+    metrics: metricsSchemaCsv,
+    error_codes: errorCodesSchemaCsv,
+  },
+  PNG: { ...availableTotalSchema, metrics: metricsSchemaPng, error_codes: errorCodesSchemaPng },
+  PNGV2: { ...availableTotalSchema, metrics: metricsSchemaPng, error_codes: errorCodesSchemaPng },
+  printable_pdf: {
+    ...availableTotalSchema,
+    layout: layoutCountsSchema,
+    metrics: metricsSchemaPdf,
+    error_codes: errorCodesSchemaPdf,
+  },
   printable_pdf_v2: {
     ...availableTotalSchema,
     layout: layoutCountsSchema,
     metrics: metricsSchemaPdf,
+    error_codes: errorCodesSchemaPdf,
   },
 };
 

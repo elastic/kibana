@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiHealth, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
+import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { getHealthColor, rulesStatusesTranslationsMapping } from '../config';
 import { RULE_STATUS_LICENSE_ERROR } from '../translations';
 import { ExecutionStatusProps } from '../types';
@@ -16,7 +16,7 @@ export function ExecutionStatus({ executionStatus }: ExecutionStatusProps) {
   const healthColor = getHealthColor(executionStatus.status);
   const tooltipMessage =
     executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
-  const isLicenseError = executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+  const isLicenseError = executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
   const statusMessage = isLicenseError
     ? RULE_STATUS_LICENSE_ERROR
     : rulesStatusesTranslationsMapping[executionStatus.status];

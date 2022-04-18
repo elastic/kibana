@@ -9,11 +9,12 @@ import uuid from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { errors } from '@elastic/elasticsearch';
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 
-import type { ESSearchResponse as SearchResponse } from '../../../../../../src/core/types/elasticsearch';
+import type { ESSearchResponse as SearchResponse } from '@kbn/core/types/elasticsearch';
+
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { IngestManagerError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';

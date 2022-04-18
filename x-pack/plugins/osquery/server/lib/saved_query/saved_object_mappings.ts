@@ -6,7 +6,7 @@
  */
 
 import { produce } from 'immer';
-import { SavedObjectsType } from '../../../../../../src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import {
   savedQuerySavedObjectType,
   packSavedObjectType,
@@ -65,6 +65,18 @@ export const savedQueryType: SavedObjectsType = {
       path: `/app/osquery/saved_queries/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',
     }),
+    onExport: (context, objects) =>
+      produce(objects, (draft) => {
+        draft.forEach((savedQuerySO) => {
+          // Only prebuilt saved queries should have a version
+          if (savedQuerySO.attributes.version) {
+            savedQuerySO.attributes.id += '_copy';
+            delete savedQuerySO.attributes.version;
+          }
+        });
+
+        return draft;
+      }),
   },
 };
 
@@ -138,6 +150,11 @@ export const packType: SavedObjectsType = {
       produce(objects, (draft) => {
         draft.forEach((packSO) => {
           packSO.references = [];
+          // Only prebuilt packs should have a version
+          if (packSO.attributes.version) {
+            packSO.attributes.name += '_copy';
+            delete packSO.attributes.version;
+          }
         });
 
         return draft;

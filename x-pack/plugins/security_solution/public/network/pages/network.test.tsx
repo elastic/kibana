@@ -24,9 +24,8 @@ import { inputsActions } from '../../common/store/inputs';
 
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
-import { mockCasesContract } from '../../../../cases/public/mocks';
-import { APP_UI_ID, SecurityPageName } from '../../../common/constants';
-import { getAppLandingUrl } from '../../common/components/link_to/redirect_to_overview';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -119,13 +118,13 @@ describe('Network page - rendering', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  test('it renders the Setup Instructions text when no index is available', () => {
+  test('it renders getting started page when no index is available', () => {
     mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
       indicesExist: false,
     });
 
-    mount(
+    const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Network {...mockProps} />
@@ -133,13 +132,10 @@ describe('Network page - rendering', () => {
       </TestProviders>
     );
 
-    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_UI_ID, {
-      deepLinkId: SecurityPageName.landing,
-      path: getAppLandingUrl(),
-    });
+    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
   });
 
-  test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
+  test('it DOES NOT render getting started page when an index is available', async () => {
     mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
       indicesExist: true,

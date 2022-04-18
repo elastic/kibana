@@ -8,24 +8,20 @@
 import React from 'react';
 
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelAlertTab } from './index';
+import { DetailPanelAlertTab } from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
 import { fireEvent } from '@testing-library/dom';
-import {
-  INVESTIGATED_ALERT_TEST_ID,
-  VIEW_MODE_TOGGLE,
-  ALERTS_TAB_EMPTY_STATE_TEST_ID,
-} from './index';
+import { INVESTIGATED_ALERT_TEST_ID, VIEW_MODE_TOGGLE, ALERTS_TAB_EMPTY_STATE_TEST_ID } from '.';
 import {
   ALERT_LIST_ITEM_TEST_ID,
   ALERT_LIST_ITEM_ARGS_TEST_ID,
   ALERT_LIST_ITEM_TIMESTAMP_TEST_ID,
-} from '../detail_panel_alert_list_item/index';
+} from '../detail_panel_alert_list_item';
 import {
   ALERT_GROUP_ITEM_TEST_ID,
   ALERT_GROUP_ITEM_COUNT_TEST_ID,
   ALERT_GROUP_ITEM_TITLE_TEST_ID,
-} from '../detail_panel_alert_group_item/index';
+} from '../detail_panel_alert_group_item';
 
 const ACCORDION_BUTTON_CLASS = '.euiAccordion__button';
 const VIEW_MODE_GROUP = 'groupView';
@@ -35,12 +31,12 @@ describe('DetailPanelAlertTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let mockOnProcessSelected = jest.fn((process) => process);
+  let mockOnJumpToEvent = jest.fn((process) => process);
   let mockShowAlertDetails = jest.fn((alertId) => alertId);
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    mockOnProcessSelected = jest.fn((process) => process);
+    mockOnJumpToEvent = jest.fn((process) => process);
     mockShowAlertDetails = jest.fn((alertId) => alertId);
   });
 
@@ -49,7 +45,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -68,7 +64,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -89,9 +85,9 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
-          investigatedAlert={mockAlerts[0]}
+          investigatedAlertId={mockAlerts[0].kibana?.alert?.uuid}
         />
       );
 
@@ -106,9 +102,9 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
-          investigatedAlert={mockAlerts[0]}
+          investigatedAlertId={mockAlerts[0].kibana?.alert?.uuid}
         />
       );
 
@@ -139,7 +135,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -171,7 +167,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -205,17 +201,17 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_TIMESTAMP_TEST_ID)[0]).toHaveTextContent(
-        mockAlerts[0]['@timestamp']
+        mockAlerts[0]['@timestamp']!
       );
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_ARGS_TEST_ID)[0]).toHaveTextContent(
-        mockAlerts[0].process.args.join(' ')
+        mockAlerts[0].process!.args!.join(' ')
       );
     });
 
@@ -223,7 +219,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={mockAlerts}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -232,7 +228,7 @@ describe('DetailPanelAlertTab component', () => {
 
       expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_COUNT_TEST_ID)).toHaveTextContent('2');
       expect(renderResult.queryByTestId(ALERT_GROUP_ITEM_TITLE_TEST_ID)).toHaveTextContent(
-        mockAlerts[0].kibana?.alert.rule.name || ''
+        mockAlerts[0].kibana!.alert!.rule!.name!
       );
     });
 
@@ -240,7 +236,7 @@ describe('DetailPanelAlertTab component', () => {
       renderResult = mockedContext.render(
         <DetailPanelAlertTab
           alerts={[]}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );

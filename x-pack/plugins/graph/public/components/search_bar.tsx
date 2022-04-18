@@ -11,6 +11,10 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { IDataPluginServices, Query } from '@kbn/data-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -22,14 +26,7 @@ import {
   selectedFieldsSelector,
 } from '../state_management';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
-  QueryStringInput,
-  IDataPluginServices,
-  Query,
-} from '../../../../../src/plugins/data/public';
 import { TooltipWrapper } from './tooltip_wrapper';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
 
 export interface SearchBarProps {
   isLoading: boolean;

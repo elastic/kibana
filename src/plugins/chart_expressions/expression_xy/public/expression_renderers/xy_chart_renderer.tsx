@@ -8,14 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ThemeServiceStart } from 'kibana/public';
+import { ThemeServiceStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ChartsPluginStart, PaletteRegistry } from '../../../../charts/public';
-import { EventAnnotationServiceType } from '../../../../event_annotation/public';
-import { ExpressionRenderDefinition } from '../../../../expressions';
-import { FormatFactory } from '../../../../field_formats/common';
-import { KibanaThemeProvider } from '../../../../kibana_react/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { XYChartProps } from '../../common';
 import { calculateMinInterval } from '../helpers/interval';
 import type { BrushEvent, FilterEvent } from '../types';

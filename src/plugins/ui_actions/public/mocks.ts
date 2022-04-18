@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from 'src/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<UiActionsSetup>;
 export type Start = jest.Mocked<UiActionsStart>;

@@ -20,7 +20,7 @@ import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, ElasticsearchClient } from 'src/core/server';
+import { IScopedClusterClient, ElasticsearchClient } from '@kbn/core/server';
 
 interface WrapScopedClusterClientOpts {
   scopedClusterClient: IScopedClusterClient;

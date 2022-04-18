@@ -24,25 +24,26 @@ import {
 } from 'rxjs/operators';
 
 import {
+  withSuspense,
+  LazyReduxEmbeddableWrapper,
+  ReduxEmbeddableWrapperPropsWithChildren,
+  SolutionToolbarPopover,
+} from '@kbn/presentation-util-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
+import {
   ControlGroupInput,
   ControlGroupOutput,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
 } from '../types';
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-  SolutionToolbarPopover,
-} from '../../../../presentation_util/public';
 import { pluginServices } from '../../services';
-import { DataView } from '../../../../data_views/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { Container, EmbeddableFactory } from '../../../../embeddable/public';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroupChainingSystems } from './control_group_chaining_system';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
@@ -50,6 +51,11 @@ import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
 >(LazyReduxEmbeddableWrapper);
+
+let flyoutRef: OverlayRef | undefined;
+export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
+  flyoutRef = newRef;
+};
 
 export interface ChildEmbeddableOrderCache {
   IdsToOrder: { [key: string]: number };
@@ -95,6 +101,11 @@ export class ControlGroupContainer extends Container<
   public getMostRelevantDataViewId = () => {
     return this.lastUsedDataViewId ?? this.relevantDataViewId;
   };
+
+  public closeAllFlyouts() {
+    flyoutRef?.close();
+    flyoutRef = undefined;
+  }
 
   /**
    * Returns a button that allows controls to be created externally using the embeddable
@@ -296,6 +307,19 @@ export class ControlGroupContainer extends Container<
     } as ControlPanelState<TEmbeddableInput>;
   }
 
+  protected onRemoveEmbeddable(idToRemove: string) {
+    const newPanels = super.onRemoveEmbeddable(idToRemove) as ControlsPanels;
+    const removedOrder = this.childOrderCache.IdsToOrder[idToRemove];
+    for (let i = removedOrder + 1; i < this.childOrderCache.idsInOrder.length; i++) {
+      const currentOrder = newPanels[this.childOrderCache.idsInOrder[i]].order;
+      newPanels[this.childOrderCache.idsInOrder[i]] = {
+        ...newPanels[this.childOrderCache.idsInOrder[i]],
+        order: currentOrder - 1,
+      };
+    }
+    return newPanels;
+  }
+
   protected getInheritedInput(id: string): ControlInput {
     const { filters, query, ignoreParentSettings, timeRange, chainingSystem } = this.getInput();
 
@@ -354,6 +378,7 @@ export class ControlGroupContainer extends Container<
 
   public destroy() {
     super.destroy();
+    this.closeAllFlyouts();
     this.subscriptions.unsubscribe();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ComplianceDashboardData } from '../../../common/types';
+import { Cluster } from '../../../common/types';
 import { getResourceTypeFromAggs, resourceTypeAggQuery } from './get_resources_types';
 import type { ResourceTypeQueryResult } from './get_resources_types';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
@@ -34,6 +34,8 @@ export interface ClusterBucket extends ResourceTypeQueryResult, KeyDocCount {
 interface ClustersQueryResult {
   aggs_by_cluster_id: Aggregation<ClusterBucket>;
 }
+
+export type ClusterWithoutTrend = Omit<Cluster, 'trend'>;
 
 export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest => ({
   index: CSP_KUBEBEAT_INDEX_PATTERN,
@@ -66,9 +68,7 @@ export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest =
   },
 });
 
-export const getClustersFromAggs = (
-  clusters: ClusterBucket[]
-): ComplianceDashboardData['clusters'] =>
+export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
   clusters.map((cluster) => {
     // get cluster's meta data
     const benchmarks = cluster.benchmarks.buckets;
@@ -103,7 +103,7 @@ export const getClustersFromAggs = (
 export const getClusters = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer
-): Promise<ComplianceDashboardData['clusters']> => {
+): Promise<ClusterWithoutTrend[]> => {
   const queryResult = await esClient.search<unknown, ClustersQueryResult>(getClustersQuery(query), {
     meta: true,
   });

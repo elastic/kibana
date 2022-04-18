@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest } from '@kbn/core/server';
 import { PLUGIN_ID } from '../constants/app';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,

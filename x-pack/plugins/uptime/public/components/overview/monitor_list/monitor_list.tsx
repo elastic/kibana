@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   getBreakpoint,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
@@ -36,8 +37,8 @@ import { STATUS_ALERT_COLUMN, TEST_NOW_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TestNowColumn } from './columns/test_now_col';
+import { NoItemsMessage } from './no_items_message';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -45,11 +46,6 @@ interface Props extends MonitorListProps {
   monitorList: MonitorList;
   refreshedMonitorIds: string[];
 }
-
-export const noItemsMessage = (loading: boolean, filters?: string) => {
-  if (loading) return labels.LOADING;
-  return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
-};
 
 export const MonitorListComponent: ({
   filters,
@@ -252,7 +248,7 @@ export const MonitorListComponent: ({
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        noItemsMessage={noItemsMessage(loading, filters)}
+        noItemsMessage={<NoItemsMessage loading={loading} filters={filters} />}
         columns={columns}
         tableLayout={'auto'}
         rowProps={

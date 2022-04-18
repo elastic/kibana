@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   ALERTS_AS_DATA_FIND_URL,
-} from '../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getSignalStatus, createSignalsIndex, deleteSignalsIndex } from '../../utils';
 

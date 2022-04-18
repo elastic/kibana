@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { APP_ID } from '../../../plugins/maps/common/constants';
+import { APP_ID } from '@kbn/maps-plugin/common/constants';
 import { FtrService } from '../ftr_provider_context';
 
 function escapeLayerName(layerName: string) {
@@ -64,7 +64,7 @@ export class GisPageObject extends FtrService {
     this.log.debug(`enterFullScreen`);
     await this.testSubjects.click('mapsFullScreenMode');
     await this.retry.try(async () => {
-      await this.testSubjects.exists('exitFullScreenModeLogo');
+      await this.testSubjects.exists('exitFullScreenModeButton');
     });
     await this.waitForLayersToLoad();
   }
@@ -72,9 +72,9 @@ export class GisPageObject extends FtrService {
   // TODO combine with dashboard full screen into a service
   async existFullScreen() {
     this.log.debug(`existFullScreen`);
-    const isFullScreen = await this.testSubjects.exists('exitFullScreenModeLogo');
+    const isFullScreen = await this.testSubjects.exists('exitFullScreenModeButton');
     if (isFullScreen) {
-      await this.testSubjects.click('exitFullScreenModeLogo');
+      await this.testSubjects.click('exitFullScreenModeButton');
     }
   }
 
@@ -544,11 +544,11 @@ export class GisPageObject extends FtrService {
   }
 
   async exitFullScreenLogoButtonExists() {
-    return await this.testSubjects.exists('exitFullScreenModeLogo');
+    return await this.testSubjects.exists('exitFullScreenModeButton');
   }
 
   async getExitFullScreenLogoButton() {
-    return await this.testSubjects.find('exitFullScreenModeLogo');
+    return await this.testSubjects.find('exitFullScreenModeButton');
   }
 
   async clickExitFullScreenTextButton() {

@@ -10,9 +10,9 @@ import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
   SavedObjectsType,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
-import { EncryptedSavedObjectsClient } from '../../../../encrypted_saved_objects/server';
 
 export const syntheticsApiKeyID = 'ba997842-b0cf-4429-aa9d-578d9bf0d391';
 export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
@@ -20,7 +20,7 @@ export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
 export const syntheticsServiceApiKey: SavedObjectsType = {
   name: syntheticsApiKeyObjectType,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
     properties: {

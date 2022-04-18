@@ -8,8 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
+import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { parseDuration } from '.';
-import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
 import { IExecutionLog, IExecutionLogResult } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
@@ -68,9 +68,14 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
   };
 }
 
-interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
+export interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
   extends estypes.AggregationsAggregateBase {
   buckets: TBucket[];
+}
+
+interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
+  executionUuid: ExecutionUuidAggResult;
+  executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
 }
 export interface IExecutionLogAggOptions {
   page: number;
@@ -112,103 +117,118 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
   }
 
   return {
-    // Get total number of executions
-    executionUuidCardinality: {
-      cardinality: {
-        field: EXECUTION_UUID_FIELD,
-      },
-    },
-    executionUuid: {
-      // Bucket by execution UUID
-      terms: {
-        field: EXECUTION_UUID_FIELD,
-        size: DEFAULT_MAX_BUCKETS_LIMIT,
-        order: formatSortForTermSort(sort),
+    excludeExecuteStart: {
+      filter: {
+        bool: {
+          must_not: [
+            {
+              term: {
+                [ACTION_FIELD]: 'execute-start',
+              },
+            },
+          ],
+        },
       },
       aggs: {
-        // Bucket sort to allow paging through executions
-        executionUuidSorted: {
-          bucket_sort: {
-            sort: formatSortForBucketSort(sort),
-            from: (page - 1) * perPage,
-            size: perPage,
-            gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
+        // Get total number of executions
+        executionUuidCardinality: {
+          cardinality: {
+            field: EXECUTION_UUID_FIELD,
           },
         },
-        // Get counts for types of alerts and whether there was an execution timeout
-        alertCounts: {
-          filters: {
-            filters: {
-              newAlerts: { match: { [ACTION_FIELD]: 'new-instance' } },
-              activeAlerts: { match: { [ACTION_FIELD]: 'active-instance' } },
-              recoveredAlerts: { match: { [ACTION_FIELD]: 'recovered-instance' } },
-            },
+        executionUuid: {
+          // Bucket by execution UUID
+          terms: {
+            field: EXECUTION_UUID_FIELD,
+            size: DEFAULT_MAX_BUCKETS_LIMIT,
+            order: formatSortForTermSort(sort),
           },
-        },
-        // Filter by action execute doc and get information from this event
-        actionExecution: {
-          filter: getProviderAndActionFilter('actions', 'execute'),
           aggs: {
-            actionOutcomes: {
-              terms: {
-                field: OUTCOME_FIELD,
-                size: 2,
+            // Bucket sort to allow paging through executions
+            executionUuidSorted: {
+              bucket_sort: {
+                sort: formatSortForBucketSort(sort),
+                from: (page - 1) * perPage,
+                size: perPage,
+                gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
               },
             },
-          },
-        },
-        // Filter by rule execute doc and get information from this event
-        ruleExecution: {
-          filter: getProviderAndActionFilter('alerting', 'execute'),
-          aggs: {
-            executeStartTime: {
-              min: {
-                field: START_FIELD,
-              },
-            },
-            scheduleDelay: {
-              max: {
-                field: SCHEDULE_DELAY_FIELD,
-              },
-            },
-            totalSearchDuration: {
-              max: {
-                field: TOTAL_SEARCH_DURATION_FIELD,
-              },
-            },
-            esSearchDuration: {
-              max: {
-                field: ES_SEARCH_DURATION_FIELD,
-              },
-            },
-            numTriggeredActions: {
-              max: {
-                field: NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
-              },
-            },
-            numScheduledActions: {
-              max: {
-                field: NUMBER_OF_SCHEDULED_ACTIONS_FIELD,
-              },
-            },
-            executionDuration: {
-              max: {
-                field: DURATION_FIELD,
-              },
-            },
-            outcomeAndMessage: {
-              top_hits: {
-                size: 1,
-                _source: {
-                  includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD],
+            // Get counts for types of alerts and whether there was an execution timeout
+            alertCounts: {
+              filters: {
+                filters: {
+                  newAlerts: { match: { [ACTION_FIELD]: 'new-instance' } },
+                  activeAlerts: { match: { [ACTION_FIELD]: 'active-instance' } },
+                  recoveredAlerts: { match: { [ACTION_FIELD]: 'recovered-instance' } },
                 },
               },
             },
+            // Filter by action execute doc and get information from this event
+            actionExecution: {
+              filter: getProviderAndActionFilter('actions', 'execute'),
+              aggs: {
+                actionOutcomes: {
+                  terms: {
+                    field: OUTCOME_FIELD,
+                    size: 2,
+                  },
+                },
+              },
+            },
+            // Filter by rule execute doc and get information from this event
+            ruleExecution: {
+              filter: getProviderAndActionFilter('alerting', 'execute'),
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
+                },
+                scheduleDelay: {
+                  max: {
+                    field: SCHEDULE_DELAY_FIELD,
+                  },
+                },
+                totalSearchDuration: {
+                  max: {
+                    field: TOTAL_SEARCH_DURATION_FIELD,
+                  },
+                },
+                esSearchDuration: {
+                  max: {
+                    field: ES_SEARCH_DURATION_FIELD,
+                  },
+                },
+                numTriggeredActions: {
+                  max: {
+                    field: NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
+                  },
+                },
+                numScheduledActions: {
+                  max: {
+                    field: NUMBER_OF_SCHEDULED_ACTIONS_FIELD,
+                  },
+                },
+                executionDuration: {
+                  max: {
+                    field: DURATION_FIELD,
+                  },
+                },
+                outcomeAndMessage: {
+                  top_hits: {
+                    size: 1,
+                    _source: {
+                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD],
+                    },
+                  },
+                },
+              },
+            },
+            // If there was a timeout, this filter will return non-zero doc count
+            timeoutMessage: {
+              filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
+            },
           },
-        },
-        // If there was a timeout, this filter will return non-zero doc count
-        timeoutMessage: {
-          filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
         },
       },
     },
@@ -280,13 +300,14 @@ export function formatExecutionLogResult(
 ): IExecutionLogResult {
   const { aggregations } = results;
 
-  if (!aggregations) {
+  if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_LOG_RESULT;
   }
 
-  const total = (aggregations.executionUuidCardinality as estypes.AggregationsCardinalityAggregate)
-    .value;
-  const buckets = (aggregations.executionUuid as ExecutionUuidAggResult).buckets;
+  const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
+
+  const total = aggs.executionUuidCardinality.value;
+  const buckets = aggs.executionUuid.buckets;
 
   return {
     total,

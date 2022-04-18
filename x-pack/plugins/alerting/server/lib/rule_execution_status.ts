@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
-  AlertExecutionStatus,
-  AlertExecutionStatusValues,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatus,
+  RuleExecutionStatusValues,
+  RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
   RuleExecutionState,
 } from '../types';
@@ -17,14 +17,14 @@ import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import {
   ActionsCompletion,
-  AlertExecutionStatuses,
+  RuleExecutionStatuses,
   EMPTY_RULE_EXECUTION_METRICS,
   RuleExecutionMetrics,
 } from '../../common';
 import { translations } from '../constants/translations';
 
 export interface IExecutionStatusAndMetrics {
-  status: AlertExecutionStatus;
+  status: RuleExecutionStatus;
   metrics: RuleExecutionMetrics;
 }
 
@@ -34,11 +34,11 @@ export function executionStatusFromState(state: RuleExecutionState): IExecutionS
   const hasIncompleteAlertExecution =
     state.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
-  let status: AlertExecutionStatuses =
-    alertIds.length === 0 ? AlertExecutionStatusValues[0] : AlertExecutionStatusValues[1];
+  let status: RuleExecutionStatuses =
+    alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
 
   if (hasIncompleteAlertExecution) {
-    status = AlertExecutionStatusValues[5];
+    status = RuleExecutionStatusValues[5];
   }
 
   return {
@@ -47,7 +47,7 @@ export function executionStatusFromState(state: RuleExecutionState): IExecutionS
       status,
       ...(hasIncompleteAlertExecution && {
         warning: {
-          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
           message: translations.taskRunner.warning.maxExecutableActions,
         },
       }),
@@ -76,7 +76,7 @@ export function ruleExecutionStatusToRaw({
   status,
   error,
   warning,
-}: AlertExecutionStatus): RawRuleExecutionStatus {
+}: RuleExecutionStatus): RawRuleExecutionStatus {
   return {
     lastExecutionDate: lastExecutionDate.toISOString(),
     lastDuration: lastDuration ?? 0,
@@ -91,7 +91,7 @@ export function ruleExecutionStatusFromRaw(
   logger: Logger,
   ruleId: string,
   rawRuleExecutionStatus?: Partial<RawRuleExecutionStatus> | null | undefined
-): AlertExecutionStatus | undefined {
+): RuleExecutionStatus | undefined {
   if (!rawRuleExecutionStatus) return undefined;
 
   const {
@@ -110,7 +110,7 @@ export function ruleExecutionStatusFromRaw(
     parsedDateMillis = Date.now();
   }
 
-  const executionStatus: AlertExecutionStatus = {
+  const executionStatus: RuleExecutionStatus = {
     status,
     lastExecutionDate: new Date(parsedDateMillis),
   };
@@ -131,7 +131,7 @@ export function ruleExecutionStatusFromRaw(
 }
 
 export const getRuleExecutionStatusPending = (lastExecutionDate: string) => ({
-  status: 'pending' as AlertExecutionStatuses,
+  status: 'pending' as RuleExecutionStatuses,
   lastExecutionDate,
   error: null,
   warning: null,

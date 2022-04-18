@@ -24,12 +24,12 @@ describe('ConfiguredSourcesList', () => {
   it('renders', () => {
     const wrapper = shallow(<ConfiguredSourcesList {...props} />);
 
-    expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(16);
+    expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(20);
     expect(wrapper.find('[data-test-subj="AccountOnlyTooltip"]')).toHaveLength(2);
-    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(19);
+    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(23);
   });
 
-  it('does not show connect button for a connected external source', () => {
+  it('does show connect button for a connected external source', () => {
     const wrapper = shallow(
       <ConfiguredSourcesList
         {...{
@@ -38,7 +38,7 @@ describe('ConfiguredSourcesList', () => {
         }}
       />
     );
-    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(0);
+    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(1);
   });
 
   it('does show connect button for an unconnected external source', () => {
@@ -50,7 +50,51 @@ describe('ConfiguredSourcesList', () => {
         }}
       />
     );
-    expect(wrapper.find(EuiButtonEmptyTo)).toHaveLength(1);
+    const button = wrapper.find(EuiButtonEmptyTo);
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual('/sources/add/external/connect');
+  });
+
+  it('connect button for an unconnected source with multiple connector options routes to choice page', () => {
+    const wrapper = shallow(
+      <ConfiguredSourcesList
+        {...{
+          sources: [
+            {
+              ...mergedConfiguredSources[0],
+              connected: false,
+              serviceType: 'share_point',
+              externalConnectorAvailable: true,
+            },
+          ],
+          isOrganization: true,
+        }}
+      />
+    );
+    const button = wrapper.find(EuiButtonEmptyTo);
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual('/sources/add/share_point/');
+  });
+
+  it('connect button for a source with multiple connector options routes to connect page for private sources', () => {
+    const wrapper = shallow(
+      <ConfiguredSourcesList
+        {...{
+          sources: [
+            {
+              ...mergedConfiguredSources[0],
+              connected: false,
+              serviceType: 'share_point',
+              externalConnectorAvailable: true,
+            },
+          ],
+          isOrganization: false,
+        }}
+      />
+    );
+    const button = wrapper.find(EuiButtonEmptyTo);
+    expect(button).toHaveLength(1);
+    expect(button.prop('to')).toEqual('/p/sources/add/share_point/connect');
   });
 
   it('handles empty state', () => {

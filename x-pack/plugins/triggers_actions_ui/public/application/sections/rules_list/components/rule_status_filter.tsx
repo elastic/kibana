@@ -14,10 +14,7 @@ import {
   EuiFilterSelectItem,
   EuiHealth,
 } from '@elastic/eui';
-import {
-  AlertExecutionStatuses,
-  AlertExecutionStatusValues,
-} from '../../../../../../alerting/common';
+import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
 
 interface RuleStatusFilterProps {
@@ -65,7 +62,7 @@ export const RuleStatusFilter: React.FunctionComponent<RuleStatusFilterProps> = 
         }
       >
         <div className="euiFilterSelect__items">
-          {[...AlertExecutionStatusValues].sort().map((item: AlertExecutionStatuses) => {
+          {[...RuleExecutionStatusValues].sort().map((item: RuleExecutionStatuses) => {
             const healthColor = getHealthColor(item);
             return (
               <EuiFilterSelectItem
@@ -92,7 +89,7 @@ export const RuleStatusFilter: React.FunctionComponent<RuleStatusFilterProps> = 
   );
 };
 
-export function getHealthColor(status: AlertExecutionStatuses) {
+export function getHealthColor(status: RuleExecutionStatuses) {
   switch (status) {
     case 'active':
       return 'success';

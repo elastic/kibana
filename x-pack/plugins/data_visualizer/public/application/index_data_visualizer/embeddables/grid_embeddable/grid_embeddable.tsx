@@ -6,7 +6,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -19,17 +19,14 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IContainer,
-} from '../../../../../../../../src/plugins/embeddable/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/embeddable-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Query } from '@kbn/data-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
-import { Query } from '../../../../../../../../src/plugins/data/common';
-import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
-import { SavedSearch } from '../../../../../../../../src/plugins/discover/public';
 import {
   DataVisualizerTable,
   ItemIdToExpandedRowMap,
@@ -189,7 +186,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
   DataVisualizerGridEmbeddableOutput
 > {
   private node?: HTMLElement;
-  private reload$ = new Subject();
+  private reload$ = new Subject<void>();
   public readonly type: string = DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE;
 
   constructor(

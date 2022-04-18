@@ -4,16 +4,23 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
-if [[ "${RELEASE_BUILD:-}" == "true" ]]; then
-  VERSION="$(jq -r '.version' package.json)"
-  RELEASE_ARG="--release"
-else
-  VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
-  RELEASE_ARG=""
-fi
+source .buildkite/scripts/steps/artifacts/env.sh
 
-echo "--- Build Kibana Distribution"
-node scripts/build "$RELEASE_ARG" --all-platforms --debug --docker-cross-compile --skip-docker-cloud
+echo "--- Build Kibana artifacts"
+node scripts/build --all-platforms --debug --docker-cross-compile $(echo "$BUILD_ARGS")
+
+echo "--- Extract default i18n messages"
+mkdir -p target/i18n
+node scripts/i18n_extract --output-dir=target/i18n
 
 echo "--- Build dependencies report"
-node scripts/licenses_csv_report "--csv=target/dependencies-$VERSION.csv"
+node scripts/licenses_csv_report "--csv=target/dependencies-$FULL_VERSION.csv"
+(cd target; sha512sum "dependencies-$FULL_VERSION.csv" > "dependencies-$FULL_VERSION.csv.sha512.txt")
+
+echo "--- Upload Kibana Artifacts"
+cd target
+buildkite-agent artifact upload 'kibana-*'
+buildkite-agent artifact upload "dependencies-$FULL_VERSION.csv"
+buildkite-agent artifact upload "dependencies-$FULL_VERSION.csv.sha512.txt"
+buildkite-agent artifact upload 'i18n/*.json'
+cd -

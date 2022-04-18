@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig, AggParam } from 'src/plugins/data/public';
+import { IAggConfig, AggParam } from '@kbn/data-plugin/public';
 import { EditorConfig } from '../utils';
 import { EditorVisState } from '../sidebar/state/reducers';
 

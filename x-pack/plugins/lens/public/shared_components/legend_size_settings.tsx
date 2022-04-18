@@ -8,7 +8,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { TooltipWrapper } from './tooltip_wrapper';
 
 export enum LegendSizes {
   AUTO = '0',
@@ -22,7 +21,6 @@ interface LegendSizeSettingsProps {
   legendSize: number | undefined;
   onLegendSizeChange: (size?: number) => void;
   isVerticalLegend: boolean;
-  isDisabled: boolean;
 }
 
 const legendSizeOptions: Array<{ value: LegendSizes; inputDisplay: string }> = [
@@ -65,7 +63,6 @@ export const LegendSizeSettings = ({
   legendSize,
   onLegendSizeChange,
   isVerticalLegend,
-  isDisabled,
 }: LegendSizeSettingsProps) => {
   useEffect(() => {
     if (legendSize && !isVerticalLegend) {
@@ -78,6 +75,8 @@ export const LegendSizeSettings = ({
     [onLegendSizeChange]
   );
 
+  if (!isVerticalLegend) return null;
+
   return (
     <EuiFormRow
       display="columnCompressed"
@@ -86,29 +85,12 @@ export const LegendSizeSettings = ({
       })}
       fullWidth
     >
-      <TooltipWrapper
-        tooltipContent={
-          isDisabled
-            ? i18n.translate('xpack.lens.shared.legendVisibleTooltip', {
-                defaultMessage: 'Requires legend to be shown',
-              })
-            : i18n.translate('xpack.lens.legendSizeSetting.legendVertical', {
-                defaultMessage: 'Requires legend to be right or left aligned',
-              })
-        }
-        condition={isDisabled || !isVerticalLegend}
-        position="top"
-        delay="regular"
-        display="block"
-      >
-        <EuiSuperSelect
-          compressed
-          valueOfSelected={legendSize?.toString() ?? LegendSizes.AUTO}
-          options={legendSizeOptions}
-          onChange={onLegendSizeOptionChange}
-          disabled={isDisabled || !isVerticalLegend}
-        />
-      </TooltipWrapper>
+      <EuiSuperSelect
+        compressed
+        valueOfSelected={legendSize?.toString() ?? LegendSizes.AUTO}
+        options={legendSizeOptions}
+        onChange={onLegendSizeOptionChange}
+      />
     </EuiFormRow>
   );
 };

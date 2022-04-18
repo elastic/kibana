@@ -11,10 +11,10 @@ import {
   sampleDocSearchResultsWithSortId,
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -23,7 +23,7 @@ const buildRuleMessage = buildRuleMessageFactory({
   name: 'fake name',
 });
 describe('singleSearchAfter', () => {
-  const mockService: AlertServicesMock = alertsMock.createAlertServices();
+  const mockService: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
   beforeEach(() => {
     jest.clearAllMocks();

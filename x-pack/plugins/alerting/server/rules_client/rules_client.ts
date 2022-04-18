@@ -19,34 +19,41 @@ import {
   PluginInitializerContext,
   SavedObjectsUtils,
   SavedObjectAttributes,
-} from '../../../../../src/core/server';
-import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
-import {
-  Alert as Rule,
-  PartialAlert as PartialRule,
-  RawRule,
-  RuleTypeRegistry,
-  AlertAction as RuleAction,
-  IntervalSchedule,
-  SanitizedAlert as SanitizedRule,
-  RuleTaskState,
-  AlertSummary,
-  AlertExecutionStatusValues as RuleExecutionStatusValues,
-  AlertNotifyWhenType as RuleNotifyWhenType,
-  AlertTypeParams as RuleTypeParams,
-  ResolvedSanitizedRule,
-  AlertWithLegacyId as RuleWithLegacyId,
-  SanitizedRuleWithLegacyId,
-  PartialAlertWithLegacyId as PartialRuleWithLegacyId,
-  RawAlertInstance as RawAlert,
-} from '../types';
-import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getAlertNotifyWhenType } from '../lib';
+} from '@kbn/core/server';
+import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../../security/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+} from '@kbn/security-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  IEvent,
+  IEventLogClient,
+  IEventLogger,
+  SAVED_OBJECT_REL_PRIMARY,
+} from '@kbn/event-log-plugin/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
+import {
+  Rule,
+  PartialRule,
+  RawRule,
+  RuleTypeRegistry,
+  RuleAction,
+  IntervalSchedule,
+  SanitizedRule,
+  RuleTaskState,
+  AlertSummary,
+  RuleExecutionStatusValues,
+  RuleNotifyWhenType,
+  RuleTypeParams,
+  ResolvedSanitizedRule,
+  RuleWithLegacyId,
+  SanitizedRuleWithLegacyId,
+  PartialRuleWithLegacyId,
+  RawAlertInstance as RawAlert,
+} from '../types';
+import { validateRuleTypeParams, ruleExecutionStatusFromRaw, getRuleNotifyWhenType } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
@@ -57,15 +64,8 @@ import {
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
-import {
-  IEvent,
-  IEventLogClient,
-  IEventLogger,
-  SAVED_OBJECT_REL_PRIMARY,
-} from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
-import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -89,13 +89,10 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogResult } from '../../common';
+import { IExecutionLogWithErrorsResult } from '../../common';
 import { validateSnoozeDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
-import {
-  formatExecutionErrorsResult,
-  IExecutionErrorsResult,
-} from '../lib/format_execution_log_errors';
+import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -263,7 +260,6 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
-export type IExecutionLogWithErrorsResult = IExecutionLogResult & IExecutionErrorsResult;
 interface ScheduleRuleOptions {
   id: string;
   consumer: string;
@@ -406,7 +402,7 @@ export class RulesClient {
 
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     const rawRule: RawRule = {
       ...data,
@@ -1204,7 +1200,7 @@ export class RulesClient {
     }
 
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
-    const notifyWhen = getAlertNotifyWhenType(data.notifyWhen, data.throttle);
+    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
     let updatedObject: SavedObject<RawRule>;
     const createAttributes = this.updateMeta({

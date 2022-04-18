@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import { extractErrorMessage, MLHttpFetchError, MLResponseError, EsErrorBody } from './index';
+import { extractErrorMessage, MLHttpFetchError, MLResponseError, EsErrorBody } from '.';
 
 describe('ML - error message utils', () => {
   describe('extractErrorMessage', () => {

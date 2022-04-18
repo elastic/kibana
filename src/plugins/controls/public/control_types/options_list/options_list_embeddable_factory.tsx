@@ -8,10 +8,10 @@
 
 import deepEqual from 'fast-deep-equal';
 
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { OptionsListEditor } from './options_list_editor';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
 import {
   createOptionsListExtract,
   createOptionsListInject,
@@ -37,8 +37,8 @@ export class OptionsListEmbeddableFactory
   ) => {
     if (
       embeddable &&
-      (!deepEqual(newInput.fieldName, embeddable.getInput().fieldName) ||
-        !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId))
+      ((newInput.fieldName && !deepEqual(newInput.fieldName, embeddable.getInput().fieldName)) ||
+        (newInput.dataViewId && !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId)))
     ) {
       // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
       newInput.selectedOptions = [];
@@ -51,7 +51,7 @@ export class OptionsListEmbeddableFactory
   public isEditable = () => Promise.resolve(false);
 
   public getDisplayName = () => OptionsListStrings.getDisplayName();
-  public getIconType = () => 'list';
+  public getIconType = () => 'editorChecklist';
   public getDescription = () => OptionsListStrings.getDescription();
 
   public inject = createOptionsListInject();

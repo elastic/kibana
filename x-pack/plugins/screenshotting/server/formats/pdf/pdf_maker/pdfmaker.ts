@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
@@ -34,7 +34,7 @@ export class PdfMaker {
   private worker?: Worker;
   private pageCount: number = 0;
 
-  protected workerModulePath = path.resolve(__dirname, './worker.js');
+  protected workerModulePath: string;
 
   /**
    * The maximum heap size for old memory region of the worker thread.
@@ -65,10 +65,18 @@ export class PdfMaker {
   constructor(
     private readonly layout: Layout,
     private readonly logo: string | undefined,
+    { dist }: PackageInfo,
     private readonly logger: Logger
   ) {
     this.title = '';
     this.content = [];
+
+    // running in dist: `worker.ts` becomes `worker.js`
+    // running in source: `worker_src_harness.ts` needs to be wrapped in JS and have a ts-node environment initialized.
+    this.workerModulePath = path.resolve(
+      __dirname,
+      dist ? './worker.js' : './worker_src_harness.js'
+    );
   }
 
   _addContents(contents: Content[]) {
@@ -202,13 +210,7 @@ export class PdfMaker {
             reject(workerError);
           }
         });
-        this.worker.on('exit', () => {}); // do nothing on errors
-
-        // Send the initial request
-        const generatePdfRequest: GeneratePdfRequest = {
-          data: this.getGeneratePdfRequestData(),
-        };
-        myPort.postMessage(generatePdfRequest);
+        this.worker.on('exit', () => {});
 
         // We expect one message from the worker generating the PDF buffer.
         myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
@@ -223,6 +225,12 @@ export class PdfMaker {
           this.pageCount = data.metrics.pages;
           resolve(data.buffer);
         });
+
+        // Send the request
+        const generatePdfRequest: GeneratePdfRequest = {
+          data: this.getGeneratePdfRequestData(),
+        };
+        myPort.postMessage(generatePdfRequest);
       });
     } finally {
       await this.cleanupWorker();

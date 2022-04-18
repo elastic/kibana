@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -13,19 +15,15 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { CloudSetup, CloudStart } from '../../cloud/public';
-import { LicensingPluginStart } from '../../licensing/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
+} from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import {
   APP_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
@@ -86,6 +84,29 @@ export class EnterpriseSearchPlugin implements Plugin {
         );
 
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
+      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
+      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchContent } = await import(
+          './applications/enterprise_search_content'
+        );
+
+        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
     });
 

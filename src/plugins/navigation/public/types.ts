@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
-import { DataPublicPluginStart } from '../../data/public';
 
 export interface NavigationPublicPluginSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
@@ -20,5 +20,5 @@ export interface NavigationPublicPluginStart {
 }
 
 export interface NavigationPluginStartDependencies {
-  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

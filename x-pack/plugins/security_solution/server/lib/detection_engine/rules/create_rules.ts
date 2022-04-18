@@ -7,12 +7,12 @@
 
 import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -77,8 +77,8 @@ export const createRules = async ({
   actions,
   isRuleRegistryEnabled,
   id,
-}: CreateRulesOptions): Promise<SanitizedAlert<AlertTypeParams>> => {
-  const rule = await rulesClient.create<AlertTypeParams>({
+}: CreateRulesOptions): Promise<SanitizedRule<RuleTypeParams>> => {
+  const rule = await rulesClient.create<RuleTypeParams>({
     options: {
       id,
     },

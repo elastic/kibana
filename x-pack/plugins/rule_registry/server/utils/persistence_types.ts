@@ -7,14 +7,14 @@
 
 import { Logger } from '@kbn/logging';
 import {
-  AlertExecutorOptions,
+  RuleExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../alerting/server';
-import { WithoutReservedActionGroups } from '../../../alerting/common';
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
+import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import { IRuleDataClient } from '../rule_data_client';
 import { BulkResponseErrorAggregation } from './utils';
 import { AlertWithCommonFieldsLatest } from '../../common/schemas';
@@ -37,8 +37,8 @@ export interface PersistenceServices {
 }
 
 export type PersistenceAlertType<
-  TParams extends AlertTypeParams,
-  TState extends AlertTypeState,
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
@@ -46,7 +46,7 @@ export type PersistenceAlertType<
   'executor'
 > & {
   executor: (
-    options: AlertExecutorOptions<
+    options: RuleExecutorOptions<
       TParams,
       TState,
       AlertInstanceState,
@@ -62,8 +62,8 @@ export type CreatePersistenceRuleTypeWrapper = (options: {
   ruleDataClient: IRuleDataClient;
   logger: Logger;
 }) => <
-  TParams extends AlertTypeParams,
-  TState extends AlertTypeState,
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 >(

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { prepareLogTable, validateAccessor } from '../../../../visualizations/common/utils';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { GaugeExpressionFunctionDefinition } from '../types';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -160,6 +160,13 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
         defaultMessage: 'Enables relative precentage mode',
       }),
     },
+    respectRanges: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionGauge.functions.gauge.respectRanges.help', {
+        defaultMessage: 'Respect max and min values from ranges',
+      }),
+    },
     commonLabel: {
       types: ['string'],
       help: i18n.translate('expressionGauge.functions.gauge.args.commonLabel.help', {
@@ -173,7 +180,6 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
       }),
     },
   },
-
   fn(data, args, handlers) {
     validateAccessor(args.metric, data.columns);
     validateAccessor(args.min, data.columns);

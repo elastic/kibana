@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isLatestTransform,
   isPivotTransform,
   TransformPivotConfig,
-} from '../../../../plugins/transform/common/types/transform';
-import { getLatestTransformConfig } from './index';
+} from '@kbn/transform-plugin/common/types/transform';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getLatestTransformConfig } from '.';
 
 interface TestData {
   type: 'pivot' | 'latest';
@@ -85,8 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  // FAILING: https://github.com/elastic/kibana/issues/128967
-  describe.skip('cloning', function () {
+  describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
     const transformConfigWithLatest = getLatestTransformConfig('cloning');

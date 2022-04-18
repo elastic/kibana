@@ -16,12 +16,12 @@ import {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectReference,
-} from '../../../../../src/core/server';
-import { RawRule, RawAlertAction, RawRuleExecutionStatus } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
+import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
-import { getMappedParams } from '../../server/rules_client/lib/mapped_params_utils';
+import { getMappedParams } from '../rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -353,7 +353,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.jira') {
         const { title, comments, description, issueType, priority, labels, parent, summary } =
           action.params.subActionParams as {
@@ -385,7 +385,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.resilient') {
         const { title, comments, description, incidentTypes, severityCode, name } = action.params
           .subActionParams as {
@@ -413,12 +413,12 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       }
     }
 
     return [...acc, action];
-  }, [] as RawAlertAction[]);
+  }, [] as RawRuleAction[]);
 
   return {
     ...doc,
@@ -855,13 +855,13 @@ function addMappedParams(
 function getCorrespondingAction(
   actions: SavedObjectAttribute,
   connectorRef: string
-): RawAlertAction | null {
+): RawRuleAction | null {
   if (!Array.isArray(actions)) {
     return null;
   } else {
     return actions.find(
-      (action) => (action as RawAlertAction)?.actionRef === connectorRef
-    ) as RawAlertAction;
+      (action) => (action as RawRuleAction)?.actionRef === connectorRef
+    ) as RawRuleAction;
   }
 }
 

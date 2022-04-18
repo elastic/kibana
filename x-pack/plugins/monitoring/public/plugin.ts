@@ -13,14 +13,11 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
@@ -109,6 +106,7 @@ export class MonitoringPlugin
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
+          dataViews: pluginsStart.dataViews,
         };
 
         Legacy.init({
@@ -122,6 +120,7 @@ export class MonitoringPlugin
           triggersActionsUi: deps.triggersActionsUi,
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
+          dataViews: deps.dataViews,
         });
 
         const config = Object.fromEntries(externalConfig);

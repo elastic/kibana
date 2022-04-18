@@ -24,9 +24,9 @@ import {
   withSuspense,
   LazyReduxEmbeddableWrapper,
   ReduxEmbeddableWrapperPropsWithChildren,
-} from '../../../../presentation_util/public';
-import { Embeddable, IContainer } from '../../../../embeddable/public';
-import { DataView, DataViewField } from '../../../../data_views/public';
+} from '@kbn/presentation-util-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
 import { ControlsDataViewsService } from '../../services/data_views';
 import { ControlsDataService } from '../../services/data';
@@ -264,8 +264,10 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
   private buildFilter = async () => {
     const { value: [selectedMin, selectedMax] = ['', ''], ignoreParentSettings } = this.getInput();
+    const availableMin = this.componentState.min;
+    const availableMax = this.componentState.max;
 
-    const hasData = !isEmpty(this.componentState.min) && !isEmpty(this.componentState.max);
+    const hasData = !isEmpty(availableMin) && !isEmpty(availableMax);
     const hasLowerSelection = !isEmpty(selectedMin);
     const hasUpperSelection = !isEmpty(selectedMax);
     const hasEitherSelection = hasLowerSelection || hasUpperSelection;
@@ -275,9 +277,9 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       hasBothSelections &&
       parseFloat(selectedMin) > parseFloat(selectedMax);
     const isLowerSelectionOutOfRange =
-      hasLowerSelection && parseFloat(selectedMin) > parseFloat(this.componentState.max);
+      hasLowerSelection && parseFloat(selectedMin) > parseFloat(availableMax);
     const isUpperSelectionOutOfRange =
-      hasUpperSelection && parseFloat(selectedMax) < parseFloat(this.componentState.min);
+      hasUpperSelection && parseFloat(selectedMax) < parseFloat(availableMin);
     const isSelectionOutOfRange =
       (!ignoreParentSettings?.ignoreValidations && hasData && isLowerSelectionOutOfRange) ||
       isUpperSelectionOutOfRange;
@@ -292,15 +294,18 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const params = {} as RangeFilterParams;
 
     if (selectedMin) {
-      params.gte = selectedMin;
+      params.gte = Math.max(parseFloat(selectedMin), parseFloat(availableMin));
     }
+
     if (selectedMax) {
-      params.lte = selectedMax;
+      params.lte = Math.min(parseFloat(selectedMax), parseFloat(availableMax));
     }
 
     const rangeFilter = buildRangeFilter(field, params, dataView);
 
     rangeFilter.meta.key = field?.name;
+    rangeFilter.meta.type = 'range';
+    rangeFilter.meta.params = params;
 
     this.updateComponentState({ loading: false });
     this.updateOutput({ filters: [rangeFilter], dataViews: [dataView], loading: false });

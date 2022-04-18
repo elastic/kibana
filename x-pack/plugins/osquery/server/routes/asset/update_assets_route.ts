@@ -11,13 +11,13 @@ import { schema } from '@kbn/config-schema';
 import { asyncForEach } from '@kbn/std';
 import deepmerge from 'deepmerge';
 
+import { IRouter } from '@kbn/core/server';
+import { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
 import { combineMerge } from './utils';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack, convertPackQueriesToSO } from '../pack/utils';
-import { KibanaAssetReference } from '../../../../fleet/common';
 import { PackSavedObjectAttributes } from '../../common/types';
 
 export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -27,7 +27,7 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
       },
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from 'kibana/public';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
 import { applyMiddleware, createStore, Store } from 'redux';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 import {
@@ -49,7 +49,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../policy/store/services/ingest', () => ({
+jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),

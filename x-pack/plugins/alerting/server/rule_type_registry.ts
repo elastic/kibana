@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
-import { Logger } from 'kibana/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
+import { Logger } from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from './types';
@@ -84,9 +84,9 @@ const ruleTypeIdSchema = schema.string({
 });
 
 export type NormalizedRuleType<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -121,9 +121,9 @@ export type NormalizedRuleType<
   >;
 
 export type UntypedNormalizedRuleType = NormalizedRuleType<
-  AlertTypeParams,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   string,
@@ -167,9 +167,9 @@ export class RuleTypeRegistry {
   }
 
   public register<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams,
-    State extends AlertTypeState,
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams,
+    State extends RuleTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
@@ -287,9 +287,9 @@ export class RuleTypeRegistry {
   }
 
   public get<
-    Params extends AlertTypeParams = AlertTypeParams,
-    ExtractedParams extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState,
+    Params extends RuleTypeParams = RuleTypeParams,
+    ExtractedParams extends RuleTypeParams = RuleTypeParams,
+    State extends RuleTypeState = RuleTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string,
@@ -382,9 +382,9 @@ function normalizedActionVariables(actionVariables: RuleType['actionVariables'])
 }
 
 function augmentActionGroupsWithReserved<
-  Params extends AlertTypeParams,
-  ExtractedParams extends AlertTypeParams,
-  State extends AlertTypeState,
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,

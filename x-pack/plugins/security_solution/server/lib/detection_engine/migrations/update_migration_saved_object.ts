@@ -8,7 +8,7 @@
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { SavedObjectsClientContract, SavedObjectsUpdateResponse } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { validateTaskEither } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '@kbn/securitysolution-list-api';
 import { signalsMigrationSOClient } from './saved_objects_client';

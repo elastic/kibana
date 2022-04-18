@@ -12,11 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { JSONCodeEditorCommonMemoized } from '../../../../components/json_code_editor/json_code_editor_common';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../../../common';
 import { useEsDocSearch } from '../../../../utils/use_es_doc_search';
-import { DataView } from '../../../../../../data_views/public';
 import { ElasticRequestState } from '../../../../application/doc/types';
 import { getHeight } from './get_height';
 
@@ -42,6 +42,7 @@ export const DocViewerSource = ({
   hasLineNumbers,
 }: SourceViewerProps) => {
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
+  const [editorHeight, setEditorHeight] = useState<number>();
   const [jsonValue, setJsonValue] = useState<string>('');
   const { uiSettings } = useDiscoverServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
@@ -59,7 +60,9 @@ export const DocViewerSource = ({
     }
   }, [reqState, hit]);
 
-  // setting editor height based on lines height and count to stretch and fit its content
+  // setting editor height
+  // - classic view: based on lines height and count to stretch and fit its content
+  // - explorer: to fill the available space of the document flyout
   useEffect(() => {
     if (!editor) {
       return;
@@ -76,12 +79,11 @@ export const DocViewerSource = ({
     }
 
     if (!jsonValue || jsonValue === '') {
-      editorElement.style.height = '0px';
+      setEditorHeight(0);
     } else {
-      editorElement.style.height = `${height}px`;
+      setEditorHeight(height);
     }
-    editor.layout();
-  }, [editor, jsonValue, useDocExplorer]);
+  }, [editor, jsonValue, useDocExplorer, setEditorHeight]);
 
   const loadingState = (
     <div className="sourceViewer__loading">
@@ -128,6 +130,7 @@ export const DocViewerSource = ({
     <JSONCodeEditorCommonMemoized
       jsonValue={jsonValue}
       width={width}
+      height={editorHeight}
       hasLineNumbers={hasLineNumbers}
       onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
     />

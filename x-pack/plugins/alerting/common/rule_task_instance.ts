@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
-import { IntervalSchedule, RuleMonitoring } from './alert';
+import { IntervalSchedule, RuleMonitoring } from './rule';
 
 export enum ActionsCompletion {
   COMPLETE = 'complete',

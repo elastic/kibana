@@ -7,20 +7,17 @@
 
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { ActionWizard } from './action_wizard';
-import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
-import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
-import { licensingMock } from '../../../../licensing/public/mocks';
+import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
+import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   Trigger,
   UiActionsActionDefinition as ActionDefinition,
-} from '../../../../../../src/plugins/ui_actions/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/data/public';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/embeddable/public';
+} from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ActionFactory, ActionFactoryDefinition, BaseActionConfig } from '../../dynamic_actions';
+import { ActionWizard } from './action_wizard';
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },

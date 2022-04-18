@@ -25,23 +25,27 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { ExecutionContextSearch } from 'src/plugins/data/public';
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import {
+  ReactExpressionRendererProps,
+  ReactExpressionRendererType,
+} from '@kbn/expressions-plugin/public';
 import {
   Datasource,
   Visualization,
   FramePublicAPI,
-  DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
+  DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import {
-  ReactExpressionRendererProps,
-  ReactExpressionRendererType,
-} from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
+import {
+  getMissingIndexPattern,
+  validateDatasourceAndVisualization,
+  getDatasourceLayers,
+} from './state_helpers';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,
@@ -226,16 +230,28 @@ export function SuggestionPanel({
               visualizationId,
               visualizationState: suggestionVisualizationState,
               datasourceState: suggestionDatasourceState,
-              datasourceId: suggetionDatasourceId,
+              datasourceId: suggestionDatasourceId,
             }) => {
               return (
                 !hide &&
                 validateDatasourceAndVisualization(
-                  suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                  suggestionDatasourceId ? datasourceMap[suggestionDatasourceId] : null,
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  frame
+                  {
+                    datasourceLayers: getDatasourceLayers(
+                      suggestionDatasourceId
+                        ? {
+                            [suggestionDatasourceId]: {
+                              isLoading: true,
+                              state: suggestionDatasourceState,
+                            },
+                          }
+                        : {},
+                      datasourceMap
+                    ),
+                  }
                 ) == null
               );
             }
@@ -284,6 +300,7 @@ export function SuggestionPanel({
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
+    frame.activeData,
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);
@@ -474,7 +491,9 @@ function getPreviewExpression(
     return null;
   }
 
-  const suggestionFrameApi: FramePublicAPI = { datasourceLayers: { ...frame.datasourceLayers } };
+  const suggestionFrameApi: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'> = {
+    datasourceLayers: { ...frame.datasourceLayers },
+  };
 
   // use current frame api and patch apis for changed datasource layers
   if (
@@ -484,7 +503,7 @@ function getPreviewExpression(
   ) {
     const datasource = datasources[visualizableState.datasourceId];
     const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: Record<string, DatasourcePublicAPI> = pick(
+    const updatedLayerApis: DatasourceLayers = pick(
       frame.datasourceLayers,
       visualizableState.keptLayerIds
     );

@@ -45,7 +45,8 @@
     "kibanaUtils",
     "maps",
     "savedObjects",
-    "usageCollection"
+    "usageCollection",
+    "unifiedSearch"
   ],
   "extraPublicDirs": [
     "common"

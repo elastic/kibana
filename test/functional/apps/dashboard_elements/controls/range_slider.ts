@@ -66,7 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create and edit', async () => {
       it('can create a new range slider control from a blank state', async () => {
-        await dashboardControls.createRangeSliderControl({ fieldName: 'bytes', width: 'small' });
+        await dashboardControls.createRangeSliderControl({
+          dataViewTitle: 'logstash-*',
+          fieldName: 'bytes',
+          width: 'small',
+        });
         expect(await dashboardControls.getControlsCount()).to.be(1);
       });
 
@@ -100,7 +104,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can edit range slider control', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.editExistingControl(firstId);
+
+        const saveButton = await testSubjects.find('control-editor-save');
+        expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('kibana_sample_data_flights');
+        expect(await saveButton.isEnabled()).to.be(false);
         await dashboardControls.controlsEditorSetfield('dayOfWeek');
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading();
@@ -184,7 +192,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('disables inputs when no data available', async () => {
-        await dashboardControls.createRangeSliderControl({ fieldName: 'bytes', width: 'small' });
+        await dashboardControls.createRangeSliderControl({
+          dataViewTitle: 'logstash-*',
+          fieldName: 'bytes',
+          width: 'small',
+        });
         const secondId = (await dashboardControls.getAllControlIds())[1];
         expect(
           await dashboardControls.rangeSliderGetLowerBoundAttribute(secondId, 'disabled')

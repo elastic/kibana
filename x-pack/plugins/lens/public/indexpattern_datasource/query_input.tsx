@@ -8,7 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { QueryStringInput, Query } from '../../../../../src/plugins/data/public';
+import { Query } from '@kbn/data-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useDebouncedValue } from '../shared_components';
 
 export const QueryInput = ({

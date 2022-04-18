@@ -7,23 +7,23 @@
 
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
-  AlertExecutorOptions,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleExecutorOptions,
+  RuleTypeParams,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatusWarningReasons,
 } from '../types';
 import {
   ConcreteTaskInstance,
   isUnrecoverableError,
   RunNowResult,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
@@ -32,16 +32,16 @@ import {
   savedObjectsServiceMock,
   elasticsearchServiceMock,
   uiSettingsServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
+} from '@kbn/core/server/mocks';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { IEventLogger } from '../../../event_log/server';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { ExecuteOptions } from '../../../actions/server/create_execute_function';
+import { ExecuteOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import moment from 'moment';
 import {
@@ -70,6 +70,7 @@ import {
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -95,12 +96,13 @@ describe('Task Runner', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
-  const services = alertsMock.createAlertServices();
+  const services = alertsMock.createRuleExecutorServices();
   const actionsClient = actionsClientMock.create();
   const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+  const dataPlugin = dataPluginMock.createStartContract();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
 
@@ -113,6 +115,7 @@ describe('Task Runner', () => {
   type EnqueueFunction = (options: ExecuteOptions) => Promise<void | RunNowResult>;
 
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
+    data: dataPlugin,
     savedObjects: savedObjectsService,
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
@@ -279,9 +282,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -383,9 +386,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -496,9 +499,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -547,9 +550,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -604,9 +607,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -664,9 +667,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -704,9 +707,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -794,9 +797,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -862,9 +865,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -937,9 +940,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -1054,9 +1057,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -1207,9 +1210,9 @@ describe('Task Runner', () => {
       ruleType.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -1291,9 +1294,9 @@ describe('Task Runner', () => {
       ruleTypeWithCustomRecovery.executor.mockImplementation(
         async ({
           services: executorServices,
-        }: AlertExecutorOptions<
-          AlertTypeParams,
-          AlertTypeState,
+        }: RuleExecutorOptions<
+          RuleTypeParams,
+          RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
           string
@@ -1353,9 +1356,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -1564,9 +1567,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -1803,9 +1806,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -1954,9 +1957,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2062,9 +2065,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2166,9 +2169,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2346,9 +2349,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2575,9 +2578,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2605,9 +2608,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2649,7 +2652,7 @@ describe('Task Runner', () => {
     };
 
     const warning = {
-      reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
       message: translations.taskRunner.warning.maxExecutableActions,
     };
 
@@ -2659,9 +2662,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string
@@ -2817,7 +2820,7 @@ describe('Task Runner', () => {
         status: 'warning',
         numberOfTriggeredActions: ruleTypeWithConfig.config.execution.actions.max,
         numberOfScheduledActions: mockActions.length,
-        reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         task: true,
         consumer: 'bar',
       })
@@ -2849,9 +2852,9 @@ describe('Task Runner', () => {
     ruleType.executor.mockImplementation(
       async ({
         services: executorServices,
-      }: AlertExecutorOptions<
-        AlertTypeParams,
-        AlertTypeState,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
         string

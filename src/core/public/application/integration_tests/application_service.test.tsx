@@ -19,7 +19,7 @@ import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { themeServiceMock } from '../../theme/theme_service.mock';
 import { AppMountParameters, AppUpdater } from '../types';
 import { Observable } from 'rxjs';
-import { MountPoint } from 'kibana/public';
+import { MountPoint } from '../..';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -170,7 +170,28 @@ describe('ApplicationService', () => {
           '/app/app1/deep-link',
         ]);
       });
-      ////
+
+      it('handles `skipOnAppLeave` option', async () => {
+        const { register } = service.setup(setupDeps);
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async ({}: AppMountParameters) => {
+            return () => undefined;
+          },
+        });
+
+        const { navigateToApp } = await service.start(startDeps);
+
+        await navigateToApp('app1', { path: '/foo' });
+        await navigateToApp('app1', { path: '/bar', skipAppLeave: true });
+        expect(history.entries.map((entry) => entry.pathname)).toEqual([
+          '/',
+          '/app/app1/foo',
+          '/app/app1/bar',
+        ]);
+      });
     });
   });
 
@@ -247,6 +268,38 @@ describe('ApplicationService', () => {
       );
       expect(history.entries.length).toEqual(3);
       expect(history.entries[2].pathname).toEqual('/app/app2');
+    });
+
+    it('does not trigger the action if `skipAppLeave` is true', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: ({ onAppLeave }: AppMountParameters) => {
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
+          return () => undefined;
+        },
+      });
+      register(Symbol(), {
+        id: 'app2',
+        title: 'App2',
+        mount: ({}: AppMountParameters) => {
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent } = await service.start(startDeps);
+
+      update = createRenderer(getComponent());
+
+      await act(async () => {
+        await navigate('/app/app1');
+        await navigateToApp('app2', { skipAppLeave: true });
+      });
+      expect(startDeps.overlays.openConfirm).toHaveBeenCalledTimes(0);
+      expect(history.entries.length).toEqual(3);
+      expect(history.entries[1].pathname).toEqual('/app/app1');
     });
 
     it('blocks navigation to the new app if action is confirm and user declined', async () => {

@@ -82,3 +82,5 @@ export const FILTER_FIELDS = {
   LOCATION: 'observer.geo.name',
   TYPE: 'monitor.type',
 };
+
+export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';

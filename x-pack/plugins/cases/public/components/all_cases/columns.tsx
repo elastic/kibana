@@ -38,8 +38,6 @@ import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { PostComment } from '../../containers/use_post_comment';
-import { CaseAttachments } from '../../types';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 
@@ -73,9 +71,6 @@ export interface GetCasesColumn {
   userCanCrud: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
-  attachments?: CaseAttachments;
-  postComment?: (args: PostComment) => Promise<void>;
-  updateCase?: (newCase: Case) => void;
 
   showSolutionColumn?: boolean;
 }
@@ -89,9 +84,6 @@ export const useCasesColumns = ({
   userCanCrud,
   connectors = [],
   onRowClick,
-  attachments,
-  postComment,
-  updateCase,
   showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
@@ -141,24 +133,11 @@ export const useCasesColumns = ({
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
-      // TODO currently the API only supports to add a comment at the time
-      // once the API is updated we should use bulk post comment #124814
-      // this operation is intentionally made in sequence
-      if (attachments !== undefined && attachments.length > 0) {
-        for (const attachment of attachments) {
-          await postComment?.({
-            caseId: theCase.id,
-            data: attachment,
-          });
-        }
-        updateCase?.(theCase);
-      }
-
       if (onRowClick) {
         onRowClick(theCase);
       }
     },
-    [attachments, onRowClick, postComment, updateCase]
+    [onRowClick]
   );
 
   useEffect(() => {

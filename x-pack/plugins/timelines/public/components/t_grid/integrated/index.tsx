@@ -14,10 +14,12 @@ import { useDispatch } from 'react-redux';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
-import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   BulkActionsProp,
@@ -35,8 +37,6 @@ import type {
   AlertStatus,
 } from '../../../../common/types/timeline';
 
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
@@ -113,7 +113,7 @@ export interface TGridIntegratedProps {
   filterStatus?: AlertStatus;
   globalFullScreen: boolean;
   // If truthy, the graph viewer (Resolver) is showing
-  graphEventId: string | undefined;
+  graphEventId?: string;
   graphOverlay?: React.ReactNode;
   hasAlertsCrud: boolean;
   height?: number;
