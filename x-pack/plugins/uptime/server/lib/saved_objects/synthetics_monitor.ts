@@ -20,18 +20,36 @@ export const syntheticsMonitor: SavedObjectsType = {
       name: {
         type: 'text',
         fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       id: {
         type: 'keyword',
       },
       type: {
         type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       urls: {
         type: 'text',
       },
       tags: {
         type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
     },
   },
