@@ -7,10 +7,10 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHealth } from '@elastic/eui';
+import { useTrackMetric, METRIC_TYPE } from '@kbn/observability-plugin/public';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import { WaterfallProvider, WaterfallChart, RenderItem, useFlyout } from '../../waterfall';
-import { useTrackMetric, METRIC_TYPE } from '../../../../../../../observability/public';
 import { WaterfallFilter } from './waterfall_filter';
 import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';

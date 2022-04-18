@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
 import {
@@ -17,7 +18,6 @@ import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
 } from '../../../../../common/endpoint/service/authz';
-import { FleetAuthz } from '../../../../../../fleet/common';
 import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
 
 /**

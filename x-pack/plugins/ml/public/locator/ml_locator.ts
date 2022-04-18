@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LocatorDefinition, KibanaLocation } from '../../../../../src/plugins/share/public';
+import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
 import {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,

@@ -10,7 +10,7 @@ import {
   overlayServiceMock,
   httpServiceMock,
   notificationServiceMock,
-} from '../../../core/public/mocks';
+} from '@kbn/core/public/mocks';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
 import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';

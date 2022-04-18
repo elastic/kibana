@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsFindOptions, SavedObjectsFindResult } from 'kibana/server';
-import { loggingSystemMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { SavedObjectsFindOptions, SavedObjectsFindResult } from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 // eslint-disable-next-line no-restricted-imports
 import {

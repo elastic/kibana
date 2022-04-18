@@ -6,24 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { DashboardSessionStorage } from '../lib';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { getSavedDashboardMock } from './get_saved_dashboard_mock';
-import { UrlForwardingStart } from '../../../../url_forwarding/public';
-import { NavigationPublicPluginStart } from '../../services/navigation';
-import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
-import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-import { DataViewsContract, SavedQueryService } from '../../services/data';
-import { savedObjectsPluginMock } from '../../../../saved_objects/public/mocks';
-import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
-import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
-import { PluginInitializerContext, ScopedHistory } from '../../../../../core/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
+import { PluginInitializerContext, ScopedHistory } from '@kbn/core/public';
+import { chromeServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
-import {
-  chromeServiceMock,
-  coreMock,
-  uiSettingsServiceMock,
-} from '../../../../../core/public/mocks';
+import { DataViewsContract, SavedQueryService } from '../../services/data';
+import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
+import { NavigationPublicPluginStart } from '../../services/navigation';
+import { getSavedDashboardMock } from './get_saved_dashboard_mock';
+import { DashboardSessionStorage } from '../lib';
 
 export function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();

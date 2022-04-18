@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
-import type { StartServicesAccessor } from 'kibana/public';
-import { LocatorPublic } from 'src/plugins/share/common';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
-import type { LayerWizard, RenderWizardArguments } from '../../../maps/public';
-import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../maps/common';
-import { SEVERITY_COLOR_RAMP } from '../../common';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
+import type { LayerWizard, RenderWizardArguments } from '@kbn/maps-plugin/public';
+import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import {
   VectorLayerDescriptor,
   VectorStylePropertiesDescriptor,
-} from '../../../maps/common/descriptor_types';
+} from '@kbn/maps-plugin/common/descriptor_types';
+import { SEVERITY_COLOR_RAMP } from '../../common';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import { AnomalySource, AnomalySourceDescriptor } from './anomaly_source';
 
 import { HttpService } from '../application/services/http_service';

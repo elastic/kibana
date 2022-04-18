@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n-react';
 
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   TimelineStatus,
@@ -30,7 +31,7 @@ import {
 } from '../../../../../common/types/timeline';
 import { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
@@ -39,9 +40,8 @@ import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../../store/timeline/model';
 import {
   startSelector,
   endSelector,

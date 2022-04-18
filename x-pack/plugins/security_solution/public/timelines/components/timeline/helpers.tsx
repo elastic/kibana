@@ -15,7 +15,7 @@ import {
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
 import {

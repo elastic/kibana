@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 
 import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
-import { CreateRulePage } from './index';
+import { CreateRulePage } from '.';
 import { useUserData } from '../../../../components/user_info';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';

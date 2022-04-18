@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 
 import { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
