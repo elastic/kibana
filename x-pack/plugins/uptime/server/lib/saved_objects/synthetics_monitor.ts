@@ -42,6 +42,12 @@ export const syntheticsMonitor: SavedObjectsType = {
       urls: {
         type: 'text',
       },
+      'url.port': {
+        type: 'keyword',
+      },
+      hosts: {
+        type: 'text',
+      },
       tags: {
         type: 'text',
         fields: {
