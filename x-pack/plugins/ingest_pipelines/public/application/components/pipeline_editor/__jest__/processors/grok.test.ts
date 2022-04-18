@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 const GROK_TYPE = 'grok';
 
@@ -14,7 +14,6 @@ describe('Processor: Grok', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
   let clickAddPattern: () => Promise<void>;
-  const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -32,7 +31,7 @@ describe('Processor: Grok', () => {
     onUpdate = jest.fn();
 
     await act(async () => {
-      testBed = await setup(httpSetup, {
+      testBed = await setup({
         value: {
           processors: [],
         },
