@@ -43,9 +43,9 @@ export const waitForVisualizations = async (
 ): Promise<void> => {
   eventLogger.waitForVisualizationStart();
 
-  const logger = eventLogger.kbnLogger;
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
+  const logger = eventLogger.kbnLogger;
   logger.debug(`waiting for ${toEqual} rendered elements to be in the DOM`);
 
   try {

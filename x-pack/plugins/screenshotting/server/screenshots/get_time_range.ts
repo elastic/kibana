@@ -15,7 +15,8 @@ export const getTimeRange = async (
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<string | null> => {
-  const logger = eventLogger.kbnLogger;
+  eventLogger.getTimeRangeStart();
+
   const timeRange = await browser.evaluate(
     {
       fn: (durationAttribute) => {
@@ -35,12 +36,14 @@ export const getTimeRange = async (
       args: [layout.selectors.timefilterDurationAttribute],
     },
     { context: CONTEXT_GETTIMERANGE },
-    logger
+    eventLogger.kbnLogger
   );
 
   if (timeRange) {
-    logger.info(`timeRange: ${timeRange}`);
+    eventLogger.kbnLogger.info(`timeRange: ${timeRange}`);
   }
+
+  eventLogger.getTimeRangeEnd();
 
   return timeRange;
 };
