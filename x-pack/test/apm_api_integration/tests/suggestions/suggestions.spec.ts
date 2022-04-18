@@ -9,11 +9,11 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
+import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function suggestionsTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  ``;
   const apmApiClient = getService('apmApiClient');
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives_metadata[archiveName];

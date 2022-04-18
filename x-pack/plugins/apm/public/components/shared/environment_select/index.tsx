@@ -6,7 +6,7 @@
  */
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
@@ -63,14 +63,11 @@ export function EnvironmentSelect({
     },
   ];
 
-  const onSelect = useCallback(
-    (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      if (changedOptions.length === 1 && changedOptions[0].value) {
-        onChange(changedOptions[0].value);
-      }
-    },
-    [onChange]
-  );
+  const onSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    if (changedOptions.length === 1 && changedOptions[0].value) {
+      onChange(changedOptions[0].value);
+    }
+  };
 
   const { data, status: searchStatus } = useFetcher(
     (callApmApi) => {
@@ -92,14 +89,9 @@ export function EnvironmentSelect({
   );
   const terms = data?.terms ?? [];
 
-  const environmentOptions = useMemo(
-    () => getEnvironmentOptions(availableEnvironments),
-    [availableEnvironments]
-  );
-
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(searchValue === ''
-      ? environmentOptions
+      ? getEnvironmentOptions(availableEnvironments)
       : terms.map((name) => {
           return { label: name, value: name };
         })),
