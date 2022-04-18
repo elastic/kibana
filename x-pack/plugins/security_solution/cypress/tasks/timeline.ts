@@ -73,7 +73,7 @@ import {
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 
-import { closeFieldsBrowser, filterFieldsBrowser } from '../tasks/fields_browser';
+import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 export const hostExistsQuery = 'host.name: *';
 
@@ -109,7 +109,7 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
       $el.find(NOTES_TAB_BUTTON).trigger('click');
       return $el.find(NOTES_TEXT_AREA);
     })
-    .should('be.visible');
+    .should('exist');
   return cy.root().find(NOTES_TAB_BUTTON);
 };
 
@@ -281,7 +281,9 @@ export const openTimelineInspectButton = () => {
 
 export const openTimelineFromSettings = () => {
   const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').pipe(click);
+  cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).pipe(click);
 };
 

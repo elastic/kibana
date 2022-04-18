@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ErrorToastOptions, Toast } from 'kibana/public';
+import { ErrorToastOptions, Toast } from '@kbn/core/public';
 import { useState } from 'react';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../lib/kibana';
 
 export const useErrorToast = () => {
   const [errorToast, setErrorToast] = useState<Toast>();
@@ -19,8 +19,10 @@ export const useErrorToast = () => {
       toasts.remove(errorToast);
     }
     if (error) {
-      // @ts-expect-error update types
-      setErrorToast(toasts.addError(error, opts));
+      setErrorToast(
+        // @ts-expect-error update types
+        toasts.addError(error, { title: error?.body?.error || error?.body?.message, ...opts })
+      );
     }
   };
 };

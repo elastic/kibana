@@ -12,30 +12,26 @@ import {
   render as reactTestLibRender,
   MatcherFunction,
   RenderOptions,
-  Nullish,
 } from '@testing-library/react';
 import { Router, Route } from 'react-router-dom';
 import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiPageTemplate } from '@elastic/eui';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { mockState } from '../__mocks__/uptime_store.mock';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
-import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
-import {
-  KibanaContextProvider,
-  KibanaServices,
-} from '../../../../../../src/plugins/kibana_react/public';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 import { stringifyUrlParams } from './stringify_url_params';
 import { ClientPluginsStart } from '../../apps/plugin';
-import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
 import { kibanaService } from '../../state/kibana_service';
 
@@ -289,7 +285,7 @@ const forNearestTag =
   (tag: string) =>
   (getByText: (f: MatcherFunction) => HTMLElement | null) =>
   (text: string): HTMLElement | null =>
-    getByText((_content: string, node: Nullish<Element>) => {
+    getByText((_content: string, node: Element | null) => {
       if (!node) return false;
       const noOtherButtonHasText = Array.from(node.children).every(
         (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== tag)
@@ -345,7 +341,7 @@ const finderWithClassWrapper =
     customAttribute?: keyof Element | keyof HTMLElement
   ) =>
   (text: string): HTMLElement | null =>
-    getterFn((_content: string, node: Nullish<Element>) => {
+    getterFn((_content: string, node: Element | null) => {
       if (!node) return false;
       // There are actually properties that are not in Element but which
       // appear on the `node`, so we must cast the customAttribute as a keyof Element

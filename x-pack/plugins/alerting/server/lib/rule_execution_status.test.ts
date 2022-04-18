@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  AlertExecutionStatusErrorReasons,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
   RuleExecutionState,
 } from '../types';
 import {
@@ -115,7 +115,7 @@ describe('RuleExecutionStatus', () => {
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.warning).toEqual({
         message: translations.taskRunner.warning.maxExecutableActions,
-        reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
       });
       expect(status.status).toBe('warning');
       expect(status.error).toBe(undefined);
@@ -136,7 +136,7 @@ describe('RuleExecutionStatus', () => {
 
     test('error with a reason', () => {
       const status = executionStatusFromError(
-        new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, new Error('hoo!'))
+        new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, new Error('hoo!'))
       );
       expect(status.status).toBe('error');
       expect(status.error).toMatchInlineSnapshot(`
@@ -151,7 +151,7 @@ describe('RuleExecutionStatus', () => {
   describe('ruleExecutionStatusToRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z');
     const status = 'ok';
-    const reason = AlertExecutionStatusErrorReasons.Decrypt;
+    const reason = RuleExecutionStatusErrorReasons.Decrypt;
     const error = { reason, message: 'wops' };
 
     test('status without an error', () => {
@@ -213,7 +213,7 @@ describe('RuleExecutionStatus', () => {
   describe('ruleExecutionStatusFromRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z').toISOString();
     const status = 'active';
-    const reason = AlertExecutionStatusErrorReasons.Execute;
+    const reason = RuleExecutionStatusErrorReasons.Execute;
     const error = { reason, message: 'wops' };
 
     test('no input', () => {

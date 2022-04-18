@@ -6,18 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import type { Logger, LogMeta } from 'kibana/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
-import {
-  Comparator,
-  InventoryMetricConditions,
-} from '../../../../plugins/infra/common/alerting/metrics';
+import { Comparator, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   InventoryItemType,
   SnapshotMetricType,
-} from '../../../../plugins/infra/common/inventory_models/types';
-import { evaluateCondition } from '../../../../plugins/infra/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
-import { InfraSource } from '../../../../plugins/infra/server/lib/sources';
+} from '@kbn/infra-plugin/common/inventory_models/types';
+import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
+import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 
@@ -93,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
     source,
     logQueryFields: void 0,
     compositeSize: 10000,
-    startTime: DATES['8.0.0'].hosts_only.max,
+    executionTimestamp: new Date(DATES['8.0.0'].hosts_only.max),
     logger,
   };
 
@@ -451,7 +448,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          startTime: DATES['8.0.0'].pods_only.max,
+          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
           nodeType: 'pod' as InventoryItemType,
           condition: {
             ...baseCondition,
@@ -492,7 +489,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 5 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          startTime: DATES['8.0.0'].pods_only.max,
+          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
           logQueryFields: { indexPattern: 'metricbeat-*' },
           nodeType: 'pod',
           condition: {

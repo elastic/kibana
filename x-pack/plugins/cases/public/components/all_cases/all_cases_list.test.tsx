@@ -17,7 +17,7 @@ import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses, CommentType } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -29,15 +29,15 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
-import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
-import { usePostComment } from '../../containers/use_post_comment';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 
-jest.mock('../../containers/use_post_comment');
+jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
@@ -61,7 +61,7 @@ const useGetTagsMock = useGetTags as jest.Mock;
 const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
-const usePostCommentMock = usePostComment as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -88,7 +88,10 @@ describe('AllCasesListGeneric', () => {
   const fetchCasesStatus = jest.fn();
   const onRowClick = jest.fn();
   const emptyTag = getEmptyTagValue().props.children;
-  usePostCommentMock.mockReturnValue({ status: { isLoading: false }, postComment: jest.fn() });
+  useCreateAttachmentsMock.mockReturnValue({
+    status: { isLoading: false },
+    createAttachments: jest.fn(),
+  });
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -515,46 +518,6 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should call postComment when a case is selected in isSelectorView=true and has attachments', async () => {
-    const postCommentMockedValue = { status: { isLoading: false }, postComment: jest.fn() };
-    usePostCommentMock.mockReturnValueOnce(postCommentMockedValue);
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList
-          isSelectorView={true}
-          attachments={[
-            {
-              type: CommentType.alert,
-              alertId: 'alert-id-201',
-              owner: 'test',
-              index: 'index-id-1',
-              rule: {
-                id: 'rule-id-1',
-                name: 'Awesome myrule',
-              },
-            },
-          ]}
-        />
-      </TestProviders>
-    );
-    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
-    await waitFor(() => {
-      expect(postCommentMockedValue.postComment).toHaveBeenCalledWith({
-        caseId: '1',
-        data: {
-          alertId: 'alert-id-201',
-          index: 'index-id-1',
-          owner: 'test',
-          rule: {
-            id: 'rule-id-1',
-            name: 'Awesome myrule',
-          },
-          type: 'alert',
-        },
-      });
-    });
-  });
-
   it('should call onRowClick with no cases and isSelectorView=true', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
@@ -851,15 +814,16 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should hide the alerts column if the alert feature is disabled', async () => {
-    expect.assertions(1);
-
-    const { findAllByTestId } = render(
+    const result = render(
       <TestProviders features={{ alerts: { enabled: false } }}>
         <AllCasesList />
       </TestProviders>
     );
 
-    await expect(findAllByTestId('case-table-column-alertsCount')).rejects.toThrow();
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('case-table-column-alertsCount').length).toBe(0);
+    });
   });
 
   it('should show the alerts column if the alert feature is enabled', async () => {

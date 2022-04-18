@@ -10,6 +10,7 @@ module.exports = {
 
   plugins: [
     '@kbn/eslint-plugin-eslint',
+    '@kbn/eslint-plugin-imports',
     'prettier',
   ],
 
@@ -109,5 +110,7 @@ module.exports = {
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
+    '@kbn/imports/no_unresolvable_imports': 'error',
+    '@kbn/imports/uniform_imports': 'error',
   },
 };

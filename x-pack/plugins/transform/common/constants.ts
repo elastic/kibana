@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { TransformHealthTests } from './types/alerting';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
@@ -144,3 +144,9 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
     ),
   },
 };
+
+// Transform API default values https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html
+export const DEFAULT_CONTINUOUS_MODE_DELAY = '60s';
+export const DEFAULT_TRANSFORM_FREQUENCY = '1m';
+export const DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND = null;
+export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE = 500;

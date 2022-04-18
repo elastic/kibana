@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsServerStart, ExpressionsServerSetup } from '../../expressions/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { imageFunction } from '../common/expression_functions';
 
 interface SetupDeps {

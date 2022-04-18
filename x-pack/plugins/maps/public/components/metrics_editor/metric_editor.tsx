@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IndexPatternField } from 'src/plugins/data/public';
+import type { IndexPatternField } from '@kbn/data-plugin/public';
 import { MetricSelect } from './metric_select';
 import { SingleFieldSelect } from '../single_field_select';
 import { AggDescriptor } from '../../../common/descriptor_types';

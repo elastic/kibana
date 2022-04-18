@@ -22,9 +22,6 @@ import {
 import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   Capabilities,
   DocLinksStart,
@@ -33,13 +30,16 @@ import type {
   IHttpFetchError,
   NotificationsStart,
   ScopedHistory,
-} from 'src/core/public';
-import type { DataViewsContract } from 'src/plugins/data/public';
+} from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-plugin/public';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import type { KibanaFeature } from '../../../../../features/common';
-import type { FeaturesPluginStart } from '../../../../../features/public';
-import type { Space, SpacesApiUi } from '../../../../../spaces/public';
 import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,
@@ -69,7 +69,7 @@ import { RoleValidator } from './validate_role';
 interface Props {
   action: 'edit' | 'clone';
   roleName?: string;
-  dataViews: DataViewsContract;
+  dataViews?: DataViewsContract;
   userAPIClient: PublicMethodsOf<UserAPIClient>;
   indicesAPIClient: PublicMethodsOf<IndicesAPIClient>;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -289,6 +289,13 @@ export const EditRolePage: FunctionComponent<Props> = ({
   history,
   spacesApiUi,
 }) => {
+  if (!dataViews) {
+    // The dataViews plugin is technically marked as an optional dependency because we don't need to pull it in for Anonymous pages (such
+    // as the login page). That said, it _is_ required for this page to function correctly, so we throw an error here if it's not available.
+    // We don't ever expect Kibana to work correctly if the dataViews plugin is not available (and we don't expect this to happen at all),
+    // so this error edge case is an acceptable tradeoff.
+    throw new Error('The dataViews plugin is required for this page, but it is not available');
+  }
   const backToRoleList = useCallback(() => history.push('/'), [history]);
 
   // We should keep the same mutable instance of Validator for every re-render since we'll

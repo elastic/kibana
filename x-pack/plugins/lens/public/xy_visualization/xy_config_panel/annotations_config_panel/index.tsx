@@ -8,9 +8,9 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import moment from 'moment';
-import { EventAnnotationConfig } from 'src/plugins/event_annotation/common/types';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common/types';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYAnnotationLayerConfig } from '../../types';
 import { FormatFactory } from '../../../../common';

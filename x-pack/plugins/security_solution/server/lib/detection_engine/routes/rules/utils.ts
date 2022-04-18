@@ -8,15 +8,15 @@
 import { countBy, partition } from 'lodash/fp';
 import uuid from 'uuid';
 import { Action } from '@kbn/securitysolution-io-ts-alerting-types';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
 
+import { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
+import { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { PartialAlert, FindResult } from '../../../../../../alerting/server';
-import { ActionsClient, FindActionResult } from '../../../../../../actions/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
@@ -121,7 +121,7 @@ export const transformFindAlerts = (
 };
 
 export const transform = (
-  rule: PartialAlert<RuleParams>,
+  rule: PartialRule<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,
   isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null

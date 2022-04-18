@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
-  AlertActionParams,
+  RuleActionParams,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertTypeParams,
+  RuleTypeParams,
 } from '../types';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 
 interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
@@ -26,8 +26,8 @@ interface TransformActionParamsOptions {
   alertActionGroup: string;
   alertActionGroupName: string;
   alertActionSubgroup?: string;
-  actionParams: AlertActionParams;
-  alertParams: AlertTypeParams;
+  actionParams: RuleActionParams;
+  alertParams: RuleTypeParams;
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
@@ -51,7 +51,7 @@ export function transformActionParams({
   state,
   kibanaBaseUrl,
   alertParams,
-}: TransformActionParamsOptions): AlertActionParams {
+}: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts

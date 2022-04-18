@@ -8,12 +8,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
 import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
@@ -25,7 +25,7 @@ import { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/al
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
   completeRule: CompleteRule<MachineLearningRuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;

@@ -9,11 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { kibanaService } from '../../state/kibana_service';
 import { MONITOR_ADD_ROUTE } from '../../../common/constants';
 import { useEnablement } from './hooks/use_enablement';
 import { useSyntheticsServiceAllowed } from './hooks/use_service_allowed';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const AddMonitorBtn = () => {
   const history = useHistory();
@@ -194,7 +194,7 @@ const SYNTHETICS_DISABLE_TOOL_TIP_MESSAGE = i18n.translate(
   'xpack.uptime.monitorManagement.syntheticsDisableToolTip',
   {
     defaultMessage:
-      'Disabling Monitor Management with immediately stop the execution of monitors in all test locations and prevent the creation of new monitors.',
+      'Disabling Monitor Management will immediately stop the execution of monitors in all test locations and prevent the creation of new monitors.',
   }
 );
 

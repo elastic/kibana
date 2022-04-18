@@ -8,10 +8,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { coreMock } from '../../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+
 import { ResetSessionPage } from './reset_session_page';
 
-jest.mock('src/core/server/rendering/views/fonts', () => ({
+jest.mock('@kbn/core/server/rendering/views/fonts', () => ({
   Fonts: () => <>MockedFonts</>,
 }));
 

@@ -128,18 +128,17 @@ export type {
   IndexPatternExpressionType,
   IndexPatternLoadStartDependencies,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../data_views/common';
+} from '@kbn/data-views-plugin/common';
 export type {
   IndexPatternsContract,
   DataViewsContract,
   DataViewListItem,
-} from '../../data_views/common';
+} from '@kbn/data-views-plugin/common';
 export {
   RUNTIME_FIELD_TYPES,
   DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
   isFilterable,
   fieldList,
   DataViewField,
@@ -156,4 +155,4 @@ export {
   isMultiField,
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
-} from '../../data_views/common';
+} from '@kbn/data-views-plugin/common';

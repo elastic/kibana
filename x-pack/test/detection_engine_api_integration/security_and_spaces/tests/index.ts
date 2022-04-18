@@ -59,21 +59,21 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // That split here enable us on using a different ciGroup to run the tests
     // listed on ./exception_operators_data_types/index
     describe('', function () {
-      loadTestFile(require.resolve('./exception_operators_data_types/index'));
+      loadTestFile(require.resolve('./exception_operators_data_types'));
     });
 
     // That split here enable us on using a different ciGroup to run the tests
     // listed on ./keyword_family/index
     describe('', function () {
-      loadTestFile(require.resolve('./keyword_family/index'));
+      loadTestFile(require.resolve('./keyword_family'));
     });
 
     describe('', function () {
-      loadTestFile(require.resolve('./alerts/index'));
+      loadTestFile(require.resolve('./alerts'));
     });
 
     describe('', function () {
-      loadTestFile(require.resolve('./telemetry/index'));
+      loadTestFile(require.resolve('./telemetry'));
     });
   });
 };

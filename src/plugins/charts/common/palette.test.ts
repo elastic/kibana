@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   palette,
   defaultCustomColors,
   systemPalette,
-  PaletteOutput,
   CustomPaletteState,
   CustomPaletteArguments,
 } from './palette';
-import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 describe('palette', () => {
   const fn = functionWrapper(palette()) as (

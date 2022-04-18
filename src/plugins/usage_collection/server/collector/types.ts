@@ -6,41 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-/** Types matching number values **/
-export type AllowedSchemaNumberTypes =
-  | 'long'
-  | 'integer'
-  | 'short'
-  | 'byte'
-  | 'double'
-  | 'float'
-  | 'date';
-/** Types matching string values **/
-export type AllowedSchemaStringTypes = 'keyword' | 'text' | 'date';
-/** Types matching boolean values **/
-export type AllowedSchemaBooleanTypes = 'boolean';
+import type { PossibleSchemaTypes } from '@elastic/analytics';
 
-/**
- * Possible type values in the schema
- */
-export type AllowedSchemaTypes =
-  | AllowedSchemaNumberTypes
-  | AllowedSchemaStringTypes
-  | AllowedSchemaBooleanTypes;
-
-/**
- * Helper to ensure the declared types match the schema types
- */
-export type PossibleSchemaTypes<U> = U extends string
-  ? AllowedSchemaStringTypes
-  : U extends number
-  ? AllowedSchemaNumberTypes
-  : U extends boolean
-  ? AllowedSchemaBooleanTypes
-  : // allow any schema type from the union if typescript is unable to resolve the exact U type
-    AllowedSchemaTypes;
+export type {
+  AllowedSchemaTypes,
+  AllowedSchemaStringTypes,
+  AllowedSchemaBooleanTypes,
+  AllowedSchemaNumberTypes,
+  PossibleSchemaTypes,
+} from '@elastic/analytics';
 
 /**
  * Helper to find out whether to keep recursively looking or if we are on an end value

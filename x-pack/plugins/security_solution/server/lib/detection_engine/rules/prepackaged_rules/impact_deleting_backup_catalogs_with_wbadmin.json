@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Deleting Backup Catalogs with Wbadmin",
+  "note": "## Triage and analysis\n\n### Investigating Deleting Backup Catalogs with Wbadmin\n\nWindows Server Backup stores the details about your backups (what volumes are backed up and where the backups are\nlocated) in a file called a backup catalog, which ransomware victims can use to recover corrupted backup files.\nDeleting these files is a common step in threat actor playbooks.\n\nThis rule identifies the deletion of the backup catalog using the `wbadmin.exe` utility.\n\n#### Possible investigation steps\n\n- Investigate the script execution chain (parent process tree).\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Confirm whether the account owner is aware of the operation.\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Check for similar behavior in other hosts on the environment.\n- Check if any files on the host machine have been encrypted.\n\n### False positive analysis\n\n- Administrators can use this command to delete corrupted catalogs, but overall the activity is unlikely to be legitimate.\n\n### Related rules\n\n- Third-party Backup Files Deleted via Unexpected Process - 11ea6bec-ebde-4d71-a8e9-784948f8e3e9\n- Volume Shadow Copy Deleted or Resized via VssAdmin - b5ea4bfe-a1b2-421f-9d47-22a75a6f2921\n- Volume Shadow Copy Deletion via PowerShell - d99a037b-c8e2-47a5-97b9-170d076827c4\n- Volume Shadow Copy Deletion via WMIC - dc9c1f74-dac3-48e3-b47f-eb79db358f57\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent destructive behavior, which is commonly associated with this activity.\n- Reset the password of the involved accounts.\n- If any other destructive action was identified on the host, it is recommended to prioritize the investigation and look\nfor ransomware preparation and execution activities.\n- If any backups were affected:\n  - Perform data recovery locally or restore the backups from replicated copies (cloud, other servers, etc.).\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"wbadmin.exe\" or process.pe.original_file_name == \"WBADMIN.EXE\") and\n  process.args : \"catalog\" and process.args : \"delete\"\n",
   "risk_score": 21,
   "rule_id": "581add16-df76-42bb-af8e-c979bfb39a59",
@@ -42,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 10
+  "version": 11
 }

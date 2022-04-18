@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
 import { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 import { UptimeESClient } from '../../lib';
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { parseRelativeDate } from '../../../../common/lib/get_histogram_interval';
 
 export class QueryContext {
@@ -102,6 +102,17 @@ export class QueryContext {
     // latencies and slowdowns that's dangerous. Making this value larger makes things
     // only slower, but only marginally so, and prevents people from seeing weird
     // behavior.
+
+    if (this.dateRangeEnd === 'now') {
+      return {
+        range: {
+          'monitor.timespan': {
+            gte: 'now-5m',
+            lte: 'now',
+          },
+        },
+      };
+    }
 
     const tsEnd = parseRelativeDate(this.dateRangeEnd, { roundUp: true })!;
     const tsStart = moment(tsEnd).subtract(5, 'minutes');

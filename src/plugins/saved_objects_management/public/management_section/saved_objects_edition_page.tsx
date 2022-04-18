@@ -10,8 +10,8 @@ import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
-import { RedirectAppLinks } from '../../../kibana_react/public';
+import { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectEdition } from './object_view';
 import './saved_objects_edition_page.scss';
 

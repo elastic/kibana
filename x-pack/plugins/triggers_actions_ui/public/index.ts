@@ -8,7 +8,8 @@
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export type {
@@ -63,4 +64,4 @@ export { loadActionTypes } from './application/lib/action_connector_api/connecto
 
 export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export type { TriggersAndActionsUiServices } from '../public/application/app';
+export type { TriggersAndActionsUiServices } from './application/app';

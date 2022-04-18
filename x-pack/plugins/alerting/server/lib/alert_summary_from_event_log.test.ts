@@ -6,8 +6,8 @@
  */
 
 import { random, mean } from 'lodash';
-import { SanitizedAlert, AlertSummary } from '../types';
-import { IValidatedEvent } from '../../../event_log/server';
+import { SanitizedRule, AlertSummary } from '../types';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 import { alertSummaryFromEventLog } from './alert_summary_from_event_log';
 
@@ -716,11 +716,11 @@ export class EventsFactory {
   }
 }
 
-function createRule(overrides: Partial<SanitizedAlert>): SanitizedAlert<{ bar: boolean }> {
+function createRule(overrides: Partial<SanitizedRule>): SanitizedRule<{ bar: boolean }> {
   return { ...BaseRule, ...overrides };
 }
 
-const BaseRule: SanitizedAlert<{ bar: boolean }> = {
+const BaseRule: SanitizedRule<{ bar: boolean }> = {
   id: 'rule-123',
   alertTypeId: '123',
   schedule: { interval: '10s' },

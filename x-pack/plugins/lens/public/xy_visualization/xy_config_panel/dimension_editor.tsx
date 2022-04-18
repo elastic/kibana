@@ -8,14 +8,11 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { YAxisMode, YConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
-import {
-  YAxisMode,
-  YConfig,
-} from '../../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
 import { PalettePicker, useDebouncedValue } from '../../shared_components';

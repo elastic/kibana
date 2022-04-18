@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export function trackLegacyRBACExemption(source: string, usageCounter?: UsageCounter) {
   if (usageCounter) {

@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Port Forwarding Rule Addition",
+  "note": "## Triage and analysis\n\n### Investigating Port Forwarding Rule Addition\n\nNetwork port forwarding is a mechanism to redirect incoming TCP connections (IPv4 or IPv6) from the local TCP port to\nany other port number, or even to a port on a remote computer.\n\nAttackers may configure port forwarding rules to bypass network segmentation restrictions, using the host as a jump box\nto access previously unreachable systems.\n\nThis rule monitors the modifications to the `HKLM\\SYSTEM\\*ControlSet*\\Services\\PortProxy\\v4tov4\\` subkeys.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree).\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Check for similar behavior in other hosts on the environment.\n- Identify the target host IP address, verify if connections were made from the host where the modification occurred,\nand check what credentials were used to perform it.\n  - Investigate suspicious login activity, such as unauthorized access and logins from outside working hours and unusual locations.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. Analysts can dismiss the alert if the Administrator is aware of the activity\nand there are justifications for this configuration.\n- If this activity is expected and noisy in your environment, consider adding exceptions \u2014 preferably with a combination\nof user and command line conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Delete the port forwarding rule.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If potential malware or credential compromise activities were discovered during the alert triage, activate the respective\nincident response plan.\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\PortProxy\\\\v4tov4\\\\*\"\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2019/01/bypassing-network-restrictions-through-rdp-tunneling.html"
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 6
 }

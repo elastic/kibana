@@ -6,7 +6,7 @@
  */
 
 import { Readable, Writable } from 'stream';
-import { kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { CSV_JOB_TYPE, PDF_JOB_TYPE } from '../../../common/constants';
 import { ReportingCore } from '../..';
 import { ContentStream, getContentStream } from '../../lib';

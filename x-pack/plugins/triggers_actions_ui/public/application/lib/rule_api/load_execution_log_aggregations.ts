@@ -7,16 +7,16 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 import {
-  IExecutionLogResult,
   IExecutionLog,
   ExecutionLogSortFields,
-} from '../../../../../alerting/common';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+  IExecutionLogWithErrorsResult,
+} from '@kbn/alerting-plugin/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 const getRenamedLog = (data: IExecutionLog) => {
   const {
@@ -36,9 +36,12 @@ const getRenamedLog = (data: IExecutionLog) => {
   };
 };
 
-const rewriteBodyRes: RewriteRequestCase<IExecutionLogResult> = ({ data, total }: any) => ({
+const rewriteBodyRes: RewriteRequestCase<IExecutionLogWithErrorsResult> = ({
+  data,
+  ...rest
+}: any) => ({
   data: data.map((log: IExecutionLog) => getRenamedLog(log)),
-  total,
+  ...rest,
 });
 
 const getFilter = (filter: string[] | undefined) => {
@@ -77,7 +80,7 @@ export const loadExecutionLogAggregations = async ({
 }: LoadExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
 
-  const result = await http.get<AsApiContract<IExecutionLogResult>>(
+  const result = await http.get<AsApiContract<IExecutionLogWithErrorsResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_log`,
     {
       query: {

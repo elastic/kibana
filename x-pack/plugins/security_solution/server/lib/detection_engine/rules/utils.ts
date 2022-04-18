@@ -29,7 +29,8 @@ import type {
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 import { SavedObjectReference } from 'kibana/server';
-import { AlertAction, AlertNotifyWhenType, SanitizedAlert } from '../../../../../alerting/common';
+import { RuleAction, RuleNotifyWhenType, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
@@ -62,7 +63,6 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
-import { RulesClient } from '../../../../../alerting/server';
 // eslint-disable-next-line no-restricted-imports
 import {
   LegacyIRuleActionsAttributes,
@@ -199,7 +199,7 @@ export const calculateName = ({
  */
 export const transformToNotifyWhen = (
   throttle: string | null | undefined
-): AlertNotifyWhenType | null => {
+): RuleNotifyWhenType | null => {
   if (throttle == null || throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
     return null; // Although I return null, this does not change the value of the "notifyWhen" and it keeps the current value of "notifyWhen"
   } else if (throttle === NOTIFICATION_THROTTLE_RULE) {
@@ -237,7 +237,7 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
  * @returns The actions of the FullResponseSchema
  */
 export const transformActions = (
-  alertAction: AlertAction[] | undefined,
+  alertAction: RuleAction[] | undefined,
   legacyRuleActions: LegacyRuleActions | null | undefined
 ): FullResponseSchema['actions'] => {
   if (alertAction != null && alertAction.length !== 0) {
@@ -259,7 +259,7 @@ export const transformActions = (
  * @returns The "security_solution" throttle
  */
 export const transformFromAlertThrottle = (
-  rule: SanitizedAlert<RuleParams>,
+  rule: SanitizedRule<RuleParams>,
   legacyRuleActions: LegacyRuleActions | null | undefined
 ): string => {
   if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
@@ -293,9 +293,9 @@ export const maybeMute = async ({
   muteAll,
   throttle,
 }: {
-  id: SanitizedAlert['id'];
+  id: SanitizedRule['id'];
   rulesClient: RulesClient;
-  muteAll: SanitizedAlert<RuleParams>['muteAll'];
+  muteAll: SanitizedRule<RuleParams>['muteAll'];
   throttle: string | null | undefined;
 }): Promise<void> => {
   if (muteAll && throttle !== NOTIFICATION_THROTTLE_NO_ACTIONS) {
@@ -316,11 +316,11 @@ export const getUpdatedActionsParams = ({
   actions,
   references,
 }: {
-  rule: SanitizedAlert<RuleParams>;
+  rule: SanitizedRule<RuleParams>;
   ruleThrottle: string | null;
   actions: LegacyRuleAlertSavedObjectAction[];
   references: SavedObjectReference[];
-}): Omit<SanitizedAlert<RuleParams>, 'id'> => {
+}): Omit<SanitizedRule<RuleParams>, 'id'> => {
   const { id, ...restOfRule } = rule;
 
   const actionReference = references.find((reference) => reference.name === 'action_0');
@@ -353,7 +353,7 @@ export const legacyMigrate = async ({
   rulesClient,
   savedObjectsClient,
   rule,
-}: LegacyMigrateParams): Promise<SanitizedAlert<RuleParams> | null | undefined> => {
+}: LegacyMigrateParams): Promise<SanitizedRule<RuleParams> | null | undefined> => {
   if (rule == null || rule.id == null) {
     return rule;
   }

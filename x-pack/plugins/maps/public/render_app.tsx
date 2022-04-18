@@ -9,8 +9,14 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import type { AppMountParameters } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
+import type { AppMountParameters } from '@kbn/core/public';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+  IKbnUrlStateStorage,
+} from '@kbn/kibana-utils-plugin/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -18,12 +24,8 @@ import {
   getToasts,
   getEmbeddableService,
   getDocLinks,
+  getCore,
 } from './kibana_services';
-import {
-  createKbnUrlStateStorage,
-  withNotifyOnErrors,
-  IKbnUrlStateStorage,
-} from '../../../../src/plugins/kibana_utils/public';
 import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
@@ -94,17 +96,19 @@ export async function renderApp(
     }
 
     return (
-      <MapPage
-        mapEmbeddableInput={mapEmbeddableInput}
-        embeddableId={embeddableId}
-        onAppLeave={onAppLeave}
-        setHeaderActionMenu={setHeaderActionMenu}
-        stateTransfer={stateTransfer}
-        originatingApp={originatingApp}
-        originatingPath={originatingPath}
-        history={history}
-        key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
-      />
+      <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
+        <MapPage
+          mapEmbeddableInput={mapEmbeddableInput}
+          embeddableId={embeddableId}
+          onAppLeave={onAppLeave}
+          setHeaderActionMenu={setHeaderActionMenu}
+          stateTransfer={stateTransfer}
+          originatingApp={originatingApp}
+          originatingPath={originatingPath}
+          history={history}
+          key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
+        />
+      </ExitFullScreenButtonKibanaProvider>
     );
   }
 

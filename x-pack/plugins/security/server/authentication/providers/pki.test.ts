@@ -14,8 +14,8 @@ import { Socket } from 'net';
 import type { PeerCertificate } from 'tls';
 import { TLSSocket } from 'tls';
 
-import type { KibanaRequest, ScopeableRequest } from 'src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import type { KibanaRequest, ScopeableRequest } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';

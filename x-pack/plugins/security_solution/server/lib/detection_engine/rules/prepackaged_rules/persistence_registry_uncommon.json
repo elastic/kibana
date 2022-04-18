@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Detects changes to registry persistence keys that are uncommonly used or modified by legitimate programs. This could be an indication of an adversary's attempt to persist in a stealthy manner.",
+  "description": "Detects changes to registry persistence keys that are not commonly used or modified by legitimate programs. This could be an indication of an adversary's attempt to persist in a stealthy manner.",
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*"
@@ -63,7 +63,9 @@
       ]
     }
   ],
+  "timeline_id": "3e47ef71-ebfc-4520-975c-cb27fc090799",
+  "timeline_title": "Comprehensive Registry Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 5
+  "version": 7
 }

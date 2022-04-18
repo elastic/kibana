@@ -14,8 +14,8 @@ import {
   buildQueryFromFilters,
   DataViewBase,
 } from '@kbn/es-query';
-import { IUiSettingsClient } from 'kibana/public';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../util/index_utils';
@@ -65,6 +65,20 @@ export function createSearchItems(
         combinedQuery = toElasticsearchQuery(ast, indexPattern);
       }
       const filterQuery = buildQueryFromFilters(filters, indexPattern);
+
+      if (combinedQuery.bool === undefined) {
+        combinedQuery.bool = {};
+        // toElasticsearchQuery may add a single multi_match item to the
+        // root of its returned query, rather than putting it inside
+        // a bool.should
+        // in this case, move it to a bool.should
+        if (combinedQuery.multi_match !== undefined) {
+          combinedQuery.bool.should = {
+            multi_match: combinedQuery.multi_match,
+          };
+          delete combinedQuery.multi_match;
+        }
+      }
 
       if (Array.isArray(combinedQuery.bool.filter) === false) {
         combinedQuery.bool.filter =

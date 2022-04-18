@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AppUpdater, CoreSetup } from 'kibana/public';
+import { AppUpdater, CoreSetup } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { createKbnUrlTracker, replaceUrlHashQuery } from '../../../kibana_utils/public';
+import { createKbnUrlTracker, replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { getScopedHistory } from '../kibana_services';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../constants';
 import type { DiscoverSetupPlugins } from '../plugin';

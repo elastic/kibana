@@ -8,7 +8,7 @@ import React from 'react';
 import { EventFiltersForm } from '.';
 import { RenderResult, act } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/dom';
-import { stubIndexPattern } from 'src/plugins/data/common/stubs';
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { getInitialExceptionFromEvent } from '../../../store/utils';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { ecsEventMock } from '../../../test_utils';
@@ -20,7 +20,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { EventFiltersListPageState } from '../../../types';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utils';
 import { GetPolicyListResponse } from '../../../../policy/types';
 import userEvent from '@testing-library/user-event';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';

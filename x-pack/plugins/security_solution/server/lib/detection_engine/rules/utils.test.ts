@@ -16,7 +16,7 @@ import {
   legacyMigrate,
   getUpdatedActionsParams,
 } from './utils';
-import { AlertAction, SanitizedAlert } from '../../../../../alerting/common';
+import { RuleAction, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -360,7 +360,7 @@ describe('utils', () => {
                 params: {},
               },
             ],
-          } as SanitizedAlert<RuleParams>,
+          } as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
@@ -373,7 +373,7 @@ describe('utils', () => {
             muteAll: false,
             notifyWhen: 'onActiveAlert',
             actions: [],
-          } as unknown as SanitizedAlert<RuleParams>,
+          } as unknown as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
@@ -387,7 +387,7 @@ describe('utils', () => {
             notifyWhen: 'onThrottleInterval',
             actions: [],
             throttle: '1d',
-          } as unknown as SanitizedAlert<RuleParams>,
+          } as unknown as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
@@ -407,7 +407,7 @@ describe('utils', () => {
                 params: {},
               },
             ],
-          } as SanitizedAlert<RuleParams>,
+          } as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
@@ -426,7 +426,7 @@ describe('utils', () => {
                 params: {},
               },
             ],
-          } as SanitizedAlert<RuleParams>,
+          } as SanitizedRule<RuleParams>,
           undefined
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
@@ -460,7 +460,7 @@ describe('utils', () => {
                 params: {},
               },
             ],
-          } as SanitizedAlert<RuleParams>,
+          } as SanitizedRule<RuleParams>,
           legacyRuleActions
         )
       ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
@@ -487,7 +487,7 @@ describe('utils', () => {
             muteAll: true,
             notifyWhen: 'onActiveAlert',
             actions: [],
-          } as unknown as SanitizedAlert<RuleParams>,
+          } as unknown as SanitizedRule<RuleParams>,
           legacyRuleActions
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
@@ -514,7 +514,7 @@ describe('utils', () => {
             muteAll: true,
             notifyWhen: 'onActiveAlert',
             actions: null,
-          } as unknown as SanitizedAlert<RuleParams>,
+          } as unknown as SanitizedRule<RuleParams>,
           legacyRuleActions
         )
       ).toEqual(NOTIFICATION_THROTTLE_RULE);
@@ -523,7 +523,7 @@ describe('utils', () => {
 
   describe('#transformActions', () => {
     test('It transforms two alert actions', () => {
-      const alertAction: AlertAction[] = [
+      const alertAction: RuleAction[] = [
         {
           id: 'id_1',
           group: 'group',
@@ -556,7 +556,7 @@ describe('utils', () => {
     });
 
     test('It transforms two alert actions but not a legacyRuleActions if this is also passed in', () => {
-      const alertAction: AlertAction[] = [
+      const alertAction: RuleAction[] = [
         {
           id: 'id_1',
           group: 'group',
@@ -601,7 +601,7 @@ describe('utils', () => {
     });
 
     test('It will transform the legacyRuleActions if the alertAction is an empty array', () => {
-      const alertAction: AlertAction[] = [];
+      const alertAction: RuleAction[] = [];
       const legacyRuleActions: LegacyRuleActions = {
         id: 'id_1',
         ruleThrottle: '',

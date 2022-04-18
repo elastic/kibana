@@ -6,11 +6,11 @@
  */
 
 import deepMerge from 'deepmerge';
-import type { Logger, LogMeta } from 'kibana/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common/constants';
 import type { TaskRunMetrics } from '../../../common/types';
 import { IReport } from '../store';
-import { ActionType } from './';
+import { ActionType } from '.';
 import { EcsLogAdapter } from './adapter';
 import {
   ClaimedTask,
@@ -149,11 +149,12 @@ export function reportingEventLoggerFactory(logger: Logger) {
 
     logClaimTask({ queueDurationMs }: ExecutionClaimMetrics): ClaimedTask {
       const message = `claimed report ${this.report._id}`;
+      const queueDurationNs = queueDurationMs * 1000000;
       const event = deepMerge(
         {
           message,
           kibana: { reporting: { actionType: ActionType.CLAIM_TASK } },
-          event: { duration: queueDurationMs },
+          event: { duration: queueDurationNs }, // this field is nanoseconds by ECS definition
         } as Partial<ClaimedTask>,
         this.eventObj
       );

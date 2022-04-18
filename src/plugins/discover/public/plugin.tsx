@@ -16,19 +16,25 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
-import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
-import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
-import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { SharePluginStart, SharePluginSetup } from 'src/plugins/share/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+} from '@kbn/core/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { EuiLoadingContent } from '@elastic/eui';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
-import { SavedObjectsStart } from '../../saved_objects/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
@@ -43,15 +49,10 @@ import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from './locator';
 import { SearchEmbeddableFactory } from './embeddable';
-import { UsageCollectionSetup } from '../../usage_collection/public';
-import { IndexPatternFieldEditorStart } from '../../../plugins/data_view_field_editor/public';
 import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
-import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
-import { DataViewEditorStart } from '../../../plugins/data_view_editor/public';
 import { useDiscoverServices } from './utils/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 
@@ -170,6 +171,7 @@ export interface DiscoverStartPlugins {
   usageCollection?: UsageCollectionSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 /**
@@ -274,7 +276,12 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        const services = buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+        const services = buildServices(
+          coreStart,
+          discoverStartPlugins,
+          this.initializerContext,
+          this.locator!
+        );
 
         // make sure the index pattern list is up to date
         await discoverStartPlugins.data.indexPatterns.clearCache();
@@ -364,7 +371,7 @@ export class DiscoverPlugin
 
     const getDiscoverServices = async () => {
       const [coreStart, discoverStartPlugins] = await core.getStartServices();
-      return buildServices(coreStart, discoverStartPlugins, this.initializerContext);
+      return buildServices(coreStart, discoverStartPlugins, this.initializerContext, this.locator!);
     };
 
     const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServices);

@@ -20,7 +20,7 @@ import {
   formatSortForTermsSort,
   getExecutionEventAggregation,
   getProviderAndActionFilter,
-} from './index';
+} from '.';
 
 describe('getExecutionEventAggregation', () => {
   test('should throw error when given bad maxExecutions field', () => {
@@ -40,11 +40,11 @@ describe('getExecutionEventAggregation', () => {
     expect(() => {
       getExecutionEventAggregation({
         maxExecutions: 5,
-        page: -1,
+        page: 0,
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }],
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid page field \\"-1\\" - must be greater than 0"`);
+    }).toThrowErrorMatchingInlineSnapshot(`"Invalid page field \\"0\\" - must be greater than 0"`);
   });
 
   test('should throw error when given bad perPage field', () => {
@@ -128,7 +128,7 @@ describe('getExecutionEventAggregation', () => {
                   },
                 },
               ],
-              from: 20,
+              from: 10,
               size: 10,
               gap_policy: 'insert_zeros',
             },

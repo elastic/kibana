@@ -6,8 +6,8 @@
  */
 
 import { snakeCase } from 'lodash';
-import { AlertTypeParams, MappedParams, MappedParamsProperties } from '../../types';
-import { SavedObjectAttribute } from '../../../../../../src/core/server';
+import { SavedObjectAttribute } from '@kbn/core/server';
+import { RuleTypeParams, MappedParams, MappedParamsProperties } from '../../types';
 import {
   iterateFilterKureyNode,
   IterateFilterKureyNodeParams,
@@ -32,7 +32,7 @@ const SEVERITY_MAP: Record<string, string> = {
  * The function will match params present in MAPPED_PARAMS_PROPERTIES and
  * return an empty object if nothing is matched.
  */
-export const getMappedParams = (params: AlertTypeParams) => {
+export const getMappedParams = (params: RuleTypeParams) => {
   return Object.entries(params).reduce<MappedParams>((result, [key, value]) => {
     const snakeCaseKey = snakeCase(key);
 

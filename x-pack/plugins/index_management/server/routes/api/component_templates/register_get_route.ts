@@ -13,7 +13,7 @@ import {
 } from '../../../../common/lib';
 import { ComponentTemplateFromEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   name: schema.string(),

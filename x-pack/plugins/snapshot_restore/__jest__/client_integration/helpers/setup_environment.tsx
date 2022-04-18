@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { i18n } from '@kbn/i18n';
 import { LocationDescriptorObject } from 'history';
 
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { HttpSetup } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { setUiMetricService, httpService } from '../../../public/application/services/http';
 import {
   breadcrumbService,
@@ -21,8 +20,6 @@ import { AppContextProvider } from '../../../public/application/app_context';
 import { textService } from '../../../public/application/services/text';
 import { init as initHttpRequests } from './http_requests';
 import { UiMetricService } from '../../../public/application/services';
-
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
 const history = scopedHistoryMock.create();
 history.createHref.mockImplementation((location: LocationDescriptorObject) => {
@@ -48,18 +45,11 @@ const appDependencies = {
 };
 
 export const setupEnvironment = () => {
-  // @ts-ignore
-  httpService.setup(mockHttpClient);
   breadcrumbService.setup(() => undefined);
   textService.setup(i18n);
   docTitleService.setup(() => undefined);
 
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
-
-  return {
-    server,
-    httpRequestsMockHelpers,
-  };
+  return initHttpRequests();
 };
 
 /**
@@ -70,9 +60,16 @@ export const setupEnvironment = () => {
   this.terminate = () => {};
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) =>
-  (
+export const WithAppDependencies = (Comp: any, httpSetup?: HttpSetup) => (props: any) => {
+  // We need to optionally setup the httpService since some cit helpers (such as snapshot_list.helpers)
+  // use jest mocks to stub the fetch hooks instead of mocking api responses.
+  if (httpSetup) {
+    httpService.setup(httpSetup);
+  }
+
+  return (
     <AppContextProvider value={appDependencies as any}>
       <Comp {...props} />
     </AppContextProvider>
   );
+};

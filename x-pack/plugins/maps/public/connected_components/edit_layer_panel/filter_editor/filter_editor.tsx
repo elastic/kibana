@@ -23,9 +23,9 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { DataView, Query } from 'src/plugins/data/common';
+import type { DataView, Query } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../common/constants';
-import { getIndexPatternService, getData } from '../../../kibana_services';
+import { getIndexPatternService, getData, getSearchBar } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 import { ILayer } from '../../../classes/layers/layer';
@@ -122,7 +122,7 @@ export class FilterEditor extends Component<Props, State> {
 
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
-    const { SearchBar } = getData().ui;
+    const SearchBar = getSearchBar();
 
     return (
       <EuiPopover

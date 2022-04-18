@@ -11,19 +11,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { createExploratoryViewUrl } from '../../../../../observability/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
-import {
-  MONITOR_MANAGEMENT_ROUTE,
-  MONITOR_ROUTE,
-  SETTINGS_ROUTE,
-} from '../../../../common/constants';
+import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
 import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
+import { ManageMonitorsBtn } from './manage_monitors_btn';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -76,21 +73,7 @@ export function ActionMenuContent(): React.ReactElement {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      <EuiHeaderLink
-        aria-label={i18n.translate('xpack.uptime.page_header.manageLink.label', {
-          defaultMessage: 'Navigate to the Uptime Monitor Management page',
-        })}
-        color="text"
-        data-test-subj="management-page-link"
-        href={history.createHref({
-          pathname: MONITOR_MANAGEMENT_ROUTE + '/all',
-        })}
-      >
-        <FormattedMessage
-          id="xpack.uptime.page_header.manageLink"
-          defaultMessage="Monitor Management"
-        />
-      </EuiHeaderLink>
+      <ManageMonitorsBtn />
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {

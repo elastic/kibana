@@ -66,6 +66,8 @@
     "share": "src/plugins/share",
     "sharedUX": "src/plugins/shared_ux",
     "sharedUXComponents": "packages/kbn-shared-ux-components/src",
+    "sharedUXPackages": "packages/shared-ux",
+    "coloring": "packages/kbn-coloring/src",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": [
       "src/plugins/telemetry",
@@ -90,7 +92,8 @@
     "visTypeVega": "src/plugins/vis_types/vega",
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
-    "visualizations": "src/plugins/visualizations"
+    "visualizations": "src/plugins/visualizations",
+    "unifiedSearch": "src/plugins/unified_search"
   },
   "translations": []
 }
