@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { SavedView } from '../../../../containers/saved_view/saved_view';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -23,7 +24,6 @@ import {
   WaffleLegendOptions,
 } from '../hooks/use_waffle_options';
 import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../lib/lib';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';

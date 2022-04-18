@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { MapsEmsPluginPublicStart, MapConfig } from '@kbn/maps-ems-plugin/public';
 import type { IServiceSettings } from './service_settings_types';
 import { ServiceSettings } from './service_settings';
 import { getMapsEms } from '../../../services';
-import type { MapsEmsPluginPublicStart, MapConfig } from '../../../../../../maps_ems/public';
 
 export async function getServiceSettings(): Promise<IServiceSettings> {
   const mapsEms: MapsEmsPluginPublicStart = getMapsEms();

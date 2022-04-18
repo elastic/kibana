@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { OsqueryPlugin } from './plugin';
 
 // This exports static code and TypeScript types,

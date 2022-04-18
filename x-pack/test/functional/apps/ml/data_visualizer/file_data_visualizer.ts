@@ -7,8 +7,8 @@
 
 import path from 'path';
 
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');

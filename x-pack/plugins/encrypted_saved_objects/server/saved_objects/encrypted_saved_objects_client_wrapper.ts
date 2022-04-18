@@ -33,10 +33,10 @@ import type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
-import { SavedObjectsUtils } from '../../../../../src/core/server';
-import type { AuthenticatedUser } from '../../../security/common/model';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
 

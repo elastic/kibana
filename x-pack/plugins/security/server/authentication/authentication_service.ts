@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
@@ -14,7 +13,8 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';

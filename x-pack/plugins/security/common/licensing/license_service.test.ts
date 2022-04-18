@@ -7,7 +7,8 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+
 import { SecurityLicenseService } from './license_service';
 
 describe('license features', function () {
