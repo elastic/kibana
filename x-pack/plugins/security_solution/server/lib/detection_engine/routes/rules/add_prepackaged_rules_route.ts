@@ -8,6 +8,8 @@
 import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
@@ -29,9 +31,7 @@ import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackage
 import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset/rule_asset_saved_objects_client';
 
 import { buildSiemResponse } from '../utils';
-import { RulesClient } from '../../../../../../alerting/server';
 
-import { ExceptionListClient } from '../../../../../../lists/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 
 export const addPrepackedRulesRoute = (router: SecuritySolutionPluginRouter) => {

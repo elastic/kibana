@@ -50,10 +50,21 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
       }
     `;
 
-    const alertTitle: CSSObject = {
+    const alertGroupItem = css`
+      ${alertItem}
+
+      & .euiAccordion__childWrapper {
+        overflow: hidden;
+      }
+    `;
+
+    const alertTitleContainer: CSSObject = {
       display: minimal ? 'none' : 'initial',
       color: alertTitleColor,
       fontWeight: font.weight.semiBold,
+    };
+
+    const alertTitle: CSSObject = {
       textOverflow: 'ellipsis',
       overflow: 'hidden',
       whiteSpace: 'nowrap',
@@ -98,6 +109,8 @@ export const useStyles = (minimal = false, isInvestigated = false) => {
 
     return {
       alertItem,
+      alertGroupItem,
+      alertTitleContainer,
       alertTitle,
       alertIcon,
       alertAccordionButton,

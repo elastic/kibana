@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { SanitizedRule } from '../../../../../alerting/common';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 import { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';

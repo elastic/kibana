@@ -8,13 +8,14 @@
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
+import { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { getFilter } from '../get_filter';
@@ -55,6 +56,7 @@ export const thresholdExecutor = async ({
   state,
   bulkCreate,
   wrapHits,
+  ruleDataReader,
 }: {
   completeRule: CompleteRule<ThresholdRuleParams>;
   tuple: RuleRangeTuple;
@@ -68,6 +70,7 @@ export const thresholdExecutor = async ({
   state: ThresholdAlertState;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  ruleDataReader: IRuleDataReader;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   let result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -77,15 +80,11 @@ export const thresholdExecutor = async ({
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
       ? { signalHistory: state.signalHistory, searchErrors: [] }
       : await getThresholdSignalHistory({
-          indexPattern: ['*'], // TODO: get outputIndex?
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          services,
-          logger,
           ruleId: ruleParams.ruleId,
           bucketByFields: ruleParams.threshold.field,
-          timestampOverride: ruleParams.timestampOverride,
-          buildRuleMessage,
+          ruleDataReader,
         });
 
     if (!state.initialized) {

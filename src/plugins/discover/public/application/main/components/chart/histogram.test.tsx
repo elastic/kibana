@@ -14,7 +14,7 @@ import { Chart } from './point_series';
 import { DiscoverHistogram } from './histogram';
 import React from 'react';
 import * as hooks from '../../utils/use_data_state';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const chartData = {
   xAxisOrderedValues: [

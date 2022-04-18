@@ -12,7 +12,7 @@ import {
   FindHit,
   getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import {
@@ -20,10 +20,10 @@ import {
   getOutputDetailsSampleWithExceptions,
 } from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
-import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 
 const exceptionsClient = getExceptionListClientMock();
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../routes/__mocks__/request_context';
 
 describe('get_export_by_object_ids', () => {

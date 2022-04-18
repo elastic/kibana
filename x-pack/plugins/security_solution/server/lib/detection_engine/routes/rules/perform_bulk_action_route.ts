@@ -8,13 +8,12 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import { KibanaResponseFactory, Logger } from 'src/core/server';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { RuleAlertType } from '../../rules/types';
-
-import type { RulesClient } from '../../../../../../alerting/server';
-import { SanitizedRule } from '../../../../../../alerting/common';
 
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -38,11 +37,10 @@ import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
 import { readRules } from '../../rules/read_rules';
-import { patchRules } from '../../rules/patch_rules';
+import { editRule } from '../../rules/edit_rule';
 import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { legacyMigrate } from '../../rules/utils';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -418,24 +416,18 @@ export const performBulkActionRoute = (
                   rule,
                 });
 
-                const editedRule = body[BulkAction.edit].reduce(
-                  (acc, action) => applyBulkActionEditToRule(acc, action),
-                  migratedRule
-                );
-
-                const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
-                const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
-
-                await patchRules({
+                const updatedRule = await editRule({
                   rulesClient,
                   rule: migratedRule,
-                  tags,
-                  index,
-                  timelineTitle,
-                  timelineId,
+                  edit: (ruleToEdit) => {
+                    return body[BulkAction.edit].reduce(
+                      (acc, action) => applyBulkActionEditToRule(acc, action),
+                      ruleToEdit
+                    );
+                  },
                 });
 
-                return editedRule;
+                return updatedRule;
               },
               abortSignal: abortController.signal,
             });

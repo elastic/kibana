@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from 'kibana/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { RuleSearchResult } from '../../types';
 
 export const getMockListModulesResponse = () => [

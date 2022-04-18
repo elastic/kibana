@@ -9,6 +9,7 @@ import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
 import { i18n } from '@kbn/i18n';
+import { firstValueFrom } from 'rxjs';
 import {
   createFilter,
   getInspectResponse,
@@ -67,8 +68,8 @@ export const useActionResults = ({
   return useQuery(
     ['actionResults', { actionId }],
     async () => {
-      const responseData = await data.search
-        .search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
+      const responseData = await firstValueFrom(
+        data.search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
           {
             actionId,
             factoryQueryType: OsqueryQueries.actionResults,
@@ -83,7 +84,7 @@ export const useActionResults = ({
             strategy: 'osquerySearchStrategy',
           }
         )
-        .toPromise();
+      );
 
       const totalResponded =
         // @ts-expect-error update types

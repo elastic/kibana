@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiLink,
+  EuiCode,
   EuiCodeBlock,
   EuiCopy,
   EuiButtonIcon,
@@ -150,7 +151,10 @@ const LogstashInstructionSteps = () => {
           <>
             <FormattedMessage
               id="xpack.fleet.settings.logstashInstructions.addPipelineStepDescription"
-              defaultMessage="In your Logstash configuration directory, open the pipelines.yml file and add the following configuration. Replace the path to your file."
+              defaultMessage="In your Logstash configuration directory, open the {pipelineFile} file and add the following configuration. Replace the path to your file."
+              values={{
+                pipelineFile: <EuiCode>pipelines.yml</EuiCode>,
+              }}
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>
@@ -164,7 +168,10 @@ const LogstashInstructionSteps = () => {
           <>
             <FormattedMessage
               id="xpack.fleet.settings.logstashInstructions.editPipelineStepDescription"
-              defaultMessage="Next, open the elastic-agent-pipeline.config file and insert the following content:"
+              defaultMessage="Next, open the {pipelineConfFile} file and insert the following content:"
+              values={{
+                pipelineConfFile: <EuiCode>elastic-agent-pipeline.conf</EuiCode>,
+              }}
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock paddingSize="m" language="yaml" isCopyable>

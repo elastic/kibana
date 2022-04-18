@@ -9,21 +9,17 @@ import {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+} from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
 import moment from 'moment';
-import { coreMock } from '../../../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { ConfigSchema } from '../../../config';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
-import { AuthenticatedUser } from '../../../../security/common/model';
-import {
-  nodeBuilder,
-  SEARCH_SESSION_TYPE,
-  SearchSessionStatus,
-} from '../../../../../../src/plugins/data/common';
-import { TaskManagerStartContract } from '../../../../task_manager/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { nodeBuilder, SEARCH_SESSION_TYPE, SearchSessionStatus } from '@kbn/data-plugin/common';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const MAX_UPDATE_RETRIES = 3;
 

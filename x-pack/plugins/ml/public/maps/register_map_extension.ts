@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapsSetupApi } from '../../../maps/public';
+import { MapsSetupApi } from '@kbn/maps-plugin/public';
 import type { MlCoreSetup } from '../plugin';
 import { AnomalySourceFactory } from './anomaly_source_factory';
 import { AnomalyLayerWizardFactory } from './anomaly_layer_wizard_factory';

@@ -9,8 +9,8 @@ import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ApmRoutes } from '../../routing/apm_route_config';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   asMillisecondDuration,
   asTransactionRate,

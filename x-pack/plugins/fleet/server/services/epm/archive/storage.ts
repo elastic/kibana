@@ -12,7 +12,7 @@ import { safeLoad } from 'js-yaml';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import uuidv5 from 'uuid/v5';
-import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
@@ -25,8 +25,8 @@ import { pkgToPkgKey } from '../registry';
 
 import { appContextService } from '../../app_context';
 
-import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from './index';
-import type { ArchiveEntry } from './index';
+import { getArchiveEntry, setArchiveEntry, setArchiveFilelist, setPackageInfo } from '.';
+import type { ArchiveEntry } from '.';
 import { parseAndVerifyPolicyTemplates, parseAndVerifyStreams } from './parse';
 
 const ONE_BYTE = 1024 * 1024;

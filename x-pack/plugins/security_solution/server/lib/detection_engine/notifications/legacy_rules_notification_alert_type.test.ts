@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+
 import { getRuleMock } from '../routes/__mocks__/request_responses';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './legacy_rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../alerting/server/mocks';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyNotificationExecutorOptions } from './legacy_types';
 import {

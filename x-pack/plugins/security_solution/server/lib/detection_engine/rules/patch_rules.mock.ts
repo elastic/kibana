@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+
 import { PatchRulesOptions } from './types';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
 import { getRuleMock } from '../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 

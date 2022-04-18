@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FilterRatioAgg } from './filter_ratio';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
-import { dataPluginMock } from '../../../../../../data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { setDataStart } from '../../../services';
 
 jest.mock('../query_bar_wrapper', () => ({

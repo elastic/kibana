@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import React from 'react';
-import { KibanaReactOverlays } from 'src/plugins/kibana_react/public';
+import { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { SourceModal } from '../components/source_modal';
 import { IndexPatternSavedObject } from '../types';
 
