@@ -55,7 +55,7 @@ describe('indexDocument', () => {
       return logger.error.mock.calls.length !== 0;
     });
 
-    const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{"_index":"event-log"}},{"message":"foo"}]`;
+    const expectedMessage = `error writing bulk events: "expected failure"; docs: [{"create":{"_index":"event-log","require_alias":true}},{"message":"foo"}]`;
     expect(logger.error).toHaveBeenCalledWith(expectedMessage);
   });
 });
