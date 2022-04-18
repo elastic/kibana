@@ -49,7 +49,7 @@ const NoMatchNoIndicesStatusMessage = () => (
   <span>
     <FormattedMessage
       id="indexPatternEditor.status.notMatchLabel.notMatchNoIndicesDetail"
-      defaultMessage="The data view you entered doesn't match any data streams, indices, or index aliases."
+      defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases."
     />
   </span>
 );
@@ -75,7 +75,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
-            defaultMessage="Your data view can match {sourceCount, plural,
+            defaultMessage="Your index pattern can match {sourceCount, plural,
               one {# source}
               other {# sources}
             }."
@@ -88,7 +88,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.noSystemIndicesWithPromptLabel"
-            defaultMessage="No data streams, indices, or index aliases match your data view."
+            defaultMessage="No data streams, indices, or index aliases match your index pattern."
           />
         </span>
       );
@@ -97,7 +97,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         <span>
           <FormattedMessage
             id="indexPatternEditor.status.noSystemIndicesLabel"
-            defaultMessage="No data streams, indices, or index aliases match your data view."
+            defaultMessage="No data streams, indices, or index aliases match your index pattern."
           />
         </span>
       );
@@ -110,7 +110,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         &nbsp;
         <FormattedMessage
           id="indexPatternEditor.status.successLabel.successDetail"
-          defaultMessage="Your data view matches {sourceCount} {sourceCount, plural,
+          defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural,
             one {source}
             other {sources}
           }."
@@ -127,7 +127,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       <span>
         <FormattedMessage
           id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
-          defaultMessage="Your data view doesn't match any data streams, indices, or index aliases, but {strongIndices}
+          defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but {strongIndices}
           {matchedIndicesLength, plural,
             one {is}
             other {are}

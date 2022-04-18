@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('createIndexPatternStatusMessage')).to.contain(
-            `The data view you entered doesn\'t match any data streams, indices, or index aliases.`
+            `The index pattern you entered doesn\'t match any data streams, indices, or index aliases.`
           );
         });
       });
@@ -125,9 +125,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
             `Logstash Star`
-          );
-          expect(await testSubjects.getVisibleText('indexPatternDescription')).to.contain(
-            `Logstash Star description`
           );
         });
       });

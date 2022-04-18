@@ -10,7 +10,7 @@ exports[`StatusMessage should render with exact matches 1`] = `
     <span>
        
       <FormattedMessage
-        defaultMessage="Your data view matches {sourceCount} {sourceCount, plural, one {source} other {sources} }."
+        defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural, one {source} other {sources} }."
         id="indexPatternEditor.status.successLabel.successDetail"
         values={
           Object {
@@ -31,7 +31,7 @@ exports[`StatusMessage should render with no partial matches 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="The data view you entered doesn't match any data streams, indices, or index aliases. You can match {strongIndices}."
+        defaultMessage="The index pattern you entered doesn't match any data streams, indices, or index aliases. You can match {strongIndices}."
         id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
         values={
           Object {
@@ -62,7 +62,7 @@ exports[`StatusMessage should render with partial matches 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your data view doesn't match any data streams, indices, or index aliases, but {strongIndices} {matchedIndicesLength, plural, one {is} other {are} } similar."
+        defaultMessage="Your index pattern doesn't match any data streams, indices, or index aliases, but {strongIndices} {matchedIndicesLength, plural, one {is} other {are} } similar."
         id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
         values={
           Object {
@@ -94,7 +94,7 @@ exports[`StatusMessage should render without a query 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="Your data view can match {sourceCount, plural, one {# source} other {# sources} }."
+        defaultMessage="Your index pattern can match {sourceCount, plural, one {# source} other {# sources} }."
         id="indexPatternEditor.status.matchAnyLabel.matchAnyDetail"
         values={
           Object {
@@ -115,7 +115,7 @@ exports[`StatusMessage should show that no indices exist 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="No data streams, indices, or index aliases match your data view."
+        defaultMessage="No data streams, indices, or index aliases match your index pattern."
         id="indexPatternEditor.status.noSystemIndicesLabel"
         values={Object {}}
       />
@@ -132,7 +132,7 @@ exports[`StatusMessage should show that system indices exist 1`] = `
   title={
     <span>
       <FormattedMessage
-        defaultMessage="No data streams, indices, or index aliases match your data view."
+        defaultMessage="No data streams, indices, or index aliases match your index pattern."
         id="indexPatternEditor.status.noSystemIndicesLabel"
         values={Object {}}
       />

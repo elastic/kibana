@@ -623,7 +623,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               <ChangeIndexPattern
                 data-test-subj="indexPattern-switcher"
                 trigger={{
-                  label: currentIndexPattern.name,
+                  label: currentIndexPattern.name
+                    ? currentIndexPattern.name
+                    : currentIndexPattern.title,
                   title: currentIndexPattern.title,
                   'data-test-subj': 'indexPattern-switch-link',
                   fontWeight: 'bold',
