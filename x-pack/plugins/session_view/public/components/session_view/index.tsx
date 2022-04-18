@@ -9,7 +9,6 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiResizableContainer,
   EuiPanel,
   EuiHorizontalRule,
@@ -157,9 +156,12 @@ export const SessionView = ({
 
   if (renderIsLoading) {
     return (
-      <div css={styles.loadingStateContainer}>
-        <EuiLoadingSpinner size="xl" />
-      </div>
+      <SectionLoading css={styles.loadingStateContainer}>
+        <FormattedMessage
+          id="xpack.sessionView.loadingProcessTree"
+          defaultMessage="Loading session…"
+        />
+      </SectionLoading>
     );
   }
 
@@ -236,15 +238,6 @@ export const SessionView = ({
                 minSize="60%"
                 paddingSize="none"
               >
-                {renderIsLoading && (
-                  <SectionLoading>
-                    <FormattedMessage
-                      id="xpack.sessionView.loadingProcessTree"
-                      defaultMessage="Loading session…"
-                    />
-                  </SectionLoading>
-                )}
-
                 {hasError && (
                   <EuiEmptyPrompt
                     iconType="alert"
