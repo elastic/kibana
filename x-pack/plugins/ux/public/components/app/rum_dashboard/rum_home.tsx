@@ -8,17 +8,17 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import { CsmSharedContextProvider } from './csm_shared_context';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
-import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useHasRumData } from './hooks/use_has_rum_data';
 import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { UxEnvironmentFilter } from './environment_filter';
-import { RumOverview } from './index';
+import { RumOverview } from '.';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
   defaultMessage: 'Dashboard',

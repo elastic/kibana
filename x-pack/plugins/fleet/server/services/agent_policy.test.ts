@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type {
   AgentPolicy,

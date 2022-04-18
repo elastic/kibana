@@ -10,8 +10,9 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
   CONTEXT_MENU_TRIGGER,
-} from '../../../src/plugins/embeddable/public';
-import { Plugin, CoreSetup, CoreStart, SavedObjectsClient } from '../../../src/core/public';
+} from '@kbn/embeddable-plugin/public';
+import { Plugin, CoreSetup, CoreStart, SavedObjectsClient } from '@kbn/core/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
@@ -46,7 +47,6 @@ import {
   BookEmbeddableFactory,
   BookEmbeddableFactoryDefinition,
 } from './book/book_embeddable_factory';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { createAddBookToLibraryAction } from './book/add_book_to_library_action';
 import { createUnlinkBookFromLibraryAction } from './book/unlink_book_from_library_action';
 import {

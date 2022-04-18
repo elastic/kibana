@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 
 import { savedQueryType, packType, packAssetType } from './lib/saved_query/saved_object_mappings';
 import { usageMetricType } from './routes/usage/saved_object_mappings';

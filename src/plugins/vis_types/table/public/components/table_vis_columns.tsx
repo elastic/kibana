@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiDataGridColumnCellActionProps, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DatatableColumn, DatatableRow, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { DatatableColumn, DatatableRow, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { FormattedColumns, TableVisUiState } from '../types';
 
 interface FilterCellData {
@@ -30,7 +30,8 @@ export const createGridColumns = (
   rows: DatatableRow[],
   formattedColumns: FormattedColumns,
   columnsWidth: TableVisUiState['colWidth'],
-  fireEvent: IInterpreterRenderHandlers['event']
+  fireEvent: IInterpreterRenderHandlers['event'],
+  closeCellPopover?: Function
 ) => {
   const onFilterClick = (data: FilterCellData, negate: boolean) => {
     fireEvent({
@@ -55,7 +56,7 @@ export const createGridColumns = (
     const formattedColumn = formattedColumns[col.id];
     const cellActions = formattedColumn.filterable
       ? [
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
             if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
@@ -82,7 +83,7 @@ export const createGridColumns = (
                 data-test-subj="tbvChartCell__filterForCellValue"
                 onClick={() => {
                   onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
-                  closePopover?.();
+                  closeCellPopover?.();
                 }}
                 iconType="plusInCircle"
               >
@@ -90,7 +91,7 @@ export const createGridColumns = (
               </Component>
             );
           },
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
             if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
@@ -116,7 +117,7 @@ export const createGridColumns = (
                 aria-label={filterOutAriaLabel}
                 onClick={() => {
                   onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
-                  closePopover?.();
+                  closeCellPopover?.();
                 }}
                 iconType="minusInCircle"
               >

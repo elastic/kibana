@@ -14,6 +14,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
@@ -25,7 +26,6 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
-import { DataView } from '../../../../../../data_views/public';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';

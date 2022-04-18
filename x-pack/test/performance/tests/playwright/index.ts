@@ -15,6 +15,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./flight_dashboard'));
     loadTestFile(require.resolve('./web_logs_dashboard'));
     loadTestFile(require.resolve('./promotion_tracking_dashboard'));
+    loadTestFile(require.resolve('./many_fields_discover'));
 
     after(async () => {
       await performance.shutdownBrowser();

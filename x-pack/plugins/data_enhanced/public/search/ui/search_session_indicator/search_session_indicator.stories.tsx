@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { SearchSessionState } from '@kbn/data-plugin/public';
 import { SearchSessionIndicator } from './search_session_indicator';
-import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
 
 storiesOf('components/SearchSessionIndicator', module).add('default', () => {
   const [searchSessionName, setSearchSessionName] = React.useState('Discover session');

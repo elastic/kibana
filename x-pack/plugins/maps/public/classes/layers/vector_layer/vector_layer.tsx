@@ -8,7 +8,7 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 import type { Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { Feature, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';

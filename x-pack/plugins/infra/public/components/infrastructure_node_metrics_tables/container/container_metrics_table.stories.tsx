@@ -9,7 +9,7 @@ import { EuiCard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta } from '@storybook/react/types-6-0';
 import React from 'react';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { ContainerMetricsTable } from './container_metrics_table';
 import type { ContainerMetricsTableProps } from './container_metrics_table';

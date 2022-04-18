@@ -7,17 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ISearchSource } from 'src/plugins/data/public';
-import type { DataView } from 'src/plugins/data_views/public';
+import type { ISearchSource } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
-import { unhashUrl } from '../../../../../../kibana_utils/public';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
-import type { TopNavMenuData } from '../../../../../../navigation/public';
 import { openAlertsPopover } from './open_alerts_popover';
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RuleTypeModel } from '../../../../triggers_actions_ui/public';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { TlsTranslationsLegacy } from '../../../common/translations';
 import { AlertTypeInitializer } from '.';
