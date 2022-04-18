@@ -156,7 +156,7 @@ export const SessionView = ({
 
   if (renderIsLoading) {
     return (
-      <SectionLoading css={styles.loadingStateContainer}>
+      <SectionLoading>
         <FormattedMessage
           id="xpack.sessionView.loadingProcessTree"
           defaultMessage="Loading session…"

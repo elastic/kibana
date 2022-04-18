@@ -25,14 +25,6 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       height: `${isFullScreen ? 'calc(100vh - 118px)' : height + 'px'}`,
     };
 
-    const loadingStateContainer: CSSObject = {
-      height: '100%',
-      minHeight: '250px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    };
-
     const processTree: CSSObject = {
       ...sessionView,
       position: 'relative',
@@ -79,7 +71,6 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       buttonsEyeDetail,
       sessionViewerComponent,
       toolBar,
-      loadingStateContainer,
     };
   }, [euiTheme, isFullScreen, height]);
 
