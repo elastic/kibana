@@ -10,7 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-import { LegendSizes, DEFAULT_LEGEND_SIZE } from '../../../../visualizations/public';
+import { LegendSizes, DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 
 const legendSizeOptions: Array<{ value: string; inputDisplay: string }> = [
   {

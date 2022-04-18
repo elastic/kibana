@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { LegendSizeSettings } from './legend_size_settings';
-import { LegendSizes, DEFAULT_LEGEND_SIZE } from '../../../../visualizations/public';
+import { LegendSizes, DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 import { EuiSuperSelect } from '@elastic/eui';
 import { shallow } from 'enzyme';
 
