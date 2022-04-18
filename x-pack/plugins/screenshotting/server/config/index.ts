@@ -9,6 +9,16 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { ConfigSchema, ConfigType } from './schema';
 
 /**
+ * Helper function
+ */
+export const durationToNumber = (value: number | moment.Duration): number => {
+  if (typeof value === 'number') {
+    return value;
+  }
+  return value.asMilliseconds();
+};
+
+/**
  * Screenshotting plugin configuration schema.
  */
 export const config: PluginConfigDescriptor<ConfigType> = {
@@ -47,9 +57,35 @@ export const config: PluginConfigDescriptor<ConfigType> = {
       'xpack.screenshotting.browser.chromium.proxy.bypass',
       { level: 'warning' }
     ),
+    renameFromRoot(
+      'xpack.reporting.capture.timeouts.openUrl',
+      'xpack.screenshotting.capture.timeouts.openUrl',
+      { level: 'warning' }
+    ),
+    renameFromRoot(
+      'xpack.reporting.capture.timeouts.renderComplete',
+      'xpack.screenshotting.capture.timeouts.renderComplete',
+      { level: 'warning' }
+    ),
+    renameFromRoot(
+      'xpack.reporting.capture.timeouts.waitForElements',
+      'xpack.screenshotting.capture.timeouts.waitForElements',
+      { level: 'warning' }
+    ),
+    renameFromRoot('xpack.reporting.capture.zoom', 'xpack.screenshotting.capture.zoom', {
+      level: 'warning',
+    }),
+    renameFromRoot('xpack.reporting.capture.loadDelay', 'xpack.screenshotting.capture.loadDelay', {
+      level: 'warning',
+    }),
   ],
   exposeToUsage: {
     networkPolicy: false, // show as [redacted]
+    capture: {
+      timeouts: { openUrl: true, renderComplete: true, waitForElements: true },
+      loadDelay: true,
+      zoom: true,
+    },
   },
 };
 

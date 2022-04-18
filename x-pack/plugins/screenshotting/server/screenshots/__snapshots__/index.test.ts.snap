@@ -1,0 +1,300 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Screenshot Observable Pipeline error handling recovers if waitForSelector fails 1`] = `
+Array [
+  Object {
+    "elementsPositionAndAttributes": Array [
+      Object {
+        "attributes": Object {},
+        "position": Object {
+          "boundingClientRect": Object {
+            "height": 100,
+            "left": 0,
+            "top": 0,
+            "width": 100,
+          },
+          "scroll": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    ],
+    "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
+    "renderErrors": undefined,
+    "screenshots": Array [
+      Object {
+        "data": Object {
+          "data": Array [
+            115,
+            99,
+            114,
+            101,
+            101,
+            110,
+            115,
+            104,
+            111,
+            116,
+          ],
+          "type": "Buffer",
+        },
+        "description": undefined,
+        "title": undefined,
+      },
+    ],
+    "timeRange": null,
+  },
+  Object {
+    "elementsPositionAndAttributes": Array [
+      Object {
+        "attributes": Object {},
+        "position": Object {
+          "boundingClientRect": Object {
+            "height": 100,
+            "left": 0,
+            "top": 0,
+            "width": 100,
+          },
+          "scroll": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    ],
+    "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Mock error!],
+    "renderErrors": undefined,
+    "screenshots": Array [
+      Object {
+        "data": Object {
+          "data": Array [
+            115,
+            99,
+            114,
+            101,
+            101,
+            110,
+            115,
+            104,
+            111,
+            116,
+          ],
+          "type": "Buffer",
+        },
+        "description": undefined,
+        "title": undefined,
+      },
+    ],
+    "timeRange": null,
+  },
+]
+`;
+
+exports[`Screenshot Observable Pipeline error handling uses defaults for element positions and size when Kibana page is not ready 1`] = `
+Array [
+  Object {
+    "elementsPositionAndAttributes": Array [
+      Object {
+        "attributes": Object {},
+        "position": Object {
+          "boundingClientRect": Object {
+            "height": 1200,
+            "left": 0,
+            "top": 0,
+            "width": 1950,
+          },
+          "scroll": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    ],
+    "error": undefined,
+    "renderErrors": undefined,
+    "screenshots": Array [
+      Object {
+        "data": Object {
+          "data": Array [
+            115,
+            99,
+            114,
+            101,
+            101,
+            110,
+            115,
+            104,
+            111,
+            116,
+          ],
+          "type": "Buffer",
+        },
+        "description": undefined,
+        "title": undefined,
+      },
+    ],
+    "timeRange": undefined,
+  },
+]
+`;
+
+exports[`Screenshot Observable Pipeline pipelines a single url into screenshot and timeRange 1`] = `
+Array [
+  Object {
+    "elementsPositionAndAttributes": Array [
+      Object {
+        "attributes": Object {
+          "description": "Default ",
+          "title": "Default Mock Title",
+        },
+        "position": Object {
+          "boundingClientRect": Object {
+            "height": 600,
+            "left": 0,
+            "top": 0,
+            "width": 800,
+          },
+          "scroll": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    ],
+    "error": undefined,
+    "renderErrors": undefined,
+    "screenshots": Array [
+      Object {
+        "data": Object {
+          "data": Array [
+            115,
+            99,
+            114,
+            101,
+            101,
+            110,
+            115,
+            104,
+            111,
+            116,
+          ],
+          "type": "Buffer",
+        },
+        "description": "Default ",
+        "title": "Default Mock Title",
+      },
+    ],
+    "timeRange": "Default GetTimeRange Result",
+  },
+]
+`;
+
+exports[`Screenshot Observable Pipeline pipelines multiple urls into 1`] = `
+Array [
+  Object {
+    "elementsPositionAndAttributes": Array [
+      Object {
+        "attributes": Object {
+          "description": "Default ",
+          "title": "Default Mock Title",
+        },
+        "position": Object {
+          "boundingClientRect": Object {
+            "height": 600,
+            "left": 0,
+            "top": 0,
+            "width": 800,
+          },
+          "scroll": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    ],
+    "error": undefined,
+    "renderErrors": undefined,
+    "screenshots": Array [
+      Object {
+        "data": Object {
+          "data": Array [
+            115,
+            111,
+            109,
+            101,
+            32,
+            115,
+            99,
+            114,
+            101,
+            101,
+            110,
+            115,
+            104,
+            111,
+            116,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "description": "Default ",
+        "title": "Default Mock Title",
+      },
+    ],
+    "timeRange": "Default GetTimeRange Result",
+  },
+  Object {
+    "elementsPositionAndAttributes": Array [
+      Object {
+        "attributes": Object {
+          "description": "Default ",
+          "title": "Default Mock Title",
+        },
+        "position": Object {
+          "boundingClientRect": Object {
+            "height": 600,
+            "left": 0,
+            "top": 0,
+            "width": 800,
+          },
+          "scroll": Object {
+            "x": 0,
+            "y": 0,
+          },
+        },
+      },
+    ],
+    "error": undefined,
+    "renderErrors": undefined,
+    "screenshots": Array [
+      Object {
+        "data": Object {
+          "data": Array [
+            115,
+            111,
+            109,
+            101,
+            32,
+            115,
+            99,
+            114,
+            101,
+            101,
+            110,
+            115,
+            104,
+            111,
+            116,
+            115,
+          ],
+          "type": "Buffer",
+        },
+        "description": "Default ",
+        "title": "Default Mock Title",
+      },
+    ],
+    "timeRange": "Default GetTimeRange Result",
+  },
+]
+`;
