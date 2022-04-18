@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { ReactNode } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,7 @@ interface Props {
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
   enableSpaceAgnosticBehavior: boolean;
+  prohibitedSpaces: Set<string>;
 }
 
 const buttonGroupLegend = i18n.translate(
@@ -54,9 +56,33 @@ const shareToExplicitSpacesButtonLabel = i18n.translate(
   { defaultMessage: 'Select spaces' }
 );
 
-const cannotChangeTooltip = i18n.translate(
-  'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotChangeTooltip',
-  { defaultMessage: 'You need additional privileges to change this option.' }
+const CANNOT_CHANGE_TOOLTIP = (
+  <EuiIconTip
+    content={i18n.translate(
+      'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotChangeTooltip',
+      { defaultMessage: 'You need additional privileges to change this option.' }
+    )}
+    position="left"
+    type="iInCircle"
+  />
+);
+
+const ALL_SPACES_PROHIBITED_TOOLTIP = (
+  <EuiIconTip
+    title={i18n.translate(
+      'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.allSpacesProhibitedTooltipTitle',
+      { defaultMessage: 'Cannot assign to all spaces' }
+    )}
+    content={i18n.translate(
+      'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.allSpacesProhibitedTooltipContent',
+      {
+        defaultMessage:
+          'A copy of this saved object exists in at least one other space. In a future release, you can merge copies of saved objects.',
+      }
+    )}
+    position="left"
+    type="iInCircle"
+  />
 );
 
 export const ShareModeControl = (props: Props) => {
@@ -68,6 +94,7 @@ export const ShareModeControl = (props: Props) => {
     onChange,
     enableCreateNewSpaceLink,
     enableSpaceAgnosticBehavior,
+    prohibitedSpaces,
   } = props;
   const { services } = useSpaces();
   const { docLinks } = services;
@@ -120,6 +147,14 @@ export const ShareModeControl = (props: Props) => {
     );
   };
 
+  const isGlobalControlChangeProhibited = prohibitedSpaces.size > 0 && !isGlobalControlChecked;
+  let globalControlTooltip: ReactNode = null;
+  if (!canShareToAllSpaces) {
+    globalControlTooltip = CANNOT_CHANGE_TOOLTIP;
+  } else if (isGlobalControlChangeProhibited) {
+    globalControlTooltip = ALL_SPACES_PROHIBITED_TOOLTIP;
+  }
+
   return (
     <>
       {getPrivilegeWarning()}
@@ -141,7 +176,7 @@ export const ShareModeControl = (props: Props) => {
         legend={buttonGroupLegend}
         color="success"
         isFullWidth={true}
-        isDisabled={!canShareToAllSpaces}
+        isDisabled={!canShareToAllSpaces || isGlobalControlChangeProhibited}
       />
 
       <EuiSpacer size="s" />
@@ -173,11 +208,7 @@ export const ShareModeControl = (props: Props) => {
                   )}
             </EuiText>
           </EuiFlexItem>
-          {!canShareToAllSpaces && (
-            <EuiFlexItem grow={false}>
-              <EuiIconTip content={cannotChangeTooltip} position="left" type="iInCircle" />
-            </EuiFlexItem>
-          )}
+          {globalControlTooltip && <EuiFlexItem grow={false}>{globalControlTooltip}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
 
@@ -190,6 +221,7 @@ export const ShareModeControl = (props: Props) => {
           onChange={onChange}
           enableCreateNewSpaceLink={enableCreateNewSpaceLink}
           enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
+          prohibitedSpaces={prohibitedSpaces}
         />
       </EuiFlexGroup>
     </>
