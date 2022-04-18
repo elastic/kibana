@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { isEmpty } from 'lodash';
 import { ISavedObjectsRepository, SavedObjectAttributes } from 'src/core/server';
 import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
+import {
+  CONTROL_GROUP_TYPE,
+  initializeControlGroupTelemetry,
+  RawControlGroupAttributes,
+} from '../../../controls/common';
+import { ControlGroupTelemetry } from '../../../controls/common';
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
 
@@ -45,6 +52,7 @@ interface LensPanel extends SavedDashboardPanel730ToLatest {
 export interface DashboardCollectorData {
   panels: number;
   panelsByValue: number;
+  controls: ControlGroupTelemetry;
   lensByValue: {
     [key: string]: number;
   };
@@ -59,6 +67,7 @@ export interface DashboardCollectorData {
 export const getEmptyTelemetryData = (): DashboardCollectorData => ({
   panels: 0,
   panelsByValue: 0,
+  controls: initializeControlGroupTelemetry({}),
   lensByValue: {},
   visualizationByValue: {},
   embeddable: {},
@@ -172,6 +181,19 @@ export async function collectDashboardTelemetry(
     const attributes = injectReferences(dashboard, {
       embeddablePersistableStateService: embeddableService,
     });
+
+    const controlGroupAttributes: RawControlGroupAttributes | undefined =
+      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
+    if (!isEmpty(controlGroupAttributes)) {
+      collectorData.controls = embeddableService.telemetry(
+        {
+          ...controlGroupAttributes,
+          type: CONTROL_GROUP_TYPE,
+          id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
+        },
+        collectorData.controls
+      ) as ControlGroupTelemetry;
+    }
 
     const panels = JSON.parse(
       attributes.panelsJSON as string
