@@ -14,7 +14,7 @@ import {
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { Process } from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessTreeDeps, ProcessTree } from './index';
+import { ProcessTreeDeps, ProcessTree } from '.';
 
 describe('ProcessTree component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

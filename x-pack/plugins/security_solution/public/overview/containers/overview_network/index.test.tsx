@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useNetworkOverview } from './index';
+import { useNetworkOverview } from '.';
 
 describe('useNetworkOverview', () => {
   it('skip = true will cancel any running request', () => {

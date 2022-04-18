@@ -7,10 +7,10 @@
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getExcludedName } from '../local_uifilters';
 
-import { fromQuery, toQuery } from '../../../../../../observability/public';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import {
   uxFiltersByName,

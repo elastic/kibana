@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SubFeaturePrivilegeConfig } from '../../../../../features/public';
+import type { SubFeaturePrivilegeConfig } from '@kbn/features-plugin/public';
+
 import { KibanaPrivilege } from './kibana_privilege';
 
 export class SubFeaturePrivilege extends KibanaPrivilege {

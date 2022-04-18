@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { Datatable } from '../../../../../expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 
 interface TableSelectorState {
   isPopoverOpen: boolean;

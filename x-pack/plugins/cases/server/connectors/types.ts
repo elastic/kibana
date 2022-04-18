@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { CaseResponse, ConnectorMappingsAttributes } from '../../common/api';
 import { CasesClientGetAlertsResponse } from '../client/alerts/types';
 import { CasesClientFactory } from '../client/factory';
