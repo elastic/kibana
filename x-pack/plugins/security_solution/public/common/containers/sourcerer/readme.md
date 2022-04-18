@@ -36,7 +36,9 @@ interface SelectedDataView {
 ```
 
 ### `useDataView`
-- called to get `indexFieldSearch`, which gets the fields and formats them in `getDataViewStateFromIndexFields`
+- called to get `indexFieldSearch`, which gets the fields and formats them in `getDataViewStateFromIndexFields` in `use_data_view.tsx`
+- `indexFieldSearch` calls the `IndexFieldsStrategyRequest` in the `timelines` plugin. This request takes an argument of either `dataViewId` or `indices` to get the fields. 
+  - Our app uses `dataViewId`, getting the fields from a Data View that includes runtime fields. No matter what the sourcerer indices are set to, we will get the same fields always from the Data View. If we only requested `indices`, we would get just the fields for those indices (not all like Data View) and therefore would not get the runtime fields. So even when we are in `SourcererScopeName.detections` narrowed down to just `.alerts-security.alerts-default`, we get all the fields from the entire Security Solution Data View.
 
 ### `useSignalHelpers`
  - called on from detections and timelines scopes
