@@ -121,7 +121,7 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (ruleRunMetrics.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
+      if (ruleRunMetrics.numberOfTriggeredActions >= ruleType.config!.run.actions.max) {
         ruleRunMetrics.triggeredActionsStatus = ActionsCompletion.PARTIAL;
         break;
       }
