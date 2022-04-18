@@ -76,11 +76,11 @@ describe('config validation', () => {
     });
   });
 
-  describe('rules.execution.actions.max', () => {
+  describe('rules.run.actions.max', () => {
     test('allows 100000 as a value', () => {
       const config: Record<string, unknown> = {
         rules: {
-          execution: {
+          run: {
             actions: {
               max: 100000,
             },
@@ -88,13 +88,13 @@ describe('config validation', () => {
         },
       };
       const validatedConfig = configSchema.validate(config);
-      expect(validatedConfig.rules.execution.actions.max).toMatchInlineSnapshot(`100000`);
+      expect(validatedConfig.rules.run.actions.max).toMatchInlineSnapshot(`100000`);
     });
 
     test(`doesn't allow 100001 as a value`, () => {
       const config: Record<string, unknown> = {
         rules: {
-          execution: {
+          run: {
             actions: {
               max: 100001,
             },
@@ -102,7 +102,7 @@ describe('config validation', () => {
         },
       };
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[rules.execution.actions.max]: Value must be equal to or lower than [100000]."`
+        `"[rules.run.actions.max]: Value must be equal to or lower than [100000]."`
       );
     });
   });
