@@ -53,10 +53,11 @@ export const getNumberOfItems = async (
       eventLogger.kbnLogger
     );
   } catch (error) {
-    eventLogger.error(error, Actions.GET_NUMBER_OF_ITEMS);
-    throw new Error(
+    const newError = new Error(
       `An error occurred when trying to read the page for visualization panel info: ${error.message}`
     );
+    eventLogger.error(newError, Actions.GET_NUMBER_OF_ITEMS);
+    throw newError;
   }
 
   eventLogger.getNumberOfItemsEnd({ itemsCount });

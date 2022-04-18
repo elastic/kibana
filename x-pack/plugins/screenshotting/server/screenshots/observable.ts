@@ -185,25 +185,34 @@ export class ScreenshotObservableHandler {
   private completeRender() {
     const driver = this.driver;
     const layout = this.layout;
-    const logger = this.eventLogger;
+    const eventLogger = this.eventLogger;
 
     return defer(async () => {
       // Waiting till _after_ elements have rendered before injecting our CSS
       // allows for them to be displayed properly in many cases
-      await injectCustomCss(driver, logger, layout);
+      await injectCustomCss(driver, eventLogger, layout);
 
       this.eventLogger.positionElementsStart();
       // position panel elements for print layout
-      await layout.positionElements?.(driver, logger.kbnLogger);
+      await layout.positionElements?.(driver, eventLogger.kbnLogger);
       this.eventLogger.positionElementsEnd();
 
-      await waitForRenderComplete(driver, logger, toNumber(this.config.capture.loadDelay), layout);
+      await waitForRenderComplete(
+        driver,
+        eventLogger,
+        toNumber(this.config.capture.loadDelay),
+        layout
+      );
     }).pipe(
       mergeMap(() =>
         forkJoin({
-          timeRange: getTimeRange(driver, logger, layout),
-          elementsPositionAndAttributes: getElementPositionAndAttributes(driver, logger, layout),
-          renderErrors: getRenderErrors(driver, logger, layout),
+          timeRange: getTimeRange(driver, eventLogger, layout),
+          elementsPositionAndAttributes: getElementPositionAndAttributes(
+            driver,
+            eventLogger,
+            layout
+          ),
+          renderErrors: getRenderErrors(driver, eventLogger, layout),
         })
       ),
       this.waitUntil(toNumber(this.config.capture.timeouts.renderComplete), 'render complete')
@@ -229,8 +238,9 @@ export class ScreenshotObservableHandler {
           try {
             screenshots = await getScreenshots(this.driver, this.eventLogger, elements);
           } catch (e) {
-            this.eventLogger.error(e, Actions.GET_SCREENSHOT);
-            throw new errors.FailedToCaptureScreenshot(e.message);
+            const newError = new errors.FailedToCaptureScreenshot(e.message);
+            this.eventLogger.error(newError, Actions.GET_SCREENSHOT);
+            throw newError;
           }
           const { timeRange, error: setupError, renderErrors } = data;
 

@@ -29,8 +29,11 @@ export const openUrl = async (
   try {
     await browser.open(url, { context, headers, waitForSelector, timeout }, eventLogger.kbnLogger);
   } catch (err) {
-    eventLogger.error(err, Actions.OPEN_URL);
-    throw new Error(`An error occurred when trying to open the Kibana URL: ${err.message}`);
+    const newError = new Error(
+      `An error occurred when trying to open the Kibana URL: ${err.message}`
+    );
+    eventLogger.error(newError, Actions.OPEN_URL);
+    throw newError;
   }
 
   eventLogger.openUrlEnd();

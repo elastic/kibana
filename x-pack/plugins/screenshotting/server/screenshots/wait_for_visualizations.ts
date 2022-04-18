@@ -57,10 +57,11 @@ export const waitForVisualizations = async (
 
     logger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
-    eventLogger.error(err, Actions.WAIT_VISUALIZATIONS);
-    throw new Error(
+    const newError = new Error(
       `An error occurred when trying to wait for ${toEqual} visualizations to finish rendering. ${err.message}`
     );
+    eventLogger.error(newError, Actions.WAIT_VISUALIZATIONS);
+    throw newError;
   }
 
   eventLogger.waitForVisualizationEnd();
