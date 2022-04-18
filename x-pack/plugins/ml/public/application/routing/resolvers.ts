@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { cacheDataViewsContract, loadSavedSearches } from '../util/index_utils';
 import { checkFullLicense } from '../license';
 import { checkGetJobsCapabilitiesResolver } from '../capabilities/check_capabilities';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../services/ml_server_info';
-
-import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
 
 export interface Resolvers {
   [name: string]: () => Promise<any>;

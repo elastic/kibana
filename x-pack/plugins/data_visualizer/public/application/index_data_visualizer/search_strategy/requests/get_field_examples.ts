@@ -8,6 +8,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
 import { combineLatest, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+  ISearchStart,
+} from '@kbn/data-plugin/public';
 import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import type {
@@ -15,12 +21,6 @@ import type {
   FieldExamples,
   FieldStatsCommonRequestParams,
 } from '../../../../../common/types/field_stats';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-  ISearchStart,
-} from '../../../../../../../../src/plugins/data/public';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
 import { extractErrorProperties } from '../../utils/error_utils';
 import { MAX_EXAMPLES_DEFAULT } from './constants';

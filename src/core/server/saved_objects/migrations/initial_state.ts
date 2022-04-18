@@ -12,7 +12,7 @@ import { SavedObjectsMigrationVersion } from '../../../types';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { InitState } from './state';
-import { excludeUnusedTypesQuery } from '../migrations/core';
+import { excludeUnusedTypesQuery } from './core';
 
 /**
  * Construct the initial state for the model

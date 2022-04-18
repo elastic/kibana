@@ -7,7 +7,7 @@
 import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConfigKey } from '../../../../common/runtime_types';
 import type { Validation } from '../../../../common/types';
 import { DescribedFormGroupWithWrap } from '../../fleet_package/common/described_form_group_with_wrap';

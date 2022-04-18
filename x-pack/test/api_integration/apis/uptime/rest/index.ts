@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   settingsObjectId,
   settingsObjectType,
-} from '../../../../../plugins/uptime/server/lib/saved_objects/uptime_settings';
+} from '@kbn/uptime-plugin/server/lib/saved_objects/uptime_settings';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

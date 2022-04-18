@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { Plugin, PluginSetup, PluginStart } from './plugin';
 import { configSchema, ConfigSchema, ConfigType } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';

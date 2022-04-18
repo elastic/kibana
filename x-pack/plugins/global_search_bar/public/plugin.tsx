@@ -10,12 +10,12 @@ import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ApplicationStart, CoreTheme } from 'kibana/public';
-import { CoreStart, Plugin } from 'src/core/public';
-import { KibanaThemeProvider } from '../../../../src/plugins/kibana_react/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { GlobalSearchPluginStart } from '../../global_search/public';
-import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import { ApplicationStart, CoreTheme } from '@kbn/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { SearchBar } from './components/search_bar';
 
 export interface GlobalSearchBarPluginStartDeps {

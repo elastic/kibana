@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsErrorHelpers,
-  SavedObjectsServiceSetup,
-} from '../../../../../../src/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
+import { SavedObjectsErrorHelpers, SavedObjectsServiceSetup } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { secretKeys } from '../../../common/constants/monitor_management';

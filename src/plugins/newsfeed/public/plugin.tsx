@@ -12,9 +12,14 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreTheme } from 'kibana/public';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { KibanaThemeProvider } from '../../kibana_react/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  CoreTheme,
+  Plugin,
+} from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';

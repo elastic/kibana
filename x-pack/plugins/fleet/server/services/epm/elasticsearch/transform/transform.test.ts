@@ -19,16 +19,17 @@ jest.mock('./common', () => {
 });
 
 import { errors } from '@elastic/elasticsearch';
-import type { SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { ElasticsearchAssetType } from '../../../../types';
-import type { Installation, RegistryPackage } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectsClientMock } from '@kbn/core/server/saved_objects/service/saved_objects_client.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+
 import { getInstallation, getInstallationObject } from '../../packages';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
+import type { Installation, RegistryPackage } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
 import { appContextService } from '../../../app_context';
 
 import { getESAssetMetadata } from '../meta';

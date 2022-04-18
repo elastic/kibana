@@ -15,7 +15,7 @@ import { EventFieldsData } from '../types';
 import { TimelineId } from '../../../../../common/types';
 import { AlertSummaryRow } from '../helpers';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
-import { getEmptyValue } from '../../../components/empty_value';
+import { getEmptyValue } from '../../empty_value';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../containers/alerts/use_alert_prevalence', () => ({

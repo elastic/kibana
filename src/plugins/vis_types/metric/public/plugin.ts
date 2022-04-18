@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { VisualizationsSetup } from '../../../visualizations/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
 import { ConfigSchema } from '../config';
 

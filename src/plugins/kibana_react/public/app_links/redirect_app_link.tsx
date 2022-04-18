@@ -9,7 +9,7 @@
 import React, { FunctionComponent, useRef, useMemo } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
-import { ApplicationStart } from 'src/core/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { createNavigateToUrlClickHandler } from './click_handler';
 
 interface RedirectCrossAppLinksProps extends React.HTMLAttributes<HTMLDivElement> {
