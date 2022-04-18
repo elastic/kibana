@@ -54,7 +54,7 @@ const ruleType: NormalizedRuleType<
   executor: jest.fn(),
   producer: 'alerts',
   config: {
-    execution: {
+    run: {
       actions: { max: 1000 },
     },
   },
@@ -481,7 +481,7 @@ describe('Create Execution Handler', () => {
       ruleType: {
         ...ruleType,
         config: {
-          execution: {
+          run: {
             actions: { max: 2 },
           },
         },
