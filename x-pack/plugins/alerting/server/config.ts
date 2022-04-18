@@ -32,7 +32,7 @@ const rulesSchema = schema.object({
     }),
     enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
   }),
-  execution: schema.object({
+  run: schema.object({
     timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
     actions: schema.object({
       max: schema.number({ defaultValue: 100000, max: 100000 }),
