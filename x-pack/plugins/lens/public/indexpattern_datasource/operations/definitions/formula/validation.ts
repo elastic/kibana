@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
 import { luceneStringToDsl, toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
-import type { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/data-plugin/public';
+import { parseTimeShift } from '@kbn/data-plugin/common';
 import {
   findMathNodes,
   findVariables,
@@ -25,10 +26,9 @@ import type {
   OperationDefinition,
   GenericIndexPatternColumn,
   GenericOperationDefinition,
-} from '../index';
+} from '..';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import type { TinymathNodeTypes } from './types';
-import { parseTimeShift } from '../../../../../../../../src/plugins/data/common';
 
 interface ValidationErrors {
   missingField: { message: string; type: { variablesLength: number; variablesList: string } };

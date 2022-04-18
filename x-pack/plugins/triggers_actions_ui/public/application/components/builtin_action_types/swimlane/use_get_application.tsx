@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { ToastsApi } from 'kibana/public';
+import { ToastsApi } from '@kbn/core/public';
 import { getApplication as getApplicationApi } from './api';
 import * as i18n from './translations';
 import { SwimlaneFieldMappingConfig } from './types';

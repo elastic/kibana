@@ -49,7 +49,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   }, [setState, state]);
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.table.valuesVisualOptions', {
           defaultMessage: 'Visual options',

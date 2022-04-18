@@ -7,7 +7,7 @@
  */
 
 import { accessSync, constants } from 'fs';
-import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory } from './';
+import { getConfigPath, getDataPath, getLogsPath, getConfigDirectory } from '.';
 import { REPO_ROOT } from '../repo_root';
 
 expect.addSnapshotSerializer(

@@ -27,9 +27,9 @@ import type {
   ICustomClusterClient,
   Logger,
   ScopeableRequest,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { pollEsNodesVersion } from '@kbn/core/server';
 
-import { pollEsNodesVersion } from '../../../../src/core/server';
 import { ElasticsearchConnectionStatus } from '../common';
 import type { Certificate, PingResult } from '../common';
 import { CompatibilityError } from './compatibility_error';

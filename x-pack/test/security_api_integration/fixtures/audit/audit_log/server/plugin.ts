@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'src/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class AuditTrailTestPlugin implements Plugin {
   public setup(core: CoreSetup) {

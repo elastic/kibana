@@ -8,7 +8,7 @@
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { useUiTracker } from '../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import {
   logIndexNameReferenceRT,
   LogDataViewReference,

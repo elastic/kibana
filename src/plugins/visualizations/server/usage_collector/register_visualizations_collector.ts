@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getStats, VisualizationUsage } from './get_usage_collector';
-import type { UsageCollectionSetup } from '../../../usage_collection/server';
 
 export function registerVisualizationsCollector(collectorSet: UsageCollectionSetup) {
   const collector = collectorSet.makeUsageCollector<VisualizationUsage | undefined>({

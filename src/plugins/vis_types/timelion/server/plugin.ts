@@ -8,12 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  PluginStart,
-  DataRequestHandlerContext,
-} from '../../../../../src/plugins/data/server';
-import type { PluginStart as DataViewPluginStart } from '../../../../../src/plugins/data_views/server';
-import { CoreSetup, PluginInitializerContext, Plugin } from '../../../../../src/core/server';
+import type { PluginStart, DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { PluginStart as DataViewPluginStart } from '@kbn/data-views-plugin/server';
+import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/server';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
 import { runRoute } from './routes/run';

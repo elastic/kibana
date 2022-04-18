@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pagePathGetters } from '../../../../fleet/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 
 const CIS_INTEGRATION_PATH = pagePathGetters.integrations_all({ searchTerm: 'CIS' }).join('');

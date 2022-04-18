@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { CustomizablePalette, FIXED_PROGRESSION, PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../types';
-import { PalettePanelContainer } from '../shared_components/';
+import { PalettePanelContainer } from '../shared_components';
 import './dimension_editor.scss';
 import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';

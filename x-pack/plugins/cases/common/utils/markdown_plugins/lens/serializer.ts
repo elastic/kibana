@@ -6,7 +6,7 @@
  */
 
 import { Plugin } from 'unified';
-import type { TimeRange } from 'src/plugins/data/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { LENS_ID } from './constants';
 
 export interface LensSerializerProps {
