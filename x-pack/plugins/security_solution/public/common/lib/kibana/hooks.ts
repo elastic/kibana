@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { NavigateToAppOptions } from '@kbn/core/public';
 import {
   APP_UI_ID,
   CASES_FEATURE_ID,
@@ -19,8 +21,6 @@ import {
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { AuthenticatedUser } from '../../../../../security/common/model';
-import { NavigateToAppOptions } from '../../../../../../../src/core/public';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 

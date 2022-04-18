@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';

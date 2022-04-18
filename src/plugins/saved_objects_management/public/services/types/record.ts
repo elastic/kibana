@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference, SavedObjectsNamespaceType } from 'src/core/public';
+import { SavedObjectReference, SavedObjectsNamespaceType } from '@kbn/core/public';
 
 export interface SavedObjectsManagementRecord {
   type: string;

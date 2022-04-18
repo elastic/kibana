@@ -7,7 +7,9 @@
 
 import { compact } from 'lodash';
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common';
 import type {
@@ -18,7 +20,6 @@ import type {
 } from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
-import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';

@@ -7,10 +7,6 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import {
-  httpHandlerMockFactory,
-  ResponseProvidersInterface,
-} from '../../../common/mock/endpoint/http_handler_mock_factory';
-import {
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -21,7 +17,11 @@ import {
   GetAgentStatusResponse,
   GetPackagesResponse,
   PACKAGE_POLICY_API_ROUTES,
-} from '../../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import {
+  httpHandlerMockFactory,
+  ResponseProvidersInterface,
+} from '../../../common/mock/endpoint/http_handler_mock_factory';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse, GetPolicyResponse } from '../policy/types';
 import { FleetAgentPolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_policy_generator';

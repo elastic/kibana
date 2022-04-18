@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy, GetAgentPoliciesResponseItem } from '../../fleet/common';
+import type { PackagePolicy, GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */

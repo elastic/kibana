@@ -11,7 +11,7 @@ import {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { findExceptionList } from '../../find_exception_list';
 import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items';

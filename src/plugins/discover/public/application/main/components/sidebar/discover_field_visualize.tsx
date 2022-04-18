@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { DataView, DataViewField } from 'src/plugins/data_views/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
 import { triggerVisualizeActions, VisualizeInformation } from './lib/visualize_trigger_utils';
 import type { FieldDetails } from './types';

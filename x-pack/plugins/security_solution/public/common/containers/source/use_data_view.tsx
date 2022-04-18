@@ -10,9 +10,6 @@ import { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
 import { omit, pick } from 'lodash/fp';
-import { useKibana } from '../../lib/kibana';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { sourcererActions } from '../../store/sourcerer';
 import {
   BrowserField,
   DELETED_SECURITY_SOLUTION_DATA_VIEW,
@@ -20,12 +17,11 @@ import {
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '../../../../../timelines/common';
-import {
-  FieldSpec,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+} from '@kbn/timelines-plugin/common';
+import { FieldSpec, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { useKibana } from '../../lib/kibana';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { sourcererActions } from '../../store/sourcerer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getSourcererDataview } from '../sourcerer/api';
