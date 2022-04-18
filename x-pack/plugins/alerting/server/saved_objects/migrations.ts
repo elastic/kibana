@@ -157,7 +157,13 @@ export function getMigrations(
   const migrationRules820 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addMappedParams, addSearchType)
+    pipeMigrations(addMappedParams)
+  );
+
+  const migrationRules830 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addSearchType)
   );
 
   return mergeSavedObjectMigrationMaps(
@@ -172,6 +178,7 @@ export function getMigrations(
       '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
       '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
       '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
+      '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
     },
     getEsQueryAlertSearchSourceMigrations(searchSourceMigrations)
   );

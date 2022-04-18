@@ -2315,10 +2315,12 @@ describe('successful migrations', () => {
           severity: '60-high',
         });
       });
+    });
 
+    describe('8.3.0', () => {
       test('migrates es_query alert params', () => {
         const migration820 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
-          '8.2.0'
+          '8.3.0'
         ];
         const alert = getMockData(
           {
