@@ -10,8 +10,8 @@ import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { UiSettingsType } from '../../../../../../core/public';
-import { themeServiceMock, notificationServiceMock } from '../../../../../../core/public/mocks';
+import { UiSettingsType } from '@kbn/core/public';
+import { themeServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { SettingsChanges } from '../../types';
 import { Form } from './form';
 

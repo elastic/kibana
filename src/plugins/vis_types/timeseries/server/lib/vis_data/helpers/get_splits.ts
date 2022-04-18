@@ -8,7 +8,7 @@
 
 import Color from 'color';
 import { get, isPlainObject } from 'lodash';
-import { overwrite } from '../helpers';
+import { overwrite } from '.';
 
 import { calculateLabel } from '../../../../common/calculate_label';
 import { SERIES_SEPARATOR } from '../../../../common/constants';

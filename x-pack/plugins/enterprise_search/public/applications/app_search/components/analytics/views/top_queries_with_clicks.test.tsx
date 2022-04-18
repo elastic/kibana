@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { AnalyticsTable } from '../components';
 
-import { TopQueriesWithClicks } from './';
+import { TopQueriesWithClicks } from '.';
 
 describe('TopQueriesWithClicks', () => {
   it('renders', () => {

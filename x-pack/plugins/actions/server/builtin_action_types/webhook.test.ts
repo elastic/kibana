@@ -9,7 +9,7 @@ import { Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { actionsMock } from '../mocks';
 import axios from 'axios';
 import {

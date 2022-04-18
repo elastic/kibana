@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import type { DataView } from 'src/plugins/data_views/public';
+import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DiscoverServices } from '../build_services';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { createSearchSourceMock } from '../../../data/common/search/search_source/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,

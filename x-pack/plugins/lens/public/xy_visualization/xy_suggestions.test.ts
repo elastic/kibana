@@ -16,12 +16,12 @@ import {
 } from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import type { PaletteOutput } from '@kbn/coloring';
 import { layerTypes } from '../../common';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../id_generator');
 

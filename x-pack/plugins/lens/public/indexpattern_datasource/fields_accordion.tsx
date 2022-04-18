@@ -17,15 +17,15 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { Filter } from '@kbn/es-query';
+import { Query } from '@kbn/data-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
-import { Query } from '../../../../../src/plugins/data/public';
 import { DatasourceDataPanelProps } from '../types';
 import { IndexPattern } from './types';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];

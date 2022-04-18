@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaFeature } from '../../../../features/common';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+
 import {
   GLOBAL_RESOURCE,
   RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
