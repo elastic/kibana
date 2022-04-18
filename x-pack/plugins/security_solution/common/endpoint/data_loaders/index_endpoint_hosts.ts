@@ -12,7 +12,7 @@ import uuid from 'uuid';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '../../../../fleet/common';
+import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../generate_data';
 import { HostMetadata, HostPolicyResponse } from '../types';
 import {

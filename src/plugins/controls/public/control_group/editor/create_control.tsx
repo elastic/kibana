@@ -9,12 +9,12 @@
 import { EuiButton, EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 
+import { OverlayRef } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { pluginServices } from '../../services';
 import { ControlEditor } from './control_editor';
-import { OverlayRef } from '../../../../../core/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlWidth, ControlInput, IEditableControlFactory } from '../../types';
-import { toMountPoint } from '../../../../kibana_react/public';
 import { DEFAULT_CONTROL_WIDTH } from '../../../common/control_group/control_group_constants';
 import { setFlyoutRef } from '../embeddable/control_group_container';
 

@@ -9,19 +9,19 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useStore } from 'react-redux';
-import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { tableHasFormulas } from '@kbn/data-plugin/common';
+import { exporters } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   LensAppServices,
   LensTopNavActions,
   LensTopNavMenuProps,
   LensTopNavTooltips,
 } from './types';
-import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters } from '../../../../../src/plugins/data/public';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,

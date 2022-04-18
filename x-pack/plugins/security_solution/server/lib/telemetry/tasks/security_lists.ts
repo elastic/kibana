@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,

@@ -6,7 +6,7 @@
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsMapping } from './latest_findings_mapping';
 import {
@@ -21,20 +21,22 @@ export const initializeCspTransformsIndices = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ) => {
-  createIndexIfNotExists(
-    esClient,
-    LATEST_FINDINGS_INDEX_NAME,
-    LATEST_FINDINGS_INDEX_PATTERN,
-    latestFindingsMapping,
-    logger
-  );
-  createIndexIfNotExists(
-    esClient,
-    BENCHMARK_SCORE_INDEX_NAME,
-    BENCHMARK_SCORE_INDEX_PATTERN,
-    benchmarkScoreMapping,
-    logger
-  );
+  return Promise.all([
+    createIndexIfNotExists(
+      esClient,
+      LATEST_FINDINGS_INDEX_NAME,
+      LATEST_FINDINGS_INDEX_PATTERN,
+      latestFindingsMapping,
+      logger
+    ),
+    createIndexIfNotExists(
+      esClient,
+      BENCHMARK_SCORE_INDEX_NAME,
+      BENCHMARK_SCORE_INDEX_PATTERN,
+      benchmarkScoreMapping,
+      logger
+    ),
+  ]);
 };
 
 export const createIndexIfNotExists = async (

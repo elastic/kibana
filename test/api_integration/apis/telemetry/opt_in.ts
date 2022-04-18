@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 
-import { TelemetrySavedObjectAttributes } from 'src/plugins/telemetry/server/telemetry_repository';
+import { TelemetrySavedObjectAttributes } from '@kbn/telemetry-plugin/server/telemetry_repository';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {

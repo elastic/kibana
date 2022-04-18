@@ -8,7 +8,7 @@
 import React from 'react';
 import { processMock } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { SessionViewSearchBar } from './index';
+import { SessionViewSearchBar } from '.';
 import userEvent from '@testing-library/user-event';
 import { fireEvent } from '@testing-library/dom';
 

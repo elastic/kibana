@@ -12,8 +12,9 @@ import {
   UiSettingsServiceStart,
   SavedObjectsClientContract,
   ElasticsearchClient,
-} from 'src/core/server';
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
+} from '@kbn/core/server';
+import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import {
   AggsCommonService,
   AggConfigs,
@@ -22,7 +23,6 @@ import {
   calculateBounds,
   TimeRange,
 } from '../../../common';
-import { FieldFormatsStart } from '../../../../field_formats/server';
 import { IndexPatternsServiceStart } from '../../data_views';
 import { AggsSetup, AggsStart } from './types';
 

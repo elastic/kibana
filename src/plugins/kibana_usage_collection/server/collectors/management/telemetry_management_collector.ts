@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { IUiSettingsClient } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { UsageStats } from './types';
 import { REDACTED_KEYWORD } from '../../../common/constants';
 import { stackManagementSchema } from './schema';

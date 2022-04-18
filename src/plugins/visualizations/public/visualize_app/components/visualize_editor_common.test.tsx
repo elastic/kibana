@@ -14,7 +14,7 @@ import { SplitChartWarning } from './split_chart_warning';
 
 const mockGetLegacyUrlConflict = jest.fn();
 const mockRedirectLegacyUrl = jest.fn(() => Promise.resolve());
-jest.mock('../../../../kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(() => ({
     services: {
       spaces: {

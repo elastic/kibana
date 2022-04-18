@@ -14,11 +14,11 @@ import { VegaParser } from '../../data_model/vega_parser';
 import { TimeCache } from '../../data_model/time_cache';
 import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
-import { coreMock } from '../../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../../data/public/mocks';
-import { dataViewPluginMocks } from '../../../../../data_views/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
-import type { IServiceSettings } from '../vega_map_view/service_settings/service_settings_types';
+import type { IServiceSettings } from './service_settings/service_settings_types';
 
 import {
   setInjectedVars,

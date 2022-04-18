@@ -9,9 +9,9 @@
 import { Filter } from '@kbn/es-query';
 
 import { Subject } from 'rxjs';
+import { EmbeddableContainerSettings, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ControlEmbeddable } from '../../types';
 import { ChildEmbeddableOrderCache } from './control_group_container';
-import { EmbeddableContainerSettings, isErrorEmbeddable } from '../../../../embeddable/public';
 import { ControlGroupChainingSystem, ControlGroupInput } from '../../../common/control_group/types';
 
 interface GetPrecedingFiltersProps {

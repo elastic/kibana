@@ -8,7 +8,7 @@
 
 import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { Datatable } from '../../../../expressions';
+import type { Datatable } from '@kbn/expressions-plugin';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { DataLayerConfigResult, XYLayerConfigResult } from '../../common';

@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
