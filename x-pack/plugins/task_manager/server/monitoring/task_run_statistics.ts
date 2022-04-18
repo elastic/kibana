@@ -9,6 +9,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
+import { Logger } from '@kbn/core/server';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import {
@@ -38,7 +39,6 @@ import {
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
-import { Logger } from '../../../../../src/core/server';
 
 interface FillPoolStat extends JsonObject {
   duration: number[];

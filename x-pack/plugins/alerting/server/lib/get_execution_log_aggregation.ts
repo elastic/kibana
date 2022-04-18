@@ -8,8 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
+import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { parseDuration } from '.';
-import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
 import { IExecutionLog, IExecutionLogResult } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions

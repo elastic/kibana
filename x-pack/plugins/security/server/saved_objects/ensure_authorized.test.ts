@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { CheckSavedObjectsPrivileges } from '../authorization';
 import { Actions } from '../authorization';

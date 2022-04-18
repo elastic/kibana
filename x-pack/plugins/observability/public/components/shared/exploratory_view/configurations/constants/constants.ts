@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OperationType } from '../../../../../../../lens/public';
+import { OperationType } from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
 import { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
@@ -67,7 +68,6 @@ import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
 } from './field_names/synthetics';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../../lens/common/constants';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 

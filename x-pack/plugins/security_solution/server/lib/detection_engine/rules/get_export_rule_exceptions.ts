@@ -9,10 +9,7 @@ import { chunk } from 'lodash/fp';
 import { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import {
-  ExceptionListClient,
-  ExportExceptionListAndItemsReturn,
-} from '../../../../../lists/server';
+import { ExceptionListClient, ExportExceptionListAndItemsReturn } from '@kbn/lists-plugin/server';
 
 const NON_EXPORTABLE_LIST_IDS = [ENDPOINT_LIST_ID];
 export const EXCEPTIONS_EXPORT_CHUNK_SIZE = 50;

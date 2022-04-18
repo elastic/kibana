@@ -13,7 +13,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
 import { SearchSessionsConfigSchema } from '../../../config';
 

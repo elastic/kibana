@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { useFetcher } from '../../../observability/public';
-import { DataPublicPluginStart, IndexPattern } from '../../../../../src/plugins/data/public';
+import { useFetcher } from '@kbn/observability-plugin/public';
+import { DataPublicPluginStart, IndexPattern } from '@kbn/data-plugin/public';
 import { useHasData } from '../components/overview/empty_state/use_has_data';
 
 export const UptimeIndexPatternContext = createContext({} as IndexPattern);

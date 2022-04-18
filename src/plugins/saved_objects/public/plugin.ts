@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, Plugin } from 'src/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 
 import './index.scss';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   createSavedObjectClass,
   SavedObjectDecoratorRegistry,
   SavedObjectDecoratorConfig,
 } from './saved_object';
-import { DataPublicPluginStart } from '../../data/public';
-import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
 

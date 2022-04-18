@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import semverLt from 'semver/functions/lt';
-import { PackagePolicy } from '../../../../../../fleet/common/types';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types';
 import { ElasticDocsLink } from '../../../shared/links/elastic_docs_link';
 import rocketLaunchGraphic from './blog_rocket_720x420.png';
 import { MigrationInProgressPanel } from './migration_in_progress_panel';

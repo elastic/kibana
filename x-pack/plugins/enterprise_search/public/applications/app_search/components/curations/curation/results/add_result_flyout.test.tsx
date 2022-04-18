@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFlyout, EuiFieldSearch, EuiEmptyPrompt } from '@elastic/eui';
 
-import { CurationResult, AddResultFlyout } from './';
+import { CurationResult, AddResultFlyout } from '.';
 
 describe('AddResultFlyout', () => {
   const values = {
