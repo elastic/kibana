@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from '@kbn/core/server';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { Optional } from '@kbn/utility-types';
 import type { Transaction } from 'elastic-apm-node';
 import apm from 'elastic-apm-node';
@@ -22,8 +24,6 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { HttpServiceSetup, KibanaRequest, Logger, PackageInfo } from '@kbn/core/server';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import {
   LayoutParams,
   SCREENSHOTTING_APP_ID,

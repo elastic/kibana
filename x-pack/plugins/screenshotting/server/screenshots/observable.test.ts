@@ -37,7 +37,6 @@ describe('ScreenshotObservableHandler', () => {
     logger = { error: jest.fn() } as unknown as jest.Mocked<Logger>;
     options = {
       headers: { testHeader: 'testHeadValue' },
-
       urls: [],
     };
 
@@ -45,8 +44,12 @@ describe('ScreenshotObservableHandler', () => {
   });
 
   describe('waitUntil', () => {
+    let screenshots: ScreenshotObservableHandler;
+    beforeEach(() => {
+      screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
+    });
+
     it('catches TimeoutError and references the timeout config in a custom message', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
       const test$ = interval(1000).pipe(screenshots.waitUntil(200, 'Test Config'));
 
       const testPipeline = () => test$.toPromise();
@@ -56,7 +59,6 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('catches other Errors and explains where they were thrown', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
       const test$ = throwError(new Error(`Test Error to Throw`)).pipe(
         screenshots.waitUntil(200, 'Test Config')
       );
@@ -68,7 +70,6 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('is a pass-through if there is no Error', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
       const test$ = of('nice to see you').pipe(screenshots.waitUntil(20, 'xxxxxxxxxxx'));
 
       await expect(test$.toPromise()).resolves.toBe(`nice to see you`);
@@ -76,9 +77,13 @@ describe('ScreenshotObservableHandler', () => {
   });
 
   describe('checkPageIsOpen', () => {
+    let screenshots: ScreenshotObservableHandler;
+    beforeEach(() => {
+      screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
+    });
+
     it('throws a decorated Error when page is not open', async () => {
       browser.isPageOpen.mockReturnValue(false);
-      const screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
       const test$ = of(234455).pipe(
         map((input) => {
           screenshots.checkPageIsOpen();
@@ -92,7 +97,6 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('is a pass-through when the page is open', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
       const test$ = of(234455).pipe(
         map((input) => {
           screenshots.checkPageIsOpen();
