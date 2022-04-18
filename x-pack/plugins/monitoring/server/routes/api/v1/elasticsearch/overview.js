@@ -15,6 +15,7 @@ import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_overview';
 import { getLogs } from '../../../../lib/logs';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
+import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
 
 export function esOverviewRoute(server) {
   server.route({
@@ -37,7 +38,11 @@ export function esOverviewRoute(server) {
     async handler(req) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
-      const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
+      const filebeatIndexPattern = prefixIndexPattern(
+        config,
+        config.ui.logs.index,
+        CCS_REMOTE_PATTERN
+      );
 
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;

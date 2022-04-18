@@ -18,13 +18,14 @@ import {
   DS_INDEX_PATTERN_METRICS,
   INDEX_PATTERN_TYPES,
   INDEX_PATTERN_ENTERPRISE_SEARCH,
+  CCS_REMOTE_PATTERN,
 } from '../../../common/constants';
 import { MonitoringConfig } from '../..';
 
 export function getIndexPatterns(
   server: LegacyServer,
   additionalPatterns: Record<string, string> = {},
-  ccs: string = '*'
+  ccs: string = CCS_REMOTE_PATTERN
 ) {
   const config = server.config;
   const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
