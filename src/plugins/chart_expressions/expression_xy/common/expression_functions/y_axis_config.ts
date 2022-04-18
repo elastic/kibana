@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Y_AXIS_CONFIG, AxisModes, AXIS_EXTENT_CONFIG, YScaleTypes } from '../constants';
-import { YConfig, YConfigResult } from '../types';
+import { YAxisConfig, YAxisConfigResult } from '../types';
 
 export const yAxisConfigFunction: ExpressionFunctionDefinition<
   typeof Y_AXIS_CONFIG,

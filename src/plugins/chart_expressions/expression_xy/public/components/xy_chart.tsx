@@ -33,7 +33,7 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
-import type { SeriesType, XYChartProps } from '../../common/types';
+import type { XYChartProps } from '../../common/types';
 import {
   isHorizontalChart,
   getAnnotationsLayers,
