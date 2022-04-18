@@ -18,7 +18,7 @@ export function getPreferredServiceAnomalyTimeseries({
   fallbackToTransactions,
 }: {
   environment: Environment;
-  environments: string[];
+  environments: Environment[];
   detectorType: ApmMlDetectorType;
   allAnomalyTimeseries: ServiceAnomalyTimeseries[];
   fallbackToTransactions: boolean;
