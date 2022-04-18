@@ -120,7 +120,6 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.extendedDataLayer.showLines.help', {
         defaultMessage: 'Show lines between points',
       }),
-      default: true,
     },
     accessors: {
       types: ['string'],
@@ -166,12 +165,15 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
     validateShowPointsForChartType(args.showPoints, args.seriesType);
     validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
 
+    const showLines = args.seriesType.includes('line') ? args.showLines ?? true : args.showLines;
+
     return {
       type: EXTENDED_DATA_LAYER,
       ...args,
       accessors: args.accessors ?? [],
       layerType: LayerTypes.DATA,
       table,
+      showLines,
     };
   },
 };

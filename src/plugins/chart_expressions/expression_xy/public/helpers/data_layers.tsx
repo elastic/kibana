@@ -83,7 +83,7 @@ type GetPointConfigFn = (config: {
 }) => Partial<AreaSeriesStyle['point']>;
 
 type GetLineConfigFn = (config: {
-  showLines: boolean;
+  showLines?: boolean;
   lineWidth?: number;
 }) => Partial<AreaSeriesStyle['line']>;
 

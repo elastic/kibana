@@ -120,7 +120,6 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.dataLayer.showLines.help', {
         defaultMessage: 'Show lines between points',
       }),
-      default: true,
     },
     accessors: {
       types: ['string'],
@@ -158,12 +157,15 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
     validateShowPointsForChartType(args.showPoints, args.seriesType);
     validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
 
+    const showLines = args.seriesType.includes('line') ? args.showLines ?? true : args.showLines;
+
     return {
       type: DATA_LAYER,
       ...args,
       accessors: args.accessors ?? [],
       layerType: LayerTypes.DATA,
       table,
+      showLines,
     };
   },
 };

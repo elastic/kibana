@@ -97,8 +97,11 @@ export const validatePointsRadiusForChartType = (
   }
 };
 
-export const validateLinesVisibilityForChartType = (showLines: boolean, seriesType: SeriesType) => {
-  if (showLines === false && !seriesType.includes('line')) {
+export const validateLinesVisibilityForChartType = (
+  showLines: boolean | undefined,
+  seriesType: SeriesType
+) => {
+  if (showLines !== undefined && !seriesType.includes('line')) {
     throw new Error(errors.linesVisibilityForNonLineChartError());
   }
 };
