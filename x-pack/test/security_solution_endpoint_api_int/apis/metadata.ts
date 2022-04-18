@@ -54,8 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/115488
-      describe.skip(`POST ${HOST_METADATA_LIST_ROUTE} when index is not empty`, () => {
+      describe(`POST ${HOST_METADATA_LIST_ROUTE} when index is not empty`, () => {
         before(async () => {
           // stop the united transform and delete the index
           // otherwise it won't hit metrics-endpoint.metadata_current_default index
@@ -242,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             (ip: string) => ip === targetEndpointIp
           );
           expect(resultIp).to.eql([targetEndpointIp]);
-          expect(body.hosts[0].metadata.event.created).to.eql(1642522686057);
+          expect(body.hosts[0].metadata.event.created).to.eql(1650299756927);
           expect(body.hosts.length).to.eql(1);
           expect(body.request_page_size).to.eql(10);
           expect(body.request_page_index).to.eql(0);
@@ -284,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
           expect(resultHostId).to.eql(targetEndpointId);
           expect(resultElasticAgentId).to.eql(targetElasticAgentId);
-          expect(body.hosts[0].metadata.event.created).to.eql(1642522686057);
+          expect(body.hosts[0].metadata.event.created).to.eql(1650299756927);
           expect(body.hosts[0].host_status).to.eql('unhealthy');
           expect(body.hosts.length).to.eql(1);
           expect(body.request_page_size).to.eql(10);
