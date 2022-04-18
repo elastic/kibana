@@ -7,7 +7,7 @@
  */
 
 import { set } from 'lodash';
-import { PersistableStateService } from '../../../kibana_utils/common';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import {
   ControlGroupTelemetry,
   initializeControlGroupTelemetry,

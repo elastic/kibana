@@ -10,6 +10,7 @@ import { assign, cloneDeep } from 'lodash';
 import { SavedObjectsClientContract } from '@kbn/core/public';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
+import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
@@ -18,7 +19,6 @@ import { createDashboardEditUrl } from '../dashboard_constants';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 
 import { DashboardOptions } from '../types';
-import { RawControlGroupAttributes } from '../../../controls/common';
 
 export interface DashboardSavedObject extends SavedObject {
   id?: string;
