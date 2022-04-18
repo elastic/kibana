@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 interface CompletedItemsCountParameters {
   context: string;
@@ -37,12 +36,12 @@ const getCompletedItemsCount = ({
  */
 export const waitForVisualizations = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   timeout: number,
   toEqual: number,
   layout: Layout
 ): Promise<void> => {
-  const span = apm.startSpan('wait_for_visualizations', 'wait');
+  const logger = eventLogger.kbnLogger;
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
   logger.debug(`waiting for ${toEqual} rendered elements to be in the DOM`);
@@ -56,11 +55,9 @@ export const waitForVisualizations = async (
 
     logger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
-    logger.error(err);
+    eventLogger.error(err, Actions.WAIT_VISUALIZATIONS);
     throw new Error(
       `An error occurred when trying to wait for ${toEqual} visualizations to finish rendering. ${err.message}`
     );
   }
-
-  span?.end();
 };

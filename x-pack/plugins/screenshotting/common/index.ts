@@ -14,3 +14,5 @@ export {
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
 } from './expression';
+
+export const PLUGIN_ID = 'screenshotting';

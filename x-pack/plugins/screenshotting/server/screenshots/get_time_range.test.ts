@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
+import { EventLogger } from './event_logger';
 import { getTimeRange } from './get_time_range';
 
 describe('getTimeRange', () => {
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let layout: ReturnType<typeof createMockLayout>;
-  let logger: jest.Mocked<Logger>;
+  let eventLogger: EventLogger;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
     layout = createMockLayout();
-    logger = { debug: jest.fn(), info: jest.fn() } as unknown as jest.Mocked<Logger>;
-
+    eventLogger = new EventLogger(loggingSystemMock.createLogger());
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
   });
 
@@ -28,7 +28,7 @@ describe('getTimeRange', () => {
   });
 
   it('should return null when there is no duration element', async () => {
-    await expect(getTimeRange(browser, logger, layout)).resolves.toBeNull();
+    await expect(getTimeRange(browser, eventLogger, layout)).resolves.toBeNull();
   });
 
   it('should return null when duration attrbute is empty', async () => {
@@ -36,7 +36,7 @@ describe('getTimeRange', () => {
       <div timefilterDurationSelector />
     `;
 
-    await expect(getTimeRange(browser, logger, layout)).resolves.toBeNull();
+    await expect(getTimeRange(browser, eventLogger, layout)).resolves.toBeNull();
   });
 
   it('should return duration', async () => {
@@ -44,6 +44,6 @@ describe('getTimeRange', () => {
       <div timefilterDurationSelector="10" />
     `;
 
-    await expect(getTimeRange(browser, logger, layout)).resolves.toBe('10');
+    await expect(getTimeRange(browser, eventLogger, layout)).resolves.toBe('10');
   });
 });

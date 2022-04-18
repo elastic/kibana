@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { interval, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { Logger } from '@kbn/core/server';
 import { createMockBrowserDriver } from '../browsers/mock';
 import type { ConfigType } from '../config';
 import { createMockLayout } from '../layouts/mock';
+import { EventLogger } from './event_logger';
 import { ScreenshotObservableHandler, ScreenshotObservableOptions } from './observable';
 
 describe('ScreenshotObservableHandler', () => {
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let config: ConfigType;
   let layout: ReturnType<typeof createMockLayout>;
-  let logger: jest.Mocked<Logger>;
+  let eventLogger: EventLogger;
   let options: ScreenshotObservableOptions;
 
   beforeEach(async () => {
@@ -34,7 +35,7 @@ describe('ScreenshotObservableHandler', () => {
       },
     } as ConfigType;
     layout = createMockLayout();
-    logger = { error: jest.fn() } as unknown as jest.Mocked<Logger>;
+    eventLogger = new EventLogger(loggingSystemMock.createLogger());
     options = {
       headers: { testHeader: 'testHeadValue' },
       urls: [],
@@ -46,7 +47,7 @@ describe('ScreenshotObservableHandler', () => {
   describe('waitUntil', () => {
     let screenshots: ScreenshotObservableHandler;
     beforeEach(() => {
-      screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
+      screenshots = new ScreenshotObservableHandler(browser, config, eventLogger, layout, options);
     });
 
     it('catches TimeoutError and references the timeout config in a custom message', async () => {
@@ -79,7 +80,7 @@ describe('ScreenshotObservableHandler', () => {
   describe('checkPageIsOpen', () => {
     let screenshots: ScreenshotObservableHandler;
     beforeEach(() => {
-      screenshots = new ScreenshotObservableHandler(browser, config, logger, layout, options);
+      screenshots = new ScreenshotObservableHandler(browser, config, eventLogger, layout, options);
     });
 
     it('throws a decorated Error when page is not open', async () => {

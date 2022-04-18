@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 export interface AttributesMap {
   [key: string]: string | null;
@@ -36,10 +35,9 @@ export interface ElementsPositionAndAttribute {
 
 export const getElementPositionAndAttributes = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   layout: Layout
 ): Promise<ElementsPositionAndAttribute[] | null> => {
-  const span = apm.startSpan('get_element_position_data', 'read');
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
   let elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   try {
@@ -77,7 +75,7 @@ export const getElementPositionAndAttributes = async (
         args: [screenshotSelector, { title: 'data-title', description: 'data-description' }],
       },
       { context: CONTEXT_ELEMENTATTRIBUTES },
-      logger
+      eventLogger.kbnLogger
     );
 
     if (!elementsPositionAndAttributes?.length) {
@@ -86,10 +84,9 @@ export const getElementPositionAndAttributes = async (
       );
     }
   } catch (err) {
+    eventLogger.error(err, Actions.GET_ELEMENT_POSITION_DATA);
     elementsPositionAndAttributes = null;
   }
-
-  span?.end();
 
   return elementsPositionAndAttributes;
 };

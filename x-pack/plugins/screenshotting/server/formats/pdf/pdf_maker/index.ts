@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { Logger, PackageInfo } from '@kbn/core/server';
-import { PdfMaker } from './pdfmaker';
+import type { PackageInfo } from '@kbn/core/server';
 import type { Layout } from '../../../layouts';
-import { getTracker } from './tracker';
 import type { CaptureResult } from '../../../screenshots';
+import { EventLogger } from '../../../screenshots/event_logger';
+import { PdfMaker } from './pdfmaker';
 
 interface PngsToPdfArgs {
   results: CaptureResult['results'];
   layout: Layout;
   packageInfo: PackageInfo;
-  logger: Logger;
+  eventLogger: EventLogger;
   logo?: string;
   title?: string;
 }
@@ -26,37 +26,34 @@ export async function pngsToPdf({
   logo,
   title,
   packageInfo,
-  logger,
+  eventLogger,
 }: PngsToPdfArgs): Promise<{ buffer: Buffer; pages: number }> {
-  const pdfMaker = new PdfMaker(layout, logo, packageInfo, logger);
-  const tracker = getTracker();
+  eventLogger.pdfBegin();
+  const pdfMaker = new PdfMaker(layout, logo, packageInfo, eventLogger.kbnLogger);
   if (title) {
     pdfMaker.setTitle(title);
   }
   results.forEach((result) => {
     result.screenshots.forEach((png) => {
-      tracker.startAddImage();
+      eventLogger.addPdfImageBegin();
       pdfMaker.addImage(png.data, {
         title: png.title ?? undefined,
         description: png.description ?? undefined,
       });
-      tracker.endAddImage();
+      eventLogger.addPdfImageEnd();
     });
   });
 
   let buffer: Uint8Array | null = null;
   try {
-    tracker.startCompile();
+    eventLogger.compilePdfBegin();
     buffer = await pdfMaker.generate();
-    tracker.endCompile();
+    eventLogger.compilePdfEnd();
 
     const byteLength = buffer?.byteLength ?? 0;
-    logger.debug(`PDF buffer byte length: ${byteLength}`);
-    tracker.setByteLength(byteLength);
+    eventLogger.pdfEnd({ byteLengthPdf: byteLength, pdfPages: pdfMaker.getPageCount() });
   } catch (err) {
     throw err;
-  } finally {
-    tracker.end();
   }
 
   return { buffer: Buffer.from(buffer.buffer), pages: pdfMaker.getPageCount() };

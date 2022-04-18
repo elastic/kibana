@@ -7,21 +7,19 @@
 
 import fs from 'fs';
 import { promisify } from 'util';
-import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_INJECTCSS } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 const fsp = { readFile: promisify(fs.readFile) };
 
 export const injectCustomCss = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   layout: Layout
 ): Promise<void> => {
-  const span = apm.startSpan('inject_css', 'correction');
-  logger.debug('injecting custom css');
+  eventLogger.injectCssBegin();
 
   const filePath = layout.getCssOverridesPath();
   if (!filePath) {
@@ -40,14 +38,14 @@ export const injectCustomCss = async (
         args: [buffer.toString()],
       },
       { context: CONTEXT_INJECTCSS },
-      logger
+      eventLogger.kbnLogger
     );
   } catch (err) {
-    logger.error(err);
+    eventLogger.error(err, Actions.INJECT_CSS);
     throw new Error(
       `An error occurred when trying to update Kibana CSS for reporting. ${err.message}`
     );
   }
 
-  span?.end();
+  eventLogger.injectCssEnd();
 };

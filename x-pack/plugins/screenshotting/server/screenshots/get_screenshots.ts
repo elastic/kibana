@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
+import { EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 
 export interface Screenshot {
@@ -29,15 +28,15 @@ export interface Screenshot {
 
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   elementsPositionAndAttributes: ElementsPositionAndAttribute[]
 ): Promise<Screenshot[]> => {
+  const { kbnLogger: logger } = eventLogger;
   logger.info(`taking screenshots`);
 
   const screenshots: Screenshot[] = [];
 
   for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
-    const span = apm.startSpan('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
 
     const data = await browser.screenshot(item.position);
@@ -51,8 +50,6 @@ export const getScreenshots = async (
       title: item.attributes.title,
       description: item.attributes.description,
     });
-
-    span?.end();
   }
 
   logger.info(`screenshots taken: ${screenshots.length}`);

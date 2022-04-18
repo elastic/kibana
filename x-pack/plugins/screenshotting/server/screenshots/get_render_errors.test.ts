@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
+import { EventLogger } from './event_logger';
 import { getRenderErrors } from './get_render_errors';
 
 describe('getRenderErrors', () => {
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let layout: ReturnType<typeof createMockLayout>;
-  let logger: jest.Mocked<Logger>;
+  let eventLogger: EventLogger;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
     layout = createMockLayout();
-    logger = { debug: jest.fn(), warn: jest.fn() } as unknown as jest.Mocked<Logger>;
-
+    eventLogger = new EventLogger(loggingSystemMock.createLogger());
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
   });
 
@@ -35,7 +35,7 @@ describe('getRenderErrors', () => {
       <div dataRenderErrorSelector="a test error" />
     `;
 
-    await expect(getRenderErrors(browser, logger, layout)).resolves.toEqual([
+    await expect(getRenderErrors(browser, eventLogger, layout)).resolves.toEqual([
       'a test error',
       'a test error',
       'a test error',
@@ -48,6 +48,6 @@ describe('getRenderErrors', () => {
       <renderedSelector />
     `;
 
-    await expect(getRenderErrors(browser, logger, layout)).resolves.toEqual(undefined);
+    await expect(getRenderErrors(browser, eventLogger, layout)).resolves.toEqual(undefined);
   });
 });

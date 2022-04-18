@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
+import { EventLogger } from './event_logger';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 
 describe('getElementPositionAndAttributes', () => {
-  const logger = {} as jest.Mocked<Logger>;
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let layout: ReturnType<typeof createMockLayout>;
+  let eventLogger: EventLogger;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
     layout = createMockLayout();
-
+    eventLogger = new EventLogger(loggingSystemMock.createLogger());
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
 
     // @see https://github.com/jsdom/jsdom/issues/653
@@ -59,7 +60,7 @@ describe('getElementPositionAndAttributes', () => {
       />
     `;
 
-    await expect(getElementPositionAndAttributes(browser, logger, layout)).resolves
+    await expect(getElementPositionAndAttributes(browser, eventLogger, layout)).resolves
       .toMatchInlineSnapshot(`
             Array [
               Object {
@@ -103,6 +104,6 @@ describe('getElementPositionAndAttributes', () => {
   });
 
   it('should return null when there are no elements matching', async () => {
-    await expect(getElementPositionAndAttributes(browser, logger, layout)).resolves.toBeNull();
+    await expect(getElementPositionAndAttributes(browser, eventLogger, layout)).resolves.toBeNull();
   });
 });

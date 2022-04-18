@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
+import { EventLogger } from './event_logger';
 import { getNumberOfItems } from './get_number_of_items';
 
 describe('getNumberOfItems', () => {
   const timeout = 10;
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let layout: ReturnType<typeof createMockLayout>;
-  let logger: jest.Mocked<Logger>;
+  let eventLogger: EventLogger;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
     layout = createMockLayout();
-    logger = { debug: jest.fn() } as unknown as jest.Mocked<Logger>;
-
+    eventLogger = new EventLogger(loggingSystemMock.createLogger());
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
   });
 
@@ -33,7 +33,7 @@ describe('getNumberOfItems', () => {
       <div itemsSelector="10" />
     `;
 
-    await expect(getNumberOfItems(browser, logger, timeout, layout)).resolves.toBe(10);
+    await expect(getNumberOfItems(browser, eventLogger, timeout, layout)).resolves.toBe(10);
   });
 
   it('should determine the number of items by selector ', async () => {
@@ -43,7 +43,7 @@ describe('getNumberOfItems', () => {
       <renderedSelector />
     `;
 
-    await expect(getNumberOfItems(browser, logger, timeout, layout)).resolves.toBe(3);
+    await expect(getNumberOfItems(browser, eventLogger, timeout, layout)).resolves.toBe(3);
   });
 
   it('should fall back to the selector when the attribute is empty', async () => {
@@ -53,6 +53,6 @@ describe('getNumberOfItems', () => {
       <renderedSelector />
     `;
 
-    await expect(getNumberOfItems(browser, logger, timeout, layout)).resolves.toBe(2);
+    await expect(getNumberOfItems(browser, eventLogger, timeout, layout)).resolves.toBe(2);
   });
 });

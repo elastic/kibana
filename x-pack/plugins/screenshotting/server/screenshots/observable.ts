@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Transaction } from 'elastic-apm-node';
+import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import type { Headers, Logger } from '@kbn/core/server';
 import { errors } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
-import { durationToNumber as toNumber, ConfigType } from '../config';
+import { ConfigType, durationToNumber as toNumber } from '../config';
 import type { Layout } from '../layouts';
+import { EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -118,7 +118,7 @@ export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
     private readonly config: ConfigType,
-    private readonly logger: Logger,
+    private readonly eventLogger: EventLogger,
     private readonly layout: Layout,
     private options: ScreenshotObservableOptions
   ) {}
@@ -154,7 +154,7 @@ export class ScreenshotObservableHandler {
 
       return openUrl(
         this.driver,
-        this.logger,
+        this.eventLogger,
         toNumber(this.config.capture.timeouts.openUrl),
         index,
         url,
@@ -168,34 +168,34 @@ export class ScreenshotObservableHandler {
     const driver = this.driver;
     const waitTimeout = toNumber(this.config.capture.timeouts.waitForElements);
 
-    return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
+    return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
       mergeMap(async (itemsCount) => {
         // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
         const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
 
         // Set the viewport allowing time for the browser to handle reflow and redraw
         // before checking for readiness of visualizations.
-        await driver.setViewport(viewport, this.logger);
-        await waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout);
+        await driver.setViewport(viewport, this.eventLogger.kbnLogger);
+        await waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout);
       }),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
   }
 
-  private completeRender(apmTrans: Transaction | null) {
+  private completeRender() {
     const driver = this.driver;
     const layout = this.layout;
-    const logger = this.logger;
+    const logger = this.eventLogger;
 
     return defer(async () => {
       // Waiting till _after_ elements have rendered before injecting our CSS
       // allows for them to be displayed properly in many cases
       await injectCustomCss(driver, logger, layout);
 
-      const apmPositionElements = apmTrans?.startSpan('position-elements', 'correction');
+      this.eventLogger.positionElementsBegin();
       // position panel elements for print layout
-      await layout.positionElements?.(driver, logger);
-      apmPositionElements?.end();
+      await layout.positionElements?.(driver, logger.kbnLogger);
+      this.eventLogger.positionElementsEnd();
 
       await waitForRenderComplete(driver, logger, toNumber(this.config.capture.loadDelay), layout);
     }).pipe(
@@ -210,10 +210,10 @@ export class ScreenshotObservableHandler {
     );
   }
 
-  public setupPage(index: number, url: UrlOrUrlWithContext, apmTrans: Transaction | null) {
+  public setupPage(index: number, url: UrlOrUrlWithContext) {
     return this.openUrl(index, url).pipe(
       switchMapTo(this.waitForElements()),
-      switchMapTo(this.completeRender(apmTrans))
+      switchMapTo(this.completeRender())
     );
   }
 
@@ -227,7 +227,7 @@ export class ScreenshotObservableHandler {
             getDefaultElementPosition(this.layout.getViewport(1));
           let screenshots: Screenshot[] = [];
           try {
-            screenshots = await getScreenshots(this.driver, this.logger, elements);
+            screenshots = await getScreenshots(this.driver, this.eventLogger, elements);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }

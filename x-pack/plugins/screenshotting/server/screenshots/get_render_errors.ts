@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { Layout } from '../layouts';
 import { CONTEXT_GETRENDERERRORS } from './constants';
+import { EventLogger } from './event_logger';
 
 export const getRenderErrors = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   layout: Layout
 ): Promise<undefined | string[]> => {
-  const span = apm.startSpan('get_render_errors', 'read');
-  logger.debug('reading render errors');
+  const { kbnLogger: logger } = eventLogger;
   const errorsFound: undefined | string[] = await browser.evaluate(
     {
       fn: (errorSelector, errorAttribute) => {
@@ -38,7 +36,6 @@ export const getRenderErrors = async (
     { context: CONTEXT_GETRENDERERRORS },
     logger
   );
-  span?.end();
 
   if (errorsFound?.length) {
     logger.warn(

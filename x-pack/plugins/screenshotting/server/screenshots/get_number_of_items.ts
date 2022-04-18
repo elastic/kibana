@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 export const getNumberOfItems = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   timeout: number,
   layout: Layout
 ): Promise<number> => {
-  const span = apm.startSpan('get_number_of_items', 'read');
+  const logger = eventLogger.kbnLogger;
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
-
-  logger.debug('waiting for elements or items count attribute; or not found to interrupt');
 
   try {
     // the dashboard is using the `itemsCountAttribute` attribute to let us
@@ -55,13 +52,11 @@ export const getNumberOfItems = async (
       logger
     );
   } catch (error) {
-    logger.error(error);
+    eventLogger.error(error, Actions.GET_NUMBER_OF_ITEMS);
     throw new Error(
       `An error occurred when trying to read the page for visualization panel info: ${error.message}`
     );
   }
-
-  span?.end();
 
   return itemsCount;
 };
