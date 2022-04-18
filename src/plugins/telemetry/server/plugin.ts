@@ -20,11 +20,11 @@ import {
 
 import { ElasticV3Shipper } from '@elastic/analytics';
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import type {
   CoreSetup,
   PluginInitializerContext,
@@ -32,9 +32,9 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-} from 'src/core/server';
-import type { SecurityPluginStart } from '../../../../x-pack/plugins/security/server';
-import { SavedObjectsClient } from '../../../core/server';
+} from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {

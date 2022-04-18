@@ -7,7 +7,7 @@
  */
 
 import type { IShipper } from '../types';
-import { shippersMock } from '../../shippers/mocks';
+import { shippersMock } from '../mocks';
 
 export const shipperMock: jest.Mocked<IShipper> = shippersMock.createShipper();
 
