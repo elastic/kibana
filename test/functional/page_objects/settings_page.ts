@@ -471,7 +471,7 @@ export class SettingsPageObject extends FtrService {
 
     if (!isStandardIndexPattern) {
       const badges = await this.find.allByCssSelector('.euiBadge__text');
-      const text = await badges[1].getVisibleText();
+      const text = await badges[0].getVisibleText();
       expect(text).to.equal('Rollup');
     }
 
