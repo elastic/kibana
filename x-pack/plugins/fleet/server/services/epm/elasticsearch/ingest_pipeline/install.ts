@@ -6,7 +6,7 @@
  */
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';

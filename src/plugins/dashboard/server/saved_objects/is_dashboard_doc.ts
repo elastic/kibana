@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { DashboardDoc730ToLatest } from '../../common';
 
 function isDoc(

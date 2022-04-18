@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ActionExecutionContext } from 'src/plugins/ui_actions/public';
-import { ApplicationStart } from 'kibana/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable, ViewMode } from '../../../embeddable/public';
-import { Action } from '../../../ui_actions/public';
+import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../common';
 import { getSavedSearchUrl } from '../services/saved_searches';

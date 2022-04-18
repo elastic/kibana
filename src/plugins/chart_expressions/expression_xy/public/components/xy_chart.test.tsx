@@ -33,7 +33,7 @@ import {
   VerticalAlignment,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
-import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { XyEndzones } from './x_domain';
 import {
   chartsActiveCursorService,
@@ -51,8 +51,8 @@ import {
   sampleLayer,
 } from '../../common/__mocks__';
 import { XYChart, XYChartRenderProps } from './xy_chart';
-import { eventAnnotationServiceMock } from '../../../../event_annotation/public/mocks';
-import { EventAnnotationOutput } from '../../../../event_annotation/common';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();

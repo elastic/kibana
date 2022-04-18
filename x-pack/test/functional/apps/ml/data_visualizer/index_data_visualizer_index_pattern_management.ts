@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 import { MetricFieldVisConfig, NonMetricFieldVisConfig } from './types';
 interface TestData {
   suiteTitle: string;

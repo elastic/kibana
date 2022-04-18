@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
 export interface IndexPatternsTestStartDeps {
   data: DataPluginStart;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository } from 'src/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { CIS_BENCHMARK_1_4_1_RULES } from './cis_1_4_1/rules';
 import { cspRuleAssetSavedObjectType } from '../../common/schemas/csp_rule';
 
