@@ -57,6 +57,9 @@ export const sampleLayer: DataLayerConfigResult = {
   xScaleType: 'ordinal',
   yScaleType: 'linear',
   isHistogram: false,
+  isHorizontal: false,
+  isStacked: false,
+  isPercentage: false,
   palette: mockPaletteOutput,
   table: createSampleDatatableWithRows([]),
 };
@@ -64,9 +67,6 @@ export const sampleLayer: DataLayerConfigResult = {
 export const createArgsWithLayers = (
   layers: DataLayerConfigResult | DataLayerConfigResult[] = sampleLayer
 ): XYProps => ({
-  xTitle: '',
-  yTitle: '',
-  yRightTitle: '',
   legend: {
     type: 'legendConfig',
     isVisible: false,
@@ -74,38 +74,43 @@ export const createArgsWithLayers = (
   },
   valueLabels: 'hide',
   valuesInLegend: false,
-  axisTitlesVisibilitySettings: {
-    type: 'axisTitlesVisibilityConfig',
-    x: true,
-    yLeft: true,
-    yRight: true,
+  xAxisConfig: {
+    type: 'xAxisConfig',
+    position: 'bottom',
+    showGridLines: true,
+    labelsOrientation: 0,
+    showLabels: true,
+    showTitle: true,
+    title: '',
   },
-  tickLabelsVisibilitySettings: {
-    type: 'tickLabelsConfig',
-    x: true,
-    yLeft: false,
-    yRight: false,
-  },
-  labelsOrientation: {
-    type: 'labelsOrientationConfig',
-    x: 0,
-    yLeft: -90,
-    yRight: -45,
-  },
-  gridlinesVisibilitySettings: {
-    type: 'gridlinesConfig',
-    x: true,
-    yLeft: false,
-    yRight: false,
-  },
-  yLeftExtent: {
-    mode: 'full',
-    type: 'axisExtentConfig',
-  },
-  yRightExtent: {
-    mode: 'full',
-    type: 'axisExtentConfig',
-  },
+  axes: [
+    {
+      type: 'yAxisConfig',
+      position: 'right',
+      showGridLines: false,
+      labelsOrientation: -45,
+      showLabels: false,
+      showTitle: true,
+      title: '',
+      extent: {
+        mode: 'full',
+        type: 'axisExtentConfig',
+      },
+    },
+    {
+      type: 'yAxisConfig',
+      position: 'left',
+      showGridLines: false,
+      labelsOrientation: -90,
+      showLabels: false,
+      showTitle: true,
+      title: '',
+      extent: {
+        mode: 'full',
+        type: 'axisExtentConfig',
+      },
+    },
+  ],
   layers: Array.isArray(layers) ? layers : [layers],
 });
 

@@ -23,6 +23,9 @@ describe('dataLayerConfig', () => {
       xScaleType: 'linear',
       yScaleType: 'linear',
       isHistogram: false,
+      isHorizontal: false,
+      isPercentage: false,
+      isStacked: false,
       palette: mockPaletteOutput,
     };
 
