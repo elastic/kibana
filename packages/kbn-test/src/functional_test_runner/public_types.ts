@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import type { Config, Lifecycle, TestMetadata, DockerServersService, EsVersion } from './lib';
 import type { Test, Suite } from './fake_mocha_types';
