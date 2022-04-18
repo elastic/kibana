@@ -19,10 +19,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import { getDisplayValueFromFilter, mapAndFlattenFilters } from '../../../data/public';
+import { getDisplayValueFromFilter, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { Filter } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterLabel } from '../filter_bar';
-import { Filter } from '../../../data/common';
-import { DataView } from '../../../data_views/public';
 
 interface Props {
   filters: Filter[];

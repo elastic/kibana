@@ -18,7 +18,7 @@ import {
 import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
 import {
   GEOMETRY_FILTER_ACTION,

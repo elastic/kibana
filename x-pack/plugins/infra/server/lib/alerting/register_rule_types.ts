@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PluginSetupContract } from '../../../../alerting/server';
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { registerMetricThresholdRuleType } from './metric_threshold/register_metric_threshold_rule_type';
 import { registerMetricInventoryThresholdRuleType } from './inventory_metric_threshold/register_inventory_metric_threshold_rule_type';
 import { registerMetricAnomalyRuleType } from './metric_anomaly/register_metric_anomaly_rule_type';
 import { registerLogThresholdRuleType } from './log_threshold/register_log_threshold_rule_type';
 import { InfraBackendLibs } from '../infra_types';
-import { MlPluginSetup } from '../../../../ml/server';
 
 const registerRuleTypes = (
   alertingPlugin: PluginSetupContract,

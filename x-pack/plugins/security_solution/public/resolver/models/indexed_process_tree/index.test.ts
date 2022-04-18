@@ -9,7 +9,7 @@ import { ResolverNode } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { generateTree, genResolverNode } from '../../mocks/generator';
 import { IndexedProcessTree } from '../../types';
-import { factory } from './index';
+import { factory } from '.';
 
 describe('factory', () => {
   const originID = 'origin';

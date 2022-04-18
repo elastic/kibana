@@ -7,7 +7,7 @@
 
 import { Action, Dispatch, MiddlewareAPI } from 'redux';
 
-import { track, METRIC_TYPE, TELEMETRY_EVENT } from './';
+import { track, METRIC_TYPE, TELEMETRY_EVENT } from '.';
 import * as timelineActions from '../../../timelines/store/timeline/actions';
 
 export const telemetryMiddleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
