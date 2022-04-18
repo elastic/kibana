@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { HttpResponse, HttpSetup } from 'kibana/public';
+import type { HttpResponse, HttpSetup } from '@kbn/core/public';
 import { trimStart } from 'lodash';
 import { API_BASE_PATH, KIBANA_API_KEYWORD } from '../../../common/constants';
 
