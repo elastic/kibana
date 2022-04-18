@@ -6,7 +6,7 @@
  */
 
 import { Logger, CoreSetup } from '@kbn/core/server';
-import moment from 'moment';
+// import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,

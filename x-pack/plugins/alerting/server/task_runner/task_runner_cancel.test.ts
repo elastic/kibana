@@ -334,6 +334,9 @@ describe('Task Runner Cancel', () => {
                 number_of_searches: 3,
                 number_of_triggered_actions: 0,
                 number_of_scheduled_actions: 0,
+                number_of_active_alerts: 0,
+                number_of_new_alerts: 0,
+                number_of_recovered_alerts: 0,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },
@@ -499,7 +502,7 @@ describe('Task Runner Cancel', () => {
     await promise;
 
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).toHaveBeenCalledTimes(8);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -523,7 +526,11 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfScheduledActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      8,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"triggeredActionsStatus":"complete"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -618,6 +625,9 @@ describe('Task Runner Cancel', () => {
                 number_of_searches: 3,
                 number_of_triggered_actions: 0,
                 number_of_scheduled_actions: 0,
+                number_of_active_alerts: 0,
+                number_of_recovered_alerts: 0,
+                number_of_new_alerts: 0,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },
@@ -663,7 +673,7 @@ describe('Task Runner Cancel', () => {
 
   function testActionsExecute() {
     const logger = taskRunnerFactoryInitializerParams.logger;
-    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -683,7 +693,11 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfScheduledActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+    );
+    expect(logger.debug).nthCalledWith(
+      7,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"triggeredActionsStatus":"complete"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -897,6 +911,9 @@ describe('Task Runner Cancel', () => {
                 number_of_searches: 3,
                 number_of_triggered_actions: 1,
                 number_of_scheduled_actions: 1,
+                number_of_active_alerts: 1,
+                number_of_new_alerts: 1,
+                number_of_recovered_alerts: 0,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },

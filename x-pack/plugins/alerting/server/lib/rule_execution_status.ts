@@ -15,26 +15,21 @@ import {
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import {
-  ActionsCompletion,
-  RuleExecutionStatuses,
-  EMPTY_RULE_RUN_METRICS,
-  RuleRunMetrics,
-} from '../../common';
+import { ActionsCompletion, RuleExecutionStatuses, RuleRunMetrics } from '../../common';
 import { translations } from '../constants/translations';
 
 export interface IExecutionStatusAndMetrics {
   status: RuleExecutionStatus;
-  metrics: RuleRunMetrics;
+  metrics: RuleRunMetrics | null;
 }
 
 export function executionStatusFromState(
-  state: RuleTaskStateAndMetrics
+  stateWithMetrics: RuleTaskStateAndMetrics
 ): IExecutionStatusAndMetrics {
-  const alertIds = Object.keys(state.alertInstances ?? {});
+  const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
   const hasIncompleteAlertExecution =
-    state.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
+    stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
   let status: RuleExecutionStatuses =
     alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
@@ -54,7 +49,7 @@ export function executionStatusFromState(
         },
       }),
     },
-    metrics: state.metrics,
+    metrics: stateWithMetrics.metrics,
   };
 }
 
@@ -68,7 +63,7 @@ export function executionStatusFromError(error: Error): IExecutionStatusAndMetri
         message: getEsErrorMessage(error),
       },
     },
-    metrics: EMPTY_RULE_RUN_METRICS,
+    metrics: null,
   };
 }
 

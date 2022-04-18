@@ -36,7 +36,7 @@ export interface RuleTaskRunResult {
 }
 
 export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
-  state: RuleTaskStateAndMetrics;
+  stateWithMetrics: RuleTaskStateAndMetrics;
 };
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {

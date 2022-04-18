@@ -129,7 +129,7 @@ describe('Create Execution Handler', () => {
     mockActionsPlugin.renderActionParameterTemplates.mockImplementation(
       renderActionParameterTemplatesDefault
     );
-    ruleRunMetrics = EMPTY_RULE_RUN_METRICS;
+    ruleRunMetrics = { ...EMPTY_RULE_RUN_METRICS };
   });
 
   test('enqueues execution per selected action', async () => {

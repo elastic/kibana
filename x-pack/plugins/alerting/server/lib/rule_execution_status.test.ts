@@ -61,7 +61,7 @@ describe('RuleExecutionStatus', () => {
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
 
-      testExpectedMetrics(metrics, EMPTY_RULE_RUN_METRICS);
+      testExpectedMetrics(metrics!, EMPTY_RULE_RUN_METRICS);
     });
 
     test('task state with no instances', () => {
@@ -74,7 +74,7 @@ describe('RuleExecutionStatus', () => {
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
 
-      testExpectedMetrics(metrics, executionMetrics);
+      testExpectedMetrics(metrics!, executionMetrics);
     });
 
     test('task state with one instance', () => {
@@ -87,7 +87,7 @@ describe('RuleExecutionStatus', () => {
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
 
-      testExpectedMetrics(metrics, executionMetrics);
+      testExpectedMetrics(metrics!, executionMetrics);
     });
 
     test('task state with warning', () => {
@@ -103,7 +103,7 @@ describe('RuleExecutionStatus', () => {
       expect(status.status).toBe('warning');
       expect(status.error).toBe(undefined);
 
-      testExpectedMetrics(metrics, {
+      testExpectedMetrics(metrics!, {
         ...executionMetrics,
         triggeredActionsStatus: ActionsCompletion.PARTIAL,
       });
@@ -120,8 +120,7 @@ describe('RuleExecutionStatus', () => {
           "reason": "unknown",
         }
       `);
-
-      testExpectedMetrics(metrics, EMPTY_RULE_RUN_METRICS);
+      expect(metrics).toBeNull();
     });
 
     test('error with a reason', () => {
@@ -135,8 +134,7 @@ describe('RuleExecutionStatus', () => {
           "reason": "execute",
         }
       `);
-
-      testExpectedMetrics(metrics, EMPTY_RULE_RUN_METRICS);
+      expect(metrics).toBeNull();
     });
   });
 

@@ -476,7 +476,7 @@ export class TaskRunner<
       recoveredAlerts,
     });
 
-    const ruleRunMetrics: RuleRunMetrics = EMPTY_RULE_RUN_METRICS;
+    const ruleRunMetrics: RuleRunMetrics = { ...EMPTY_RULE_RUN_METRICS };
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       generateNewAndRecoveredAlertEvents({
@@ -668,7 +668,7 @@ export class TaskRunner<
     }
     return {
       monitoring: asOk(rule.monitoring),
-      state: await promiseResult<RuleTaskStateAndMetrics, Error>(
+      stateWithMetrics: await promiseResult<RuleTaskStateAndMetrics, Error>(
         this.validateAndExecuteRule(fakeRequest, apiKey, rule, event)
       ),
       schedule: asOk(
@@ -749,7 +749,7 @@ export class TaskRunner<
 
     eventLogger.logEvent(startEvent);
 
-    const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
+    const { stateWithMetrics, schedule, monitoring } = await errorAsRuleTaskRunResult(
       this.loadRuleAttributesAndRun(event)
     );
 
@@ -763,8 +763,8 @@ export class TaskRunner<
       ElasticsearchError,
       IExecutionStatusAndMetrics
     >(
-      state,
-      (ruleRunState) => executionStatusFromState(ruleRunState),
+      stateWithMetrics,
+      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics),
       (err: ElasticsearchError) => executionStatusFromError(err)
     );
     // set the executionStatus date to same as event, if it's set
@@ -781,8 +781,13 @@ export class TaskRunner<
     }
 
     this.logger.debug(
-      `ruleExecutionStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionStatus)}`
+      `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionStatus)}`
     );
+    if (executionMetrics) {
+      this.logger.debug(
+        `ruleRunMetrics for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionMetrics)}`
+      );
+    }
 
     eventLogger.stopTiming(event);
     set(event, 'kibana.alerting.status', executionStatus.status);
@@ -817,31 +822,33 @@ export class TaskRunner<
         set(event, 'event.reason', executionStatus.warning?.reason || 'unknown');
         set(event, 'message', executionStatus.warning?.message || event?.message);
       }
-      set(
-        event,
-        'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
-        executionMetrics.numberOfTriggeredActions
-      );
-      set(
-        event,
-        'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
-        executionMetrics.numberOfGeneratedActions
-      );
-      set(
-        event,
-        'kibana.alert.rule.execution.metrics.number_of_active_alerts',
-        executionMetrics.numberOfActiveAlerts
-      );
-      set(
-        event,
-        'kibana.alert.rule.execution.metrics.number_of_new_alerts',
-        executionMetrics.numberOfNewAlerts
-      );
-      set(
-        event,
-        'kibana.alert.rule.execution.metrics.number_of_recovered_alerts',
-        executionMetrics.numberOfRecoveredAlerts
-      );
+      if (executionMetrics) {
+        set(
+          event,
+          'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+          executionMetrics.numberOfTriggeredActions
+        );
+        set(
+          event,
+          'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+          executionMetrics.numberOfGeneratedActions
+        );
+        set(
+          event,
+          'kibana.alert.rule.execution.metrics.number_of_active_alerts',
+          executionMetrics.numberOfActiveAlerts
+        );
+        set(
+          event,
+          'kibana.alert.rule.execution.metrics.number_of_new_alerts',
+          executionMetrics.numberOfNewAlerts
+        );
+        set(
+          event,
+          'kibana.alert.rule.execution.metrics.number_of_recovered_alerts',
+          executionMetrics.numberOfRecoveredAlerts
+        );
+      }
     }
 
     // Copy search stats into event log
@@ -887,19 +894,20 @@ export class TaskRunner<
       });
     }
 
-    const transformExecutionStateToTaskState = (
-      runState: RuleTaskStateAndMetrics
+    const transformRunStateToTaskState = (
+      runStateWithMetrics: RuleTaskStateAndMetrics
     ): RuleTaskState => {
       return {
-        ...omit(runState, ['metrics']),
+        ...omit(runStateWithMetrics, ['metrics']),
         previousStartedAt: startedAt,
       };
     };
 
     return {
       state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
-        state,
-        (runState: RuleTaskStateAndMetrics) => transformExecutionStateToTaskState(runState),
+        stateWithMetrics,
+        (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
+          transformRunStateToTaskState(ruleRunStateWithMetrics),
         (err: ElasticsearchError) => {
           const message = `Executing Rule ${spaceId}:${
             this.ruleType.id
@@ -1309,7 +1317,7 @@ async function errorAsRuleTaskRunResult(
     return await future;
   } catch (e) {
     return {
-      state: asErr(e),
+      stateWithMetrics: asErr(e),
       schedule: asErr(e),
       monitoring: asErr(e),
     };
