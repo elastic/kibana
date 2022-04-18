@@ -18,16 +18,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-<<<<<<< HEAD
-import { stubIndexPattern } from '../../../data/public/stubs';
-import { UI_SETTINGS } from '../../../data/common';
-import { setAutocomplete } from '../../../unified_search/public/services';
-import { unifiedSearchPluginMock } from '../../../unified_search/public/mocks';
-
-=======
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
->>>>>>> upstream/main
+import { setAutocomplete } from '../services';
+import { unifiedSearchPluginMock } from '../mocks';
+
 const startMock = coreMock.createStart();
 
 const mockTimeHistory = {
