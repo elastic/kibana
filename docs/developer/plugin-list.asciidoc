@@ -613,6 +613,11 @@ the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/synthetics/README.md[synthetics]
+|The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
+in their infrastructure.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[taskManager]
 |The task manager is a generic system for running background tasks.
 Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
@@ -646,11 +651,6 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: xpack.upgrade_assistant.readonly (#101296).
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
-|The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
-in their infrastructure.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
