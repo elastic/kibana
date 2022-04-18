@@ -89,7 +89,7 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
     console.log('*** CHRIS RESPONSE ***');
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(response));
-    const body = response.body;// || response.text;
+    const body = response.body; // || response.text;
 
     if (body.isRunning) {
       const result = await retry.try(async () => {
