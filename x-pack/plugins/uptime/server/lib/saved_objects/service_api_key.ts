@@ -20,7 +20,7 @@ export const syntheticsApiKeyObjectType = 'uptime-synthetics-api-key';
 export const syntheticsServiceApiKey: SavedObjectsType = {
   name: syntheticsApiKeyObjectType,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
     properties: {
