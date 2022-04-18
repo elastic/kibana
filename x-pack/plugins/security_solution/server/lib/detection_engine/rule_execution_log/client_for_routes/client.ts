@@ -6,7 +6,7 @@
  */
 
 import { chunk, mapValues } from 'lodash';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../utils/with_security_span';

@@ -8,13 +8,13 @@
 jest.mock('../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
-import type { ElasticsearchClientMock } from '../../../../../../../src/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { setupServer } from 'src/core/server/test_utils';
+import { setupServer } from '@kbn/core/server/test_utils';
 import { Readable } from 'stream';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
-import { licensingMock } from '../../../../../licensing/server/mocks';
+import { ReportingCore } from '../../..';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
 import {

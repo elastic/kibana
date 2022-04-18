@@ -26,13 +26,13 @@
       "name": "Fleet - Cypress"
     },
     {
-      "key": "xpack/cigroup",
-      "name": "Default CI Group",
-      "ciGroups": 27
+      "key": "xpack/cypress/apm_cypress",
+      "name": "APM - Cypress"
     },
     {
-      "key": "xpack/cigroup/Docker",
-      "name": "Default CI Group Docker"
+      "key": "xpack/cigroup",
+      "name": "Default CI Group",
+      "ciGroups": 29
     },
     {
       "key": "xpack/firefox",

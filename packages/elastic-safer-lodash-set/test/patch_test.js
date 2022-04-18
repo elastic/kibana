@@ -6,11 +6,11 @@
 const test = require('tape');
 
 const setFunctions = [
-  [require('../').set, 'module.set'],
+  [require('..').set, 'module.set'],
   [require('../set'), 'module/set'],
 ];
 const setWithFunctions = [
-  [require('../').setWith, 'module.setWith'],
+  [require('..').setWith, 'module.setWith'],
   [require('../setWith'), 'module/setWith'],
 ];
 const setAndSetWithFunctions = [].concat(setFunctions, setWithFunctions);

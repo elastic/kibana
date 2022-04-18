@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypedLensByValueInput } from '../../../../../lens/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { InputsModelId } from '../../store/inputs/constants';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];

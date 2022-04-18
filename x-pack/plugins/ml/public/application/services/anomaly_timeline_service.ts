@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
-import {
-  TimefilterContract,
-  TimeRange,
-  UI_SETTINGS,
-} from '../../../../../../src/plugins/data/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { TimefilterContract, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   getBoundsRoundedToInterval,
   TimeBuckets,

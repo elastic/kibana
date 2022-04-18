@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useState } from 'react';
-import { RuleRegistrySearchRequestPagination } from '../../../../../../rule_registry/common';
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;

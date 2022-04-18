@@ -8,7 +8,7 @@
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessEventHost } from '../../../common/types/process_tree';
-import { DetailPanelHostTab } from './index';
+import { DetailPanelHostTab } from '.';
 
 const TEST_ARCHITECTURE = 'x86_64';
 const TEST_HOSTNAME = 'host-james-fleet-714-2';

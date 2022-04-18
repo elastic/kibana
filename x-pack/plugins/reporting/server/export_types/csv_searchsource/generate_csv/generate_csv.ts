@@ -7,26 +7,19 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient, IUiSettingsClient, Logger } from 'kibana/server';
-import type { IScopedSearchClient } from 'src/plugins/data/server';
-import type { Datatable } from 'src/plugins/expressions/server';
+import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import type { Datatable } from '@kbn/expressions-plugin/server';
 import type { Writable } from 'stream';
-import type { ReportingConfig } from '../../..';
-import type {
-  DataView,
-  ISearchSource,
-  ISearchStartSearchSource,
-} from '../../../../../../../src/plugins/data/common';
-import {
-  cellHasFormulas,
-  ES_SEARCH_STRATEGY,
-  tabifyDocs,
-} from '../../../../../../../src/plugins/data/common';
+import { lastValueFrom } from 'rxjs';
+import type { DataView, ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
-} from '../../../../../../../src/plugins/field_formats/common';
+} from '@kbn/field-formats-plugin/common';
+import type { ReportingConfig } from '../../..';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
@@ -78,7 +71,7 @@ export class CsvGenerator {
     };
 
     const results = (
-      await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
+      await lastValueFrom(this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }))
     ).rawResponse as estypes.SearchResponse<unknown>;
 
     return results;

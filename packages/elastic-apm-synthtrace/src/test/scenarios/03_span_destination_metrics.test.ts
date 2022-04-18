@@ -10,6 +10,7 @@ import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
 import { getSpanDestinationMetrics } from '../../lib/apm/processors/get_span_destination_metrics';
 import { StreamProcessor } from '../../lib/stream_processor';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
 describe('span destination metrics', () => {
   let events: Array<Record<string, any>>;
@@ -22,13 +23,13 @@ describe('span destination metrics', () => {
       new Date('2021-01-01T00:00:00.000Z'),
       new Date('2021-01-01T00:15:00.000Z')
     );
-    const processor = new StreamProcessor({ processors: [getSpanDestinationMetrics] });
+    const processor = new StreamProcessor<ApmFields>({ processors: [getSpanDestinationMetrics] });
     events = processor
       .streamToArray(
         range
           .interval('1m')
           .rate(25)
-          .spans((timestamp) =>
+          .generator((timestamp) =>
             javaInstance
               .transaction('GET /api/product/list')
               .duration(1000)
@@ -42,12 +43,11 @@ describe('span destination metrics', () => {
                   .destination('elasticsearch')
                   .success()
               )
-              .serialize()
           ),
         range
           .interval('1m')
           .rate(50)
-          .spans((timestamp) =>
+          .generator((timestamp) =>
             javaInstance
               .transaction('GET /api/product/list')
               .duration(1000)
@@ -66,7 +66,6 @@ describe('span destination metrics', () => {
                   .duration(500)
                   .success()
               )
-              .serialize()
           )
       )
       .filter((fields) => fields['metricset.name'] === 'span_destination');
