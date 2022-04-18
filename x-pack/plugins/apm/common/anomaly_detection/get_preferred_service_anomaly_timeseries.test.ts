@@ -5,11 +5,11 @@
  * 2.0.
  */
 import uuid from 'uuid';
-import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
-import { Environment } from '../../common/environment_rt';
-import { ApmMlDetectorType } from '../../common/anomaly_detection/apm_ml_detectors';
+import { ENVIRONMENT_ALL } from '../environment_filter_values';
+import { Environment } from '../environment_rt';
+import { ApmMlDetectorType } from './apm_ml_detectors';
 import { getPreferredServiceAnomalyTimeseries } from './get_preferred_service_anomaly_timeseries';
-import { ServiceAnomalyTimeseries } from '../../common/anomaly_detection/service_anomaly_timeseries';
+import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
 
 const PROD = 'production' as Environment;
 const DEV = 'development' as Environment;

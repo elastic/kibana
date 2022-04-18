@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery, termQuery } from '../../../../observability/server';
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function getSuggestionsWithTermsAggregation({
