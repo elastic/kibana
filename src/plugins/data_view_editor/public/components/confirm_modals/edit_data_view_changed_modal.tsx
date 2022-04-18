@@ -11,32 +11,29 @@ import { i18n } from '@kbn/i18n';
 
 const geti18nTexts = (dataViewName?: string) => ({
   cancelButtonText: i18n.translate(
-    'indexPatternManagement.editDataView.editConfirmationModal.cancelButtonLabel',
+    'indexPatternEditor.editDataView.editConfirmationModal.cancelButtonLabel',
     {
       defaultMessage: 'Cancel',
     }
   ),
   confirmButtonText: i18n.translate(
-    'indexPatternManagement.editDataView.editConfirmationModal.saveButtonLabel',
+    'indexPatternEditor.editDataView.editConfirmationModal.saveButtonLabel',
     {
       defaultMessage: 'Edit',
     }
   ),
   warningEditingDataView: i18n.translate(
-    'indexPatternManagement.editDataView.editConfirmationModal.warningEditingDataView',
+    'indexPatternEditor.editDataView.editConfirmationModal.warningEditingDataView',
     {
       defaultMessage:
         'Are you sure you want to edit this data view? Changing it might have unwanted outcomes.',
     }
   ),
-  typeConfirm: i18n.translate(
-    'indexPatternManagement.editDataView.editConfirmationModal.typeConfirm',
-    {
-      defaultMessage: 'Enter CHANGE to continue',
-    }
-  ),
+  typeConfirm: i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.typeConfirm', {
+    defaultMessage: 'Enter CHANGE to continue',
+  }),
   titleConfirmChanges: i18n.translate(
-    'indexPatternManagement.editDataView.editConfirmationModal.title',
+    'indexPatternEditor.editDataView.editConfirmationModal.title',
     {
       defaultMessage: `Edit {name}`,
       values: {
@@ -75,6 +72,7 @@ export const EditDataViewChangedModal: React.FC<Props> = ({
         title={i18nTexts.warningEditingDataView}
         iconType="alert"
         size="s"
+        data-test-subj="editDataViewWarning"
       />
       <EuiSpacer />
       <EuiFormRow label={i18nTexts.typeConfirm}>

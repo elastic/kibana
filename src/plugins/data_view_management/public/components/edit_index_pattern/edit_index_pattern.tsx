@@ -14,8 +14,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiBadge,
-  EuiText,
-  EuiLink,
   EuiCallOut,
   EuiCode,
 } from '@elastic/eui';
@@ -32,13 +30,6 @@ import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
 }
-
-const mappingAPILink = i18n.translate(
-  'indexPatternManagement.editIndexPattern.timeFilterLabel.mappingAPILink',
-  {
-    defaultMessage: 'field mappings',
-  }
-);
 
 const mappingConflictHeader = i18n.translate(
   'indexPatternManagement.editIndexPattern.mappingConflictHeader',
@@ -110,11 +101,17 @@ export const EditIndexPattern = withRouter(
       setShowEditDialog(true);
     };
 
-    const timeFilterHeader = i18n.translate(
-      'indexPatternManagement.editIndexPattern.timeFilterHeader',
+    const indexPatternHeading = i18n.translate(
+      'indexPatternManagement.editIndexPattern.indexPatternHeading',
       {
-        defaultMessage: "Time field: '{timeFieldName}'",
-        values: { timeFieldName: indexPattern.timeFieldName },
+        defaultMessage: 'Index pattern:',
+      }
+    );
+
+    const timeFilterHeading = i18n.translate(
+      'indexPatternManagement.editIndexPattern.timeFilterHeading',
+      {
+        defaultMessage: 'Time field:',
       }
     );
 
@@ -133,9 +130,6 @@ export const EditIndexPattern = withRouter(
 
     chrome.docTitle.change(indexPattern.getName());
 
-    const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
-    const kibana = useKibana();
-    const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     const userEditPermission = dataViews.getCanSaveSync();
 
     const warning =
@@ -171,45 +165,35 @@ export const EditIndexPattern = withRouter(
           canSave={userEditPermission}
         >
           <EuiHorizontalRule margin="none" />
-          {showTagsSection && (
-            <>
-              <EuiSpacer size="l" />
-              <EuiFlexGroup wrap gutterSize="s">
-                {Boolean(indexPattern.timeFieldName) && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
-                  </EuiFlexItem>
-                )}
-                {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>{securityDataView}</EuiBadge>
-                  </EuiFlexItem>
-                )}
-                {tags.map((tag: any) => (
-                  <EuiFlexItem grow={false} key={tag.key}>
-                    <EuiBadge color="hollow">{tag.name}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </>
-          )}
-          <EuiSpacer size="m" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                defaultMessage="View and edit fields in {indexPatternTitle}. Field attributes, such as type and searchability, are based on {mappingAPILink} in Elasticsearch."
-                values={{
-                  indexPatternTitle: <strong>{indexPattern.title}</strong>,
-                  mappingAPILink: (
-                    <EuiLink href={docsUrl} target="_blank" external>
-                      {mappingAPILink}
-                    </EuiLink>
-                  ),
-                }}
-              />{' '}
-            </p>
-          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup wrap gutterSize="l" alignItems="center">
+            {Boolean(indexPattern.title) && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="none" alignItems="center">
+                  {indexPatternHeading}
+                  <EuiCode>{indexPattern.title}</EuiCode>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            {Boolean(indexPattern.timeFieldName) && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="none" alignItems="center">
+                  {timeFilterHeading}
+                  <EuiCode>{indexPattern.timeFieldName}</EuiCode>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge>{securityDataView}</EuiBadge>
+              </EuiFlexItem>
+            )}
+            {tags.map((tag: any) => (
+              <EuiFlexItem grow={false} key={tag.key}>
+                <EuiBadge color={tag.key === 'default' ? 'default' : 'hollow'}>{tag.name}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />
@@ -219,7 +203,7 @@ export const EditIndexPattern = withRouter(
             </>
           )}
         </IndexHeader>
-        <EuiSpacer />
+        <EuiSpacer size="xl" />
         <Tabs
           indexPattern={indexPattern}
           saveIndexPattern={dataViews.updateSavedObject.bind(dataViews)}
