@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { FleetServerFlyout as FleetServerFlyoutComponent } from './index';
+import { FleetServerFlyout as FleetServerFlyoutComponent } from '.';
 
 export const FleetServerFlyout = () => {
   const [isOpen, setIsOpen] = React.useState(false);

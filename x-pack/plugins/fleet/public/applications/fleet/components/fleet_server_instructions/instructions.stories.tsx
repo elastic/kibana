@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { FleetServerInstructions as FleetServerInstructionsComponent } from './index';
+import { FleetServerInstructions as FleetServerInstructionsComponent } from '.';
 
 export const FleetServerInstructions = () => {
   return <FleetServerInstructionsComponent />;

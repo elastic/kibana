@@ -9,7 +9,7 @@ import type { EuiStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 
-import { SelectCreateAgentPolicy } from '../../../components';
+import { SelectCreateAgentPolicy } from '../..';
 
 import type { GetAgentPoliciesResponseItem } from '../../../types';
 

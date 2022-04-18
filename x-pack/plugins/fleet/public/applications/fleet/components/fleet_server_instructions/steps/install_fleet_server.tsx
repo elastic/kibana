@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PLATFORM_TYPE } from '../../../hooks';
 import { useDefaultOutput, useKibanaVersion } from '../../../hooks';
 
-import { PlatformSelector } from '../../../components';
+import { PlatformSelector } from '../..';
 
 import { getInstallCommandForPlatform } from '../utils';
 
