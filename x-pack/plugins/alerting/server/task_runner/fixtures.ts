@@ -109,7 +109,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   producer: 'alerts',
   config: {
-    execution: {
+    run: {
       actions: { max: 1000 },
     },
   },

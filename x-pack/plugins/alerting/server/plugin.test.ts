@@ -34,7 +34,7 @@ const generateAlertingConfig = (): AlertingConfig => ({
   cancelAlertsOnRuleTimeout: true,
   rules: {
     minimumScheduleInterval: { value: '1m', enforce: false },
-    execution: {
+    run: {
       actions: {
         max: 1000,
       },
@@ -51,7 +51,7 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   defaultActionGroupId: 'default',
   producer: 'test',
   config: {
-    execution: {
+    run: {
       actions: {
         max: 1000,
       },
@@ -127,7 +127,7 @@ describe('Alerting Plugin', () => {
         ...generateAlertingConfig(),
         rules: {
           minimumScheduleInterval: { value: '1m', enforce: false },
-          execution: {
+          run: {
             actions: {
               max: 123,
             },
@@ -142,7 +142,7 @@ describe('Alerting Plugin', () => {
       setupContract.registerType(ruleType);
 
       expect(ruleType.config).toEqual({
-        execution: {
+        run: {
           actions: { max: 123 },
         },
       });
@@ -153,7 +153,7 @@ describe('Alerting Plugin', () => {
         ...generateAlertingConfig(),
         rules: {
           minimumScheduleInterval: { value: '1m', enforce: false },
-          execution: {
+          run: {
             actions: { max: 123 },
             ruleTypeOverrides: [{ id: sampleRuleType.id, timeout: '1d' }],
           },
@@ -167,7 +167,7 @@ describe('Alerting Plugin', () => {
       setupContract.registerType(ruleType);
 
       expect(ruleType.config).toEqual({
-        execution: {
+        run: {
           id: sampleRuleType.id,
           actions: {
             max: 123,

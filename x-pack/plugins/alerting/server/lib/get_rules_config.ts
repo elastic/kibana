@@ -15,13 +15,13 @@ export const getExecutionConfigForRuleType = ({
   config: RulesConfig;
   ruleTypeId: string;
 }): RuleTypeConfig => {
-  const ruleTypeExecutionConfig = config.execution.ruleTypeOverrides?.find(
+  const ruleTypeExecutionConfig = config.run.ruleTypeOverrides?.find(
     (ruleType) => ruleType.id === ruleTypeId
   );
 
   return {
-    execution: {
-      ...omit(config.execution, 'ruleTypeOverrides'),
+    run: {
+      ...omit(config.run, 'ruleTypeOverrides'),
       ...ruleTypeExecutionConfig,
     },
   };
