@@ -12,7 +12,7 @@ import {
   PanelState,
 } from '@kbn/embeddable-plugin/common/types';
 import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common/lib/saved_object_embeddable';
-import { ControlGroupInput, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,

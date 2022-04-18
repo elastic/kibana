@@ -18,6 +18,7 @@ import {
   persistableControlGroupInputIsEqual,
   rawControlGroupAttributesToControlGroupInput,
 } from '@kbn/controls-plugin/common';
+import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
