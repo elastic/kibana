@@ -83,7 +83,7 @@ image::images/highlights-lens-discover.gif[Seamlessly move from Lens to Discover
 * **Metric visualization.** Use the new Metric visualization type in **Lens**
 to show the latest or earliest data, or the last value.
 * **Group by multiple fields in TSVB.** When you select **Terms** from the **Group by**
-dropdown in ****TSVB, you can calculate the top values for multiple fields.
+dropdown in **TSVB**, you can calculate the top values for multiple fields.
 * **Customize the legend size.** In all visualization editors,
 you can now increase or decrease the visibility of your legend by changing the size.
 
