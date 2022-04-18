@@ -37,6 +37,7 @@ interface TimeseriesVisualizationProps {
   visData: TimeseriesVisData;
   uiState: PersistedState;
   syncColors: boolean;
+  syncTooltips: boolean;
 }
 
 function TimeseriesVisualization({
@@ -46,6 +47,7 @@ function TimeseriesVisualization({
   uiState,
   getConfig,
   syncColors,
+  syncTooltips,
 }: TimeseriesVisualizationProps) {
   const [indexPattern, setIndexPattern] = useState<FetchedIndexPattern['indexPattern']>(null);
   const [palettesService, setPalettesService] = useState<PaletteRegistry | null>(null);
@@ -188,6 +190,7 @@ function TimeseriesVisualization({
             onFilterClick={handleFilterClick}
             onUiState={handleUiState}
             syncColors={syncColors}
+            syncTooltips={syncTooltips}
             palettesService={palettesService}
             indexPattern={indexPattern}
             fieldFormatMap={indexPattern?.fieldFormatMap}

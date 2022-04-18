@@ -529,6 +529,7 @@ export class Embeddable
           interactive={!input.disableTriggers}
           renderMode={input.renderMode}
           syncColors={input.syncColors}
+          syncTooltips={input.syncTooltips}
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}

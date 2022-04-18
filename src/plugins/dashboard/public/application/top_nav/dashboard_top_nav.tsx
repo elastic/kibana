@@ -48,6 +48,7 @@ import {
   setSavedQueryId,
   setStateFromSaveModal,
   setSyncColors,
+  setSyncTooltips,
   setUseMargins,
   setViewMode,
   useDashboardDispatch,
@@ -395,6 +396,10 @@ export function DashboardTopNav({
         syncColors: Boolean(currentState.options.syncColors),
         onSyncColorsChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setSyncColors(isChecked));
+        },
+        syncTooltips: Boolean(currentState.options.syncTooltips),
+        onSyncTooltipsChange: (isChecked: boolean) => {
+          dispatchDashboardStateChange(setSyncTooltips(isChecked));
         },
         hidePanelTitles: currentState.options.hidePanelTitles,
         onHidePanelTitlesChange: (isChecked: boolean) => {
