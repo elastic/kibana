@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { createStubDataView } from 'src/plugins/data_views/common/mocks';
-import type { DataViewsContract } from 'src/plugins/data_views/common';
-import type { Datatable, DatatableColumn } from 'src/plugins/expressions/common';
-import { FieldFormat } from 'src/plugins/field_formats/common';
-import { fieldFormatsMock } from 'src/plugins/field_formats/common/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { AggsCommonStart } from '../search';
 import { DatatableUtilitiesService } from './datatable_utilities_service';
 

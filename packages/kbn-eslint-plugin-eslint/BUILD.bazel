@@ -30,6 +30,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "//packages/kbn-utils",
   "@npm//@babel/eslint-parser",
   "@npm//dedent",
   "@npm//eslint",

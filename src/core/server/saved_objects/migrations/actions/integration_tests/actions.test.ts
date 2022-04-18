@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '../../../../';
+import { ElasticsearchClient } from '../../../..';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import { SavedObjectsRawDoc } from '../../../serialization';
 import {
@@ -35,7 +35,7 @@ import {
   transformDocs,
   waitForIndexStatusYellow,
   initAction,
-} from '../../actions';
+} from '..';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { errors } from '@elastic/elasticsearch';

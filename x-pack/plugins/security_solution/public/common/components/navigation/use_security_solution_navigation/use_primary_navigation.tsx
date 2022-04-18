@@ -8,9 +8,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
-import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',

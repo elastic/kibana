@@ -18,7 +18,7 @@ import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { SYNONYMS_PAGE_META } from './constants';
 
-import { SynonymsLogic } from './';
+import { SynonymsLogic } from '.';
 
 describe('SynonymsLogic', () => {
   const { mount } = new LogicMounter(SynonymsLogic);

@@ -10,7 +10,7 @@ import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from '
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { GROUP_ID } from './constants';
 import type { DatasourceLayers, OperationDescriptor } from '../../types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { layerTypes } from '../../../common';
 import type { GaugeVisualizationState } from './constants';
 

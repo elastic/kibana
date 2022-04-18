@@ -6,10 +6,10 @@
  */
 
 import { identity, merge } from 'lodash';
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { MethodKeysOf } from '@kbn/utility-types';
 
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { IEventLogClient } from '../types';
 
 export function mockHandlerArguments(

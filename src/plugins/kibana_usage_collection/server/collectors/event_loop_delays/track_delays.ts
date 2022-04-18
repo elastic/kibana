@@ -8,8 +8,8 @@
 
 import { takeUntil, finalize, map } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import type { ISavedObjectsRepository } from 'kibana/server';
-import type { EventLoopDelaysMonitor } from '../../../../../core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import type { EventLoopDelaysMonitor } from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,

@@ -7,6 +7,11 @@
 
 import _ from 'lodash';
 import {
+  DEFAULT_EMS_DARKMAP_ID,
+  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+  DEFAULT_EMS_ROADMAP_ID,
+} from '@kbn/maps-ems-plugin/common';
+import {
   GRID_RESOLUTION,
   LAYER_TYPE,
   RENDER_AS,
@@ -22,11 +27,6 @@ import {
   VectorLayerDescriptor,
 } from '../../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
-import {
-  DEFAULT_EMS_DARKMAP_ID,
-  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
-  DEFAULT_EMS_ROADMAP_ID,
-} from '../../../../../../src/plugins/maps_ems/common/';
 import {
   ClusterCountStats,
   EMS_BASEMAP_KEYS,

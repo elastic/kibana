@@ -7,7 +7,7 @@
 
 import { http } from '../http_service';
 
-import { basePath } from './index';
+import { basePath } from '.';
 import type { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
 import type {

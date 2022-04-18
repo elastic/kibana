@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ChartsPluginSetup } from '../../../charts/public';
-import { CoreSetup, CoreStart } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { gaugeFunction } from '../common';
 import { setFormatService, setThemeService, setPaletteService } from './services';
 import { gaugeRenderer } from './expression_renderers';
-import type { FieldFormatsStart } from '../../../field_formats/public';
 
 /** @internal */
 export interface ExpressionGaugePluginSetup {

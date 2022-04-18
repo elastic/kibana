@@ -6,13 +6,13 @@
  */
 
 // @ts-ignore
+import { ActionResult } from '@kbn/actions-plugin/common';
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { handleError } from '../../../../lib/errors';
 import { AlertsFactory } from '../../../../alerts';
 import { LegacyServer, RouteDependencies } from '../../../../types';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
-import { ActionResult } from '../../../../../../actions/common';
 import { disableWatcherClusterAlerts } from '../../../../lib/alerts/disable_watcher_cluster_alerts';
-import { RuleTypeParams, SanitizedRule } from '../../../../../../alerting/common';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 

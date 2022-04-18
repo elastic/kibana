@@ -9,7 +9,7 @@ import versionCompare from 'compare-versions';
 import valid from 'semver/functions/valid';
 import ipaddr from 'ipaddr.js';
 import type { IPv4, IPv6 } from 'ipaddr.js';
-import type { FieldFormat } from '../../../../../../src/plugins/field_formats/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 function isIPv6Address(ip: IPv4 | IPv6): ip is IPv6 {
   return ip.kind() === 'ipv6';

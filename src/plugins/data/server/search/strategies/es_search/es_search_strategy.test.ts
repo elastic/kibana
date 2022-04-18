@@ -7,14 +7,14 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock } from '../../../../../../core/server/mocks';
-import { pluginInitializerContextConfigMock } from '../../../../../../core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { pluginInitializerContextConfigMock } from '@kbn/core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../../types';
 
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { errors } from '@elastic/elasticsearch';
-import { KbnServerError } from '../../../../../kibana_utils/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 
 describe('ES search strategy', () => {
   const successBody = {
