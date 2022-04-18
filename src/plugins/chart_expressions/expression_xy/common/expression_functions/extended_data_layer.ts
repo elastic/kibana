@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { validateAccessor } from '@kbn/visualizations-plugin/common';
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExtendedDataLayerArgs, ExtendedDataLayerConfigResult } from '../types';
 import {
   EXTENDED_DATA_LAYER,
