@@ -493,7 +493,7 @@ export class TaskRunner<
 
     const alertExecutionStore: AlertExecutionStore = {
       numberOfTriggeredActions: 0,
-      numberOfScheduledActions: 0,
+      numberOfGeneratedActions: 0,
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
@@ -823,7 +823,7 @@ export class TaskRunner<
       set(
         event,
         'kibana.alert.rule.execution.metrics.number_of_generated_actions',
-        executionStatus.numberOfScheduledActions
+        executionStatus.numberOfGeneratedActions
       );
     }
 
