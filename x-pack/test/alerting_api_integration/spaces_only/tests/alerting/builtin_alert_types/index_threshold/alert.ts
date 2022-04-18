@@ -35,8 +35,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  // Failing: See https://github.com/elastic/kibana/issues/126949
-  describe.skip('rule', async () => {
+  describe('rule', async () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -55,7 +54,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       endDate = new Date(endDateMillis).toISOString();
 
       // write documents from now to the future end date in 3 groups
-      createEsDocumentsInGroups(3);
+      await createEsDocumentsInGroups(3);
     });
 
     afterEach(async () => {
@@ -103,7 +102,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     it('runs correctly: count grouped <= =>', async () => {
       // create some more documents in the first group
-      createEsDocumentsInGroups(1);
+      await createEsDocumentsInGroups(1);
 
       await createRule({
         name: 'never fire',
@@ -147,7 +146,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     it('runs correctly: sum all between', async () => {
       // create some more documents in the first group
-      createEsDocumentsInGroups(1);
+      await createEsDocumentsInGroups(1);
 
       await createRule({
         name: 'never fire',
@@ -181,7 +180,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     it('runs correctly: avg all', async () => {
       // create some more documents in the first group
-      createEsDocumentsInGroups(1);
+      await createEsDocumentsInGroups(1);
 
       // this never fires because of bad fields error
       await createRule({
@@ -217,7 +216,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     it('runs correctly: max grouped', async () => {
       // create some more documents in the first group
-      createEsDocumentsInGroups(1);
+      await createEsDocumentsInGroups(1);
 
       await createRule({
         name: 'never fire',
@@ -263,7 +262,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     it('runs correctly: min grouped', async () => {
       // create some more documents in the first group
-      createEsDocumentsInGroups(1);
+      await createEsDocumentsInGroups(1);
 
       await createRule({
         name: 'never fire',
@@ -317,6 +316,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         thresholdComparator: '<',
         threshold: [10],
         timeWindowSize: 60,
+        notifyWhen: 'onActionGroupChange',
       });
 
       await createEsDocumentsInGroups(1);
@@ -383,6 +383,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       termSize?: number;
       thresholdComparator: string;
       threshold: number[];
+      notifyWhen?: string;
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -441,7 +442,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           rule_type_id: RULE_TYPE_ID,
           schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
           actions: [action, recoveryAction],
-          notify_when: 'onActiveAlert',
+          notify_when: params.notifyWhen || 'onActiveAlert',
           params: {
             index: ES_TEST_INDEX_NAME,
             timeField: params.timeField || 'date',
