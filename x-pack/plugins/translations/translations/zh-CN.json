@@ -11703,7 +11703,6 @@
     "xpack.fleet.agentEnrollment.stepDownloadAgentForFleetServerTitle": "将 Fleet 服务器下载到集中式主机",
     "xpack.fleet.agentEnrollment.stepDownloadAgentTitle": "将 Elastic 代理下载到您的主机",
     "xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle": "注册并启动 Elastic 代理",
-    "xpack.fleet.agentEnrollment.stepRunAgentDescription": "从代理目录运行此命令，以安装、注册并启动 Elastic 代理。您可以重复使用此命令在多个主机上设置代理。需要管理员权限。",
     "xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s": "从下载 Kubernetes 清单的目录运行应用命令。",
     "xpack.fleet.agentHealth.checkInTooltipText": "上次签入时间 {lastCheckIn}",
     "xpack.fleet.agentHealth.healthyStatusText": "运行正常",

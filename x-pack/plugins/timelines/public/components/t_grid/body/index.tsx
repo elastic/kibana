@@ -844,7 +844,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             <EventRenderedView
               appId={appId}
               alertToolbar={alertToolbar}
-              browserFields={browserFields}
               events={data}
               leadingControlColumns={leadingTGridControlColumns ?? []}
               onChangePage={onChangePage}
