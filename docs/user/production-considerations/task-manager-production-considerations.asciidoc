@@ -2,7 +2,7 @@
 [[task-manager-production-considerations]]
 == Task Manager
 
-{kib} Task Manager is leveraged by features such as Alerting, Actions, Reporting, and Telemetry to run mission critical work as persistent background tasks.
+{kib} Task Manager is leveraged by features such as Alerting, Actions, and Reporting to run mission critical work as persistent background tasks.
 These background tasks distribute work across multiple {kib} instances.
 This has three major benefits:
 
