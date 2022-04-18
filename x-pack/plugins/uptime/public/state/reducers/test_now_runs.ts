@@ -7,7 +7,7 @@
 
 import { createReducer, PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import {
   Locations,
   ScheduleUnit,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import { takeEvery } from 'redux-saga/effects';
 import { testNowMonitorAction } from '../actions';
 import { TestNowResponse, triggerTestNowMonitor } from '../api';
