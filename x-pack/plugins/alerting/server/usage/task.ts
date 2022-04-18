@@ -165,6 +165,6 @@ export function telemetryTaskRunner(
   };
 }
 
-function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
-}
+// function getNextMidnight() {
+//   return moment().add(1, 'd').startOf('d').toDate();
+// }

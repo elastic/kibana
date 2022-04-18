@@ -529,7 +529,7 @@ export class TaskRunner<
       await Promise.all(
         alertsWithExecutableActions.map(
           ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) =>
-            this.executeAlert(alertId, alert, executionHandler, ruleExecutionStore)
+            this.executeAlert(alertId, alert, executionHandler, ruleRunMetrics)
         )
       );
 

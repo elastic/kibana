@@ -49,9 +49,6 @@ export enum RuleExecutionStatusWarningReasons {
 
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
-  numberOfTriggeredActions?: number;
-  numberOfScheduledActions?: number;
-  metrics?: RuleRunMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {
