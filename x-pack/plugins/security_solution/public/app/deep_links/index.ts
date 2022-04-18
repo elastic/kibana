@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 import { get } from 'lodash';
-import { LicenseType } from '../../../../licensing/common/types';
-import { getCasesDeepLinks } from '../../../../cases/public';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '../types';
-import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   DETECTION_RESPONSE,
@@ -208,6 +208,14 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/uncommonProcesses`,
           },
           {
+            id: SecurityPageName.hostsAnomalies,
+            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: `${HOSTS_PATH}/anomalies`,
+            isPremium: true,
+          },
+          {
             id: SecurityPageName.hostsEvents,
             title: i18n.translate('xpack.securitySolution.search.hosts.events', {
               defaultMessage: 'Events',
@@ -222,12 +230,12 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/externalAlerts`,
           },
           {
-            id: SecurityPageName.hostsAnomalies,
-            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
-              defaultMessage: 'Anomalies',
+            id: SecurityPageName.usersRisk,
+            title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
+              defaultMessage: 'Hosts by risk',
             }),
-            path: `${HOSTS_PATH}/anomalies`,
-            isPremium: true,
+            path: `${HOSTS_PATH}/hostRisk`,
+            experimentalKey: 'riskyHostsEnabled',
           },
           {
             id: SecurityPageName.sessions,
@@ -319,7 +327,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           {
             id: SecurityPageName.usersRisk,
             title: i18n.translate('xpack.securitySolution.search.users.risk', {
-              defaultMessage: 'Risk',
+              defaultMessage: 'Users by risk',
             }),
             path: `${USERS_PATH}/userRisk`,
             experimentalKey: 'riskyUsersEnabled',

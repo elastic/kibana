@@ -15,8 +15,8 @@ import {
   KibanaContextProvider,
   KibanaThemeProvider,
   useUiSetting$,
-} from '../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '../../../../src/plugins/kibana_react/common';
+} from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RenderAppProps } from './types';
 import { CasesApp } from './components/app';
 

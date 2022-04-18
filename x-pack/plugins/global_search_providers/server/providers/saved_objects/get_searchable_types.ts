@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from 'src/core/server';
+import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core/server';
 
 export const getSearchableTypes = (typeRegistry: ISavedObjectTypeRegistry, types?: string[]) => {
   const typeFilter = types

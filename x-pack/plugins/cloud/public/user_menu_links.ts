@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UserMenuLink } from '../../security/public';
+import { UserMenuLink } from '@kbn/security-plugin/public';
 import { CloudConfigType } from '.';
 import { getFullCloudUrl } from './utils';
 

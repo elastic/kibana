@@ -156,7 +156,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   ).truncateText;
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
@@ -183,7 +183,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           </EuiFormRow>
         ) : null}
 
-        {numberOptions.length ? (
+        {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
           <EuiFormRow
             label={i18n.translate('xpack.lens.pieChart.numberLabels', {
               defaultMessage: 'Values',
@@ -193,8 +193,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           >
             <EuiSuperSelect
               compressed
-              disabled={layer.categoryDisplay === 'hide'}
-              valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
+              valueOfSelected={layer.numberDisplay}
               options={numberOptions}
               onChange={onNumberDisplayChange}
             />

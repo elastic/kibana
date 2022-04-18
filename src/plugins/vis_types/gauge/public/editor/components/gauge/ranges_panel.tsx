@@ -16,9 +16,9 @@ import {
   SwitchOption,
   ColorSchemaOptions,
   PercentageModeOption,
-} from '../../../../../../vis_default_editor/public';
-import { ColorSchemaParams, ColorSchemas, colorSchemas } from '../../../../../../charts/public';
-import { GaugeOptionsInternalProps } from '../gauge';
+} from '@kbn/vis-default-editor-plugin/public';
+import { ColorSchemaParams, ColorSchemas, colorSchemas } from '@kbn/charts-plugin/public';
+import { GaugeOptionsInternalProps } from '.';
 import { Gauge } from '../../../types';
 
 function RangesPanel({

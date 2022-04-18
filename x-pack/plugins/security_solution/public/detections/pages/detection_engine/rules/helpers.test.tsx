@@ -35,8 +35,6 @@ import {
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
-  // @ts-expect-error 4.3.5 upgrade - likely requires moment upgrade
-  // https://github.com/elastic/kibana/issues/120236
   moment.suppressDeprecationWarnings = true;
   describe('getStepsData', () => {
     test('returns object with about, define, schedule and actions step properties formatted', () => {

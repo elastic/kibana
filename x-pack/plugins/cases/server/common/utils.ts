@@ -10,10 +10,10 @@ import {
   SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { AlertInfo } from './types';
-import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
   CaseAttributes,

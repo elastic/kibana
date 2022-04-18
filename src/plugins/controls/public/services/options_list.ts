@@ -8,8 +8,8 @@
 
 import { Filter, Query } from '@kbn/es-query';
 
-import { TimeRange } from '../../../data/public';
-import { DataView, DataViewField } from '../../../data_views/public';
+import { TimeRange } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { OptionsListRequestBody, OptionsListResponse } from '../control_types/options_list/types';
 
 export type OptionsListRequest = Omit<

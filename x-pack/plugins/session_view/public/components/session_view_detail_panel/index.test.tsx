@@ -11,7 +11,7 @@ import {
   sessionViewBasicProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { SessionViewDetailPanel } from './index';
+import { SessionViewDetailPanel } from '.';
 
 describe('SessionView component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

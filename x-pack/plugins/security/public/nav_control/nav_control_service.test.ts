@@ -7,10 +7,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
-import type { ILicense } from '../../../licensing/public';
 import { SecurityLicenseService } from '../../common/licensing';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityMock } from '../mocks';
@@ -85,7 +85,7 @@ describe('SecurityNavControlService', () => {
                   >
                     <div
                       aria-label="some-user"
-                      class="euiAvatar euiAvatar--s euiAvatar--user"
+                      class="euiAvatar euiAvatar--s euiAvatar--user css-1e7wq2y-euiAvatar-s-user"
                       data-test-subj="userMenuAvatar"
                       role="img"
                       style="background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"

@@ -7,7 +7,7 @@
 
 import type { SearchListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { VALUE } from '../../../common/constants.mock';
+import { VALUE } from '../../constants.mock';
 
 import { getListItemResponseMock } from './list_item_schema.mock';
 

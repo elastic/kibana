@@ -18,7 +18,7 @@ import {
   mockTimelineDetails,
   mockTimelineResult,
   mockAADEcsDataWithAlert,
-} from '../../../common/mock/';
+} from '../../../common/mock';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
 import {
@@ -27,8 +27,8 @@ import {
   TimelineStatus,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -47,7 +47,8 @@ import {
   NAMESPACE_TYPE,
   TIE_BREAKER,
   USER,
-} from '../../../../../lists/common/constants.mock';
+} from '@kbn/lists-plugin/common/constants.mock';
+import { of } from 'rxjs';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -156,9 +157,7 @@ describe('alert actions', () => {
       ...dataPluginMock.createStartContract().search,
       aggs: {} as ISearchStart['aggs'],
       showError: jest.fn(),
-      search: jest
-        .fn()
-        .mockImplementation(() => ({ toPromise: () => ({ data: mockTimelineDetails }) })),
+      search: jest.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
       searchSource: {} as ISearchStart['searchSource'],
     };
 

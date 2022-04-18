@@ -10,7 +10,7 @@ import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { Introduction } from './introduction';
-import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { TutorialsCategory } from '../../../../common/constants';
 
 const basePathMock = httpServiceMock.createBasePath();

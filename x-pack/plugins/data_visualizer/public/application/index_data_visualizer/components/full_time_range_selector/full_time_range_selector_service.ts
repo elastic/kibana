@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
-import { TimefilterContract } from 'src/plugins/data/public';
-import dateMath from '@elastic/datemath';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import dateMath from '@kbn/datemath';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from 'kibana/public';
-import { DataView } from '../../../../../../../../src/plugins/data_views/public';
+import type { ToastsStart } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { getTimeFieldRange } from '../../services/time_field_range';
 import type { GetTimeFieldRangeResponse } from '../../../../../common/types/time_field_request';

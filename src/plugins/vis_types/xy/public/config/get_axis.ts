@@ -10,9 +10,9 @@ import { identity } from 'lodash';
 
 import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
 
-import { LabelRotation } from '../../../../charts/public';
-import { BUCKET_TYPES } from '../../../../data/public';
-import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../charts/common';
+import { LabelRotation } from '@kbn/charts-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 
 import {
   Aspect,

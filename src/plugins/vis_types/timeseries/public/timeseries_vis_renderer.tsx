@@ -11,17 +11,17 @@ import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
+import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 
-import { VisualizationContainer, PersistedState } from '../../../visualizations/public';
+import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
 
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
 
 import type { TimeseriesVisParams } from './types';
-import type { ExpressionRenderDefinition } from '../../../expressions/common';
 import type { TimeseriesRenderValue } from './metrics_fn';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')

@@ -9,10 +9,7 @@ import React, { useCallback } from 'react';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { Ast } from '@kbn/interpreter';
 import deepEqual from 'react-fast-compare';
-import {
-  ExpressionAstExpression,
-  ExpressionValue,
-} from '../../../../../../src/plugins/expressions';
+import { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin';
 import { findExpressionType } from '../../lib/find_expression_type';
 import { getId } from '../../lib/get_id';
 // @ts-expect-error unconverted action function

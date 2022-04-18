@@ -13,9 +13,8 @@ import { log } from '../utils/log';
 import { spawnStreaming } from '../utils/child_process';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { getNonBazelProjectsOnly, topologicallyBatchProjects } from '../utils/projects';
-import { ICommand } from './';
+import { ICommand } from '.';
 import { readYarnLock } from '../utils/yarn_lock';
-import { sortPackageJson } from '../utils/sort_package_json';
 import { validateDependencies } from '../utils/validate_dependencies';
 import { installBazelTools, removeYarnIntegrityFileIfExists, runBazel } from '../utils/bazel';
 import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
@@ -71,7 +70,7 @@ export const BootstrapCommand: ICommand = {
     if (forceInstall) {
       await time('force install dependencies', async () => {
         await removeYarnIntegrityFileIfExists(resolve(kibanaProjectPath, 'node_modules'));
-        await runBazel(['clean']);
+        await runBazel(['clean', '--expunge']);
         await runBazel(['run', '@nodejs//:yarn'], runOffline, {
           env: {
             SASS_BINARY_SITE:
@@ -113,10 +112,6 @@ export const BootstrapCommand: ICommand = {
         }
       }
     }
-
-    await time('sort package json', async () => {
-      await sortPackageJson(kbn);
-    });
 
     const yarnLock = await time('read yarn.lock', async () => await readYarnLock(kbn));
 
