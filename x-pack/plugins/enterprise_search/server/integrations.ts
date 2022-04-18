@@ -335,7 +335,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over meeting recordings, chats and other communications with Enterprise Search.',
       }
     ),
-    categories: ['enterprise_search', 'zoom', 'communications', 'productivity'],
+    categories: ['enterprise_search', 'communications', 'productivity'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/zoom',
   },
   {
