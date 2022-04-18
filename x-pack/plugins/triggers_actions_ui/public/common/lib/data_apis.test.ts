@@ -11,7 +11,7 @@ import {
   getMatchingIndices,
   getESIndexFields,
 } from './data_apis';
-import { httpServiceMock } from 'src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 const mockFind = jest.fn();
 const perPage = 1000;

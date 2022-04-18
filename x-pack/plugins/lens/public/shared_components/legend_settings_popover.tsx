@@ -15,11 +15,11 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { ToolbarPopover } from '../shared_components';
+import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarPopover } from '.';
 import { LegendLocationSettings } from './legend_location_settings';
 import { ColumnsNumberSetting } from './columns_number_setting';
 import { LegendSizeSettings } from './legend_size_settings';
-import { ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { useDebouncedValue } from './debounced_value';
 
 export interface LegendSettingsPopoverProps {

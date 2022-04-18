@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { HttpFetchOptions, HttpResponse, HttpSetup } from 'kibana/public';
+import type { HttpFetchOptions, HttpResponse, HttpSetup } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
 const esVersion: string[] = [];

@@ -12,13 +12,15 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
+import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { getAlertUrlTransaction } from '../../../common/utils/formatters';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
@@ -36,14 +38,12 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asDecimalOrInteger } from '../../../common/utils/formatters';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import { getDocumentTypeFilterForTransactions } from '../../lib/helpers/transactions';
-import { asPercent } from '../../../../observability/common/utils/formatters';
-import { termQuery } from '../../../../observability/server';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),

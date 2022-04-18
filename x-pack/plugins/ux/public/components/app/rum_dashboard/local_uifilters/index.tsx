@@ -15,11 +15,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ESFilter } from 'src/core/types/elasticsearch';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { FieldValueSuggestions } from '@kbn/observability-plugin/public';
 import { useLocalUIFilters } from '../hooks/use_local_uifilters';
 
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
-import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { URLFilter } from '../url_filter';
 import { SelectedFilters } from './selected_filters';
 import { useDataView } from './use_data_view';

@@ -19,11 +19,11 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
-import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType } from '../../../../types';
-import { OperationDefinition } from '../index';
+import { OperationDefinition } from '..';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';

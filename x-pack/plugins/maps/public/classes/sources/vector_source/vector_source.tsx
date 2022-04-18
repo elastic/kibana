@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';

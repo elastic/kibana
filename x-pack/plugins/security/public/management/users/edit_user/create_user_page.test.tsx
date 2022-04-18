@@ -9,7 +9,7 @@ import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';

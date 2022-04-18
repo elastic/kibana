@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { BASE_ALERTING_API_PATH } from '../../../../plugins/alerting/common';
-import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../plugins/security_solution/common/constants';
+import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { DETECTION_ENGINE_RULES_BULK_DELETE } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,

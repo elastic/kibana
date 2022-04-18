@@ -7,6 +7,8 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { JobStat } from '@kbn/ml-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useGetUrlParams } from '../../../hooks';
 import {
   getAnomalyRecordsAction,
@@ -20,11 +22,9 @@ import {
   selectDurationLines,
 } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
-import { JobStat } from '../../../../../ml/public';
 import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../common/types';
 import { getMLJobId } from '../../../../common/lib';
-import { createExploratoryViewUrl } from '../../../../../observability/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {

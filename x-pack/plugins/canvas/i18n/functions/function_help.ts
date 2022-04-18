@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { UnionToIntersection } from '@kbn/utility-types';
 import { CanvasFunction, FunctionFactory } from '../../types';
 

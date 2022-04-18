@@ -68,7 +68,8 @@ function createFakeElasticsearchServer() {
   return server;
 }
 
-describe('fake elasticsearch', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/129754
+describe.skip('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;
   let kibanaHttpServer: http.Server;

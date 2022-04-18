@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Banner } from './components';
 import { getBannerInfo } from './get_banner_info';
 import { BannerPluginStartDependencies } from './types';

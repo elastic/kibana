@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Event, EventType } from 'src/core/public';
+import type { Event, EventType } from '@kbn/core/public';
 
 declare global {
   interface Window {
