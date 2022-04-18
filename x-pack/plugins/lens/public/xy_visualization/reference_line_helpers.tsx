@@ -7,7 +7,6 @@
 
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { YAxisMode, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { layerTypes } from '../../common';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../types';

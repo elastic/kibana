@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { FillStyle, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
+import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import { FormatFactory } from '../../../../common';
