@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import { useResponseActionsConsoleActionItem } from '../response_actions_console';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/alerts_utility_bar/translations';
 import { useExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
@@ -135,6 +136,8 @@ export const TakeActionDropdown = React.memo(
       isHostIsolationPanelOpen,
     });
 
+    const endpointActionsItems = useResponseActionsConsoleActionItem();
+
     const handleOnAddExceptionTypeClick = useCallback(
       (type: ExceptionListType) => {
         onAddExceptionTypeClick(type);
@@ -223,6 +226,7 @@ export const TakeActionDropdown = React.memo(
         ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
         ...hostIsolationActionItems,
+        ...endpointActionsItems,
         ...(osqueryAvailable ? [osqueryActionItem] : []),
         ...investigateInTimelineActionItems,
       ],
@@ -231,6 +235,7 @@ export const TakeActionDropdown = React.memo(
         addToCaseActionItems,
         alertsActionItems,
         hostIsolationActionItems,
+        endpointActionsItems,
         osqueryAvailable,
         osqueryActionItem,
         investigateInTimelineActionItems,
