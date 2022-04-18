@@ -71,7 +71,7 @@ For further exploration of your data, you can now open *Lens* visualization data
 in *Discover*. With *Discover* you can view the documents in the fields you used
 to create the visualization, then navigate back to *Lens* to finish creating your
 visualization. For more information,
-check {kibana-ref}/explore-lens-data-in-discover.html[Explore the data in Discover].
+check {kibana-ref}/lens.html#explore-lens-data-in-discover[Explore the data in Discover].
 
 [role="screenshot"]
 image::images/highlights-lens-discover.gif[Seamlessly move from Lens to Discover to further explore your data]
