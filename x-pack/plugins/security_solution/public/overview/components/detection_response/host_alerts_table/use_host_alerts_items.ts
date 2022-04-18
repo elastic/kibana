@@ -22,7 +22,7 @@ interface TimeRange {
 export interface UseHostAlertsItemsProps {
   skip: boolean;
   queryId: string;
-  signalIndexName: string;
+  signalIndexName: string | null;
 }
 export interface HostAlertsItem {
   hostName: string;

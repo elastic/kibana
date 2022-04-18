@@ -86,7 +86,6 @@ export const parsedVulnerableUserAlertsResult = [
     critical: 4,
     high: 1,
     userName: 'crffn20qcs',
-
     low: 1,
     medium: 1,
   },

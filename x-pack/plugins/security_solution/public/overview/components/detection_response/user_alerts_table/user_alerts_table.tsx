@@ -28,7 +28,7 @@ import * as i18n from '../translations';
 import { LastUpdatedAt, SEVERITY_COLOR } from '../util';
 import { UserAlertsItem, useUserAlertsItems } from './use_user_alerts_items';
 
-interface UserAlertsTableProps {
+export interface UserAlertsTableProps {
   signalIndexName: string | null;
 }
 
@@ -60,7 +60,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
   );
 
   return (
-    <EuiPanel hasBorder data-test-subj="userSeverityAlertsPanel">
+    <EuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
       <HeaderSection
         id={DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID}
         title={i18n.USER_ALERTS_SECTION_TITLE}
@@ -73,7 +73,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
       {toggleStatus && (
         <>
           <EuiBasicTable
-            data-test-subj="userAlertsTable"
+            data-test-subj="severityUserAlertsTable"
             columns={columns}
             items={items}
             loading={isLoading}
@@ -82,7 +82,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
             }
           />
           <EuiSpacer size="m" />
-          <EuiButton data-test-subj="userAlertsButton" onClick={navigateToAlerts}>
+          <EuiButton data-test-subj="severityUserAlertsButton" onClick={navigateToAlerts}>
             {i18n.VIEW_ALL_USER_ALERTS}
           </EuiButton>
         </>
@@ -128,7 +128,7 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
       return (
         <EuiLink
           data-test-subj="userSeverityAlertsTable-totalAlerts"
-          href={`/app/security/users/id/${userName}`}
+          href={`/app/security/users/${userName}`}
           onClick={(ev?: React.MouseEvent) => {
             if (ev) {
               ev.preventDefault();

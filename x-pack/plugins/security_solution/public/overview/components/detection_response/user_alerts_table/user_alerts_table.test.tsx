@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
-import { RuleAlertsTable, RuleAlertsTableProps } from './rule_alerts_table';
-import { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
-import moment from 'moment';
+
 import { SecurityPageName } from '../../../../../common/constants';
+import { TestProviders } from '../../../../common/mock';
+import { parsedVulnerableUserAlertsResult } from './mock_data';
+import { UseUserAlertsItems } from './use_user_alerts_items';
+import { UserAlertsTable } from './user_alerts_table';
 
 const mockGetAppUrl = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
@@ -24,121 +26,100 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
   };
 });
 
-type UseRuleAlertsItemsReturn = ReturnType<UseRuleAlertsItems>;
-const defaultUseRuleAlertsItemsReturn: UseRuleAlertsItemsReturn = {
+type UseUserAlertsItemsReturn = ReturnType<UseUserAlertsItems>;
+const defaultUseUserAlertsItemsReturn: UseUserAlertsItemsReturn = {
   items: [],
   isLoading: false,
   updatedAt: Date.now(),
 };
-const mockUseRuleAlertsItems = jest.fn(() => defaultUseRuleAlertsItemsReturn);
-const mockUseRuleAlertsItemsReturn = (param: Partial<UseRuleAlertsItemsReturn>) => {
-  mockUseRuleAlertsItems.mockReturnValueOnce({ ...defaultUseRuleAlertsItemsReturn, ...param });
+const mockUseUserAlertsItems = jest.fn(() => defaultUseUserAlertsItemsReturn);
+const mockUseUserAlertsItemsReturn = (overrides: Partial<UseUserAlertsItemsReturn>) => {
+  mockUseUserAlertsItems.mockReturnValueOnce({ ...defaultUseUserAlertsItemsReturn, ...overrides });
 };
-jest.mock('./use_rule_alerts_items', () => ({
-  useRuleAlertsItems: () => mockUseRuleAlertsItems(),
+
+jest.mock('./use_user_alerts_items', () => ({
+  useUserAlertsItems: () => mockUseUserAlertsItems(),
 }));
 
-const defaultProps: RuleAlertsTableProps = {
-  signalIndexName: '',
-};
-const items: RuleAlertsItem[] = [
-  {
-    id: 'ruleId',
-    name: 'ruleName',
-    last_alert_at: moment().subtract(1, 'day').format(),
-    alert_count: 10,
-    severity: 'high',
-  },
-];
+const renderComponent = () =>
+  render(
+    <TestProviders>
+      <UserAlertsTable signalIndexName="some signal index" />
+    </TestProviders>
+  );
 
-describe('RuleAlertsTable', () => {
+describe('UserAlertsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render empty table', () => {
-    const result = render(
-      <TestProviders>
-        <RuleAlertsTable {...defaultProps} />
-      </TestProviders>
-    );
+    const { getByText, getByTestId } = renderComponent();
 
-    expect(result.getByTestId('severityRuleAlertsPanel')).toBeInTheDocument();
-    expect(result.getByText('No alerts to display')).toBeInTheDocument();
-    expect(result.getByTestId('severityRuleAlertsButton')).toBeInTheDocument();
+    expect(getByTestId('severityUserAlertsPanel')).toBeInTheDocument();
+    expect(getByText('No alerts to display')).toBeInTheDocument();
+    expect(getByTestId('severityUserAlertsButton')).toBeInTheDocument();
   });
 
   it('should render a loading table', () => {
-    mockUseRuleAlertsItemsReturn({ isLoading: true });
-    const result = render(
-      <TestProviders>
-        <RuleAlertsTable {...defaultProps} />
-      </TestProviders>
-    );
+    mockUseUserAlertsItemsReturn({ isLoading: true });
+    const { getByText, getByTestId } = renderComponent();
 
-    expect(result.getByText('Updating...')).toBeInTheDocument();
-    expect(result.getByTestId('severityRuleAlertsButton')).toBeInTheDocument();
-    expect(result.getByTestId('severityRuleAlertsTable')).toHaveClass('euiBasicTable-loading');
+    expect(getByText('Updating...')).toBeInTheDocument();
+    expect(getByTestId('severityUserAlertsButton')).toBeInTheDocument();
+    expect(getByTestId('severityUserAlertsTable')).toHaveClass('euiBasicTable-loading');
   });
 
   it('should render the updated at subtitle', () => {
-    mockUseRuleAlertsItemsReturn({ isLoading: false });
-    const result = render(
-      <TestProviders>
-        <RuleAlertsTable {...defaultProps} />
-      </TestProviders>
-    );
+    mockUseUserAlertsItemsReturn({ isLoading: false });
+    const { getByText } = renderComponent();
 
-    expect(result.getByText('Updated now')).toBeInTheDocument();
+    expect(getByText('Updated now')).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {
-    mockUseRuleAlertsItemsReturn({ items });
-    const result = render(
-      <TestProviders>
-        <RuleAlertsTable {...defaultProps} />
-      </TestProviders>
-    );
+    mockUseUserAlertsItemsReturn({ items: parsedVulnerableUserAlertsResult });
+    const { getAllByRole } = renderComponent();
 
-    const columnHeaders = result.getAllByRole('columnheader');
-    expect(columnHeaders.at(0)).toHaveTextContent('Rule name');
-    expect(columnHeaders.at(1)).toHaveTextContent('Last alert');
-    expect(columnHeaders.at(2)).toHaveTextContent('Alert count');
-    expect(columnHeaders.at(3)).toHaveTextContent('Severity');
+    const columnHeaders = getAllByRole('columnheader');
+    expect(columnHeaders.at(0)).toHaveTextContent('User name');
+    expect(columnHeaders.at(1)).toHaveTextContent('Alerts');
+    expect(columnHeaders.at(2)).toHaveTextContent('Critical');
+    expect(columnHeaders.at(3)).toHaveTextContent('High');
+    expect(columnHeaders.at(4)).toHaveTextContent('Medium');
+    expect(columnHeaders.at(5)).toHaveTextContent('Low');
   });
 
   it('should render the table items', () => {
-    mockUseRuleAlertsItemsReturn({ items });
-    const result = render(
-      <TestProviders>
-        <RuleAlertsTable {...defaultProps} />
-      </TestProviders>
-    );
+    mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
+    const { getByTestId } = renderComponent();
 
-    expect(result.getByTestId('severityRuleAlertsTable-name')).toHaveTextContent('ruleName');
-    expect(result.getByTestId('severityRuleAlertsTable-lastAlertAt')).toHaveTextContent(
-      'yesterday'
-    );
-    expect(result.getByTestId('severityRuleAlertsTable-alertCount')).toHaveTextContent('10');
-    expect(result.getByTestId('severityRuleAlertsTable-severity')).toHaveTextContent('High');
+    expect(getByTestId('userSeverityAlertsTable-userName')).toHaveTextContent('crffn20qcs');
+    expect(getByTestId('userSeverityAlertsTable-totalAlerts')).toHaveTextContent('4');
+    expect(getByTestId('userSeverityAlertsTable-critical')).toHaveTextContent('4');
+    expect(getByTestId('userSeverityAlertsTable-high')).toHaveTextContent('1');
+    expect(getByTestId('userSeverityAlertsTable-medium')).toHaveTextContent('1');
+    expect(getByTestId('userSeverityAlertsTable-low')).toHaveTextContent('1');
   });
 
   it('should generate the table items links', () => {
-    const linkUrl = '/fake/link';
-    mockGetAppUrl.mockReturnValue(linkUrl);
-    mockUseRuleAlertsItemsReturn({ items });
+    mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
 
-    const result = render(
-      <TestProviders>
-        <RuleAlertsTable {...defaultProps} />
-      </TestProviders>
-    );
+    const { getByTestId } = renderComponent();
 
     expect(mockGetAppUrl).toBeCalledWith({
-      deepLinkId: SecurityPageName.rules,
-      path: `id/${items[0].id}`,
+      deepLinkId: SecurityPageName.users,
+      path: `${parsedVulnerableUserAlertsResult[0].userName}`,
     });
 
-    expect(result.getByTestId('severityRuleAlertsTable-name')).toHaveAttribute('href', linkUrl);
+    expect(getByTestId('userSeverityAlertsTable-userName')).toHaveAttribute(
+      'href',
+      `/app/security/users/${parsedVulnerableUserAlertsResult[0].userName}`
+    );
+
+    expect(getByTestId('userSeverityAlertsTable-totalAlerts')).toHaveAttribute(
+      'href',
+      `/app/security/users/${parsedVulnerableUserAlertsResult[0].userName}`
+    );
   });
 });
