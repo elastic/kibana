@@ -33,14 +33,6 @@ export const syntheticsMonitor: SavedObjectsType = {
       tags: {
         type: 'text',
       },
-      locations: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'text',
-          },
-        },
-      },
     },
   },
   management: {
