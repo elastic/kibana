@@ -15,9 +15,9 @@ import { schema } from '@kbn/config-schema';
 
 import { request } from './axios_utils';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { createReadySignal } from '../../../../event_log/server/lib/ready_signal';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
 import { ActionsConfig } from '../../config';
 import {
   ActionsConfigurationUtilities,

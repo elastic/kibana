@@ -7,15 +7,15 @@
 
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreTheme } from 'kibana/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Store } from 'redux';
 import { Provider } from 'react-redux';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   disableAutoApply,
   enableAutoApply,

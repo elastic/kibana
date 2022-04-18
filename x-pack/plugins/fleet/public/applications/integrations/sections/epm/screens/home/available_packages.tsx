@@ -22,8 +22,11 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+
 import { useStartServices } from '../../../../hooks';
-import { TrackApplicationView } from '../../../../../../../../../../src/plugins/usage_collection/public';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -37,8 +40,6 @@ import {
 import { doesPackageHaveIntegrations } from '../../../../services';
 import type { PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
-
-import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { PackageListItem } from '../../../../types';
 

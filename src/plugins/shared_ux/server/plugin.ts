@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import { SharedUXPluginSetup, SharedUXPluginStart } from './types';
 

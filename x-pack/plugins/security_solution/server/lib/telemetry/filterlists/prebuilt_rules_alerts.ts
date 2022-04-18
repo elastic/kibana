@@ -77,7 +77,9 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   group: {
     name: true,
   },
-  host: true,
+  host: {
+    os: true,
+  },
   http: {
     request: {
       body: {

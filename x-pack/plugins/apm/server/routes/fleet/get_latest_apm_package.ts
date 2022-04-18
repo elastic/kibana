@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { APMPluginStartDependencies } from '../../types';
 import { APM_PACKAGE_NAME } from './get_cloud_apm_package_policy';
 

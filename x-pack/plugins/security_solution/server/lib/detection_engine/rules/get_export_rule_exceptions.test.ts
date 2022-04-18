@@ -7,9 +7,9 @@
 
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
-import { getDetectionsExceptionListSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
+import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
 import {
   getRuleExceptionsForExport,

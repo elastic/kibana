@@ -8,10 +8,9 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 
+import { getDailyEvents } from '@kbn/lens-plugin/server/usage/task';
+import { getVisualizationCounts } from '@kbn/lens-plugin/server/usage/visualization_counts';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-import { getDailyEvents } from '../../../../plugins/lens/server/usage/task';
-import { getVisualizationCounts } from '../../../../plugins/lens/server/usage/visualization_counts';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

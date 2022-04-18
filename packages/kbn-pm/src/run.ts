@@ -6,25 +6,98 @@
  * Side Public License, v 1.
  */
 
-import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
+import { CiStatsReporter, CiStatsTiming } from '@kbn/dev-utils/ci_stats_reporter';
 
+import { simpleKibanaPlatformPluginDiscovery, getPluginSearchPaths } from '@kbn/plugin-discovery';
 import { ICommand, ICommandConfig } from './commands';
 import { CliError } from './utils/errors';
 import { log } from './utils/log';
 import { buildProjectGraph } from './utils/projects';
 import { renderProjectsTree } from './utils/projects_tree';
+import { regeneratePackageJson } from './utils/regenerate_package_json';
+import { regenerateSyntheticPackageMap } from './utils/regenerate_synthetic_package_map';
+import { regenerateBaseTsconfig } from './utils/regenerate_base_tsconfig';
 import { Kibana } from './utils/kibana';
 
 process.env.CI_STATS_NESTED_TIMING = 'true';
 
 export async function runCommand(command: ICommand, config: Omit<ICommandConfig, 'kbn'>) {
   const runStartTime = Date.now();
-  let kbn;
+  let kbn: undefined | Kibana;
+  const timings: Array<Omit<CiStatsTiming, 'group'>> = [];
+  async function time<T>(id: string, block: () => Promise<T>): Promise<T> {
+    const start = Date.now();
+    let success = true;
+    try {
+      return await block();
+    } catch (error) {
+      success = false;
+      throw error;
+    } finally {
+      timings.push({
+        id,
+        ms: Date.now() - start,
+        meta: {
+          success,
+        },
+      });
+    }
+  }
+
+  async function reportTimes(timingConfig: { group: string; id: string }, error?: Error) {
+    if (!kbn) {
+      // things are too broken to report remotely
+      return;
+    }
+
+    const reporter = CiStatsReporter.fromEnv(log);
+
+    try {
+      await reporter.timings({
+        upstreamBranch: kbn.kibanaProject.json.branch,
+        // prevent loading @kbn/utils by passing null
+        kibanaUuid: kbn.getUuid() || null,
+        timings: [
+          ...timings.map((t) => ({ ...timingConfig, ...t })),
+          {
+            group: timingConfig.group,
+            id: timingConfig.id,
+            ms: Date.now() - runStartTime,
+            meta: {
+              success: !error,
+            },
+          },
+        ],
+      });
+    } catch (e) {
+      // prevent hiding bootstrap errors
+      log.error('failed to report timings:');
+      log.error(e);
+    }
+  }
 
   try {
     log.debug(`Running [${command.name}] command from [${config.rootPath}]`);
 
-    kbn = await Kibana.loadFrom(config.rootPath);
+    await time('regenerate package.json, synthetic-package map and tsconfig', async () => {
+      const plugins = simpleKibanaPlatformPluginDiscovery(
+        getPluginSearchPaths({
+          rootDir: config.rootPath,
+          oss: false,
+          examples: true,
+          testPlugins: true,
+        }),
+        []
+      );
+
+      await Promise.all([
+        regeneratePackageJson(config.rootPath),
+        regenerateSyntheticPackageMap(plugins, config.rootPath),
+        regenerateBaseTsconfig(plugins, config.rootPath),
+      ]);
+    });
+
+    kbn = await time('load Kibana project', async () => await Kibana.loadFrom(config.rootPath));
     const projects = kbn.getFilteredProjects({
       skipKibanaPlugins: Boolean(config.options['skip-kibana-plugins']),
       ossOnly: Boolean(config.options.oss),
@@ -50,50 +123,11 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
     });
 
     if (command.reportTiming) {
-      const reporter = CiStatsReporter.fromEnv(log);
-      await reporter.timings({
-        upstreamBranch: kbn.kibanaProject.json.branch,
-        // prevent loading @kbn/utils by passing null
-        kibanaUuid: kbn.getUuid() || null,
-        timings: [
-          {
-            group: command.reportTiming.group,
-            id: command.reportTiming.id,
-            ms: Date.now() - runStartTime,
-            meta: {
-              success: true,
-            },
-          },
-        ],
-      });
+      await reportTimes(command.reportTiming);
     }
   } catch (error) {
     if (command.reportTiming) {
-      // if we don't have a kbn object then things are too broken to report on
-      if (kbn) {
-        try {
-          const reporter = CiStatsReporter.fromEnv(log);
-          await reporter.timings({
-            upstreamBranch: kbn.kibanaProject.json.branch,
-            // prevent loading @kbn/utils by passing null
-            kibanaUuid: kbn.getUuid() || null,
-            timings: [
-              {
-                group: command.reportTiming.group,
-                id: command.reportTiming.id,
-                ms: Date.now() - runStartTime,
-                meta: {
-                  success: false,
-                },
-              },
-            ],
-          });
-        } catch (e) {
-          // prevent hiding bootstrap errors
-          log.error('failed to report timings:');
-          log.error(e);
-        }
-      }
+      await reportTimes(command.reportTiming, error);
     }
 
     log.error(`[${command.name}] failed:`);

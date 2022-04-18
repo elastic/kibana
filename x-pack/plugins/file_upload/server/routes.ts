@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
-import { CoreSetup, Logger } from 'src/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { MAX_FILE_SIZE_BYTES } from '../common/constants';
 import type { IngestPipelineWrapper, InputData, Mappings, Settings } from '../common/types';
 import { wrapError } from './error_wrapper';

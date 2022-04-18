@@ -11,6 +11,8 @@ import { InheritedFtrProviderContext } from './ftr_provider_context';
 export async function synthtraceEsClientService(context: InheritedFtrProviderContext) {
   const es = context.getService('es');
 
-  const forceDataStreams = false;
-  return new apm.ApmSynthtraceEsClient(es, createLogger(LogLevel.info), forceDataStreams);
+  return new apm.ApmSynthtraceEsClient(es, createLogger(LogLevel.info), {
+    forceLegacyIndices: true,
+    refreshAfterIndex: true,
+  });
 }

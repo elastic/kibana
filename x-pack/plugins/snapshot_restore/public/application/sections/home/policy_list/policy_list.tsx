@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContent, EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import {
   PageLoading,

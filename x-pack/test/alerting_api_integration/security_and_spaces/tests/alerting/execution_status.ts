@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { RuleExecutionStatusErrorReasons } from '../../../../../plugins/alerting/common';
+import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';

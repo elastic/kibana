@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { copyAllowlistedFields } from './index';
+import { copyAllowlistedFields } from '.';
 
 describe('Security Telemetry filters', () => {
   describe('allowlistEventFields', () => {
