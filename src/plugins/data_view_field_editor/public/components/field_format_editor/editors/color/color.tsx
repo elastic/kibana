@@ -12,10 +12,10 @@ import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } fro
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DEFAULT_CONVERTER_COLOR } from '@kbn/field-formats-plugin/common';
 import { DefaultFormatEditor } from '../default/default';
 import { formatId } from './constants';
 
-import { DEFAULT_CONVERTER_COLOR } from '../../../../../../field_formats/common';
 import { FormatEditorProps } from '../types';
 
 interface Color {

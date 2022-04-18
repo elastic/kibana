@@ -10,7 +10,7 @@ import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { PagerDutyActionConnector } from '.././types';
+import { PagerDutyActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 

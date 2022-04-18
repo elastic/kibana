@@ -7,15 +7,15 @@
  */
 
 import { flow, mapValues } from 'lodash';
-import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SerializedSearchSourceFields } from 'src/plugins/data/public';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
   MigrateFunction,
-} from '../../../kibana_utils/common';
+} from '@kbn/kibana-utils-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,

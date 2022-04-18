@@ -20,7 +20,7 @@ import { getUserRiskScoreColumns } from './columns';
 
 import * as i18nUsers from '../../pages/translations';
 import * as i18n from './translations';
-import { usersModel, usersSelectors } from '../../store';
+import { usersModel, usersSelectors, usersActions } from '../../store';
 import {
   UserRiskScoreFields,
   UserRiskScoreItem,
@@ -29,7 +29,6 @@ import { SeverityCount } from '../../../common/components/severity/types';
 import { SeverityBadges } from '../../../common/components/severity/severity_badges';
 import { SeverityBar } from '../../../common/components/severity/severity_bar';
 import { SeverityFilterGroup } from '../../../common/components/severity/severity_filter_group';
-import { usersActions } from '../../../users/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { State } from '../../../common/store';
 import {

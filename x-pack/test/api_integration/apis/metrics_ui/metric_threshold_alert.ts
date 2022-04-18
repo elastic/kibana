@@ -11,12 +11,12 @@ import {
   Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from '../../../../plugins/infra/common/alerting/metrics';
-import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
+} from '@kbn/infra-plugin/common/alerting/metrics';
+import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
 import {
   EvaluatedRuleParams,
   evaluateRule,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+} from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
 

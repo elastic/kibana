@@ -13,7 +13,7 @@ const { run } = require('jest');
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 
-const config = require('../../jest.config.js');
+const config = require('../../jest.config');
 
 const argv = [...process.argv.slice(2), '--config', JSON.stringify(config)];
 

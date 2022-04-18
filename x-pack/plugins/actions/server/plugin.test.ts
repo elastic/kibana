@@ -7,14 +7,14 @@
 
 import moment from 'moment';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
-import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
-import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { eventLogMock } from '../../event_log/server/mocks';
+import { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { ActionType, ActionsApiRequestHandlerContext } from './types';
 import { ActionsConfig } from './config';
 import {

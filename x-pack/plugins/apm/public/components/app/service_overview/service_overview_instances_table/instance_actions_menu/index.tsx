@@ -14,7 +14,7 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
-} from '../../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/elasticsearch_fieldnames';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';

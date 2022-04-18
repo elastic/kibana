@@ -9,10 +9,7 @@ import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
-import {
-  buildExpression,
-  buildExpressionFunction,
-} from '../../../../../src/plugins/expressions/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';

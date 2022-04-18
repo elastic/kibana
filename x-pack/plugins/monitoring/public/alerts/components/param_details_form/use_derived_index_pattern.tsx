@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
 import { useEffect, useState } from 'react';
-import { DataPublicPluginStart, IIndexPattern } from 'src/plugins/data/public';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { prefixIndexPattern } from '../../../../common/ccs_utils';
 import {
   INDEX_PATTERN_BEATS,
@@ -20,26 +19,21 @@ import { MonitoringConfig } from '../../../types';
 const INDEX_PATTERNS = `${INDEX_PATTERN_ELASTICSEARCH},${INDEX_PATTERN_KIBANA},${INDEX_PATTERN_LOGSTASH},${INDEX_PATTERN_BEATS}`;
 
 export const useDerivedIndexPattern = (
-  data: DataPublicPluginStart,
+  dataViews: DataViewsPublicPluginStart,
   config?: MonitoringConfig
-): { loading: boolean; derivedIndexPattern: IIndexPattern } => {
+): { loading: boolean; derivedIndexPattern?: DataView } => {
   const indexPattern = prefixIndexPattern(config || ({} as MonitoringConfig), INDEX_PATTERNS, '*');
   const [loading, setLoading] = useState<boolean>(true);
-  const [fields, setFields] = useState<DataViewFieldBase[]>([]);
+  const [dataView, setDataView] = useState<DataView>();
   useEffect(() => {
     (async function fetchData() {
-      const result = await data.indexPatterns.getFieldsForWildcard({
-        pattern: indexPattern,
-      });
-      setFields(result);
+      const result = await dataViews.create({ title: indexPattern });
+      setDataView(result);
       setLoading(false);
     })();
-  }, [indexPattern, data.indexPatterns]);
+  }, [indexPattern, dataViews]);
   return {
     loading,
-    derivedIndexPattern: {
-      title: indexPattern,
-      fields,
-    },
+    derivedIndexPattern: dataView,
   };
 };

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { VisToExpressionAst, getVisSchemas, SchemaConfig } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './utils/palette';
 import type { HeatmapVisParams } from './types';
 import { getEsaggsFn } from './to_ast_esaggs';
-import { DEFAULT_LEGEND_SIZE } from '../../../visualizations/public';
 
 const DEFAULT_PERCENT_DECIMALS = 2;
 

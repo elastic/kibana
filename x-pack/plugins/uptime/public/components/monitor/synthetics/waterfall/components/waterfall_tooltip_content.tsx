@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useWaterfallContext } from '../context/waterfall_chart';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   text: string;

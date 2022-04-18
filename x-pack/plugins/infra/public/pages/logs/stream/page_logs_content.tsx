@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';

@@ -12,15 +12,15 @@ import {
   VisToExpressionAst,
   SchemaConfig,
   DEFAULT_LEGEND_SIZE,
-} from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+} from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   PIE_VIS_EXPRESSION_NAME,
   PARTITION_LABELS_FUNCTION,
   PieVisExpressionFunctionDefinition,
   PartitionVisParams,
   LabelsParams,
-} from '../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/expression-partition-vis-plugin/common';
 import { getEsaggsFn } from './to_ast_esaggs';
 
 const prepareDimension = (params: SchemaConfig) => {

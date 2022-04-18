@@ -11,7 +11,7 @@ import {
   httpServiceMock,
   themeServiceMock,
   docLinksServiceMock,
-} from '../../../../../core/public/mocks';
+} from '@kbn/core/public/mocks';
 
 import type { ObjectStorageClient } from '../../../common/types';
 import { HistoryMock } from '../../services/history.mock';

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { useKibana, toMountPoint, KibanaThemeProvider } from '../../../../kibana_react/public';
+import { useKibana, toMountPoint, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 
