@@ -102,7 +102,11 @@ type TransactionEntity = 'generatePdf' | 'screenshotting';
 
 type SimpleEvent = Omit<ScreenshottingAction['kibana']['screenshotting'], 'session_id'>;
 
-type LogAdapter = (message: string, event: SimpleEvent, startTime?: Date | undefined) => void;
+type LogAdapter = (
+  message: string,
+  event: SimpleEvent,
+  startTime?: Date | undefined
+) => ScreenshottingAction;
 
 function logAdapter(logger: Logger, suffix: 'start' | 'complete', sessionId: string) {
   const log: LogAdapter = (message, event, startTime) => {
@@ -189,8 +193,9 @@ export class EventLogger {
    */
   public screenshottingStart() {
     this.transactions.screenshotting = apm.startTransaction(Actions.SCREENSHOTTING, PLUGIN_ID);
-    this.logEventStart('screenshot-pipeline starting', { action: Actions.SCREENSHOTTING });
     this.startTiming(Actions.SCREENSHOTTING);
+
+    return this.logEventStart('screenshot-pipeline starting', { action: Actions.SCREENSHOTTING });
   }
 
   /**
@@ -212,7 +217,7 @@ export class EventLogger {
     this.transactions.screenshotting?.setLabel('byte-length', byteLength, false);
     this.transactions.screenshotting?.end();
 
-    this.logEventEnd(
+    return this.logEventEnd(
       'screenshot-pipeline finished',
       { action: Actions.SCREENSHOTTING, byte_length: byteLength, cpu, memory },
       this.timings[Actions.SCREENSHOTTING]
@@ -221,8 +226,9 @@ export class EventLogger {
 
   public pdfStart() {
     this.transactions.generatePdf = apm.startTransaction(Actions.PDF, PLUGIN_ID);
-    this.logEventStart('pdf generation starting', { action: Actions.PDF });
     this.startTiming(Actions.PDF);
+
+    return this.logEventStart('pdf generation starting', { action: Actions.PDF });
   }
 
   /**
@@ -235,7 +241,7 @@ export class EventLogger {
     this.transactions.generatePdf?.setLabel('pdf-pages', pdfPages, false);
     this.transactions.generatePdf?.end();
 
-    this.logEventEnd(
+    return this.logEventEnd(
       'pdf generation finished',
       {
         action: Actions.PDF,
@@ -253,10 +259,11 @@ export class EventLogger {
       Actions.GET_ELEMENT_POSITION_DATA,
       SpanTypes.READ
     );
-    this.logEventStart('getting element position data', {
+    this.startTiming(Actions.GET_ELEMENT_POSITION_DATA);
+
+    return this.logEventStart('getting element position data', {
       action: Actions.GET_ELEMENT_POSITION_DATA,
     });
-    this.startTiming(Actions.GET_ELEMENT_POSITION_DATA);
   }
 
   /**
@@ -265,7 +272,8 @@ export class EventLogger {
    */
   public getElementPositionsEnd({ elementPositions }: { elementPositions?: number }) {
     this.spans.getElementPositionData?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'element position data read',
       { action: Actions.GET_ELEMENT_POSITION_DATA, element_positions: elementPositions },
       this.timings[Actions.GET_ELEMENT_POSITION_DATA]
@@ -277,10 +285,11 @@ export class EventLogger {
       Actions.GET_NUMBER_OF_ITEMS,
       SpanTypes.READ
     );
-    this.logEventStart('getting number of visualization items', {
+    this.startTiming(Actions.GET_NUMBER_OF_ITEMS);
+
+    return this.logEventStart('getting number of visualization items', {
       action: Actions.GET_NUMBER_OF_ITEMS,
     });
-    this.startTiming(Actions.GET_NUMBER_OF_ITEMS);
   }
 
   /**
@@ -289,7 +298,8 @@ export class EventLogger {
    */
   public getNumberOfItemsEnd({ itemsCount }: { itemsCount: number }) {
     this.spans.getNumberOfItems?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'received number of visualization items',
       {
         action: Actions.GET_NUMBER_OF_ITEMS,
@@ -304,8 +314,11 @@ export class EventLogger {
       Actions.GET_RENDER_ERRORS,
       SpanTypes.READ
     );
-    this.logEventStart('starting scan for rendering errors', { action: Actions.GET_RENDER_ERRORS });
     this.startTiming(Actions.GET_RENDER_ERRORS);
+
+    return this.logEventStart('starting scan for rendering errors', {
+      action: Actions.GET_RENDER_ERRORS,
+    });
   }
 
   /**
@@ -314,7 +327,8 @@ export class EventLogger {
    */
   public getRenderErrorsEnd({ renderErrors }: { renderErrors?: number }) {
     this.spans.getRenderErrors?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'finished scanning for rendering errors',
       {
         action: Actions.GET_RENDER_ERRORS,
@@ -333,12 +347,13 @@ export class EventLogger {
       Actions.GET_SCREENSHOT,
       SpanTypes.READ
     );
-    this.logEventStart('capturing single screenshot', {
+    this.startTiming(Actions.GET_SCREENSHOT);
+
+    return this.logEventStart('capturing single screenshot', {
       action: Actions.GET_SCREENSHOT,
       screenshot_current: current,
       screenshot_total: total,
     });
-    this.startTiming(Actions.GET_SCREENSHOT);
   }
 
   /**
@@ -347,7 +362,8 @@ export class EventLogger {
    */
   public getScreenshotEnd({ byteLength, current, total }: GetScreenshotOptions) {
     this.spans.getScreenshot?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'single screenshot captured',
       {
         action: Actions.GET_SCREENSHOT,
@@ -364,13 +380,15 @@ export class EventLogger {
       Actions.GET_TIMERANGE,
       SpanTypes.READ
     );
-    this.logEventStart('getting time range', { action: Actions.GET_TIMERANGE });
     this.startTiming(Actions.GET_TIMERANGE);
+
+    return this.logEventStart('getting time range', { action: Actions.GET_TIMERANGE });
   }
 
   public getTimeRangeEnd() {
     this.spans.getTimeRange?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'received time range',
       { action: Actions.GET_TIMERANGE },
       this.timings[Actions.GET_TIMERANGE]
@@ -382,13 +400,15 @@ export class EventLogger {
       Actions.INJECT_CSS,
       SpanTypes.CORRECT
     );
-    this.logEventStart('injecting css', { action: Actions.INJECT_CSS });
     this.startTiming(Actions.INJECT_CSS);
+
+    return this.logEventStart('injecting css', { action: Actions.INJECT_CSS });
   }
 
   public injectCssEnd() {
     this.spans.injectCss?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'finished injecting css',
       { action: Actions.INJECT_CSS },
       this.timings[Actions.INJECT_CSS]
@@ -400,13 +420,15 @@ export class EventLogger {
       Actions.OPEN_URL,
       SpanTypes.WAIT
     );
-    this.logEventStart('opening url', { action: Actions.OPEN_URL });
     this.startTiming(Actions.OPEN_URL);
+
+    return this.logEventStart('opening url', { action: Actions.OPEN_URL });
   }
 
   public openUrlEnd() {
     this.spans.openUrl?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'finished opening url',
       { action: Actions.OPEN_URL },
       this.timings[Actions.OPEN_URL]
@@ -418,13 +440,15 @@ export class EventLogger {
       Actions.REPOSITION,
       SpanTypes.CORRECT
     );
-    this.logEventStart('positioning elements', { action: Actions.REPOSITION });
     this.startTiming(Actions.REPOSITION);
+
+    return this.logEventStart('positioning elements', { action: Actions.REPOSITION });
   }
 
   public positionElementsEnd() {
     this.spans.positionElements?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'finished positioning elements',
       { action: Actions.REPOSITION },
       this.timings[Actions.REPOSITION]
@@ -436,13 +460,15 @@ export class EventLogger {
       Actions.WAIT_RENDER,
       SpanTypes.WAIT
     );
-    this.logEventStart('waiting for render to complete', { action: Actions.WAIT_RENDER });
     this.startTiming(Actions.WAIT_RENDER);
+
+    return this.logEventStart('waiting for render to complete', { action: Actions.WAIT_RENDER });
   }
 
   public waitForRenderEnd() {
     this.spans.waitForRender?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'finished waiting for render to complete',
       { action: Actions.WAIT_RENDER },
       this.timings[Actions.WAIT_RENDER]
@@ -454,13 +480,17 @@ export class EventLogger {
       Actions.WAIT_VISUALIZATIONS,
       SpanTypes.WAIT
     );
-    this.logEventStart('waiting for visualizations', { action: Actions.WAIT_VISUALIZATIONS });
     this.startTiming(Actions.WAIT_VISUALIZATIONS);
+
+    return this.logEventStart('waiting for visualizations', {
+      action: Actions.WAIT_VISUALIZATIONS,
+    });
   }
 
   public waitForVisualizationEnd() {
     this.spans.waitForVisualization?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'finished waiting for visualizations',
       { action: Actions.WAIT_VISUALIZATIONS },
       this.timings[Actions.WAIT_VISUALIZATIONS]
@@ -472,13 +502,15 @@ export class EventLogger {
       Actions.ADD_IMAGE,
       SpanTypes.OUTPUT
     );
-    this.logEventStart('adding pdf image', { action: Actions.ADD_IMAGE });
     this.startTiming(Actions.ADD_IMAGE);
+
+    return this.logEventStart('adding pdf image', { action: Actions.ADD_IMAGE });
   }
 
   public addPdfImageEnd() {
     this.spans.addPdfImage?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'pdf image added',
       { action: Actions.ADD_IMAGE },
       this.timings[Actions.ADD_IMAGE]
@@ -490,13 +522,15 @@ export class EventLogger {
       Actions.COMPILE,
       SpanTypes.OUTPUT
     );
-    this.logEventStart('compiling pdf file', { action: Actions.COMPILE });
     this.startTiming(Actions.COMPILE);
+
+    return this.logEventStart('compiling pdf file', { action: Actions.COMPILE });
   }
 
   public compilePdfEnd() {
     this.spans.compilePdf?.end();
-    this.logEventEnd(
+
+    return this.logEventEnd(
       'pdf file compiled',
       { action: Actions.COMPILE },
       this.timings[Actions.COMPILE]
@@ -513,9 +547,10 @@ export class EventLogger {
   public error(error: ErrorAction | string, action: Actions) {
     const isError = typeof error === 'object';
     this.logger.error(error as Error);
-    this.logger.debug('an error occurred', {
+
+    const logData = {
       message: 'an error occurred',
-      kibana: { screenshotting: { action } },
+      kibana: { screenshotting: { action: `${action}-error` } },
       event: { provider: PLUGIN_ID },
       error: {
         message: isError ? error.message : undefined,
@@ -523,6 +558,9 @@ export class EventLogger {
         stack_trace: isError ? error.stack_trace : undefined,
         type: isError ? error.type : undefined,
       },
-    });
+    };
+    this.logger.debug('an error occurred', logData);
+
+    return logData;
   }
 }

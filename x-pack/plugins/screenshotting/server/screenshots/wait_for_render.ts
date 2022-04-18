@@ -16,50 +16,56 @@ export const waitForRenderComplete = async (
   loadDelay: number,
   layout: Layout
 ) => {
-  return await browser.evaluate(
-    {
-      fn: (selector, visLoadDelay) => {
-        // wait for visualizations to finish loading
-        const visualizations: NodeListOf<Element> = document.querySelectorAll(selector);
-        const visCount = visualizations.length;
-        const renderedTasks = [];
+  eventLogger.waitForRenderStart();
 
-        function waitForRender(visualization: Element) {
-          return new Promise<void>((resolve) => {
-            visualization.addEventListener('renderComplete', () => resolve());
-          });
-        }
+  return await browser
+    .evaluate(
+      {
+        fn: (selector, visLoadDelay) => {
+          // wait for visualizations to finish loading
+          const visualizations: NodeListOf<Element> = document.querySelectorAll(selector);
+          const visCount = visualizations.length;
+          const renderedTasks = [];
 
-        function waitForRenderDelay() {
-          return new Promise((resolve) => {
-            setTimeout(resolve, visLoadDelay);
-          });
-        }
-
-        for (let i = 0; i < visCount; i++) {
-          const visualization = visualizations[i];
-          const isRendered = visualization.getAttribute('data-render-complete');
-
-          if (isRendered === 'disabled') {
-            renderedTasks.push(waitForRenderDelay());
-          } else if (isRendered === 'false') {
-            renderedTasks.push(waitForRender(visualization));
+          function waitForRender(visualization: Element) {
+            return new Promise<void>((resolve) => {
+              visualization.addEventListener('renderComplete', () => resolve());
+            });
           }
-        }
 
-        // The renderComplete fires before the visualizations are in the DOM, so
-        // we wait for the event loop to flush before telling reporting to continue. This
-        // seems to correct a timing issue that was causing reporting to occasionally
-        // capture the first visualization before it was actually in the DOM.
-        // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
-        // bumping to 250.
-        const hackyWaitForVisualizations = () => new Promise((r) => setTimeout(r, 250));
+          function waitForRenderDelay() {
+            return new Promise((resolve) => {
+              setTimeout(resolve, visLoadDelay);
+            });
+          }
 
-        return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
+          for (let i = 0; i < visCount; i++) {
+            const visualization = visualizations[i];
+            const isRendered = visualization.getAttribute('data-render-complete');
+
+            if (isRendered === 'disabled') {
+              renderedTasks.push(waitForRenderDelay());
+            } else if (isRendered === 'false') {
+              renderedTasks.push(waitForRender(visualization));
+            }
+          }
+
+          // The renderComplete fires before the visualizations are in the DOM, so
+          // we wait for the event loop to flush before telling reporting to continue. This
+          // seems to correct a timing issue that was causing reporting to occasionally
+          // capture the first visualization before it was actually in the DOM.
+          // Note: 100 proved too short, see https://github.com/elastic/kibana/issues/22581,
+          // bumping to 250.
+          const hackyWaitForVisualizations = () => new Promise((r) => setTimeout(r, 250));
+
+          return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
+        },
+        args: [layout.selectors.renderComplete, loadDelay],
       },
-      args: [layout.selectors.renderComplete, loadDelay],
-    },
-    { context: CONTEXT_WAITFORRENDER },
-    eventLogger.kbnLogger
-  );
+      { context: CONTEXT_WAITFORRENDER },
+      eventLogger.kbnLogger
+    )
+    .then(() => {
+      eventLogger.waitForRenderEnd();
+    });
 };

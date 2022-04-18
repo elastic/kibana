@@ -41,6 +41,8 @@ export const waitForVisualizations = async (
   toEqual: number,
   layout: Layout
 ): Promise<void> => {
+  eventLogger.waitForVisualizationStart();
+
   const logger = eventLogger.kbnLogger;
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
@@ -60,4 +62,6 @@ export const waitForVisualizations = async (
       `An error occurred when trying to wait for ${toEqual} visualizations to finish rendering. ${err.message}`
     );
   }
+
+  eventLogger.waitForVisualizationEnd();
 };
