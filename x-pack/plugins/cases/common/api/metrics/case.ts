@@ -7,7 +7,10 @@
 
 import * as rt from 'io-ts';
 
-export type CaseMetricsResponse = rt.TypeOf<typeof CaseMetricsResponseRt>;
+export type SingleCaseMetricsRequest = rt.TypeOf<typeof SingleCaseMetricsRequestRt>;
+export type SingleCaseMetricsResponse = rt.TypeOf<typeof SingleCaseMetricsResponseRt>;
+export type CasesMetricsRequest = rt.TypeOf<typeof CasesMetricsRequestRt>;
+export type CasesMetricsResponse = rt.TypeOf<typeof CasesMetricsResponseRt>;
 export type AlertHostsMetrics = rt.TypeOf<typeof AlertHostsMetricsRt>;
 export type AlertUsersMetrics = rt.TypeOf<typeof AlertUsersMetricsRt>;
 export type StatusInfo = rt.TypeOf<typeof StatusInfoRt>;
@@ -69,7 +72,25 @@ const AlertUsersMetricsRt = rt.type({
   ),
 });
 
-export const CaseMetricsResponseRt = rt.partial(
+export const SingleCaseMetricsRequestRt = rt.type({
+  /**
+   * The ID of the case.
+   */
+  caseId: rt.string,
+  /**
+   * The metrics to retrieve.
+   */
+  features: rt.array(rt.string),
+});
+
+export const CasesMetricsRequestRt = rt.type({
+  /**
+   * The metrics to retrieve.
+   */
+  features: rt.array(rt.string),
+});
+
+export const SingleCaseMetricsResponseRt = rt.partial(
   rt.type({
     alerts: rt.partial(
       rt.type({
@@ -142,3 +163,5 @@ export const CaseMetricsResponseRt = rt.partial(
     }),
   }).props
 );
+
+export const CasesMetricsResponseRt = rt.partial(rt.type({}).props);

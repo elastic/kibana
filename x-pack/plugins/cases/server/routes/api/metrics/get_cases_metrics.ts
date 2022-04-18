@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+import { CASE_METRICS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
+
+export const getCasesMetricRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_METRICS_URL,
+  params: {
+    query: schema.object({
+      features: schema.arrayOf(schema.string({ minLength: 1 })),
+    }),
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const client = await context.cases.getCasesClient();
+      return response.ok({
+        body: await client.metrics.getCasesMetrics({
+          features: request.query.features,
+        }),
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to get cases metrics in route: ${error}`,
+        error,
+      });
+    }
+  },
+});

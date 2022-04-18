@@ -8,12 +8,12 @@
 import { BaseHandler } from './base_handler';
 import { AggregationBuilder, BaseHandlerCommonOptions } from './types';
 
-export abstract class AggregationHandler extends BaseHandler {
-  protected aggregationBuilders: AggregationBuilder[] = [];
+export abstract class AggregationHandler<R> extends BaseHandler<R> {
+  protected aggregationBuilders: Array<AggregationBuilder<R>> = [];
 
   constructor(
     options: BaseHandlerCommonOptions,
-    private readonly aggregations: Map<string, AggregationBuilder>
+    protected readonly aggregations: Map<string, AggregationBuilder<R>>
   ) {
     super(options);
   }
