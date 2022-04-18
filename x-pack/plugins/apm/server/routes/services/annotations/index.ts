@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
-import { ScopedAnnotationsClient } from '../../../../../observability/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getStoredAnnotations } from './get_stored_annotations';

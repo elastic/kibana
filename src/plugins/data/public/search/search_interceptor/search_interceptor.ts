@@ -31,9 +31,11 @@ import {
   ThemeServiceSetup,
   ToastsSetup,
   ExecutionContextSetup,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '../../../../bfetch/public';
+import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -55,8 +57,6 @@ import {
   TimeoutErrorMode,
   SearchSessionIncompleteWarning,
 } from '../errors';
-import { toMountPoint } from '../../../../kibana_react/public';
-import { AbortError, KibanaServerError } from '../../../../kibana_utils/public';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';

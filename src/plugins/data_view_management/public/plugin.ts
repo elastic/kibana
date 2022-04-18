@@ -7,17 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { UrlForwardingSetup } from '../../url_forwarding/public';
+import { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 
-import { ManagementSetup } from '../../management/public';
-import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
-import { DataViewEditorStart } from '../../data_view_editor/public';
-import { DataViewsPublicPluginStart } from '../../data_views/public';
-import { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
-import { UnifiedSearchPublicPluginStart } from '../../unified_search/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;

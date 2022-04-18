@@ -14,7 +14,7 @@ import { join, relative } from 'path';
 import { isBazelBinAvailable, runBazel } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
-import { ICommand } from './';
+import { ICommand } from '.';
 
 export const CleanCommand: ICommand = {
   description: 'Deletes output directories and resets internal caches.',

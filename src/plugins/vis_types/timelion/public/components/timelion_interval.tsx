@@ -10,9 +10,9 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { search } from '../../../../data/public';
+import { search } from '@kbn/data-plugin/public';
 const { isValidEsInterval } = search.aggs;
-import { useValidation } from '../../../../vis_default_editor/public';
+import { useValidation } from '@kbn/vis-default-editor-plugin/public';
 
 const intervalOptions = [
   {

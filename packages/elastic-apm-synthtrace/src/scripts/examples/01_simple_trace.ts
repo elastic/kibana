@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '../../index';
+import { apm, timerange } from '../..';
 import { ApmFields } from '../../lib/apm/apm_fields';
 import { Instance } from '../../lib/apm/instance';
 import { Scenario } from '../scenario';

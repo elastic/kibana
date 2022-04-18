@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginServices } from '../../../presentation_util/public';
+import { PluginServices } from '@kbn/presentation-util-plugin/public';
 
 import { CustomIntegrationsFindService } from './find';
 import { CustomIntegrationsPlatformService } from './platform';

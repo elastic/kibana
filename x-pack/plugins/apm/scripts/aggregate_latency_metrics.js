@@ -8,9 +8,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/optimizer').registerNodeAutoTranspilation();
 
-const {
-  aggregateLatencyMetrics,
-} = require('./aggregate_latency_metrics/index.ts');
+const { aggregateLatencyMetrics } = require('./aggregate_latency_metrics');
 
 aggregateLatencyMetrics().catch((err) => {
   if (err.meta && err.meta.body) {

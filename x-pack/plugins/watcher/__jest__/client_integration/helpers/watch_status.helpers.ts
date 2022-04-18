@@ -13,7 +13,7 @@ import {
   TestBed,
   AsyncTestBedConfig,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
