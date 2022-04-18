@@ -7,14 +7,15 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ISavedObjectsRepository, SavedObjectAttributes } from 'src/core/server';
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
+import { ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import {
+  type ControlGroupTelemetry,
   CONTROL_GROUP_TYPE,
   initializeControlGroupTelemetry,
   RawControlGroupAttributes,
-} from '../../../controls/common';
-import { ControlGroupTelemetry } from '../../../controls/common';
+} from '@kbn/controls-plugin/common';
+
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
 

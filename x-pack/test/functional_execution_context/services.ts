@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { services as functionalServices } from '../../test/functional/services';
+import { services as functionalServices } from '../functional/services';
 
 export const services = functionalServices;

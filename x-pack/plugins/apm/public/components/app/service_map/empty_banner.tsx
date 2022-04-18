@@ -8,7 +8,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CytoscapeContext } from './cytoscape';
 import { useTheme } from '../../../hooks/use_theme';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';

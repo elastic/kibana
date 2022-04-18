@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { IFieldFormat } from 'src/plugins/field_formats/common';
-import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
-import { ExpressionValueVisDimension } from 'src/plugins/visualizations/public';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
 import { TableVisParams } from '../common';
 
 export interface ColumnWidthData {

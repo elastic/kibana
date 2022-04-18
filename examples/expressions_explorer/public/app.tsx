@@ -18,15 +18,15 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { AppMountParameters, IUiSettingsClient } from '../../../src/core/public';
-import { ExpressionsStart } from '../../../src/plugins/expressions/public';
-import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
+import { AppMountParameters, IUiSettingsClient } from '@kbn/core/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RunExpressionsExample } from './run_expressions';
 import { RenderExpressionsExample } from './render_expressions';
 import { ActionsExpressionsExample } from './actions_and_expressions';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { ActionsExpressionsExample2 } from './actions_and_expressions2';
-import { createKibanaReactContext } from '../../../src/plugins/kibana_react/public';
 
 interface Props {
   expressions: ExpressionsStart;

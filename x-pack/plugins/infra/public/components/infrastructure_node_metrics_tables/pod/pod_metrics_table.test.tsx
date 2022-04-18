@@ -7,7 +7,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { HttpFetchOptions } from '../../../../../../../src/core/public';
+import type { HttpFetchOptions } from '@kbn/core/public';
 import type {
   DataResponseMock,
   NodeMetricsTableFetchMock,

@@ -9,7 +9,7 @@
 import React from 'react';
 import { ManageData } from './manage_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { FeatureCatalogueCategory } from 'src/plugins/home/public';
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 
 const mockFeatures = [
   {

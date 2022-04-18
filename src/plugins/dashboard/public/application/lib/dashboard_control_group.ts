@@ -11,16 +11,18 @@ import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
-import { DashboardContainer } from '..';
-import { DashboardState } from '../../types';
-import { DashboardContainerInput, DashboardSavedObject } from '../..';
-import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
 import {
+  ControlGroupInput,
   controlGroupInputToRawControlGroupAttributes,
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
   rawControlGroupAttributesToControlGroupInput,
-} from '../../../../controls/common';
+} from '@kbn/controls-plugin/common';
+
+import { DashboardContainer } from '..';
+import { DashboardState } from '../../types';
+import { DashboardContainerInput, DashboardSavedObject } from '../..';
+
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
 }

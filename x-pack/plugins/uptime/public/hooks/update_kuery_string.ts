@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { IndexPattern } from '../../../../../src/plugins/data/public';
+import type { IndexPattern } from '@kbn/data-plugin/public';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 
 const getKueryString = (urlFilters: string, excludedFilters?: string): string => {

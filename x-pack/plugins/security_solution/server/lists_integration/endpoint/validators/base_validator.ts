@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
