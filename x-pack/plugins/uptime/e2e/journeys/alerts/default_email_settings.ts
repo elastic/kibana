@@ -40,7 +40,7 @@ journey('DefaultEmailSettings', async ({ page, params }) => {
     await page.goto(`${baseUrl}?${queryParams}`, {
       waitUntil: 'networkidle',
     });
-    await loginToKibana({ page });
+    await settings.loginToKibana();
   });
 
   step('clear existing settings', async () => {
