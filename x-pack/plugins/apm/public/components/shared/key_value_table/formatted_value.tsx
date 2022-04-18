@@ -7,7 +7,7 @@
 
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
 const EmptyValue = euiStyled.span`

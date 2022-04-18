@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
-import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
-import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -21,7 +21,7 @@ import {
   deleteSignalsIndex,
   getSimpleRule,
 } from '../../utils';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
+import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // This test was meant to be more full flow, ensuring that

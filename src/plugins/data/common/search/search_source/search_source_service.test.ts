@@ -7,7 +7,7 @@
  */
 
 import { IndexPatternsContract } from '../..';
-import { SearchSourceService, SearchSourceDependencies } from './';
+import { SearchSourceService, SearchSourceDependencies } from '.';
 
 describe('SearchSource service', () => {
   let dependencies: jest.Mocked<SearchSourceDependencies>;

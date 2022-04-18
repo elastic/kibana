@@ -11,7 +11,7 @@ import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
 import type { SavedObjectsMigrationVersion } from '../types';
 import type { TransformRawDocs } from './types';
-import { MigrationResult } from '../migrations/core';
+import { MigrationResult } from './core';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './initial_state';

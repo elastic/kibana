@@ -7,7 +7,7 @@
 
 import { registerRoutesMock } from './plugin.test.mocks';
 
-import { coreMock } from '../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { GlobalSearchPlugin } from './plugin';
 
 describe('GlobalSearchPlugin', () => {

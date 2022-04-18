@@ -8,7 +8,7 @@
 import {
   CreateExceptionListItemOptions,
   ExceptionsListPreCreateItemServerExtension,
-} from '../../../../../lists/server';
+} from '@kbn/lists-plugin/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   EventFilterValidator,

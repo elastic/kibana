@@ -17,9 +17,9 @@ import {
   Vis,
   VisualizeEmbeddableContract,
   EditorRenderProps,
-} from 'src/plugins/visualizations/public';
-import { KibanaContextProvider } from '../../kibana_react/public';
-import { Storage } from '../../kibana_utils/public';
+} from '@kbn/visualizations-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';

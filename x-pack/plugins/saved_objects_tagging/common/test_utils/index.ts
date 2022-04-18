@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from 'src/core/types';
+import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { Tag, TagAttributes } from '../types';
 import { TagsCapabilities } from '../capabilities';
 import { AssignableObject } from '../assignments';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,

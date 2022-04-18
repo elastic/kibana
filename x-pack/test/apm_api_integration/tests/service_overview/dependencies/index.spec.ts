@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { last, omit, pick, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { Node, NodeType } from '../../../../../plugins/apm/common/connections';
-import { roundNumber } from '../../../utils';
+import { Node, NodeType } from '@kbn/apm-plugin/common/connections';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
-} from '../../../../../plugins/apm/common/environment_filter_values';
-import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
+} from '@kbn/apm-plugin/common/environment_filter_values';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { roundNumber } from '../../../utils';
 import archives from '../../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { apmDependenciesMapping, createServiceDependencyDocs } from './es_utils';

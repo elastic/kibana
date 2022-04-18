@@ -16,7 +16,7 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import { BrowserFields } from '../../../../../../timelines/common/search_strategy';
+import { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
 import { Ecs } from '../../../../../common/ecs';
 
 jest.mock('../../../../common/lib/kibana');
@@ -114,7 +114,6 @@ describe('DefaultCellRenderer', () => {
 
     expect(mockImplementation.renderColumn).toBeCalledWith({
       asPlainText: false,
-      browserFields,
       columnName: header.id,
       ecsData,
       eventId,

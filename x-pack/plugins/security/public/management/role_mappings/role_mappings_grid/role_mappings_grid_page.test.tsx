@@ -9,10 +9,10 @@ import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { CoreStart } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';

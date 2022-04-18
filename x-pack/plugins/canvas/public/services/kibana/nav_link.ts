@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { SESSIONSTORAGE_LASTPATH } from '../../../common/lib/constants';
 import { getSessionStorage } from '../../lib/storage';

@@ -9,10 +9,11 @@ import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from 'src/core/public/mocks';
+import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -34,6 +35,8 @@ const exampleCustomMetric = {
   type: 'custom',
 } as SnapshotCustomMetricInput;
 
+const dataViewMock = dataViewPluginMocks.createStartContract();
+
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
     const ruleParams = {
@@ -51,6 +54,7 @@ describe('Expression', () => {
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
         metadata={currentOptions}
+        dataViews={dataViewMock}
       />
     );
 
@@ -116,6 +120,7 @@ describe('Expression', () => {
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
         metadata={{}}
+        dataViews={dataViewMock}
       />
     );
 

@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useHostsKpiHosts } from './index';
+import { useHostsKpiHosts } from '.';
 
 describe('kpi hosts - hosts', () => {
   it('skip = true will cancel any running request', () => {
