@@ -7,16 +7,16 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart, SavedObject } from '../../../../core/server';
-import { coreMock } from '../../../../core/server/mocks';
+import { CoreSetup, CoreStart, SavedObject } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { createFieldFormatsStartMock } from '../../../field_formats/server/mocks';
+import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { createIndexPatternsStartMock } from '../data_views/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
-import { bfetchPluginMock } from '../../../bfetch/server/mocks';
-import { of } from 'rxjs';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
+import { lastValueFrom, of } from 'rxjs';
 import type {
   IEsSearchRequest,
   IEsSearchResponse,
@@ -28,7 +28,7 @@ import type {
 } from '.';
 import { NoSearchIdInSessionError } from '.';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { expressionsPluginMock } from '../../../expressions/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
@@ -182,7 +182,7 @@ describe('Search service', () => {
           throw new NoSearchIdInSessionError();
         });
 
-        const res = await mockScopedClient.search(searchRequest, options).toPromise();
+        const res = await lastValueFrom(mockScopedClient.search(searchRequest, options));
 
         const [request, callOptions] = mockStrategy.search.mock.calls[0];
         expect(callOptions).toBe(options);

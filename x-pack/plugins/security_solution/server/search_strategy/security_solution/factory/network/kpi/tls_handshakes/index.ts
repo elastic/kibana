@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   NetworkKpiQueries,
   NetworkKpiTlsHandshakesStrategyResponse,
@@ -14,7 +14,6 @@ import {
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildTlsHandshakeQuery } from './query.network_kpi_tls_handshakes.dsl';
-import { buildTlsHandshakeQueryEntities } from './query.network_kpi_tls_handshakes_entities.dsl';
 
 export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {
   buildDsl: (options: NetworkKpiTlsHandshakesRequestOptions) => buildTlsHandshakeQuery(options),
@@ -34,24 +33,3 @@ export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.
     };
   },
 };
-
-export const networkKpiTlsHandshakesEntities: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> =
-  {
-    buildDsl: (options: NetworkKpiTlsHandshakesRequestOptions) =>
-      buildTlsHandshakeQueryEntities(options),
-    parse: async (
-      options: NetworkKpiTlsHandshakesRequestOptions,
-      response: IEsSearchResponse<unknown>
-    ): Promise<NetworkKpiTlsHandshakesStrategyResponse> => {
-      const inspect = {
-        dsl: [inspectStringifyObject(buildTlsHandshakeQueryEntities(options))],
-      };
-
-      return {
-        ...response,
-        inspect,
-        // @ts-expect-error code doesn't handle TotalHits
-        tlsHandshakes: response.rawResponse.aggregations?.tls?.value ?? null,
-      };
-    },
-  };

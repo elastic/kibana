@@ -25,16 +25,16 @@ import {
 } from '@elastic/eui';
 import {
   IDataPluginServices,
-  IIndexPattern,
   TimeRange,
   TimeHistoryContract,
   Query,
   getQueryLog,
-} from '../../../data/public';
-import type { PersistedLog } from '../../../data/public';
-import { useKibana, withKibana } from '../../../kibana_react/public';
+} from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { PersistedLog } from '@kbn/data-plugin/public';
+import { useKibana, withKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import QueryStringInputUI from './query_string_input';
-import { UI_SETTINGS } from '../../../data/common';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils';
 
@@ -56,7 +56,7 @@ export interface QueryBarTopRowProps {
   disableAutoFocus?: boolean;
   fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
-  indexPatterns?: Array<IIndexPattern | string>;
+  indexPatterns?: Array<DataView | string>;
   indicateNoData?: boolean;
   isClearable?: boolean;
   isDirty: boolean;

@@ -8,6 +8,7 @@
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';

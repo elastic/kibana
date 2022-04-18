@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import {
   ExceptionListItemSchema,
@@ -18,6 +18,7 @@ import {
   ExceptionListSchema,
   ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,

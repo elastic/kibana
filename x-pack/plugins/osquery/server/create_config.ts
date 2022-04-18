@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigType } from './config';
 

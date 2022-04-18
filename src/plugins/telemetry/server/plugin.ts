@@ -8,13 +8,12 @@
 
 import { URL } from 'url';
 import type { Observable } from 'rxjs';
-import { ReplaySubject } from 'rxjs';
-import { take } from 'rxjs/operators';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { firstValueFrom, ReplaySubject } from 'rxjs';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import type {
   CoreSetup,
   PluginInitializerContext,
@@ -22,9 +21,9 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-} from 'src/core/server';
-import type { SecurityPluginStart } from '../../../../x-pack/plugins/security/server';
-import { SavedObjectsClient } from '../../../core/server';
+} from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
@@ -131,7 +130,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getTelemetryUrl: async () => {
-        const { sendUsageTo } = await config$.pipe(take(1)).toPromise();
+        const { sendUsageTo } = await firstValueFrom(config$);
         const telemetryUrl = getTelemetryChannelEndpoint({
           env: sendUsageTo,
           channelName: 'snapshot',
@@ -157,9 +156,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     return {
       getIsOptedIn: async () => {
-        const internalRepositoryClient = await this.savedObjectsInternalClient$
-          .pipe(take(1))
-          .toPromise();
+        const internalRepositoryClient = await firstValueFrom(this.savedObjectsInternalClient$);
         let telemetrySavedObject: TelemetrySavedObject = false; // if an error occurs while fetching opt-in status, a `false` result indicates that Kibana cannot opt-in
         try {
           telemetrySavedObject = await getTelemetrySavedObject(internalRepositoryClient);
@@ -167,7 +164,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
           this.logger.debug('Failed to check telemetry opt-in status: ' + err.message);
         }
 
-        const config = await this.config$.pipe(take(1)).toPromise();
+        const config = await firstValueFrom(this.config$);
         const allowChangingOptInStatus = config.allowChangingOptInStatus;
         const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
         const currentKibanaVersion = this.currentKibanaVersion;

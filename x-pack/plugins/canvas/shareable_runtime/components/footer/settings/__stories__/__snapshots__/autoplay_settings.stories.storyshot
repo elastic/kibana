@@ -107,6 +107,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -275,6 +276,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -443,6 +445,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 >
                   <input
                     aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}

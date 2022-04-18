@@ -26,7 +26,7 @@ import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
   AlertStatusValues,
-} from '../../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,

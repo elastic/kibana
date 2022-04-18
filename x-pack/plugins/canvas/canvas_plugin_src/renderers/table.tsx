@@ -7,10 +7,10 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { CoreTheme } from 'kibana/public';
+import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { defaultTheme$ } from '../../../../../src/plugins/presentation_util/common/lib';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common/lib';
 import { StartInitializer } from '../plugin';
 import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';

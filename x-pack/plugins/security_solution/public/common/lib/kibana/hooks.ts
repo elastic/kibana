@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { NavigateToAppOptions } from '@kbn/core/public';
 import {
   APP_UI_ID,
   CASES_FEATURE_ID,
@@ -19,8 +21,6 @@ import {
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { AuthenticatedUser } from '../../../../../security/common/model';
-import { NavigateToAppOptions } from '../../../../../../../src/core/public';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
@@ -169,19 +169,19 @@ export const useGetUserCasesPermissions = () => {
  * Returns a full URL to the provided page path by using
  * kibana's `getUrlForApp()`
  */
+
+export type GetAppUrl = (param: {
+  appId?: string;
+  deepLinkId?: string;
+  path?: string;
+  absolute?: boolean;
+}) => string;
+
 export const useAppUrl = () => {
   const { getUrlForApp } = useKibana().services.application;
 
-  const getAppUrl = useCallback(
-    ({
-      appId = APP_UI_ID,
-      ...options
-    }: {
-      appId?: string;
-      deepLinkId?: string;
-      path?: string;
-      absolute?: boolean;
-    }) => getUrlForApp(appId, options),
+  const getAppUrl = useCallback<GetAppUrl>(
+    ({ appId = APP_UI_ID, ...options }) => getUrlForApp(appId, options),
     [getUrlForApp]
   );
   return { getAppUrl };
@@ -191,18 +191,19 @@ export const useAppUrl = () => {
  * Navigate to any app using kibana's `navigateToApp()`
  * or by url using `navigateToUrl()`
  */
+
+export type NavigateTo = (
+  param: {
+    url?: string;
+    appId?: string;
+  } & NavigateToAppOptions
+) => void;
+
 export const useNavigateTo = () => {
   const { navigateToApp, navigateToUrl } = useKibana().services.application;
 
-  const navigateTo = useCallback(
-    ({
-      url,
-      appId = APP_UI_ID,
-      ...options
-    }: {
-      url?: string;
-      appId?: string;
-    } & NavigateToAppOptions) => {
+  const navigateTo = useCallback<NavigateTo>(
+    ({ url, appId = APP_UI_ID, ...options }) => {
       if (url) {
         navigateToUrl(url);
       } else {

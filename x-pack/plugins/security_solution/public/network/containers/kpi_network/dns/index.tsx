@@ -10,7 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { useTransforms } from '../../../../transforms/containers/use_transforms';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -23,10 +23,6 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -62,7 +58,6 @@ export const useNetworkKpiDns = ({
   const [loading, setLoading] = useState(false);
   const [networkKpiDnsRequest, setNetworkKpiDnsRequest] =
     useState<NetworkKpiDnsRequestOptions | null>(null);
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [networkKpiDnsResponse, setNetworkKpiDnsResponse] = useState<NetworkKpiDnsArgs>({
     dnsQueries: 0,
@@ -127,30 +122,23 @@ export const useNetworkKpiDns = ({
 
   useEffect(() => {
     setNetworkKpiDnsRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.dns,
-        indices: indexNames,
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-      });
-
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        factoryQueryType,
-        filterQuery: createFilter(filterQuery),
-        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiDnsSearch(networkKpiDnsRequest);
