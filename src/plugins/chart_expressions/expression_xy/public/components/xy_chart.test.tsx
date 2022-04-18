@@ -1994,15 +1994,18 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
     const { args } = sampleArgs();
 
-    args.axes = [{
-      type: 'yAxisConfig',
-      position: 'left',
-      showLabels: true
-    }, {
-      type: 'yAxisConfig',
-      position: 'right',
-      showLabels: true
-    }];
+    args.axes = [
+      {
+        type: 'yAxisConfig',
+        position: 'left',
+        showLabels: true,
+      },
+      {
+        type: 'yAxisConfig',
+        position: 'right',
+        showLabels: true,
+      },
+    ];
 
     args.xAxisConfig = {
       type: 'xAxisConfig',
@@ -2024,15 +2027,18 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the y axis if the tick labels is hidden', () => {
     const { args } = sampleArgs();
 
-    args.axes = [{
-      type: 'yAxisConfig',
-      position: 'left',
-      showLabels: false
-    }, {
-      type: 'yAxisConfig',
-      position: 'right',
-      showLabels: false
-    }];
+    args.axes = [
+      {
+        type: 'yAxisConfig',
+        position: 'left',
+        showLabels: false,
+      },
+      {
+        type: 'yAxisConfig',
+        position: 'right',
+        showLabels: false,
+      },
+    ];
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
 
@@ -2048,15 +2054,18 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the x axis if the tick labels is shown', () => {
     const { args } = sampleArgs();
 
-    args.axes = [{
-      type: 'yAxisConfig',
-      position: 'left',
-      showLabels: true
-    }, {
-      type: 'yAxisConfig',
-      position: 'right',
-      showLabels: true
-    }];
+    args.axes = [
+      {
+        type: 'yAxisConfig',
+        position: 'left',
+        showLabels: true,
+      },
+      {
+        type: 'yAxisConfig',
+        position: 'right',
+        showLabels: true,
+      },
+    ];
 
     args.xAxisConfig = {
       type: 'xAxisConfig',
@@ -2078,15 +2087,18 @@ describe('XYChart component', () => {
   test('it should set the tickLabel orientation on the x axis', () => {
     const { args } = sampleArgs();
 
-    args.axes = [{
-      type: 'yAxisConfig',
-      position: 'left',
-      labelsOrientation: 0
-    }, {
-      type: 'yAxisConfig',
-      position: 'right',
-      labelsOrientation: -90
-    }];
+    args.axes = [
+      {
+        type: 'yAxisConfig',
+        position: 'left',
+        labelsOrientation: 0,
+      },
+      {
+        type: 'yAxisConfig',
+        position: 'right',
+        labelsOrientation: -90,
+      },
+    ];
 
     args.xAxisConfig = {
       type: 'xAxisConfig',
@@ -2109,15 +2121,18 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the y axis if the tick labels is shown', () => {
     const { args } = sampleArgs();
 
-    args.axes = [{
-      type: 'yAxisConfig',
-      position: 'left',
-      showLabels: true
-    }, {
-      type: 'yAxisConfig',
-      position: 'right',
-      showLabels: true
-    }];
+    args.axes = [
+      {
+        type: 'yAxisConfig',
+        position: 'left',
+        showLabels: true,
+      },
+      {
+        type: 'yAxisConfig',
+        position: 'right',
+        showLabels: true,
+      },
+    ];
 
     args.xAxisConfig = {
       type: 'xAxisConfig',
@@ -2139,15 +2154,18 @@ describe('XYChart component', () => {
   test('it should set the tickLabel orientation on the y axis', () => {
     const { args } = sampleArgs();
 
-    args.axes = [{
-      type: 'yAxisConfig',
-      position: 'left',
-      labelsOrientation: -90
-    }, {
-      type: 'yAxisConfig',
-      position: 'right',
-      labelsOrientation: -90
-    }];
+    args.axes = [
+      {
+        type: 'yAxisConfig',
+        position: 'left',
+        labelsOrientation: -90,
+      },
+      {
+        type: 'yAxisConfig',
+        position: 'right',
+        labelsOrientation: -90,
+      },
+    ];
 
     args.xAxisConfig = {
       type: 'xAxisConfig',
@@ -2197,29 +2215,32 @@ describe('XYChart component', () => {
     const args: XYProps = {
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
-      axes: [{
-        type: 'yAxisConfig',
-        position: 'left',
-        labelsOrientation: 0,
-        showGridLines: false,
-        showLabels: true,
-        title: '',
-        extent: {
-          mode: 'full',
-        type: 'axisExtentConfig',
-        }
-      }, {
-        type: 'yAxisConfig',
-        position: 'right',
-        labelsOrientation: 0,
-        showGridLines: false,
-        showLabels: true,
-        title: '',
-        extent: {
-          mode: 'full',
-        type: 'axisExtentConfig',
-        }
-      }],
+      axes: [
+        {
+          type: 'yAxisConfig',
+          position: 'left',
+          labelsOrientation: 0,
+          showGridLines: false,
+          showLabels: true,
+          title: '',
+          extent: {
+            mode: 'full',
+            type: 'axisExtentConfig',
+          },
+        },
+        {
+          type: 'yAxisConfig',
+          position: 'right',
+          labelsOrientation: 0,
+          showGridLines: false,
+          showLabels: true,
+          title: '',
+          extent: {
+            mode: 'full',
+            type: 'axisExtentConfig',
+          },
+        },
+      ],
       xAxisConfig: {
         type: 'xAxisConfig',
         id: 'x',
@@ -2292,29 +2313,32 @@ describe('XYChart component', () => {
     const args: XYProps = {
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
-      axes: [{
-        type: 'yAxisConfig',
-        position: 'left',
-        labelsOrientation: 0,
-        showGridLines: false,
-        showLabels: false,
-        title: '',
-        extent: {
-          mode: 'full',
-        type: 'axisExtentConfig',
-        }
-      }, {
-        type: 'yAxisConfig',
-        position: 'right',
-        labelsOrientation: 0,
-        showGridLines: false,
-        showLabels: false,
-        title: '',
-        extent: {
-          mode: 'full',
-        type: 'axisExtentConfig',
-        }
-      }],
+      axes: [
+        {
+          type: 'yAxisConfig',
+          position: 'left',
+          labelsOrientation: 0,
+          showGridLines: false,
+          showLabels: false,
+          title: '',
+          extent: {
+            mode: 'full',
+            type: 'axisExtentConfig',
+          },
+        },
+        {
+          type: 'yAxisConfig',
+          position: 'right',
+          labelsOrientation: 0,
+          showGridLines: false,
+          showLabels: false,
+          title: '',
+          extent: {
+            mode: 'full',
+            type: 'axisExtentConfig',
+          },
+        },
+      ],
       xAxisConfig: {
         type: 'xAxisConfig',
         id: 'x',
@@ -2368,29 +2392,32 @@ describe('XYChart component', () => {
     const args: XYProps = {
       legend: { type: 'legendConfig', isVisible: true, position: Position.Top },
       valueLabels: 'hide',
-      axes: [{
-        type: 'yAxisConfig',
-        position: 'left',
-        labelsOrientation: 0,
-        showGridLines: false,
-        showLabels: false,
-        title: '',
-        extent: {
-          mode: 'full',
-        type: 'axisExtentConfig',
-        }
-      }, {
-        type: 'yAxisConfig',
-        position: 'right',
-        labelsOrientation: 0,
-        showGridLines: false,
-        showLabels: false,
-        title: '',
-        extent: {
-          mode: 'full',
-        type: 'axisExtentConfig',
-        }
-      }],
+      axes: [
+        {
+          type: 'yAxisConfig',
+          position: 'left',
+          labelsOrientation: 0,
+          showGridLines: false,
+          showLabels: false,
+          title: '',
+          extent: {
+            mode: 'full',
+            type: 'axisExtentConfig',
+          },
+        },
+        {
+          type: 'yAxisConfig',
+          position: 'right',
+          labelsOrientation: 0,
+          showGridLines: false,
+          showLabels: false,
+          title: '',
+          extent: {
+            mode: 'full',
+            type: 'axisExtentConfig',
+          },
+        },
+      ],
       xAxisConfig: {
         type: 'xAxisConfig',
         id: 'x',
@@ -2564,15 +2591,18 @@ describe('XYChart component', () => {
   test('it should hide the X axis title if the corresponding switch is off', () => {
     const { args } = sampleArgs();
 
-    args.axes = [{
-      type: 'yAxisConfig',
-      position: 'left',
-      showTitle: true
-    }, {
-      type: 'yAxisConfig',
-      position: 'right',
-      showTitle: true
-    }];
+    args.axes = [
+      {
+        type: 'yAxisConfig',
+        position: 'left',
+        showTitle: true,
+      },
+      {
+        type: 'yAxisConfig',
+        position: 'right',
+        showTitle: true,
+      },
+    ];
 
     args.xAxisConfig = {
       type: 'xAxisConfig',
@@ -2596,15 +2626,18 @@ describe('XYChart component', () => {
   test('it should show the X axis gridlines if the setting is on', () => {
     const { args } = sampleArgs();
 
-    args.axes = [{
-      type: 'yAxisConfig',
-      position: 'left',
-      showGridLines: false
-    }, {
-      type: 'yAxisConfig',
-      position: 'right',
-      showGridLines: false
-    }];
+    args.axes = [
+      {
+        type: 'yAxisConfig',
+        position: 'left',
+        showGridLines: false,
+      },
+      {
+        type: 'yAxisConfig',
+        position: 'right',
+        showGridLines: false,
+      },
+    ];
 
     args.xAxisConfig = {
       type: 'xAxisConfig',
