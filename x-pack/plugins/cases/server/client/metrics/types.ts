@@ -31,3 +31,7 @@ export interface BaseHandlerCommonOptions {
 export interface SingleCaseBaseHandlerCommonOptions extends BaseHandlerCommonOptions {
   caseId: string;
 }
+
+export interface AllCasesBaseHandlerCommonOptions extends BaseHandlerCommonOptions {
+  owner?: string | string[];
+}

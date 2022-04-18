@@ -17,6 +17,7 @@ export const getCasesMetricRoute = createCasesRoute({
   params: {
     query: schema.object({
       features: schema.arrayOf(schema.string({ minLength: 1 })),
+      owner: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
     }),
   },
   handler: async ({ context, request, response }) => {
@@ -24,7 +25,7 @@ export const getCasesMetricRoute = createCasesRoute({
       const client = await context.cases.getCasesClient();
       return response.ok({
         body: await client.metrics.getCasesMetrics({
-          features: request.query.features,
+          ...request.query,
         }),
       });
     } catch (error) {

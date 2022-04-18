@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
-
 import { SingleCaseMetricsResponse } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
-import {
-  AggregationBuilder,
-  AggregationResponse,
-  SingleCaseBaseHandlerCommonOptions,
-} from '../types';
+import { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
 import { AlertHosts, AlertUsers } from './aggregations';
 
 export class AlertDetails extends SingleCaseAggregationHandler {
@@ -47,7 +41,7 @@ export class AlertDetails extends SingleCaseAggregationHandler {
         alerts,
       });
 
-      return this.formatResponse(aggregationsResponse);
+      return this.formatResponse<SingleCaseMetricsResponse>(aggregationsResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts details attached case id: ${this.caseId}: ${error}`,
@@ -55,12 +49,5 @@ export class AlertDetails extends SingleCaseAggregationHandler {
         logger,
       });
     }
-  }
-
-  private formatResponse(aggregationsResponse?: AggregationResponse): SingleCaseMetricsResponse {
-    return this.aggregationBuilders.reduce(
-      (acc, feature) => merge(acc, feature.formatResponse(aggregationsResponse)),
-      {}
-    );
   }
 }

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import { BaseHandler } from './base_handler';
-import { AggregationBuilder, BaseHandlerCommonOptions } from './types';
+import { AggregationBuilder, AggregationResponse, BaseHandlerCommonOptions } from './types';
 
 export abstract class AggregationHandler<R> extends BaseHandler<R> {
   protected aggregationBuilders: Array<AggregationBuilder<R>> = [];
@@ -27,5 +28,12 @@ export abstract class AggregationHandler<R> extends BaseHandler<R> {
     if (aggregation) {
       this.aggregationBuilders.push(aggregation);
     }
+  }
+
+  public formatResponse<F>(aggregationsResponse?: AggregationResponse): F {
+    return this.aggregationBuilders.reduce(
+      (acc, feature) => merge(acc, feature.formatResponse(aggregationsResponse)),
+      {} as F
+    );
   }
 }

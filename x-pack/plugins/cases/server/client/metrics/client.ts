@@ -11,6 +11,7 @@ import {
   CasesStatusRequest,
   CasesStatusResponse,
   SingleCaseMetricsRequest,
+  CasesMetricsResponse,
 } from '../../../common/api';
 import { CasesClient } from '../client';
 
@@ -24,7 +25,7 @@ import { getCasesMetrics } from './get_cases_metrics';
  */
 export interface MetricsSubClient {
   getCaseMetrics(params: SingleCaseMetricsRequest): Promise<SingleCaseMetricsResponse>;
-  getCasesMetrics(params: CasesMetricsRequest): Promise<SingleCaseMetricsResponse>;
+  getCasesMetrics(params: CasesMetricsRequest): Promise<CasesMetricsResponse>;
   /**
    * Retrieves the total number of open, closed, and in-progress cases.
    */

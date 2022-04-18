@@ -83,12 +83,22 @@ export const SingleCaseMetricsRequestRt = rt.type({
   features: rt.array(rt.string),
 });
 
-export const CasesMetricsRequestRt = rt.type({
-  /**
-   * The metrics to retrieve.
-   */
-  features: rt.array(rt.string),
-});
+export const CasesMetricsRequestRt = rt.intersection([
+  rt.type({
+    /**
+     * The metrics to retrieve.
+     */
+    features: rt.array(rt.string),
+  }),
+  rt.partial({
+    /**
+     * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
+     * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
+     * that the user has access to.
+     */
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  }),
+]);
 
 export const SingleCaseMetricsResponseRt = rt.partial(
   rt.type({
@@ -164,4 +174,8 @@ export const SingleCaseMetricsResponseRt = rt.partial(
   }).props
 );
 
-export const CasesMetricsResponseRt = rt.partial(rt.type({}).props);
+export const CasesMetricsResponseRt = rt.partial(
+  rt.type({
+    mttr: rt.number,
+  }).props
+);

@@ -4,12 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { merge } from 'lodash';
+import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 
 import {
   CasesMetricsRequest,
+  CasesMetricsRequestRt,
   CasesMetricsResponse,
   CasesMetricsResponseRt,
+  throwErrors,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { CasesClient } from '../client';
@@ -23,8 +30,13 @@ export const getCasesMetrics = async (
 ): Promise<CasesMetricsResponse> => {
   const { logger } = clientArgs;
 
+  const queryParams = pipe(
+    CasesMetricsRequestRt.decode(params),
+    fold(throwErrors(Boom.badRequest), identity)
+  );
+
   try {
-    const handlers = buildHandlers(params, casesClient, clientArgs);
+    const handlers = buildHandlers(queryParams, casesClient, clientArgs);
 
     const computedMetrics = await Promise.all(
       Array.from(handlers).map(async (handler) => {
