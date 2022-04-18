@@ -127,25 +127,18 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
       } catch (error) {
         let value;
-        let contentType: string | null = '';
+        const { response, body } = error as IHttpFetchError;
+        const contentType = response?.headers.get('Content-Type') ?? 'unknown';
+        const statusCode = response?.status ?? 500;
 
-        const { response, body = {} } = error as IHttpFetchError;
-        if (response) {
-          const { status, headers } = response;
-          if (body) {
-            value = JSON.stringify(body, null, 2); // ES error should be shown
-            contentType = headers.get('Content-Type');
-          } else {
-            value = 'Request failed to get to the server (status code: ' + status + ')';
-            contentType = headers.get('Content-Type');
-          }
-
-          if (isMultiRequest) {
-            value = '# ' + req.method + ' ' + req.url + '\n' + value;
-          }
+        if (body) {
+          value = JSON.stringify(body, null, 2);
         } else {
-          value =
-            "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
+          value = 'Request failed to get to the server (status code: ' + statusCode + ')';
+        }
+
+        if (isMultiRequest) {
+          value = '# ' + req.method + ' ' + req.url + '\n' + value;
         }
 
         reject({

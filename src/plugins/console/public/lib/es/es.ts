@@ -46,7 +46,6 @@ export async function send({
 
   if (kibanaRequestUrl) {
     const httpMethod = method.toLowerCase() as Method;
-    // construct URL object, so we can extract out pathname, searchParams, etc...
     const url = new URL(kibanaRequestUrl);
     const { pathname, searchParams } = url;
     const query = Object.fromEntries(searchParams.entries());
