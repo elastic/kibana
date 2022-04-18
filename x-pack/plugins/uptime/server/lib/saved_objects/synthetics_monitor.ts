@@ -33,13 +33,18 @@ export const syntheticsMonitor: SavedObjectsType = {
       tags: {
         type: 'text',
       },
-      secrets: {
-        type: 'text',
+      locations: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'text',
+          },
+        },
       },
     },
   },
   management: {
-    importableAndExportable: false,
+    importableAndExportable: true,
     icon: 'uptimeApp',
     getTitle: (savedObject) =>
       savedObject.attributes.name +
