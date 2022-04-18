@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection rule type telemetry', function () {
     describe('', function () {
-      this.tags('ciGroup11');
+      this.tags('ciGroup28');
       loadTestFile(require.resolve('./usage_collector/all_types'));
       loadTestFile(require.resolve('./usage_collector/detection_rules'));
       loadTestFile(require.resolve('./usage_collector/detection_rule_status'));

@@ -5,14 +5,31 @@
  * 2.0.
  */
 
-import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
-import { CoreSetup, CoreStart } from 'src/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  IContextProvider,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
-} from '../../actions/server';
+} from '@kbn/actions-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '@kbn/features-plugin/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { APP_ID } from '../common/constants';
 
 import {
@@ -27,18 +44,11 @@ import {
 import { CasesClient } from './client';
 import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
-import { SpacesPluginStart } from '../../spaces/server';
-import {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
-} from '../../features/server';
-import { LensServerPluginSetup } from '../../lens/server';
 import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
+import { getInternalRoutes } from './routes/api/get_internal_routes';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -130,7 +140,7 @@ export class CasePlugin {
 
     registerRoutes({
       router,
-      routes: getExternalRoutes(),
+      routes: [...getExternalRoutes(), ...getInternalRoutes()],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,

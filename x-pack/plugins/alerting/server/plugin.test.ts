@@ -6,21 +6,21 @@
  */
 
 import { AlertingPlugin, PluginSetupContract } from './plugin';
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
-import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
-import { KibanaRequest } from 'kibana/server';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { KibanaFeature } from '../../features/server';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { eventLogServiceMock } from '@kbn/event-log-plugin/server/event_log_service.mock';
+import { KibanaRequest } from '@kbn/core/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/server';
 import { AlertingConfig } from './config';
 import { RuleType } from './types';
-import { eventLogMock } from '../../event_log/server/mocks';
-import { actionsMock } from '../../actions/server/mocks';
-import { dataPluginMock } from '../../../../src/plugins/data/server/mocks';
-import { monitoringCollectionMock } from '../../monitoring_collection/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -34,7 +34,7 @@ const generateAlertingConfig = (): AlertingConfig => ({
   cancelAlertsOnRuleTimeout: true,
   rules: {
     minimumScheduleInterval: { value: '1m', enforce: false },
-    execution: {
+    run: {
       actions: {
         max: 1000,
       },
@@ -51,7 +51,7 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   defaultActionGroupId: 'default',
   producer: 'test',
   config: {
-    execution: {
+    run: {
       actions: {
         max: 1000,
       },
@@ -127,7 +127,7 @@ describe('Alerting Plugin', () => {
         ...generateAlertingConfig(),
         rules: {
           minimumScheduleInterval: { value: '1m', enforce: false },
-          execution: {
+          run: {
             actions: {
               max: 123,
             },
@@ -142,7 +142,7 @@ describe('Alerting Plugin', () => {
       setupContract.registerType(ruleType);
 
       expect(ruleType.config).toEqual({
-        execution: {
+        run: {
           actions: { max: 123 },
         },
       });
@@ -153,7 +153,7 @@ describe('Alerting Plugin', () => {
         ...generateAlertingConfig(),
         rules: {
           minimumScheduleInterval: { value: '1m', enforce: false },
-          execution: {
+          run: {
             actions: { max: 123 },
             ruleTypeOverrides: [{ id: sampleRuleType.id, timeout: '1d' }],
           },
@@ -167,7 +167,7 @@ describe('Alerting Plugin', () => {
       setupContract.registerType(ruleType);
 
       expect(ruleType.config).toEqual({
-        execution: {
+        run: {
           id: sampleRuleType.id,
           actions: {
             max: 123,

@@ -12,16 +12,12 @@ import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
 import { FilterStateStore, Filter, Query } from '@kbn/es-query';
+import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
-import type {
-  FilterManager,
-  SavedQuery,
-  SavedQueryTimeFilter,
-} from '../../../../../../../../src/plugins/data/public';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
-import { KqlMode } from '../../../../timelines/store/timeline/model';
+import { KqlMode } from '../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { QueryBar } from '../../../../common/components/query_bar';

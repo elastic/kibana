@@ -7,9 +7,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { TelemetryCounter } from 'src/core/server';
+import type { TelemetryCounter } from '@kbn/core/server';
+import { Action } from '@kbn/analytics-plugin-a-plugin/server/custom_shipper';
 import { FtrProviderContext } from '../services';
-import { Action } from '../__fixtures__/plugins/analytics_plugin_a/server/custom_shipper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   ): Promise<TelemetryCounter[]> => {
     const resp = await supertest
       .get(`/internal/analytics_plugin_a/stats`)
-      .query({ takeNumberOfCounters })
+      .query({ takeNumberOfCounters, eventType: 'test-plugin-lifecycle' })
       .set('kbn-xsrf', 'xxx')
       .expect(200);
 

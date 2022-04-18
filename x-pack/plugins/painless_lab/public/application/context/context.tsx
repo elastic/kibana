@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, ReactNode, useState, useContext } from 'react';
-import { HttpSetup, ChromeStart } from 'src/core/public';
+import { HttpSetup, ChromeStart } from '@kbn/core/public';
 
 import { Links } from '../../links';
 import { Store, Payload, Validation } from '../types';

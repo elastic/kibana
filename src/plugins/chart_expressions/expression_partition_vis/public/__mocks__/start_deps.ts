@@ -8,8 +8,8 @@
 
 import { from } from 'rxjs';
 import { action } from '@storybook/addon-actions';
-import { DataPublicPluginStart } from '../../../../data/public';
-import { FieldFormatsStart } from '../../../../field_formats/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFormatService } from './format_service';
 
 const theme = {

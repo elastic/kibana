@@ -8,6 +8,7 @@
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useEsSearch } from '@kbn/observability-plugin/public';
 import {
   Histogram,
   HistogramPoint,
@@ -15,7 +16,6 @@ import {
 } from '../../../../common/runtime_types/monitor';
 import { useGetUrlParams } from '../../../hooks';
 import { UptimeRefreshContext } from '../../../contexts';
-import { useEsSearch } from '../../../../../observability/public';
 import { esKuerySelector } from '../../../state/selectors';
 import { getHistogramInterval } from '../../../../common/lib/get_histogram_interval';
 import { Ping } from '../../../../common/runtime_types';

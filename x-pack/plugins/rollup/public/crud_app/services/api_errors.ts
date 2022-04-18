@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'src/core/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import { getNotifications, getFatalErrors } from '../../kibana_services';
 
 function createToastConfig(

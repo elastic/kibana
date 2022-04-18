@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 export type InternalSavedObjectsClient = Awaited<

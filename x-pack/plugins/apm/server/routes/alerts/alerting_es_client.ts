@@ -8,8 +8,8 @@
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../src/core/types/elasticsearch';
-import { RuleExecutorServices } from '../../../../alerting/server';
+} from '@kbn/core/types/elasticsearch';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 export async function alertingEsClient<TParams extends ESSearchRequest>({
   scopedClusterClient,

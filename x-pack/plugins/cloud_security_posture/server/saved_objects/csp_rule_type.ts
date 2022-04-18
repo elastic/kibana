@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsType, SavedObjectsValidationMap } from '../../../../../src/core/server';
+import type { SavedObjectsType, SavedObjectsValidationMap } from '@kbn/core/server';
 import {
   type CspRuleSchema,
   cspRuleSchema,

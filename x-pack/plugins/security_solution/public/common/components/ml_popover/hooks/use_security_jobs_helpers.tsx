@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MlSummaryJob } from '@kbn/ml-plugin/public';
 import {
   AugmentedSecurityJobFields,
   Module,
@@ -13,7 +14,6 @@ import {
   SecurityJob,
 } from '../types';
 import { mlModules } from '../ml_modules';
-import { MlSummaryJob } from '../../../../../../ml/public';
 
 /**
  * Helper function for converting from ModuleJob -> SecurityJob

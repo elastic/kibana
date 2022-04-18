@@ -8,7 +8,7 @@
 
 import { createHashHistory, History, UnregisterCallback } from 'history';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { AppUpdater, ToastsSetup } from 'kibana/public';
+import { AppUpdater, ToastsSetup } from '@kbn/core/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
 import { unhashUrl } from './hash_unhash_url';
 
