@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { from, of, delay, concatMap } from 'rxjs';
 import { renderHook } from '@testing-library/react-hooks';
 import type { RefObject } from 'react';
 
@@ -17,59 +15,69 @@ import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
 import type { Chart, PointerEvent } from '@elastic/charts';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
-/** @internal **/
-type DispatchExternalPointerEventFn = (pointerEvent: PointerEvent) => void;
+// FLAKY: https://github.com/elastic/kibana/issues/130177
+describe.skip('useActiveCursor', () => {
+  let cursor: ActiveCursorPayload['cursor'];
+  let dispatchExternalPointerEvent: jest.Mock;
 
-describe('useActiveCursor', () => {
-  const act = async (
+  const act = (
     syncOption: ActiveCursorSyncOption,
     events: Array<Partial<ActiveCursorPayload>>,
-    eventsTimeout = 5
-  ): Promise<{ dispatchExternalPointerEvent: DispatchExternalPointerEventFn }> => {
-    const activeCursor = new ActiveCursor();
-    const cursor = {} as ActiveCursorPayload['cursor'];
-    const dispatchExternalPointerEvent: DispatchExternalPointerEventFn = jest.fn();
-    const debounce = syncOption.debounce ?? 5;
+    eventsTimeout = 1
+  ) =>
+    new Promise(async (resolve, reject) => {
+      try {
+        const activeCursor = new ActiveCursor();
+        let allEventsExecuted = false;
+        activeCursor.setup();
+        dispatchExternalPointerEvent.mockImplementation((pointerEvent) => {
+          if (allEventsExecuted) {
+            resolve(pointerEvent);
+          }
+        });
+        renderHook(() =>
+          useActiveCursor(
+            activeCursor,
+            {
+              current: {
+                dispatchExternalPointerEvent: dispatchExternalPointerEvent as (
+                  pointerEvent: PointerEvent
+                ) => void,
+              },
+            } as RefObject<Chart>,
+            { ...syncOption, debounce: syncOption.debounce ?? 1 }
+          )
+        );
 
-    activeCursor.setup();
+        for (const e of events) {
+          await new Promise((eventResolve) =>
+            setTimeout(() => {
+              if (e === events[events.length - 1]) {
+                allEventsExecuted = true;
+              }
 
-    renderHook(() =>
-      useActiveCursor(
-        activeCursor,
-        {
-          current: {
-            dispatchExternalPointerEvent,
-          },
-        } as RefObject<Chart>,
-        { ...syncOption, debounce }
-      )
-    );
+              activeCursor.activeCursor$!.next({
+                cursor,
+                ...e,
+              });
+              eventResolve(null);
+            }, eventsTimeout)
+          );
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
 
-    return new Promise((res, rej) =>
-      from(events)
-        .pipe(concatMap((x) => of(x).pipe(delay(eventsTimeout))))
-        .subscribe({
-          next: (item) => {
-            activeCursor.activeCursor$!.next({
-              cursor,
-              ...item,
-            });
-          },
-          complete: () => {
-            /** We have to wait before resolving the promise to make sure the debouncedEvent gets fired.  **/
-            setTimeout(() => res({ dispatchExternalPointerEvent }), eventsTimeout + debounce + 30);
-          },
-          error: (error) => {
-            rej(error);
-          },
-        })
-    );
-  };
+  beforeEach(() => {
+    cursor = {} as ActiveCursorPayload['cursor'];
+    dispatchExternalPointerEvent = jest.fn();
+  });
 
   test('should debounce events', async () => {
-    const { dispatchExternalPointerEvent } = await act(
+    await act(
       {
-        debounce: 10,
+        debounce: 50,
         datatables: [
           {
             columns: [
@@ -95,15 +103,13 @@ describe('useActiveCursor', () => {
   });
 
   test('should trigger cursor pointer update (chart type: time, event type: time)', async () => {
-    const { dispatchExternalPointerEvent } = await act({ isDateHistogram: true }, [
-      { isDateHistogram: true },
-    ]);
+    await act({ isDateHistogram: true }, [{ isDateHistogram: true }]);
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);
   });
 
   test('should trigger cursor pointer update (chart type: datatable - time based, event type: time)', async () => {
-    const { dispatchExternalPointerEvent } = await act(
+    await act(
       {
         datatables: [
           {
@@ -128,7 +134,7 @@ describe('useActiveCursor', () => {
   });
 
   test('should not trigger cursor pointer update (chart type: datatable, event type: time)', async () => {
-    const { dispatchExternalPointerEvent } = await act(
+    await act(
       {
         datatables: [
           {
@@ -150,7 +156,7 @@ describe('useActiveCursor', () => {
   });
 
   test('should works with multi datatables (intersection)', async () => {
-    const { dispatchExternalPointerEvent } = await act(
+    await act(
       {
         datatables: [
           {
