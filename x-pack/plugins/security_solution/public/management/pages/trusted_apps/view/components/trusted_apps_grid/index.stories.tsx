@@ -12,7 +12,7 @@ import { storiesOf } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 import { EuiHorizontalRule } from '@elastic/eui';
 
-import { KibanaContextProvider } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import {
   createGlobalNoMiddlewareStore,

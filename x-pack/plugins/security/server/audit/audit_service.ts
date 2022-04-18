@@ -13,9 +13,9 @@ import type {
   Logger,
   LoggerContextConfigInput,
   LoggingServiceSetup,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
-import type { SpacesPluginSetup } from '../../../spaces/server';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';

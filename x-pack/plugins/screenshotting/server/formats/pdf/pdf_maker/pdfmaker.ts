@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, PackageInfo } from 'src/core/server';
+import type { Logger, PackageInfo } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 /**
  * Supported query parameters for CreatePackagePolicyRouteState

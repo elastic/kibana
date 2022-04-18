@@ -6,12 +6,12 @@
  */
 
 import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
-import { homePluginMock } from 'src/plugins/home/public/mocks';
-import { securityMock } from '../../security/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { homePluginMock } from '@kbn/home-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { CloudPlugin, CloudConfigType, loadUserId } from './plugin';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { KibanaExecutionContext } from 'kibana/public';
+import { KibanaExecutionContext } from '@kbn/core/public';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {

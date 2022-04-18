@@ -9,8 +9,8 @@
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CoreStart } from 'kibana/public';
-import { toMountPoint } from '../../../kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 let bannerId: string;
 

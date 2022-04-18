@@ -13,18 +13,21 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
-import { ManualInstructions } from '../../enrollment_instructions';
+import { InstallSection } from '../../enrollment_instructions/install_section';
+import type { CommandsByPlatform } from '../../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
+
+import type { K8sMode } from '../types';
 
 export const InstallManagedAgentStep = ({
+  installCommand,
   selectedApiKeyId,
   apiKeyData,
-  fleetServerHosts,
   isK8s,
 }: {
-  fleetServerHosts: string[];
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
-  isK8s?: string;
+  isK8s?: K8sMode;
+  installCommand: CommandsByPlatform;
 }): EuiContainedStepProps => {
   return {
     status: selectedApiKeyId ? undefined : 'disabled',
@@ -32,11 +35,7 @@ export const InstallManagedAgentStep = ({
       defaultMessage: 'Install Elastic Agent on your host',
     }),
     children: selectedApiKeyId && apiKeyData && (
-      <ManualInstructions
-        apiKey={apiKeyData.item}
-        fleetServerHosts={fleetServerHosts}
-        isK8s={isK8s}
-      />
+      <InstallSection installCommand={installCommand} isK8s={isK8s} />
     ),
   };
 };

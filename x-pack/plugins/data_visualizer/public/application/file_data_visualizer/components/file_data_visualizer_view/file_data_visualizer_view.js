@@ -30,7 +30,7 @@ import {
   processResults,
 } from '../../../common/components/utils';
 
-import { Chat } from '../../../../../../cloud/public';
+import { Chat } from '@kbn/cloud-plugin/public';
 
 import { MODE } from './constants';
 

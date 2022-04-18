@@ -17,12 +17,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { useReduxContainerContext } from '../../../../presentation_util/public';
 
 export interface ControlFrameProps {
   customPrepend?: JSX.Element;
