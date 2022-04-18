@@ -9,8 +9,8 @@
 import semverGte from 'semver/functions/gte';
 import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
-import type { SerializedSearchSourceFields } from 'src/plugins/data/common';
-import type { GetMigrationFunctionObjectFn } from 'src/plugins/kibana_utils/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { GetMigrationFunctionObjectFn } from '@kbn/kibana-utils-plugin/common';
 
 describe('embeddable migrations', () => {
   test('should have same versions registered as saved object migrations versions (>7.13.0)', () => {

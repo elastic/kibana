@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { EmbeddableRegistryDefinition } from '../../../../embeddable/common';
+import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
 import { OPTIONS_LIST_CONTROL } from '../../../common';
 import {
   createOptionsListExtract,

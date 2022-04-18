@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { counterRate, CounterRateArgs } from './index';
+import { counterRate, CounterRateArgs } from '.';
 
-import type { Datatable } from 'src/plugins/expressions/common';
-import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 describe('lens_counter_rate', () => {
   const fn = functionWrapper(counterRate);

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Datatable, DatatableColumn } from 'src/plugins/expressions/common';
-import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
-import { formatColumn } from './index';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { formatColumn } from '.';
 
 describe('format_column', () => {
   const fn = functionWrapper(formatColumn);

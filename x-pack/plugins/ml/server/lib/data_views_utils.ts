@@ -9,10 +9,10 @@ import type {
   IScopedClusterClient,
   SavedObjectsClientContract,
   KibanaRequest,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
-import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 
 export type GetDataViewsService = () => Promise<DataViewsService>;
 

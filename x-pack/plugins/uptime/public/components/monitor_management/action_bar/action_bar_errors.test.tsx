@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { FETCH_STATUS } from '../../../../../observability/public';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import {
   DataStream,
   HTTPFields,

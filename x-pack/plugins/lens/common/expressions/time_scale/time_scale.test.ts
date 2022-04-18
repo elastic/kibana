@@ -6,13 +6,13 @@
  */
 
 import moment from 'moment';
-import type { Datatable } from 'src/plugins/expressions/common';
-import type { TimeRange } from 'src/plugins/data/common';
-import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 // mock the specific inner variable:
 // there are intra dependencies in the data plugin we might break trying to mock the whole thing
-jest.mock('../../../../../../src/plugins/data/common/query/timefilter/get_time', () => {
+jest.mock('@kbn/data-plugin/common/query/timefilter/get_time', () => {
   const localMoment = jest.requireActual('moment');
   return {
     calculateBounds: jest.fn(({ from, to }) => ({

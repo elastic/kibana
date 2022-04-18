@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { TimelineType } from '../../../../../../common/types/timeline';
 
 import {
@@ -73,7 +73,7 @@ describe('clean draft timelines', () => {
       persistNote: mockPersistNote,
     }));
 
-    const cleanDraftTimelinesRoute = jest.requireActual('./index').cleanDraftTimelinesRoute;
+    const cleanDraftTimelinesRoute = jest.requireActual('.').cleanDraftTimelinesRoute;
     cleanDraftTimelinesRoute(server.router, createMockConfig(), securitySetup);
   });
 

@@ -21,12 +21,15 @@ import {
   EuiFlexGrid,
   EuiCard,
   EuiFlexGroup,
+  EuiIcon,
   type PropsOf,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
 import type { CspFinding } from './types';
 import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
 import * as TEXT from './translations';
+import cisLogoIcon from '../../assets/icons/cis_logo.svg';
+import k8sLogoIcon from '../../assets/icons/k8s_logo.svg';
 
 const tabs = ['remediation', 'resource', 'general'] as const;
 
@@ -163,7 +166,17 @@ const getGeneralCards = ({ rule }: CspFinding): Card[] => [
       [TEXT.SEVERITY, ''],
       [TEXT.INDEX, ''],
       [TEXT.RULE_EVALUATED_AT, ''],
-      [TEXT.FRAMEWORK_SOURCES, ''],
+      [
+        TEXT.FRAMEWORK_SOURCES,
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={cisLogoIcon} size="xxl" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={k8sLogoIcon} size="xxl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>,
+      ],
       [TEXT.SECTION, ''],
       [TEXT.PROFILE_APPLICABILITY, ''],
       [TEXT.AUDIT, ''],

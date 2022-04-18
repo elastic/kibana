@@ -11,11 +11,11 @@ export type {
   SavedObject,
   SavedObjectsStart,
   SavedObjectSaveOpts,
-} from '../../../saved_objects/public';
+} from '@kbn/saved-objects-plugin/public';
 export {
   showSaveModal,
   SavedObjectSaveModal,
   getSavedObjectFinder,
-} from '../../../saved_objects/public';
+} from '@kbn/saved-objects-plugin/public';
 export { SavedObjectLoader } from './saved_object_loader';
 export type { SavedObjectLoaderFindOptions } from './saved_object_loader';

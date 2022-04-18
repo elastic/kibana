@@ -9,7 +9,7 @@
 import type {
   EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
-} from '../../../embeddable/common';
+} from '@kbn/embeddable-plugin/common';
 import { CONTROL_GROUP_TYPE } from '../../common';
 import {
   createControlGroupExtract,

@@ -9,7 +9,7 @@
 import type {
   EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
-} from 'src/plugins/embeddable/common';
+} from '@kbn/embeddable-plugin/common';
 import {
   createExtract,
   createInject,

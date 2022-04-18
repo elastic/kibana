@@ -7,8 +7,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { AggConfigSerialized, SerializedSearchSourceFields } from 'src/plugins/data/common';
-import type { SavedObjectAttributes } from '../../../core/types';
+import type { AggConfigSerialized, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SavedObjectAttributes } from '@kbn/core/types';
 
 export interface VisParams {
   [key: string]: any;

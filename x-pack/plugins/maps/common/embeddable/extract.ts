@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/common';
-import type { MapEmbeddablePersistableState } from './types';
-import type { MapSavedObjectAttributes } from '../map_saved_object_type';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
+import { MapEmbeddablePersistableState } from './types';
+import { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { extractReferences } from '../migrations/references';
 
 export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {

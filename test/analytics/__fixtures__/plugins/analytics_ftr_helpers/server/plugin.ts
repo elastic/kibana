@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ReplaySubject } from 'rxjs';
+import { firstValueFrom, ReplaySubject, filter, take, toArray } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, Event } from 'src/core/server';
-import { filter, take, toArray } from 'rxjs/operators';
+import type { Plugin, CoreSetup, Event } from '@kbn/core/server';
 import { CustomShipper } from './custom_shipper';
 
 export class AnalyticsFTRHelpers implements Plugin {
@@ -52,8 +51,8 @@ export class AnalyticsFTRHelpers implements Plugin {
       async (context, req, res) => {
         const { takeNumberOfEvents, eventTypes } = req.query;
 
-        const events = await events$
-          .pipe(
+        const events = await firstValueFrom(
+          events$.pipe(
             filter((event) => {
               if (eventTypes.length > 0) {
                 return eventTypes.includes(event.event_type);
@@ -63,7 +62,7 @@ export class AnalyticsFTRHelpers implements Plugin {
             take(takeNumberOfEvents),
             toArray()
           )
-          .toPromise();
+        );
 
         return res.ok({ body: events });
       }
