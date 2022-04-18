@@ -8,8 +8,8 @@
 
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { getEmptyDashboardData, collectPanelsByType } from './dashboard_telemetry';
-import { EmbeddableStateWithType } from '../../../embeddable/common';
-import { createEmbeddablePersistableStateServiceMock } from '../../../embeddable/common/mocks';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 
 const visualizationType1ByValue = {
   embeddableConfig: {
