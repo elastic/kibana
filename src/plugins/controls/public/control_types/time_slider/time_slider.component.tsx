@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import moment from 'moment-timezone';
-import { calcAutoIntervalNear } from '../../../../data/common';
-import { ValidatedDualRange } from '../../../../kibana_react/public';
+import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { TimeSliderStrings } from './time_slider_strings';
 import './time_slider.component.scss';
 

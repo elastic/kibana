@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from '../../../../kibana_utils';
+import { of } from '@kbn/kibana-utils-plugin';
 import {
   KibanaLocation,
   Locator,

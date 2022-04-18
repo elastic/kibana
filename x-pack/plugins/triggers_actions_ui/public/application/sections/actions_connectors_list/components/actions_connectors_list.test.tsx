@@ -11,7 +11,7 @@ import { ThemeProvider } from 'styled-components';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import ActionsConnectorsList from './actions_connectors_list';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';

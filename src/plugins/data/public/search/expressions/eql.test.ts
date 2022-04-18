@@ -9,7 +9,7 @@
 import { getEql } from './eql';
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
-import { StartServicesAccessor } from 'kibana/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { of } from 'rxjs';
 

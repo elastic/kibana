@@ -7,13 +7,13 @@
  */
 
 import { cloneDeep, defaults, forOwn, assign } from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
-import { SavedObjectNotFound } from '../../../../kibana_utils/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   IndexPattern,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
-} from '../../../../data/public';
+} from '@kbn/data-plugin/public';
+import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
 import { expandShorthand } from './field_mapping';
 
 /**

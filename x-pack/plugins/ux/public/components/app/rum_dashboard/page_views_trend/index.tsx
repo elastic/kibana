@@ -14,12 +14,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageViewsChart } from '../charts/page_views_chart';
-import { createExploratoryViewUrl } from '../../../../../../observability/public';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 

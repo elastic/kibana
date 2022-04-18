@@ -9,8 +9,8 @@ import React, { useContext, useState, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InfraMetadata } from '../../../../../common/http_api';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { MetadataContext } from '../containers/metadata_context';
 
 interface FieldDef {

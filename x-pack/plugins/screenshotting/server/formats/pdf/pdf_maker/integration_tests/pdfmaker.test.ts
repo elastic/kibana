@@ -7,9 +7,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { PackageInfo } from 'kibana/server';
+import { PackageInfo } from '@kbn/core/server';
 import path from 'path';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { isUint8Array } from 'util/types';
 import { errors } from '../../../../../common';
 import { createMockLayout } from '../../../../layouts/mock';

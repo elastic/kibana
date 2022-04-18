@@ -10,7 +10,7 @@ import path from 'path';
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
-import type { ResponseHeaders, KnownHeaders } from 'src/core/server';
+import type { ResponseHeaders, KnownHeaders } from '@kbn/core/server';
 
 import type {
   GetInfoResponse,

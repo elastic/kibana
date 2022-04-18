@@ -15,8 +15,8 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import type { FilterManager, TimeRange, SavedQuery } from 'src/plugins/data/public';
-import type { DataView } from 'src/plugins/data_views/public';
+import type { FilterManager, TimeRange, SavedQuery } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
 

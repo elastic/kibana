@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DataView } from '../../../../data_views/public';
-import { ISearchSource } from '../../../../data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { getSortForSearchSource } from '../../components/doc_table';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
 

@@ -8,6 +8,7 @@
 import React, { ComponentType } from 'react';
 import moment from 'moment';
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   ActivityLog,
   Immutable,
@@ -16,7 +17,6 @@ import {
 import { EndpointDetailsFlyoutTabs } from './components/endpoint_details_tabs';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsFlyout } from '.';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { AsyncResourceState } from '../../../../state';
 
 export const dummyEndpointActivityLog = (

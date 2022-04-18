@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { filter } from 'lodash';
 import { Assign } from 'utility-types';
-import { METRIC_TYPES } from '../../../data/common';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from './enums';
 import type { Metric, MetricType } from './types';
 

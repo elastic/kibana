@@ -12,7 +12,7 @@ import * as H from 'history';
 
 import type { Filter, Query } from '@kbn/es-query';
 
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';

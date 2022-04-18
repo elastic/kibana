@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
-import { rangeQuery, kqlQuery } from '../../../../../observability/server';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
