@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_INDEX_URL,
-} from '../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
 
-import { SIGNALS_FIELD_ALIASES_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import { SIGNALS_FIELD_ALIASES_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteSignalsIndex } from '../../utils';

@@ -6,10 +6,10 @@
  */
 
 import * as Rx from 'rxjs';
-import type { CoreSetup, HttpServerInfo, Logger, PluginInitializerContext } from 'kibana/server';
-import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { CoreSetup, HttpServerInfo, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '../test_helpers';
-import type { ReportingConfigType } from './';
+import type { ReportingConfigType } from '.';
 import { createConfig$ } from './create_config';
 
 const createMockConfig = (

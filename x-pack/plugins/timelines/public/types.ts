@@ -8,9 +8,9 @@
 import { ReactElement } from 'react';
 import type { SensorAPI } from 'react-beautiful-dnd';
 import { Store } from 'redux';
-import { CoreStart } from '../../../../src/core/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { CasesUiStart } from '../../cases/public';
+import { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
 import type {
   LastUpdatedAtProps,
   LoadingPanelProps,
@@ -22,7 +22,7 @@ export type { SortDirection } from '../common/types';
 import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
-import { HoverActionsConfig } from './components/hover_actions/index';
+import { HoverActionsConfig } from './components/hover_actions';
 import { TimelineTabs } from '../common/types';
 export * from './store/t_grid';
 export interface TimelinesUIStart {

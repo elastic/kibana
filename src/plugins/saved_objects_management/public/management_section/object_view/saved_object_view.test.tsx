@@ -21,7 +21,7 @@ import {
   uiSettingsServiceMock,
   scopedHistoryMock,
   docLinksServiceMock,
-} from '../../../../../core/public/mocks';
+} from '@kbn/core/public/mocks';
 
 import {
   SavedObjectEdition,

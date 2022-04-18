@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import type { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DataPluginStart } from 'src/plugins/data/server/plugin';
-import { FieldFormatsStart } from 'src/plugins/field_formats/server';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Writable } from 'stream';
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { LicensingPluginStart } from '../../licensing/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   PngScreenshotOptions as BasePngScreenshotOptions,
   PdfScreenshotOptions as BasePdfScreenshotOptions,
   ScreenshottingStart,
-} from '../../screenshotting/server';
+} from '@kbn/screenshotting-plugin/server';
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
   SecurityPluginStart,
-} from '../../security/server';
-import type { SpacesPluginSetup } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from '@kbn/security-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { CancellationToken } from '../common/cancellation_token';
 import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';

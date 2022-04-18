@@ -6,7 +6,7 @@
  */
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { formatDuration, parseDuration } from '../../../../../alerting/common/parse_duration';
+import { formatDuration, parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleTypeModel,
   Rule,

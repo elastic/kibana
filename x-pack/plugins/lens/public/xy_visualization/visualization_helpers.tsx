@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
+import { SeriesType } from '@kbn/expression-xy-plugin/common';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../types';
 import {
   State,
@@ -18,7 +19,6 @@ import {
   XYReferenceLineLayerConfig,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
-import { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '..';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { ActionDetailsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 

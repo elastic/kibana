@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
 import { getSimpleRuleOutput } from './get_simple_rule_output';
-import type { RulesSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 
 export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
   ...getSimpleRuleOutput(),

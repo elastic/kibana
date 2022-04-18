@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 export enum SortDirection {
   asc = 'asc',

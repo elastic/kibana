@@ -13,8 +13,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../../../../security/common/model';
+import { SavedObjectsFindOptions } from '@kbn/core/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import {
   SavedNote,
