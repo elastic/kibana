@@ -19,6 +19,7 @@ export type {
   XYDataLayerConfig,
   XYAnnotationLayerConfig,
   YAxisMode,
+  SeriesType,
 } from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
@@ -77,7 +78,6 @@ export type {
   LayerType,
   LineStyle,
   FillStyle,
-  SeriesType,
   YScaleType,
   XScaleType,
   AxisConfig,
