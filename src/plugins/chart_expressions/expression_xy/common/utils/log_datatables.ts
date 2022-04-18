@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from '../../../../expressions';
-import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
+import { ExecutionContext } from '@kbn/expressions-plugin';
+import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes } from '../constants';
 import { strings } from '../i18n';
 import {

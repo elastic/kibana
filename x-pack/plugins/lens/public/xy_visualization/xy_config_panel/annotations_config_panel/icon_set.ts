@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AvailableAnnotationIcon } from '../../../../../../../src/plugins/event_annotation/common';
+import { AvailableAnnotationIcon } from '@kbn/event-annotation-plugin/common';
 import { IconTriangle, IconCircle } from '../../../assets/annotation_icons';
 import { IconSet } from '../shared/icon_select';
 
