@@ -8,13 +8,18 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { CoreStart, SavedObjectReference } from 'kibana/public';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { isEqual } from 'lodash';
-import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -64,18 +69,10 @@ import {
   IndexPatternPersistedState,
   IndexPattern,
 } from './types';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
-import { DataPublicPluginStart, ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
-import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
-import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';

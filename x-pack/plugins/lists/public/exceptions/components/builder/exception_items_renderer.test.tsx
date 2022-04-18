@@ -8,11 +8,11 @@
 import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import { coreMock } from 'src/core/public/mocks';
-import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
 
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEmptyValue } from '../../../common/empty_value';

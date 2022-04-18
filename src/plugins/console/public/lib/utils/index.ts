@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { XJson } from '../../../../es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 

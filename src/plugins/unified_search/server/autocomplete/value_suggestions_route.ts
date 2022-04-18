@@ -7,10 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import { getRequestAbortedSignal } from '../../../data/server';
-import { getKbnServerError, reportServerError } from '../../../kibana_utils/server';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ConfigSchema } from '../../config';
 import { termsEnumSuggestions } from './terms_enum';
 import { termsAggSuggestions } from './terms_agg';

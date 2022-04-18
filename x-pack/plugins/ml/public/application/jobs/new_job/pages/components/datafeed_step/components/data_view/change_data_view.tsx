@@ -23,6 +23,7 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -33,7 +34,6 @@ import {
 import { extractErrorMessage } from '../../../../../../../../../common/util/errors';
 import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
-import { SavedObjectFinderUi } from '../../../../../../../../../../../../src/plugins/saved_objects/public';
 import {
   useMlKibana,
   useMlApiContext,

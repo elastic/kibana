@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { waitFor } from '@testing-library/dom';
+import { coreMock } from '@kbn/core/public/mocks';
 import {
   doesNotExistOperator,
   existsOperator,
@@ -22,12 +21,13 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { validateFilePathInput } from '@kbn/securitysolution-utils';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
-import type { FieldSpec } from 'src/plugins/data/common';
-
-import { fields, getField } from '../../../../../../../src/plugins/data/common/mocks';
-import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { waitFor } from '@testing-library/dom';
+import { ReactWrapper, mount } from 'enzyme';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
+
 
 import { BuilderEntryItem } from './entry_renderer';
 

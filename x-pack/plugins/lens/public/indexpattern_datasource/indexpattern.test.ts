@@ -6,16 +6,21 @@
  */
 
 import React from 'react';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { SavedObjectReference } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { Ast } from '@kbn/interpreter';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { TinymathAST } from '@kbn/tinymath';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../types';
-import { coreMock } from 'src/core/public/mocks';
-import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { unifiedSearchPluginMock } from '../../../../../src/plugins/unified_search/public/mocks';
-import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
-import { Ast } from '@kbn/interpreter';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
   operationDefinitionMap,
@@ -29,11 +34,6 @@ import {
   FiltersIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
-import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { TinymathAST } from '@kbn/tinymath';
-import { SavedObjectReference } from 'kibana/public';
 import { cloneDeep } from 'lodash';
 
 jest.mock('./loader');

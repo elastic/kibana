@@ -7,11 +7,11 @@
 
 import { parse } from '@kbn/tinymath';
 import { monaco } from '@kbn/monaco';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../../mocks';
-import { GenericOperationDefinition } from '../../index';
+import { GenericOperationDefinition } from '../..';
 import type { IndexPatternField } from '../../../../types';
 import type { OperationMetadata } from '../../../../../types';
-import { unifiedSearchPluginMock } from '../../../../../../../../../src/plugins/unified_search/public/mocks';
 import { tinymathFunctions } from '../util';
 import {
   getSignatureHelp,

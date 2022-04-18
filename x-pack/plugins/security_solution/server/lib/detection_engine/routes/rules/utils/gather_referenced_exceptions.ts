@@ -5,14 +5,13 @@
  * 2.0.
  */
 import { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request';
-
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ExceptionListQueryInfo,
   getAllListTypes,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../lists/server/services/exception_lists/utils/import/find_all_exception_list_types';
+} from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
+import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request';
 
 /**
  * Helper that takes rules, goes through their referenced exception lists and

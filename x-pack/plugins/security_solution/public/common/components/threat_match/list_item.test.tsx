@@ -9,8 +9,8 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
-import { useKibana } from '../../../common/lib/kibana';
-import { fields } from '../../../../../../../src/plugins/data/common/mocks';
+import { useKibana } from '../../lib/kibana';
+import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { ListItemComponent } from './list_item';
 import { ThreatMapEntries } from './types';
@@ -23,7 +23,7 @@ const mockTheme = getMockTheme({
   },
 });
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
 const singlePayload = (): ThreatMapEntries => ({
   entries: [

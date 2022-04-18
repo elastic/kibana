@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginServices } from '../../../presentation_util/public';
+import { PluginServices } from '@kbn/presentation-util-plugin/public';
 import { ControlsDataViewsService } from './data_views';
 import { ControlsOverlaysService } from './overlays';
 import { registry as stubRegistry } from './stub';

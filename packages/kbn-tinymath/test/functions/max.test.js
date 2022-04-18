@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { max } = require('../../src/functions/max.js');
+const { max } = require('../../src/functions/max');
 
 describe('Max', () => {
   it('numbers', () => {

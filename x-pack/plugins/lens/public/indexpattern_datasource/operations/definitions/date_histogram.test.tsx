@@ -7,17 +7,14 @@
 
 import React from 'react';
 import type { DateHistogramIndexPatternColumn } from './date_histogram';
-import { dateHistogramOperation } from './index';
+import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
-import {
-  dataPluginMock,
-  getCalculateAutoTimeExpression,
-} from '../../../../../../../src/plugins/data/public/mocks';
-import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { dataPluginMock, getCalculateAutoTimeExpression } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import type { IndexPatternLayer, IndexPattern } from '../../types';
 import { getFieldByNameFactory } from '../../pure_helpers';

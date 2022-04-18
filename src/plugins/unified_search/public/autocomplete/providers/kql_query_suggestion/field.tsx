@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { IFieldType, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import { flatten } from 'lodash';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
-import { IFieldType, indexPatterns as indexPatternsUtils } from '../../../../../data/public';
-import { QuerySuggestionField, QuerySuggestionTypes } from '../../index';
+import { QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
 import { KqlQuerySuggestionProvider } from './types';
 
 const keywordComparator = (first: IFieldType, second: IFieldType) => {
   const extensions = ['raw', 'keyword'];
   if (extensions.map((ext) => `${first.name}.${ext}`).includes(second.name)) {
-    return 1;
+    return 1;``
   } else if (extensions.map((ext) => `${second.name}.${ext}`).includes(first.name)) {
     return -1;
   }

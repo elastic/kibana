@@ -14,14 +14,14 @@ import type {
   SavedObjectsClientContract,
   HttpSetup,
   CoreStart,
-} from 'kibana/public';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { unifiedSearchPluginMock } from '../../../../../../../../src/plugins/unified_search/public/mocks';
+} from '@kbn/core/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import { GenericOperationDefinition, termsOperation, LastValueIndexPatternColumn } from '../index';
+import { GenericOperationDefinition, termsOperation, LastValueIndexPatternColumn } from '..';
 import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';

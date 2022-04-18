@@ -6,11 +6,11 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../types';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { UnifiedSearchPublicPluginStart } from '../../../../../../src/plugins/unified_search/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { GenericIndexPatternColumn } from '../indexpattern';
 import { isColumnInvalid } from '../utils';
 import { IndexPatternPrivateState } from '../types';

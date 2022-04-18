@@ -18,11 +18,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
 import { Table } from '../../waterfall/components/waterfall_flyout_table';
 import { MiddleTruncatedText } from '../../waterfall';
 import { WaterfallMetadataEntry } from '../../waterfall/types';
 import { OnFlyoutClose } from '../../waterfall/components/use_flyout';
-import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
 
 export const DETAILS = i18n.translate('xpack.uptime.synthetics.waterfall.flyout.details', {
   defaultMessage: 'Details',

@@ -14,15 +14,20 @@ import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
 import QueryBarTopRow from './query_bar_top_row';
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
+<<<<<<< HEAD
 import { stubIndexPattern } from '../../../data/public/stubs';
 import { UI_SETTINGS } from '../../../data/common';
 import { setAutocomplete } from '../../../unified_search/public/services';
 import { unifiedSearchPluginMock } from '../../../unified_search/public/mocks';
 
+=======
+import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+>>>>>>> upstream/main
 const startMock = coreMock.createStart();
 
 const mockTimeHistory = {

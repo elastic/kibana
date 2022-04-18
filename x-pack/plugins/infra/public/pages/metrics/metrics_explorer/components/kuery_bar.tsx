@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
-import { QuerySuggestion } from '../../../../../../../../src/plugins/unified_search/public';
 
 type LoadSuggestionsFn = (
   e: string,

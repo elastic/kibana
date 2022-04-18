@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DataViewsPublicPluginStart } from '../../data_views/public';
-import type { FieldFormatsStart } from '../../field_formats/public';
-import { IndexPatternSelectProps, StatefulSearchBarProps } from './index';
-import type { DataPublicPluginStart } from '../../data/public';
-import type { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { IndexPatternSelectProps, StatefulSearchBarProps } from './index';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;

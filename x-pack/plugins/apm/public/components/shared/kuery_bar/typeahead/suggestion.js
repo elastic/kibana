@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { EuiIcon } from '@elastic/eui';
 import { unit } from '../../../../utils/style';
 import { tint } from 'polished';

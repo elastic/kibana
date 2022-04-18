@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
 import { $Keys } from 'utility-types';
 import { flatten, uniqBy } from 'lodash';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -14,8 +14,8 @@ import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
 import { setupGetConjunctionSuggestions } from './conjunction';
-import { UnifiedSearchPublicPluginStart } from '../../../index';
-import { QuerySuggestion, QuerySuggestionGetFnArgs, QuerySuggestionGetFn } from '../../index';
+import { UnifiedSearchPublicPluginStart } from '../../../types';
+import { QuerySuggestion, QuerySuggestionGetFnArgs, QuerySuggestionGetFn } from '../query_suggestion_provider'
 
 const cursorSymbol = '@kuery-cursor@';
 

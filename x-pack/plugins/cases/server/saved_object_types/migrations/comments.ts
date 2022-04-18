@@ -7,18 +7,15 @@
 
 import { mapValues, trimEnd, mergeWith, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
-} from '../../../../../../src/core/server';
-import { LensServerPluginSetup } from '../../../../lens/server';
+} from '@kbn/core/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { CommentType } from '../../../common/api';
 import {
   isLensMarkdownNode,

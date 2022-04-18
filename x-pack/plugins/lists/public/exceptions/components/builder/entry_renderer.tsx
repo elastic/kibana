@@ -44,9 +44,9 @@ import {
   validateFilePathInput,
 } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import { HttpStart } from '@kbn/core/public';
 
-import type { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
-import { HttpStart } from '../../../../../../../src/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';

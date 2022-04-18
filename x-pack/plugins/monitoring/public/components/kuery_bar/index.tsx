@@ -8,8 +8,8 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import type { DataView } from 'src/plugins/data_views/public';
-import { QuerySuggestion } from '../../../../../../src/plugins/unified_search/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { AutocompleteField } from './autocomplete_field';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';
 

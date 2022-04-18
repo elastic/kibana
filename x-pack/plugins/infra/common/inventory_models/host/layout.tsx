@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '../../../../../../src/plugins/kibana_react/common';
+import { withTheme } from '@kbn/kibana-react-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LayoutPropsWithTheme } from '../../../public/pages/metrics/metric_detail/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

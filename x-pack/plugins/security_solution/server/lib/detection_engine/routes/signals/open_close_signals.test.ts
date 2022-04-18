@@ -18,7 +18,7 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { SetupPlugins } from '../../../../plugin';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;

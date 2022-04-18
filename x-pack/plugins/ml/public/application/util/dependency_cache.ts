@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataPublicPluginSetup } from 'src/plugins/data/public';
+import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type {
   IUiSettingsClient,
   ChromeStart,
@@ -19,14 +19,14 @@ import type {
   ThemeServiceStart,
   ChromeRecentlyAccessed,
   IBasePath,
-} from 'kibana/public';
-import type { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
-import type { DashboardStart } from 'src/plugins/dashboard/public';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import type { DataViewsContract } from '../../../../../../src/plugins/data_views/public';
-import type { SecurityPluginSetup } from '../../../../security/public';
-import type { MapsStartApi } from '../../../../maps/public';
-import type { DataVisualizerPluginStart } from '../../../../data_visualizer/public';
+} from '@kbn/core/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;

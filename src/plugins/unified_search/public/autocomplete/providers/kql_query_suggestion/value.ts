@@ -7,12 +7,12 @@
  */
 
 import { flatten } from 'lodash';
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
-import { IFieldType, IIndexPattern } from '../../../../../data/public';
-import { UnifiedSearchPublicPluginStart } from '../../../types';
-import { QuerySuggestion, QuerySuggestionTypes } from '../../index';
+import { IFieldType, IIndexPattern } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '../../../types';
+import { QuerySuggestion, QuerySuggestionTypes } from '../query_suggestion_provider';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values

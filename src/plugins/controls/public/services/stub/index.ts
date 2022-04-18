@@ -10,7 +10,7 @@ import {
   PluginServiceProviders,
   PluginServiceProvider,
   PluginServiceRegistry,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 import { ControlsServices } from '..';
 import { httpServiceFactory } from './http';
 import { overlaysServiceFactory } from './overlays';

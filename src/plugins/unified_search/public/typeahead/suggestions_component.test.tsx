@@ -8,7 +8,11 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+<<<<<<< HEAD
 import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+=======
+import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/data-plugin/public';
+>>>>>>> upstream/main
 import { SuggestionComponent } from './suggestion_component';
 import SuggestionsComponent from './suggestions_component';
 

@@ -7,7 +7,7 @@
 import React, { type ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
 import Chance from 'chance';
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createNavigationItemFixture } from '../test/fixtures/navigation_item';
 import { createReactQueryResponse } from '../test/fixtures/react_query';
 import { TestProvider } from '../test/test_provider';

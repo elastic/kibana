@@ -7,9 +7,9 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { PluginServiceFactory } from '../../../../presentation_util/public';
-import { DataPublicPluginStart } from '../../../../data/public';
-import { DataView } from '../../../../data_views/common';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { ControlsDataService } from '../data';
 
 export type DataServiceFactory = PluginServiceFactory<ControlsDataService>;

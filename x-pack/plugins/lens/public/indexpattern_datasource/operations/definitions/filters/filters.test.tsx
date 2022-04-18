@@ -8,12 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { unifiedSearchPluginMock } from '../../../../../../../../src/plugins/unified_search/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { FiltersIndexPatternColumn } from '.';
-import { filtersOperation } from '../index';
+import { filtersOperation } from '..';
 import type { IndexPatternLayer } from '../../../types';
 import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
@@ -290,7 +290,7 @@ describe('filters', () => {
   describe('popover param editor', () => {
     // @ts-expect-error
     window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
-    jest.mock('../../../../../../../../src/plugins/unified_search/public', () => ({
+    jest.mock('@kbn/unified-search-plugin/public', () => ({
       QueryStringInput: () => {
         return 'QueryStringInput';
       },

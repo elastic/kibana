@@ -12,14 +12,14 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { Observable } from 'rxjs';
 
+import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { FieldSpec, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 import {
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../../common/control_types/options_list/types';
-import { CoreSetup, ElasticsearchClient } from '../../../../../core/server';
-import { getKbnServerError, reportServerError } from '../../../../kibana_utils/server';
 import { PluginSetup as UnifiedSearchPluginSetup } from '../../../../unified_search/server';
-import { FieldSpec, getFieldSubtypeNested } from '../../../../data_views/common';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,

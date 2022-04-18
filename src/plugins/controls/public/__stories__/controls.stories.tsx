@@ -15,17 +15,17 @@ import {
   getFlightOptionsAsync,
   getFlightSearchOptions,
   storybookFlightsDataView,
-} from '../../../presentation_util/public/mocks';
+} from '@kbn/presentation-util-plugin/public/mocks';
+
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import {
   ControlGroupContainerFactory,
   OptionsListEmbeddableInput,
   RangeSliderEmbeddableInput,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
-} from '../';
-
-import { ViewMode } from '../../../embeddable/public';
-import { EmbeddablePersistableStateService } from '../../../embeddable/common';
+} from '..';
 
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';

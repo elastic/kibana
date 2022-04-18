@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { createDatatableUtilitiesMock } from '../common/mocks';
 import { DataPlugin, DataViewsContract } from '.';
-import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { createNowProviderMock } from './now_provider/mocks';

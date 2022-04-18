@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
-import type { ConfigSchema } from '.';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -16,34 +16,37 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 import type {
   DataPublicPluginStart,
   DataPublicPluginSetup,
-} from '../../../../src/plugins/data/public';
-import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
+} from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerting/public';
-import type { FeaturesPluginSetup } from '../../features/public';
-import type { FleetStart } from '../../fleet/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { MapsStartApi } from '../../maps/public';
-import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+} from '@kbn/alerting-plugin/public';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import {
   FetchDataParams,
   METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
+} from '@kbn/observability-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import {
   getApmEnrollmentFlyoutData,
@@ -53,9 +56,7 @@ import { getLazyApmAgentsTabExtension } from './components/fleet_integration/laz
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import type { SecurityPluginStart } from '../../security/public';
-import { SpacesPluginStart } from '../../spaces/public';
-import { enableServiceGroups } from '../../observability/public';
+import type { ConfigSchema } from '.';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 

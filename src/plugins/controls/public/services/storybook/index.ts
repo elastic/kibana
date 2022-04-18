@@ -11,7 +11,7 @@ import {
   PluginServiceProviders,
   PluginServiceProvider,
   PluginServiceRegistry,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 import { ControlsServices } from '..';
 import { dataServiceFactory } from './data';
 import { unifiedSearchServiceFactory } from './unified_search';

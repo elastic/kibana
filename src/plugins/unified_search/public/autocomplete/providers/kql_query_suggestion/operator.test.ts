@@ -9,9 +9,9 @@
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { setupGetOperatorSuggestions } from './operator';
-import { KueryNode } from '../../../../../data/public';
-import { QuerySuggestionGetFnArgs } from '../../index';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { KueryNode } from '@kbn/data-plugin/public';
+import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 

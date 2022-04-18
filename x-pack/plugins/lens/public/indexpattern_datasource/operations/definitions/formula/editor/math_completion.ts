@@ -16,10 +16,8 @@ import {
   TinymathVariable,
   TinymathNamedArgument,
 } from '@kbn/tinymath';
-import type {
-  UnifiedSearchPublicPluginStart,
-  QuerySuggestion,
-} from '../../../../../../../../../src/plugins/unified_search/public';
+import type { UnifiedSearchPublicPluginStart, QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { parseTimeShift } from '@kbn/data-plugin/common';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
@@ -27,7 +25,6 @@ import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
 import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
-import { parseTimeShift } from '../../../../../../../../../src/plugins/data/common';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',

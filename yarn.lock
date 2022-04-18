@@ -2948,7 +2948,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-code-parser@link:bazel-bin/packages/kbn-babel-code-parser":
+"@kbn/babel-plugin-synthetic-packages@link:bazel-bin/packages/kbn-babel-plugin-synthetic-packages":
   version "0.0.0"
   uid ""
 
@@ -3024,6 +3024,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/find-used-node-modules@link:bazel-bin/packages/kbn-find-used-node-modules":
+  version "0.0.0"
+  uid ""
+
 "@kbn/flot-charts@link:bazel-bin/packages/kbn-flot-charts":
   version "0.0.0"
   uid ""
@@ -3037,6 +3041,10 @@
   uid ""
 
 "@kbn/i18n@link:bazel-bin/packages/kbn-i18n":
+  version "0.0.0"
+  uid ""
+
+"@kbn/import-resolver@link:bazel-bin/packages/kbn-import-resolver":
   version "0.0.0"
   uid ""
 
@@ -3156,6 +3164,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-components@link:bazel-bin/packages/kbn-shared-ux-components":
   version "0.0.0"
   uid ""
@@ -3181,6 +3193,10 @@
   uid ""
 
 "@kbn/storybook@link:bazel-bin/packages/kbn-storybook":
+  version "0.0.0"
+  uid ""
+
+"@kbn/synthetic-package-map@link:bazel-bin/packages/kbn-synthetic-package-map":
   version "0.0.0"
   uid ""
 
@@ -5316,10 +5332,10 @@
   resolved "https://registry.yarnpkg.com/@types/aria-query/-/aria-query-4.2.0.tgz#14264692a9d6e2fa4db3df5e56e94b5e25647ac0"
   integrity sha512-iIgQNzCm0v7QMhhe4Jjn9uRh+I6GoPmt03CbEtwx3ao8/EfoQcmgtqH4vQ5Db/lxiIGaWDv6nwvunuh0RyX0+A==
 
-"@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
-  version "7.1.10"
-  resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.10.tgz#ca58fc195dd9734e77e57c6f2df565623636ab40"
-  integrity sha512-x8OM8XzITIMyiwl5Vmo2B1cR1S1Ipkyv4mdlbJjMa1lmuKvKY9FrBbEANIaMlnWn5Rf7uO+rC/VgYabNkE17Hw==
+"@types/babel__core@*", "@types/babel__core@^7.1.19":
+  version "7.1.19"
+  resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.19.tgz#7b497495b7d1b4812bdb9d02804d0576f43ee460"
+  integrity sha512-WEOTgRsbYkvA/KCsDwVEGkd7WAr1e3g31VHQ8zy5gul/V1qKullU/BU5I68X5v7V3GnB9eotmom4v5a5gjxorw==
   dependencies:
     "@babel/parser" "^7.1.0"
     "@babel/types" "^7.0.0"
@@ -5327,10 +5343,10 @@
     "@types/babel__template" "*"
     "@types/babel__traverse" "*"
 
-"@types/babel__core@^7.1.19":
-  version "7.1.19"
-  resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.19.tgz#7b497495b7d1b4812bdb9d02804d0576f43ee460"
-  integrity sha512-WEOTgRsbYkvA/KCsDwVEGkd7WAr1e3g31VHQ8zy5gul/V1qKullU/BU5I68X5v7V3GnB9eotmom4v5a5gjxorw==
+"@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
+  version "7.1.10"
+  resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.10.tgz#ca58fc195dd9734e77e57c6f2df565623636ab40"
+  integrity sha512-x8OM8XzITIMyiwl5Vmo2B1cR1S1Ipkyv4mdlbJjMa1lmuKvKY9FrBbEANIaMlnWn5Rf7uO+rC/VgYabNkE17Hw==
   dependencies:
     "@babel/parser" "^7.1.0"
     "@babel/types" "^7.0.0"
@@ -5344,6 +5360,13 @@
   integrity sha512-NHcOfab3Zw4q5sEE2COkpfXjoE7o+PmqD9DQW4koUT3roNxwziUdXGnRndMat/LJNUtePwn1TlP4do3uoe3KZQ==
   dependencies:
     "@babel/types" "^7.0.0"
+
+"@types/babel__helper-plugin-utils@^7.10.0":
+  version "7.10.0"
+  resolved "https://registry.yarnpkg.com/@types/babel__helper-plugin-utils/-/babel__helper-plugin-utils-7.10.0.tgz#dcd2416f9c189d5837ab2a276368cf67134efe78"
+  integrity sha512-60YtHzhQ9HAkToHVV+TB4VLzBn9lrfgrsOjiJMtbv/c1jPdekBxaByd6DMsGBzROXWoIL6U3lEFvvbu69RkUoA==
+  dependencies:
+    "@types/babel__core" "*"
 
 "@types/babel__template@*":
   version "7.0.2"
@@ -6044,6 +6067,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__find-used-node-modules@link:bazel-bin/packages/kbn-find-used-node-modules/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__generate@link:bazel-bin/packages/kbn-generate/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6053,6 +6080,10 @@
   uid ""
 
 "@types/kbn__i18n@link:bazel-bin/packages/kbn-i18n/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__import-resolver@link:bazel-bin/packages/kbn-import-resolver/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6165,6 +6196,10 @@
   uid ""
 
 "@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-button-exit-full-screen@link:bazel-bin/packages/shared-ux/button/exit_full_screen/npm_module_types":
   version "0.0.0"
   uid ""
 

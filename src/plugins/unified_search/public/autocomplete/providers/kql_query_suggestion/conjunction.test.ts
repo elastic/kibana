@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
+import { KueryNode } from '@kbn/data-plugin/public';
 import { setupGetConjunctionSuggestions } from './conjunction';
-import { KueryNode } from '../../../../../../../src/plugins/data/public';
-import { QuerySuggestionGetFnArgs } from '../../index';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
