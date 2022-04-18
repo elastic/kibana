@@ -276,7 +276,9 @@ export const serviceDetail = {
         }),
         element: <InfraOverview />,
         searchBarOptions: {
-          hidden: true,
+          showKueryBar: false,
+          showTimeComparison: false,
+          showTransactionTypeSelector: false,
         },
       }),
       '/services/{serviceName}/': {

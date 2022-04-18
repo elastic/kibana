@@ -11,7 +11,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -50,9 +50,9 @@ export function InfraTabs() {
   );
 
   const tabs = useTabs({
-    containterIds: data?.infrastructureData.containerIds,
-    podNames: data?.infrastructureData.podNames,
-    hostNames: data?.infrastructureData.hostNames,
+    containerIds: data?.infrastructureData.containerIds || [],
+    podNames: data?.infrastructureData.podNames || [],
+    hostNames: data?.infrastructureData.hostNames || [],
     start,
     end,
   });
@@ -78,13 +78,13 @@ export function InfraTabs() {
 }
 
 function useTabs({
-  containterIds,
+  containerIds,
   podNames,
   hostNames,
   start,
   end,
 }: {
-  containterIds: string[];
+  containerIds: string[];
   podNames: string[];
   hostNames: string[];
   start: string;
@@ -138,13 +138,13 @@ function useTabs({
         filter: [
           {
             terms: {
-              'container.id': containterIds,
+              'container.id': containerIds,
             },
           },
         ],
       },
     }),
-    [containterIds]
+    [containerIds]
   );
 
   const tabs: Tab[] = [
@@ -154,7 +154,7 @@ function useTabs({
       content:
         ContainerMetricsTable &&
         ContainerMetricsTable({ timerange, filterClauseDsl: containersFilter }),
-      hidden: false,
+      hidden: containerIds && containerIds.length <= 0,
     },
     {
       id: 'pods',
@@ -162,7 +162,7 @@ function useTabs({
       content:
         PodMetricsTable &&
         PodMetricsTable({ timerange, filterClauseDsl: podsFilter }),
-      hidden: false,
+      hidden: podNames && podNames.length <= 0,
     },
     {
       id: 'hosts',
