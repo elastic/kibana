@@ -30,27 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await waitTableIsLoaded();
 
-      const euiDataGridRows = await find.allByCssSelector('.euiDataGridRow');
-      const rows = [];
-      for (const euiDataGridRow of euiDataGridRows) {
-        const $ = await euiDataGridRow.parseDomContent();
-        rows.push({
-          status: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="event.action"] .euiDataGridRowCell__truncate')
-            .text(),
-          lastUpdated: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="@timestamp"] .euiDataGridRowCell__truncate')
-            .text(),
-          duration: $.findTestSubjects('dataGridRowCell')
-            .find(
-              '[data-gridcell-column-id="kibana.alert.duration.us"] .euiDataGridRowCell__truncate'
-            )
-            .text(),
-          reason: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="kibana.alert.reason"] .euiDataGridRowCell__truncate')
-            .text(),
-        });
-      }
+      const rows = await getRows();
       expect(rows.length).to.be(10);
       expect(rows[0].status).to.be('active');
       expect(rows[0].lastUpdated).to.be('2021-10-19T15:20:38.749Z');
@@ -76,27 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await waitTableIsLoaded();
 
-      const euiDataGridRows = await find.allByCssSelector('.euiDataGridRow');
-      const rows = [];
-      for (const euiDataGridRow of euiDataGridRows) {
-        const $ = await euiDataGridRow.parseDomContent();
-        rows.push({
-          status: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="event.action"] .euiDataGridRowCell__truncate')
-            .text(),
-          lastUpdated: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="@timestamp"] .euiDataGridRowCell__truncate')
-            .text(),
-          duration: $.findTestSubjects('dataGridRowCell')
-            .find(
-              '[data-gridcell-column-id="kibana.alert.duration.us"] .euiDataGridRowCell__truncate'
-            )
-            .text(),
-          reason: $.findTestSubjects('dataGridRowCell')
-            .find('[data-gridcell-column-id="kibana.alert.reason"] .euiDataGridRowCell__truncate')
-            .text(),
-        });
-      }
+      const rows = await getRows();
       expect(rows.length).to.be(10);
       expect(rows[0].status).to.be('open');
       expect(rows[0].lastUpdated).to.be('2021-10-19T15:20:26.974Z');
@@ -117,6 +77,67 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await waitTableIsLoaded();
 
+      const rows = await getRows();
+      expect(rows.length).to.be(10);
+      expect(rows[0].status).to.be('active');
+      expect(rows[0].lastUpdated).to.be('2021-10-19T15:20:26.974Z');
+      expect(rows[0].duration).to.be('63291000');
+      expect(rows[0].reason).to.be(
+        'CPU usage is greater than a threshold of 40 (current value is 40.8%) for gke-edge-oblt-default-pool-350b44de-3v4p'
+      );
+    });
+
+    it('should open a flyout and paginate through the flyout', async () => {
+      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
+      await waitTableIsLoaded();
+      await testSubjects.click('openFlyoutButton');
+      await waitFlyoutOpen();
+
+      expect(await testSubjects.getVisibleText('alertsFlyoutTitle')).to.be(
+        'APM Failed Transaction Rate (one)'
+      );
+      expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
+        'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
+      );
+
+      await testSubjects.click('alertsFlyoutPaginateNext');
+
+      expect(await testSubjects.getVisibleText('alertsFlyoutTitle')).to.be(
+        'APM Failed Transaction Rate (one)'
+      );
+      expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
+        'Failed transactions rate is greater than 5.0% (current value is 35%) for opbeans-python'
+      );
+
+      await testSubjects.click('alertsFlyoutPaginatePrevious');
+      await testSubjects.click('alertsFlyoutPaginatePrevious');
+
+      await waitTableIsLoaded();
+
+      const rows = await getRows();
+      expect(rows[0].status).to.be('close');
+      expect(rows[0].lastUpdated).to.be('2021-10-19T14:55:14.503Z');
+      expect(rows[0].duration).to.be('252002000');
+      expect(rows[0].reason).to.be(
+        'CPU usage is greater than a threshold of 40 (current value is 56.7%) for gke-edge-oblt-default-pool-350b44de-c3dd'
+      );
+    });
+
+    async function waitTableIsLoaded() {
+      return await retry.try(async () => {
+        const exists = await testSubjects.exists('internalAlertsPageLoading');
+        if (exists) throw new Error('Still loading...');
+      });
+    }
+
+    async function waitFlyoutOpen() {
+      return await retry.try(async () => {
+        const exists = await testSubjects.exists('alertsFlyout');
+        if (!exists) throw new Error('Still loading...');
+      });
+    }
+
+    async function getRows() {
       const euiDataGridRows = await find.allByCssSelector('.euiDataGridRow');
       const rows = [];
       for (const euiDataGridRow of euiDataGridRows) {
@@ -138,20 +159,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             .text(),
         });
       }
-      expect(rows.length).to.be(10);
-      expect(rows[0].status).to.be('active');
-      expect(rows[0].lastUpdated).to.be('2021-10-19T15:20:26.974Z');
-      expect(rows[0].duration).to.be('63291000');
-      expect(rows[0].reason).to.be(
-        'CPU usage is greater than a threshold of 40 (current value is 40.8%) for gke-edge-oblt-default-pool-350b44de-3v4p'
-      );
-    });
-
-    async function waitTableIsLoaded() {
-      return await retry.try(async () => {
-        const exists = await testSubjects.exists('internalAlertsPageLoading');
-        if (exists) throw new Error('Still loading...');
-      });
+      return rows;
     }
   });
 };

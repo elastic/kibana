@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getLeadingControlColumns() should return at least the flyout action control 1`] = `
+<EuiFlexGroup
+  gutterSize="none"
+  responsive={false}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiIcon
+      type="alert"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiToolTip
+      content="View details"
+      delay="regular"
+      display="inlineBlock"
+      position="top"
+    >
+      <EuiButtonIcon
+        aria-label="View details"
+        color="text"
+        data-test-subj="openFlyoutButton"
+        iconType="expand"
+        onClick={[Function]}
+        size="s"
+      />
+    </EuiToolTip>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

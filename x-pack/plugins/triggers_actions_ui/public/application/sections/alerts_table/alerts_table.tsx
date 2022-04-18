@@ -13,11 +13,11 @@ import {
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps, AlertsField } from '../../../types';
 import { getLeadingControlColumns } from './lib';
+// import AlertsFlyout from './alerts_flyout';
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const { activePage, alertsCount, onPageChange, onSortChange } = props.useFetchAlertsData();
-  // const [rowClasses, setRowClasses] = useState<{ [rowIndex: number]: string }>({});
   const { sortingColumns, onSort } = useSorting(onSortChange);
   const {
     pagination,
@@ -80,7 +80,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           onChangeItemsPerPage: onChangePageSize,
           onChangePage: onChangePageIndex,
         }}
-        // gridStyle={{ rowClasses }} This exists in EUI 54 so we can use once Kibana is upgraded
       />
     </section>
   );

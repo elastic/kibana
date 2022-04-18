@@ -66,25 +66,25 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
           <h4>{REASON_LABEL}</h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="s">{get(alert, AlertsField.reason)}</EuiText>
+        <EuiText size="s" data-test-subj="alertsFlyoutReason">
+          {get(alert, AlertsField.reason)}
+        </EuiText>
         <EuiSpacer size="s" />
-        {/* {!!linkToRule && (
-          <EuiLink href={linkToRule} data-test-subj="viewRuleDetailsFlyout">
-            {translations.alertsFlyout.viewRulesDetailsLinkText}
-          </EuiLink>
-        )} */}
         <EuiHorizontalRule size="full" />
-        {/* dynamic content */}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="alertsFlyoutPaginateNext" fill onClick={onPaginatePrevious}>
+            <EuiButton
+              data-test-subj="alertsFlyoutPaginatePrevious"
+              fill
+              onClick={onPaginatePrevious}
+            >
               {PREVIOUS_LABEL}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="alertsFlyoutPaginatePrevious" fill onClick={onPaginateNext}>
+            <EuiButton data-test-subj="alertsFlyoutPaginateNext" fill onClick={onPaginateNext}>
               {NEXT_LABEL}
             </EuiButton>
           </EuiFlexItem>

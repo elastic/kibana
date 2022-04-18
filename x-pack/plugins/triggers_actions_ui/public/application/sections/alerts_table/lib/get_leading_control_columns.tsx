@@ -42,7 +42,7 @@ export const getLeadingControlColumns = ({
   return [
     {
       id: 'expand',
-      width: 120,
+      width: 50,
       headerCellRender: () => {
         return <span>{ACTIONS_LABEL}</span>;
       },
@@ -64,10 +64,6 @@ export const getLeadingControlColumns = ({
                   iconType="expand"
                   color="text"
                   onClick={() => {
-                    // setRowClasses({
-                    //   ...rowClasses,
-                    //   [visibleRowIndex]: 'active',
-                    // });
                     setFlyoutAlertIndex(visibleRowIndex);
                   }}
                   data-test-subj="openFlyoutButton"
