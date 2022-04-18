@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiIconProps } from '@elastic/eui';
-import { useCommonChartStyles } from '../../../../charts/public';
+import { useCommonChartStyles } from '@kbn/charts-plugin/public';
 
 export const PieIcon = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => {
   const { chartIcon } = useCommonChartStyles();

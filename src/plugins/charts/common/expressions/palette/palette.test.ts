@@ -7,9 +7,8 @@
  */
 import type { PaletteOutput } from '@kbn/coloring';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { palette, CustomPaletteState, CustomPaletteArguments } from './index';
+import { palette, CustomPaletteState, CustomPaletteArguments } from '.';
 import { defaultCustomColors } from '../../constants';
-
 
 describe('palette', () => {
   const fn = functionWrapper(palette()) as (

@@ -8,7 +8,7 @@
 
 import { EuiIconProps } from '@elastic/eui';
 import React from 'react';
-import { useCommonChartStyles } from '../../../../charts/public';
+import { useCommonChartStyles } from '@kbn/charts-plugin/public';
 
 export const HeatmapIcon = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => {
   const { chartIcon } = useCommonChartStyles();

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { EuiIconProps } from '@elastic/eui';
-import { useCommonChartStyles } from '../../../../../charts/public';
+import { useCommonChartStyles } from '@kbn/charts-plugin/public';
 
 export const HorizontalBulletIcon = ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => {
   const { chartIcon } = useCommonChartStyles();
