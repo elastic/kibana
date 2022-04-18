@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.3>>
 * <<release-notes-7.17.2>>
 * <<release-notes-7.17.1>>
 * <<release-notes-7.17.0>>
@@ -73,6 +74,52 @@ Review important information about the {kib} 7.17.x releases.
 
 --
 
+[[release-notes-7.17.3]]
+== {kib} 7.17.3
+
+coming::[7.17.3]
+
+Review the following information about the 7.17.3 release.
+
+[float]
+[[breaking-changes-v7.17.3]]
+=== Breaking changes
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in the 7.17.3 release.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.16/release-notes-7.16.0.html#breaking-changes-7.16.0[7.16] | {kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[enhancement-v7.17.3]]
+=== Enhancements
+Management::
+Compress mappings response size for autocomplete {kibana-pull}120456[#120456]
+
+Monitoring::
+Define configuration to expose to the browser {kibana-pull}128938[#128938]
+
+[float]
+[[fixes-v7.17.3]]
+=== Bug fixes
+Dashboard::
+* Explicitly hide panel titles migration {kibana-pull}129540[#129540]
+* Fixes removal of blank string titles in *Lens* and *Maps* {kibana-pull}129404[#129404]
+
+Elastic Security::
+For the Elastic Security 7.17.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Platform::
+Fixes an issue that prevented Gold license users from accessing PDF and PNG reporting features when using {kib} roles {kibana-pull}129374[#129374]
+
 [[release-notes-7.17.2]]
 == {kib} 7.17.2
 
@@ -82,9 +129,7 @@ Review the following information about the 7.17.2 release.
 [[breaking-changes-v7.17.2]]
 === Breaking changes
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in the 7.17.2 release.
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following: 
 
