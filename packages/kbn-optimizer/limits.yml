@@ -116,7 +116,7 @@ pageLoadAssetSize:
   reporting: 57003
   visTypeHeatmap: 25340
   expressionGauge: 25000
-  controls: 34788
+  controls: 40000
   expressionPartitionVis: 26338
   sharedUX: 16225
   ux: 20784
