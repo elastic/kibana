@@ -119,7 +119,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             [
               ...Object.values(throughputTransactionValues),
               ...Object.values(throughputMetricValues),
-            ].forEach((value) => expect(roundNumber(value)).to.be.equal(roundNumber(GO_DEV_RATE)));
+            ].forEach((value) => expect(roundNumber(value)).to.be.equal(GO_DEV_RATE));
           });
         });
 
@@ -132,7 +132,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns expected throughput value', () => {
-            expect(roundNumber(serviceMapsNodeThroughput)).to.be.equal(roundNumber(GO_DEV_RATE));
+            expect(roundNumber(serviceMapsNodeThroughput)).to.be.equal(GO_DEV_RATE);
           });
         });
       });
