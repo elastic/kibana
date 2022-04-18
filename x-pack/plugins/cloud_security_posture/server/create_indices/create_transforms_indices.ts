@@ -6,7 +6,7 @@
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsMapping } from './latest_findings_mapping';
 import {

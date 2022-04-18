@@ -24,16 +24,15 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { Repository } from '../../../../../common/types';
 import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
 import { useCore, useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
-import { InlineLoading } from '../../';
-import { StepProps } from './';
-
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { InlineLoading } from '../..';
+import { StepProps } from '.';
 
 export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   policy,

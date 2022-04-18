@@ -15,12 +15,12 @@ import { useLocation } from 'react-router-dom';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
-import { AppMountParameters } from '../../../../../../../src/core/public';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
-import { isDetectionsPath } from '../../../../public/helpers';
+import { isDetectionsPath } from '../../../helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';

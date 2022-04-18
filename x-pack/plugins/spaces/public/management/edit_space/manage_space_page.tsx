@@ -20,12 +20,12 @@ import {
 import { difference } from 'lodash';
 import React, { Component } from 'react';
 
+import type { Capabilities, NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Capabilities, NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import { SectionLoading } from '../../../../../../src/plugins/es_ui_shared/public';
-import type { FeaturesPluginStart, KibanaFeature } from '../../../../features/public';
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { getSpacesFeatureDescription } from '../../constants';

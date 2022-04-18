@@ -7,7 +7,8 @@
 
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import {
   getSingleMetricViewerJobErrorMessage,
   parseTimeIntervalForJob,
@@ -47,7 +48,6 @@ import {
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
 import { isPopulatedObject } from '../../../common/util/object_utils';
-import type { RulesClient } from '../../../../alerting/server';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { AuthorizationHeader } from '../../lib/request_authorization';

@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { FullAgentPolicyOutputPermissions, RegistryDataStreamPrivileges } from '../../common';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../constants';
-import { getPackageInfo } from '../../server/services/epm/packages';
+
 import type { PackagePolicy } from '../types';
+
+import { getPackageInfo } from './epm/packages';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 

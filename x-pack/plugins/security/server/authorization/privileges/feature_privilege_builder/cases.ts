@@ -7,7 +7,8 @@
 
 import { uniq } from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/server';
+
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export type CasesSupportedOperations = typeof allOperations[number];

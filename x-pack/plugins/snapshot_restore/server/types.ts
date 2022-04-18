@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, IScopedClusterClient } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { SecurityPluginSetup } from '../../security/server';
-import { CloudSetup } from '../../cloud/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { IRouter, RequestHandlerContext, IScopedClusterClient } from '@kbn/core/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { License } from './services';
 import { wrapEsError } from './lib';
 import { handleEsError } from './shared_imports';

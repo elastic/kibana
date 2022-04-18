@@ -9,13 +9,10 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { FillStyle, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYReferenceLineLayerConfig } from '../../types';
 import { FormatFactory } from '../../../../common';
-import {
-  FillStyle,
-  ExtendedYConfig,
-} from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 import { ColorPicker } from '../color_picker';
 import { updateLayer } from '..';

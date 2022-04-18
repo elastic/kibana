@@ -7,7 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, Datatable } from '../../../../expressions';
+import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin';
+import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import {
   AxisExtentConfigResult,
   DataLayerConfigResult,
@@ -34,7 +35,6 @@ import {
   LayerTypes,
   AxisExtentModes,
 } from '../constants';
-import { Dimension, prepareLogTable } from '../../../../visualizations/common/utils';
 import { getLayerDimensions } from '../utils';
 import { validateMarkSizeRatioLimits } from './validate';
 

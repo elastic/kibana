@@ -12,7 +12,7 @@ import React from 'react';
 import { groupBy } from 'lodash';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { FieldFormat } from '../../../../field_formats/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type {
   CommonXYReferenceLineLayerConfigResult,
   IconPosition,

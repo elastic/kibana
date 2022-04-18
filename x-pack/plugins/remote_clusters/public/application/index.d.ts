@@ -6,7 +6,7 @@
  */
 import { Observable } from 'rxjs';
 
-import { ScopedHistory, CoreTheme, ExecutionContextStart } from 'kibana/public';
+import { ScopedHistory, CoreTheme, ExecutionContextStart } from '@kbn/core/public';
 import { RegisterManagementAppArgs, I18nStart } from '../types';
 
 export declare const renderApp: (

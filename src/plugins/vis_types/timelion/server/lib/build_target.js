@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import splitInterval from './split_interval.js';
+import splitInterval from './split_interval';
 
 export default function (tlConfig) {
   const min = moment(tlConfig.time.from);

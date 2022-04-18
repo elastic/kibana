@@ -6,11 +6,8 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { SeriesType, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type {
-  SeriesType,
-  ExtendedYConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import {
   visualizationTypes,
   XYLayerConfig,

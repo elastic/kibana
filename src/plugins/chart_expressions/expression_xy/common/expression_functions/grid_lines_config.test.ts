@@ -7,8 +7,8 @@
  */
 
 import { AxesSettingsConfig } from '../types';
-import { gridlinesConfigFunction } from '../expression_functions';
-import { createMockExecutionContext } from '../../../../../plugins/expressions/common/mocks';
+import { gridlinesConfigFunction } from '.';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 
 describe('gridlinesConfig', () => {
   test('produces the correct arguments', () => {

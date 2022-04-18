@@ -11,8 +11,8 @@ import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
-import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockServices = {
   history: () => ({

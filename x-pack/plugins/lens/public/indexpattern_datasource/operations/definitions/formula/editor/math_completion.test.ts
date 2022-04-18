@@ -8,10 +8,10 @@
 import { parse } from '@kbn/tinymath';
 import { monaco } from '@kbn/monaco';
 import { createMockedIndexPattern } from '../../../../mocks';
-import { GenericOperationDefinition } from '../../index';
+import { GenericOperationDefinition } from '../..';
 import type { IndexPatternField } from '../../../../types';
 import type { OperationMetadata } from '../../../../../types';
-import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { tinymathFunctions } from '../util';
 import {
   getSignatureHelp,
