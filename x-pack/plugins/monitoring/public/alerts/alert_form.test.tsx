@@ -13,21 +13,21 @@ import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from 'src/core/public/mocks';
-import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { ruleTypeRegistryMock } from '../../../triggers_actions_ui/public/application/rule_type_registry.mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import {
   ValidationResult,
   Rule,
   ConnectorValidationResult,
   GenericValidationResult,
   RuleTypeModel,
-} from '../../../triggers_actions_ui/public/types';
-import { RuleForm } from '../../../triggers_actions_ui/public/application/sections/rule_form/rule_form';
-import ActionForm from '../../../triggers_actions_ui/public/application/sections/action_connector_form/action_form';
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+import { RuleForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/rule_form/rule_form';
+import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
-import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 interface AlertAction {
   group: string;
@@ -36,12 +36,12 @@ interface AlertAction {
   params: unknown;
 }
 
-jest.mock('../../../triggers_actions_ui/public/application/lib/action_connector_api', () => ({
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
 
-jest.mock('../../../triggers_actions_ui/public/application/lib/rule_api', () => ({
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api', () => ({
   loadAlertTypes: jest.fn(),
 }));
 
@@ -182,7 +182,7 @@ describe('alert_form', () => {
       async function setup() {
         initLegacyShims();
         const { loadAllActions } = jest.requireMock(
-          '../../../triggers_actions_ui/public/application/lib/action_connector_api'
+          '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
         );
         loadAllActions.mockResolvedValueOnce([
           {

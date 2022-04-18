@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../../src/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 
 export class CorePluginDeepLinksPlugin
   implements Plugin<CorePluginDeepLinksPluginSetup, CorePluginDeepLinksPluginStart>

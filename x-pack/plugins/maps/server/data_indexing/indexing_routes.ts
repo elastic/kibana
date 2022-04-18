@@ -6,9 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
-import { IRouter } from 'src/core/server';
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { Logger } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   INDEX_SOURCE_API_PATH,
   MAX_DRAWING_SIZE_BYTES,
@@ -19,9 +21,7 @@ import {
 } from '../../common/constants';
 import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { getMatchingIndexes } from './get_indexes_matching_pattern';
-import { SecurityPluginStart } from '../../../security/server';
 
 export function initIndexingRoutes({
   router,

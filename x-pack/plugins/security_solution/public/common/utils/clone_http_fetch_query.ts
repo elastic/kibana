@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchQuery } from '../../../../../../src/core/public';
+import { HttpFetchQuery } from '@kbn/core/public';
 import { Immutable } from '../../../common/endpoint/types';
 
 export function cloneHttpFetchQuery(query: Immutable<HttpFetchQuery>): HttpFetchQuery {

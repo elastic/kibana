@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
   LANDING_PATH,
   OVERVIEW_PATH,

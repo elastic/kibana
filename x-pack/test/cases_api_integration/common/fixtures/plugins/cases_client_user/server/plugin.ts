@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
-import { SpacesPluginStart } from '../../../../../../../plugins/spaces/server';
-import { SecurityPluginStart } from '../../../../../../../plugins/security/server';
-import { PluginStartContract as CasesPluginStart } from '../../../../../../../plugins/cases/server';
-import { CasesPatchRequest } from '../../../../../../../plugins/cases/common/api';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as CasesPluginStart } from '@kbn/cases-plugin/server';
+import { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;

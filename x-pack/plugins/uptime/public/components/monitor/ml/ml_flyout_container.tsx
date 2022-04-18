@@ -8,7 +8,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Observable } from 'rxjs';
-import type { CoreTheme } from 'kibana/public';
+import type { CoreTheme } from '@kbn/core/public';
+import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   canCreateMLJobSelector,
   hasMLJobSelector,
@@ -30,7 +31,6 @@ import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
 import { useMonitorId } from '../../../hooks';
 import { kibanaService } from '../../../state/kibana_service';
-import { toMountPoint, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 
 interface Props {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from '@kbn/data-plugin/common';
 import { AGG_TYPE } from '../../../../common/constants';
 import { TileMetaFeature } from '../../../../common/descriptor_types';
 import { CountAggField } from './count_agg_field';

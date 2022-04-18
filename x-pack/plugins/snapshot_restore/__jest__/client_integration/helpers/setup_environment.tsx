@@ -9,8 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { LocationDescriptorObject } from 'history';
 
-import { HttpSetup } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
+import { HttpSetup } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { setUiMetricService, httpService } from '../../../public/application/services/http';
 import {
   breadcrumbService,

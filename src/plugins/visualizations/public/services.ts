@@ -17,15 +17,15 @@ import type {
   DocLinksStart,
   ThemeServiceStart,
   ExecutionContextSetup,
-} from '../../../core/public';
+} from '@kbn/core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TypesStart } from './vis_types';
-import { createGetterSetter } from '../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';
-import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
-import { ExpressionsStart } from '../../../plugins/expressions/public';
-import { UiActionsStart } from '../../../plugins/ui_actions/public';
-import { EmbeddableStart } from '../../embeddable/public';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

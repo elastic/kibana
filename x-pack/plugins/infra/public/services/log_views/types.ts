@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
-import { ISearchStart } from 'src/plugins/data/public';
-import { DataViewsContract } from 'src/plugins/data_views/public';
+import { HttpStart } from '@kbn/core/public';
+import { ISearchStart } from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import {
   LogView,
   LogViewAttributes,
