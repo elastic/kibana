@@ -13,7 +13,7 @@ import { SuperTest } from 'supertest';
 import {
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateObjectsSpacesResponse,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
 import { SPACES } from '../lib/spaces';
 import {
   expectResponses,

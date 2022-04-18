@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScreenshotResult } from '../../../plugins/screenshotting/server';
+import type { ScreenshotResult } from '@kbn/screenshotting-plugin/server';
 
 export interface ScreenshottingExpressionResponse {
   errors?: string[];

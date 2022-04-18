@@ -6,13 +6,13 @@
  */
 
 import React, { FC, useState, useMemo, useCallback } from 'react';
-import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
   SaveModalDashboardProps,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
-} from '../../../../../src/plugins/presentation_util/public';
-import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
 export type DashboardSaveProps = OnSaveProps & {
   returnToOrigin: boolean;

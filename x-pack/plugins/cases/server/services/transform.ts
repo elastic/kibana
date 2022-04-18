@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { CaseConnector, ConnectorTypeFields } from '../../common/api';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 import { getNoneCaseConnector } from '../common/utils';
 import { ESCaseConnector, ESConnectorFields } from '.';
 

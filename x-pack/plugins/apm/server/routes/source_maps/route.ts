@@ -6,8 +6,9 @@
  */
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { jsonRt } from '@kbn/io-ts-utils';
+import { Artifact } from '@kbn/fleet-plugin/server';
 import {
   createApmArtifact,
   deleteApmArtifact,
@@ -19,7 +20,6 @@ import {
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
-import { Artifact } from '../../../../fleet/server';
 
 export const sourceMapRt = t.intersection([
   t.type({

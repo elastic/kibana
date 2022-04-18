@@ -7,16 +7,15 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { AlertInstanceContext } from '@kbn/alerting-plugin/common';
+import { Alert } from '@kbn/alerting-plugin/server';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState } from './common';
 import { TLS_LEGACY } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
-import { ActionGroupIdsOf } from '../../../../alerting/common';
-
-import { AlertInstanceContext } from '../../../../alerting/common';
-import { Alert } from '../../../../alerting/server';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 import { createUptimeESClient } from '../lib';

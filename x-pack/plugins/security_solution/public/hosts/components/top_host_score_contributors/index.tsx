@@ -15,10 +15,10 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 
+import { Direction } from '@kbn/timelines-plugin/common';
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
-import { Direction } from '../../../../../timelines/common';
 
 import { buildHostNamesFilter, RiskScoreFields } from '../../../../common/search_strategy';
 

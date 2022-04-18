@@ -6,7 +6,7 @@
  */
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, ValueOf } from '../../types';
+import type { MonitoringType, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';

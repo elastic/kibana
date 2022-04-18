@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { BENCHMARK_SCORE_INDEX_PATTERN } from '../../../common/constants';
 import { Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';

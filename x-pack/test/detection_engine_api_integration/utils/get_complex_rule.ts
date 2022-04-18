@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
+import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
 
 /**
  * This will return a complex rule with all the outputs possible

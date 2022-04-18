@@ -6,7 +6,8 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { HttpSetup } from 'kibana/public';
+
+import { HttpSetup } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 
