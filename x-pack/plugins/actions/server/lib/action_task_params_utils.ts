@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute, SavedObjectReference } from 'src/core/server/types';
+import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/server/types';
 import { RelatedSavedObjects } from './related_saved_objects';
 
 export const ACTION_REF_NAME = `actionRef`;

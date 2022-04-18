@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { InfraClientStartServicesAccessor } from '../../types';
 import {
   LogStreamEmbeddable,

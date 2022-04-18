@@ -12,6 +12,7 @@ import { useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '..';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { CursorIcon } from '../../../icons';
 
@@ -39,7 +40,6 @@ import {
   TOP_QUERIES_NO_CLICKS,
   RECENT_QUERIES,
 } from '../constants';
-import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../index';
 
 import './analytics.scss';
 

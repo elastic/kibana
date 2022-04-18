@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { DataViewsPublicPluginStart, DataView } from 'src/plugins/data_views/public';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { prefixIndexPattern } from '../../../../common/ccs_utils';
 import {
   INDEX_PATTERN_BEATS,

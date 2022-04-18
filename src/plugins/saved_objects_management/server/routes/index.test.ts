@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { registerRoutes } from './index';
+import { registerRoutes } from '.';
 import { ISavedObjectsManagement } from '../services';
-import { coreMock, httpServiceMock } from '../../../../core/server/mocks';
+import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
 
 describe('registerRoutes', () => {
   it('registers the management routes', () => {

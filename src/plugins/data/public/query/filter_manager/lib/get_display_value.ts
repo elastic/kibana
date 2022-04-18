@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Filter } from '../../../../common';
-import { DataView, DataViewField } from '../../../../../data_views/public';
 import { getIndexPatternFromFilter } from './get_index_pattern_from_filter';
 
 function getValueFormatter(indexPattern?: DataView, key?: string) {

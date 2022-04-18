@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { kibanaService } from '../../state/kibana_service';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { ServiceLocationErrors, ServiceLocations } from '../../../common/runtime_types';
 
 export const showSyncErrors = (errors: ServiceLocationErrors, locations: ServiceLocations) => {

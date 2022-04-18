@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { joinByKey } from './';
+import { joinByKey } from '.';
 
 describe('joinByKey', () => {
   it('joins by a string key', () => {

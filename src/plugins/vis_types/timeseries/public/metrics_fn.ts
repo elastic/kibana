@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaContext } from '../../../data/public';
-import { ExpressionFunctionDefinition, Render } from '../../../expressions/public';
+import { KibanaContext } from '@kbn/data-plugin/public';
+import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 
 import type { TimeseriesVisData } from '../common/types';
 import { metricsRequestHandler } from './request_handler';
