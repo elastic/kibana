@@ -71,7 +71,7 @@ async function resolveIndexPattern(
 ) {
   if (!indexPatternValue) return;
   if (isStringTypeIndexPattern(indexPatternValue)) {
-    return await indexPatterns.find(indexPatternValue);
+    return await indexPatterns.find(indexPatternValue, 1);
   }
 
   if (indexPatternValue.id) {
