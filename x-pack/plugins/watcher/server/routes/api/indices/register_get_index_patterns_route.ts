@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResult } from 'src/core/server';
+import { SavedObjectsFindResult } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 
 export function registerGetIndexPatternsRoute({

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { HomePublicPluginSetup } from '../../../home/public';
-export { FeatureCatalogueCategory } from '../../../home/public';
+export type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+export { FeatureCatalogueCategory } from '@kbn/home-plugin/public';

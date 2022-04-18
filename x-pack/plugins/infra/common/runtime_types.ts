@@ -10,7 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { RouteValidationFunction } from 'kibana/server';
+import type { RouteValidationFunction } from '@kbn/core/server';
 
 type ErrorFactory = (message: string) => Error;
 

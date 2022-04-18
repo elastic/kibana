@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OptInExampleFlyout } from '../../../../../../../src/plugins/telemetry_management_section/public';
+import { OptInExampleFlyout } from '@kbn/telemetry-management-section-plugin/public';
 
 // required for lazy loading
 // eslint-disable-next-line import/no-default-export

@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
-} from 'src/plugins/data/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { FieldFormatsStart } from 'src/plugins/field_formats/server';
-import type { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+} from '@kbn/data-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { setupRoutes } from './routes';
 import { getUiSettings } from './ui_settings';
 import {
@@ -25,7 +29,6 @@ import {
   scheduleLensTelemetry,
 } from './usage';
 import { setupSavedObjects } from './saved_objects';
-import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 import type { CustomVisualizationMigrations } from './migrations/types';

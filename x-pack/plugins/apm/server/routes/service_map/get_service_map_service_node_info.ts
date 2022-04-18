@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
-import { rangeQuery } from '../../../../observability/server';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,

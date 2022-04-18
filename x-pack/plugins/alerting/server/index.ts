@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { RulesClient as RulesClientClass } from './rules_client';
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
 import { AlertingPlugin } from './plugin';
 import { configSchema } from './config';
 import { AlertsConfigType } from './types';

@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import Color from 'color';
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
 
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { createColorPalette } from '../../static/colors';

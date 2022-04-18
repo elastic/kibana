@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { ThrottleSelectField } from './index';
+import { ThrottleSelectField } from '.';
 import { useFormFieldMock } from '../../../../common/mock';
 
 describe('ThrottleSelectField', () => {

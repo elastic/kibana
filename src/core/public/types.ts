@@ -11,7 +11,7 @@ export type {
   PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
-} from '../../core/types';
+} from '../types';
 
 /**
  * A function that should mount DOM content inside the provided container element

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHasData } from '../../../hooks/use_has_data';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
 import { getContent } from './content';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityAppServices } from '../../../application/types';
 
 export function ObservabilityStatus() {

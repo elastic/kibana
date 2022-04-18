@@ -11,12 +11,12 @@ import seedrandom from 'seedrandom';
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
 import { merge } from 'lodash';
-import { EndpointDocGenerator, TreeOptions } from './generate_data';
 import {
   CreatePackagePolicyResponse,
   EPM_API_ROUTES,
   GetPackagesResponse,
-} from '../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { EndpointDocGenerator, TreeOptions } from './generate_data';
 import {
   deleteIndexedEndpointHosts,
   DeleteIndexedEndpointHostsResponse,
