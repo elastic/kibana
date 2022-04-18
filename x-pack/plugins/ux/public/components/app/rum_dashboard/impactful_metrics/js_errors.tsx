@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../csm_shared_context';
 
@@ -32,6 +33,8 @@ interface JSErrorItem {
 }
 
 export function JSErrors() {
+  const { http } = useKibanaServices();
+  const basePath = http.basePath.get();
   const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, serviceName, searchTerm } = urlParams;
@@ -70,7 +73,9 @@ export function JSErrors() {
       field: 'errorMessage',
       name: I18LABELS.errorMessage,
       render: (errorMessage: string, item: JSErrorItem) => (
-        <EuiLink href={`/services/${serviceName}/errors/${item.errorGroupId}`}>
+        <EuiLink
+          href={`${basePath}/app/apm/services/${serviceName}/errors/${item.errorGroupId}`}
+        >
           {errorMessage}
         </EuiLink>
       ),
