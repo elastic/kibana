@@ -105,7 +105,7 @@ image::images/highlights-maps-hexagon.png[region map created in Lens]
 ==== Region Maps in Lens
 
 You can now create region maps
-(also called cloropeth maps) from *Lens*.
+(also called choropleth maps) from *Lens*.
 
 [role="screenshot"]
 image::images/highlights-maps-region.png[Apply changes to render visualization]
