@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { createMetricQuery } from './saved_objects_metric_factory';
 import { LensVisualizationUsage } from './types';
 

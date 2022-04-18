@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { useExecutionContext } from '../../../../../src/plugins/kibana_react/public';
 import * as i18n from './translations';
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
 import { ExceptionListsTable } from '../detections/pages/detection_engine/rules/all/exceptions/exceptions_table';
 import { SpyRoute } from '../common/utils/route/spy_routes';

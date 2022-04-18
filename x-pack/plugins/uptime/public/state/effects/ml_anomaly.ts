@@ -24,7 +24,7 @@ import {
 } from '../api/ml_anomaly';
 import type { MonitorIdParam, DeleteJobResults } from '../actions/types';
 import { anomalyAlertSelector, deleteAlertAction } from '../alerts/alerts';
-import type { AppState } from '../../state';
+import type { AppState } from '..';
 
 export function* fetchMLJobEffect() {
   yield takeLatest(

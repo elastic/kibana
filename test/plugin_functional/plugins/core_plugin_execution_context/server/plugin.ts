@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup } from 'kibana/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class CorePluginExecutionContext implements Plugin {
   public setup(core: CoreSetup, deps: {}) {

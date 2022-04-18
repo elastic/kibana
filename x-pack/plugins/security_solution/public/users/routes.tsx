@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { UsersContainer } from './pages';
 
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { USERS_PATH } from '../../common/constants';
 import { useExecutionContext } from '../../../../../src/plugins/kibana_react/public';

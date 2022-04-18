@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { Timelines } from './pages';
 import { TIMELINES_PATH } from '../../common/constants';
 import { useExecutionContext } from '../../../../../src/plugins/kibana_react/public';

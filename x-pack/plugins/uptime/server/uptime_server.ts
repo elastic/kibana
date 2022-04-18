@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import { createLifecycleRuleTypeFactory, IRuleDataClient } from '../../rule_registry/server';
+import { Logger } from '@kbn/core/server';
+import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
 import { UptimeServerSetup, UptimeCorePluginsSetup } from './lib/adapters';

@@ -11,12 +11,12 @@ import React from 'react';
 import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { PluginServiceRegistry } from '../../presentation_util/public';
+import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common/eui_styled_components';
 import { pluginServices } from '../public/services';
 import { CustomIntegrationsServices } from '../public/services';
 import { providers } from '../public/services/storybook';
-import { EuiThemeProvider } from '../../kibana_react/common/eui_styled_components';
 
 /**
  * Returns a Storybook Decorator that provides both the `I18nProvider` and access to `PluginServices`

@@ -18,7 +18,7 @@ import {
   DeleteAgentPolicyResponse,
   DeletePackagePoliciesResponse,
   PACKAGE_POLICY_API_ROUTES,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 import { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
 import { wrapErrorAndRejectPromise } from './utils';
