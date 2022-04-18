@@ -9,11 +9,11 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from 'src/core/public/mocks';
+import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { Comparator } from '../../../../common/alerting/metrics';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import { Expressions } from './expression';
-import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({

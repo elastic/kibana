@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CommandsByPlatform } from '../../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
-import type { K8sMode } from '../../../components/agent_enrollment_flyout/types';
+import type { K8sMode } from '../../agent_enrollment_flyout/types';
 
 export const StandaloneInstructions = (
   kibanaVersion: string,

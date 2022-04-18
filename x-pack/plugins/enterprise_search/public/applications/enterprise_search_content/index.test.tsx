@@ -28,7 +28,7 @@ import {
   EnterpriseSearchContent,
   EnterpriseSearchContentUnconfigured,
   EnterpriseSearchContentConfigured,
-} from './';
+} from '.';
 
 describe('EnterpriseSearchContent', () => {
   it('always renders the Setup Guide', () => {

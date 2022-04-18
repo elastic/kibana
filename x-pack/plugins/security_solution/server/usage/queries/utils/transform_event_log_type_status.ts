@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import type { EventLogTypeStatusAggs } from '../../types';
 import type { SingleEventLogStatusMetric } from '../../detections/rules/types';
 import { getInitialSingleEventLogUsage } from '../../detections/rules/get_initial_usage';

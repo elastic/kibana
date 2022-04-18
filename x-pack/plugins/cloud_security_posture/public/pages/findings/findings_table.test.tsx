@@ -57,8 +57,8 @@ type TableProps = PropsOf<typeof FindingsTable>;
 describe('<FindingsTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
-      status: 'success',
-      data: { data: [], total: 0 },
+      loading: false,
+      data: { page: [], total: 0 },
       error: null,
       sort: [],
       from: 1,
@@ -76,8 +76,8 @@ describe('<FindingsTable />', () => {
     const data = names.map(getFakeFindings);
 
     const props: TableProps = {
-      status: 'success',
-      data: { data, total: 10 },
+      loading: false,
+      data: { page: data, total: 10 },
       error: null,
       sort: [],
       from: 0,

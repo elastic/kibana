@@ -17,7 +17,7 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
-import { useSecurityJobs } from '../../../../../public/common/components/ml_popover/hooks/use_security_jobs';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';

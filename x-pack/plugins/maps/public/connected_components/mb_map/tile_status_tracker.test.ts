@@ -64,7 +64,7 @@ function createMockMbDataEvent(mbSourceId: string, tileKey: string): unknown {
         canonical: {
           x: 80,
           y: 10,
-          z: 5
+          z: 5,
         },
         key: tileKey,
       },

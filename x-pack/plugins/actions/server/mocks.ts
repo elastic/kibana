@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { actionsClientMock } from './actions_client.mock';
-import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
-import { Services } from './types';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { actionsClientMock } from './actions_client.mock';
+import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
+import { Services } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
-import { Logger } from '../../../../src/core/server';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;

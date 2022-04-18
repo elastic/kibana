@@ -7,10 +7,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
+import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
+import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -25,7 +26,6 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
 import { SearchUsage, searchUsageObserver } from '../../collectors';
 import {
   getDefaultSearchParams,

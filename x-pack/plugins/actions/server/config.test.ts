@@ -6,8 +6,8 @@
  */
 
 import { configSchema, ActionsConfig, getValidatedConfig } from './config';
-import { Logger } from '../../../..//src/core/server';
-import { loggingSystemMock } from '../../../..//src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

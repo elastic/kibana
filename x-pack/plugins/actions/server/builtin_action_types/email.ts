@@ -11,9 +11,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 
+import { Logger } from '@kbn/core/server';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
-import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';

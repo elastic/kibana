@@ -25,7 +25,7 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import { partition } from 'lodash';
-import { ActionVariable, RuleActionParam } from '../../../../../alerting/common';
+import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import {
   IErrorObject,
   RuleAction,

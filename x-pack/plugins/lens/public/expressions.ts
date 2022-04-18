@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExpressionsSetup } from 'src/plugins/expressions/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { getDatatable } from '../common/expressions/datatable/datatable';
 import { datatableColumn } from '../common/expressions/datatable/datatable_column';
 import { mergeTables } from '../common/expressions/merge_tables';

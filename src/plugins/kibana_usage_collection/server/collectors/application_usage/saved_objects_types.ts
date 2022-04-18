@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
+import type { SavedObjectAttributes, SavedObjectsServiceSetup } from '@kbn/core/server';
 
 /**
  * Used for accumulating the totals of all the stats older than 90d

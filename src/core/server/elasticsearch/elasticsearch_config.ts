@@ -11,7 +11,7 @@ import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
-import { ConfigDeprecationProvider } from 'src/core/server';
+import { ConfigDeprecationProvider } from '..';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { getReservedHeaders } from './default_headers';
 
