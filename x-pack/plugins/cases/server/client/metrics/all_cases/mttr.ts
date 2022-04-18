@@ -29,7 +29,13 @@ export class MTTR extends AllCasesAggregationHandler {
         Operations.getCaseMetrics
       );
 
-      const caseQueryOptions = constructQueryOptions({ owner: this.owner, authorizationFilter });
+      const caseQueryOptions = constructQueryOptions({
+        from: this.from,
+        to: this.to,
+        owner: this.owner,
+        authorizationFilter,
+      });
+
       const aggregationsResponse = await caseService.executeAggregations({
         aggregationBuilders: this.aggregationBuilders,
         options: { filter: caseQueryOptions.filter },

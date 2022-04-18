@@ -34,7 +34,14 @@ export const buildHandlers = (
     );
   } else {
     handlers = [MTTR].map(
-      (ClassName) => new ClassName({ owner: params.owner, casesClient, clientArgs })
+      (ClassName) =>
+        new ClassName({
+          owner: params.owner,
+          from: params.from,
+          to: params.to,
+          casesClient,
+          clientArgs,
+        })
     );
   }
 

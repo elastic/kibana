@@ -18,6 +18,8 @@ export const getCasesMetricRoute = createCasesRoute({
     query: schema.object({
       features: schema.arrayOf(schema.string({ minLength: 1 })),
       owner: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+      from: schema.maybe(schema.string()),
+      to: schema.maybe(schema.string()),
     }),
   },
   handler: async ({ context, request, response }) => {

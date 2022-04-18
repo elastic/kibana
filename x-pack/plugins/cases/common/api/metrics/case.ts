@@ -92,6 +92,14 @@ export const CasesMetricsRequestRt = rt.intersection([
   }),
   rt.partial({
     /**
+     * A KQL date. If used all cases created after (gte) the from date will be returned
+     */
+    from: rt.string,
+    /**
+     * A KQL date. If used all cases created before (lte) the to date will be returned.
+     */
+    to: rt.string,
+    /**
      * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
      * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
      * that the user has access to.

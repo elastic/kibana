@@ -33,5 +33,7 @@ export interface SingleCaseBaseHandlerCommonOptions extends BaseHandlerCommonOpt
 }
 
 export interface AllCasesBaseHandlerCommonOptions extends BaseHandlerCommonOptions {
+  from?: string;
+  to?: string;
   owner?: string | string[];
 }

@@ -10,15 +10,19 @@ import { AggregationHandler } from './aggregation_handler';
 import { AggregationBuilder, AllCasesBaseHandlerCommonOptions } from './types';
 
 export abstract class AllCasesAggregationHandler extends AggregationHandler<CasesMetricsResponse> {
+  protected readonly from?: string;
+  protected readonly to?: string;
   protected readonly owner?: string | string[];
 
   constructor(
     options: AllCasesBaseHandlerCommonOptions,
     aggregations: Map<string, AggregationBuilder<CasesMetricsResponse>>
   ) {
-    const { owner, ...restOptions } = options;
+    const { owner, from, to, ...restOptions } = options;
     super(restOptions, aggregations);
 
+    this.from = from;
+    this.to = to;
     this.owner = owner;
   }
 }
