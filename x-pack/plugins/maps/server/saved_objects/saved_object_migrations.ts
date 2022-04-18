@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { extractReferences } from '../../common/migrations/references';
 // @ts-expect-error
 import { emsRasterTileToEmsVectorTile } from '../../common/migrations/ems_raster_tile_to_ems_vector_tile';

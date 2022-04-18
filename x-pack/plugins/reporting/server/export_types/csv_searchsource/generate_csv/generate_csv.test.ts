@@ -6,7 +6,7 @@
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
-import type { IScopedClusterClient, IUiSettingsClient, SearchResponse } from 'kibana/server';
+import type { IScopedClusterClient, IUiSettingsClient, SearchResponse } from '@kbn/core/server';
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import {
@@ -14,14 +14,14 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
-} from 'src/core/server/mocks';
-import { ISearchStartSearchSource } from 'src/plugins/data/common';
-import { searchSourceInstanceMock } from 'src/plugins/data/common/search/search_source/mocks';
-import { IScopedSearchClient } from 'src/plugins/data/server';
-import { dataPluginMock } from 'src/plugins/data/server/mocks';
-import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
+} from '@kbn/core/server/mocks';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { IScopedSearchClient } from '@kbn/data-plugin/server';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { Writable } from 'stream';
-import { ReportingConfig } from '../../../';
+import { ReportingConfig } from '../../..';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,

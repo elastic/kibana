@@ -13,9 +13,9 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { firstValueFrom } from 'rxjs';
+import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
+import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { getAlertUrlTransaction } from '../../../common/utils/formatters';
-import { asDuration } from '../../../../observability/common/utils/formatters';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import {
   AlertType,
@@ -40,7 +40,7 @@ import {
   getDocumentTypeFilterForTransactions,
   getDurationFieldForTransactions,
 } from '../../lib/helpers/transactions';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';

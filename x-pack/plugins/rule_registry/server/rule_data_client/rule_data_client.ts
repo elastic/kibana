@@ -9,9 +9,9 @@ import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Either, isLeft } from 'fp-ts/lib/Either';
 
-import { ElasticsearchClient } from 'kibana/server';
-import { Logger } from 'kibana/server';
-import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
 import {
   RuleDataWriteDisabledError,
