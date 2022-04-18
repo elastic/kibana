@@ -98,6 +98,19 @@ describe('startTransformIfNotStarted', () => {
     })
   );
 
+  it('expect not to start if transform not found', async () => {
+    mockEsClient.transform.getTransformStats.mockResolvedValue({
+      transforms: [],
+      count: 0,
+    });
+    await startTransformIfNotStarted(mockEsClient, latestFindingsTransform.transform_id, logger);
+    expect(mockEsClient.transform.getTransformStats).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.transform.getTransformStats).toHaveBeenCalledWith({
+      transform_id: latestFindingsTransform.transform_id,
+    });
+    expect(mockEsClient.transform.startTransform).toHaveBeenCalledTimes(0);
+  });
+
   it('expect to start if state is stopped', async () => {
     mockEsClient.transform.getTransformStats.mockResolvedValue({
       transforms: [getTransformWithState('stopped')],
