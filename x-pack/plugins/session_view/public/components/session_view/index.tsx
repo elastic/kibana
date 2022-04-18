@@ -9,6 +9,7 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiResizableContainer,
   EuiPanel,
   EuiHorizontalRule,
@@ -115,7 +116,7 @@ export const SessionView = ({
 
   const hasData = alerts && data && data.pages?.[0].events.length > 0;
   const hasError = error || alertsError;
-  const renderIsLoading = (isFetching || alertsFetching) && !data;
+  const renderIsLoading = (isFetching || alertsFetching) && !(data && alerts);
   const renderDetails = isDetailOpen && selectedProcess;
   const { data: newUpdatedAlertsStatus } = useFetchAlertStatus(
     updatedAlertsStatus,
@@ -154,7 +155,15 @@ export const SessionView = ({
     [setDisplayOptions]
   );
 
-  if (!isFetching && !hasData) {
+  if (renderIsLoading) {
+    return (
+      <div css={styles.loadingStateContainer}>
+        <EuiLoadingSpinner size="xl" />
+      </div>
+    );
+  }
+
+  if (!hasData) {
     return (
       <EuiEmptyPrompt
         data-test-subj="sessionView:sessionViewProcessEventsEmpty"
