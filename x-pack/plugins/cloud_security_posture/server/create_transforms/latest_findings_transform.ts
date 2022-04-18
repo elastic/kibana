@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { CSP_KUBEBEAT_INDEX_PATTERN, LATEST_FINDINGS_INDEX_PATTERN } from '../../common/constants';
+import { FINDINGS_INDEX_PATTERN, LATEST_FINDINGS_INDEX_PATTERN } from '../../common/constants';
 
 export const latestFindingsTransform: TransformPutTransformRequest = {
   transform_id: 'cloud_security_posture.findings_latest-default-0.0.1',
   description: 'Defines findings transformation to view only the latest finding per resource',
   source: {
-    index: CSP_KUBEBEAT_INDEX_PATTERN,
+    index: FINDINGS_INDEX_PATTERN,
   },
   dest: {
     index: LATEST_FINDINGS_INDEX_PATTERN,
