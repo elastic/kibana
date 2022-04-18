@@ -140,7 +140,7 @@ export function sendResponse(
 
   const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
   const lastModified = `${new Date().toUTCString()}`;
-  if (tileStream && headers) {
+  if (tileStream) {
     // use the content-encoding and content-length headers from elasticsearch if they exist
     const { 'content-length': contentLength, 'content-encoding': contentEncoding } = headers;
     return response.ok({
