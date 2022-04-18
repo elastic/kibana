@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import { prefixIndexPattern } from '../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../common/ccs_utils';
 import {
   CCS_REMOTE_PATTERN,
   INDEX_PATTERN_BEATS,
@@ -23,7 +23,7 @@ export const useDerivedIndexPattern = (
   dataViews: DataViewsPublicPluginStart,
   config?: MonitoringConfig
 ): { loading: boolean; derivedIndexPattern?: DataView } => {
-  const indexPattern = prefixIndexPattern(
+  const indexPattern = prefixIndexPatternWithCcs(
     config || ({} as MonitoringConfig),
     INDEX_PATTERNS,
     CCS_REMOTE_PATTERN

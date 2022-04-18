@@ -19,7 +19,11 @@ import type { MonitoringConfig } from '../server/config';
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config: MonitoringConfig, indexPattern: string, ccs?: string) {
+export function prefixIndexPatternWithCcs(
+  config: MonitoringConfig,
+  indexPattern: string,
+  ccs?: string
+) {
   const ccsEnabled = config.ui.ccs.enabled;
   if (!ccsEnabled || !ccs) {
     return indexPattern;

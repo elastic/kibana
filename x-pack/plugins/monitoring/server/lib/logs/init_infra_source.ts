@@ -7,13 +7,13 @@
 
 // @ts-ignore
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
-import { prefixIndexPattern } from '../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../common/ccs_utils';
 import { CCS_REMOTE_PATTERN, INFRA_SOURCE_ID } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
 
 export const initInfraSource = (config: MonitoringConfig, infraPlugin: InfraPluginSetup) => {
   if (infraPlugin) {
-    const filebeatIndexPattern = prefixIndexPattern(
+    const filebeatIndexPattern = prefixIndexPatternWithCcs(
       config,
       config.ui.logs.index,
       CCS_REMOTE_PATTERN
