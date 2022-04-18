@@ -10242,7 +10242,6 @@
     "xpack.enterpriseSearch.appSearch.engine.curations.manageQueryButtonLabel": "クエリを管理",
     "xpack.enterpriseSearch.appSearch.engine.curations.manageQueryDescription": "このキュレーションのクエリを編集、追加、削除します。",
     "xpack.enterpriseSearch.appSearch.engine.curations.manageQueryTitle": "クエリを管理",
-    "xpack.enterpriseSearch.appSearch.engine.curations.newBadgeLabel": "新機能！",
     "xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.description": "表示するオーガニック結果はありません。{manualDescription}",
     "xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.manualDescription": "上記のアクティブなクエリを追加または変更します。",
     "xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.title": "\"{currentQuery}\"の上位のオーガニックドキュメント",
