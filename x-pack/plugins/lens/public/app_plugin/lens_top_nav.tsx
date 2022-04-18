@@ -9,20 +9,20 @@ import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useStore } from 'react-redux';
-import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { tableHasFormulas } from '@kbn/data-plugin/common';
+import { exporters } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { trackUiEvent } from '../lens_ui_telemetry';
+import type { StateSetter } from '../types';
 import {
   LensAppServices,
   LensTopNavActions,
   LensTopNavMenuProps,
   LensTopNavTooltips,
 } from './types';
-import type { StateSetter } from '../types';
-import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import { tableHasFormulas } from '../../../../../src/plugins/data/common';
-import { exporters } from '../../../../../src/plugins/data/public';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { toggleSettingsMenuOpen } from './settings_menu';
 import {
   setState,
@@ -39,11 +39,7 @@ import {
   handleIndexPatternChange,
   refreshIndexPatternsList,
 } from '../utils';
-import {
-  combineQueryAndFilters,
-  getLayerMetaInfo,
-  getShowUnderlyingDataLabel,
-} from './show_underlying_data';
+import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -111,11 +107,15 @@ function getLensTopNavConfig(options: {
   }
 
   if (showOpenInDiscover) {
+    const exploreDataInDiscoverLabel = i18n.translate('xpack.lens.app.exploreDataInDiscover', {
+      defaultMessage: 'Explore data in Discover',
+    });
+
     topNavMenu.push({
-      label: getShowUnderlyingDataLabel(),
+      label: exploreDataInDiscoverLabel,
       run: () => {},
       testId: 'lnsApp_openInDiscover',
-      description: getShowUnderlyingDataLabel(),
+      description: exploreDataInDiscoverLabel,
       disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
       tooltip: tooltips.showUnderlyingDataWarning,
       target: '_blank',

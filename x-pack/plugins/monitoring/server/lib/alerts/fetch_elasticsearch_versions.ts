@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';

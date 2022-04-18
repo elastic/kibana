@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { injectI18n } from '@kbn/i18n-react';
-import { withKibana } from '../../../kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type { SearchBarProps } from './search_bar';
 import '../index.scss';
 

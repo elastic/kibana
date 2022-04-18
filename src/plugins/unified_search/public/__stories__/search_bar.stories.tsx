@@ -10,8 +10,8 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '../../../kibana_react/public';
-import type { DataView, DataViewsContract } from '../../../data_views/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SearchBar, SearchBarProps } from '../search_bar';
 import { setIndexPatterns } from '../services';
 

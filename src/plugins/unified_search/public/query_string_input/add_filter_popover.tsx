@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import type { DataView } from '../../../data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 
 interface AddFilterPopoverProps {

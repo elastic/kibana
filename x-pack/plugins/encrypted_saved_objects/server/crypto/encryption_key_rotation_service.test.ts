@@ -9,14 +9,14 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import type { EncryptedSavedObjectsService } from './encrypted_saved_objects_service';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';

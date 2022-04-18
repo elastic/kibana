@@ -31,12 +31,12 @@ import {
   TimeHistoryContract,
   Query,
   getQueryLog,
-} from '../../../data/public';
-import { DataView } from '../../../data_views/public';
-import type { PersistedLog } from '../../../data/public';
-import { useKibana, withKibana } from '../../../kibana_react/public';
+} from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { PersistedLog } from '@kbn/data-plugin/public';
+import { useKibana, withKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import QueryStringInputUI from './query_string_input';
-import { UI_SETTINGS } from '../../../data/common';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';

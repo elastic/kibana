@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
 
 import { IndexDataEnricher } from '../../../services/index_data_enricher';
 

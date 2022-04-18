@@ -10,12 +10,11 @@ import { EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import React, { useRef } from 'react';
-
+import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterItem } from './filter_item';
-import { useKibana } from '../../../kibana_react/public';
-import { IDataPluginServices } from '../../../data/public';
-import { DataView } from '../../../data_views/public';
 
 export interface Props {
   filters: Filter[];

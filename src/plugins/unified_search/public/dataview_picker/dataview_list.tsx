@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSelectable, EuiSelectableProps, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { DataViewListItem } from '../../../data_views/public';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 
 export interface DataViewsListProps {
   dataViewsList: DataViewListItem[];

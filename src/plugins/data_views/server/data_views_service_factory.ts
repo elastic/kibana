@@ -13,9 +13,9 @@ import {
   UiSettingsServiceStart,
   KibanaRequest,
   CoreStart,
-} from 'kibana/server';
+} from '@kbn/core/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
-import { FieldFormatsStart } from '../../field_formats/server';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';

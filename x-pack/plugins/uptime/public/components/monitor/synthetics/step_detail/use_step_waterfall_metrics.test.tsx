@@ -13,7 +13,7 @@ import {
   useStepWaterfallMetrics,
 } from './use_step_waterfall_metrics';
 import * as reduxHooks from 'react-redux';
-import * as searchHooks from '../../../../../../observability/public/hooks/use_es_search';
+import * as searchHooks from '@kbn/observability-plugin/public/hooks/use_es_search';
 
 describe('useStepWaterfallMetrics', () => {
   jest

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RecoveredActionGroup } from '../../../../alerting/common';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { AlertProvidedActionVariables } from './action_variables';
 import { getDefaultsForActionParams } from './get_defaults_for_action_params';
 

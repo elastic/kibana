@@ -9,14 +9,14 @@
 import React from 'react';
 import SearchBar from './search_bar';
 
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
-import { DataView } from '../../../data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 const mockTimeHistory = {
   get: () => {

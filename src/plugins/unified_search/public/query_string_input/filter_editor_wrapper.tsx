@@ -9,10 +9,10 @@
 import React, { useState, useEffect } from 'react';
 import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useKibana } from '../../../kibana_react/public';
-import { UI_SETTINGS } from '../../../data/common';
-import { IDataPluginServices } from '../../../data/public';
-import type { DataView } from '../../../data_views/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';

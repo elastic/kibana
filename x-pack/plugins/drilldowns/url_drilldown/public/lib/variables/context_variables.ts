@@ -8,16 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import { getFlattenedObject } from '@kbn/std';
+import type { Filter, Query, TimeRange } from '@kbn/data-plugin/public';
+import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';
-import type { Filter, Query, TimeRange } from '../../../../../../../src/plugins/data/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-} from '../../../../../../../src/plugins/embeddable/public';
 import type { EmbeddableWithQueryInput } from '../url_drilldown';
 import { deleteUndefinedKeys } from './util';
 import type { ActionFactoryContext } from '../url_drilldown';
-import type { UrlTemplateEditorVariable } from '../../../../../../../src/plugins/kibana_react/public';
 
 /**
  * Part of context scope extracted from an embeddable

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'src/core/server';
+import { IUiSettingsClient } from '@kbn/core/server';
 import { UiSettingsCommon } from '../common';
 
 export class UiSettingsServerToCommon implements UiSettingsCommon {

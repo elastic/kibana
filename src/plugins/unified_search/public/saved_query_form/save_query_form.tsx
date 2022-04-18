@@ -10,7 +10,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortBy, isEqual } from 'lodash';
-import { SavedQuery, SavedQueryService } from '../../../data/public';
+import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 
 interface Props {
   savedQuery?: SavedQuery;

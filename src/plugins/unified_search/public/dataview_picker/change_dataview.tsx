@@ -22,10 +22,10 @@ import {
   EuiText,
   EuiTourStep,
 } from '@elastic/eui';
-import type { DataViewListItem } from 'src/plugins/data_views/public';
-import { IDataPluginServices } from '../../../data/public';
-import { useKibana } from '../../../kibana_react/public';
-import type { DataViewPickerProps } from './index';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataViewPickerProps } from '.';
 import { DataViewsList } from './dataview_list';
 import { ChangeDataViewStyles } from './change_dataview.styles';
 

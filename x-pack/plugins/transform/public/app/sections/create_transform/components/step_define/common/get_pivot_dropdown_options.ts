@@ -6,11 +6,8 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-} from '../../../../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 import { getNestedProperty } from '../../../../../../../common/utils/object_utils';
 import { removeKeywordPostfix } from '../../../../../../../common/utils/field_utils';

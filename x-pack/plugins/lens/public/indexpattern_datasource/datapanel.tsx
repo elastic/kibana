@@ -24,11 +24,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import type {
@@ -41,10 +46,8 @@ import { trackUiEvent } from '../lens_ui_telemetry';
 import { loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
-import { getEsQueryConfig } from '../../../../../src/plugins/data/public';
-import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
-import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
+import { LensFieldIcon } from './lens_field_icon';
+import { FieldGroups, FieldList } from './field_list';
 
 export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'core'> & {
   data: DataPublicPluginStart;
@@ -59,9 +62,6 @@ export type Props = Omit<DatasourceDataPanelProps<IndexPatternPrivateState>, 'co
   core: CoreStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
 };
-import { LensFieldIcon } from './lens_field_icon';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { FieldGroups, FieldList } from './field_list';
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });

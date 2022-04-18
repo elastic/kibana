@@ -33,6 +33,9 @@ import {
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { XJsonLang } from '@kbn/monaco';
+import { DataView, IFieldType } from '@kbn/data-views-plugin/common';
+import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -45,9 +48,6 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { DataView, IFieldType } from '../../../../data_views/common';
-import { getIndexPatternFromFilter } from '../../../../data/public';
-import { CodeEditor } from '../../../../kibana_react/public';
 
 export interface Props {
   filter: Filter;

@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { ToolbarButton, ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
-import { DataViewsList } from '../../../../../src/plugins/unified_search/public';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;

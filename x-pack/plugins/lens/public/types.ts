@@ -6,9 +6,13 @@
  */
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreSetup, SavedObjectReference, SavedObjectsResolveResponse } from 'kibana/public';
+import type {
+  CoreSetup,
+  SavedObjectReference,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { TopNavMenuData } from 'src/plugins/navigation/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
 import type {
@@ -16,26 +20,23 @@ import type {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
-} from '../../../../src/plugins/expressions/public';
-import type { VisualizeEditorLayersContext } from '../../../../src/plugins/visualizations/public';
+} from '@kbn/expressions-plugin/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import type { Query } from '@kbn/data-plugin/public';
+import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type {
+  UiActionsStart,
+  RowClickContext,
+  VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
-import type { Query } from '../../../../src/plugins/data/public';
-import type {
-  RangeSelectContext,
-  ValueClickContext,
-} from '../../../../src/plugins/embeddable/public';
 import type {
   LensSortActionData,
   LensResizeActionData,
   LensToggleActionData,
   LensPagesizeActionData,
 } from './datatable_visualization/components/types';
-import type {
-  UiActionsStart,
-  RowClickContext,
-  VisualizeFieldContext,
-} from '../../../../src/plugins/ui_actions/public';
 
 import {
   LENS_EDIT_SORT_ACTION,
@@ -600,7 +601,7 @@ interface VisualizationDimensionChangeProps<T> {
   layerId: string;
   columnId: string;
   prevState: T;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: FramePublicAPI;
 }
 export interface Suggestion {
   visualizationId: string;
@@ -692,9 +693,11 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
+export type DatasourceLayers = Record<string, DatasourcePublicAPI>;
+
 export interface FramePublicAPI {
-  datasourceLayers: Record<string, DatasourcePublicAPI>;
-  appliedDatasourceLayers?: Record<string, DatasourcePublicAPI>; // this is only set when auto-apply is turned off
+  datasourceLayers: DatasourceLayers;
+  dateRange: DateRange;
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
@@ -703,7 +706,6 @@ export interface FramePublicAPI {
   activeData?: Record<string, Datatable>;
 }
 export interface FrameDatasourceAPI extends FramePublicAPI {
-  dateRange: DateRange;
   query: Query;
   filters: Filter[];
 }
@@ -893,7 +895,7 @@ export interface Visualization<T = unknown> {
 
   toExpression: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>,
+    datasourceLayers: DatasourceLayers,
     attributes?: Partial<{ title: string; description: string }>
   ) => ExpressionAstExpression | string | null;
   /**
@@ -902,7 +904,7 @@ export interface Visualization<T = unknown> {
    */
   toPreviewExpression?: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>
+    datasourceLayers: DatasourceLayers
   ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
@@ -910,7 +912,7 @@ export interface Visualization<T = unknown> {
    */
   getErrorMessages: (
     state: T,
-    datasourceLayers?: Record<string, DatasourcePublicAPI>
+    datasourceLayers?: DatasourceLayers
   ) =>
     | Array<{
         shortMessage: string;

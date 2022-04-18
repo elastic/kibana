@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query } from '@kbn/es-query';
-import type { TimeRange, SavedQueryService, SavedQuery } from '../../../data/public';
-import type { DataView } from '../../../data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { TimeRange, SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { QueryBarMenuPanels } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 

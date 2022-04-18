@@ -8,9 +8,10 @@ import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
-import type { TimefilterContract } from 'src/plugins/data/public';
-import type { IUiSettingsClient, SavedObjectReference } from 'kibana/public';
-import type { DataView, DataViewsContract } from '../../../../src/plugins/data_views/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { search } from '@kbn/data-plugin/public';
 import type { Document } from './persistence/saved_object_store';
 import type {
   Datasource,
@@ -20,7 +21,6 @@ import type {
   Visualization,
   StateSetter,
 } from './types';
-import { search } from '../../../../src/plugins/data/public';
 import type { DatasourceStates, VisualizationState } from './state_management';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {

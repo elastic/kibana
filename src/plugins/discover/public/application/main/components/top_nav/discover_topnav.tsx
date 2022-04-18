@@ -7,13 +7,13 @@
  */
 import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { Query, TimeRange } from '@kbn/data-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
-import { Query, TimeRange } from '../../../../../../data/public';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
-import { DataViewType } from '../../../../../../data_views/public';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,

@@ -10,11 +10,11 @@ import React, { ReactNode } from 'react';
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { IField, IVectorSource } from '../../../maps/public';
-import { FIELD_ORIGIN, DECIMAL_DEGREES_PRECISION } from '../../../maps/common';
-import { TileMetaFeature } from '../../../maps/common/descriptor_types';
+import { IField, IVectorSource } from '@kbn/maps-plugin/public';
+import { FIELD_ORIGIN, DECIMAL_DEGREES_PRECISION } from '@kbn/maps-plugin/common';
+import { TileMetaFeature } from '@kbn/maps-plugin/common/descriptor_types';
+import { ITooltipProperty } from '@kbn/maps-plugin/public';
 import { AnomalySource } from './anomaly_source';
-import { ITooltipProperty } from '../../../maps/public';
 
 export const ACTUAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
   defaultMessage: 'Actual',
