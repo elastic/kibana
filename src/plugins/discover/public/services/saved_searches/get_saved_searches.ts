@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsStart } from 'kibana/public';
-import type { DataPublicPluginStart } from '../../../../data/public';
+import type { SavedObjectsStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { injectSearchSourceReferences, parseSearchSourceJSON } from '@kbn/data-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedSearchAttributes, SavedSearch } from './types';
 
 import { SAVED_SEARCH_TYPE } from './constants';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
-import { injectSearchSourceReferences, parseSearchSourceJSON } from '../../../../data/public';
-import { SavedObjectNotFound } from '../../../../kibana_utils/public';
-
-import type { SpacesApi } from '../../../../../../x-pack/plugins/spaces/public';
 
 interface GetSavedSearchDependencies {
   search: DataPublicPluginStart['search'];

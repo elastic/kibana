@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource } from '.';
 import { IField } from '../../fields/field';
 import { IESAggField } from '../../fields/agg';
 import _ from 'lodash';

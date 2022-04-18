@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { PLUGIN_ID } from '../common/constants/app';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {

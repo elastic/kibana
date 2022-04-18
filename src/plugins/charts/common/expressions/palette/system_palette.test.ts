@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import type { PaletteOutput } from '@kbn/coloring';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { systemPalette } from './system_palette';
-import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 describe('system_palette', () => {
   const fn = functionWrapper(systemPalette()) as (

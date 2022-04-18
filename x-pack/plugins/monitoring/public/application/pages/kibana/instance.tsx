@@ -18,9 +18,9 @@ import {
   EuiFlexItem,
   EuiPanel,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useCharts } from '../../hooks/use_charts';
 // @ts-ignore
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';

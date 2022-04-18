@@ -9,7 +9,6 @@ import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { plainRowRenderer } from './plain_row_renderer';
@@ -22,7 +21,6 @@ describe('plain_row_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     const children = plainRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: mockDatum,
       isDraggable: true,
       timelineId: 'test',
@@ -37,7 +35,6 @@ describe('plain_row_renderer', () => {
 
   test('should render a plain row', () => {
     const children = plainRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: mockDatum,
       isDraggable: true,
       timelineId: 'test',

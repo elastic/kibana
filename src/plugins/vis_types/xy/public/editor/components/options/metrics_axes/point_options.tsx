@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiRange, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { SwitchOption } from '../../../../../../../vis_default_editor/public';
+import { SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 
 import { SeriesParam } from '../../../../types';
 import { SetChart } from './chart_options';

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { Inspect, Maybe, PageInfoPaginated, SortField } from '../../common';
 import { RequestOptionsPaginated } from '../..';

@@ -9,7 +9,7 @@
 
 import dateMath from '@kbn/datemath';
 import { formatDate } from '@elastic/eui';
-import { TimeRange } from '../../../../../src/plugins/data/common';
+import { TimeRange } from '@kbn/data-plugin/common';
 import { TIME_FORMAT } from '../constants/time_format';
 
 export function formatHumanReadableDate(ts: number) {

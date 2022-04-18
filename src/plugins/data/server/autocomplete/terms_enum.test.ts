@@ -7,8 +7,8 @@
  */
 
 import { termsEnumSuggestions } from './terms_enum';
-import { coreMock } from '../../../../core/server/mocks';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -39,7 +39,7 @@ describe('_terms_enum suggestions', () => {
       'fieldName',
       'query',
       [],
-      { name: 'field_name', type: 'string' }
+      { name: 'field_name', type: 'string', searchable: true, aggregatable: true }
     );
 
     const [[args]] = esClientMock.termsEnum.mock.calls;

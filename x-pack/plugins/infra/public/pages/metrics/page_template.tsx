@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
-import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 
 interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
   hasData?: boolean;

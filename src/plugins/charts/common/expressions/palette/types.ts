@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { PaletteContinuity } from '@kbn/coloring';
-import { ExpressionFunctionDefinition } from '../../../../expressions';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 export interface PaletteOutput<T = { [key: string]: unknown }> {
   type: 'palette' | 'system_palette';

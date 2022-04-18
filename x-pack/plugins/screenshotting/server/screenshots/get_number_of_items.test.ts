@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import { createMockBrowserDriver } from '../browsers/mock';
 import { createMockLayout } from '../layouts/mock';
 import { getNumberOfItems } from './get_number_of_items';

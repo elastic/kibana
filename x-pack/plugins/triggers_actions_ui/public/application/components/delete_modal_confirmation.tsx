@@ -8,7 +8,7 @@
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 
 export const DeleteModalConfirmation = ({

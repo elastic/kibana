@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor } from 'src/core/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { ConfigSchema, ConfigType } from './schema';
 
 /**

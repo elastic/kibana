@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
   decodeCloudId,

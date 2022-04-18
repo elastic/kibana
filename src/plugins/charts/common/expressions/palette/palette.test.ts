@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 import type { PaletteOutput } from '@kbn/coloring';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { palette, CustomPaletteState, CustomPaletteArguments } from './index';
-import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 import { defaultCustomColors } from '../../constants';
+
 
 describe('palette', () => {
   const fn = functionWrapper(palette()) as (

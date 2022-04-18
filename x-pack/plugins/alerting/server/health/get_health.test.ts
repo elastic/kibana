@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  savedObjectsRepositoryMock,
-  savedObjectsServiceMock,
-} from '../../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { RuleExecutionStatusErrorReasons, HealthStatus } from '../types';
 import { getAlertingHealthStatus, getHealth } from './get_health';
 

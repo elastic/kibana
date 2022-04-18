@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../expressions';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from './types';
 import { paletteIds } from '../../constants';
 

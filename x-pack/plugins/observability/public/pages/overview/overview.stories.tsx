@@ -7,14 +7,15 @@
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { createKibanaReactContext, KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { OverviewPage } from './';
+import { OverviewPage } from '.';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
 import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.mock';
@@ -22,10 +23,6 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import {
-  createKibanaReactContext,
-  KibanaPageTemplate,
-} from '../../../../../../src/plugins/kibana_react/public';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {
