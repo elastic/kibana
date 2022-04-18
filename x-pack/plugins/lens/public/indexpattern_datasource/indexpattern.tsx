@@ -20,6 +20,7 @@ import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -69,7 +70,6 @@ import {
   IndexPatternPersistedState,
   IndexPattern,
 } from './types';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter, VisualizeEditorContext } from '../types';
 import { deleteColumn, isReferenced } from './operations';

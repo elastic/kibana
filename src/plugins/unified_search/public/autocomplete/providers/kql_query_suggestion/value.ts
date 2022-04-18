@@ -8,9 +8,9 @@
 
 import { flatten } from 'lodash';
 import { CoreSetup } from '@kbn/core/public';
+import { IFieldType, IIndexPattern } from '@kbn/data-plugin/public';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
-import { IFieldType, IIndexPattern } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
 import { QuerySuggestion, QuerySuggestionTypes } from '../query_suggestion_provider';
 

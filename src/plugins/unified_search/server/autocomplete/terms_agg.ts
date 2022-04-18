@@ -9,8 +9,8 @@
 import { get, map } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IFieldType, getFieldSubtypeNested } from '@kbn/data-plugin/common';
 import { ConfigSchema } from '../../config';
-import { IFieldType, getFieldSubtypeNested } from '../../../data/common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 
 export async function termsAggSuggestions(

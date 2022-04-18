@@ -16,7 +16,8 @@ import { KqlQuerySuggestionProvider } from './types';
 const keywordComparator = (first: IFieldType, second: IFieldType) => {
   const extensions = ['raw', 'keyword'];
   if (extensions.map((ext) => `${first.name}.${ext}`).includes(second.name)) {
-    return 1;``
+    return 1;
+    ``;
   } else if (extensions.map((ext) => `${second.name}.${ext}`).includes(first.name)) {
     return -1;
   }

@@ -8,7 +8,7 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IFieldType } from '../../../data/common';
+import { IFieldType } from '@kbn/data-plugin/common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 import { ConfigSchema } from '../../config';
 

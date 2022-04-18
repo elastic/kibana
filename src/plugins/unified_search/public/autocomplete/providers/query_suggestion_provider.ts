@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ValueSuggestionsMethod } from '../../../../data/common';
-import { IFieldType, IIndexPattern } from '../../../../data/common';
+import { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import { IFieldType, IIndexPattern } from '@kbn/data-plugin/common';
 
 export enum QuerySuggestionTypes {
   Field = 'field',

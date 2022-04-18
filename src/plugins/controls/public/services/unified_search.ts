@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UnifiedSearchPublicPluginStart } from '../../../unified_search/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface ControlsUnifiedSearchService {
   autocomplete: UnifiedSearchPublicPluginStart['autocomplete'];

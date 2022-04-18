@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UnifiedSearchPublicPluginStart } from '../../../../../../../src/plugins/unified_search/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IndexPatternDimensionEditorProps } from '../dimension_panel';
 import { onDrop } from './on_drop_handler';

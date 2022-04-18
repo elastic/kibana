@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsUnifiedSearchService } from '../unified_search';
 import { ControlsPluginStartDeps } from '../../types';
-import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
 
 export type UnifiedSearchServiceFactory = KibanaPluginServiceFactory<
   ControlsUnifiedSearchService,

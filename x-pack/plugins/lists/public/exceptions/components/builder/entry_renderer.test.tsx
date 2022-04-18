@@ -26,8 +26,8 @@ import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { waitFor } from '@testing-library/dom';
 import { ReactWrapper, mount } from 'enzyme';
-import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
 
+import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
 
 import { BuilderEntryItem } from './entry_renderer';
 

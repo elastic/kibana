@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ConfigSchema } from '../config';
 import { AutocompleteService } from './autocomplete';
 import { AutocompleteSetup } from './autocomplete/autocomplete_service';

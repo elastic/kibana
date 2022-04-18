@@ -15,7 +15,11 @@ import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
 import { setupGetConjunctionSuggestions } from './conjunction';
 import { UnifiedSearchPublicPluginStart } from '../../../types';
-import { QuerySuggestion, QuerySuggestionGetFnArgs, QuerySuggestionGetFn } from '../query_suggestion_provider'
+import {
+  QuerySuggestion,
+  QuerySuggestionGetFnArgs,
+  QuerySuggestionGetFn,
+} from '../query_suggestion_provider';
 
 const cursorSymbol = '@kuery-cursor@';
 

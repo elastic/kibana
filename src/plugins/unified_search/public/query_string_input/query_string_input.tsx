@@ -28,11 +28,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
 import { Toast } from '@kbn/core/public';
-import {
-  IDataPluginServices,
-  Query,
-  getQueryLog,
-} from '@kbn/data-plugin/public';
+import { IDataPluginServices, Query, getQueryLog } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';

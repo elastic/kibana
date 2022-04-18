@@ -28,8 +28,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { KibanaContextProvider, withKibana } from '@kbn/kibana-react-plugin/public';
 
-import { setAutocomplete } from '../../../unified_search/public/services';
-import { unifiedSearchPluginMock } from '../../../unified_search/public/mocks';
+import { setAutocomplete } from '../services';
+import { unifiedSearchPluginMock } from '../mocks';
 
 jest.useFakeTimers();
 

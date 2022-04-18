@@ -16,7 +16,10 @@ import {
   TinymathVariable,
   TinymathNamedArgument,
 } from '@kbn/tinymath';
-import type { UnifiedSearchPublicPluginStart, QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type {
+  UnifiedSearchPublicPluginStart,
+  QuerySuggestion,
+} from '@kbn/unified-search-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';

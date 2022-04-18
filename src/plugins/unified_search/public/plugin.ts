@@ -17,11 +17,11 @@ import { setIndexPatterns, setTheme, setOverlays, setAutocomplete } from './serv
 import { AutocompleteService } from './autocomplete';
 import { createSearchBar } from './search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
-import type { 
+import type {
   UnifiedSearchStartDependencies,
   UnifiedSearchSetupDependencies,
   UnifiedSearchPluginSetup,
-  UnifiedSearchPublicPluginStart
+  UnifiedSearchPublicPluginStart,
 } from './types';
 import { createFilterAction } from './actions/apply_filter_action';
 import { ACTION_GLOBAL_APPLY_FILTER } from './actions';

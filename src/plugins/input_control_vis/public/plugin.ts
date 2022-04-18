@@ -9,7 +9,10 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart, UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/public';
+import {
+  UnifiedSearchPublicPluginStart,
+  UnifiedSearchPluginSetup,
+} from '@kbn/unified-search-plugin/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';

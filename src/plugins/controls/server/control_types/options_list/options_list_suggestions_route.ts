@@ -15,11 +15,11 @@ import { Observable } from 'rxjs';
 import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { FieldSpec, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
+import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import {
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../../common/control_types/options_list/types';
-import { PluginSetup as UnifiedSearchPluginSetup } from '../../../../unified_search/server';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,

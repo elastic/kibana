@@ -43,6 +43,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import {
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
