@@ -15,7 +15,7 @@ import { EuiPageContentBody } from '@elastic/eui';
 import { Route, Switch, Redirect, Router, useLocation } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { EuiText } from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 
 function useQuery() {
   const { search } = useLocation();

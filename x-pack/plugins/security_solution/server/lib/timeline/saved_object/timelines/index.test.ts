@@ -27,7 +27,7 @@ import {
   mockResolveTimelineResponse,
 } from '../../__mocks__/resolve_timeline';
 import { DATA_VIEW_ID_REF_NAME, SAVED_QUERY_ID_REF_NAME, SAVED_QUERY_TYPE } from '../../constants';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../../../../../src/plugins/data_views/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),

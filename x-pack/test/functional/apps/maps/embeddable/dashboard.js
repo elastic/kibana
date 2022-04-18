@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);

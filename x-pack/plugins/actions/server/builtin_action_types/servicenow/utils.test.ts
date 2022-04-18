@@ -7,8 +7,8 @@
 
 import { AxiosError } from 'axios';
 
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   prepareIncident,
   createServiceError,

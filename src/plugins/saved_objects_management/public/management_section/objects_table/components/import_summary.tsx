@@ -27,7 +27,7 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
   IBasePath,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
 import './import_summary.scss';

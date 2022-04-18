@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../../../../src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { StartPlugins } from '../../../types';
 
 type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings' | 'notifications'> &

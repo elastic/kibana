@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { extractReferences } from './extract_references';
 import { RuleParams } from '../../schemas/rule_schemas';
 import {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'src/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
+} from '@kbn/alerting-plugin/server';
+import { ListClient } from '@kbn/lists-plugin/server';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';

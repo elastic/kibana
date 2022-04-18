@@ -7,16 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import type { CoreStart } from 'kibana/public';
+import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
-import { GenericIndexPatternColumn, operationDefinitionMap } from '../index';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
 import type { FieldStatsResponse } from '../../../../../common';
 import type { FrameDatasourceAPI } from '../../../../types';
-import type { FiltersIndexPatternColumn } from '../index';
+import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import { LastValueIndexPatternColumn } from '../last_value';
 

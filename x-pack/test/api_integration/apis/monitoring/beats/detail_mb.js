@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import beatDetailFixture from './fixtures/detail';
+import beatDetailFixture from './fixtures/detail.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {

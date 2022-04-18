@@ -22,14 +22,14 @@ describe('config validation', () => {
         },
         "maxEphemeralActionsPerAlert": 10,
         "rules": Object {
-          "execution": Object {
-            "actions": Object {
-              "max": 100000,
-            },
-          },
           "minimumScheduleInterval": Object {
             "enforce": false,
             "value": "1m",
+          },
+          "run": Object {
+            "actions": Object {
+              "max": 100000,
+            },
           },
         },
       }

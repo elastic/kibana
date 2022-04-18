@@ -7,12 +7,12 @@
 
 import { performance } from 'perf_hooks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
-} from '../../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { isOutdated } from '../../migrations/helpers';
