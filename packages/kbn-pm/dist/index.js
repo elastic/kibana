@@ -1346,22 +1346,7 @@ module.exports = _interopRequireDefault, module.exports.__esModule = true, modul
 
 /***/ }),
 
-/***/ "../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter sync recursive":
-/***/ (function(module, exports) {
-
-function webpackEmptyContext(req) {
-	var e = new Error("Cannot find module '" + req + "'");
-	e.code = 'MODULE_NOT_FOUND';
-	throw e;
-}
-webpackEmptyContext.keys = function() { return []; };
-webpackEmptyContext.resolve = webpackEmptyContext;
-module.exports = webpackEmptyContext;
-webpackEmptyContext.id = "../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter sync recursive";
-
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter/ci_stats_config.js":
+/***/ "../../node_modules/@kbn/ci-stats-core/target_node/ci_stats_config.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1428,7 +1413,42 @@ function parseConfig(log) {
 
 /***/ }),
 
-/***/ "../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter/ci_stats_reporter.js":
+/***/ "../../node_modules/@kbn/ci-stats-core/target_node/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "parseConfig", {
+  enumerable: true,
+  get: function () {
+    return _ci_stats_config.parseConfig;
+  }
+});
+
+var _ci_stats_config = __webpack_require__("../../node_modules/@kbn/ci-stats-core/target_node/ci_stats_config.js");
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/ci-stats-reporter/target_node sync recursive":
+/***/ (function(module, exports) {
+
+function webpackEmptyContext(req) {
+	var e = new Error("Cannot find module '" + req + "'");
+	e.code = 'MODULE_NOT_FOUND';
+	throw e;
+}
+webpackEmptyContext.keys = function() { return []; };
+webpackEmptyContext.resolve = webpackEmptyContext;
+module.exports = webpackEmptyContext;
+webpackEmptyContext.id = "../../node_modules/@kbn/ci-stats-reporter/target_node sync recursive";
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/ci-stats-reporter/target_node/ci_stats_reporter.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1457,7 +1477,7 @@ var _axios = _interopRequireDefault(__webpack_require__("../../node_modules/axio
 
 var _http = _interopRequireDefault(__webpack_require__("../../node_modules/axios/lib/adapters/http.js"));
 
-var _ci_stats_config = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter/ci_stats_config.js");
+var _ciStatsCore = __webpack_require__("../../node_modules/@kbn/ci-stats-core/target_node/index.js");
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -1476,7 +1496,7 @@ class CiStatsReporter {
    * Create a CiStatsReporter by inspecting the ENV for the necessary config
    */
   static fromEnv(log) {
-    return new CiStatsReporter((0, _ci_stats_config.parseConfig)(log), log);
+    return new CiStatsReporter((0, _ciStatsCore.parseConfig)(log), log);
   }
 
   constructor(config, log) {
@@ -1655,7 +1675,7 @@ class CiStatsReporter {
 
     const {
       kibanaPackageJson
-    } = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter sync recursive")(hideFromWebpack.join(''));
+    } = __webpack_require__("../../node_modules/@kbn/ci-stats-reporter/target_node sync recursive")(hideFromWebpack.join(''));
 
     return kibanaPackageJson.branch;
   }
@@ -1672,7 +1692,7 @@ class CiStatsReporter {
 
     const {
       REPO_ROOT
-    } = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter sync recursive")(hideFromWebpack.join(''));
+    } = __webpack_require__("../../node_modules/@kbn/ci-stats-reporter/target_node sync recursive")(hideFromWebpack.join(''));
 
     try {
       return _fs.default.readFileSync(_path.default.resolve(REPO_ROOT, 'data/uuid'), 'utf-8').trim();
@@ -1755,20 +1775,46 @@ exports.CiStatsReporter = CiStatsReporter;
 
 /***/ }),
 
-/***/ "../../node_modules/@kbn/dev-utils/target_node/sort_package_json.js":
+/***/ "../../node_modules/@kbn/ci-stats-reporter/target_node/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _interopRequireDefault = __webpack_require__("../../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "CiStatsReporter", {
+  enumerable: true,
+  get: function () {
+    return _ci_stats_reporter.CiStatsReporter;
+  }
+});
+Object.defineProperty(exports, "getTimeReporter", {
+  enumerable: true,
+  get: function () {
+    return _report_time.getTimeReporter;
+  }
+});
+
+var _ci_stats_reporter = __webpack_require__("../../node_modules/@kbn/ci-stats-reporter/target_node/ci_stats_reporter.js");
+
+var _report_time = __webpack_require__("../../node_modules/@kbn/ci-stats-reporter/target_node/report_time.js");
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/ci-stats-reporter/target_node/report_time.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.sortPackageJson = sortPackageJson;
+exports.getTimeReporter = void 0;
 
-var _sortPackageJson = _interopRequireDefault(__webpack_require__("../../node_modules/sort-package-json/index.js"));
+var _ci_stats_reporter = __webpack_require__("../../node_modules/@kbn/ci-stats-reporter/target_node/ci_stats_reporter.js");
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -1777,655 +1823,22 @@ var _sortPackageJson = _interopRequireDefault(__webpack_require__("../../node_mo
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-function sortPackageJson(json) {
-  return JSON.stringify((0, _sortPackageJson.default)(JSON.parse(json), {
-    // top level keys in the order they were written when this was implemented
-    sortOrder: ['name', 'description', 'keywords', 'private', 'version', 'branch', 'main', 'browser', 'types', 'tsdocMetadata', 'build', 'homepage', 'bugs', 'license', 'kibana', 'author', 'scripts', 'repository', 'engines', 'resolutions']
-  }), null, 2) + '\n';
-}
+const getTimeReporter = (log, group) => {
+  const reporter = _ci_stats_reporter.CiStatsReporter.fromEnv(log);
 
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/stdio/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _observe_lines = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/stdio/observe_lines.js");
-
-Object.keys(_observe_lines).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (key in exports && exports[key] === _observe_lines[key]) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _observe_lines[key];
-    }
-  });
-});
-
-var _observe_readable = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/stdio/observe_readable.js");
-
-Object.keys(_observe_readable).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (key in exports && exports[key] === _observe_readable[key]) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _observe_readable[key];
-    }
-  });
-});
-
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/stdio/observe_lines.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.observeLines = observeLines;
-
-var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
-
-var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
-
-var _observe_readable = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/stdio/observe_readable.js");
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-const SEP = /\r?\n/;
-
-/**
- *  Creates an Observable from a Readable Stream that:
- *   - splits data from `readable` into lines
- *   - completes when `readable` emits "end"
- *   - fails if `readable` emits "errors"
- *
- *  @param  {ReadableStream} readable
- *  @return {Rx.Observable}
- */
-function observeLines(readable) {
-  const done$ = (0, _observe_readable.observeReadable)(readable).pipe((0, _operators.share)());
-  const scan$ = Rx.fromEvent(readable, 'data').pipe((0, _operators.scan)(({
-    buffer
-  }, chunk) => {
-    buffer += chunk;
-    const lines = [];
-
-    while (true) {
-      const match = buffer.match(SEP);
-
-      if (!match || match.index === undefined) {
-        break;
-      }
-
-      lines.push(buffer.slice(0, match.index));
-      buffer = buffer.slice(match.index + match[0].length);
-    }
-
-    return {
-      buffer,
-      lines
-    };
-  }, {
-    buffer: ''
-  }), // stop if done completes or errors
-  (0, _operators.takeUntil)(done$.pipe((0, _operators.materialize)())), (0, _operators.share)());
-  return Rx.merge( // use done$ to provide completion/errors
-  done$, // merge in the "lines" from each step
-  scan$.pipe((0, _operators.mergeMap)(({
-    lines
-  }) => lines || [])), // inject the "unsplit" data at the end
-  scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
-    buffer
-  }) => buffer ? [buffer] : []), // if there were no lines, last() will error, so catch and complete
-  (0, _operators.catchError)(() => Rx.empty())));
-}
-
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/stdio/observe_readable.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.observeReadable = observeReadable;
-
-var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
-
-var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-/**
- *  Produces an Observable from a ReadableSteam that:
- *   - completes on the first "end" event
- *   - fails on the first "error" event
- */
-function observeReadable(readable) {
-  return Rx.race(Rx.fromEvent(readable, 'end').pipe((0, _operators.first)(), (0, _operators.ignoreElements)()), Rx.fromEvent(readable, 'error').pipe((0, _operators.first)(), (0, _operators.mergeMap)(err => Rx.throwError(err))));
-}
-
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/tooling_log/index.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "ToolingLog", {
-  enumerable: true,
-  get: function () {
-    return _tooling_log.ToolingLog;
-  }
-});
-Object.defineProperty(exports, "ToolingLogCollectingWriter", {
-  enumerable: true,
-  get: function () {
-    return _tooling_log_collecting_writer.ToolingLogCollectingWriter;
-  }
-});
-Object.defineProperty(exports, "ToolingLogTextWriter", {
-  enumerable: true,
-  get: function () {
-    return _tooling_log_text_writer.ToolingLogTextWriter;
-  }
-});
-Object.defineProperty(exports, "parseLogLevel", {
-  enumerable: true,
-  get: function () {
-    return _log_levels.parseLogLevel;
-  }
-});
-Object.defineProperty(exports, "pickLevelFromFlags", {
-  enumerable: true,
-  get: function () {
-    return _log_levels.pickLevelFromFlags;
-  }
-});
-
-var _tooling_log = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/tooling_log.js");
-
-var _tooling_log_text_writer = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/tooling_log_text_writer.js");
-
-var _log_levels = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/log_levels.js");
-
-var _tooling_log_collecting_writer = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/tooling_log_collecting_writer.js");
-
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/tooling_log/log_levels.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.LOG_LEVEL_FLAGS = exports.DEFAULT_LOG_LEVEL = void 0;
-exports.getLogLevelFlagsHelp = getLogLevelFlagsHelp;
-exports.parseLogLevel = parseLogLevel;
-exports.pickLevelFromFlags = pickLevelFromFlags;
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'];
-const DEFAULT_LOG_LEVEL = 'info';
-exports.DEFAULT_LOG_LEVEL = DEFAULT_LOG_LEVEL;
-
-function pickLevelFromFlags(flags, options = {}) {
-  if (flags.verbose) return 'verbose';
-  if (flags.debug) return 'debug';
-  if (flags.info) return 'info';
-  if (flags.quiet) return 'error';
-  if (flags.silent) return 'silent';
-  return options.default || DEFAULT_LOG_LEVEL;
-}
-
-const LOG_LEVEL_FLAGS = [{
-  name: 'verbose',
-  help: '--verbose, -v      Log verbosely'
-}, {
-  name: 'info',
-  help: "--info             Don't log debug messages"
-}, {
-  name: 'debug',
-  help: '--debug            Log debug messages (less than verbose)'
-}, {
-  name: 'quiet',
-  help: '--quiet            Only log errors'
-}, {
-  name: 'silent',
-  help: "--silent           Don't log anything"
-}];
-exports.LOG_LEVEL_FLAGS = LOG_LEVEL_FLAGS;
-
-function getLogLevelFlagsHelp(defaultLogLevel = DEFAULT_LOG_LEVEL) {
-  return LOG_LEVEL_FLAGS.filter(({
-    name
-  }) => name !== defaultLogLevel).map(({
-    help
-  }) => help).join('\n');
-}
-
-function parseLogLevel(name) {
-  const i = LEVELS.indexOf(name);
-
-  if (i === -1) {
-    const msg = `Invalid log level "${name}" ` + `(expected one of ${LEVELS.join(',')})`;
-    throw new Error(msg);
-  }
-
-  const flags = {};
-  LEVELS.forEach((level, levelI) => {
-    flags[level] = levelI <= i;
-  });
-  return {
-    name,
-    flags: flags
+  return async (startTime, id, meta) => {
+    await reporter.timings({
+      timings: [{
+        group,
+        id,
+        ms: Date.now() - startTime,
+        meta
+      }]
+    });
   };
-}
-
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/tooling_log/tooling_log.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__("../../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.ToolingLog = void 0;
-
-var _defineProperty2 = _interopRequireDefault(__webpack_require__("../../node_modules/@babel/runtime/helpers/defineProperty.js"));
-
-var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
-
-var _tooling_log_text_writer = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/tooling_log_text_writer.js");
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-class ToolingLog {
-  constructor(writerConfig, options) {
-    (0, _defineProperty2.default)(this, "indentWidth$", void 0);
-    (0, _defineProperty2.default)(this, "writers$", void 0);
-    (0, _defineProperty2.default)(this, "written$", void 0);
-    (0, _defineProperty2.default)(this, "type", void 0);
-    this.indentWidth$ = options !== null && options !== void 0 && options.parent ? options.parent.indentWidth$ : new Rx.BehaviorSubject(0);
-    this.writers$ = options !== null && options !== void 0 && options.parent ? options.parent.writers$ : new Rx.BehaviorSubject([]);
-
-    if (!(options !== null && options !== void 0 && options.parent) && writerConfig) {
-      this.writers$.next([new _tooling_log_text_writer.ToolingLogTextWriter(writerConfig)]);
-    }
-
-    this.written$ = options !== null && options !== void 0 && options.parent ? options.parent.written$ : new Rx.Subject();
-    this.type = options === null || options === void 0 ? void 0 : options.type;
-  }
-  /**
-   * Get the current indentation level of the ToolingLog
-   */
-
-
-  getIndent() {
-    return this.indentWidth$.getValue();
-  }
-  /**
-   * Indent the output of the ToolingLog by some character (4 is a good choice usually).
-   *
-   * If provided, the `block` function will be executed and once it's promise is resolved
-   * or rejected the indentation will be reset to its original state.
-   *
-   * @param delta the number of spaces to increase/decrease the indentation
-   * @param block a function to run and reset any indentation changes after
-   */
-
-
-  indent(delta = 0, block) {
-    const originalWidth = this.indentWidth$.getValue();
-    this.indentWidth$.next(Math.max(originalWidth + delta, 0));
-
-    if (!block) {
-      return;
-    }
-
-    const maybePromise = block();
-
-    if (typeof maybePromise === 'object' && maybePromise && typeof maybePromise.then === 'function') {
-      return (async () => {
-        try {
-          return await maybePromise;
-        } finally {
-          this.indentWidth$.next(originalWidth);
-        }
-      })();
-    }
-
-    this.indentWidth$.next(originalWidth);
-    return maybePromise;
-  }
-
-  verbose(...args) {
-    this.sendToWriters('verbose', args);
-  }
-
-  debug(...args) {
-    this.sendToWriters('debug', args);
-  }
-
-  info(...args) {
-    this.sendToWriters('info', args);
-  }
-
-  success(...args) {
-    this.sendToWriters('success', args);
-  }
-
-  warning(...args) {
-    this.sendToWriters('warning', args);
-  }
-
-  error(error) {
-    this.sendToWriters('error', [error]);
-  }
-
-  write(...args) {
-    this.sendToWriters('write', args);
-  }
-
-  getWriters() {
-    return [...this.writers$.getValue()];
-  }
-
-  setWriters(writers) {
-    this.writers$.next([...writers]);
-  }
-
-  getWritten$() {
-    return this.written$.asObservable();
-  }
-  /**
-   * Create a new ToolingLog which sets a different "type", allowing messages to be filtered out by "source"
-   * @param type A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`
-   */
-
-
-  withType(type) {
-    return new ToolingLog(undefined, {
-      type,
-      parent: this
-    });
-  }
-
-  sendToWriters(type, args) {
-    const indent = this.indentWidth$.getValue();
-    const writers = this.writers$.getValue();
-    const msg = {
-      type,
-      indent,
-      source: this.type,
-      args
-    };
-    let written = false;
-
-    for (const writer of writers) {
-      if (writer.write(msg)) {
-        written = true;
-      }
-    }
-
-    if (written) {
-      this.written$.next(msg);
-    }
-  }
-
-}
-
-exports.ToolingLog = ToolingLog;
-
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/tooling_log/tooling_log_collecting_writer.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__("../../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.ToolingLogCollectingWriter = void 0;
-
-var _defineProperty2 = _interopRequireDefault(__webpack_require__("../../node_modules/@babel/runtime/helpers/defineProperty.js"));
-
-var _tooling_log_text_writer = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/tooling_log_text_writer.js");
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-class ToolingLogCollectingWriter extends _tooling_log_text_writer.ToolingLogTextWriter {
-  constructor(level = 'verbose') {
-    super({
-      level,
-      writeTo: {
-        write: msg => {
-          // trim trailing new line
-          this.messages.push(msg.slice(0, -1));
-        }
-      }
-    });
-    (0, _defineProperty2.default)(this, "messages", []);
-  }
-  /**
-   * Called by ToolingLog, extends messages with the source if message includes one.
-   */
-
-
-  write(msg) {
-    if (msg.source) {
-      return super.write({ ...msg,
-        args: [`source[${msg.source}]`, ...msg.args]
-      });
-    }
-
-    return super.write(msg);
-  }
-
-}
-
-exports.ToolingLogCollectingWriter = ToolingLogCollectingWriter;
-
-/***/ }),
-
-/***/ "../../node_modules/@kbn/dev-utils/target_node/tooling_log/tooling_log_text_writer.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__("../../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.ToolingLogTextWriter = void 0;
-
-var _defineProperty2 = _interopRequireDefault(__webpack_require__("../../node_modules/@babel/runtime/helpers/defineProperty.js"));
-
-var _util = __webpack_require__("util");
-
-var _chalk = _interopRequireDefault(__webpack_require__("../../node_modules/chalk/source/index.js"));
-
-var _log_levels = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/log_levels.js");
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-const {
-  magentaBright,
-  yellow,
-  red,
-  blue,
-  green,
-  dim
-} = _chalk.default;
-const PREFIX_INDENT = ' '.repeat(6);
-const MSG_PREFIXES = {
-  verbose: ` ${magentaBright('sill')} `,
-  debug: ` ${dim('debg')} `,
-  info: ` ${blue('info')} `,
-  success: ` ${green('succ')} `,
-  warning: ` ${yellow('warn')} `,
-  error: `${red('ERROR')} `
 };
 
-const has = (obj, key) => obj.hasOwnProperty(key);
-
-function shouldWriteType(level, type) {
-  if (type === 'write') {
-    return level.name !== 'silent';
-  }
-
-  return Boolean(level.flags[type === 'success' ? 'info' : type]);
-}
-
-function stringifyError(error) {
-  if (typeof error !== 'string' && !(error instanceof Error)) {
-    error = new Error(`"${error}" thrown`);
-  }
-
-  if (typeof error === 'string') {
-    return error;
-  }
-
-  return error.stack || error.message || error;
-}
-
-class ToolingLogTextWriter {
-  constructor(config) {
-    (0, _defineProperty2.default)(this, "level", void 0);
-    (0, _defineProperty2.default)(this, "writeTo", void 0);
-    (0, _defineProperty2.default)(this, "ignoreSources", void 0);
-    this.level = (0, _log_levels.parseLogLevel)(config.level);
-    this.writeTo = config.writeTo;
-    this.ignoreSources = config.ignoreSources;
-
-    if (!this.writeTo || typeof this.writeTo.write !== 'function') {
-      throw new Error('ToolingLogTextWriter requires the `writeTo` option be set to a stream (like process.stdout)');
-    }
-  }
-
-  write(msg) {
-    if (!shouldWriteType(this.level, msg.type)) {
-      return false;
-    }
-
-    if (this.ignoreSources && msg.source && this.ignoreSources.includes(msg.source)) {
-      if (msg.type === 'write') {
-        const txt = (0, _util.format)(msg.args[0], ...msg.args.slice(1)); // Ensure that Elasticsearch deprecation log messages from Kibana aren't ignored
-
-        if (!/elasticsearch\.deprecation/.test(txt)) {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    }
-
-    const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
-    ToolingLogTextWriter.write(this.writeTo, prefix, msg);
-    return true;
-  }
-
-  static write(writeTo, prefix, msg) {
-    const txt = msg.type === 'error' ? stringifyError(msg.args[0]) : (0, _util.format)(msg.args[0], ...msg.args.slice(1));
-    (prefix + txt).split('\n').forEach((line, i) => {
-      let lineIndent = '';
-
-      if (msg.indent > 0) {
-        // if we are indenting write some spaces followed by a symbol
-        lineIndent += ' '.repeat(msg.indent - 1);
-        lineIndent += line.startsWith('-') ? '└' : '│';
-      }
-
-      if (line && prefix && i > 0) {
-        // apply additional indentation to lines after
-        // the first if this message gets a prefix
-        lineIndent += PREFIX_INDENT;
-      }
-
-      writeTo.write(`${lineIndent}${line}\n`);
-    });
-  }
-
-}
-
-exports.ToolingLogTextWriter = ToolingLogTextWriter;
+exports.getTimeReporter = getTimeReporter;
 
 /***/ }),
 
@@ -2636,6 +2049,688 @@ function simpleKibanaPlatformPluginDiscovery(scanDirs, pluginPaths) {
 
   return manifestPaths.map(_parse_kibana_platform_plugin.parseKibanaPlatformPlugin);
 }
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/sort-package-json/target_node/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__("../../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.sortPackageJson = sortPackageJson;
+
+var _sortPackageJson = _interopRequireDefault(__webpack_require__("../../node_modules/sort-package-json/index.js"));
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+function sortPackageJson(json) {
+  return JSON.stringify((0, _sortPackageJson.default)(JSON.parse(json), {
+    // top level keys in the order they were written when this was implemented
+    sortOrder: ['name', 'description', 'keywords', 'private', 'version', 'branch', 'main', 'browser', 'types', 'tsdocMetadata', 'build', 'homepage', 'bugs', 'license', 'kibana', 'author', 'scripts', 'repository', 'engines', 'resolutions']
+  }), null, 2) + '\n';
+}
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/stdio-dev-helpers/target_node/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "observeLines", {
+  enumerable: true,
+  get: function () {
+    return _observe_lines.observeLines;
+  }
+});
+Object.defineProperty(exports, "observeReadable", {
+  enumerable: true,
+  get: function () {
+    return _observe_readable.observeReadable;
+  }
+});
+
+var _observe_lines = __webpack_require__("../../node_modules/@kbn/stdio-dev-helpers/target_node/observe_lines.js");
+
+var _observe_readable = __webpack_require__("../../node_modules/@kbn/stdio-dev-helpers/target_node/observe_readable.js");
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/stdio-dev-helpers/target_node/observe_lines.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.observeLines = observeLines;
+
+var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
+
+var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
+
+var _observe_readable = __webpack_require__("../../node_modules/@kbn/stdio-dev-helpers/target_node/observe_readable.js");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+const SEP = /\r?\n/;
+
+/**
+ *  Creates an Observable from a Readable Stream that:
+ *   - splits data from `readable` into lines
+ *   - completes when `readable` emits "end"
+ *   - fails if `readable` emits "errors"
+ *
+ *  @param  {ReadableStream} readable
+ *  @return {Rx.Observable}
+ */
+function observeLines(readable) {
+  const done$ = (0, _observe_readable.observeReadable)(readable).pipe((0, _operators.share)());
+  const scan$ = Rx.fromEvent(readable, 'data').pipe((0, _operators.scan)(({
+    buffer
+  }, chunk) => {
+    buffer += chunk;
+    const lines = [];
+
+    while (true) {
+      const match = buffer.match(SEP);
+
+      if (!match || match.index === undefined) {
+        break;
+      }
+
+      lines.push(buffer.slice(0, match.index));
+      buffer = buffer.slice(match.index + match[0].length);
+    }
+
+    return {
+      buffer,
+      lines
+    };
+  }, {
+    buffer: ''
+  }), // stop if done completes or errors
+  (0, _operators.takeUntil)(done$.pipe((0, _operators.materialize)())), (0, _operators.share)());
+  return Rx.merge( // use done$ to provide completion/errors
+  done$, // merge in the "lines" from each step
+  scan$.pipe((0, _operators.mergeMap)(({
+    lines
+  }) => lines || [])), // inject the "unsplit" data at the end
+  scan$.pipe((0, _operators.last)(), (0, _operators.mergeMap)(({
+    buffer
+  }) => buffer ? [buffer] : []), // if there were no lines, last() will error, so catch and complete
+  (0, _operators.catchError)(() => Rx.empty())));
+}
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/stdio-dev-helpers/target_node/observe_readable.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.observeReadable = observeReadable;
+
+var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
+
+var _operators = __webpack_require__("../../node_modules/rxjs/dist/esm5/operators/index.js");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+/**
+ *  Produces an Observable from a ReadableSteam that:
+ *   - completes on the first "end" event
+ *   - fails on the first "error" event
+ */
+function observeReadable(readable) {
+  return Rx.race(Rx.fromEvent(readable, 'end').pipe((0, _operators.first)(), (0, _operators.ignoreElements)()), Rx.fromEvent(readable, 'error').pipe((0, _operators.first)(), (0, _operators.mergeMap)(err => Rx.throwError(err))));
+}
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/tooling-log/target_node/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "DEFAULT_LOG_LEVEL", {
+  enumerable: true,
+  get: function () {
+    return _log_levels.DEFAULT_LOG_LEVEL;
+  }
+});
+Object.defineProperty(exports, "LOG_LEVEL_FLAGS", {
+  enumerable: true,
+  get: function () {
+    return _log_levels.LOG_LEVEL_FLAGS;
+  }
+});
+Object.defineProperty(exports, "ToolingLog", {
+  enumerable: true,
+  get: function () {
+    return _tooling_log.ToolingLog;
+  }
+});
+Object.defineProperty(exports, "ToolingLogCollectingWriter", {
+  enumerable: true,
+  get: function () {
+    return _tooling_log_collecting_writer.ToolingLogCollectingWriter;
+  }
+});
+Object.defineProperty(exports, "ToolingLogTextWriter", {
+  enumerable: true,
+  get: function () {
+    return _tooling_log_text_writer.ToolingLogTextWriter;
+  }
+});
+Object.defineProperty(exports, "getLogLevelFlagsHelp", {
+  enumerable: true,
+  get: function () {
+    return _log_levels.getLogLevelFlagsHelp;
+  }
+});
+Object.defineProperty(exports, "parseLogLevel", {
+  enumerable: true,
+  get: function () {
+    return _log_levels.parseLogLevel;
+  }
+});
+Object.defineProperty(exports, "pickLevelFromFlags", {
+  enumerable: true,
+  get: function () {
+    return _log_levels.pickLevelFromFlags;
+  }
+});
+
+var _tooling_log = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/tooling_log.js");
+
+var _tooling_log_text_writer = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/tooling_log_text_writer.js");
+
+var _log_levels = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/log_levels.js");
+
+var _tooling_log_collecting_writer = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/tooling_log_collecting_writer.js");
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/tooling-log/target_node/log_levels.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.LOG_LEVEL_FLAGS = exports.DEFAULT_LOG_LEVEL = void 0;
+exports.getLogLevelFlagsHelp = getLogLevelFlagsHelp;
+exports.parseLogLevel = parseLogLevel;
+exports.pickLevelFromFlags = pickLevelFromFlags;
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+const LEVELS = ['silent', 'error', 'warning', 'success', 'info', 'debug', 'verbose'];
+const DEFAULT_LOG_LEVEL = 'info';
+exports.DEFAULT_LOG_LEVEL = DEFAULT_LOG_LEVEL;
+
+function pickLevelFromFlags(flags, options = {}) {
+  if (flags.verbose) return 'verbose';
+  if (flags.debug) return 'debug';
+  if (flags.info) return 'info';
+  if (flags.quiet) return 'error';
+  if (flags.silent) return 'silent';
+  return options.default || DEFAULT_LOG_LEVEL;
+}
+
+const LOG_LEVEL_FLAGS = [{
+  name: 'verbose',
+  help: '--verbose, -v      Log verbosely'
+}, {
+  name: 'info',
+  help: "--info             Don't log debug messages"
+}, {
+  name: 'debug',
+  help: '--debug            Log debug messages (less than verbose)'
+}, {
+  name: 'quiet',
+  help: '--quiet            Only log errors'
+}, {
+  name: 'silent',
+  help: "--silent           Don't log anything"
+}];
+exports.LOG_LEVEL_FLAGS = LOG_LEVEL_FLAGS;
+
+function getLogLevelFlagsHelp(defaultLogLevel = DEFAULT_LOG_LEVEL) {
+  return LOG_LEVEL_FLAGS.filter(({
+    name
+  }) => name !== defaultLogLevel).map(({
+    help
+  }) => help).join('\n');
+}
+
+function parseLogLevel(name) {
+  const i = LEVELS.indexOf(name);
+
+  if (i === -1) {
+    const msg = `Invalid log level "${name}" ` + `(expected one of ${LEVELS.join(',')})`;
+    throw new Error(msg);
+  }
+
+  const flags = {};
+  LEVELS.forEach((level, levelI) => {
+    flags[level] = levelI <= i;
+  });
+  return {
+    name,
+    flags: flags
+  };
+}
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/tooling-log/target_node/tooling_log.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__("../../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ToolingLog = void 0;
+
+var _defineProperty2 = _interopRequireDefault(__webpack_require__("../../node_modules/@babel/runtime/helpers/defineProperty.js"));
+
+var Rx = _interopRequireWildcard(__webpack_require__("../../node_modules/rxjs/dist/esm5/index.js"));
+
+var _tooling_log_text_writer = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/tooling_log_text_writer.js");
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+class ToolingLog {
+  constructor(writerConfig, options) {
+    (0, _defineProperty2.default)(this, "indentWidth$", void 0);
+    (0, _defineProperty2.default)(this, "writers$", void 0);
+    (0, _defineProperty2.default)(this, "written$", void 0);
+    (0, _defineProperty2.default)(this, "type", void 0);
+    this.indentWidth$ = options !== null && options !== void 0 && options.parent ? options.parent.indentWidth$ : new Rx.BehaviorSubject(0);
+    this.writers$ = options !== null && options !== void 0 && options.parent ? options.parent.writers$ : new Rx.BehaviorSubject([]);
+
+    if (!(options !== null && options !== void 0 && options.parent) && writerConfig) {
+      this.writers$.next([new _tooling_log_text_writer.ToolingLogTextWriter(writerConfig)]);
+    }
+
+    this.written$ = options !== null && options !== void 0 && options.parent ? options.parent.written$ : new Rx.Subject();
+    this.type = options === null || options === void 0 ? void 0 : options.type;
+  }
+  /**
+   * Get the current indentation level of the ToolingLog
+   */
+
+
+  getIndent() {
+    return this.indentWidth$.getValue();
+  }
+  /**
+   * Indent the output of the ToolingLog by some character (4 is a good choice usually).
+   *
+   * If provided, the `block` function will be executed and once it's promise is resolved
+   * or rejected the indentation will be reset to its original state.
+   *
+   * @param delta the number of spaces to increase/decrease the indentation
+   * @param block a function to run and reset any indentation changes after
+   */
+
+
+  indent(delta = 0, block) {
+    const originalWidth = this.indentWidth$.getValue();
+    this.indentWidth$.next(Math.max(originalWidth + delta, 0));
+
+    if (!block) {
+      return;
+    }
+
+    const maybePromise = block();
+
+    if (typeof maybePromise === 'object' && maybePromise && typeof maybePromise.then === 'function') {
+      return (async () => {
+        try {
+          return await maybePromise;
+        } finally {
+          this.indentWidth$.next(originalWidth);
+        }
+      })();
+    }
+
+    this.indentWidth$.next(originalWidth);
+    return maybePromise;
+  }
+
+  verbose(...args) {
+    this.sendToWriters('verbose', args);
+  }
+
+  debug(...args) {
+    this.sendToWriters('debug', args);
+  }
+
+  info(...args) {
+    this.sendToWriters('info', args);
+  }
+
+  success(...args) {
+    this.sendToWriters('success', args);
+  }
+
+  warning(...args) {
+    this.sendToWriters('warning', args);
+  }
+
+  error(error) {
+    this.sendToWriters('error', [error]);
+  }
+
+  write(...args) {
+    this.sendToWriters('write', args);
+  }
+
+  getWriters() {
+    return [...this.writers$.getValue()];
+  }
+
+  setWriters(writers) {
+    this.writers$.next([...writers]);
+  }
+
+  getWritten$() {
+    return this.written$.asObservable();
+  }
+  /**
+   * Create a new ToolingLog which sets a different "type", allowing messages to be filtered out by "source"
+   * @param type A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`
+   */
+
+
+  withType(type) {
+    return new ToolingLog(undefined, {
+      type,
+      parent: this
+    });
+  }
+
+  sendToWriters(type, args) {
+    const indent = this.indentWidth$.getValue();
+    const writers = this.writers$.getValue();
+    const msg = {
+      type,
+      indent,
+      source: this.type,
+      args
+    };
+    let written = false;
+
+    for (const writer of writers) {
+      if (writer.write(msg)) {
+        written = true;
+      }
+    }
+
+    if (written) {
+      this.written$.next(msg);
+    }
+  }
+
+}
+
+exports.ToolingLog = ToolingLog;
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/tooling-log/target_node/tooling_log_collecting_writer.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__("../../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ToolingLogCollectingWriter = void 0;
+
+var _defineProperty2 = _interopRequireDefault(__webpack_require__("../../node_modules/@babel/runtime/helpers/defineProperty.js"));
+
+var _tooling_log_text_writer = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/tooling_log_text_writer.js");
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+class ToolingLogCollectingWriter extends _tooling_log_text_writer.ToolingLogTextWriter {
+  constructor(level = 'verbose') {
+    super({
+      level,
+      writeTo: {
+        write: msg => {
+          // trim trailing new line
+          this.messages.push(msg.slice(0, -1));
+        }
+      }
+    });
+    (0, _defineProperty2.default)(this, "messages", []);
+  }
+  /**
+   * Called by ToolingLog, extends messages with the source if message includes one.
+   */
+
+
+  write(msg) {
+    if (msg.source) {
+      return super.write({ ...msg,
+        args: [`source[${msg.source}]`, ...msg.args]
+      });
+    }
+
+    return super.write(msg);
+  }
+
+}
+
+exports.ToolingLogCollectingWriter = ToolingLogCollectingWriter;
+
+/***/ }),
+
+/***/ "../../node_modules/@kbn/tooling-log/target_node/tooling_log_text_writer.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__("../../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ToolingLogTextWriter = void 0;
+
+var _defineProperty2 = _interopRequireDefault(__webpack_require__("../../node_modules/@babel/runtime/helpers/defineProperty.js"));
+
+var _util = __webpack_require__("util");
+
+var _chalk = _interopRequireDefault(__webpack_require__("../../node_modules/chalk/source/index.js"));
+
+var _log_levels = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/log_levels.js");
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+const {
+  magentaBright,
+  yellow,
+  red,
+  blue,
+  green,
+  dim
+} = _chalk.default;
+const PREFIX_INDENT = ' '.repeat(6);
+const MSG_PREFIXES = {
+  verbose: ` ${magentaBright('sill')} `,
+  debug: ` ${dim('debg')} `,
+  info: ` ${blue('info')} `,
+  success: ` ${green('succ')} `,
+  warning: ` ${yellow('warn')} `,
+  error: `${red('ERROR')} `
+};
+
+const has = (obj, key) => obj.hasOwnProperty(key);
+
+function shouldWriteType(level, type) {
+  if (type === 'write') {
+    return level.name !== 'silent';
+  }
+
+  return Boolean(level.flags[type === 'success' ? 'info' : type]);
+}
+
+function stringifyError(error) {
+  if (typeof error !== 'string' && !(error instanceof Error)) {
+    error = new Error(`"${error}" thrown`);
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  return error.stack || error.message || error;
+}
+
+class ToolingLogTextWriter {
+  constructor(config) {
+    (0, _defineProperty2.default)(this, "level", void 0);
+    (0, _defineProperty2.default)(this, "writeTo", void 0);
+    (0, _defineProperty2.default)(this, "ignoreSources", void 0);
+    this.level = (0, _log_levels.parseLogLevel)(config.level);
+    this.writeTo = config.writeTo;
+    this.ignoreSources = config.ignoreSources;
+
+    if (!this.writeTo || typeof this.writeTo.write !== 'function') {
+      throw new Error('ToolingLogTextWriter requires the `writeTo` option be set to a stream (like process.stdout)');
+    }
+  }
+
+  write(msg) {
+    if (!shouldWriteType(this.level, msg.type)) {
+      return false;
+    }
+
+    if (this.ignoreSources && msg.source && this.ignoreSources.includes(msg.source)) {
+      if (msg.type === 'write') {
+        const txt = (0, _util.format)(msg.args[0], ...msg.args.slice(1)); // Ensure that Elasticsearch deprecation log messages from Kibana aren't ignored
+
+        if (!/elasticsearch\.deprecation/.test(txt)) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+
+    const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
+    ToolingLogTextWriter.write(this.writeTo, prefix, msg);
+    return true;
+  }
+
+  static write(writeTo, prefix, msg) {
+    const txt = msg.type === 'error' ? stringifyError(msg.args[0]) : (0, _util.format)(msg.args[0], ...msg.args.slice(1));
+    (prefix + txt).split('\n').forEach((line, i) => {
+      let lineIndent = '';
+
+      if (msg.indent > 0) {
+        // if we are indenting write some spaces followed by a symbol
+        lineIndent += ' '.repeat(msg.indent - 1);
+        lineIndent += line.startsWith('-') ? '└' : '│';
+      }
+
+      if (line && prefix && i > 0) {
+        // apply additional indentation to lines after
+        // the first if this message gets a prefix
+        lineIndent += PREFIX_INDENT;
+      }
+
+      writeTo.write(`${lineIndent}${line}\n`);
+    });
+  }
+
+}
+
+exports.ToolingLogTextWriter = ToolingLogTextWriter;
 
 /***/ }),
 
@@ -86028,8 +86123,8 @@ module.exports.sync = (filePath, data, options) => {
 /* harmony import */ var getopts__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(getopts__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("path");
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/index.js");
-/* harmony import */ var _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _kbn_tooling_log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/index.js");
+/* harmony import */ var _kbn_tooling_log__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_kbn_tooling_log__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _commands__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/commands/index.ts");
 /* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/run.ts");
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/utils/log.ts");
@@ -86080,7 +86175,7 @@ function help() {
 }
 
 async function run(argv) {
-  _utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].setLogLevel(Object(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_3__["pickLevelFromFlags"])(getopts__WEBPACK_IMPORTED_MODULE_1___default()(argv, {
+  _utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].setLogLevel(Object(_kbn_tooling_log__WEBPACK_IMPORTED_MODULE_3__["pickLevelFromFlags"])(getopts__WEBPACK_IMPORTED_MODULE_1___default()(argv, {
     boolean: ['verbose', 'debug', 'quiet', 'silent', 'skip-missing']
   }))); // We can simplify this setup (and remove this extra handling) once Yarn
   // starts forwarding the `--` directly to this script, see
@@ -86141,8 +86236,8 @@ async function run(argv) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BootstrapCommand; });
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("path");
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter/ci_stats_reporter.js");
-/* harmony import */ var _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _kbn_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../../node_modules/@kbn/ci-stats-reporter/target_node/index.js");
+/* harmony import */ var _kbn_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_kbn_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/log.ts");
 /* harmony import */ var _utils_child_process__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/child_process.ts");
 /* harmony import */ var _utils_link_project_executables__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/link_project_executables.ts");
@@ -86193,7 +86288,7 @@ const BootstrapCommand = {
     const batchedNonBazelProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_5__[/* topologicallyBatchProjects */ "f"])(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = ((_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path) || '';
     const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true;
-    const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__[/* log */ "a"]);
+    const reporter = _kbn_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__[/* log */ "a"]);
     const timings = [];
 
     const time = async (id, body) => {
@@ -87090,8 +87185,8 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return runCommand; });
-/* harmony import */ var _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/ci_stats_reporter/ci_stats_reporter.js");
-/* harmony import */ var _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _kbn_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/@kbn/ci-stats-reporter/target_node/index.js");
+/* harmony import */ var _kbn_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _kbn_plugin_discovery__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../../node_modules/@kbn/plugin-discovery/target_node/index.js");
 /* harmony import */ var _kbn_plugin_discovery__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_kbn_plugin_discovery__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _utils_errors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/errors.ts");
@@ -87157,7 +87252,7 @@ async function runCommand(command, config) {
       return;
     }
 
-    const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_3__[/* log */ "a"]);
+    const reporter = _kbn_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_3__[/* log */ "a"]);
 
     try {
       await reporter.timings({
@@ -87444,8 +87539,8 @@ async function installBazelTools(repoRootPath) {
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../../node_modules/rxjs/dist/esm5/internal/Subject.js");
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../../node_modules/rxjs/dist/esm5/internal/observable/merge.js");
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../../node_modules/rxjs/dist/esm5/internal/operators/tap.js");
-/* harmony import */ var _kbn_dev_utils_stdio__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/stdio/index.js");
-/* harmony import */ var _kbn_dev_utils_stdio__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_stdio__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _kbn_stdio_dev_helpers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../../node_modules/@kbn/stdio-dev-helpers/target_node/index.js");
+/* harmony import */ var _kbn_stdio_dev_helpers__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_kbn_stdio_dev_helpers__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/child_process.ts");
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/utils/log.ts");
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/utils/errors.ts");
@@ -87484,7 +87579,7 @@ async function runBazelCommandWithRunner(bazelCommandRunner, bazelArgs, offline 
   const bazelLogs$ = new rxjs__WEBPACK_IMPORTED_MODULE_1__[/* Subject */ "a"](); // Bazel outputs machine readable output into stdout and human readable output goes to stderr.
   // Therefore we need to get both. In order to get errors we need to parse the actual text line
 
-  const bazelLogSubscription = rxjs__WEBPACK_IMPORTED_MODULE_2__[/* merge */ "a"](Object(_kbn_dev_utils_stdio__WEBPACK_IMPORTED_MODULE_4__["observeLines"])(bazelProc.stdout).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__[/* tap */ "a"])(line => _log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].info(`${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.cyan(`[${bazelCommandRunner}]`)} ${line}`))), Object(_kbn_dev_utils_stdio__WEBPACK_IMPORTED_MODULE_4__["observeLines"])(bazelProc.stderr).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__[/* tap */ "a"])(line => _log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].info(`${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.cyan(`[${bazelCommandRunner}]`)} ${line}`)))).subscribe(bazelLogs$); // Wait for process and logs to finish, unsubscribing in the end
+  const bazelLogSubscription = rxjs__WEBPACK_IMPORTED_MODULE_2__[/* merge */ "a"](Object(_kbn_stdio_dev_helpers__WEBPACK_IMPORTED_MODULE_4__["observeLines"])(bazelProc.stdout).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__[/* tap */ "a"])(line => _log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].info(`${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.cyan(`[${bazelCommandRunner}]`)} ${line}`))), Object(_kbn_stdio_dev_helpers__WEBPACK_IMPORTED_MODULE_4__["observeLines"])(bazelProc.stderr).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__[/* tap */ "a"])(line => _log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].info(`${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.cyan(`[${bazelCommandRunner}]`)} ${line}`)))).subscribe(bazelLogs$); // Wait for process and logs to finish, unsubscribing in the end
 
   try {
     await bazelProc;
@@ -88216,8 +88311,8 @@ async function linkProjectExecutables(projectsByName, projectGraph) {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return log; });
 /* unused harmony export Log */
-/* harmony import */ var _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/tooling_log/index.js");
-/* harmony import */ var _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _kbn_tooling_log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/@kbn/tooling-log/target_node/index.js");
+/* harmony import */ var _kbn_tooling_log__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_tooling_log__WEBPACK_IMPORTED_MODULE_0__);
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 /*
@@ -88229,7 +88324,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
  */
 
 
-class Log extends _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["ToolingLog"] {
+class Log extends _kbn_tooling_log__WEBPACK_IMPORTED_MODULE_0__["ToolingLog"] {
   constructor() {
     super();
 
@@ -88239,8 +88334,8 @@ class Log extends _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["Tooli
   }
 
   setLogLevel(level) {
-    this.logLevel = Object(_kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["parseLogLevel"])(level);
-    this.setWriters([new _kbn_dev_utils_tooling_log__WEBPACK_IMPORTED_MODULE_0__["ToolingLogTextWriter"]({
+    this.logLevel = Object(_kbn_tooling_log__WEBPACK_IMPORTED_MODULE_0__["parseLogLevel"])(level);
+    this.setWriters([new _kbn_tooling_log__WEBPACK_IMPORTED_MODULE_0__["ToolingLogTextWriter"]({
       level: this.logLevel.name,
       writeTo: process.stdout
     })]);
@@ -88980,8 +89075,8 @@ async function regenerateBaseTsconfig(plugins, repoRoot) {
 /* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(fs_promises__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("path");
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _kbn_dev_utils_sort_package_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../../node_modules/@kbn/dev-utils/target_node/sort_package_json.js");
-/* harmony import */ var _kbn_dev_utils_sort_package_json__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_kbn_dev_utils_sort_package_json__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _kbn_sort_package_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../../node_modules/@kbn/sort-package-json/target_node/index.js");
+/* harmony import */ var _kbn_sort_package_json__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_kbn_sort_package_json__WEBPACK_IMPORTED_MODULE_2__);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -88995,7 +89090,7 @@ async function regenerateBaseTsconfig(plugins, repoRoot) {
 async function regeneratePackageJson(rootPath) {
   const path = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(rootPath, 'package.json');
   const json = await fs_promises__WEBPACK_IMPORTED_MODULE_0___default.a.readFile(path, 'utf8');
-  await fs_promises__WEBPACK_IMPORTED_MODULE_0___default.a.writeFile(path, Object(_kbn_dev_utils_sort_package_json__WEBPACK_IMPORTED_MODULE_2__["sortPackageJson"])(json));
+  await fs_promises__WEBPACK_IMPORTED_MODULE_0___default.a.writeFile(path, Object(_kbn_sort_package_json__WEBPACK_IMPORTED_MODULE_2__["sortPackageJson"])(json));
 }
 
 /***/ }),

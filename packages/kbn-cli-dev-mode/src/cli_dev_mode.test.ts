@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import * as Rx from 'rxjs';
-import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
 import { REPO_ROOT } from '@kbn/utils';
 
