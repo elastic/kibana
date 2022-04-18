@@ -59,7 +59,7 @@ image::images/highlights-lens-annotations.png[Annotations in Lens visualzations]
 Open and edit your Time Series *TSVB* visualizations in *Lens*,
 the drag-and-drop visualization editor that provides you with additional
 visualization types, reference lines, and more.
-For more information, check {kibana-ref}/edit-visualizations-in-lens.html[Edit visualizations in Lens].
+For more information, check {kibana-ref}/tsvb.html#edit-visualizations-in-lens[Edit visualizations in Lens].
 
 [role="screenshot"]
 image::images/highlights-lens-tsvb.gif[TSVB visualization in Lens]
