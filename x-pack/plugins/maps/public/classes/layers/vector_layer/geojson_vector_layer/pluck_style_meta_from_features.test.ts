@@ -13,7 +13,7 @@ import {
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
-import { IVectorLayer } from '../../vector_layer/vector_layer';
+import { IVectorLayer } from '../vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
 import { DynamicColorProperty } from '../../../styles/vector/properties/dynamic_color_property';
 import { InlineField } from '../../../fields/inline_field';
