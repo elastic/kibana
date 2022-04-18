@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { parseTileKey, getTileBoundingBox, expandToTileBoundaries } from './geo_tile_utils';
+import {
+  getTileKey,
+  parseTileKey,
+  getTileBoundingBox,
+  expandToTileBoundaries,
+} from './geo_tile_utils';
 
 it('Should parse tile key', () => {
   expect(parseTileKey('15/23423/1867')).toEqual({
@@ -14,6 +19,10 @@ it('Should parse tile key', () => {
     y: 1867,
     tileCount: Math.pow(2, 15),
   });
+});
+
+it('Should get tile key', () => {
+  expect(getTileKey(45, 120, 10)).toEqual('10/853/368');
 });
 
 it('Should convert tile key to geojson Polygon', () => {

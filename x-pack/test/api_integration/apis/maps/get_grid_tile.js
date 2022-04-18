@@ -192,5 +192,13 @@ export default function ({ getService }) {
         ],
       ]);
     });
+
+    it('should return error when index does not exist', async () => {
+      await supertest
+        .get(URL.replace('index=logstash-*', 'index=notRealIndex') + '&renderAs=point')
+        .set('kbn-xsrf', 'kibana')
+        .responseType('blob')
+        .expect(404);
+    });
   });
 }
