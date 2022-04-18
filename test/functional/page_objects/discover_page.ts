@@ -245,9 +245,9 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async dismissDocumentExplorerCallout() {
-    if (await this.testSubjects.exists('document-explorer-update-callout-dismiss-button')) {
+    await this.retry.tryForTime(5000, async () => {
       await this.testSubjects.click('document-explorer-update-callout-dismiss-button');
-    }
+    });
   }
 
   public async getDocTableIndex(index: number) {
