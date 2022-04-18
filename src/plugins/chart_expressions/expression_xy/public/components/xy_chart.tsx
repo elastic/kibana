@@ -28,7 +28,7 @@ import {
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/common';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
@@ -521,7 +521,6 @@ export function XYChart({
               shouldRotate
             ),
           },
-          markSizeRatio: args.markSizeRatio ?? 1,
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
