@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { HomePublicPluginSetup } from '../../../home/public';
-import { DevToolsSetup } from '../../../dev_tools/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { SharePluginSetup, LocatorPublic } from '../../../share/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { SharePluginSetup, LocatorPublic } from '@kbn/share-plugin/public';
 
 import { ConsoleUILocatorParams } from './locator';
 

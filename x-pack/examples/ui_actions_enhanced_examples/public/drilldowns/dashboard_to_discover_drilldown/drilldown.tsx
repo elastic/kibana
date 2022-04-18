@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
+import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { StartDependencies as Start } from '../../plugin';
-import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config_container';
 import { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
 import { txtGoToDiscover } from './i18n';
-import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/data/public';
-import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/unified_search/public';
 
 const isOutputWithIndexPatterns = (
   output: unknown

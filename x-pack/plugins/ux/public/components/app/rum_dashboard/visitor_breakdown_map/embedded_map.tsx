@@ -9,19 +9,16 @@ import React, { useEffect, useState, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 
-import {
-  MapEmbeddable,
-  MapEmbeddableInput,
-} from '../../../../../../maps/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/common';
+import { MapEmbeddable, MapEmbeddableInput } from '@kbn/maps-plugin/public';
+import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
 import {
   ErrorEmbeddable,
   ViewMode,
   isErrorEmbeddable,
-} from '../../../../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import { useLayerList } from './use_layer_list';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import type { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './map_tooltip';
 import { useMapFilters } from './use_map_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';

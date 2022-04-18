@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup, ApplicationStart, CoreSetup } from 'src/core/public';
+import type { HttpSetup, ApplicationStart, CoreSetup } from '@kbn/core/public';
 
 export interface KibanaContext {
   http: HttpSetup;

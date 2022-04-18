@@ -16,7 +16,7 @@ import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/re
 import { InstallSection } from '../../enrollment_instructions/install_section';
 import type { CommandsByPlatform } from '../../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
 
-import type { K8sMode } from '../../agent_enrollment_flyout/types';
+import type { K8sMode } from '../types';
 
 export const InstallManagedAgentStep = ({
   installCommand,

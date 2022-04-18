@@ -19,7 +19,7 @@ import { DEFAULT_META } from '../../../shared/constants';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
-import { ApiLogsLogic } from './';
+import { ApiLogsLogic } from '.';
 
 describe('ApiLogsLogic', () => {
   const { mount, unmount } = new LogicMounter(ApiLogsLogic);
