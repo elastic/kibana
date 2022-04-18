@@ -78,6 +78,7 @@ export const getFindingsQuery = ({
   from,
   sort,
 }: Omit<UseFindingsOptions, 'error'>) => ({
+  index,
   query,
   size,
   from,
