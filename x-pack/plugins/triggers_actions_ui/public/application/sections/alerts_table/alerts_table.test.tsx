@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
 import { AlertsData } from '../../../types';
-jest.mock('../../../../../../../src/plugins/data/public/');
+jest.mock('@kbn/data-plugin/public');
 jest.mock('../../../common/lib/kibana');
 
 describe('AlertsTable', () => {

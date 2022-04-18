@@ -20,6 +20,11 @@ import {
   EuiDataGridCellValueElementProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
+import {
+  IExecutionLog,
+  executionLogSortableColumns,
+  ExecutionLogSortFields,
+} from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
@@ -28,11 +33,6 @@ import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_ce
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
-import {
-  IExecutionLog,
-  executionLogSortableColumns,
-  ExecutionLogSortFields,
-} from '../../../../../../alerting/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,

@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import type { UiSettingsParams } from 'kibana/server';
+import type { UiSettingsParams } from '@kbn/core/server';
 
 import { UI_SETTINGS } from '../common/constants';
 

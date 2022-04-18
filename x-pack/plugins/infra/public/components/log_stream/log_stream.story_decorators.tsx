@@ -13,14 +13,14 @@ import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ES_SEARCH_STRATEGY,
   FieldSpec,
-} from '../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 import {
   IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from '../../../../../../src/plugins/data/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/data-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getLogViewResponsePayloadRT } from '../../../common/http_api/log_views';
 import { defaultLogViewAttributes } from '../../../common/log_views';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { ManifestManager } from '../../endpoint/services';
 import { Manifest, reportErrors } from '../../endpoint/lib/artifacts';
 import { InternalArtifactCompleteSchema } from '../../endpoint/schemas';

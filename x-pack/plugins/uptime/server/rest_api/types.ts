@@ -14,7 +14,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { UMServerLibs, UptimeESClient } from '../lib/lib';
 import type { UptimeRequestHandlerContext } from '../types';
 import { UptimeServerSetup } from '../lib/adapters';

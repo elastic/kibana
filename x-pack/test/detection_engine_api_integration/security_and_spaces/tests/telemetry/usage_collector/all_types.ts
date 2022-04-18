@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -13,7 +14,6 @@ import {
   deleteSignalsIndex,
   getStats,
 } from '../../../../utils';
-import { getInitialDetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/get_initial_usage';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

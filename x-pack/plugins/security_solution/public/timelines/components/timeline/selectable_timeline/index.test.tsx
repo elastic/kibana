@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow, ShallowWrapper, mount } from 'enzyme';
 
 import { SortFieldTimeline, TimelineType } from '../../../../../common/types/timeline';
-import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from './';
+import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 
 const mockFetchAllTimeline = jest.fn();

@@ -6,11 +6,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
+import { AdditionalEmailServices } from '@kbn/actions-plugin/common';
 import { EmailConfig } from '../types';
 import { getServiceConfig } from './api';
-import { AdditionalEmailServices } from '../../../../../../actions/common';
 
 export function useEmailConfig(
   http: HttpSetup,

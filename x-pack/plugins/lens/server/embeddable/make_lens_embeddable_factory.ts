@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
-} from '../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/kibana-utils-plugin/common';
 import { DOC_TYPE } from '../../common';
 import {
   commonEnhanceTableRowHeight,

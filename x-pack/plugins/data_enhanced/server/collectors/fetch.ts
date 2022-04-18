@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from 'kibana/server';
-import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
-import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
+import { Logger } from '@kbn/core/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import { SEARCH_SESSION_TYPE } from '@kbn/data-plugin/common';
 import { ReportedUsage } from './register';
 
 interface SessionPersistedTermsBucket {

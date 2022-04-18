@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { encode } from 'rison-node';
 import moment from 'moment';
 
+import { useUiTracker, useLinkProps } from '@kbn/observability-plugin/public';
 import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
 import { TimeRange } from '../../../../../../common/time';
 import {
@@ -26,7 +27,6 @@ import {
 } from '../../../../../components/logging/log_text_stream';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
-import { useUiTracker, useLinkProps } from '../../../../../../../observability/public';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;

@@ -7,10 +7,8 @@
 
 import { getOr } from 'lodash/fp';
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-} from '../../../../../../../../src/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
@@ -37,9 +35,8 @@ import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
-import { timelineSavedObjectType } from '../../saved_object_mappings/';
+import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
-import { AuthenticatedUser } from '../../../../../../security/server';
 import { Maybe } from '../../../../../common/search_strategy';
 import { timelineFieldsMigrator } from './field_migrator';
 export { pickSavedTimeline } from './pick_saved_timeline';
