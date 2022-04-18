@@ -30,20 +30,20 @@ describe('Edit settings', () => {
 
   it('should update Fleet server hosts', () => {
     cy.getBySel('editHostsBtn').click();
-    cy.get('[placeholder="Specify host URL"').type('http://localhost:8220');
+    cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
 
     cy.intercept('/api/fleet/settings', {
-      item: { id: 'fleet-default-settings', fleet_server_hosts: ['http://localhost:8220'] },
+      item: { id: 'fleet-default-settings', fleet_server_hosts: ['https://localhost:8220'] },
     });
     cy.intercept('PUT', '/api/fleet/settings', {
-      fleet_server_hosts: ['http://localhost:8220'],
+      fleet_server_hosts: ['https://localhost:8220'],
     }).as('updateSettings');
 
     cy.getBySel('saveApplySettingsBtn').click();
     cy.getBySel(CONFIRM_MODAL_BTN).click();
 
     cy.wait('@updateSettings').then((interception) => {
-      expect(interception.request.body.fleet_server_hosts[0]).to.equal('http://localhost:8220');
+      expect(interception.request.body.fleet_server_hosts[0]).to.equal('https://localhost:8220');
     });
   });
 
