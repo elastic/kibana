@@ -11,11 +11,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { useRef } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { FilterItem } from './filter_item';
 import FilterBadgesWrapper from './filter_badges_wrapper';
 
 export interface Props {
