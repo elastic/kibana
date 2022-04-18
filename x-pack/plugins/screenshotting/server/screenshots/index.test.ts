@@ -68,9 +68,9 @@ describe('Screenshot Observable Pipeline', () => {
       poolSize: 1,
       capture: {
         timeouts: {
-          openUrl: 11,
-          waitForElements: 12,
-          renderComplete: 13,
+          openUrl: 30000,
+          waitForElements: 30000,
+          renderComplete: 30000,
         },
         loadDelay: 5000000000,
         zoom: 2,
