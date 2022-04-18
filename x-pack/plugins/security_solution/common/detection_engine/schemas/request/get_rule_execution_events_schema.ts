@@ -21,7 +21,7 @@ import {
 /**
  * Types the DefaultStatusFiltersStringArray as:
  *   - If undefined, then a default array will be set
- *   - If an array is sent in, then the array will be validated to ensure all elements are a ruleExecutionStatus
+ *   - If an array is sent in, then the array will be validated to ensure all elements are a ruleExecutionStatus (or that the array is empty)
  */
 export const DefaultStatusFiltersStringArray = new t.Type<
   RuleExecutionStatus[],
@@ -34,7 +34,11 @@ export const DefaultStatusFiltersStringArray = new t.Type<
     if (input == null) {
       return t.success([]);
     } else if (typeof input === 'string') {
-      return t.array(ruleExecutionStatus).validate(input.split(','), context);
+      if (input === '') {
+        return t.success([]);
+      } else {
+        return t.array(ruleExecutionStatus).validate(input.split(','), context);
+      }
     } else {
       return t.array(ruleExecutionStatus).validate(input, context);
     }
