@@ -35,7 +35,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { TinymathAST } from '@kbn/tinymath';
 import { SavedObjectReference } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
-import { DatatableColumn } from 'src/plugins/expressions';
+import { DatatableColumn } from '@kbn/expressions-plugin';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
