@@ -16,7 +16,7 @@ import {
   IndexMapping,
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinitions,
-} from './../../mappings';
+} from '../../mappings';
 
 /**
  * Creates an index mapping with the core properties required by saved object

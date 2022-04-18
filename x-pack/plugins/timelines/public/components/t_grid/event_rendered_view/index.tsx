@@ -21,7 +21,7 @@ import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 import type { TimelineItem } from '../../../../common/search_strategy';
 import type { RowRenderer } from '../../../../common/types';

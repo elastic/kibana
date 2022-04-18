@@ -10,12 +10,12 @@ import fn from './scale_interval';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import invoke from './helpers/invoke_series_fn';
 
 describe('scale_interval.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list.js')();
+    seriesList = require('./fixtures/series_list')();
   });
 
   it('Can multiply to transform one interval to another', () => {

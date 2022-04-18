@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 
-import { EmbeddableSetup } from '../../embeddable/server';
-import { PluginSetup as DataSetup } from '../../data/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import { setupOptionsListSuggestionsRoute } from './control_types/options_list/options_list_suggestions_route';
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
 import { optionsListPersistableStateServiceFactory } from './control_types/options_list/options_list_embeddable_factory';

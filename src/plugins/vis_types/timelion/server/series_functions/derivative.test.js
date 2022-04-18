@@ -10,12 +10,12 @@ import fn from './derivative';
 
 import _ from 'lodash';
 const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn.js';
+import invoke from './helpers/invoke_series_fn';
 
 describe('derivative.js', () => {
   let seriesList;
   beforeEach(() => {
-    seriesList = require('./fixtures/series_list.js')();
+    seriesList = require('./fixtures/series_list')();
   });
 
   it('gets the change in the set', () => {

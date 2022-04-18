@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { REPORTING_SYSTEM_INDEX } from '../../common/constants';
 import type { ExportTypesRegistry } from '../lib/export_types_registry';
-import type { GetLicense } from './';
+import type { GetLicense } from '.';
 import { getExportStats } from './get_export_stats';
 import { getExportTypesHandler } from './get_export_type_handler';
 import type {

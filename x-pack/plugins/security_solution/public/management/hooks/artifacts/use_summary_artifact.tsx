@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../common/utils';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';

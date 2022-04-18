@@ -7,7 +7,7 @@
  */
 
 import { createSavedQueryService } from './saved_query_service';
-import { httpServiceMock } from '../../../../../core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SavedQueryAttributes } from '../../../common';
 
 const http = httpServiceMock.createStartContract();

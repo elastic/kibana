@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
-import { IndexPatternField } from 'src/plugins/data/public';
+import { IndexPatternField } from '@kbn/data-plugin/public';
 
 function fieldsToOptions(
   fields?: IndexPatternField[],

@@ -8,12 +8,9 @@
 
 import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
 import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
-import type {
-  IAsyncSearchOptions,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/common';
-import { isErrorResponse, isPartialResponse } from '../../../../../src/plugins/data/common';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type { IAsyncSearchOptions, IKibanaSearchResponse } from '..';
+import { isErrorResponse, isPartialResponse } from '..';
 
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,

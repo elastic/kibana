@@ -9,11 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { kibanaService } from '../../state/kibana_service';
 import { MONITOR_ADD_ROUTE } from '../../../common/constants';
 import { useEnablement } from './hooks/use_enablement';
 import { useSyntheticsServiceAllowed } from './hooks/use_service_allowed';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const AddMonitorBtn = () => {
   const history = useHistory();

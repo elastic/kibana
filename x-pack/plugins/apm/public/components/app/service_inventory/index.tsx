@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import uuid from 'uuid';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -18,8 +20,6 @@ import { SearchBar } from '../../shared/search_bar';
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { apmServiceInventoryOptimizedSorting } from '../../../../../observability/common';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { orderServiceItems } from './service_list/order_service_items';
 

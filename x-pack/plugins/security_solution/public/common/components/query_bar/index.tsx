@@ -15,10 +15,10 @@ import {
   TimeRange,
   SavedQuery,
   SavedQueryTimeFilter,
-} from '../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
-import { SearchBar } from '../../../../../../../src/plugins/unified_search/public';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
