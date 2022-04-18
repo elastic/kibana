@@ -385,8 +385,27 @@ export const QueryBarTopRow = React.memo(
               filters={props.filters}
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               onFiltersUpdated={props.onFiltersUpdated}
-              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm' }}
+              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
             />
+          </EuiFlexItem>
+        )
+      );
+    }
+
+    function renderFilterButtonGroup() {
+      return (
+        (Boolean(props.showAddFilter) || Boolean(props.prepend)) && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              className={classNames('kbnQueryBar__buttonGroup', {
+                'kbnQueryBar__buttonGroup--small': shouldShowDatePickerAsBadge(),
+              })}
+              gutterSize="none"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
+              {renderAddButton()}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )
       );
@@ -395,7 +414,7 @@ export const QueryBarTopRow = React.memo(
     function renderQueryInput() {
       return (
         <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
+          {renderFilterButtonGroup()}
           {shouldRenderQueryInput() && (
             <EuiFlexItem>
               <QueryStringInput
@@ -417,7 +436,6 @@ export const QueryBarTopRow = React.memo(
               />
             </EuiFlexItem>
           )}
-          {renderAddButton()}
         </EuiFlexGroup>
       );
     }

@@ -101,7 +101,7 @@ export function QueryBarMenu({
     <EuiToolTip delay="long" content={buttonLabel}>
       <EuiButtonIcon
         size="m"
-        display="base"
+        display="empty"
         onClick={onButtonClick}
         {...buttonProps}
         iconType="filter"
