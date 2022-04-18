@@ -21,20 +21,22 @@ export const initializeCspTransformsIndices = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ) => {
-  createIndexIfNotExists(
-    esClient,
-    LATEST_FINDINGS_INDEX_NAME,
-    LATEST_FINDINGS_INDEX_PATTERN,
-    latestFindingsMapping,
-    logger
-  );
-  createIndexIfNotExists(
-    esClient,
-    BENCHMARK_SCORE_INDEX_NAME,
-    BENCHMARK_SCORE_INDEX_PATTERN,
-    benchmarkScoreMapping,
-    logger
-  );
+  return Promise.all([
+    createIndexIfNotExists(
+      esClient,
+      LATEST_FINDINGS_INDEX_NAME,
+      LATEST_FINDINGS_INDEX_PATTERN,
+      latestFindingsMapping,
+      logger
+    ),
+    createIndexIfNotExists(
+      esClient,
+      BENCHMARK_SCORE_INDEX_NAME,
+      BENCHMARK_SCORE_INDEX_PATTERN,
+      benchmarkScoreMapping,
+      logger
+    ),
+  ]);
 };
 
 export const createIndexIfNotExists = async (

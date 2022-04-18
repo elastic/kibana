@@ -25,6 +25,7 @@ import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
 import { initializeCspRules } from './saved_objects/initialize_rules';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
+import { initializeCspTransforms } from './create_transforms/create_transforms';
 
 export interface CspAppContext {
   logger: Logger;
@@ -72,7 +73,10 @@ export class CspPlugin
     });
 
     initializeCspRules(core.savedObjects.createInternalRepository());
-    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger).then(
+      (_) => initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger)
+    );
+
     return {};
   }
   public stop() {}
