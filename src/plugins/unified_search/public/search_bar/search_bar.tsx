@@ -16,15 +16,15 @@ import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Query, Filter } from '@kbn/es-query';
-import { withKibana, KibanaReactContextValue } from '../../../kibana_react/public';
+import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 
-import QueryBarTopRow from '../query_string_input/query_bar_top_row';
-import type { TimeHistoryContract, SavedQuery } from '../../../data/public';
-import type { SavedQueryAttributes } from '../../../data/common';
-import { IDataPluginServices } from '../../../data/public';
+import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
+import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterBar } from '../filter_bar';
-import { TimeRange } from '../../../data/common';
-import { DataView } from '../../../data_views/public';
+import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';

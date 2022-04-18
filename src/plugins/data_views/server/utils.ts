@@ -7,18 +7,13 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import {
-  IFieldType,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  DataViewAttributes,
-  SavedObject,
-} from '../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, SavedObject, FieldSpec } from '../common';
 
 export const getFieldByName = (
   fieldName: string,
   indexPattern: SavedObject<DataViewAttributes>
-): IFieldType | undefined => {
-  const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
+): FieldSpec | undefined => {
+  const fields: FieldSpec[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
   const field = fields && fields.find((f) => f.name === fieldName);
 
   return field;

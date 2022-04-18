@@ -6,10 +6,10 @@
  */
 
 import type { History } from 'history';
-import type { OnSaveProps } from 'src/plugins/saved_objects/public';
-import { DiscoverStart } from 'src/plugins/discover/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { Observable } from 'rxjs';
-import { SpacesApi } from '../../../spaces/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import type {
   ApplicationStart,
   AppMountParameters,
@@ -21,28 +21,22 @@ import type {
   NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
-} from '../../../../../src/core/public';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import type { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
-import type { UsageCollectionStart } from '../../../../../src/plugins/usage_collection/public';
-import type { DashboardStart } from '../../../../../src/plugins/dashboard/public';
-import type { LensEmbeddableInput } from '../embeddable/embeddable';
-import type { NavigationPublicPluginStart } from '../../../../../src/plugins/navigation/public';
-import type { LensAttributeService } from '../lens_attribute_service';
-import type { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
-import type { DashboardFeatureFlagConfig } from '../../../../../src/plugins/dashboard/public';
-import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
-import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
-import type { DataViewEditorStart } from '../../../../../src/plugins/data_view_editor/public';
-import {
-  VisualizeFieldContext,
-  ACTION_VISUALIZE_LENS_FIELD,
-} from '../../../../../src/plugins/ui_actions/public';
-import { ACTION_CONVERT_TO_LENS } from '../../../../../src/plugins/visualizations/public';
-import type {
-  EmbeddableEditorState,
-  EmbeddableStateTransfer,
-} from '../../../../../src/plugins/embeddable/public';
+} from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { VisualizeFieldContext, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
+import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
+import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   DatasourceMap,
   EditorFrameInstance,
@@ -50,8 +44,8 @@ import type {
   LensTopNavMenuEntryGenerator,
   VisualizationMap,
 } from '../types';
-import type { PresentationUtilPluginStart } from '../../../../../src/plugins/presentation_util/public';
-import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
+import type { LensAttributeService } from '../lens_attribute_service';
+import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
 
 export interface RedirectToOriginProps {

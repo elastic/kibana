@@ -21,22 +21,22 @@ import {
   mockStoreDeps,
 } from '../mocks';
 import { I18nProvider } from '@kbn/i18n-react';
-import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
-import { FilterManager, Query } from '../../../../../src/plugins/data/public';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
+import { FilterManager, Query } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
-import type { FieldSpec } from '../../../../../src/plugins/data/common';
-import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { LensByValueInput } from '../embeddable/embeddable';
-import { SavedObjectReference } from '../../../../../src/core/types';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { SavedObjectReference } from '@kbn/core/types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 
-import { setState, LensAppState } from '../state_management/index';
+import { setState, LensAppState } from '../state_management';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
-jest.mock('src/core/public');
+jest.mock('@kbn/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
   checkForDuplicateTitle: jest.fn(),
 }));

@@ -632,6 +632,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           ? (current(state.activeData) as TableInspectorAdapter)
           : undefined,
         datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
+        dateRange: current(state.resolvedDateRange),
       };
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
@@ -690,6 +691,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             ? (current(state.activeData) as TableInspectorAdapter)
             : undefined,
           datasourceLayers: getDatasourceLayers(state.datasourceStates, datasourceMap),
+          dateRange: current(state.resolvedDateRange),
         },
         activeVisualization,
         activeDatasource,

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query } from '@kbn/es-query';
-import type { TimeRange, SavedQueryService, SavedQuery } from '../../../data/public';
+import type { TimeRange, SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { QueryBarMenuPanels } from './query_bar_menu_panels';
 
 export interface QueryBarMenuProps {

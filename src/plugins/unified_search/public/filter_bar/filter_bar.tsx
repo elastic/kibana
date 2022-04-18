@@ -13,10 +13,10 @@ import classNames from 'classnames';
 import React, { useRef } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterItem } from './filter_item';
-import { useKibana } from '../../../kibana_react/public';
-import { IDataPluginServices } from '../../../data/public';
-import { DataView } from '../../../data_views/public';
 
 export interface Props {
   filters: Filter[];

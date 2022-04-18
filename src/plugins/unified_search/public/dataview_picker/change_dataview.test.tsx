@@ -11,11 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { dataPluginMock } from '../../../data/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { EuiTourStep } from '@elastic/eui';
-import type { DataViewPickerProps } from './index';
+import type { DataViewPickerProps } from '.';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({

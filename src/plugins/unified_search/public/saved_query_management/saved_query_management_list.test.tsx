@@ -13,9 +13,9 @@ import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import {
   SavedQueryManagementListProps,
   SavedQueryManagementList,

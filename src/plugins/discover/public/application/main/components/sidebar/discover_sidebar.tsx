@@ -26,20 +26,20 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { indexPatterns as indexPatternUtils } from '@kbn/data-plugin/public';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
-import { indexPatterns as indexPatternUtils } from '../../../../../../data/public';
-import { DataViewPicker } from '../../../../../../unified_search/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-import { DataViewField } from '../../../../../../data_views/public';
 
 /**
  * Default number of available fields displayed and added on scroll

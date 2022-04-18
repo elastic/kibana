@@ -38,7 +38,7 @@ import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
 import { readRules } from '../../rules/read_rules';
-import { patchRules } from '../../rules/patch_rules';
+import { editRule } from '../../rules/edit_rule';
 import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
@@ -424,24 +424,18 @@ export const performBulkActionRoute = (
                   rule,
                 });
 
-                const editedRule = body[BulkAction.edit].reduce(
-                  (acc, action) => applyBulkActionEditToRule(acc, action),
-                  migratedRule
-                );
-
-                const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
-                const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
-
-                await patchRules({
+                const updatedRule = await editRule({
                   rulesClient,
                   rule: migratedRule,
-                  tags,
-                  index,
-                  timelineTitle,
-                  timelineId,
+                  edit: (ruleToEdit) => {
+                    return body[BulkAction.edit].reduce(
+                      (acc, action) => applyBulkActionEditToRule(acc, action),
+                      ruleToEdit
+                    );
+                  },
                 });
 
-                return editedRule;
+                return updatedRule;
               },
               abortSignal: abortController.signal,
             });

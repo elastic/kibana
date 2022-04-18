@@ -26,16 +26,16 @@ import {
   unpinFilter,
 } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { useKibana } from '../../../kibana_react/public';
-import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../data/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '@kbn/data-plugin/common';
 import type {
   IDataPluginServices,
   TimeRange,
   SavedQueryService,
   SavedQuery,
-} from '../../../data/public';
+} from '@kbn/data-plugin/public';
 import { fromUser } from './from_user';
-import { QueryLanguageSwitcher } from '../query_string_input/language_switcher';
+import { QueryLanguageSwitcher } from './language_switcher';
 
 interface QueryBarMenuPanelProps {
   filters?: Filter[];

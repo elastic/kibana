@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { Storage, IStorageWrapper } from '../../kibana_utils/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Storage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ConfigSchema } from '../config';
 import { setIndexPatterns, setTheme, setOverlays } from './services';
-import type { UsageCollectionSetup } from '../../usage_collection/public';
 import { createSearchBar } from './search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import { UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart } from './types';
 import type { UnifiedSearchStartDependencies, UnifiedSearchSetupDependencies } from './types';
 import { createFilterAction } from './actions/apply_filter_action';
 import { ACTION_GLOBAL_APPLY_FILTER } from './actions';
-import { APPLY_FILTER_TRIGGER } from '../../data/public';
 
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
