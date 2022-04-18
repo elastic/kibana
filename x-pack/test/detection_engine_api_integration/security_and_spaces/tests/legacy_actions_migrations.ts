@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
   // For new routes that do any updates on a rule, please ensure that you are including the legacy
   // action migration code. We are monitoring legacy action telemetry to clean up once we see their
   // existence being near 0.
-  describe.only('migrate_legacy_actions', () => {
+  describe('migrate_legacy_actions', () => {
     describe('legacy action migration', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/legacy_actions');
