@@ -369,7 +369,10 @@ export class SyntheticsService {
       encryptedMonitors.map((monitor) =>
         encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
           syntheticsMonitor.name,
-          monitor.id
+          monitor.id,
+          {
+            namespace: monitor.namespaces?.[0],
+          }
         )
       )
     );
