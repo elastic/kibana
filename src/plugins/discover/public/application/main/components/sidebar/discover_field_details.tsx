@@ -9,9 +9,9 @@
 import React from 'react';
 import { EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { Bucket, FieldDetails } from './types';
-import { DataViewField, DataView } from '../../../../../../data_views/public';
 
 interface DiscoverFieldDetailsProps {
   field: DataViewField;

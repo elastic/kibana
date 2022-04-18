@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { eventRenderedProps, TestProviders } from '../../../mock';
-import { EventRenderedView } from './';
+import { EventRenderedView } from '.';
 
 describe('event_rendered_view', () => {
   test('it renders the timestamp correctly', () => {

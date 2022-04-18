@@ -8,10 +8,10 @@
 import { FetchStatus } from '../../types';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { reduce } from 'rxjs/operators';
-import { SearchSource } from '../../../../../data/public';
-import { RequestAdapter } from '../../../../../inspector';
+import { SearchSource } from '@kbn/data-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
+import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll } from './fetch_all';

@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { FilterGroup } from './filter_group';
-import * as Hooks from '../../../../../observability/public/hooks/use_values_list';
+import * as Hooks from '@kbn/observability-plugin/public/hooks/use_values_list';
 
 describe('FilterGroup', () => {
   it.each([

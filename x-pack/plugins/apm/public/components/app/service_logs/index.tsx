@@ -10,9 +10,9 @@ import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { LogStream } from '@kbn/infra-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { LogStream } from '../../../../../infra/public';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 import {

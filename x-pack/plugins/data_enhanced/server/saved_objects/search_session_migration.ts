@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import {
   SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest,
   SearchSessionStatus,
-} from '../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 
 /**
  * Search sessions were released in 7.12.0
