@@ -21,7 +21,6 @@ import {
   ConfigKey,
   FetchMonitorManagementListQueryArgs,
   ICMPSimpleFields,
-  MonitorFields,
   Ping,
   ServiceLocations,
   EncryptedSyntheticsMonitorWithId,
