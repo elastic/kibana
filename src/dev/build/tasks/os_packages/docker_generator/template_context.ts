@@ -20,11 +20,11 @@ export interface TemplateContext {
   imageTag: string;
   dockerBuildDir: string;
   dockerTargetFilename: string;
-  baseOSImage: string;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   publicArtifactSubdomain: string;
   baseImage: 'none' | 'ubi' | 'ubuntu';
+  baseImageName: string;
   cloud?: boolean;
   metricbeatTarball?: string;
   filebeatTarball?: string;

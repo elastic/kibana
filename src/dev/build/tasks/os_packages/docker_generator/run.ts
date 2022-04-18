@@ -37,9 +37,9 @@ export async function runDockerGenerator(
     dockerBuildDate?: string;
   }
 ) {
-  let baseOSImage = '';
-  if (flags.baseImage === 'ubuntu') baseOSImage = 'ubuntu:20.04';
-  if (flags.baseImage === 'ubi') baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
+  let baseImageName = '';
+  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
+  if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   const ubiVersionTag = 'ubi8';
 
   let imageFlavor = '';
@@ -91,7 +91,7 @@ export async function runDockerGenerator(
     dockerPush,
     dockerTagQualifier,
     dockerCrossCompile,
-    baseOSImage,
+    baseImageName,
     dockerBuildDate,
     baseImage: flags.baseImage,
     cloud: flags.cloud,
