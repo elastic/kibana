@@ -105,7 +105,7 @@ export const SaveCustom: React.FC = () => {
                 heading="h3"
                 size="s"
                 title={
-                  <EuiLink href={'https://www.elastic.co/kibana/feedback'} external>
+                  <EuiLink href="https://www.elastic.co/kibana/feedback" external>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.workplaceSearch.sources.feedbackLinkLabel"
                       defaultMessage="Have feedback about deploying a {name} connector? Let us know."
