@@ -61,8 +61,8 @@ import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer'
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
 
-import { ExpressionInput } from '../../../../src/plugins/presentation_util/public/components/expression_input';
-jest.mock('../../../../src/plugins/presentation_util/public/components/expression_input');
+import { ExpressionInput } from '@kbn/presentation-util-plugin/public/components/expression_input';
+jest.mock('@kbn/presentation-util-plugin/public/components/expression_input');
 // @ts-expect-error
 ExpressionInput.mockImplementation(() => 'ExpressionInput');
 

@@ -8,10 +8,10 @@
 
 import { lastValueFrom, of, throwError } from 'rxjs';
 import { IndexPattern } from '../..';
-import { SearchSource, SearchSourceDependencies, SortDirection } from './';
-import { AggConfigs, AggTypesRegistryStart } from '../../';
+import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
+import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { RequestResponder } from 'src/plugins/inspector/common';
+import { RequestResponder } from '@kbn/inspector-plugin/common';
 import { switchMap } from 'rxjs/operators';
 import { Filter } from '@kbn/es-query';
 

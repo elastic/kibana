@@ -19,10 +19,11 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
-} from 'src/core/public';
-import { RedirectAppLinks } from '../../../../kibana_react/public';
-import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
-import { DataViewsContract } from '../../../../data_views/public';
+} from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import {
   parseQuery,
@@ -49,7 +50,6 @@ import {
   DeleteConfirmModal,
   ExportModal,
 } from './components';
-import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
   id: string;

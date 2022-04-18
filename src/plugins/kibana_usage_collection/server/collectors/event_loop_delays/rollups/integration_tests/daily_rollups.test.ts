@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { Logger, ISavedObjectsRepository } from '../../../../../../../core/server';
+import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import {
   createTestServers,
   TestElasticsearchUtils,
   TestKibanaUtils,
   createRootWithCorePlugins,
-} from '../../../../../../../core/test_helpers/kbn_server';
+} from '@kbn/core/test_helpers/kbn_server';
 import { rollDailyData } from '../daily';
-import { metricsServiceMock } from '../../../../../../../core/server/mocks';
+import { metricsServiceMock } from '@kbn/core/server/mocks';
 
 import {
   SAVED_OBJECTS_DAILY_TYPE,

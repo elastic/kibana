@@ -15,7 +15,7 @@ import { useActiveCursor } from './use_active_cursor';
 
 import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
 import type { Chart, PointerEvent } from '@elastic/charts';
-import type { Datatable } from '../../../../expressions/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 
 /** @internal **/
 type DispatchExternalPointerEventFn = (pointerEvent: PointerEvent) => void;

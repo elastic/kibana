@@ -8,7 +8,7 @@
 
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
   schema.literal('prod'),

@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { DataView } from '../../../../../src/plugins/data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,

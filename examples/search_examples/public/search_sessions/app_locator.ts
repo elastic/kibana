@@ -8,9 +8,9 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 import { Filter, Query, isFilterPinned } from '@kbn/es-query';
-import type { TimeRange } from '../../../../src/plugins/data/public';
-import { getStatesFromKbnUrl, setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import { LocatorDefinition } from '../../../../src/plugins/share/common';
+import type { TimeRange } from '@kbn/data-plugin/public';
+import { getStatesFromKbnUrl, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { LocatorDefinition } from '@kbn/share-plugin/common';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';

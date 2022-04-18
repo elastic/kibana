@@ -9,7 +9,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import { SharedUxServices } from '@kbn/shared-ux-services';
-import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 /** @internal */
 export interface SharedUXPluginSetup {}

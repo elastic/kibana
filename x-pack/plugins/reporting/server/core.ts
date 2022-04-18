@@ -18,25 +18,28 @@ import type {
   SavedObjectsServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
-} from 'src/core/server';
-import type { PluginStart as DataPluginStart } from 'src/plugins/data/server';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
-import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { LicensingPluginStart } from '../../licensing/server';
+} from '@kbn/core/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { KibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   PdfScreenshotResult,
   PngScreenshotResult,
   ScreenshotOptions,
   ScreenshottingStart,
-} from '../../screenshotting/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
-import type { SpacesPluginSetup } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from '@kbn/screenshotting-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
-import type { ReportingConfig, ReportingSetup } from './';
+import type { ReportingConfig, ReportingSetup } from '.';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';

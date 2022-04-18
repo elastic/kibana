@@ -10,7 +10,7 @@ import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
-import { JobSpacesSyncFlyout } from '../../components/job_spaces_sync';
+import { JobSpacesSyncFlyout } from '../job_spaces_sync';
 import { checkPermission } from '../../capabilities/check_capabilities';
 
 interface Props {

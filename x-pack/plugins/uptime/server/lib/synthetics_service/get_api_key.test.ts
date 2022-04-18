@@ -6,11 +6,11 @@
  */
 
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { securityMock } from '../../../../security/server/mocks';
-import { coreMock } from '../../../../../../src/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { syntheticsServiceApiKey } from '../saved_objects/service_api_key';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { UptimeServerSetup } from '../adapters';
 import { getUptimeESMockClient } from '../requests/helper';
 

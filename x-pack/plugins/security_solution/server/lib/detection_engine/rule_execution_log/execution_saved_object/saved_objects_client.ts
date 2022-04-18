@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../../../src/core/server';
+import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 

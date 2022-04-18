@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RenderTooltipContentParams } from '../../../../../maps/public';
+import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 
 export interface IndexPatternMapping {
   title: string;

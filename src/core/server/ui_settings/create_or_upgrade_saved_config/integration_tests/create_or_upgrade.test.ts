@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from '../../..';
 
 import {
   createTestServers,

@@ -7,7 +7,7 @@
 
 import createContainer from 'constate';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 import { LogView, LogViewAttributes, LogViewStatus, ResolvedLogView } from '../../common/log_views';
 import type { ILogViewsClient } from '../services/log_views';
 import { isRejectedPromiseState, useTrackedPromise } from '../utils/use_tracked_promise';
