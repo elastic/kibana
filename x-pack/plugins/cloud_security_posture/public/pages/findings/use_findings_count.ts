@@ -29,7 +29,7 @@ export const getFindingsCountAggQuery = ({ index, query }: Omit<FindingsBaseQuer
   track_total_hits: true,
   body: {
     query,
-    aggs: { count: { terms: { field: 'result.evaluation' } } },
+    aggs: { count: { terms: { field: 'result.evaluation.keyword' } } },
   },
 });
 
