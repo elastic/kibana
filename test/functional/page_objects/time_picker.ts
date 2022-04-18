@@ -110,7 +110,7 @@ export class TimePickerPageObject extends FtrService {
         timeout: 50,
       });
       if (isShowDatesButton) {
-        await this.testSubjects.clickWithRetries('superDatePickerShowDatesButton', 0, 50);
+        await this.testSubjects.click('superDatePickerShowDatesButton', 50);
       }
       await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
       // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked

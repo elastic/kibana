@@ -376,29 +376,6 @@ export class FindService extends FtrService {
     });
   }
 
-  public async clickByCssSelectorWithRetries(
-    selector: string,
-    timeout: number = this.defaultFindTimeout,
-    topOffset?: number,
-    retries?: number
-  ): Promise<void> {
-    this.log.debug(
-      `Find.clickByCssSelectorWithRetries('${selector}') with timeout=${timeout}, retries=${retries}`
-    );
-    await this.retry.tryForTime(1000, async () => {
-      const element = await this.byCssSelector(selector, timeout);
-      if (element) {
-        if (typeof retries === 'number') {
-          await element.clickWithRetries(retries, topOffset);
-        } else {
-          await element.click(topOffset);
-        }
-      } else {
-        throw new Error(`Element with css='${selector}' is not found`);
-      }
-    });
-  }
-
   public async clickByDisplayedLinkText(
     linkText: string,
     timeout: number = this.defaultFindTimeout

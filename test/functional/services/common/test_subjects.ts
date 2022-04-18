@@ -104,21 +104,6 @@ export class TestSubjects extends FtrService {
     await this.findService.clickByCssSelector(testSubjSelector(selector), timeout, topOffset);
   }
 
-  public async clickWithRetries(
-    selector: string,
-    retries: number,
-    timeout: number = this.FIND_TIME,
-    topOffset?: number
-  ): Promise<void> {
-    this.log.debug(`TestSubjects.clickWithRetries(${selector})`);
-    await this.findService.clickByCssSelectorWithRetries(
-      testSubjSelector(selector),
-      timeout,
-      topOffset,
-      retries
-    );
-  }
-
   public async doubleClick(selector: string, timeout: number = this.FIND_TIME): Promise<void> {
     this.log.debug(`TestSubjects.doubleClick(${selector})`);
     const element = await this.find(selector, timeout);
