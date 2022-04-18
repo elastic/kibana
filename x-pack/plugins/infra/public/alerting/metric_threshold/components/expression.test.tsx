@@ -13,6 +13,7 @@ import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { Comparator } from '../../../../common/alerting/metrics';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import { Expressions } from './expression';
+import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -26,6 +27,8 @@ jest.mock('../../../hooks/use_kibana', () => ({
     services: mockCoreMock.createStart(),
   }),
 }));
+
+const dataViewMock = dataViewPluginMocks.createStartContract();
 
 describe('Expression', () => {
   async function setup(currentOptions: {
@@ -51,6 +54,7 @@ describe('Expression', () => {
         metadata={{
           currentOptions,
         }}
+        dataViews={dataViewMock}
       />
     );
 

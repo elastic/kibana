@@ -23,7 +23,7 @@ import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
-import { ensurePreconfiguredOutputs } from './preconfiguration/index';
+import { ensurePreconfiguredOutputs } from './preconfiguration/outputs';
 import { outputService } from './output';
 
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
