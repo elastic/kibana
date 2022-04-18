@@ -51,6 +51,14 @@ export const syntheticsMonitor: SavedObjectsType = {
           },
         },
       },
+      locations: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   },
   management: {
