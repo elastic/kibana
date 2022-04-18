@@ -15,7 +15,7 @@ import {
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
-import { caseConnectorIdMigration, removeCaseType } from './cases';
+import { addDuration, caseConnectorIdMigration, removeCaseType } from './cases';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const create_7_14_0_case = ({
@@ -367,6 +367,168 @@ describe('case migrations', () => {
         ...doc,
         attributes: {
           title: doc.attributes.title,
+        },
+      });
+    });
+  });
+
+  describe('addDuration', () => {
+    it('adds the duration correctly', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: '2021-11-23T19:00:00Z',
+          closed_at: '2021-11-23T19:02:00Z',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+
+      expect(addDuration(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          duration: 120,
+        },
+      });
+    });
+
+    it('returns null if the created_at date is invalid', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: 'invalid',
+          closed_at: '2021-11-23T19:02:00Z',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+
+      expect(addDuration(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          duration: null,
+        },
+      });
+    });
+
+    it('returns null if the closed_at date is invalid', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: '2021-11-23T19:02:00Z',
+          closed_at: 'invalid',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+
+      expect(addDuration(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          duration: null,
+        },
+      });
+    });
+
+    it('returns null if the created_at is null', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: null,
+          closed_at: '2021-11-23T19:02:00Z',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+
+      expect(addDuration(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          duration: null,
+        },
+      });
+    });
+
+    it('returns null if the closed_at is null', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: '2021-11-23T19:02:00Z',
+          closed_at: null,
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+
+      expect(addDuration(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          duration: null,
+        },
+      });
+    });
+
+    it('returns null if created_at > closed_at', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: '2021-11-23T19:05:00Z',
+          closed_at: '2021-11-23T19:00:00Z',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+
+      expect(addDuration(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          duration: null,
+        },
+      });
+    });
+
+    it('rounds the seconds correctly', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: '2022-04-11T15:56:00.087Z',
+          closed_at: '2022-04-11T15:58:56.187Z',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+
+      expect(addDuration(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          duration: 176,
+        },
+      });
+    });
+
+    it('rounds to zero correctly', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: '2022-04-11T15:56:00.087Z',
+          closed_at: '2022-04-11T15:56:00.187Z',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+
+      expect(addDuration(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          duration: 0,
         },
       });
     });

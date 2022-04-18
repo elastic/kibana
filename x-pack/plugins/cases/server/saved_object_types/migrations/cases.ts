@@ -11,7 +11,7 @@ import { cloneDeep, unset } from 'lodash';
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import { ESConnectorFields } from '../../services';
-import { ConnectorTypes } from '../../../common/api';
+import { CaseAttributes, ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -86,6 +86,34 @@ export const removeCaseType = (
   return { ...docCopy, references: doc.references ?? [] };
 };
 
+export const addDuration = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<CaseAttributes & { duration: number | null }> => {
+  let duration = null;
+
+  try {
+    const createdAt = doc.attributes.created_at;
+    const closedAt = doc.attributes.closed_at;
+
+    if (createdAt != null && closedAt != null) {
+      const createdAtMillis = new Date(createdAt).getTime();
+      const closedAtMillis = new Date(closedAt).getTime();
+
+      if (!isNaN(createdAtMillis) && !isNaN(closedAtMillis) && closedAtMillis >= createdAtMillis) {
+        duration = Math.floor((closedAtMillis - createdAtMillis) / 1000);
+      }
+    }
+  } catch (err) {
+    // Silence date errors
+  }
+
+  /**
+   * Duration is the time from the creation of the case to the close of the case in seconds
+   * If an error occurs or the case has not been close then the duration is set to null
+   */
+  return { ...doc, attributes: { ...doc.attributes, duration }, references: doc.references ?? [] };
+};
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -147,4 +175,5 @@ export const caseMigrations = {
   },
   '7.15.0': caseConnectorIdMigration,
   '8.1.0': removeCaseType,
+  '8.3.0': addDuration,
 };
