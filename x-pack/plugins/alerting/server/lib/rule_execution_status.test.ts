@@ -10,9 +10,9 @@ import {
   ActionsCompletion,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
-  EMPTY_RULE_EXECUTION_METRICS,
-  EMPTY_RULE_EXECUTION_STATE,
-  RuleExecutionMetrics,
+  EMPTY_RULE_RUN_METRICS,
+  EMPTY_RULE_RUN_STATE,
+  RuleRunMetrics,
 } from '../types';
 import {
   executionStatusFromState,
@@ -29,7 +29,7 @@ const executionMetrics = {
   esSearchDurationMs: 10,
   totalSearchDurationMs: 20,
   numberOfTriggeredActions: 32,
-  numberOfScheduledActions: 11,
+  numberOfGeneratedActions: 11,
   numberOfActiveAlerts: 2,
   numberOfNewAlerts: 3,
   numberOfRecoveredAlerts: 13,
@@ -41,12 +41,12 @@ describe('RuleExecutionStatus', () => {
     jest.resetAllMocks();
   });
 
-  function testExpectedMetrics(received: RuleExecutionMetrics, expected: RuleExecutionMetrics) {
+  function testExpectedMetrics(received: RuleRunMetrics, expected: RuleRunMetrics) {
     expect(received.numSearches).toEqual(expected.numSearches);
     expect(received.totalSearchDurationMs).toEqual(expected.totalSearchDurationMs);
     expect(received.esSearchDurationMs).toEqual(expected.esSearchDurationMs);
     expect(received.numberOfTriggeredActions).toEqual(expected.numberOfTriggeredActions);
-    expect(received.numberOfScheduledActions).toEqual(expected.numberOfScheduledActions);
+    expect(received.numberOfGeneratedActions).toEqual(expected.numberOfGeneratedActions);
     expect(received.numberOfActiveAlerts).toEqual(expected.numberOfActiveAlerts);
     expect(received.numberOfRecoveredAlerts).toEqual(expected.numberOfRecoveredAlerts);
     expect(received.numberOfNewAlerts).toEqual(expected.numberOfNewAlerts);
@@ -55,13 +55,13 @@ describe('RuleExecutionStatus', () => {
 
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
-      const { status, metrics } = executionStatusFromState(EMPTY_RULE_EXECUTION_STATE);
+      const { status, metrics } = executionStatusFromState(EMPTY_RULE_RUN_STATE);
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
 
-      testExpectedMetrics(metrics, EMPTY_RULE_EXECUTION_METRICS);
+      testExpectedMetrics(metrics, EMPTY_RULE_RUN_METRICS);
     });
 
     test('task state with no instances', () => {
@@ -121,7 +121,7 @@ describe('RuleExecutionStatus', () => {
         }
       `);
 
-      testExpectedMetrics(metrics, EMPTY_RULE_EXECUTION_METRICS);
+      testExpectedMetrics(metrics, EMPTY_RULE_RUN_METRICS);
     });
 
     test('error with a reason', () => {
@@ -136,7 +136,7 @@ describe('RuleExecutionStatus', () => {
         }
       `);
 
-      testExpectedMetrics(metrics, EMPTY_RULE_EXECUTION_METRICS);
+      testExpectedMetrics(metrics, EMPTY_RULE_RUN_METRICS);
     });
   });
 

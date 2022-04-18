@@ -9,8 +9,9 @@ import {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server';
-import { RuleExecutionMetrics } from '.';
+import { RuleRunMetrics } from '.';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 
 export type RuleTypeState = Record<string, unknown>;
@@ -50,7 +51,7 @@ export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
   numberOfTriggeredActions?: number;
   numberOfScheduledActions?: number;
-  metrics?: RuleExecutionMetrics;
+  metrics?: RuleRunMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
   error?: {

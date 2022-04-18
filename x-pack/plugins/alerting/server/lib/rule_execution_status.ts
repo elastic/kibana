@@ -11,24 +11,26 @@ import {
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
-  RuleExecutionState,
+  RuleTaskStateAndMetrics,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import {
   ActionsCompletion,
   RuleExecutionStatuses,
-  EMPTY_RULE_EXECUTION_METRICS,
-  RuleExecutionMetrics,
+  EMPTY_RULE_RUN_METRICS,
+  RuleRunMetrics,
 } from '../../common';
 import { translations } from '../constants/translations';
 
 export interface IExecutionStatusAndMetrics {
   status: RuleExecutionStatus;
-  metrics: RuleExecutionMetrics;
+  metrics: RuleRunMetrics;
 }
 
-export function executionStatusFromState(state: RuleExecutionState): IExecutionStatusAndMetrics {
+export function executionStatusFromState(
+  state: RuleTaskStateAndMetrics
+): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(state.alertInstances ?? {});
 
   const hasIncompleteAlertExecution =
@@ -66,7 +68,7 @@ export function executionStatusFromError(error: Error): IExecutionStatusAndMetri
         message: getEsErrorMessage(error),
       },
     },
-    metrics: EMPTY_RULE_EXECUTION_METRICS,
+    metrics: EMPTY_RULE_RUN_METRICS,
   };
 }
 

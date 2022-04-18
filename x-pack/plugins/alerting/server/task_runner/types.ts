@@ -18,8 +18,8 @@ import {
   RuleTypeParams,
   RuleTypeState,
   IntervalSchedule,
-  RuleExecutionState,
-  RuleExecutionMetrics,
+  RuleTaskStateAndMetrics,
+  RuleRunMetrics,
   RuleMonitoring,
   RuleTaskState,
   SanitizedRule,
@@ -29,17 +29,15 @@ import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
 import { RawRule } from '../types';
 
-export interface RuleTaskRunResultWithActions {
-  state: RuleExecutionState;
-  monitoring: RuleMonitoring | undefined;
-  schedule: IntervalSchedule | undefined;
-}
-
 export interface RuleTaskRunResult {
   state: RuleTaskState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }
+
+export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
+  state: RuleTaskStateAndMetrics;
+};
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
@@ -81,7 +79,7 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
   >;
   rule: SanitizedRule<RuleTypeParams>;
   spaceId: string;
-  ruleExecutionMetrics: RuleExecutionMetrics;
+  ruleRunMetrics: RuleRunMetrics;
 }
 
 export interface ScheduleActionsForRecoveredAlertsParams<
@@ -95,7 +93,7 @@ export interface ScheduleActionsForRecoveredAlertsParams<
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
-  ruleExecutionMetrics: RuleExecutionMetrics;
+  ruleRunMetrics: RuleRunMetrics;
 }
 
 export interface LogActiveAndRecoveredAlertsParams<
@@ -155,5 +153,5 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   alertId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
-  ruleExecutionMetrics: RuleExecutionMetrics;
+  ruleRunMetrics: RuleRunMetrics;
 }

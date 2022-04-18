@@ -21,47 +21,47 @@ export const ruleStateSchema = t.partial({
   previousStartedAt: t.union([t.null, DateFromString]),
 });
 
-const ruleExecutionActionsCompletion = t.union([
+const ruleRunActionsCompletion = t.union([
   t.literal(ActionsCompletion.COMPLETE),
   t.literal(ActionsCompletion.PARTIAL),
 ]);
 
-const ruleExecutionMetricsSchema = t.type({
+const ruleRunMetricsSchema = t.type({
   numSearches: t.number,
   totalSearchDurationMs: t.number,
   esSearchDurationMs: t.number,
   numberOfTriggeredActions: t.number,
-  numberOfScheduledActions: t.number,
+  numberOfGeneratedActions: t.number,
   numberOfActiveAlerts: t.number,
   numberOfRecoveredAlerts: t.number,
   numberOfNewAlerts: t.number,
-  triggeredActionsStatus: ruleExecutionActionsCompletion,
+  triggeredActionsStatus: ruleRunActionsCompletion,
 });
 
-export type RuleExecutionMetrics = t.TypeOf<typeof ruleExecutionMetricsSchema>;
+export type RuleRunMetrics = t.TypeOf<typeof ruleRunMetricsSchema>;
 
 // This is serialized in the rule task document
 export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
 
-// This is the task state plus additional metrics gathered during rule execution
-export type RuleExecutionState = RuleTaskState & {
-  metrics: RuleExecutionMetrics;
+// This is the state of the alerting task after rule execution, which includes run metrics plus the task state
+export type RuleTaskStateAndMetrics = RuleTaskState & {
+  metrics: RuleRunMetrics;
 };
 
-export const EMPTY_RULE_EXECUTION_METRICS: RuleExecutionMetrics = {
+export const EMPTY_RULE_RUN_METRICS: RuleRunMetrics = {
   numSearches: 0,
   totalSearchDurationMs: 0,
   esSearchDurationMs: 0,
   numberOfTriggeredActions: 0,
-  numberOfScheduledActions: 0,
+  numberOfGeneratedActions: 0,
   numberOfActiveAlerts: 0,
   numberOfRecoveredAlerts: 0,
   numberOfNewAlerts: 0,
   triggeredActionsStatus: ActionsCompletion.COMPLETE,
 };
 
-export const EMPTY_RULE_EXECUTION_STATE: RuleExecutionState = {
-  metrics: EMPTY_RULE_EXECUTION_METRICS,
+export const EMPTY_RULE_RUN_STATE: RuleTaskStateAndMetrics = {
+  metrics: EMPTY_RULE_RUN_METRICS,
 };
 
 export const ruleParamsSchema = t.intersection([
@@ -73,9 +73,3 @@ export const ruleParamsSchema = t.intersection([
   }),
 ]);
 export type RuleTaskParams = t.TypeOf<typeof ruleParamsSchema>;
-
-export interface RuleExecutionRunResult {
-  state: RuleExecutionState;
-  monitoring: RuleMonitoring | undefined;
-  schedule: IntervalSchedule | undefined;
-}

@@ -69,7 +69,7 @@ export function createExecutionHandler<
     actionSubgroup,
     context,
     state,
-    ruleExecutionMetrics,
+    ruleRunMetrics,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!ruleTypeActionGroups.has(actionGroup)) {
@@ -113,7 +113,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    ruleExecutionMetrics.numberOfScheduledActions += actions.length;
+    ruleRunMetrics.numberOfGeneratedActions += actions.length;
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -121,8 +121,8 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (ruleExecutionMetrics.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
-        ruleExecutionMetrics.triggeredActionsStatus = ActionsCompletion.PARTIAL;
+      if (ruleRunMetrics.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
+        ruleRunMetrics.triggeredActionsStatus = ActionsCompletion.PARTIAL;
         break;
       }
 
@@ -135,7 +135,7 @@ export function createExecutionHandler<
         continue;
       }
 
-      ruleExecutionMetrics.numberOfTriggeredActions++;
+      ruleRunMetrics.numberOfTriggeredActions++;
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
