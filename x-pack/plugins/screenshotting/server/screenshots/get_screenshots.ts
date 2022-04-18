@@ -38,8 +38,12 @@ export const getScreenshots = async (
 
   const size = elementsPositionAndAttributes.length;
   for (let i = 0; i < size; i++) {
-    eventLogger.getScreenshotStart({ current: size, total: i + 1 });
     const item = elementsPositionAndAttributes[i];
+    eventLogger.getScreenshotStart({
+      current: size,
+      total: i + 1,
+      elementPosition: item.position,
+    });
 
     const data = await browser.screenshot(item.position);
 
@@ -53,7 +57,12 @@ export const getScreenshots = async (
       description: item.attributes.description,
     });
 
-    eventLogger.getScreenshotEnd({ byteLength: data.byteLength, current: size, total: i + 1 });
+    eventLogger.getScreenshotEnd({
+      current: size,
+      total: i + 1,
+      elementPosition: item.position,
+      byteLength: data.byteLength,
+    });
   }
 
   kbnLogger.info(`screenshots taken: ${screenshots.length}`);

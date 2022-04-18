@@ -26,6 +26,7 @@ export interface ElementPosition {
     x: number;
     y: number;
   };
+  zoom: number;
 }
 
 export interface ElementsPositionAndAttribute {
@@ -64,6 +65,7 @@ export const getElementPositionAndAttributes = async (
                   x: window.scrollX,
                   y: window.scrollY,
                 },
+                zoom: layout.getBrowserZoom(),
               },
               attributes: Object.keys(attributes).reduce((result: AttributesMap, key) => {
                 const attribute = attributes[key];

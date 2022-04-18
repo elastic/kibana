@@ -11,6 +11,7 @@ import { Logger, LogMeta } from '@kbn/core/server';
 import { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
 import { Screenshot } from '../get_screenshots';
+import { ElementPosition } from '../get_element_position_data';
 
 export enum Actions {
   SCREENSHOTTING = 'screenshot-pipeline',
@@ -57,6 +58,7 @@ export interface ScreenshottingAction extends LogMeta {
 
       // screenshotting stats
       items_count?: number;
+      pixels?: number;
       byte_length?: number;
       element_positions?: number;
       screenshot_current?: number;
@@ -80,6 +82,7 @@ interface ErrorAction {
 interface GetScreenshotOptions {
   current: number; // current screenshot to be taken
   total: number; // total number of screenshots to be taken
+  elementPosition: ElementPosition;
   byteLength?: number; // byte length of completed completed current screenshot
 }
 
@@ -338,11 +341,18 @@ export class EventLogger {
     );
   }
 
+  private getPixels(elementPosition: ElementPosition) {
+    const { width, height } = elementPosition.boundingClientRect;
+    const { zoom } = elementPosition;
+
+    return width * zoom * (height * zoom);
+  }
+
   /**
    * @param GetScreenshotOptions - context of the screenshot to be taken
    * @returns void
    */
-  public getScreenshotStart({ current, total }: GetScreenshotOptions) {
+  public getScreenshotStart({ current, total, elementPosition }: GetScreenshotOptions) {
     this.spans.getScreenshot = this.transactions.screenshotting?.startSpan(
       Actions.GET_SCREENSHOT,
       SpanTypes.READ
@@ -353,6 +363,7 @@ export class EventLogger {
       action: Actions.GET_SCREENSHOT,
       screenshot_current: current,
       screenshot_total: total,
+      pixels: this.getPixels(elementPosition),
     });
   }
 
@@ -360,7 +371,12 @@ export class EventLogger {
    * @param GetScreenshotOptions - context of the screenshot taken
    * @returns void
    */
-  public getScreenshotEnd({ byteLength, current, total }: GetScreenshotOptions) {
+  public getScreenshotEnd({
+    byteLength,
+    current,
+    total,
+    elementPosition,
+  }: Required<GetScreenshotOptions>) {
     this.spans.getScreenshot?.end();
 
     return this.logEventEnd(
@@ -370,6 +386,7 @@ export class EventLogger {
         byte_length: byteLength,
         screenshot_current: current,
         screenshot_total: total,
+        pixels: this.getPixels(elementPosition),
       },
       this.timings[Actions.GET_SCREENSHOT]
     );

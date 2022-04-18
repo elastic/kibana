@@ -18,6 +18,7 @@ describe('getScreenshots', () => {
         boundingClientRect: { top: 10, left: 10, height: 100, width: 100 },
         scroll: { x: 100, y: 100 },
       },
+      zoom: 2,
     },
     {
       attributes: { description: 'description2', title: 'title2' },
@@ -25,6 +26,7 @@ describe('getScreenshots', () => {
         boundingClientRect: { top: 10, left: 10, height: 100, width: 100 },
         scroll: { x: 100, y: 100 },
       },
+      zoom: 2,
     },
   ];
   let browser: ReturnType<typeof createMockBrowserDriver>;

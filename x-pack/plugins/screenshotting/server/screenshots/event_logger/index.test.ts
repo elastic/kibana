@@ -8,15 +8,16 @@
 import moment from 'moment';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Actions, EventLogger } from '.';
+import { ElementPosition } from '../get_element_position_data';
 
 describe('Event Logger', () => {
   let eventLogger: EventLogger;
 
   beforeEach(() => {
     const testDate = moment(new Date('2021-04-12T16:00:00.000Z'));
-    let walker = 1;
+    let delaySeconds = 1;
     jest.spyOn(global.Date, 'now').mockImplementation(() => {
-      return testDate.add(walker++, 'seconds').valueOf();
+      return testDate.add(delaySeconds++, 'seconds').valueOf();
     });
 
     eventLogger = new EventLogger(loggingSystemMock.createLogger());
@@ -42,8 +43,6 @@ describe('Event Logger', () => {
     logs.push(eventLogger.positionElementsEnd());
     logs.push(eventLogger.waitForRenderStart());
     logs.push(eventLogger.waitForRenderEnd());
-    logs.push(eventLogger.getScreenshotStart({ current: 1, total: 1 }));
-    logs.push(eventLogger.getScreenshotEnd({ byteLength: 4444, current: 1, total: 1 }));
     logs.push(eventLogger.pdfStart());
     logs.push(eventLogger.addPdfImageStart());
     logs.push(eventLogger.addPdfImageEnd());
@@ -51,11 +50,11 @@ describe('Event Logger', () => {
     logs.push(eventLogger.compilePdfEnd());
     logs.push(eventLogger.pdfEnd({ pdfPages: 1, byteLengthPdf: 6666 }));
 
-    const actionNames = logs.map((log) => ({
+    const logData = logs.map((log) => ({
       event: log.kibana.screenshotting.action,
       duration: log.event?.duration,
     }));
-    expect(actionNames).toMatchInlineSnapshot(`
+    expect(logData).toMatchInlineSnapshot(`
       Array [
         Object {
           "duration": undefined,
@@ -127,14 +126,6 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": undefined,
-          "event": "get-screenshots-start",
-        },
-        Object {
-          "duration": 19000,
-          "event": "get-screenshots-complete",
-        },
-        Object {
-          "duration": undefined,
           "event": "generate-pdf-start",
         },
         Object {
@@ -142,7 +133,7 @@ describe('Event Logger', () => {
           "event": "add-pdf-image-start",
         },
         Object {
-          "duration": 22000,
+          "duration": 20000,
           "event": "add-pdf-image-complete",
         },
         Object {
@@ -150,12 +141,58 @@ describe('Event Logger', () => {
           "event": "compile-pdf-start",
         },
         Object {
-          "duration": 24000,
+          "duration": 22000,
           "event": "compile-pdf-complete",
         },
         Object {
-          "duration": 115000,
+          "duration": 105000,
           "event": "generate-pdf-complete",
+        },
+      ]
+    `);
+  });
+
+  it('logs number of pixels', () => {
+    const logs = [];
+    const elementPosition = {
+      zoom: 2,
+      boundingClientRect: { width: 1350, height: 2000 },
+      scroll: {},
+    } as ElementPosition;
+    logs.push(eventLogger.getScreenshotStart({ current: 1, total: 1, elementPosition }));
+    logs.push(
+      eventLogger.getScreenshotEnd({ byteLength: 4444, current: 1, total: 1, elementPosition })
+    );
+
+    const logData = logs.map((log) => ({
+      message: log.message,
+      duration: log.event?.duration,
+      screenshotting: log.kibana.screenshotting,
+    }));
+
+    expect(
+      logData.map((l) => ({
+        duration: l.duration,
+        message: l.message,
+        action: l.screenshotting.action,
+        byte_length: l.screenshotting.byte_length,
+        pixels: l.screenshotting.pixels,
+      }))
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": "get-screenshots-start",
+          "byte_length": undefined,
+          "duration": undefined,
+          "message": "capturing single screenshot",
+          "pixels": 10800000,
+        },
+        Object {
+          "action": "get-screenshots-complete",
+          "byte_length": 4444,
+          "duration": 2000,
+          "message": "single screenshot captured",
+          "pixels": 10800000,
         },
       ]
     `);
@@ -166,12 +203,12 @@ describe('Event Logger', () => {
     logs.push(eventLogger.screenshottingStart());
     logs.push(eventLogger.error(new Error('Something erroneous happened'), Actions.SCREENSHOTTING));
 
-    const actionNames = logs.map((log) => ({
+    const logData = logs.map((log) => ({
       action: log.kibana.screenshotting.action,
       message: log.message,
       error: log.error,
     }));
-    expect(actionNames).toMatchInlineSnapshot(`
+    expect(logData).toMatchInlineSnapshot(`
       Array [
         Object {
           "action": "screenshot-pipeline-start",
