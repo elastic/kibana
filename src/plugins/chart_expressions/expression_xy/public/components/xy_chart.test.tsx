@@ -9,9 +9,6 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { Datatable } from '../../../../expressions/common';
-import { AnnotationLayerConfigResult, DataLayerConfigResult } from '../../common';
-import { LayerTypes } from '../../common/constants';
 import {
   AreaSeries,
   Axis,
@@ -29,7 +26,12 @@ import {
   VerticalAlignment,
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
-import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import { AnnotationLayerConfigResult, DataLayerConfigResult } from '../../common';
+import { LayerTypes } from '../../common/constants';
 import { XyEndzones } from './x_domain';
 import {
   chartsActiveCursorService,
@@ -48,8 +50,6 @@ import {
 } from '../../common/__mocks__';
 import { XYChart, XYChartRenderProps } from './xy_chart';
 import { ExtendedDataLayerConfigResult, XYChartProps, XYProps } from '../../common/types';
-import { eventAnnotationServiceMock } from '../../../../event_annotation/public/mocks';
-import { EventAnnotationOutput } from '../../../../event_annotation/common';
 import { DataLayers } from './data_layers';
 
 const onClickValue = jest.fn();

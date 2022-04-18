@@ -14,9 +14,9 @@ import {
 } from '@elastic/charts';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from '../../../../charts/public';
-import { FormatFactory } from '../../../../field_formats/common';
-import { Datatable } from '../../../../expressions';
+import { PaletteRegistry } from '@kbn/charts-plugin/public';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin';
 import {
   CommonXYDataLayerConfigResult,
   EndValue,

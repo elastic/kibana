@@ -8,7 +8,7 @@
 
 import { AxisConfig, DataLayerConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import { Datatable } from '../../../../../plugins/expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
 
 describe('axes_configuration', () => {

@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from 'react-query';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { CspClientPluginStartDeps } from '../../types';
 

@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition, ParamEditorProps } from './index';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,

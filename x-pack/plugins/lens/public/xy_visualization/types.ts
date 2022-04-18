@@ -8,6 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
+import type {
+  LegendConfig,
+  AxisExtentConfig,
+  XYCurveType,
+  FittingFunction,
+  EndValue,
+  YScaleType,
+  XScaleType,
+  LineStyle,
+  IconPosition,
+  FillStyle,
+} from '@kbn/expression-xy-plugin/common';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { LensIconChartArea } from '../assets/chart_area';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
 import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
@@ -20,19 +33,6 @@ import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizo
 import { LensIconChartLine } from '../assets/chart_line';
 
 import type { VisualizationType, Suggestion } from '../types';
-import type {
-  LegendConfig,
-  AxisExtentConfig,
-  XYCurveType,
-  FittingFunction,
-  EndValue,
-  YScaleType,
-  XScaleType,
-  LineStyle,
-  IconPosition,
-  FillStyle,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { EventAnnotationConfig } from '../../../../../src/plugins/event_annotation/common';
 import type { ValueLabelConfig } from '../../common/types';
 
 export const YAxisModes = {

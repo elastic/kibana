@@ -21,12 +21,12 @@ import {
   FieldFormat,
   FieldFormatParams,
   SerializedFieldFormat,
-} from 'src/plugins/field_formats/common';
-import { Datatable, DatatableRow } from '../../../../expressions';
+} from '@kbn/field-formats-plugin/common';
+import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
+import { PaletteRegistry, SeriesLayer } from '@kbn/charts-plugin/public';
 import { CommonXYDataLayerConfigResult, XScaleType } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
 import { FormatFactory } from '../types';
-import { PaletteRegistry, SeriesLayer } from '../../../../charts/public';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';

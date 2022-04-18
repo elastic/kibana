@@ -9,9 +9,9 @@ import React, { FC, useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-import { TimeRange, RefreshInterval } from '../../../../../../../../src/plugins/data/public';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
-import type { FileUploadPluginStart } from '../../../../../../file_upload/public';
+import { TimeRange, RefreshInterval } from '@kbn/data-plugin/public';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 type LinkType = 'file' | 'index';

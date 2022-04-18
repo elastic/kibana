@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsStart } from 'kibana/public';
-import type { DataPublicPluginStart } from '../../../../data/public';
+import type { SavedObjectsStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { getSavedSearch } from './get_saved_searches';
 

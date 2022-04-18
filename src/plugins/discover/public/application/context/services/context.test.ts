@@ -8,7 +8,7 @@
 
 import { updateSearchSource } from './context';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
-import { createSearchSourceMock } from '../../../../../data/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 describe('context api', function () {
   test('createSearchSource when useFieldsApi is true', () => {

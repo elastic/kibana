@@ -25,7 +25,11 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { ExecutionContextSearch } from 'src/plugins/data/public';
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import {
+  ReactExpressionRendererProps,
+  ReactExpressionRendererType,
+} from '@kbn/expressions-plugin/public';
 import {
   Datasource,
   Visualization,
@@ -35,10 +39,6 @@ import {
   DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import {
-  ReactExpressionRendererProps,
-  ReactExpressionRendererType,
-} from '../../../../../../src/plugins/expressions/public';
 import {
   getDatasourceExpressionsByLayers,
   prependDatasourceExpression,

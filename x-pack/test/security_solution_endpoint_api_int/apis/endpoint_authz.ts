@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { IndexedHostsAndAlertsResponse } from '../../../plugins/security_solution/common/endpoint/index_data';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
 } from '../../common/services/security_solution';
-import { wrapErrorAndRejectPromise } from '../../../plugins/security_solution/common/endpoint/data_loaders/utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');

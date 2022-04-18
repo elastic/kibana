@@ -98,7 +98,7 @@ export type {
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfigResult,
-} from '../../../../src/plugins/chart_expressions/expression_xy/common';
+} from '@kbn/expression-xy-plugin/common';
 export type { LensEmbeddableInput } from './embeddable';
 export { layerTypes } from '../common';
 

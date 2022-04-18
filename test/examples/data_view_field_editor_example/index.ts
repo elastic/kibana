@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({

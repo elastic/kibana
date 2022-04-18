@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keys } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { ChromeStart } from '../../../../core/public';
+import type { ChromeStart } from '@kbn/core/public';
 
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;

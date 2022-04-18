@@ -7,6 +7,7 @@
  */
 
 import { Position } from '@elastic/charts';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
 import {
   YAxisConfig,
@@ -17,10 +18,6 @@ import {
   YConfig,
 } from '../../common';
 import { AxisModes } from '../../common/constants';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../plugins/field_formats/common';
 import { isDataLayer } from './visualization';
 
 export interface Series {

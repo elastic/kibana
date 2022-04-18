@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
 import { CombinedFieldLabel } from './combined_field_label';
@@ -29,7 +30,6 @@ import {
   removeCombinedFieldsFromMappings,
   removeCombinedFieldsFromPipeline,
 } from './utils';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 
 interface Props {
   mappingsString: string;

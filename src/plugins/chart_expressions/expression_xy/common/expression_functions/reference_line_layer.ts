@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
-import { EXTENDED_Y_CONFIG, LayerTypes, REFERENCE_LINE_LAYER } from '../constants';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { LayerTypes, REFERENCE_LINE_LAYER, EXTENDED_Y_CONFIG } from '../constants';
 import { ReferenceLineLayerArgs, ReferenceLineLayerConfigResult } from '../types';
 
 export const referenceLineLayerFunction: ExpressionFunctionDefinition<

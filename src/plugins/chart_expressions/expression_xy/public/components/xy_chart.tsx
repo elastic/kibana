@@ -27,17 +27,13 @@ import {
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { RenderMode } from '../../../../expressions/common';
-import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
+import { RenderMode } from '@kbn/expressions-plugin/common';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
-import type { XYChartProps } from '../../common/types';
-import { EventAnnotationServiceType } from '../../../../event_annotation/public';
-import {
-  ChartsPluginSetup,
-  ChartsPluginStart,
-  useActiveCursor,
-} from '../../../../../plugins/charts/public';
-import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../plugins/charts/common';
+import type { SeriesType, XYChartProps } from '../../common/types';
 import {
   isHorizontalChart,
   getAnnotationsLayers,

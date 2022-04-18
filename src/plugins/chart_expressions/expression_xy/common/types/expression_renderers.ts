@@ -7,7 +7,7 @@
  */
 
 import { AnnotationTooltipFormatter } from '@elastic/charts';
-import { AvailableAnnotationIcon, EventAnnotationArgs } from '../../../../event_annotation/common';
+import { AvailableAnnotationIcon, EventAnnotationArgs } from '@kbn/event-annotation-plugin/common';
 import { XY_VIS_RENDERER } from '../constants';
 import { XYProps } from './expression_functions';
 

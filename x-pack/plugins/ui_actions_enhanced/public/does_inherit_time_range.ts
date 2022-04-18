@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Embeddable, IContainer, ContainerInput } from '../../../../src/plugins/embeddable/public';
+import { Embeddable, IContainer, ContainerInput } from '@kbn/embeddable-plugin/public';
 import { TimeRangeInput } from './custom_time_range_action';
 
 export function doesInheritTimeRange(embeddable: Embeddable<TimeRangeInput>) {
