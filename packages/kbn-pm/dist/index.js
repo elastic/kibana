@@ -1413,18 +1413,6 @@ function parseConfig(log) {
 
 /***/ }),
 
-/***/ "../../node_modules/@kbn/ci-stats-core/target_node/ci_stats_metadata.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-/***/ }),
-
 /***/ "../../node_modules/@kbn/ci-stats-core/target_node/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1434,18 +1422,6 @@ Object.defineProperty(exports, "__esModule", {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-Object.defineProperty(exports, "CiStatsMetadata", {
-  enumerable: true,
-  get: function () {
-    return _ci_stats_metadata.CiStatsMetadata;
-  }
-});
-Object.defineProperty(exports, "Config", {
-  enumerable: true,
-  get: function () {
-    return _ci_stats_config.Config;
-  }
-});
 Object.defineProperty(exports, "parseConfig", {
   enumerable: true,
   get: function () {
@@ -1454,8 +1430,6 @@ Object.defineProperty(exports, "parseConfig", {
 });
 
 var _ci_stats_config = __webpack_require__("../../node_modules/@kbn/ci-stats-core/target_node/ci_stats_config.js");
-
-var _ci_stats_metadata = __webpack_require__("../../node_modules/@kbn/ci-stats-core/target_node/ci_stats_metadata.js");
 
 /***/ }),
 
