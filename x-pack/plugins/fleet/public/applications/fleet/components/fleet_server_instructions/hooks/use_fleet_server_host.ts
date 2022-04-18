@@ -10,7 +10,7 @@ import { useCallback, useState } from 'react';
 
 import { sendPutSettings, useGetSettings } from '../../../hooks';
 
-const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
+const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 
 export interface FleetServerHostForm {
   saveFleetServerHost: () => Promise<void>;
@@ -29,11 +29,23 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const { data: settings } = useGetSettings();
 
   const validateFleetServerHost = useCallback(() => {
-    if (fleetServerHost && fleetServerHost.match(URL_REGEX)) {
-      setError(undefined);
+    if (!fleetServerHost) {
+      setError(
+        i18n.translate('xpack.fleet.fleetServerHost.requiredError', {
+          defaultMessage: 'Fleet server host is required.',
+        })
+      );
 
-      return true;
-    } else {
+      return false;
+    } else if (!fleetServerHost.startsWith('https')) {
+      setError(
+        i18n.translate('xpack.fleet.fleetServerHost.requiresHttpsError', {
+          defaultMessage: 'Fleet server host must begin with "https"',
+        })
+      );
+
+      return false;
+    } else if (!fleetServerHost.match(URL_REGEX)) {
       setError(
         i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostInvalidUrlError', {
           defaultMessage: 'Invalid URL',
@@ -42,6 +54,8 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
       return false;
     }
+
+    return true;
   }, [fleetServerHost]);
 
   const saveFleetServerHost = useCallback(async () => {

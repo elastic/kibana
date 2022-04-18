@@ -46,7 +46,10 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     error: fleetServerError,
   } = useFleetServerHost();
 
+  // When a validation error is surfaced from the Fleet Server host form, we want to treat it
+  // the same way we do errors from the service token or policy creation steps
   useEffect(() => {
+    setStatus('error');
     setError(fleetServerError);
   }, [fleetServerError]);
 
@@ -63,9 +66,8 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const submit = useCallback(async () => {
     try {
-      setStatus('loading');
-
       if (validateFleetServerHost()) {
+        setStatus('loading');
         await saveFleetServerHost();
         await generateServiceToken();
 
@@ -95,7 +97,6 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
       });
 
       setStatus('error');
-      alert(err.message);
       setError(err.message);
     }
   }, [
