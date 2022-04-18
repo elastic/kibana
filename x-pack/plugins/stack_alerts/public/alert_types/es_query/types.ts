@@ -7,6 +7,8 @@
 
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EXPRESSION_ERRORS } from './constants';
 
 export interface Comparator {
   text: string;
@@ -19,7 +21,7 @@ export enum SearchType {
   searchSource = 'searchSource',
 }
 
-export interface CommonAlertParams<T extends SearchType> extends RuleTypeParams {
+export interface CommonAlertParams extends RuleTypeParams {
   size: number;
   thresholdComparator?: string;
   threshold: number[];
@@ -28,8 +30,8 @@ export interface CommonAlertParams<T extends SearchType> extends RuleTypeParams 
 }
 
 export type EsQueryAlertParams<T = SearchType> = T extends SearchType.searchSource
-  ? CommonAlertParams<SearchType.searchSource> & OnlySearchSourceAlertParams
-  : CommonAlertParams<SearchType.esQuery> & OnlyEsQueryAlertParams;
+  ? CommonAlertParams & OnlySearchSourceAlertParams
+  : CommonAlertParams & OnlyEsQueryAlertParams;
 
 export interface OnlyEsQueryAlertParams {
   esQuery: string;
@@ -40,3 +42,9 @@ export interface OnlySearchSourceAlertParams {
   searchType: 'searchSource';
   searchConfiguration: SerializedSearchSourceFields;
 }
+
+export type DataViewOption = EuiComboBoxOptionOption<string>;
+
+export type ExpressionErrors = typeof EXPRESSION_ERRORS;
+
+export type ErrorKey = keyof ExpressionErrors & unknown;

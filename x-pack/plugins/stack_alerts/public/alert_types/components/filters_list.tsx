@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { Filter } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterItem } from '@kbn/unified-search-plugin/public';
+import { useTriggersAndActionsUiDeps } from '../es_query/util';
 
-const FilterItemComponent = injectI18n(FilterItem);
-
-interface ReadOnlyFilterItemsProps {
+interface FiltersListProps {
+  dataView: DataView;
   filters: Filter[];
-  indexPatterns: DataView[];
 }
 
 const noOp = () => {};
+const FilterItemComponent = injectI18n(FilterItem);
 
-export const ReadOnlyFilterItems = ({ filters, indexPatterns }: ReadOnlyFilterItemsProps) => {
-  const { uiSettings } = useKibana().services;
+export const FiltersList = ({ filters, dataView }: FiltersListProps) => {
+  const { uiSettings } = useTriggersAndActionsUiDeps();
+  const dataViews = useMemo(() => [dataView], [dataView]);
 
   const filterList = filters.map((filter, index) => {
-    const filterValue = getDisplayValueFromFilter(filter, indexPatterns);
+    const filterValue = getDisplayValueFromFilter(filter, dataViews);
     return (
       <EuiFlexItem grow={false} className="globalFilterBar__flexItem">
         <FilterItemComponent
@@ -37,7 +37,7 @@ export const ReadOnlyFilterItems = ({ filters, indexPatterns }: ReadOnlyFilterIt
           filter={filter}
           onUpdate={noOp}
           onRemove={noOp}
-          indexPatterns={indexPatterns}
+          indexPatterns={dataViews}
           uiSettings={uiSettings!}
           readonly
         />

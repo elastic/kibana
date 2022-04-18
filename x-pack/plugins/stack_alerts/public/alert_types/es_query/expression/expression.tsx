@@ -12,22 +12,11 @@ import 'brace/theme/github';
 
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryAlertParams } from '../types';
+import { ErrorKey, EsQueryAlertParams } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { isSearchSourceAlert } from '../util';
-
-const expressionFieldsWithValidation = [
-  'index',
-  'size',
-  'timeField',
-  'threshold0',
-  'threshold1',
-  'timeWindowSize',
-  'searchType',
-  'esQuery',
-  'searchConfiguration',
-];
+import { EXPRESSION_ERROR_KEYS } from '../constants';
 
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<EsQueryAlertParams>
@@ -35,11 +24,11 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   const { ruleParams, errors } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
 
-  const hasExpressionErrors = !!Object.keys(errors).find((errorKey) => {
+  const hasExpressionErrors = Object.keys(errors).some((errorKey) => {
     return (
-      expressionFieldsWithValidation.includes(errorKey) &&
+      EXPRESSION_ERROR_KEYS.includes(errorKey as ErrorKey) &&
       errors[errorKey].length >= 1 &&
-      ruleParams[errorKey as keyof EsQueryAlertParams] !== undefined
+      ruleParams[errorKey] !== undefined
     );
   });
 
@@ -54,7 +43,6 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     <>
       {hasExpressionErrors && (
         <>
-          <EuiSpacer />
           <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
           <EuiSpacer />
         </>

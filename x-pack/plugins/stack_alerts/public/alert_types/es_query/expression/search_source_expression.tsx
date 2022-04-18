@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import './search_source_expression.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -24,15 +24,16 @@ import {
   ThresholdExpression,
   ValueExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { DataViewOption, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
-import { ReadOnlyFilterItems } from './read_only_filter_items';
+import { DataViewSelectPopover } from '../../components/data_view_select_popover';
+import { FiltersList } from '../../components/filters_list';
+import { useTriggersAndActionsUiDeps } from '../util';
 
 export const SearchSourceExpression = ({
   ruleParams,
   setRuleParams,
   setRuleProperty,
-  data,
   errors,
 }: RuleTypeParamsExpressionProps<EsQueryAlertParams<SearchType.searchSource>>) => {
   const {
@@ -43,8 +44,10 @@ export const SearchSourceExpression = ({
     timeWindowUnit,
     size,
   } = ruleParams;
-  const [usedSearchSource, setUsedSearchSource] = useState<ISearchSource | undefined>();
-  const [paramsError, setParamsError] = useState<Error | undefined>();
+  const { data } = useTriggersAndActionsUiDeps();
+
+  const searchSourceRef = useRef<ISearchSource>();
+  const [paramsError, setParamsError] = useState<Error>();
 
   const [currentAlertParams, setCurrentAlertParams] = useState<
     EsQueryAlertParams<SearchType.searchSource>
@@ -69,44 +72,59 @@ export const SearchSourceExpression = ({
     [setRuleParams]
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => setRuleProperty('params', currentAlertParams), []);
+  useEffect(() => {
+    setRuleProperty('params', currentAlertParams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    async function initSearchSource() {
-      try {
-        const loadedSearchSource = await data.search.searchSource.create(searchConfiguration);
-        setUsedSearchSource(loadedSearchSource);
-      } catch (error) {
-        setParamsError(error);
-      }
-    }
-    if (searchConfiguration) {
-      initSearchSource();
-    }
-  }, [data.search.searchSource, searchConfiguration]);
+    const initSearchSource = () =>
+      data.search.searchSource
+        .create(searchConfiguration)
+        .then((searchSource) => (searchSourceRef.current = searchSource))
+        .catch(setParamsError);
+
+    initSearchSource();
+  }, [data.search.searchSource, searchConfiguration, data.dataViews]);
+
+  if (!searchSourceRef.current) {
+    return <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />;
+  }
 
   if (paramsError) {
     return (
       <>
         <EuiCallOut color="danger" iconType="alert">
-          <p>{paramsError.message}</p>
+          <p>
+            {paramsError || (
+              <FormattedMessage
+                id="xpack.stackAlerts.searchThreshold.ui.fetchError"
+                defaultMessage="Error when fetching alert rule parameters"
+              />
+            )}
+          </p>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>
     );
   }
 
-  if (!usedSearchSource) {
-    return <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />;
-  }
-
+  const usedSearchSource = searchSourceRef.current;
   const dataView = usedSearchSource.getField('index')!;
   const query = usedSearchSource.getField('query')!;
-  const filters = (usedSearchSource.getField('filter') as Filter[]).filter(
+  const filters = ((usedSearchSource.getField('filter') as Filter[]) || []).filter(
     ({ meta }) => !meta.disabled
   );
-  const dataViews = [dataView];
+
+  const onSelectDataView = ([selected]: DataViewOption[]) => {
+    // type casting is safe, since id was set to ComboBox value
+    data.dataViews.get(selected.value!).then((newDataView) => {
+      const newSearchSource = usedSearchSource.createCopy();
+      newSearchSource.setField('index', newDataView);
+      setParam('searchConfiguration', newSearchSource);
+    });
+  };
+
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -129,11 +147,9 @@ export const SearchSourceExpression = ({
         iconType="iInCircle"
       />
       <EuiSpacer size="s" />
-      <EuiExpression
-        className="dscExpressionParam"
-        description={'Data view'}
-        value={dataView.title}
-        display="columns"
+      <DataViewSelectPopover
+        selectedDataViewTitle={dataView.title}
+        onSelectDataView={onSelectDataView}
       />
       {query.query !== '' && (
         <EuiExpression
@@ -148,7 +164,7 @@ export const SearchSourceExpression = ({
           className="dscExpressionParam searchSourceAlertFilters"
           title={'sas'}
           description={'Filter'}
-          value={<ReadOnlyFilterItems filters={filters} indexPatterns={dataViews} />}
+          value={<FiltersList filters={filters} dataView={dataView} />}
           display="columns"
         />
       )}
