@@ -59,6 +59,9 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      duration: {
+        type: 'unsigned_long',
+      },
       description: {
         type: 'text',
       },

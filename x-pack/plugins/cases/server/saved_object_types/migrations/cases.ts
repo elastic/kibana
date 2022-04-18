@@ -87,8 +87,8 @@ export const removeCaseType = (
 };
 
 export const addDuration = (
-  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
-): SavedObjectSanitizedDoc<CaseAttributes & { duration: number | null }> => {
+  doc: SavedObjectUnsanitizedDoc<Omit<CaseAttributes, 'duration'>>
+): SavedObjectSanitizedDoc<CaseAttributes> => {
   let duration = null;
 
   try {

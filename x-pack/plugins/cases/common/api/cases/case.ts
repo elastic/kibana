@@ -95,6 +95,7 @@ export const CaseFullExternalServiceRt = rt.union([CaseExternalServiceBasicRt, r
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
   rt.type({
+    duration: rt.union([rt.number, rt.null]),
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
