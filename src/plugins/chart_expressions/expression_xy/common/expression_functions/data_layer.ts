@@ -19,6 +19,7 @@ import {
   Y_CONFIG,
 } from '../constants';
 import {
+  validateLinesVisibilityForChartType,
   validateLineWidthForChartType,
   validateMarkSizeForChartType,
   validatePointsRadiusForChartType,
@@ -152,6 +153,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
   fn(table, args) {
     validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
     validateAccessor(args.markSizeAccessor, table.columns);
+    validateLinesVisibilityForChartType(args.showLines, args.seriesType);
     validateLineWidthForChartType(args.lineWidth, args.seriesType);
     validateShowPointsForChartType(args.showPoints, args.seriesType);
     validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);

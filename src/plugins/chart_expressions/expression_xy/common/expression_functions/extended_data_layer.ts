@@ -23,6 +23,7 @@ import {
   validateLineWidthForChartType,
   validateShowPointsForChartType,
   validatePointsRadiusForChartType,
+  validateLinesVisibilityForChartType,
 } from './validate';
 
 export const extendedDataLayerFunction: ExpressionFunctionDefinition<
@@ -160,6 +161,7 @@ export const extendedDataLayerFunction: ExpressionFunctionDefinition<
 
     validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
     validateAccessor(args.markSizeAccessor, table.columns);
+    validateLinesVisibilityForChartType(args.showLines, args.seriesType);
     validateLineWidthForChartType(args.lineWidth, args.seriesType);
     validateShowPointsForChartType(args.showPoints, args.seriesType);
     validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
