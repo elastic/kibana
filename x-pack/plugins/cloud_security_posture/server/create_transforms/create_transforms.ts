@@ -23,9 +23,11 @@ export const initializeTransform = async (
   transform: TransformPutTransformRequest,
   logger: Logger
 ) => {
-  return createTransformIfNotExists(esClient, transform, logger).then(() =>
-    startTransformIfNotStarted(esClient, transform.transform_id, logger)
-  );
+  return createTransformIfNotExists(esClient, transform, logger).then((succeeded) => {
+    if (succeeded) {
+      startTransformIfNotStarted(esClient, transform.transform_id, logger);
+    }
+  });
 };
 
 export const createTransformIfNotExists = async (
@@ -37,11 +39,13 @@ export const createTransformIfNotExists = async (
     await esClient.transform.getTransform({
       transform_id: transform.transform_id,
     });
+    return true;
   } catch (existErr) {
     const existError = transformError(existErr);
     if (existError.statusCode === 404) {
       try {
-        return await esClient.transform.putTransform(transform);
+        await esClient.transform.putTransform(transform);
+        return true;
       } catch (createErr) {
         const createError = transformError(createErr);
         logger.error(
@@ -54,6 +58,7 @@ export const createTransformIfNotExists = async (
       );
     }
   }
+  return false;
 };
 
 export const startTransformIfNotStarted = async (
