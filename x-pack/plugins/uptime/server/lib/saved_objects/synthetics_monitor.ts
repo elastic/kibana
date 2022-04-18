@@ -47,7 +47,7 @@ export const syntheticsMonitor: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
     icon: 'uptimeApp',
     getTitle: (savedObject) =>
       savedObject.attributes.name +
