@@ -36,7 +36,7 @@ image::images/highlights-discover.png[A view of the the Document Explorer in Dis
 
 By default, *Lens* has always automatically applied the changes you make to visualizations.
 Now you can control when *Lens* applies your changes and generates suggestions with
-he new ability to turn on and off auto-apply. To start manually applying your changes,
+the new ability to turn on and off auto-apply. To start manually applying your changes,
 click *Settings* in the toolbar, then deselect *Auto-apply visualization changes*.
 For more information, check {kibana-ref}/lens.html#create-the-visualization-panel[Create visualizations].
 
