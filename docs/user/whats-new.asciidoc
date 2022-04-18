@@ -161,7 +161,7 @@ This way you have peace of mind that your instance remains performant.
 Specifically, in the kibana.yml file:
 
 * Configure your rule queries to timeout after a custom time expires without the query returning.
-You can do this on a per rule type basis too. Refer to {kibana-ref}/alert-action-settings-kb.html[documentation] for the `rules.execution.timeout setting.``
+You can do this on a per rule type basis too. Refer to {kibana-ref}/alert-action-settings-kb.html[documentation] for the `rules.execution.timeout` setting.
 
 * Configure a minimum value for the interval with which your rules run. Strictly enforce the
 minimum interval or just display warnings on the UI. Check the documentation for `the minimumScheduleInterval` setting.
