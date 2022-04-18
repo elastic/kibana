@@ -7,9 +7,9 @@
 
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import { FilterStateStore } from '@kbn/data-plugin/common';
 import { MlCoreSetup } from '../plugin';
-import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   AnomalyChartsFieldSelectionContext,

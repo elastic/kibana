@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { Observable } from 'rxjs';
-import { ManagementSetup } from 'src/plugins/management/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { SharePluginSetup } from 'src/plugins/share/public';
-import { CoreStart, ScopedHistory, CoreTheme } from 'src/core/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { CoreStart, ScopedHistory, CoreTheme } from '@kbn/core/public';
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { CloudSetup } from '../../cloud/public';
-import { LicensingPluginStart } from '../../licensing/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { BreadcrumbService } from './application/lib/breadcrumbs';
 import { ApiService } from './application/lib/api';
 

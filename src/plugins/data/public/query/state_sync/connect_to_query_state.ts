@@ -9,7 +9,7 @@
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
-import { BaseStateContainer } from '../../../../kibana_utils/public';
+import { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';

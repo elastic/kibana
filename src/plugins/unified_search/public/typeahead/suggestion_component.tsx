@@ -9,7 +9,7 @@
 import { EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
-import { QuerySuggestion } from '../../../data/public';
+import { QuerySuggestion } from '@kbn/data-plugin/public';
 import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 
 function getEuiIconType(type: string) {

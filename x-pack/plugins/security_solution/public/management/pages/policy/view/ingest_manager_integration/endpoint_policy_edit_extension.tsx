@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
-} from '../../../../../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
 import { useHttp } from '../../../../../common/lib/kibana/hooks';
 import {
   getPolicyDetailPath,

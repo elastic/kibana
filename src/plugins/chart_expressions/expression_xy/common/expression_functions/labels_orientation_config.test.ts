@@ -7,8 +7,8 @@
  */
 
 import { LabelsOrientationConfig } from '../types';
-import { labelsOrientationConfigFunction } from '../expression_functions';
-import { createMockExecutionContext } from '../../../../../plugins/expressions/common/mocks';
+import { labelsOrientationConfigFunction } from '.';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 
 describe('labelsOrientationConfig', () => {
   test('produces the correct arguments', () => {

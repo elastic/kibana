@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput, PanelState } from '../../../embeddable/common/types';
+import { EmbeddableInput, PanelState } from '@kbn/embeddable-plugin/common/types';
 import { ControlInput, ControlStyle, ControlWidth } from '../types';
 
 export const CONTROL_GROUP_TYPE = 'control_group';
