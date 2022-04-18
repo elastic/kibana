@@ -8,7 +8,7 @@
 
 import { isEqual } from 'lodash';
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';

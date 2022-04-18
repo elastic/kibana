@@ -146,7 +146,7 @@ export const ConfiguredControlGroupStory = () => (
           dataViewId: 'demoDataFlights',
           fieldName: 'OriginCityName',
           selectedOptions: ['Toronto'],
-        } as OptionsListEmbeddableInput,
+        } as Omit<OptionsListEmbeddableInput, 'resetSelections'>,
       },
       optionsList2: {
         type: OPTIONS_LIST_CONTROL,
@@ -158,7 +158,7 @@ export const ConfiguredControlGroupStory = () => (
           dataViewId: 'demoDataFlights',
           fieldName: 'DestCityName',
           selectedOptions: ['London'],
-        } as OptionsListEmbeddableInput,
+        } as Omit<OptionsListEmbeddableInput, 'resetSelections'>,
       },
       optionsList3: {
         type: 'TIME_SLIDER',
@@ -169,7 +169,7 @@ export const ConfiguredControlGroupStory = () => (
           id: 'optionsList3',
           dataViewId: 'demoDataFlights',
           fieldName: 'Carrier',
-        } as OptionsListEmbeddableInput,
+        } as Omit<OptionsListEmbeddableInput, 'resetSelections'>,
       },
       rangeSlider1: {
         type: RANGE_SLIDER_CONTROL,
@@ -182,7 +182,7 @@ export const ConfiguredControlGroupStory = () => (
           fieldName: 'AvgTicketPrice',
           value: ['4', '12'],
           step: 2,
-        } as RangeSliderEmbeddableInput,
+        } as Omit<RangeSliderEmbeddableInput, 'resetSelections'>,
       },
     }}
   />
@@ -202,7 +202,7 @@ export const RangeSliderControlGroupStory = () => (
           fieldName: 'AvgTicketPrice',
           value: ['4', '12'],
           step: 2,
-        } as RangeSliderEmbeddableInput,
+        } as Omit<RangeSliderEmbeddableInput, 'resetSelections'>,
       },
       rangeSlider2: {
         type: RANGE_SLIDER_CONTROL,
@@ -215,7 +215,7 @@ export const RangeSliderControlGroupStory = () => (
           fieldName: 'DistanceMiles',
           value: ['0', '100'],
           step: 10,
-        } as RangeSliderEmbeddableInput,
+        } as Omit<RangeSliderEmbeddableInput, 'resetSelections'>,
       },
       rangeSlider3: {
         type: RANGE_SLIDER_CONTROL,
@@ -228,7 +228,7 @@ export const RangeSliderControlGroupStory = () => (
           fieldName: 'FlightTimeHour',
           value: ['30', '600'],
           step: 30,
-        } as RangeSliderEmbeddableInput,
+        } as Omit<RangeSliderEmbeddableInput, 'resetSelections'>,
       },
     }}
   />
