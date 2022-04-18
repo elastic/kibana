@@ -10,8 +10,8 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { set } from '@elastic/safer-lodash-set';
 import uuid from 'uuid';
-import { detectionEngineRuleExecutionEventsUrl } from '../../../../plugins/security_solution/common/constants';
-import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
+import { detectionEngineRuleExecutionEventsUrl } from '@kbn/security-solution-plugin/common/constants';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EcsEventType, KibanaRequest } from 'kibana/server';
+import { EcsEventType, KibanaRequest } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { Space } from '../../../spaces/server';
-import { CasesSupportedOperations } from '../../../security/server';
+import { Space } from '@kbn/spaces-plugin/server';
+import { CasesSupportedOperations } from '@kbn/security-plugin/server';
 
 /**
  * The tenses for describing the action performed by a API route

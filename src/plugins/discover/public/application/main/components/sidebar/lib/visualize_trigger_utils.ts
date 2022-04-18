@@ -11,10 +11,10 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
-} from '../../../../../../../ui_actions/public';
+} from '@kbn/ui-actions-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getUiActions } from '../../../../../kibana_services';
-import type { DataViewField } from '../../../../../../../data_views/public';
-import { KBN_FIELD_TYPES } from '../../../../../../../data/public';
 
 function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE

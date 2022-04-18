@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiButton, EuiTitle, EuiLink } from '@elastic/eui';
-import { useEnablement } from '..//hooks/use_enablement';
+import { useEnablement } from '../hooks/use_enablement';
 import { kibanaService } from '../../../state/kibana_service';
 import { SYNTHETICS_ENABLE_SUCCESS, SYNTHETICS_DISABLE_SUCCESS } from '../content';
 

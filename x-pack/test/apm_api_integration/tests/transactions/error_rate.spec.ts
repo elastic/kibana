@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import { format } from 'url';
 import moment from 'moment';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 

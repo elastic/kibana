@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiComboBoxOptionOption } from
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { GetAgentPoliciesResponseItem } from '../../../../fleet/common';
+import { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import { ComboBoxField, FieldHook } from '../../shared_imports';
 
 // Custom styling for drop down list items due to:

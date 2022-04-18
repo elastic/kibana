@@ -10,9 +10,9 @@ import { Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoData } from '../../../components/no_data';
 import { PageTemplate } from '../page_template';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 import { Legacy } from '../../../legacy_shims';
 import { Enabler } from './enabler';

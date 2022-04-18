@@ -8,31 +8,34 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/utils';
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import type { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
-} from '../../../encrypted_saved_objects/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type { SecurityPluginStart, SecurityPluginSetup } from '../../../security/server';
+import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
+
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+
 import type { FleetConfigType } from '../../common';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
-import type { CloudSetup } from '../../../cloud/server';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 
 class AppContextService {
@@ -183,6 +186,8 @@ class AppContextService {
           ? PostPackagePolicyCreateCallback
           : T extends 'postPackagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostCreate'
+          ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
       >
     | undefined {
@@ -192,6 +197,8 @@ class AppContextService {
           ? PostPackagePolicyCreateCallback
           : T extends 'postPackagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostCreate'
+          ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
       >;
     }

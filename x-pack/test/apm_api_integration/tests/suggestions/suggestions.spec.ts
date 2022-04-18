@@ -8,7 +8,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../plugins/apm/common/elasticsearch_fieldnames';
+} from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function suggestionsTests({ getService }: FtrProviderContext) {

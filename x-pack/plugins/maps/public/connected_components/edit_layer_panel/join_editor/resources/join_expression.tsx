@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPatternField } from 'src/plugins/data/public';
+import { IndexPatternField } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../common/constants';
