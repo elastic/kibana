@@ -96,4 +96,24 @@ export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-ru
 
 export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
 
+export const ALERT_DETAILS_PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
+
+export const ALERT_DETAILS_RULE = '[data-test-subj="formatted-field-signal.rule.name"]';
+
+export const ALERT_DETAILS_SEVERITY = '[data-test-subj="formatted-field-signal.rule.severity"]';
+
+export const ALERT_DETAILS_RISK_SCORE = '[data-test-subj="formatted-field-signal.rule.risk_score"]';
+
+export const ALERT_DETAILS_HOST_NAME = '[data-test-subj="formatted-field-host.name"]';
+
+export const ALERT_DETAILS_USER_NAME = '[data-test-subj="formatted-field-user.name"]';
+
+export const ALERT_DETAILS_PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
+
+export const ALERT_DETAILS_FILE_NAME = '[data-test-subj="formatted-field-file.name"]';
+
+export const ALERT_DETAILS_SOURCE_IP = '[data-test-subj="formatted-field-source.ip"]';
+
+export const ALERT_DETAILS_DESTINATION_IP = '[data-test-subj="formatted-field-destination.ip"]';
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';

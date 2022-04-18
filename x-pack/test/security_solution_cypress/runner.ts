@@ -129,6 +129,7 @@ export async function SecuritySolutionCypressUpgradeCliTestRunner({
         CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
         CYPRESS_ELASTICSEARCH_USERNAME: process.env.TEST_ES_USER,
         CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TEST_ES_PASS,
+        CYPRESS_ORIGINAL_VERSION: process.env.ORIGINAL_VERSION,
         ...process.env,
       },
       wait: true,
