@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import './_index.scss';
 import React, { PureComponent, ReactNode } from 'react';
 import { isEmpty } from 'lodash';
 import classNames from 'classnames';

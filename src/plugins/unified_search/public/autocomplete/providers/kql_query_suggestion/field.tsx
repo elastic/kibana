@@ -8,7 +8,7 @@
 
 import { IFieldType, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import { flatten } from 'lodash';
-import { escapeKuery } from './lib/escape_kuery';
+import { escapeKuery } from '@kbn/es-query';
 import { sortPrefixFirst } from './sort_prefix_first';
 import { QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
 import { KqlQuerySuggestionProvider } from './types';
