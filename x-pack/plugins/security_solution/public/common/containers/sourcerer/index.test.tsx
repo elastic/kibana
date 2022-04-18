@@ -308,8 +308,8 @@ describe('Sourcerer Hooks', () => {
         await waitForNextUpdate();
         rerender();
         expect(result.current.selectedPatterns).toEqual([
-          '-*elastic-cloud-logs-*',
           ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
+          '-*elastic-cloud-logs-*',
         ]);
       });
     });
