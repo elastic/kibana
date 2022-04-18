@@ -7,14 +7,14 @@
  */
 
 import { get } from 'lodash';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { inter } from '../../../expressions/common';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { inter } from '@kbn/expressions-plugin/common';
 
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
+} from '@kbn/data-plugin/public';
 import { VisParams } from './types';
 import { getStopsWithColorsFromRanges } from './utils';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from 'src/core/public';
+import { Capabilities } from '@kbn/core/public';
 import { IconType } from '@elastic/eui';
 
 /** @public */

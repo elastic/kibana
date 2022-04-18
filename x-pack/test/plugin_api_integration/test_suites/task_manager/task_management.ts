@@ -8,13 +8,10 @@
 import { random, times } from 'lodash';
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
+import { DEFAULT_MAX_WORKERS, DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
-import {
-  DEFAULT_MAX_WORKERS,
-  DEFAULT_POLL_INTERVAL,
-} from '../../../../plugins/task_manager/server/config';
-import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 const {
   task: { properties: taskManagerIndexMapping },

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
-import { CoreSetup, PluginInitializerContext } from '../../../../../../../src/core/server';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
 export function initRoutes(initializerContext: PluginInitializerContext, core: CoreSetup) {
   const logger = initializerContext.logger.get();

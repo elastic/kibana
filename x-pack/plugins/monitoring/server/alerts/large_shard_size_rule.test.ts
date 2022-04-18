@@ -9,7 +9,7 @@ import { LargeShardSizeRule } from './large_shard_size_rule';
 import { RULE_LARGE_SHARD_SIZE } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 type ILargeShardSizeRuleMock = LargeShardSizeRule & {
   defaultParams: {

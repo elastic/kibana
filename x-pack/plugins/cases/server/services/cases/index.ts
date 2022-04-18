@@ -16,12 +16,12 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsUpdateResponse,
   SavedObjectsResolveResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder, KueryNode } from '@kbn/es-query';
 
-import { SecurityPluginSetup } from '../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,

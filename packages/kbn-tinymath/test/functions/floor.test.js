@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { floor } = require('../../src/functions/floor.js');
+const { floor } = require('../../src/functions/floor');
 
 describe('Floor', () => {
   it('numbers', () => {

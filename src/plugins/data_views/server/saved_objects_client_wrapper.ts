@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,

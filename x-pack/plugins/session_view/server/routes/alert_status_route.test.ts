@@ -10,19 +10,19 @@ import {
   SPACE_IDS,
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { searchAlertByUuid } from './alert_status_route';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
 
 import {
   AlertsClient,
   ConstructorOptions,
-} from '../../../rule_registry/server/alert_data_client/alerts_client';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { alertingAuthorizationMock } from '../../../alerting/server/authorization/alerting_authorization.mock';
-import { auditLoggerMock } from '../../../security/server/audit/mocks';
-import { AlertingAuthorizationEntity } from '../../../alerting/server';
-import { ruleDataServiceMock } from '../../../rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.mock';
+} from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
+import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();

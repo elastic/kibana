@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 

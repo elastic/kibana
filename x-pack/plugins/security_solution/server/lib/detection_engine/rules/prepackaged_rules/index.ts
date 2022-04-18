@@ -160,7 +160,7 @@ import rule147 from './defense_evasion_waf_acl_deletion.json';
 import rule148 from './impact_attempt_to_revoke_okta_api_token.json';
 import rule149 from './impact_iam_group_deletion.json';
 import rule150 from './impact_possible_okta_dos_attack.json';
-import rule151 from './impact_rds_cluster_deletion.json';
+import rule151 from './impact_rds_instance_cluster_deletion.json';
 import rule152 from './initial_access_suspicious_activity_reported_by_okta_user.json';
 import rule153 from './okta_attempt_to_deactivate_okta_policy.json';
 import rule154 from './okta_attempt_to_deactivate_okta_policy_rule.json';
