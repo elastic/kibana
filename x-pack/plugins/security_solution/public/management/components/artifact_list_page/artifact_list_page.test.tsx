@@ -18,9 +18,7 @@ import {
 
 jest.mock('../../../common/components/user_privileges');
 
-// FLAKY: https://github.com/elastic/kibana/issues/129837
-// FLAKY: https://github.com/elastic/kibana/issues/129836
-describe.skip('When using the ArtifactListPage component', () => {
+describe('When using the ArtifactListPage component', () => {
   let render: (
     props?: Partial<ArtifactListPageProps>
   ) => ReturnType<AppContextTestRender['render']>;
@@ -115,7 +113,7 @@ describe.skip('When using the ArtifactListPage component', () => {
       });
     });
 
-    it('should persist pagination `page size` changes to the URL', async () => {
+    it('should persist pagination `pageSize` changes to the URL', async () => {
       const { getByTestId } = await renderWithListData();
       act(() => {
         userEvent.click(getByTestId('tablePaginationPopoverButton'));
@@ -124,6 +122,8 @@ describe.skip('When using the ArtifactListPage component', () => {
         await waitFor(() => {
           expect(getByTestId('tablePagination-20-rows'));
         });
+      });
+      act(() => {
         userEvent.click(getByTestId('tablePagination-20-rows'));
       });
 
@@ -159,7 +159,9 @@ describe.skip('When using the ArtifactListPage component', () => {
         const { getByTestId } = await renderWithListData();
         await clickCardAction('delete');
 
-        expect(getByTestId('testPage-deleteModal')).toBeTruthy();
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeTruthy();
+        });
       });
     });
 
@@ -259,7 +261,6 @@ describe.skip('When using the ArtifactListPage component', () => {
         });
 
         await waitFor(() => {
-          // console.log(`\n\n${renderResult.getByTestId('testPage-list').outerHTML}\n\n\n`);
           expect(renderResult.getByTestId('testPage-list-noResults')).toBeTruthy();
         });
       });
