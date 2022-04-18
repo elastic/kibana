@@ -48,7 +48,7 @@ image::images/highlights-lens-auto-apply.png[Auto-apply changes in Lens]
 
 To call out significant changes and trends in your data, you can now add annotations
 to *Lens* visualizations in tech preview. Customize the appearance of annotations with text,
-icons, colors, and more. For more information, check {kibana-ref}/add-annotations.html[Add annotations].
+icons, colors, and more. For more information, check {kibana-ref}/lens.html#add-annotations[Add annotations].
 
 [role="screenshot"]
 image::images/highlights-lens-annotations.png[Annotations in Lens visualzations]
