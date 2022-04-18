@@ -34,7 +34,7 @@ import {
 } from '../routes/__mocks__/request_responses';
 import { requestContextMock } from '../routes/__mocks__';
 
-const getRuleLegacyActions = (): SanitizedAlert<RuleParams> =>
+const getRuleLegacyActions = (): SanitizedRule<RuleParams> =>
   ({
     id: '123',
     notifyWhen: 'onThrottleInterval',
@@ -85,7 +85,7 @@ const getRuleLegacyActions = (): SanitizedAlert<RuleParams> =>
       lastExecutionDate: '2022-03-31T21:47:25.695Z',
       lastDuration: 0,
     },
-  } as unknown as SanitizedAlert<RuleParams>);
+  } as unknown as SanitizedRule<RuleParams>);
 
 describe('utils', () => {
   describe('#calculateInterval', () => {
@@ -677,7 +677,7 @@ describe('utils', () => {
         throttle: null,
         notifyWhen: 'onActiveAlert',
         muteAll: true,
-      } as SanitizedAlert<RuleParams>;
+      } as SanitizedRule<RuleParams>;
 
       const migratedRule = await legacyMigrate({
         rulesClient: clients.rulesClient,
