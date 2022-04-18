@@ -24781,7 +24781,6 @@
     "xpack.uptime.emptyStateError.notAuthorized": "Vous n'êtes pas autorisé à afficher les données Uptime, veuillez contacter votre administrateur système.",
     "xpack.uptime.emptyStateError.notFoundPage": "Page introuvable",
     "xpack.uptime.emptyStateError.title": "Erreur",
-    "xpack.uptime.featureRegistry.uptimeFeatureName": "Uptime",
     "xpack.uptime.filterBar.ariaLabel": "Saisissez des critères de filtre pour la page d'aperçu",
     "xpack.uptime.filterBar.filterAllLabel": "Tous",
     "xpack.uptime.filterBar.options.location.name": "Emplacement",

@@ -28510,7 +28510,6 @@
     "xpack.uptime.emptyStateError.notFoundPage": "ページが見つかりません",
     "xpack.uptime.emptyStateError.title": "エラー",
     "xpack.uptime.enableAlert.editAlert": "アラートを編集",
-    "xpack.uptime.featureRegistry.uptimeFeatureName": "アップタイム",
     "xpack.uptime.filterBar.ariaLabel": "概要ページのインプットフィルター基準",
     "xpack.uptime.filterBar.filterAllLabel": "すべて",
     "xpack.uptime.filterBar.options.location.name": "場所",

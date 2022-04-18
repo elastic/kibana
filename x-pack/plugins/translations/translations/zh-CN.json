@@ -28541,7 +28541,6 @@
     "xpack.uptime.emptyStateError.notFoundPage": "未找到页面",
     "xpack.uptime.emptyStateError.title": "错误",
     "xpack.uptime.enableAlert.editAlert": "编辑告警",
-    "xpack.uptime.featureRegistry.uptimeFeatureName": "运行时间",
     "xpack.uptime.filterBar.ariaLabel": "概览页面的输入筛选条件",
     "xpack.uptime.filterBar.filterAllLabel": "全部",
     "xpack.uptime.filterBar.options.location.name": "位置",
