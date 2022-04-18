@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient } from 'kibana/server';
-import { IRouter } from '../../../../../src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import {
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,

@@ -11,7 +11,7 @@
 import expect from '@kbn/expect';
 import request from 'superagent';
 import type SuperTest from 'supertest';
-import { IEsSearchResponse } from 'src/plugins/data/common';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { RetryService } from '../../../../test/common/services/retry/retry';
 

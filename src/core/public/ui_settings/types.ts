@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { PublicUiSettingsParams, UserProvidedValues } from 'src/core/server/types';
+import { PublicUiSettingsParams, UserProvidedValues } from '../../server/types';
 
 /** @public */
 export interface UiSettingsState {

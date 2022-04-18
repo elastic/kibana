@@ -24,29 +24,29 @@ import {
 } from 'rxjs/operators';
 
 import {
+  withSuspense,
+  LazyReduxEmbeddableWrapper,
+  ReduxEmbeddableWrapperPropsWithChildren,
+  SolutionToolbarPopover,
+} from '@kbn/presentation-util-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
+import {
   ControlGroupInput,
   ControlGroupOutput,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
 } from '../types';
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-  SolutionToolbarPopover,
-} from '../../../../presentation_util/public';
 import { pluginServices } from '../../services';
-import { DataView } from '../../../../data_views/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { Container, EmbeddableFactory } from '../../../../embeddable/public';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroupChainingSystems } from './control_group_chaining_system';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { OverlayRef } from '../../../../../core/public';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>

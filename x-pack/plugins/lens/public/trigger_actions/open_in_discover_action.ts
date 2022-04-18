@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IEmbeddable } from 'src/plugins/embeddable/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { Embeddable } from '../embeddable';
-import type { DiscoverStart } from '../../../../../src/plugins/discover/public';
 import { DOC_TYPE } from '../../common';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';

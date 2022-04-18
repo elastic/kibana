@@ -10,10 +10,10 @@ import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, Query, DataPublicPluginStart } from '../../../../data/public';
-import { QueryStringInput } from '../../../../unified_search/public';
+import { IAggConfig, Query, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
-import { useKibana } from '../../../../kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface FilterRowProps {
   id: string;

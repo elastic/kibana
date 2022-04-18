@@ -18,12 +18,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useContext, useEffect, useMemo, useRef, useState, FC } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import {
   isScreenshotRef as isAScreenshotRef,
   ScreenshotRefImageData,
 } from '../../../common/runtime_types';
 import { UptimeRefreshContext, UptimeSettingsContext, UptimeThemeContext } from '../../contexts';
-import { useFetcher } from '../../../../observability/public';
 import { getJourneyScreenshot } from '../../state/api/journey';
 import { useCompositeImage } from '../../hooks';
 

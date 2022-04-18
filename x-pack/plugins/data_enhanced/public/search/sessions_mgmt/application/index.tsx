@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
-import type { ManagementAppMountParams } from 'src/plugins/management/public';
+import { CoreSetup } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type {
   AppDependencies,
   IManagementSectionsPluginsSetup,
   IManagementSectionsPluginsStart,
   SessionsConfigSchema,
-} from '../';
-import { APP } from '../';
+} from '..';
+import { APP } from '..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { renderApp } from './render';
