@@ -23,8 +23,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pagination,
     onChangePageSize,
     onChangePageIndex,
-    onPaginateRowNext,
-    onPaginateRowPrevious,
+    onPaginateFlyoutNext,
+    onPaginateFlyoutPrevious,
     flyoutAlertIndex,
     setFlyoutAlertIndex,
   } = usePagination({
@@ -52,8 +52,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           <AlertsFlyout
             alert={props.alerts[flyoutAlertIndex]}
             onClose={handleFlyoutClose}
-            onPaginateNext={onPaginateRowNext}
-            onPaginatePrevious={onPaginateRowPrevious}
+            onPaginateNext={onPaginateFlyoutNext}
+            onPaginatePrevious={onPaginateFlyoutPrevious}
           />
         </Suspense>
       )}

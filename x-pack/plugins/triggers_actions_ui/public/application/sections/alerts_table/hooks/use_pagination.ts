@@ -37,7 +37,7 @@ export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }
     [setPagination, onPageChange, pagination.pageSize]
   );
 
-  const paginateRow = useCallback(
+  const paginateFlyout = useCallback(
     (newFlyoutAlertIndex: number) => {
       const lastPage = Math.floor(alertsCount / pagination.pageSize) - 1;
       if (newFlyoutAlertIndex < 0) {
@@ -58,19 +58,19 @@ export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }
     },
     [pagination, alertsCount, onChangePageIndex]
   );
-  const onPaginateRowNext = useCallback(() => {
-    paginateRow(flyoutAlertIndex + 1);
-  }, [paginateRow, flyoutAlertIndex]);
-  const onPaginateRowPrevious = useCallback(() => {
-    paginateRow(flyoutAlertIndex - 1);
-  }, [paginateRow, flyoutAlertIndex]);
+  const onPaginateFlyoutNext = useCallback(() => {
+    paginateFlyout(flyoutAlertIndex + 1);
+  }, [paginateFlyout, flyoutAlertIndex]);
+  const onPaginateFlyoutPrevious = useCallback(() => {
+    paginateFlyout(flyoutAlertIndex - 1);
+  }, [paginateFlyout, flyoutAlertIndex]);
 
   return {
     pagination,
     onChangePageSize,
     onChangePageIndex,
-    onPaginateRowNext,
-    onPaginateRowPrevious,
+    onPaginateFlyoutNext,
+    onPaginateFlyoutPrevious,
     flyoutAlertIndex,
     setFlyoutAlertIndex,
   };
