@@ -10,7 +10,7 @@ import { getColorAssignments } from './color_assignment';
 import type { DataLayerConfigResult } from '../../common';
 import type { FormatFactory } from '../types';
 import { LayerTypes } from '../../common/constants';
-import { Datatable } from '../../../../expressions';
+import { Datatable } from '@kbn/expressions-plugin';
 
 describe('color_assignment', () => {
   const tables: Record<string, Datatable> = {

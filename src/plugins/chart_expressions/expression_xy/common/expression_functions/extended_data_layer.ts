@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Datatable, ExpressionFunctionDefinition } from '../../../../expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { ExtendedDataLayerArgs, ExtendedDataLayerConfigResult } from '../types';
 import {
   EXTENDED_DATA_LAYER,
