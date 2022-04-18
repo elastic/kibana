@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/public';
-import { EventAnnotationPluginSetup } from '../../../../../src/plugins/event_annotation/public';
-import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { CoreSetup } from '@kbn/core/public';
+import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import type { EditorFrameSetup } from '../types';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import type { LensPluginStartDependencies } from '../plugin';
 import type { FormatFactory } from '../../common';
-import { LEGACY_TIME_AXIS } from '../../../../../src/plugins/charts/common';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;

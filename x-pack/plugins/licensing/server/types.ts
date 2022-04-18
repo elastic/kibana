@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { IClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IClusterClient, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { ILicense } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 

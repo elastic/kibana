@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_switcher';
-import { KibanaContextProvider } from '../../../kibana_react/public';
-import { coreMock } from '../../../../core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButtonEmpty, EuiIcon, EuiPopover } from '@elastic/eui';
 const startMock = coreMock.createStart();

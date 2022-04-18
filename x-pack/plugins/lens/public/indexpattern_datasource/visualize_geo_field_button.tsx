@@ -12,7 +12,7 @@ import {
   visualizeGeoFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   UiActionsStart,
-} from '../../../../../src/plugins/ui_actions/public';
+} from '@kbn/ui-actions-plugin/public';
 import { APP_ID } from '../../common/constants';
 
 interface Props {

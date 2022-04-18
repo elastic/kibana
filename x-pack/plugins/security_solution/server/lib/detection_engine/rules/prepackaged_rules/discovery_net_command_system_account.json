@@ -11,9 +11,9 @@
   ],
   "language": "eql",
   "license": "Elastic License v2",
-  "name": "Net command via SYSTEM account",
+  "name": "Account Discovery Command via SYSTEM Account",
   "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "process where event.type in (\"start\", \"process_started\") and \n  (?process.Ext.token.integrity_level_name : \"System\" or\n  ?winlog.event_data.IntegrityLevel : \"System\") and\n  process.name : \"whoami.exe\" or\n  (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\")\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and \n  (?process.Ext.token.integrity_level_name : \"System\" or\n  ?winlog.event_data.IntegrityLevel : \"System\") and\n  (process.name : \"whoami.exe\" or\n  (process.name : \"net1.exe\" and not process.parent.name : \"net.exe\"))\n",
   "risk_score": 21,
   "rule_id": "2856446a-34e6-435b-9fb5-f8f040bfa7ed",
   "severity": "low",
@@ -43,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 10
+  "version": 11
 }

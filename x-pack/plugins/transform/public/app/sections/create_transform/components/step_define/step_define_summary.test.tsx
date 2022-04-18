@@ -21,9 +21,9 @@ import { StepDefineExposedState } from './common';
 import { StepDefineSummary } from './step_define_summary';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
 
 describe('Transform: <DefinePivotSummary />', () => {

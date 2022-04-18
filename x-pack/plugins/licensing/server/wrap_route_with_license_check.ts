@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { RequestHandler, KibanaRequest, RouteMethod, KibanaResponseFactory } from 'src/core/server';
+import {
+  RequestHandler,
+  KibanaRequest,
+  RouteMethod,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 
 import { ILicense } from '../common/types';
 import type { LicensingRequestHandlerContext } from './types';

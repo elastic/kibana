@@ -10,7 +10,7 @@ import { initParams } from './agg_params';
 import { BaseParamType } from './param_types/base';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
-import { AggParamType } from '../aggs/param_types/agg';
+import { AggParamType } from './param_types/agg';
 
 describe('AggParams class', () => {
   describe('constructor args', () => {

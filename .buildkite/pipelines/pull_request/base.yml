@@ -19,12 +19,14 @@ steps:
     label: 'Default CI Group'
     parallelism: 31
     agents:
-      queue: n2-4
+      queue: n2-4-spot-2
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 

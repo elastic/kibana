@@ -8,7 +8,7 @@
 
 import { Observable, fromEvent, merge } from 'rxjs';
 import { distinct, map, pluck, scan, take } from 'rxjs/operators';
-import type { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 
 const EVENTS: Array<keyof WindowEventMap> = [
   'mousedown',

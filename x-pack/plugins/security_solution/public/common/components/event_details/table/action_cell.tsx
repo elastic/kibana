@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useState, useContext } from 'react';
+import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EnrichedFieldInfo } from '../types';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
-import { TimelineContext } from '../../../../../../timelines/public';
 
 interface Props extends EnrichedFieldInfo {
   contextId: string;

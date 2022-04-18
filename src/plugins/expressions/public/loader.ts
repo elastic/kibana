@@ -10,7 +10,7 @@ import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, ide
 import { filter, map, delay, shareReplay, throttleTime } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
-import { Adapters } from '../../inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';

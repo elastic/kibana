@@ -8,9 +8,9 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter } from '@kbn/es-query';
-import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
-import type { LocatorDefinition, LocatorPublic } from '../../share/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
+import type { TimeRange, Query, QueryState, RefreshInterval } from '@kbn/data-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { VIEW_MODE } from './components/view_mode_toggle';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';

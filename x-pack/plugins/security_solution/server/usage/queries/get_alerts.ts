@@ -10,7 +10,7 @@ import type {
   AggregationsCompositeAggregation,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { AlertBucket, AlertAggs } from '../types';
 

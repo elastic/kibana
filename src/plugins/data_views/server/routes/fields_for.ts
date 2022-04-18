@@ -12,7 +12,7 @@ import {
   StartServicesAccessor,
   RequestHandler,
   RouteValidatorFullConfig,
-} from '../../../../core/server';
+} from '@kbn/core/server';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 import { IndexPatternsFetcher } from '../fetcher';
 
