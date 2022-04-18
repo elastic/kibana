@@ -8,7 +8,6 @@
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
-import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
