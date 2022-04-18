@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
-import { AvailableReferenceLineIcon } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
