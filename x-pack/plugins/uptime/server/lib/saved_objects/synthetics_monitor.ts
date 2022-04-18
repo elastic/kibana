@@ -19,16 +19,12 @@ export const syntheticsMonitor: SavedObjectsType = {
     properties: {
       name: {
         type: 'text',
-        fielddata: true,
         fields: {
           keyword: {
             type: 'keyword',
             ignore_above: 256,
           },
         },
-      },
-      id: {
-        type: 'keyword',
       },
       type: {
         type: 'text',
@@ -41,27 +37,10 @@ export const syntheticsMonitor: SavedObjectsType = {
       },
       urls: {
         type: 'text',
-      },
-      'url.port': {
-        type: 'keyword',
-      },
-      hosts: {
-        type: 'text',
-      },
-      tags: {
-        type: 'text',
         fields: {
           keyword: {
             type: 'keyword',
             ignore_above: 256,
-          },
-        },
-      },
-      locations: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'keyword',
           },
         },
       },
