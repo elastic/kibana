@@ -11,6 +11,7 @@
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.2.0>>
+//* <<release-notes-8.1.3>>
 //* <<release-notes-8.1.2>>
 //* <<release-notes-8.1.1>>
 //* <<release-notes-8.1.0>>
@@ -304,6 +305,43 @@ Security::
 * Change session expiration to override on app leave behavior {kibana-pull}129384[#129384]
 
 /////
+[[release-notes-8.1.3]]
+== {kib} 8.1.3
+
+Review the following information about the {kib} 8.1.3 release.
+
+[float]
+[[breaking-changes-8.1.3]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking changes, then mitigate the impact to your application.
+
+There are no breaking changes in {kib} 8.1.3.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[fixes-v8.1.3]]
+=== Bug fix
+Discover::
+* Fixes toggle table column for classic table {kibana-pull}128603[#128603]
+
+[[release-notes-8.1.2]]
+== {kib} 8.1.2
+
+	@@ -35,12 +66,8 @@ Review the following information about the {kib} 8.1.2 release.
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking changes, then mitigate the impact to your application.
+
+There are no breaking changes in {kib} 8.1.2.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
 [[release-notes-8.1.2]]
 == {kib} 8.1.2
 
