@@ -94,7 +94,6 @@ const DEFAULT_SETUP_RESULT = {
 
 export class Screenshots {
   private semaphore: Semaphore;
-  private eventLogger: EventLogger;
 
   constructor(
     private readonly browserDriverFactory: HeadlessChromiumDriverFactory,
@@ -103,22 +102,20 @@ export class Screenshots {
     private readonly http: HttpServiceSetup,
     private readonly config: ConfigType
   ) {
-    this.eventLogger = new EventLogger(logger);
     this.semaphore = new Semaphore(config.poolSize);
   }
 
   private createLayout(options: CaptureOptions): Layout {
-    this.eventLogger.createLayoutBegin();
     const layout = createLayout(options.layout ?? {});
     this.logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
-    this.eventLogger.createLayoutEnd();
 
     return layout;
   }
 
   private captureScreenshots(
     layout: Layout,
-    options: ScreenshotObservableOptions
+    options: ScreenshotObservableOptions,
+    eventLogger: EventLogger
   ): Observable<CaptureResult> {
     const { browserTimezone } = options;
 
@@ -137,7 +134,7 @@ export class Screenshots {
           const screen = new ScreenshotObservableHandler(
             driver,
             this.config,
-            this.eventLogger,
+            eventLogger,
             layout,
             options
           );
@@ -220,19 +217,20 @@ export class Screenshots {
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
-    this.eventLogger.screenshottingBegin();
+    const eventLogger = new EventLogger(this.logger);
+    eventLogger.screenshottingStart();
 
     const layout = this.createLayout(options);
     const captureOptions = this.getCaptureOptions(options);
 
-    return this.captureScreenshots(layout, captureOptions).pipe(
+    return this.captureScreenshots(layout, captureOptions, eventLogger).pipe(
       tap((results) => {
-        this.eventLogger.screenshottingEnd(results);
+        eventLogger.screenshottingEnd(results);
       }),
       mergeMap((result) => {
         switch (options.format) {
           case 'pdf':
-            return toPdf(this.eventLogger, this.packageInfo, layout, options, result);
+            return toPdf(eventLogger, this.packageInfo, layout, options, result);
           default:
             return toPng(result);
         }

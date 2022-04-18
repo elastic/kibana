@@ -15,7 +15,9 @@ export const getRenderErrors = async (
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<undefined | string[]> => {
-  const { kbnLogger: logger } = eventLogger;
+  eventLogger.getRenderErrorsStart();
+
+  const { kbnLogger } = eventLogger;
   const errorsFound: undefined | string[] = await browser.evaluate(
     {
       fn: (errorSelector, errorAttribute) => {
@@ -34,14 +36,15 @@ export const getRenderErrors = async (
       args: [layout.selectors.renderError, layout.selectors.renderErrorAttribute],
     },
     { context: CONTEXT_GETRENDERERRORS },
-    logger
+    kbnLogger
   );
 
-  if (errorsFound?.length) {
-    logger.warn(
-      `Found ${errorsFound.length} error messages. See report object for more information.`
-    );
+  const renderErrors = errorsFound?.length;
+  if (renderErrors) {
+    kbnLogger.warn(`Found ${renderErrors} error messages. See report object for more information.`);
   }
+
+  eventLogger.getRenderErrorsEnd({ renderErrors });
 
   return errorsFound;
 };

@@ -16,11 +16,13 @@ export const getNumberOfItems = async (
   timeout: number,
   layout: Layout
 ): Promise<number> => {
-  const logger = eventLogger.kbnLogger;
+  eventLogger.getNumberOfItemsStart();
+
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
 
   try {
+    const logger = eventLogger.kbnLogger;
     // the dashboard is using the `itemsCountAttribute` attribute to let us
     // know how many items to expect since gridster incrementally adds panels
     // we have to use this hint to wait for all of them
@@ -57,6 +59,8 @@ export const getNumberOfItems = async (
       `An error occurred when trying to read the page for visualization panel info: ${error.message}`
     );
   }
+
+  eventLogger.getNumberOfItemsEnd({ itemsCount });
 
   return itemsCount;
 };

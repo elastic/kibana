@@ -38,6 +38,8 @@ export const getElementPositionAndAttributes = async (
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<ElementsPositionAndAttribute[] | null> => {
+  eventLogger.getElementPositionsStart();
+
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
   let elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   try {
@@ -87,6 +89,8 @@ export const getElementPositionAndAttributes = async (
     eventLogger.error(err, Actions.GET_ELEMENT_POSITION_DATA);
     elementsPositionAndAttributes = null;
   }
+
+  eventLogger.getElementPositionsEnd({ elementsPositions: elementsPositionAndAttributes?.length });
 
   return elementsPositionAndAttributes;
 };

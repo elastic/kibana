@@ -192,7 +192,7 @@ export class ScreenshotObservableHandler {
       // allows for them to be displayed properly in many cases
       await injectCustomCss(driver, logger, layout);
 
-      this.eventLogger.positionElementsBegin();
+      this.eventLogger.positionElementsStart();
       // position panel elements for print layout
       await layout.positionElements?.(driver, logger.kbnLogger);
       this.eventLogger.positionElementsEnd();

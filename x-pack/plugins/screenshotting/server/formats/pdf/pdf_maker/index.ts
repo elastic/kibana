@@ -28,14 +28,14 @@ export async function pngsToPdf({
   packageInfo,
   eventLogger,
 }: PngsToPdfArgs): Promise<{ buffer: Buffer; pages: number }> {
-  eventLogger.pdfBegin();
+  eventLogger.pdfStart();
   const pdfMaker = new PdfMaker(layout, logo, packageInfo, eventLogger.kbnLogger);
   if (title) {
     pdfMaker.setTitle(title);
   }
   results.forEach((result) => {
     result.screenshots.forEach((png) => {
-      eventLogger.addPdfImageBegin();
+      eventLogger.addPdfImageStart();
       pdfMaker.addImage(png.data, {
         title: png.title ?? undefined,
         description: png.description ?? undefined,
@@ -46,7 +46,7 @@ export async function pngsToPdf({
 
   let buffer: Uint8Array | null = null;
   try {
-    eventLogger.compilePdfBegin();
+    eventLogger.compilePdfStart();
     buffer = await pdfMaker.generate();
     eventLogger.compilePdfEnd();
 

@@ -19,12 +19,13 @@ export const injectCustomCss = async (
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<void> => {
-  eventLogger.injectCssBegin();
-
   const filePath = layout.getCssOverridesPath();
   if (!filePath) {
     return;
   }
+
+  eventLogger.injectCssStart();
+
   const buffer = await fsp.readFile(filePath);
   try {
     await browser.evaluate(

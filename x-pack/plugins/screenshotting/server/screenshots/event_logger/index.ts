@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import apm from 'elastic-apm-node';
 import { Logger, LogMeta } from '@kbn/core/server';
 import { CaptureResult } from '..';
@@ -14,12 +15,11 @@ import { Screenshot } from '../get_screenshots';
 export enum Actions {
   SCREENSHOTTING = 'screenshot-pipeline',
   PDF = 'generate-pdf',
-  CREATE_LAYOUT = 'create-layout',
   CREATE_PAGE = 'create-page',
   GET_ELEMENT_POSITION_DATA = 'get-element-position-data',
   GET_NUMBER_OF_ITEMS = 'get-number-of-items',
   GET_RENDER_ERRORS = 'get-render-errors',
-  GET_SCREENSHOTS = 'get-screenshots',
+  GET_SCREENSHOT = 'get-screenshots',
   GET_TIMERANGE = 'get-timerange',
   INJECT_CSS = 'inject-css',
   OPEN_URL = 'open-url',
@@ -41,23 +41,32 @@ enum SpanTypes {
 export interface ScreenshottingAction extends LogMeta {
   event?: {
     duration?: number; // number of nanoseconds from begin to end of an event
+    provider: typeof PLUGIN_ID;
   };
 
   message: string;
   kibana: {
     screenshotting: {
       action: Actions;
-      // flow_id: string; // TODO random uuid to trace a pipeline flow
-      // is_pdf: boolean; // TODO
+      session_id: string;
+
+      // chromium stats
       cpu?: number;
       cpu_percentage?: number;
       memory?: number;
       memory_mb?: number;
+
+      // screenshotting stats
       items_count?: number;
       byte_length?: number;
+      element_positions?: number;
+      screenshot_current?: number;
+      screenshot_total?: number; // should match element_positions
+      render_errors?: number;
+
+      // pdf stats
       byte_length_pdf?: number;
       pdf_pages?: number;
-      render_errors?: number;
     };
   };
 }
@@ -75,22 +84,27 @@ interface PdfEndOptions {
 }
 
 interface RenderErrorsOptions {
-  renderErrors: number;
+  renderErrors?: number;
 }
 
 interface NumberOfItemsOptions {
   itemsCount: number;
 }
 
+interface GetScreenshotOptions {
+  current: number;
+  total: number;
+  byteLength?: number;
+}
+
 type SpanEntity =
   | 'addPdfImage'
   | 'compilePdf'
-  | 'createLayout'
   | 'createPage'
   | 'getElementPositionData'
   | 'getNumberOfItems'
   | 'getRenderErrors'
-  | 'getScreenshots'
+  | 'getScreenshot'
   | 'getTimeRange'
   | 'injectCss'
   | 'openUrl'
@@ -100,29 +114,32 @@ type SpanEntity =
 
 type TransactionEntity = 'generatePdf' | 'screenshotting';
 
-type LogAdapter = (
-  message: string,
-  event: ScreenshottingAction['kibana']['screenshotting'],
-  startTime?: Date | undefined
-) => void;
+type SimpleEvent = Omit<ScreenshottingAction['kibana']['screenshotting'], 'session_id'>;
 
-function logAdapter(logger: Logger) {
-  const log: LogAdapter = (
-    message: string,
-    event: ScreenshottingAction['kibana']['screenshotting'],
-    startTime?: Date | undefined
-  ) => {
+type LogAdapter = (message: string, event: SimpleEvent, startTime?: Date | undefined) => void;
+
+function logAdapter(logger: Logger, suffix: 'start' | 'complete', sessionId: string) {
+  const log: LogAdapter = (message, event, startTime) => {
     let duration: number | undefined;
     if (startTime != null) {
       const start = startTime.valueOf();
       duration = new Date(Date.now()).valueOf() - start.valueOf();
     }
 
-    logger.debug(message, {
+    const interpretedAction = (event.action + `-${suffix}`) as Actions;
+    const logData: ScreenshottingAction = {
       message,
-      kibana: { screenshotting: event },
+      kibana: {
+        screenshotting: {
+          ...event,
+          action: interpretedAction,
+          session_id: sessionId,
+        },
+      },
       event: { duration, provider: PLUGIN_ID },
-    });
+    };
+    logger.debug(message, logData);
+    return logData;
   };
   return log;
 }
@@ -134,12 +151,11 @@ export class EventLogger {
   private spans: Record<SpanEntity, null | apm.Span | undefined> = {
     addPdfImage: null,
     compilePdf: null,
-    createLayout: null,
     createPage: null,
     getElementPositionData: null,
     getNumberOfItems: null,
     getRenderErrors: null,
-    getScreenshots: null,
+    getScreenshot: null,
     getTimeRange: null,
     injectCss: null,
     openUrl: null,
@@ -153,12 +169,15 @@ export class EventLogger {
     generatePdf: null,
   };
 
-  private logEventData: ReturnType<typeof logAdapter>;
+  private sessionId: string; // identifier to track all logs from one screenshotting flow
+  private logEventStart: LogAdapter;
+  private logEventEnd: LogAdapter;
   private timings: Partial<Record<Actions, Date>> = {};
 
   constructor(private readonly logger: Logger) {
-    this.logEventData = logAdapter(logger.get('events'));
-    // TODO flow_id
+    this.sessionId = uuid.v4();
+    this.logEventStart = logAdapter(logger.get('events'), 'start', this.sessionId);
+    this.logEventEnd = logAdapter(logger.get('events'), 'complete', this.sessionId);
   }
 
   private startTiming(a: Actions) {
@@ -184,9 +203,9 @@ export class EventLogger {
    *
    * @returns void
    */
-  public screenshottingBegin() {
+  public screenshottingStart() {
     this.transactions.screenshotting = apm.startTransaction(Actions.SCREENSHOTTING, PLUGIN_ID);
-    this.logEventData(
+    this.logEventStart(
       'screenshot-pipeline starting',
       { action: Actions.SCREENSHOTTING } //
     );
@@ -196,7 +215,7 @@ export class EventLogger {
   /**
    * Signal when the screenshotting pipeline finishes
    *
-   * @param {CaptureResult} [TODO:name] - [TODO:description]
+   * @param {CaptureResult} results - outcome of screenshotting pipeline
    * @returns void
    */
   public screenshottingEnd({ metrics, results }: CaptureResult) {
@@ -212,7 +231,7 @@ export class EventLogger {
     this.transactions.screenshotting?.setLabel('byte-length', byteLength, false);
     this.transactions.screenshotting?.end();
 
-    this.logEventData(
+    this.logEventEnd(
       'screenshot-pipeline finished',
       { action: Actions.SCREENSHOTTING, byte_length: byteLength, cpu, memory },
       this.timings[Actions.SCREENSHOTTING]
@@ -224,9 +243,9 @@ export class EventLogger {
    *
    * @returns void
    */
-  public pdfBegin() {
+  public pdfStart() {
     this.transactions.generatePdf = apm.startTransaction(Actions.PDF, PLUGIN_ID);
-    this.logEventData(
+    this.logEventStart(
       'pdf generation starting',
       { action: Actions.PDF } //
     );
@@ -236,6 +255,7 @@ export class EventLogger {
   /**
    * Signal when PdfMaker generation finishes
    *
+   * @param {PdfEndOptions} - outcome of pdf generation
    * @returns void
    */
   public pdfEnd({ byteLengthPdf, pdfPages }: PdfEndOptions) {
@@ -243,7 +263,7 @@ export class EventLogger {
     this.transactions.generatePdf?.setLabel('pdf-pages', pdfPages, false);
     this.transactions.generatePdf?.end();
 
-    this.logEventData(
+    this.logEventEnd(
       'pdf generation finished',
       {
         action: Actions.PDF,
@@ -256,54 +276,33 @@ export class EventLogger {
 
   // Methods for spans
 
-  public createLayoutBegin() {
-    this.spans.createLayout = this.transactions.screenshotting?.startSpan(
-      Actions.CREATE_LAYOUT,
-      SpanTypes.SETUP
-    );
-    this.logEventData(
-      'create-layout starting',
-      { action: Actions.CREATE_LAYOUT } //
-    );
-    this.startTiming(Actions.CREATE_LAYOUT);
-  }
-
-  public createLayoutEnd() {
-    this.spans.createLayout?.end();
-    this.logEventData(
-      'create-layout finished',
-      { action: Actions.CREATE_LAYOUT },
-      this.timings[Actions.CREATE_LAYOUT]
-    );
-  }
-
-  public getElementPositionDataBegin() {
+  public getElementPositionsStart() {
     this.spans.getElementPositionData = this.transactions.screenshotting?.startSpan(
       Actions.GET_ELEMENT_POSITION_DATA,
       SpanTypes.READ
     );
-    this.logEventData(
+    this.logEventStart(
       'getting element position data',
       { action: Actions.GET_ELEMENT_POSITION_DATA } //
     );
     this.startTiming(Actions.GET_ELEMENT_POSITION_DATA);
   }
 
-  public getElementPositionDataEnd() {
+  public getElementPositionsEnd({ elementPositions }: { elementPositions: number }) {
     this.spans.getElementPositionData?.end();
-    this.logEventData(
+    this.logEventEnd(
       'element position data read',
-      { action: Actions.GET_ELEMENT_POSITION_DATA },
+      { action: Actions.GET_ELEMENT_POSITION_DATA, element_positions: elementPositions },
       this.timings[Actions.GET_ELEMENT_POSITION_DATA]
     );
   }
 
-  public getNumberOfItemsBegin() {
+  public getNumberOfItemsStart() {
     this.spans.getNumberOfItems = this.transactions.screenshotting?.startSpan(
       Actions.GET_NUMBER_OF_ITEMS,
       SpanTypes.READ
     );
-    this.logEventData(
+    this.logEventStart(
       'getting number of visualization items',
       { action: Actions.GET_NUMBER_OF_ITEMS } //
     );
@@ -312,7 +311,7 @@ export class EventLogger {
 
   public getNumberOfItemsEnd({ itemsCount }: NumberOfItemsOptions) {
     this.spans.getNumberOfItems?.end();
-    this.logEventData(
+    this.logEventEnd(
       'received number of visualization items',
       {
         action: Actions.GET_NUMBER_OF_ITEMS,
@@ -322,12 +321,12 @@ export class EventLogger {
     );
   }
 
-  public getRenderErrorsBegin() {
+  public getRenderErrorsStart() {
     this.spans.getRenderErrors = this.transactions.screenshotting?.startSpan(
       Actions.GET_RENDER_ERRORS,
       SpanTypes.READ
     );
-    this.logEventData(
+    this.logEventStart(
       'starting scan for rendering errors',
       { action: Actions.GET_RENDER_ERRORS } //
     );
@@ -336,7 +335,7 @@ export class EventLogger {
 
   public getRenderErrorsEnd({ renderErrors }: RenderErrorsOptions) {
     this.spans.getRenderErrors?.end();
-    this.logEventData(
+    this.logEventEnd(
       'finished scanning for rendering errors',
       {
         action: Actions.GET_RENDER_ERRORS,
@@ -346,33 +345,34 @@ export class EventLogger {
     );
   }
 
-  public getScreenshotsBegin() {
-    this.spans.getScreenshots = this.transactions.screenshotting?.startSpan(
-      Actions.GET_SCREENSHOTS,
+  public getScreenshotStart({ current, total }: GetScreenshotOptions) {
+    this.spans.getScreenshot = this.transactions.screenshotting?.startSpan(
+      Actions.GET_SCREENSHOT,
       SpanTypes.READ
     );
-    this.logEventData(
-      'capturing screenshots',
-      { action: Actions.GET_SCREENSHOTS } //
-    );
-    this.startTiming(Actions.GET_SCREENSHOTS);
+    this.logEventStart('capturing single screenshot', {
+      action: Actions.GET_SCREENSHOT,
+      screenshot_current: current,
+      screenshot_total: total,
+    });
+    this.startTiming(Actions.GET_SCREENSHOT);
   }
 
-  public getScreenshotsEnd() {
-    this.spans.getScreenshots?.end();
-    this.logEventData(
-      'screenshots captured',
-      { action: Actions.GET_SCREENSHOTS },
-      this.timings[Actions.GET_SCREENSHOTS]
+  public getScreenshotEnd({ byteLength }: GetScreenshotOptions) {
+    this.spans.getScreenshot?.end();
+    this.logEventEnd(
+      'single screenshot captured',
+      { action: Actions.GET_SCREENSHOT, byte_length: byteLength },
+      this.timings[Actions.GET_SCREENSHOT]
     );
   }
 
-  public getTimeRangeBegin() {
+  public getTimeRangeStart() {
     this.spans.getTimeRange = this.transactions.screenshotting?.startSpan(
       Actions.GET_TIMERANGE,
       SpanTypes.READ
     );
-    this.logEventData(
+    this.logEventStart(
       'getting time range',
       { action: Actions.GET_TIMERANGE } //
     );
@@ -381,19 +381,19 @@ export class EventLogger {
 
   public getTimeRangeEnd() {
     this.spans.getTimeRange?.end();
-    this.logEventData(
+    this.logEventEnd(
       'received time range',
       { action: Actions.GET_TIMERANGE },
       this.timings[Actions.GET_TIMERANGE]
     );
   }
 
-  public injectCssBegin() {
+  public injectCssStart() {
     this.spans.injectCss = this.transactions.screenshotting?.startSpan(
       Actions.INJECT_CSS,
       SpanTypes.CORRECT
     );
-    this.logEventData(
+    this.logEventStart(
       'injecting css',
       { action: Actions.INJECT_CSS } //
     );
@@ -402,19 +402,19 @@ export class EventLogger {
 
   public injectCssEnd() {
     this.spans.injectCss?.end();
-    this.logEventData(
+    this.logEventEnd(
       'finished injecting css',
       { action: Actions.INJECT_CSS },
       this.timings[Actions.INJECT_CSS]
     );
   }
 
-  public openUrlBegin() {
+  public openUrlStart() {
     this.spans.openUrl = this.transactions.screenshotting?.startSpan(
       Actions.OPEN_URL,
       SpanTypes.WAIT
     );
-    this.logEventData(
+    this.logEventStart(
       'opening url',
       { action: Actions.OPEN_URL } //
     );
@@ -423,19 +423,19 @@ export class EventLogger {
 
   public openUrlEnd() {
     this.spans.openUrl?.end();
-    this.logEventData(
+    this.logEventEnd(
       'finished opening url',
       { action: Actions.OPEN_URL },
       this.timings[Actions.OPEN_URL]
     );
   }
 
-  public positionElementsBegin() {
+  public positionElementsStart() {
     this.spans.positionElements = this.transactions.screenshotting?.startSpan(
       Actions.REPOSITION,
       SpanTypes.CORRECT
     );
-    this.logEventData(
+    this.logEventStart(
       'positioning elements',
       { action: Actions.REPOSITION } //
     );
@@ -444,19 +444,19 @@ export class EventLogger {
 
   public positionElementsEnd() {
     this.spans.positionElements?.end();
-    this.logEventData(
+    this.logEventEnd(
       'finished positioning elements',
       { action: Actions.REPOSITION },
       this.timings[Actions.REPOSITION]
     );
   }
 
-  public waitForRenderBegin() {
+  public waitForRenderStart() {
     this.spans.waitForRender = this.transactions.screenshotting?.startSpan(
       Actions.WAIT_RENDER,
       SpanTypes.WAIT
     );
-    this.logEventData(
+    this.logEventStart(
       'waiting for render to complete',
       { action: Actions.WAIT_RENDER } //
     );
@@ -465,19 +465,19 @@ export class EventLogger {
 
   public waitForRenderEnd() {
     this.spans.waitForRender?.end();
-    this.logEventData(
+    this.logEventEnd(
       'finished waiting for render to complete',
       { action: Actions.WAIT_RENDER },
       this.timings[Actions.WAIT_RENDER]
     );
   }
 
-  public waitForVisualizationBegin() {
+  public waitForVisualizationStart() {
     this.spans.waitForVisualization = this.transactions.screenshotting?.startSpan(
       Actions.WAIT_VISUALIZATIONS,
       SpanTypes.WAIT
     );
-    this.logEventData(
+    this.logEventStart(
       'waiting for visualizations',
       { action: Actions.WAIT_VISUALIZATIONS } //
     );
@@ -486,19 +486,19 @@ export class EventLogger {
 
   public waitForVisualizationEnd() {
     this.spans.waitForVisualization?.end();
-    this.logEventData(
+    this.logEventEnd(
       'finished waiting for visualizations',
       { action: Actions.WAIT_VISUALIZATIONS },
       this.timings[Actions.WAIT_VISUALIZATIONS]
     );
   }
 
-  public addPdfImageBegin() {
+  public addPdfImageStart() {
     this.spans.addPdfImage = this.transactions.generatePdf?.startSpan(
       Actions.ADD_IMAGE,
       SpanTypes.OUTPUT
     );
-    this.logEventData(
+    this.logEventStart(
       'adding pdf image',
       { action: Actions.ADD_IMAGE } //
     );
@@ -507,19 +507,19 @@ export class EventLogger {
 
   public addPdfImageEnd() {
     this.spans.addPdfImage?.end();
-    this.logEventData(
+    this.logEventEnd(
       'pdf image added',
       { action: Actions.ADD_IMAGE },
       this.timings[Actions.ADD_IMAGE]
     );
   }
 
-  public compilePdfBegin() {
+  public compilePdfStart() {
     this.spans.compilePdf = this.transactions.generatePdf?.startSpan(
       Actions.COMPILE,
       SpanTypes.OUTPUT
     );
-    this.logEventData(
+    this.logEventStart(
       'compiling pdf file',
       { action: Actions.COMPILE } //
     );
@@ -528,7 +528,7 @@ export class EventLogger {
 
   public compilePdfEnd() {
     this.spans.compilePdf?.end();
-    this.logEventData(
+    this.logEventEnd(
       'pdf file compiled',
       { action: Actions.COMPILE },
       this.timings[Actions.COMPILE]
