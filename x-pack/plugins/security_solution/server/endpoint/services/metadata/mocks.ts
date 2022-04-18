@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceStart } from 'kibana/server';
-import { EndpointMetadataService } from './endpoint_metadata_service';
-import {
-  loggingSystemMock,
-  savedObjectsServiceMock,
-} from '../../../../../../../src/core/server/mocks';
+import { SavedObjectsServiceStart } from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import {
   createMockAgentPolicyService,
   createMockAgentService,
   createMockPackageService,
   createPackagePolicyServiceMock,
-} from '../../../../../fleet/server/mocks';
-import { AgentPolicyServiceInterface, AgentService } from '../../../../../fleet/server';
+} from '@kbn/fleet-plugin/server/mocks';
+import { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
+import { EndpointMetadataService } from './endpoint_metadata_service';
 import {
   EndpointFleetServicesFactory,
   EndpointInternalFleetServicesInterface,

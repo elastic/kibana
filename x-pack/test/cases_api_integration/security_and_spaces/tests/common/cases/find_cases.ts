@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CaseResponse, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   postCaseReq,
   postCommentUserReq,
@@ -23,11 +24,6 @@ import {
   updateCase,
   createComment,
 } from '../../../../common/lib/utils';
-import {
-  CaseResponse,
-  CaseStatuses,
-  CommentType,
-} from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,

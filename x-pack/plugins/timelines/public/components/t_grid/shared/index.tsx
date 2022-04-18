@@ -16,8 +16,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import type { CoreStart } from '../../../../../../../src/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
 const heights = {
   tall: 490,

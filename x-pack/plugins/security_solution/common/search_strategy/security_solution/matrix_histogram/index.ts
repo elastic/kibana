@@ -6,9 +6,9 @@
  */
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { Inspect, Maybe, TimerangeInput } from '../../common';
-import { AuthenticationHit, RequestBasicOptions } from '../';
+import { AuthenticationHit, RequestBasicOptions } from '..';
 import { AlertsGroupData } from './alerts';
 import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
 import { DnsHistogramGroupData } from './dns';

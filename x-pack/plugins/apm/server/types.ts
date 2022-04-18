@@ -6,46 +6,49 @@
  */
 
 import { Observable } from 'rxjs';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
-} from '../../rule_registry/server';
+} from '@kbn/rule-registry-plugin/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/data-plugin/server';
+import {
+  SpacesPluginSetup,
+  SpacesPluginStart,
+} from '@kbn/spaces-plugin/server';
 import {
   HomeServerPluginSetup,
   HomeServerPluginStart,
-} from '../../../../src/plugins/home/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { ActionsPlugin } from '../../actions/server';
-import { AlertingPlugin } from '../../alerting/server';
-import { CloudSetup } from '../../cloud/server';
+} from '@kbn/home-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ActionsPlugin } from '@kbn/actions-plugin/server';
+import { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
+} from '@kbn/features-plugin/server';
 import {
   LicensingPluginSetup,
   LicensingPluginStart,
-} from '../../licensing/server';
-import { MlPluginSetup, MlPluginStart } from '../../ml/server';
-import { ObservabilityPluginSetup } from '../../observability/server';
+} from '@kbn/licensing-plugin/server';
+import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import {
   SecurityPluginSetup,
   SecurityPluginStart,
-} from '../../security/server';
+} from '@kbn/security-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
-} from '../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import { APMConfig } from '.';
 import { ApmIndicesConfig } from './routes/settings/apm_indices/get_apm_indices';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';

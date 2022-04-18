@@ -11,10 +11,10 @@ import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
-import { CoreStart, OverlayStart, ThemeServiceStart } from '../../../../../core/public';
-import { toMountPoint } from '../../../../kibana_react/public';
-import { UsageCollectionStart } from '../../../../usage_collection/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import {

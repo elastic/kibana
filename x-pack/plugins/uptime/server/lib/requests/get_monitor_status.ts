@@ -8,13 +8,13 @@
 import { JsonObject } from '@kbn/utility-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PromiseType } from 'utility-types';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
 import { createEsQuery } from '../../../common/utils/es_search';
 import { UptimeESClient } from '../lib';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;

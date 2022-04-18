@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { NotificationsStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
@@ -17,7 +18,6 @@ import {
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
 } from '../../services/embeddable';
-import { NotificationsStart } from '../../../../../core/public';
 import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 

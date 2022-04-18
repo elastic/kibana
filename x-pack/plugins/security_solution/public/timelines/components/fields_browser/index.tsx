@@ -7,11 +7,11 @@
 
 import { MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { DataViewField, DataView } from '../../../../../../../src/plugins/data_views/common';
+import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,
   GetFieldTableColumns,
-} from '../../../../../timelines/common/types';
+} from '@kbn/timelines-plugin/common/types';
 import { TimelineId } from '../../../../common/types';
 import { useDataView } from '../../../common/containers/source/use_data_view';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';

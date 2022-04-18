@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useNetworkKpiTlsHandshakes } from './index';
+import { useNetworkKpiTlsHandshakes } from '.';
 
 describe('kpi network - tls handshakes', () => {
   it('skip = true will cancel any running request', () => {

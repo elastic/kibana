@@ -8,18 +8,18 @@
 
 import { mapValues } from 'lodash';
 import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+} from '@kbn/kibana-utils-plugin/common';
+import {
   createSearchSource,
   extractReferences,
   injectReferences,
   SearchSource,
   SearchSourceDependencies,
   SerializedSearchSourceFields,
-} from './';
+} from '.';
 import { IndexPatternsContract } from '../..';
-import {
-  mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
-} from '../../../../kibana_utils/common';
 import { getAllMigrations as filtersGetAllMigrations } from '../../query/persistable_state';
 
 const getAllMigrations = (): MigrateFunctionsObject => {

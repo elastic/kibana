@@ -21,16 +21,16 @@ import {
   InlineScript,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleTypeParams } from '../../../alerting/server';
+import { RuleTypeParams } from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   AlertingAuthorization,
   WriteOperations,
   AlertingAuthorizationEntity,
-} from '../../../alerting/server';
-import { Logger, ElasticsearchClient, EcsEventOutcome } from '../../../../../src/core/server';
+} from '@kbn/alerting-plugin/server';
+import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
-import { AuditLogger } from '../../../security/server';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,

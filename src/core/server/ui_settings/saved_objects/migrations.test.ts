@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from '../..';
 import { migrations } from './migrations';
 
 describe('ui_settings 7.9.0 migrations', () => {

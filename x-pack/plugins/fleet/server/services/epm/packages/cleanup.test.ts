@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { PackagePolicyServiceInterface } from '../../package_policy';
 import * as storage from '../archive/storage';

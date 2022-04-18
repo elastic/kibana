@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { LicensingPluginSetup, LicenseType } from '../../../licensing/server';
-import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
+import { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 
 export interface LicenseStatus {
   isValid: boolean;

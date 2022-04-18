@@ -21,7 +21,7 @@ import {
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ThemeContext } from 'styled-components';
 import { PolicyOperatingSystem, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
-import { ConfigForm, ConfigFormHeading } from '../../components/config_form';
+import { ConfigForm, ConfigFormHeading } from '../config_form';
 
 const OPERATING_SYSTEM_TO_TEST_SUBJ: { [K in OperatingSystem]: string } = {
   [OperatingSystem.WINDOWS]: 'Windows',

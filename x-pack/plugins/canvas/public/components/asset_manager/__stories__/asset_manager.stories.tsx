@@ -10,7 +10,7 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import { reduxDecorator, getAddonPanelParameters } from '../../../../storybook';
 
-import { AssetManager, AssetManagerComponent } from '../';
+import { AssetManager, AssetManagerComponent } from '..';
 import { assets } from './assets';
 
 storiesOf('components/Assets/AssetManager', module)

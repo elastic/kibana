@@ -5,31 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { useKibanaVersion } from '../../../hooks';
-import type { EnrollmentAPIKey } from '../../../types';
-
-import { PlatformSelector } from '../../../components';
-import { InstallationMessage } from '../../agent_enrollment_flyout/installation_message';
-
-interface Props {
-  fleetServerHosts: string[];
-  apiKey: EnrollmentAPIKey;
-  isK8s: string | undefined;
+function getfleetServerHostsEnrollArgs(apiKey: string, fleetServerHosts: string[]) {
+  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey}`;
 }
 
-function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
-  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey.api_key}`;
-}
-
-export const ManualInstructions: React.FunctionComponent<Props> = ({
-  apiKey,
-  fleetServerHosts,
-  isK8s,
-}) => {
+export const ManualInstructions = (
+  apiKey: string,
+  fleetServerHosts: string[],
+  kibanaVersion: string
+) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
-  const kibanaVersion = useKibanaVersion();
 
   const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
 tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
@@ -54,17 +39,11 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
 sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm
 sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
-  return (
-    <>
-      <InstallationMessage />
-      <PlatformSelector
-        linuxCommand={linuxCommand}
-        macCommand={macCommand}
-        windowsCommand={windowsCommand}
-        linuxDebCommand={linuxDebCommand}
-        linuxRpmCommand={linuxRpmCommand}
-        isK8s={isK8s === 'IS_KUBERNETES'}
-      />
-    </>
-  );
+  return {
+    linux: linuxCommand,
+    mac: macCommand,
+    windows: windowsCommand,
+    deb: linuxDebCommand,
+    rpm: linuxRpmCommand,
+  };
 };

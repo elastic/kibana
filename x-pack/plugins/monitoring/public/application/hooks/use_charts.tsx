@@ -7,8 +7,8 @@
 import moment from 'moment';
 import { useContext, useState, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MonitoringTimeContainer } from './use_monitoring_time';
 
 export function useCharts() {
   const { services } = useKibana<{ data: any }>();
