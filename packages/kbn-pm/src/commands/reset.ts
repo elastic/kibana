@@ -19,7 +19,7 @@ import {
 } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
-import { ICommand } from './';
+import { ICommand } from '.';
 
 export const ResetCommand: ICommand = {
   description:

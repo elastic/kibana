@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { sha256 } from 'js-sha256';
-import type { Logger } from 'src/core/server';
-import { SavedObjectsUpdateResponse, SavedObject } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,

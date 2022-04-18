@@ -7,9 +7,9 @@
  */
 
 import _ from 'lodash';
-import { Datatable } from '../../../../../plugins/expressions/public';
-import { esFilters, Filter } from '../../../public';
-import { getIndexPatterns, getSearchService } from '../../../public/services';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { esFilters, Filter } from '../..';
+import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 
 interface ValueClickDataContext {

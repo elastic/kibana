@@ -10,8 +10,8 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { Meta } from '@storybook/react';
 
-import { ExpressionFunction, ExpressionFunctionParameter, Style } from 'src/plugins/expressions';
-import { ExpressionInput } from '../expression_input';
+import { ExpressionFunction, ExpressionFunctionParameter, Style } from '@kbn/expressions-plugin';
+import { ExpressionInput } from '.';
 import { registerExpressionsLanguage } from './language';
 
 const content: ExpressionFunctionParameter<'string'> = {

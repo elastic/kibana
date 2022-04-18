@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CustomPaletteState } from 'src/plugins/charts/common';
+import { CustomPaletteState } from '@kbn/charts-plugin/common';
 
 export const getPaletteService = () => {
   return {

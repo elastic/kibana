@@ -8,7 +8,7 @@
 
 import { COLOR_MODES_STANDARD } from '@elastic/eui';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import type { CoreTheme } from '../../../../core/public';
+import type { CoreTheme } from '@kbn/core/public';
 
 /* IMPORTANT: This code has been copied to the `interactive_setup` plugin, any changes here should be applied there too.
 That copy and this comment can be removed once https://github.com/elastic/kibana/issues/119204 is implemented.*/
