@@ -8,8 +8,8 @@
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import {
   TRACE_ID,

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SearchSessionStatus } from '../../../../../src/plugins/data/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

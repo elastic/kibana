@@ -9,18 +9,19 @@ import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
 
-import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import type { AuthenticatedUser } from '../../../security/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,

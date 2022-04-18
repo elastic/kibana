@@ -19,12 +19,12 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../csm_shared_context';
-import { FETCH_STATUS } from '../../../../../../observability/public';
 
 interface JSErrorItem {
   errorMessage: string;

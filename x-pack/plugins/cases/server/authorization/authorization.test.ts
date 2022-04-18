@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { securityMock } from '../../../../plugins/security/server/mocks';
-import { httpServerMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { featuresPluginMock } from '../../../../plugins/features/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { Authorization, Operations } from '.';
-import { Space } from '../../../spaces/server';
+import { Space } from '@kbn/spaces-plugin/server';
 import { AuthorizationAuditLogger } from './audit_logger';
-import { KibanaRequest } from 'kibana/server';
-import { KibanaFeature } from '../../../../plugins/features/common';
-import { AuditLogger, SecurityPluginStart } from '../../../security/server';
-import { auditLoggerMock } from '../../../security/server/audit/mocks';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { KibanaRequest } from '@kbn/core/server';
+import { KibanaFeature } from '@kbn/features-plugin/common';
+import { AuditLogger, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 describe('authorization', () => {
   let request: KibanaRequest;

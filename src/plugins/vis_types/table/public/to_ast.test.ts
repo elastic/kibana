@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from 'src/plugins/visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
 import { AggTypes, TableVisParams } from '../common';
-import { buildExpressionFunction } from '../../../expressions/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 const mockSchemas = {
   metric: [{ accessor: 1, format: { id: 'number' }, params: {}, label: 'Count', aggType: 'count' }],
@@ -32,11 +32,11 @@ const mockTableExpression = {
   toAst: jest.fn(),
 };
 
-jest.mock('../../../visualizations/public', () => ({
+jest.mock('@kbn/visualizations-plugin/public', () => ({
   getVisSchemas: () => mockSchemas,
 }));
 
-jest.mock('../../../expressions/public', () => ({
+jest.mock('@kbn/expressions-plugin/public', () => ({
   buildExpression: jest.fn(() => mockTableExpression),
   buildExpressionFunction: jest.fn(() => mockTableExpressionFunction),
 }));

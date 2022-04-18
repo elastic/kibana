@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { startCase } from 'lodash/fp';
-import { RuleAction } from '../../../../../../alerting/common';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 
 const ActionsDescription = ({ actions }: { actions: RuleAction[] }) => {
   if (!actions.length) return null;

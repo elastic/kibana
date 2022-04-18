@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import * as PluginContext from '../../hooks/use_plugin_context';
 import { PluginContextValue } from '../../context/plugin_context';
-import { OverviewPage } from './';
+import { OverviewPage } from '.';
 import { OverviewPage as OldOverviewPage } from './old_overview_page';
 import { OverviewPage as NewOverviewPage } from './overview_page';
 

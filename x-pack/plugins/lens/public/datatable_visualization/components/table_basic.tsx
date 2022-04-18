@@ -19,7 +19,7 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';

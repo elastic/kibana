@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Labels } from '../../../../charts/public';
+import type { Labels } from '@kbn/charts-plugin/public';
 import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueBoxed,
-} from '../../../../expressions/public';
+} from '@kbn/expressions-plugin/public';
 
 export type ExpressionValueLabel = ExpressionValueBoxed<
   'label',

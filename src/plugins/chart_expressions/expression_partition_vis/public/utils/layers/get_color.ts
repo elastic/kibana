@@ -8,9 +8,9 @@
 import { ShapeTreeNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
-import type { FieldFormatsStart } from '../../../../../field_formats/public';
-import { lightenColor } from '../../../../../charts/public';
-import type { Datatable, DatatableRow } from '../../../../../expressions/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { lightenColor } from '@kbn/charts-plugin/public';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { DistinctSeries, getDistinctSeries } from '../get_distinct_series';
 

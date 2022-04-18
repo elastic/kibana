@@ -6,7 +6,7 @@
  */
 
 import { keyBy } from 'lodash';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,

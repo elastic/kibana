@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
 
-import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { deleteMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const DeleteMonitor = ({
   id,

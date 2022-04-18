@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ActionType } from '@kbn/actions-plugin/server';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { ActionType } from '../../../../../../../plugins/actions/server';
 
 export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
