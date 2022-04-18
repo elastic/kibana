@@ -4,29 +4,57 @@ steps:
     agents:
       queue: c2-16
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - wait
 
   - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
-    label: Package testing for deb
+    label: Artifact Testing
     agents:
       queue: n2-4-virt
-    timeout_in_minutes: 20
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
-    label: Package testing for rpm
+    label: Artifact Testing
     agents:
       queue: n2-4-virt
-    timeout_in_minutes: 20
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
-    label: Package testing for docker
+    label: Artifact Testing
     agents:
       queue: n2-4-virt
-    timeout_in_minutes: 20
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/artifacts/docker_context.sh
-    label: 'Docker Build Context'
+    label: 'Docker Context Verification'
     agents:
       queue: n2-2
-    timeout_in_minutes: 20
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - wait
+
+  - command: .buildkite/scripts/steps/artifacts/publish.sh
+    label: 'Publish Kibana Artifacts'
+    agents:
+      queue: n2-2
+    timeout_in_minutes: 30

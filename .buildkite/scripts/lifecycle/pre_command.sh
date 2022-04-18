@@ -65,6 +65,15 @@ EOF
   fi
 }
 
+# If a custom manifest isn't specified, then use the default one that we resolve earlier in the build
+{
+  if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
+    ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST_DEFAULT --default '')}
+    export ES_SNAPSHOT_MANIFEST
+    echo "Using default ES Snapshot Manifest: $ES_SNAPSHOT_MANIFEST"
+  fi
+}
+
 # Setup CI Stats
 {
   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
@@ -91,6 +100,12 @@ EOF
 
 GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
+
+KIBANA_DOCKER_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_USERNAME
+
+KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
+export KIBANA_DOCKER_PASSWORD
 
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
