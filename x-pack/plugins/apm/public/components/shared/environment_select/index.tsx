@@ -16,7 +16,6 @@ import {
 } from '../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useServiceName } from '../../../hooks/use_service_name';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
@@ -50,10 +49,10 @@ export function EnvironmentSelect({
   onChange: (value: string) => void;
 }) {
   const [searchValue, setSearchValue] = useState('');
-  const serviceName = useServiceName();
-
-  const { query } = useApmParams('/services/{serviceName}/*');
-  const { rangeFrom, rangeTo } = query;
+  const {
+    path: { serviceName },
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
