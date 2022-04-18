@@ -19,7 +19,7 @@ steps:
     label: 'Default CI Group'
     parallelism: 29
     agents:
-      queue: n2-4
+      queue: n2-4-spot-2
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
