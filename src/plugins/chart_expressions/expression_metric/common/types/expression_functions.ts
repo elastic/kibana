@@ -12,9 +12,9 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
   Style,
-} from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { ColorMode, CustomPaletteState } from '../../../../charts/common';
+} from '@kbn/expressions-plugin';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VisParams, visType, LabelPositionType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 

@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { UrlFormatEditor } from './url';
-import { coreMock } from 'src/core/public/mocks';
-import { createKibanaReactContext } from '../../../../../../kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

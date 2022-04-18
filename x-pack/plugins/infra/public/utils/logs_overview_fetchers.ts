@@ -7,7 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { encode } from 'rison-node';
-import { FetchData, FetchDataParams, LogsFetchDataResponse } from '../../../observability/public';
+import {
+  FetchData,
+  FetchDataParams,
+  LogsFetchDataResponse,
+} from '@kbn/observability-plugin/public';
 import { DEFAULT_SOURCE_ID, TIMESTAMP_FIELD } from '../../common/constants';
 import { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
 

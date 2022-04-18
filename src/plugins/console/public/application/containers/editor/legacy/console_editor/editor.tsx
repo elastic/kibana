@@ -19,7 +19,7 @@ import { debounce } from 'lodash';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { ace } from '../../../../../../../es_ui_shared/public';
+import { ace } from '@kbn/es-ui-shared-plugin/public';
 // @ts-ignore
 import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';

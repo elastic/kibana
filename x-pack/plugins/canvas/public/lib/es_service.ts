@@ -6,7 +6,7 @@
  */
 
 // TODO - clint: convert to service abstraction
-import { IndexPatternAttributes } from 'src/plugins/data/public';
+import { IndexPatternAttributes } from '@kbn/data-plugin/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';

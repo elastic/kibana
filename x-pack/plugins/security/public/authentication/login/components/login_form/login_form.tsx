@@ -29,9 +29,9 @@ import type { ChangeEvent, FormEvent, MouseEvent } from 'react';
 import React, { Component, Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
 
+import type { HttpStart, IHttpFetchError, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
 
 import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
 import { LoginValidator } from './validate_login';

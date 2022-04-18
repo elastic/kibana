@@ -7,11 +7,11 @@
 
 import { firstValueFrom } from 'rxjs';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   CollectorFetchContext,
   UsageCollectionSetup,
-} from 'src/plugins/usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
 
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';

@@ -31,7 +31,7 @@ jest.mock('../../services/job_service', () => ({
   },
 }));
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;
   },

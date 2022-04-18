@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { RegistryAlertTypeWithAuth } from '../authorization';
 import { RewriteResponseCase, verifyAccessAndContext } from './lib';
