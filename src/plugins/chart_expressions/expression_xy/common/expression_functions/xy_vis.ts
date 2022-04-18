@@ -243,6 +243,13 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
     },
+    orderBucketsBySum: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionXY.xyVis.orderBucketsBySum.help', {
+        defaultMessage: 'Order buckets by sum',
+      }),
+    },
   },
   fn(data, args, handlers) {
     const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;

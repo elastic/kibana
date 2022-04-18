@@ -171,6 +171,13 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       }),
       required: false,
     },
+    orderBucketsBySum: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionXY.layeredXyVis.orderBucketsBySum.help', {
+        defaultMessage: 'Order buckets by sum',
+      }),
+    },
   },
   fn(data, args, handlers) {
     const layers = (args.layers ?? []).filter<XYExtendedLayerConfigResult>(
