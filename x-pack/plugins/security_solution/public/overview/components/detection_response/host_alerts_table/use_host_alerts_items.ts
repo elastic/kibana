@@ -66,7 +66,7 @@ export const useHostAlertsItems: UseHostAlertsItems = ({ skip, queryId, signalIn
     if (data == null || !data.aggregations) {
       setItems([]);
     } else {
-      setItems(getHostAlertItemsFromAgg(data.aggregations));
+      setItems(parseHostsData(data.aggregations));
     }
     setUpdatedAt(Date.now());
   }, [data]);
@@ -182,7 +182,7 @@ interface AlertCountersBySeverityAndHostAggregation {
   };
 }
 
-function getHostAlertItemsFromAgg(
+function parseHostsData(
   rawAggregation: AlertCountersBySeverityAndHostAggregation
 ): HostAlertsItem[] {
   const buckets = rawAggregation?.[HOSTS_BY_SEVERITY_AGG].buckets ?? [];

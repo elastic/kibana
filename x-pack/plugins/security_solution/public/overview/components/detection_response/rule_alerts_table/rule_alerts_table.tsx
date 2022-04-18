@@ -106,7 +106,7 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   );
 
   return (
-    <EuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
+    <EuiPanel hasBorder data-test-subj="severityRuleAlertsPanel">
       <HeaderSection
         id={DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID}
         title={i18n.RULE_ALERTS_SECTION_TITLE}
@@ -118,7 +118,7 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
       {toggleStatus && (
         <>
           <EuiBasicTable
-            data-test-subj="severityUserAlertsTable"
+            data-test-subj="severityRuleAlertsTable"
             columns={columns}
             items={items}
             loading={isLoading}
@@ -127,7 +127,7 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
             }
           />
           <EuiSpacer size="m" />
-          <EuiButton data-test-subj="severityUserAlertsButton" onClick={navigateToAlerts}>
+          <EuiButton data-test-subj="severityRuleAlertsButton" onClick={navigateToAlerts}>
             {i18n.OPEN_ALL_ALERTS_BUTTON}
           </EuiButton>
         </>

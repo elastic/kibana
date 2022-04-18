@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @elastic/eui/href-or-on-click */ // we need both to allow a user to right click and open in new a tab or click and navigate within the app without forcing a reload of the application
-
 import React, { useCallback, useMemo } from 'react';
 
 import {
@@ -15,13 +13,13 @@ import {
   EuiButton,
   EuiEmptyPrompt,
   EuiHealth,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { HostDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
@@ -99,46 +97,14 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     name: i18n.HOST_ALERTS_HOSTNAME_COLUMN,
     truncateText: true,
     textOnly: true,
-    render: (hostName: string) => {
-      const url = getAppUrl({ deepLinkId: SecurityPageName.hosts, path: hostName });
-
-      return (
-        <EuiLink
-          data-test-subj="hostSeverityAlertsTable-hostName"
-          href={`/app/security/hosts/${hostName}`}
-          onClick={(ev?: React.MouseEvent) => {
-            if (ev) {
-              ev.preventDefault();
-            }
-            navigateTo({ url });
-          }}
-        >
-          {hostName}
-        </EuiLink>
-      );
-    },
+    render: (hostName: string) => (
+      <HostDetailsLink hostName={hostName} data-test-subj="hostSeverityAlertsTable-hostName" />
+    ),
   },
   {
     field: 'totalAlerts',
     name: i18n.ALERTS_COLUMN,
-    render: (totalAlerts: number, { hostName }) => {
-      const url = getAppUrl({ deepLinkId: SecurityPageName.hosts, path: hostName });
-
-      return (
-        <EuiLink
-          data-test-subj="hostSeverityAlertsTable-totalAlerts"
-          href={`/app/security/hosts/${hostName}`}
-          onClick={(ev?: React.MouseEvent) => {
-            if (ev) {
-              ev.preventDefault();
-            }
-            navigateTo({ url });
-          }}
-        >
-          {totalAlerts}
-        </EuiLink>
-      );
-    },
+    render: (totalAlerts: number) => <div>{totalAlerts}</div>,
   },
   {
     field: 'critical',

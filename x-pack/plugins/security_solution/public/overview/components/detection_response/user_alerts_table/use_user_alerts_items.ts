@@ -67,7 +67,7 @@ export const useUserAlertsItems: UseUserAlertsItems = ({ skip, queryId, signalIn
     if (data == null || !data.aggregations) {
       setItems([]);
     } else {
-      setItems(getUserAlertItemsFromAgg(data.aggregations));
+      setItems(parseUsersData(data.aggregations));
     }
     setUpdatedAt(Date.now());
   }, [data]);
@@ -183,9 +183,7 @@ interface AlertCountersBySeverityAggregation {
   };
 }
 
-function getUserAlertItemsFromAgg(
-  rawAggregation: AlertCountersBySeverityAggregation
-): UserAlertsItem[] {
+function parseUsersData(rawAggregation: AlertCountersBySeverityAggregation): UserAlertsItem[] {
   const buckets = rawAggregation?.[USERS_BY_SEVERITY_AGG].buckets ?? [];
 
   return buckets.reduce<UserAlertsItem[]>((accumalatedAlertsByUser, currentUser) => {
