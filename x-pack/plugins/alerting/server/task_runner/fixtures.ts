@@ -246,7 +246,7 @@ export const generateEventLog = ({
           ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfGeneratedActions)) && {
             metrics: {
               number_of_triggered_actions: numberOfTriggeredActions,
-              number_of_scheduled_actions: numberOfGeneratedActions,
+              number_of_generated_actions: numberOfGeneratedActions,
               number_of_active_alerts: numberOfActiveAlerts ?? 0,
               number_of_new_alerts: numberOfNewAlerts ?? 0,
               number_of_recovered_alerts: numberOfRecoveredAlerts ?? 0,

@@ -381,66 +381,66 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
       ).to.be.empty();
 
       // percentile calculations for number of scheduled actions
-      expect(telemetry.percentile_num_scheduled_actions_per_day.p50 >= 0).to.be(true);
-      expect(telemetry.percentile_num_scheduled_actions_per_day.p90 > 0).to.be(true);
-      expect(telemetry.percentile_num_scheduled_actions_per_day.p99 > 0).to.be(true);
+      expect(telemetry.percentile_num_generated_actions_per_day.p50 >= 0).to.be(true);
+      expect(telemetry.percentile_num_generated_actions_per_day.p90 > 0).to.be(true);
+      expect(telemetry.percentile_num_generated_actions_per_day.p99 > 0).to.be(true);
 
       // percentile calculations by rule type. most of these rule types don't schedule actions so they should all be 0
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p50['example__always-firing']
+        telemetry.percentile_num_generated_actions_by_type_per_day.p50['example__always-firing']
       ).to.equal(0);
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p90['example__always-firing']
+        telemetry.percentile_num_generated_actions_by_type_per_day.p90['example__always-firing']
       ).to.equal(0);
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p99['example__always-firing']
+        telemetry.percentile_num_generated_actions_by_type_per_day.p99['example__always-firing']
       ).to.equal(0);
 
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p50.test__onlyContextVariables
+        telemetry.percentile_num_generated_actions_by_type_per_day.p50.test__onlyContextVariables
       ).to.equal(0);
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p90.test__onlyContextVariables
+        telemetry.percentile_num_generated_actions_by_type_per_day.p90.test__onlyContextVariables
       ).to.equal(0);
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p99.test__onlyContextVariables
+        telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__onlyContextVariables
       ).to.equal(0);
 
-      expect(telemetry.percentile_num_scheduled_actions_by_type_per_day.p50.test__noop).to.equal(0);
-      expect(telemetry.percentile_num_scheduled_actions_by_type_per_day.p90.test__noop).to.equal(0);
-      expect(telemetry.percentile_num_scheduled_actions_by_type_per_day.p99.test__noop).to.equal(0);
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p50.test__noop).to.equal(0);
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p90.test__noop).to.equal(0);
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__noop).to.equal(0);
 
-      expect(telemetry.percentile_num_scheduled_actions_by_type_per_day.p50.test__throw).to.equal(
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p50.test__throw).to.equal(
         0
       );
-      expect(telemetry.percentile_num_scheduled_actions_by_type_per_day.p90.test__throw).to.equal(
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p90.test__throw).to.equal(
         0
       );
-      expect(telemetry.percentile_num_scheduled_actions_by_type_per_day.p99.test__throw).to.equal(
+      expect(telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__throw).to.equal(
         0
       );
 
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p50.test__multipleSearches
+        telemetry.percentile_num_generated_actions_by_type_per_day.p50.test__multipleSearches
       ).to.equal(0);
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p90.test__multipleSearches
+        telemetry.percentile_num_generated_actions_by_type_per_day.p90.test__multipleSearches
       ).to.equal(0);
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p99.test__multipleSearches
+        telemetry.percentile_num_generated_actions_by_type_per_day.p99.test__multipleSearches
       ).to.equal(0);
 
       // this rule type does schedule actions so should be least 1 action scheduled
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p50['test__cumulative-firing'] >=
+        telemetry.percentile_num_generated_actions_by_type_per_day.p50['test__cumulative-firing'] >=
           1
       ).to.be(true);
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p90['test__cumulative-firing'] >=
+        telemetry.percentile_num_generated_actions_by_type_per_day.p90['test__cumulative-firing'] >=
           1
       ).to.be(true);
       expect(
-        telemetry.percentile_num_scheduled_actions_by_type_per_day.p99['test__cumulative-firing'] >=
+        telemetry.percentile_num_generated_actions_by_type_per_day.p99['test__cumulative-firing'] >=
           1
       ).to.be(true);
 
