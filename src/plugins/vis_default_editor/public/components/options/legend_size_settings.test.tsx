@@ -71,7 +71,7 @@ describe('legend size settings', () => {
         .find(EuiSuperSelect)
         .props().options;
 
-    const autoOption = expect.objectContaining({ value: LegendSizes.AUTO });
+    const autoOption = expect.objectContaining({ value: LegendSizes.AUTO.toString() });
     expect(getOptions(Number(LegendSizes.AUTO))).toContainEqual(autoOption);
     expect(getOptions(undefined)).not.toContainEqual(autoOption);
     expect(getOptions(Number(LegendSizes.LARGE))).not.toContainEqual(autoOption);
