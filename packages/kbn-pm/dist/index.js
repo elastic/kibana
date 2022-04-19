@@ -59725,7 +59725,9 @@ const BootstrapCommand = {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BuildCommand; });
-/* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/bazel/index.ts");
+/* harmony import */ var _kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/@kbn/bazel-runner/target_node/index.js");
+/* harmony import */ var _kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/log.ts");
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -59733,6 +59735,7 @@ const BootstrapCommand = {
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 const BuildCommand = {
   description: 'Runs a build in the Bazel built packages',
@@ -59745,9 +59748,12 @@ const BuildCommand = {
   async run(projects, projectGraph, {
     options
   }) {
-    const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true; // Call bazel with the target to build all available packages
-
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runBazel"])(['build', '//packages:build', '--show_result=1'], runOffline);
+    // Call bazel with the target to build all available packages
+    await Object(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_0__["runBazel"])({
+      bazelArgs: ['build', '//packages:build', '--show_result=1'],
+      log: _utils_log__WEBPACK_IMPORTED_MODULE_1__[/* log */ "a"],
+      offline: (options === null || options === void 0 ? void 0 : options.offline) === true
+    });
   }
 
 };
@@ -59767,9 +59773,11 @@ const BuildCommand = {
 /* harmony import */ var ora__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(ora__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("path");
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/bazel/index.ts");
-/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/fs.ts");
-/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/utils/log.ts");
+/* harmony import */ var _kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../../node_modules/@kbn/bazel-runner/target_node/index.js");
+/* harmony import */ var _kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/bazel/index.ts");
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/utils/fs.ts");
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/utils/log.ts");
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -59777,6 +59785,7 @@ const BuildCommand = {
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -59795,7 +59804,7 @@ const CleanCommand = {
   async run(projects, projectGraph, {
     kbn
   }) {
-    _utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
+    _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
       This command is only necessary for the circumstance where you need to recover a consistent
       state when problems arise. If you need to run this command often, please let us know by
       filling out this form: https://ela.st/yarn-kbn-clean.
@@ -59805,7 +59814,7 @@ const CleanCommand = {
     const toDelete = [];
 
     for (const project of projects.values()) {
-      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__[/* isDirectory */ "c"])(project.targetLocation)) {
+      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_6__[/* isDirectory */ "c"])(project.targetLocation)) {
         toDelete.push({
           cwd: project.path,
           pattern: Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(project.path, project.targetLocation)
@@ -59825,13 +59834,16 @@ const CleanCommand = {
     } // Runs Bazel soft clean
 
 
-    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__[/* isBazelBinAvailable */ "d"])(kbn.getAbsolute())) {
-      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean']);
-      _utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].success('Soft cleaned bazel');
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_5__[/* isBazelBinAvailable */ "d"])(kbn.getAbsolute())) {
+      await Object(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4__["runBazel"])({
+        bazelArgs: ['clean'],
+        log: _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"]
+      });
+      _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"].success('Soft cleaned bazel');
     }
 
     if (toDelete.length === 0) {
-      _utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].success('Nothing to delete');
+      _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"].success('Nothing to delete');
     } else {
       /**
        * In order to avoid patterns like `/build` in packages from accidentally
@@ -59852,7 +59864,7 @@ const CleanCommand = {
           process.chdir(cwd);
           const promise = del__WEBPACK_IMPORTED_MODULE_1___default()(pattern);
 
-          if (_utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].wouldLogLevel('info')) {
+          if (_utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"].wouldLogLevel('info')) {
             ora__WEBPACK_IMPORTED_MODULE_2___default.a.promise(promise, Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(originalCwd, Object(path__WEBPACK_IMPORTED_MODULE_3__["join"])(cwd, String(pattern))));
           }
 
@@ -59916,9 +59928,11 @@ const commands = {
 /* harmony import */ var ora__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(ora__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("path");
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/bazel/index.ts");
-/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/fs.ts");
-/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/utils/log.ts");
+/* harmony import */ var _kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../../node_modules/@kbn/bazel-runner/target_node/index.js");
+/* harmony import */ var _kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/bazel/index.ts");
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/utils/fs.ts");
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/utils/log.ts");
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -59926,6 +59940,7 @@ const commands = {
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -59944,7 +59959,7 @@ const ResetCommand = {
   async run(projects, projectGraph, {
     kbn
   }) {
-    _utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
+    _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
       In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
       problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
       If you think you need to use this command very often (which is not normal), please let us know.
@@ -59952,14 +59967,14 @@ const ResetCommand = {
     const toDelete = [];
 
     for (const project of projects.values()) {
-      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__[/* isDirectory */ "c"])(project.nodeModulesLocation)) {
+      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_6__[/* isDirectory */ "c"])(project.nodeModulesLocation)) {
         toDelete.push({
           cwd: project.path,
           pattern: Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(project.path, project.nodeModulesLocation)
         });
       }
 
-      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__[/* isDirectory */ "c"])(project.targetLocation)) {
+      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_6__[/* isDirectory */ "c"])(project.targetLocation)) {
         toDelete.push({
           cwd: project.path,
           pattern: Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(project.path, project.targetLocation)
@@ -59979,15 +59994,18 @@ const ResetCommand = {
     } // Runs Bazel hard clean and deletes Bazel Cache Folders
 
 
-    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__[/* isBazelBinAvailable */ "d"])(kbn.getAbsolute())) {
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_5__[/* isBazelBinAvailable */ "d"])(kbn.getAbsolute())) {
       // Hard cleaning bazel
-      await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean', '--expunge']);
-      _utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].success('Hard cleaned bazel'); // Deletes Bazel Cache Folders
+      await Object(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4__["runBazel"])({
+        bazelArgs: ['clean', '--expunge'],
+        log: _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"]
+      });
+      _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"].success('Hard cleaned bazel'); // Deletes Bazel Cache Folders
 
-      await del__WEBPACK_IMPORTED_MODULE_1___default()([await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__[/* getBazelDiskCacheFolder */ "a"])(), await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__[/* getBazelRepositoryCacheFolder */ "b"])()], {
+      await del__WEBPACK_IMPORTED_MODULE_1___default()([await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_5__[/* getBazelDiskCacheFolder */ "a"])(), await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_5__[/* getBazelRepositoryCacheFolder */ "b"])()], {
         force: true
       });
-      _utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].success('Removed disk caches');
+      _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"].success('Removed disk caches');
     }
 
     if (toDelete.length === 0) {
@@ -60014,7 +60032,7 @@ const ResetCommand = {
         process.chdir(cwd);
         const promise = del__WEBPACK_IMPORTED_MODULE_1___default()(pattern);
 
-        if (_utils_log__WEBPACK_IMPORTED_MODULE_6__[/* log */ "a"].wouldLogLevel('info')) {
+        if (_utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"].wouldLogLevel('info')) {
           ora__WEBPACK_IMPORTED_MODULE_2___default.a.promise(promise, Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(originalCwd, Object(path__WEBPACK_IMPORTED_MODULE_3__["join"])(cwd, String(pattern))));
         }
 
@@ -60103,7 +60121,9 @@ const RunCommand = {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return WatchCommand; });
-/* harmony import */ var _utils_bazel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/bazel/index.ts");
+/* harmony import */ var _kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/@kbn/bazel-runner/target_node/index.js");
+/* harmony import */ var _kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/log.ts");
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -60111,6 +60131,7 @@ const RunCommand = {
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 const WatchCommand = {
   description: 'Runs a build in the Bazel built packages and keeps watching them for changes',
@@ -60128,7 +60149,11 @@ const WatchCommand = {
     // Note: --run_output=false arg will disable the iBazel notifications about gazelle and buildozer when running it
     // Can also be solved by adding a root `.bazel_fix_commands.json` but its not needed at the moment
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])(['--run_output=false', 'build', '//packages:build', '--show_result=1'], runOffline);
+    await Object(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_0__["runIBazel"])({
+      bazelArgs: ['--run_output=false', 'build', '//packages:build', '--show_result=1'],
+      log: _utils_log__WEBPACK_IMPORTED_MODULE_1__[/* log */ "a"],
+      offline: runOffline
+    });
   }
 
 };
