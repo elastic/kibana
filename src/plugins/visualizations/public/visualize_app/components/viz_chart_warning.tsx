@@ -136,7 +136,7 @@ const TimelionWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   return (
     <FormattedMessage
       id="visualizations.oldTimelionChart.notificationMessage"
-      defaultMessage="You are using the legacy charts library, which will be removed in a future version. {conditionalMessage}"
+      defaultMessage="You are using the legacy charts library, which will be removed in 8.4. {conditionalMessage}"
       values={{
         conditionalMessage: (
           <>
