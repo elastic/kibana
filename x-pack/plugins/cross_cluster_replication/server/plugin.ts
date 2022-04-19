@@ -6,10 +6,10 @@
  */
 
 import { firstValueFrom, Observable } from 'rxjs';
-import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
-import { IScopedClusterClient } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import { Index } from '../../index_management/server';
+import { Index } from '@kbn/index-management-plugin/server';
 import { PLUGIN } from '../common/constants';
 import { SetupDependencies, StartDependencies } from './types';
 import { registerApiRoutes } from './routes';

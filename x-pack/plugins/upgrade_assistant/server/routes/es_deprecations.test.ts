@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../shared_imports';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
