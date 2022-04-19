@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
+import { isFragment } from 'react-is';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../types';
@@ -34,6 +35,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { TinymathAST } from '@kbn/tinymath';
 import { SavedObjectReference } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
+import { DatatableColumn } from '@kbn/expressions-plugin';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -2246,6 +2248,21 @@ describe('IndexPattern Data Source', () => {
     let framePublicAPI: FramePublicAPI;
 
     beforeEach(() => {
+      const termsColumn: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        dataType: 'number',
+        isBucketed: true,
+        label: '123211',
+        sourceField: 'foo',
+        params: {
+          size: 10,
+          orderBy: {
+            type: 'alphabetical',
+          },
+          orderDirection: 'asc',
+        },
+      };
+
       state = {
         indexPatternRefs: [],
         existingFields: {},
@@ -2305,6 +2322,7 @@ describe('IndexPattern Data Source', () => {
                 isBucketed: false,
                 sourceField: 'records',
               },
+              termsCol: termsColumn,
             },
           },
         },
@@ -2331,16 +2349,34 @@ describe('IndexPattern Data Source', () => {
                   },
                 },
               },
+              {
+                id: 'termsCol',
+                name: 'termsCol',
+                meta: {
+                  type: 'string',
+                  source: 'esaggs',
+                  sourceParams: {
+                    type: 'terms',
+                  },
+                },
+              } as DatatableColumn,
             ],
           },
         },
       } as unknown as FramePublicAPI;
     });
 
+    const extractTranslationIdsFromWarnings = (warnings: React.ReactNode[] | undefined) =>
+      warnings?.map((item) =>
+        isFragment(item)
+          ? (item as ReactElement).props.children[0].props.id
+          : (item as ReactElement).props.id
+      );
+
     it('should return mismatched time shifts', () => {
       const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI, () => {});
 
-      expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
+      expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
         Array [
           "xpack.lens.indexPattern.timeShiftSmallWarning",
           "xpack.lens.indexPattern.timeShiftMultipleWarning",
@@ -2349,15 +2385,15 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should show different types of warning messages', () => {
-      framePublicAPI.activeData!.first.columns[0].meta.sourceParams!.hasPrecisionError = true;
+      framePublicAPI.activeData!.first.columns[1].meta.sourceParams!.hasPrecisionError = true;
 
       const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI, () => {});
 
-      expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
+      expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
         Array [
           "xpack.lens.indexPattern.timeShiftSmallWarning",
           "xpack.lens.indexPattern.timeShiftMultipleWarning",
-          "xpack.lens.indexPattern.precisionErrorWarning",
+          "xpack.lens.indexPattern.precisionErrorWarning.accuracyDisabled",
         ]
       `);
     });

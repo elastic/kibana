@@ -235,6 +235,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
+
+    // To get more accurate results, we set shard_size to a minimum of 1000
+    // The other calculation matches the current Elasticsearch shard_size default,
+    // but they may diverge in the future
+    const shardSize = column.params.accuracyMode
+      ? Math.max(1000, column.params.size * 1.5 + 10)
+      : undefined;
+
     if (column.params?.secondaryFields?.length) {
       return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
         id: columnId,
@@ -247,6 +255,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
         order: column.params.orderDirection,
         size: column.params.size,
+        shardSize,
         otherBucket: Boolean(column.params.otherBucket),
         otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
           defaultMessage: 'Other',
@@ -264,6 +273,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
       order: column.params.orderDirection,
       size: column.params.size,
+      shardSize,
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
@@ -625,6 +635,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 }),
                 indexPattern
               );
+
               updateLayer(
                 updateColumnParam({
                   layer: updatedLayer,
@@ -742,6 +753,44 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       layer,
                       columnId,
                       paramName: 'missingBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={
+                  <>
+                    {i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
+                      defaultMessage: 'Enable accuracy mode',
+                    })}{' '}
+                    <EuiIconTip
+                      color="subdued"
+                      content={i18n.translate('xpack.lens.indexPattern.terms.accuracyModeHelp', {
+                        defaultMessage: `Improves results for high-cardinality data, but increases the load on the Elasticsearch cluster.`,
+                      })}
+                      iconProps={{
+                        className: 'eui-alignTop',
+                      }}
+                      position="top"
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </>
+                }
+                compressed
+                disabled={currentColumn.params.orderBy.type === 'rare'}
+                data-test-subj="indexPattern-accuracy-mode"
+                checked={Boolean(
+                  currentColumn.params.accuracyMode && currentColumn.params.orderBy.type !== 'rare'
+                )}
+                onChange={(e: EuiSwitchEvent) =>
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'accuracyMode',
                       value: e.target.checked,
                     })
                   )

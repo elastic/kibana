@@ -39,6 +39,7 @@ export interface AggParamsTerms extends BaseAggParams {
   orderAgg?: AggConfigSerialized;
   order?: 'asc' | 'desc';
   size?: number;
+  shardSize?: number;
   missingBucket?: boolean;
   missingBucketLabel?: string;
   otherBucket?: boolean;
@@ -114,6 +115,12 @@ export const getTermsBucketAgg = () =>
       {
         name: 'size',
         default: 5,
+      },
+      {
+        name: 'shardSize',
+        write: (aggConfig, output) => {
+          output.params.shard_size = aggConfig.params.shardSize;
+        },
       },
       {
         name: 'otherBucket',

@@ -564,7 +564,6 @@
     "xpack.lens.indexPattern.percentile.percentileValue": "パーセンタイル",
     "xpack.lens.indexPattern.percentile.signature": "フィールド：文字列、[percentile]：数値",
     "xpack.lens.indexPattern.pinnedTopValuesLabel": "{field}のフィルター",
-    "xpack.lens.indexPattern.precisionErrorWarning": "データのインデックス方法のため、このビジュアライゼーションの{name}は近似される場合があります。{topValues}の数を増やすか、正確な結果を得るには{topValues}ではなく{filters}を使用してください。この制限の詳細については、{link}。",
     "xpack.lens.indexPattern.precisionErrorWarning.filters": "フィルター",
     "xpack.lens.indexPattern.precisionErrorWarning.link": "ドキュメントをご覧ください",
     "xpack.lens.indexPattern.precisionErrorWarning.topValues": "トップの値",
