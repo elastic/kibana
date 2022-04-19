@@ -60,7 +60,7 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   ruleTypesRoute(router, licenseState);
-  muteAllRuleRoute(router, licenseState);
+  muteAllRuleRoute(router, licenseState, usageCounter);
   muteAlertRoute(router, licenseState);
   unmuteAllRuleRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
