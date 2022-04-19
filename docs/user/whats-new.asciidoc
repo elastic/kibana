@@ -172,7 +172,6 @@ minimum interval or just display warnings on the UI. Check the
 
 * Configure the maximum number of actions that a rule can generate with the `xpack.alerting.rules.run.actions.max` setting. Specify a different cap for your
 different rule types with the `xpack.alerting.rules.run.ruleTypeOverrides` setting, depending on your needs.
-Check the {kibana-ref}/alert-action-settings-kb.html#action-settings[documentation] for the `xpack.alerting.run.actions.max` setting.
 For more information, refer to {kibana-ref}/alert-action-settings-kb.html#action-settings[Action settings].
 [float]
 ==== New xMatters connector
