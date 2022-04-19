@@ -125,7 +125,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, log, id);
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-        expect(signalsOpen.hits.hits[0]._source![ALERT_RULE_RULE_ID]).eql(getSimpleRule().rule_id);
+        expect(signalsOpen.hits.hits[0]._source![ALERT_RULE_RULE_ID]).eql(
+          getSimpleRule(id).rule_id
+        );
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
