@@ -9,7 +9,8 @@
 import { format } from 'util';
 
 import Mocha from 'mocha';
-import { ToolingLogTextWriter, CiStatsReporter } from '@kbn/dev-utils';
+import { ToolingLogTextWriter } from '@kbn/tooling-log';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import moment from 'moment';
 
 import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';

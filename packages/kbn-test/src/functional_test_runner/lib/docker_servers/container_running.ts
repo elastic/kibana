@@ -8,7 +8,7 @@
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 /**
  * Create an observable that errors if a docker

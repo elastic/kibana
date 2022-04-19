@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, basename, resolve } from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import { escape } from 'he';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
 import {

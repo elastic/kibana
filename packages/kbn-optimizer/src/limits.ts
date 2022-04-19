@@ -11,7 +11,9 @@ import Path from 'path';
 
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
-import { createFailError, ToolingLog, CiStatsMetric } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 import { OptimizerConfig, Limits } from './optimizer';
 

@@ -17,8 +17,8 @@ import treeKill from 'tree-kill';
 import { promisify } from 'util';
 const treeKillAsync = promisify((...args: [number, string, any]) => treeKill(...args));
 
-import { ToolingLog } from '../tooling_log';
-import { observeLines } from '../stdio';
+import { ToolingLog } from '@kbn/tooling-log';
+import { observeLines } from '@kbn/stdio-dev-helpers';
 import { createFailError } from '../run';
 
 const SECOND = 1000;

@@ -7,7 +7,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 

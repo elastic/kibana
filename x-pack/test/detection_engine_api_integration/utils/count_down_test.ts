@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
  * Does a plain countdown and checks against a boolean to determine if to wait and try again.

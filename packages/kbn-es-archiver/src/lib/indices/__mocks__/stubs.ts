@@ -8,7 +8,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import sinon from 'sinon';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../../stats';
 
 type StubStats = Stats & {

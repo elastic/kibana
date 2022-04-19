@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-const {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  ES_NOPASSWORD_P12_PATH,
-  createAnyInstanceSerializer,
-  createStripAnsiSerializer,
-} = require('@kbn/dev-utils');
+const { ES_NOPASSWORD_P12_PATH } = require('@kbn/dev-utils');
+const { ToolingLog, ToolingLogCollectingWriter } = require('@kbn/tooling-log');
+const { createAnyInstanceSerializer, createStripAnsiSerializer } = require('@kbn/jest-serializers');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');

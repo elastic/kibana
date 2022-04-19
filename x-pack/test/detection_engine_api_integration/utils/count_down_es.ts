@@ -6,7 +6,7 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { countDownTest } from './count_down_test';
 
 /**

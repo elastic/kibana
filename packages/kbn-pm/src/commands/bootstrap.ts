@@ -7,7 +7,7 @@
  */
 
 import { resolve, sep } from 'path';
-import { CiStatsReporter } from '@kbn/dev-utils/ci_stats_reporter';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 
 import { log } from '../utils/log';
 import { spawnStreaming } from '../utils/child_process';

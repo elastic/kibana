@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { pickLevelFromFlags, ToolingLog, LogLevel } from '../tooling_log';
+import { pickLevelFromFlags, ToolingLog, LogLevel } from '@kbn/tooling-log';
 import { createFlagError } from './fail';
 import { Flags, getFlags, FlagOptions } from './flags';
 import { ProcRunner, withProcRunner } from '../proc_runner';

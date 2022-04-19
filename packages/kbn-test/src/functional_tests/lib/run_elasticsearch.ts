@@ -7,7 +7,7 @@
  */
 
 import { resolve } from 'path';
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { KIBANA_ROOT } from './paths';
 import type { Config } from '../../functional_test_runner';

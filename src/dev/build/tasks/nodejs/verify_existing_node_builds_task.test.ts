@@ -10,12 +10,8 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/utils';
-import {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  createAnyInstanceSerializer,
-  createRecursiveSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createAnyInstanceSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
 import { Config, Platform } from '../../lib';
 import { VerifyExistingNodeBuilds } from './verify_existing_node_builds_task';

@@ -10,7 +10,7 @@ import Path from 'path';
 
 import cpy from 'cpy';
 import del from 'del';
-import { createAbsolutePathSerializer, createStripAnsiSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
 
 import { OptimizerConfig } from '../optimizer/optimizer_config';
 import { allValuesFrom, Bundle, Hashes, ParsedDllManifest } from '../common';

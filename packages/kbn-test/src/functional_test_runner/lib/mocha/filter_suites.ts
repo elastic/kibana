@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Suite, Test } from '../../fake_mocha_types';
 import { EsVersion } from '../es_version';
 

@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import { Project } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { PluginApi, PluginOrPackage } from '../types';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';

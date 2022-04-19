@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';

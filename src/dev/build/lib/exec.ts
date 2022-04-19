@@ -8,7 +8,7 @@
 
 import execa from 'execa';
 import chalk from 'chalk';
-import { ToolingLog, LogLevel } from '@kbn/dev-utils';
+import { ToolingLog, LogLevel } from '@kbn/tooling-log';
 
 import { watchStdioForLine } from './watch_stdio_for_line';
 

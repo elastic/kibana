@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ListArray, NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';

@@ -8,7 +8,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { Features } from '../features';
 

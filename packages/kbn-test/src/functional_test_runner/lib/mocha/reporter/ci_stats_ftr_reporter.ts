@@ -9,7 +9,11 @@
 import * as Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { CiStatsReporter, CiStatsReportTestsOptions, CiStatsTestType } from '@kbn/dev-utils';
+import {
+  CiStatsReporter,
+  CiStatsReportTestsOptions,
+  CiStatsTestType,
+} from '@kbn/ci-stats-reporter';
 
 import { Config } from '../../config';
 import { Runner } from '../../../fake_mocha_types';

@@ -10,7 +10,8 @@ import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 

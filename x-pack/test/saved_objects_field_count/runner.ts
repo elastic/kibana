@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CiStatsReporter } from '@kbn/dev-utils';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { FtrProviderContext } from '../functional/ftr_provider_context';
 
 const IGNORED_FIELDS = [

@@ -10,7 +10,7 @@ import chalk from 'chalk';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { observeLines } from '@kbn/dev-utils/stdio';
+import { observeLines } from '@kbn/stdio-dev-helpers';
 import { spawn } from '../child_process';
 import { log } from '../log';
 import { CliError } from '../errors';

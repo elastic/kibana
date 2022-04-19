@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';

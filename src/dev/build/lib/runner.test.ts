@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  createStripAnsiSerializer,
-  createRecursiveSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createStripAnsiSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 import { Config } from './config';
 import { createRunner } from './runner';
 import { Build } from './build';

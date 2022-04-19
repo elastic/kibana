@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { readConfigFile } from './read_config_file';
 import { Config } from './config';
 import { EsVersion } from '../es_version';

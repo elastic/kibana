@@ -36,7 +36,7 @@ The majority of this logic is extracted from the legacy grunt build, and is desi
 
 **Platform**: [lib/platform.js] defines the Platform objects, which define the different platforms we build for. Use `config.getTargetPlatforms()` to get the list of platforms we are targeting in this build, `config.getNodePlatforms()` to get the list of platform we will download node for, or `config.getPlatform` to get a specific platform and architecture.
 
-**Log**: We uses the `ToolingLog` defined in [../tooling_log/tooling_log.js]
+**Log**: We use the `ToolingLog` defined in [@kbn/tooling-log]
 
 **Runner**: [lib/runner.js] defines the runner used to execute tasks. It calls tasks with specific arguments based on whether they are global or not.
 
@@ -48,4 +48,4 @@ The majority of this logic is extracted from the legacy grunt build, and is desi
 [lib/runner.js]: ./lib/runner.js
 [lib/build.js]: ./lib/build.js
 [build_distributables.js]: ./build_distributables.js
-[../tooling_log/tooling_log.js]: ../tooling_log/tooling_log.js
+[@kbn/tooling-log]: ../../../packages/kbn-tooling-log

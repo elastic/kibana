@@ -9,7 +9,7 @@
 import path from 'path';
 
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { BASE_PATH } from '../paths';
 import { installArchive } from './install_archive';

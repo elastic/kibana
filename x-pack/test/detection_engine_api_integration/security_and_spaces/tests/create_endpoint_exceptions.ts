@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import expect from '@kbn/expect';
 
 import type SuperTest from 'supertest';

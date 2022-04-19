@@ -16,7 +16,7 @@ import { setTimeout } from 'timers/promises';
 import fetch, { Headers } from 'node-fetch';
 import AbortController from 'abort-controller';
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { cache } from './utils/cache';
 import { resolveCustomSnapshotUrl } from './custom_snapshots';

@@ -6,7 +6,7 @@
  */
 
 import { Context } from 'mocha';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export function warnAndSkipTest(mochaContext: Context, log: ToolingLog) {

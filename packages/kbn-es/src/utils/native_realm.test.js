@@ -7,7 +7,7 @@
  */
 
 const { NativeRealm } = require('./native_realm');
-const { ToolingLog } = require('@kbn/dev-utils');
+const { ToolingLog } = require('@kbn/tooling-log');
 
 const mockClient = {
   xpack: {

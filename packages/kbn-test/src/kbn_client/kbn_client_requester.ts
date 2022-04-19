@@ -11,7 +11,8 @@ import Https from 'https';
 import Qs from 'querystring';
 
 import Axios, { AxiosResponse, ResponseType } from 'axios';
-import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 const isConcliftOnGetError = (error: any) => {
   return (

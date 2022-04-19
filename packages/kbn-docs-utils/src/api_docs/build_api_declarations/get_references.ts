@@ -7,7 +7,7 @@
  */
 
 import { Node, ReferenceFindableNode } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginForPath } from '../utils';
 import { getSourceForNode } from './utils';
 import { ApiDeclaration, ApiReference, PluginOrPackage } from '../types';

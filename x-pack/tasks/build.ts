@@ -12,7 +12,8 @@ import { promisify } from 'util';
 import { pipeline } from 'stream';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import gulp from 'gulp';
 import del from 'del';
 import fancyLog from 'fancy-log';
