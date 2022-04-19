@@ -7,14 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  deleteMetadataStream,
-  deleteAllDocsFromMetadataCurrentIndex,
-  deleteAllDocsFromMetadataUnitedIndex,
-  deletePolicyStream,
-  deleteAllDocsFromFleetAgents,
-} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
+import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -32,13 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('When on the Endpoint Policy List Page', () => {
     before(async () => {
-      // need to ensure there is no data so that CI works
-      await deleteMetadataStream(getService);
-      await deleteAllDocsFromMetadataCurrentIndex(getService);
-      await deleteAllDocsFromMetadataUnitedIndex(getService);
-      await deletePolicyStream(getService);
-      await deleteAllDocsFromFleetAgents(getService);
-
       const endpointPackage = await policyTestResources.getEndpointPackage();
       await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       await browser.refresh();
@@ -63,13 +50,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('with policies', () => {
       let indexedData: IndexedHostsAndAlertsResponse;
+      let policyInfo: PolicyTestResourceInfo;
       before(async () => {
         indexedData = await endpointTestResources.loadEndpointData();
+        policyInfo = await policyTestResources.createPolicy();
         await browser.refresh();
       });
       after(async () => {
         if (indexedData) {
           await endpointTestResources.unloadEndpointData(indexedData);
+        }
+        if (policyInfo) {
+          await policyInfo.cleanup();
         }
       });
       it('shows the policy list table', async () => {
@@ -77,20 +69,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('policyListTable');
       });
       it('navigates to the policy details page when the policy name is clicked and returns back to the policy list page using the header back button', async () => {
-        const policyName = await testSubjects.find('policyNameCellLink');
+        const policyName = (await testSubjects.findAll('policyNameCellLink'))[0];
         await policyName.click();
         pageObjects.policy.ensureIsOnDetailsPage();
         const backButton = await testSubjects.find('policyDetailsBackLink');
         await backButton.click();
         pageObjects.policy.ensureIsOnListPage();
       });
-      it('navigates to the endpoint list page filtered by policy when the endpoint count number is clicked and returns back to the policy list page using the header back button', async () => {
-        const endpointCount = await testSubjects.find('policyEndpointCountLink');
-        await endpointCount.click();
-        pageObjects.endpoint.ensureIsOnEndpointListPage();
-        const backButton = await testSubjects.find('endpointListBackLink');
-        await backButton.click();
-        pageObjects.policy.ensureIsOnListPage();
+      describe('when the endpoint count link is clicked', () => {
+        it('navigates to the endpoint list page filtered by policy', async () => {
+          const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
+          await endpointCount.click();
+          pageObjects.endpoint.ensureIsOnEndpointListPage();
+        });
+        it('admin searchbar contains the selected policy id', async () => {
+          const expectedPolicyId = indexedData.integrationPolicies[0].id;
+          pageObjects.endpoint.ensureIsOnEndpointListPage();
+          expect(await testSubjects.getVisibleText('adminSearchBar')).to.equal(
+            `united.endpoint.Endpoint.policy.applied.id : "${expectedPolicyId}"`
+          );
+        });
+        it('returns back to the policy list page when the header back button is clicked', async () => {
+          pageObjects.endpoint.ensureIsOnEndpointListPage();
+          const backButton = await testSubjects.find('endpointListBackLink');
+          await backButton.click();
+          pageObjects.policy.ensureIsOnListPage();
+        });
       });
     });
   });
