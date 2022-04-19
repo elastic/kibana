@@ -69,7 +69,7 @@ const UserActionPropertyActionsComponent = ({
                 label: editLabel,
                 onClick: onEditClick,
               },
-              ...((deleteLabel && onDelete)
+              ...(deleteLabel && onDelete
                 ? [
                     {
                       iconType: 'trash',
@@ -92,6 +92,7 @@ const UserActionPropertyActionsComponent = ({
       editLabel,
       onEditClick,
       deleteLabel,
+      onDelete,
       onDeleteClick,
       quoteLabel,
       onQuoteClick,
