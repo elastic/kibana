@@ -1439,15 +1439,16 @@ describe('Package policy service', () => {
       appContextService.addExternalCallback('packagePolicyPostCreate', callbackA);
       appContextService.addExternalCallback('packagePolicyPostCreate', callbackB);
 
+      const requestContext = coreMock.createCustomRequestHandlerContext(context);
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyPostCreate',
         packagePolicy,
-        coreMock.createCustomRequestHandlerContext(context),
+        requestContext,
         request
       );
 
-      expect(callbackA).toHaveBeenCalledWith(packagePolicy, context, request);
-      expect(callbackB).toHaveBeenCalledWith(packagePolicy, context, request);
+      expect(callbackA).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackB).toHaveBeenCalledWith(packagePolicy, requestContext, request);
       expect(callbackCallingOrder).toEqual(['a', 'b']);
     });
   });
