@@ -6,9 +6,11 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { loginToKibana, waitForLoadingToFinish } from './utils';
+import { waitForLoadingToFinish } from './utils';
+import { loginPageProvider } from '../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
+  const login = loginPageProvider({ page });
   before(async () => {
     await waitForLoadingToFinish({ page });
   });
@@ -24,7 +26,7 @@ journey('StepsDuration', async ({ page, params }) => {
     await page.goto(`${baseUrl}?${queryParams}`, {
       waitUntil: 'networkidle',
     });
-    await loginToKibana({ page });
+    await login.loginToKibana();
   });
 
   step('Go to monitor details', async () => {

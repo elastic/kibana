@@ -36,6 +36,12 @@ export function loginPageProvider({
       await page.click('[data-test-subj=loginSubmit]');
 
       await this.waitForLoadingToFinish();
+      // Close Monitor Management tour added in 8.2.0
+      try {
+        await page.click('text=Close tour');
+      } catch (e) {
+        return;
+      }
     },
   };
 }
