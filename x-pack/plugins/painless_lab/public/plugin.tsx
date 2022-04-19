@@ -8,6 +8,11 @@
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from '@kbn/core/public';
+<<<<<<< HEAD
+=======
+
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+>>>>>>> upstream/main
 
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN } from '../common/constants';

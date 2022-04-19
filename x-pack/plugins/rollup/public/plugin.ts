@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+<<<<<<< HEAD
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+=======
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+>>>>>>> upstream/main
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';

@@ -19,7 +19,11 @@ import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
+<<<<<<< HEAD
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+=======
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+>>>>>>> upstream/main
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,

@@ -10,7 +10,7 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-} from '../../../core/server';
+} from '@kbn/core/server';
 import { IndexPatternSavedObjectAttrs } from '../common/data_views';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../common/constants';
 

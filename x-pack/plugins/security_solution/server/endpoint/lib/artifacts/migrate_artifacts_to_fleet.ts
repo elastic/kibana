@@ -7,7 +7,7 @@
 
 import { inflate as _inflate } from 'zlib';
 import { promisify } from 'util';
-import { SavedObjectsClient, Logger } from 'kibana/server';
+import { SavedObjectsClient, Logger } from '@kbn/core/server';
 import { EndpointArtifactClientInterface } from '../../services';
 import { InternalArtifactCompleteSchema, InternalArtifactSchema } from '../../schemas';
 import { ArtifactConstants } from './common';

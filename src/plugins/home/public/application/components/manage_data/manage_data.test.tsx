@@ -10,7 +10,11 @@ import React from 'react';
 import { ManageData } from './manage_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ApplicationStart } from '@kbn/core/public';
+<<<<<<< HEAD
 import { FeatureCatalogueEntry } from '../../../services';
+=======
+import { FeatureCatalogueEntry, FeatureCatalogueCategory } from '../../../services';
+>>>>>>> upstream/main
 
 jest.mock('../app_navigation_handler', () => {
   return {

@@ -11,16 +11,16 @@ import { act } from 'react-dom/test-utils';
 import { Observable } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
 
-import type { NotificationsSetup } from '../../../../../../src/core/public';
+import type { NotificationsSetup } from '@kbn/core/public';
 import {
   applicationServiceMock,
   httpServiceMock,
   notificationServiceMock,
   coreMock,
-} from '../../../../../../src/core/public/mocks';
-import type { LocatorPublic, SharePluginSetup } from '../../../../../../src/plugins/share/public';
+} from '@kbn/core/public/mocks';
+import type { LocatorPublic, SharePluginSetup } from '@kbn/share-plugin/public';
 
-import type { ILicense } from '../../../../licensing/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 
 import { mockJobs } from '../../../common/test';
 
@@ -30,7 +30,7 @@ import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_cont
 import { InternalApiClientProvider, ReportingAPIClient } from '../../lib/reporting_api_client';
 import { Job } from '../../lib/job';
 
-import { ListingProps as Props, ReportListing } from '../';
+import { ListingProps as Props, ReportListing } from '..';
 
 export interface TestDependencies {
   http: ReturnType<typeof httpServiceMock.createSetupContract>;

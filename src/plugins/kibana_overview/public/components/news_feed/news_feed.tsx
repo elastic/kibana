@@ -9,7 +9,7 @@
 import React, { FC } from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FetchResult } from 'src/plugins/newsfeed/public';
+import { FetchResult } from '@kbn/newsfeed-plugin/public';
 
 interface Props {
   newsFetchResult: FetchResult;

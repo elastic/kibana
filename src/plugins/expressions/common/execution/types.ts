@@ -8,11 +8,11 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { KibanaRequest } from 'src/core/server';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Datatable, ExpressionType } from '../expression_types';
-import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { TablesAdapter } from '../util/tables_adapter';
 import { ExpressionsInspectorAdapter } from '../util';
 

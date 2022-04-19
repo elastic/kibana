@@ -6,8 +6,8 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import type { HttpFetchOptions } from '../../../../../../src/core/public';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import type { HttpFetchOptions } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { MetricsExplorerResponse } from '../../../common/http_api/metrics_explorer';
 import type { MetricsSourceConfigurationResponse } from '../../../common/metrics_sources';
 import type { CoreProvidersProps } from '../../apps/common_providers';

@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+<<<<<<< HEAD
+=======
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+>>>>>>> upstream/main
 import { FileDataVisualizerWrapper } from './lazy_load_bundle/component_wrapper';
 import {
   featureTitle,

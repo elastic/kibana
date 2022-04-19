@@ -29,7 +29,7 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
-import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';

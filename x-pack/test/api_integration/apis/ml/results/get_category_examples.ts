@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import { Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

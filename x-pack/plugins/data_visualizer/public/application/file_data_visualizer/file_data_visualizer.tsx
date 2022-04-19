@@ -6,14 +6,11 @@
  */
 import '../_index.scss';
 import React, { FC } from 'react';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
-import { FileDataVisualizerView } from './components/file_data_visualizer_view/index';
+import { FileDataVisualizerView } from './components/file_data_visualizer_view';
 import { ResultLink } from '../common/components/results_links';
 
 interface Props {

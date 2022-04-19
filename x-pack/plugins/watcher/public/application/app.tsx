@@ -14,7 +14,7 @@ import {
   IUiSettingsClient,
   ApplicationStart,
   ExecutionContextStart,
-} from 'kibana/public';
+} from '@kbn/core/public';
 
 import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
@@ -22,12 +22,9 @@ import { EuiPageContent, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  RegisterManagementAppArgs,
-  ManagementAppMountParams,
-} from '../../../../../src/plugins/management/public';
+import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
 
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LicenseStatus } from '../../common/types/license_status';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';

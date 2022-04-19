@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateRulesSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+import type { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { getSimpleRule } from './get_simple_rule';
 
 /**

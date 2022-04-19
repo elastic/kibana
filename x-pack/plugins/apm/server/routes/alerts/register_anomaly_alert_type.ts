@@ -14,10 +14,10 @@ import {
   ALERT_SEVERITY,
 } from '@kbn/rule-data-utils';
 import { compact } from 'lodash';
-import { ESSearchResponse } from 'src/core/types/elasticsearch';
-import { KibanaRequest } from '../../../../../../src/core/server';
-import { termQuery } from '../../../../observability/server';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { KibanaRequest } from '@kbn/core/server';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,

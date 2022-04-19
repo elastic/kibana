@@ -6,8 +6,8 @@
  */
 
 import { identity } from 'lodash';
-import { CoreSetup, Plugin } from '../../../../src/core/server';
-import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { dynamicActionEnhancement } from './dynamic_action_enhancement';
 import { ActionFactoryRegistry, SerializedEvent, ActionFactoryDefinition } from './types';
 

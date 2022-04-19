@@ -9,9 +9,9 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import IndexThresholdAlertTypeExpression, { DEFAULT_VALUES } from './expression';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { IndexThresholdAlertParams } from './types';
 import { validateExpression } from './validation';
 import {
@@ -19,10 +19,10 @@ import {
   builtInComparators,
   getTimeUnitLabel,
   TIME_UNITS,
-} from '../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 
-jest.mock('../../../../triggers_actions_ui/public', () => {
-  const original = jest.requireActual('../../../../triggers_actions_ui/public');
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
     getIndexPatterns: () => {

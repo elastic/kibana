@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+<<<<<<< HEAD
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+=======
+import { HomePublicPluginSetup, FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+>>>>>>> upstream/main
 
 export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
   homePlugin.featureCatalogue.register({

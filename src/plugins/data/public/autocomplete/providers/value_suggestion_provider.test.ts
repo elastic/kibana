@@ -10,7 +10,7 @@ import { stubIndexPattern, stubFields } from '../../stubs';
 import type { TimefilterSetup } from '../../query';
 import { setupValueSuggestionProvider } from './value_suggestion_provider';
 import type { ValueSuggestionsGetFn } from './value_suggestion_provider';
-import { IUiSettingsClient, CoreSetup } from 'kibana/public';
+import { IUiSettingsClient, CoreSetup } from '@kbn/core/public';
 import { UI_SETTINGS } from '../../../common';
 
 describe('FieldSuggestions', () => {

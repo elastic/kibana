@@ -8,6 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
+<<<<<<< HEAD
+=======
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+>>>>>>> upstream/main
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 

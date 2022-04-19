@@ -8,6 +8,10 @@
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/public';
+<<<<<<< HEAD
+=======
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+>>>>>>> upstream/main
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initUiMetric } from './application/services/ui_metric';
