@@ -200,7 +200,7 @@ export const patchRules = async ({
     throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
     notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
   };
-  console.log({ newRule });
+
   const [validated, errors] = validate(newRule, internalRuleUpdate);
   if (errors != null || validated === null) {
     throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
