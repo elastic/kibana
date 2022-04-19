@@ -7,10 +7,10 @@
 
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import { FilterStateStore } from '@kbn/data-plugin/common';
 import { MlCoreSetup } from '../plugin';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
-import { FilterStateStore } from '../../../../../src/plugins/data/common';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from './constants';
 

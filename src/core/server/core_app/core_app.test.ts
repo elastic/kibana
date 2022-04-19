@@ -15,7 +15,7 @@ import type { UiPlugins } from '../plugins';
 import { PluginType } from '../plugins';
 import { CoreApp } from './core_app';
 import { mockRouter } from '../http/router/router.mock';
-import { RequestHandlerContext } from 'kibana/server';
+import { RequestHandlerContext } from '..';
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),

@@ -24,13 +24,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import { FilterLabel } from '@kbn/unified-search-plugin/public';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
 import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { getDisplayValueFromFilter } from '../../../../../../../../src/plugins/data/public';
-import { FilterLabel } from '../../../../../../../../src/plugins/unified_search/public';
 import {
   subtechniquesOptions,
   tacticsOptions,
@@ -85,6 +85,7 @@ export const buildQueryBarDescription = ({
                   {indexPatterns != null ? (
                     <FilterLabel
                       filter={filter}
+                      // @ts-ignore-next-line
                       valueLabel={getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
                   ) : (

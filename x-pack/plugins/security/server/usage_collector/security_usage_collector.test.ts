@@ -6,11 +6,11 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
-} from 'src/plugins/usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
 import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';

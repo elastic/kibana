@@ -11,13 +11,13 @@ import { BehaviorSubject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
-import realHits from '../../../../__fixtures__/real_hits.js';
+import realHits from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { DataViewAttributes } from '../../../../../../data_views/public';
-import { flattenHit } from '../../../../../../data/public';
-import { SavedObject } from '../../../../../../../core/types';
+import { DataViewAttributes } from '@kbn/data-views-plugin/public';
+import { flattenHit } from '@kbn/data-plugin/public';
+import { SavedObject } from '@kbn/core/types';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
@@ -25,10 +25,10 @@ import {
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
 import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
-import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
+import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockServices = {
   history: () => ({
@@ -51,6 +51,7 @@ const mockServices = {
       }
     },
   },
+  docLinks: { links: { discover: { fieldTypeHelp: '' } } },
 } as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ITelemetryEventsSender } from '../sender';
 import { ITelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense } from '../types';
@@ -13,7 +13,7 @@ import { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
 import { batchTelemetryRecords } from '../helpers';
 import { TelemetryEvent } from '../types';
-import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists/index';
+import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   return {

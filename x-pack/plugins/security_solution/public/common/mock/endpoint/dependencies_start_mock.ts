@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { FleetStart } from '../../../../../fleet/public';
-import {
-  dataPluginMock,
-  Start as DataPublicStartMock,
-} from '../../../../../../../src/plugins/data/public/mocks';
-import type { UnifiedSearchPublicPluginStart } from '../../../../../../../src/plugins/unified_search/public';
-import { fleetMock } from '../../../../../fleet/public/mocks';
-import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
+import { FleetStart } from '@kbn/fleet-plugin/public';
+import { dataPluginMock, Start as DataPublicStartMock } from '@kbn/data-plugin/public/mocks';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
   indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {

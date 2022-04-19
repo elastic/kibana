@@ -10,7 +10,7 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ElasticsearchClient, Logger } from 'src/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuditLogger } from '../audit';
