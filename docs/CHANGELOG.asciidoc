@@ -264,7 +264,7 @@ Lens & Visualizations::
 Machine Learning::
 * Fixes alignment of Anomaly Explorer swim lane annotations label on Firefox {kibana-pull}130274[#130274]
 * Fixes Single Metric Viewer chart failing to load if no points during calendar event {kibana-pull}130000[#130000]
-* Fixes Single Metric Viewer for jobs that hasn't been run {kibana-pull}129063[#129063]
+* Fixes Single Metric Viewer for jobs that haven't been run {kibana-pull}129063[#129063]
 * Data Frame Analytics: Fix Outlier detection results exploration color legend display {kibana-pull}129058[#129058]
 * Fixes new AD job from saved search with no query filter {kibana-pull}129022[#129022]
 * Fixes DFA map saved object sync warning {kibana-pull}128876[#128876]
