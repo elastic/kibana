@@ -10,7 +10,7 @@ import Path from 'path';
 
 import loadJsonFile from 'load-json-file';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Plugin } from './load_kibana_platform_plugin';
 
 export interface Config {

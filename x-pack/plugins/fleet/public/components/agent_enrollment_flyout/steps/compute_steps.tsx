@@ -271,6 +271,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           agentDataConfirmed,
           setAgentDataConfirmed,
           installedPolicy: installedPackagePolicy,
+          troubleshootLink: link,
         })
       );
     }

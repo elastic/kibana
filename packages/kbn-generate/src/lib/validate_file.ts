@@ -9,7 +9,8 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { ToolingLog, createFailError, diffStrings } from '@kbn/dev-utils';
+import { createFailError, diffStrings } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export async function validateFile(log: ToolingLog, usage: string, path: string, expected: string) {
   const relPath = Path.relative(process.cwd(), path);
