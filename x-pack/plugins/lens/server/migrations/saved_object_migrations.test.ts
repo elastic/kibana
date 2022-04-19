@@ -2113,4 +2113,71 @@ describe('Lens migrations', () => {
       expect(visState.size).toBe('s');
     });
   });
+
+  describe('8.3.0 - preserves default legend size for existing visualizations', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const migrate = migrations['8.3.0'];
+
+    const autoLegendSize = 0;
+    const largeLegendSize = 120;
+
+    it('works for XY visualization and heatmap', () => {
+      const getDoc = (type: string, legendSize: number | undefined) =>
+        ({
+          attributes: {
+            visualizationType: type,
+            state: {
+              visualization: {
+                legend: {
+                  legendSize,
+                },
+              },
+            },
+          },
+        } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>);
+
+      expect(
+        migrate(getDoc('lnsXY', undefined), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(autoLegendSize);
+      expect(
+        migrate(getDoc('lnsXY', largeLegendSize), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(largeLegendSize);
+
+      expect(
+        migrate(getDoc('lnsHeatmap', undefined), context).attributes.state.visualization.legend
+          .legendSize
+      ).toBe(autoLegendSize);
+      expect(
+        migrate(getDoc('lnsHeatmap', largeLegendSize), context).attributes.state.visualization
+          .legend.legendSize
+      ).toBe(largeLegendSize);
+    });
+
+    it('works for pie visualization', () => {
+      const pieVisDoc = {
+        attributes: {
+          visualizationType: 'lnsPie',
+          state: {
+            visualization: {
+              layers: [
+                {
+                  legendSize: undefined,
+                },
+                {
+                  legendSize: largeLegendSize,
+                },
+              ],
+            },
+          },
+        },
+      } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+      expect(migrate(pieVisDoc, context).attributes.state.visualization.layers).toEqual([
+        { legendSize: autoLegendSize },
+        { legendSize: largeLegendSize },
+      ]);
+    });
+  });
 });
