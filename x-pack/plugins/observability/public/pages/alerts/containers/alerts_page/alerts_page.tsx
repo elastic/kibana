@@ -330,6 +330,7 @@ function AlertsPage() {
               rangeTo={rangeTo}
               kuery={kuery}
               setRefetch={setRefetch}
+              stateStorageKey="xpack.observability.alert.tableState"
             />
           </CasesContext>
         </EuiFlexItem>

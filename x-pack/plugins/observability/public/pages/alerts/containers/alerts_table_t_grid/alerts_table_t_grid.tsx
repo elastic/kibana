@@ -68,13 +68,14 @@ import { addDisplayNames } from './add_display_names';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
 
-const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
+// const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
   kuery?: string;
+  stateStorageKey: string;
   setRefetch: (ref: () => void) => void;
 }
 
@@ -302,7 +303,7 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 ];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch } = props;
+  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch, stateStorageKey } = props;
 
   const {
     timelines,
@@ -311,7 +312,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
-    JSON.parse(localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY) ?? 'null')
+    JSON.parse(localStorage.getItem(stateStorageKey) ?? 'null')
   );
 
   const casePermissions = useGetUserCasesPermissions();
@@ -336,11 +337,11 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
           pick(c, ['columnHeaderType', 'displayAsText', 'id', 'initialWidth', 'linkField'])
         ),
       });
-      if (newState !== localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY)) {
-        localStorage.setItem(ALERT_TABLE_STATE_STORAGE_KEY, newState);
+      if (newState !== localStorage.getItem(stateStorageKey)) {
+        localStorage.setItem(stateStorageKey, newState);
       }
     }
-  }, [tGridState]);
+  }, [tGridState, stateStorageKey]);
 
   const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
     if (action.isDeleted) {

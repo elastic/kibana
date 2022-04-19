@@ -195,6 +195,7 @@ export function OverviewPage({ routeParams }: Props) {
                     rangeFrom={relativeStart}
                     rangeTo={relativeEnd}
                     indexNames={indexNames}
+                    stateStorageKey="xpack.observability.overview.alert.tableState"
                   />
                 </CasesContext>
               </SectionContainer>
