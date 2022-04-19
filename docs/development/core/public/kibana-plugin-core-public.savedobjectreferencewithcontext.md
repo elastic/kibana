@@ -19,7 +19,9 @@ export interface SavedObjectReferenceWithContext
 |  [id](./kibana-plugin-core-public.savedobjectreferencewithcontext.id.md) | string | The ID of the referenced object |
 |  [inboundReferences](./kibana-plugin-core-public.savedobjectreferencewithcontext.inboundreferences.md) | Array&lt;{ type: string; id: string; name: string; }&gt; | References to this object; note that this does not contain \_all inbound references everywhere for this object\_, it only contains inbound references for the scope of this operation |
 |  [isMissing?](./kibana-plugin-core-public.savedobjectreferencewithcontext.ismissing.md) | boolean | <i>(Optional)</i> Whether or not this object or reference is missing |
+|  [originId?](./kibana-plugin-core-public.savedobjectreferencewithcontext.originid.md) | string | <i>(Optional)</i> The origin ID of the referenced object (if it has one) |
 |  [spaces](./kibana-plugin-core-public.savedobjectreferencewithcontext.spaces.md) | string\[\] | The space(s) that the referenced object exists in |
 |  [spacesWithMatchingAliases?](./kibana-plugin-core-public.savedobjectreferencewithcontext.spaceswithmatchingaliases.md) | string\[\] | <i>(Optional)</i> The space(s) that legacy URL aliases matching this type/id exist in |
+|  [spacesWithMatchingOrigins?](./kibana-plugin-core-public.savedobjectreferencewithcontext.spaceswithmatchingorigins.md) | string\[\] | <i>(Optional)</i> The space(s) that objects matching this origin exist in (including this one) |
 |  [type](./kibana-plugin-core-public.savedobjectreferencewithcontext.type.md) | string | The type of the referenced object |
 
