@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   CustomIntegrationsSetup,
@@ -18,8 +19,8 @@ import {
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
 } from '../common';
 
-import { pluginServices } from './services';
-import { pluginServiceRegistry } from './services/kibana';
+import { CustomIntegrationsServicesProvider } from './services';
+import { servicesFactory } from './services/kibana';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
@@ -41,9 +42,15 @@ export class CustomIntegrationsPlugin
     coreStart: CoreStart,
     startPlugins: CustomIntegrationsStartDependencies
   ): CustomIntegrationsStart {
-    pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
+    const services = servicesFactory({ coreStart, startPlugins });
+    const ContextProvider: React.FC = ({ children }) => (
+      <CustomIntegrationsServicesProvider {...services}>
+        {children}
+      </CustomIntegrationsServicesProvider>
+    );
+
     return {
-      ContextProvider: pluginServices.getContextProvider(),
+      ContextProvider,
     };
   }
 
