@@ -13,3 +13,4 @@ export * from './step_duration.journey';
 export * from './alerts';
 export * from './read_only_user';
 export * from './monitor_details';
+export * from './locations';

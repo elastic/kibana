@@ -43,7 +43,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
       savedObjectsClient,
       esClient: esClient.asCurrentUser,
     });
-    if (isInspectorEnabled) {
+    if (isInspectorEnabled && server.config.service?.username !== 'localKibanaIntegrationTestsUser') {
       inspectableEsQueriesMap.set(request, []);
     }
 
