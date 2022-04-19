@@ -15,7 +15,7 @@ import {
 } from '../../../../../../common/detection_engine/schemas/common';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { RuleDetailTabs } from './index';
+import { RuleDetailTabs } from '.';
 
 export interface ExecutionLogTableState {
   /**

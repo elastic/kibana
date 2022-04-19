@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 import { buildFilter, Filter, FILTERS, Query } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { RuleDetailTabs } from '../.';
-import { mountReactNode } from '../../../../../../../../../../src/core/public/utils';
+import { mountReactNode } from '@kbn/core/public/utils';
+import { RuleDetailTabs } from '..';
 import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../../common/constants';
 import {
   AggregateRuleExecutionEvent,
