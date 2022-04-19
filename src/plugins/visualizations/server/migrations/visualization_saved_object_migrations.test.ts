@@ -2539,4 +2539,62 @@ describe('migration visualization', () => {
       expect(otherParams.addLegend).toBeUndefined();
     });
   });
+
+  describe('8.3.0 - preserves default legend size for existing visualizations', () => {
+    const getDoc = (type: string, legendSize: number | undefined) => ({
+      attributes: {
+        title: 'Some Vis with a Legend',
+        description: '',
+        visState: JSON.stringify({
+          type,
+          title: 'Pie vis',
+          params: {
+            legendSize,
+          },
+        }),
+      },
+    });
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['8.3.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const autoLegendSize = 0;
+    const largeLegendSize = 120;
+
+    test.each([
+      ['pie', undefined, autoLegendSize],
+      ['area', undefined, autoLegendSize],
+      ['histogram', undefined, autoLegendSize],
+      ['horizontal_bar', undefined, autoLegendSize],
+      ['line', undefined, autoLegendSize],
+      ['heatmap', undefined, autoLegendSize],
+      ['pie', largeLegendSize, largeLegendSize],
+      ['area', largeLegendSize, largeLegendSize],
+      ['histogram', largeLegendSize, largeLegendSize],
+      ['horizontal_bar', largeLegendSize, largeLegendSize],
+      ['line', largeLegendSize, largeLegendSize],
+      ['heatmap', largeLegendSize, largeLegendSize],
+    ])(
+      'given a %s visualization with current legend size of %s -- sets legend size to %s',
+      (
+        visualizationType: string,
+        currentLegendSize: number | undefined,
+        expectedLegendSize: number
+      ) => {
+        const visState = JSON.parse(
+          migrate(getDoc(visualizationType, currentLegendSize)).attributes.visState
+        );
+
+        expect(visState.params.legendSize).toBe(expectedLegendSize);
+      }
+    );
+
+    test.each(['metric', 'gauge', 'table'])('leaves visualization without legend alone: %s', () => {
+      const visState = JSON.parse(migrate(getDoc('table', undefined)).attributes.visState);
+
+      expect(visState.params.legendSize).toBeUndefined();
+    });
+  });
 });
