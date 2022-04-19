@@ -63,7 +63,7 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
     };
 
     const betaBadge: CSSObject = {
-      backgroundColor: `${colors.emptyShade}`, // important used since euipanel overrides this
+      backgroundColor: `${colors.emptyShade}`,
     };
 
     return {
