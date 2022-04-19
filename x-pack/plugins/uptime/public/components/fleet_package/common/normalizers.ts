@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { CommonFields, ConfigKey, DataStream } from '../types';
-import { NewPackagePolicyInput } from '../../../../../fleet/common';
 import { defaultValues as commonDefaultValues } from './default_values';
 import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
 import { defaultConfig } from '../contexts';

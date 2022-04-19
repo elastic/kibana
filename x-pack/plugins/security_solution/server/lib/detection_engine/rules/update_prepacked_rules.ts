@@ -6,10 +6,10 @@
  */
 
 import { chunk } from 'lodash/fp';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../common/constants';
-import { RulesClient, PartialRule } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter } from '../types';

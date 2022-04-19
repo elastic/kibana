@@ -5,10 +5,10 @@
  * 2.0.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { ReportingCore } from '../../';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ReportingCore } from '../..';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { Report, ReportDocument, ReportingStore, SavedReport } from './';
+import { Report, ReportDocument, ReportingStore, SavedReport } from '.';
 
 describe('ReportingStore', () => {
   const mockLogger = loggingSystemMock.createLogger();

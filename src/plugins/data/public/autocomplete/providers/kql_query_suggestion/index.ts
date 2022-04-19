@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
 import { $Keys } from 'utility-types';
 import { flatten, uniqBy } from 'lodash';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -19,7 +19,7 @@ import {
   QuerySuggestionGetFnArgs,
   QuerySuggestionGetFn,
   DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../..';
 
 const cursorSymbol = '@kuery-cursor@';
 

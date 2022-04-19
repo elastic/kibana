@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import {
@@ -12,12 +12,12 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { ActionGroupIdsOf } from '../../../../alerting/common';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
+import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
 import { updateState, generateAlertMessage, getViewInAppUrl } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
-import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
-import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';

@@ -8,9 +8,10 @@
 import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
-import { Adapters } from 'src/plugins/inspector/public';
-import type { Query } from 'src/plugins/data/common';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
@@ -55,7 +56,6 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
-import { TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';

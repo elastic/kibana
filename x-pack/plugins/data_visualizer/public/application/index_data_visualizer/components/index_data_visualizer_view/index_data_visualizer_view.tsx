@@ -21,7 +21,8 @@ import {
 import { Required } from 'utility-types';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
-import { Query, generateFilters } from '../../../../../../../../src/plugins/data/public';
+import { Query, generateFilters } from '@kbn/data-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { usePageUrlState, useUrlState } from '../../../common/util/url_state';
 import {
@@ -48,7 +49,6 @@ import { HelpMenu } from '../../../common/components/help_menu';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { ResultLink } from '../../../common/components/results_links';
-import { DataView, DataViewField } from '../../../../../../../../src/plugins/data_views/public';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import './_index.scss';

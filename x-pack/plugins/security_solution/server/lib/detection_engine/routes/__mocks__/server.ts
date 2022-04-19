@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  RequestHandler,
-  RouteConfig,
-  KibanaRequest,
-} from '../../../../../../../../src/core/server';
-import { httpServiceMock } from '../../../../../../../../src/core/server/mocks';
+import { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from './request_context';
 import { responseMock as responseFactoryMock } from './response_factory';
 import { requestMock } from '.';

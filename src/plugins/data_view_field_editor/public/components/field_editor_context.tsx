@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
-import { NotificationsStart, CoreStart } from 'src/core/public';
+import { NotificationsStart, CoreStart } from '@kbn/core/public';
 import { FieldFormatsStart } from '../shared_imports';
 import type { DataView, DataPublicPluginStart } from '../shared_imports';
 import { ApiService } from '../lib/api';
