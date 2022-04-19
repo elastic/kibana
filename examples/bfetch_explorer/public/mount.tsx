@@ -8,8 +8,8 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, CoreStart, AppMountParameters } from 'kibana/public';
-import { KibanaContextProvider } from '../../../src/plugins/kibana_react/public';
+import { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BfetchExplorerStartPlugins, ExplorerService } from './plugin';
 import { App } from './containers/app';
 

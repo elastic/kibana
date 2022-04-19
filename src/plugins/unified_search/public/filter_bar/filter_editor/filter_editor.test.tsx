@@ -10,8 +10,8 @@ import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { FilterEditor, Props } from '.';
 import React from 'react';
 
-jest.mock('../../../../kibana_react/public', () => {
-  const original = jest.requireActual('../../../../kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,

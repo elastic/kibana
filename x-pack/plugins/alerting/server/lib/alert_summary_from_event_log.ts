@@ -6,8 +6,8 @@
  */
 
 import { mean } from 'lodash';
+import { IEvent } from '@kbn/event-log-plugin/server';
 import { SanitizedRule, AlertSummary, AlertStatus } from '../types';
-import { IEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
 const Millis2Nanos = 1000 * 1000;

@@ -7,6 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   EndpointAction,
   EndpointActionResponse,
@@ -15,7 +16,6 @@ import {
   LogsEndpointActionResponse,
 } from '../types';
 import { ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX } from '../constants';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
 import { FleetActionGenerator } from '../data_generators/fleet_action_generator';
 import { wrapErrorAndRejectPromise } from './utils';
 

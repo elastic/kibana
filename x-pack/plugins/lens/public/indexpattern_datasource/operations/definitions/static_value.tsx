@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormLabel, EuiSpacer } from '@elastic/eui';
-import { OperationDefinition } from './index';
+import { OperationDefinition } from '.';
 import {
   ReferenceBasedIndexPatternColumn,
   GenericIndexPatternColumn,

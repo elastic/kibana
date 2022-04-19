@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleActionParam } from '../../../../alerting/common';
+import { RuleActionParam } from '@kbn/alerting-plugin/common';
 import { EventActionOptions } from '../components/builtin_action_types/types';
 import { AlertProvidedActionVariables } from './action_variables';
 

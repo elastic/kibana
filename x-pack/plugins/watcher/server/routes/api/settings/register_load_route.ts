@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
-import { Settings } from '../../../models/settings/index';
+import { Settings } from '../../../models/settings';
 import { RouteDependencies } from '../../../types';
 
 function fetchClusterSettings(client: IScopedClusterClient) {

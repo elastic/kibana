@@ -8,8 +8,8 @@
 import { EuiSwitch, EuiProgress, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
 import { setMonitor } from '../../../state/api';
 

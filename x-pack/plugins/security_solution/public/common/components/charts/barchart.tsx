@@ -19,7 +19,7 @@ import { useTimeZone } from '../../lib/kibana';
 import { defaultLegendColors } from '../matrix_histogram/utils';
 import { useThrottledResizeObserver } from '../utils';
 import { hasValueToDisplay } from '../../utils/validators';
-import { EMPTY_VALUE_LABEL } from '../charts/translation';
+import { EMPTY_VALUE_LABEL } from './translation';
 
 import { ChartPlaceHolder } from './chart_place_holder';
 import {

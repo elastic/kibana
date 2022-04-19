@@ -8,8 +8,8 @@
 import { cloneDeep, isEqual, pick } from 'lodash';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import type { RulesClient } from '../../../../../alerting/server';
-import { RuleAlertType } from '../rules/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { RuleAlertType } from './types';
 import { InternalRuleUpdate, internalRuleUpdate } from '../schemas/rule_schemas';
 import { addTags } from './add_tags';
 

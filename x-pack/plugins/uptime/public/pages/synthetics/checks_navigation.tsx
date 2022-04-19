@@ -12,7 +12,7 @@ import { useHistory } from 'react-router-dom';
 import moment from 'moment';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
-import { useBreakpoints } from '../../../public/hooks/use_breakpoints';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
 
 interface Props {
   timestamp: string;

@@ -6,9 +6,9 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 import { ThresholdSignalHistory } from '../types';
 import { buildThresholdSignalHistory } from './build_signal_history';
-import { IRuleDataReader } from '../../../../../../rule_registry/server';
 import { createErrorsFromShard } from '../utils';
 
 interface GetThresholdSignalHistoryParams {

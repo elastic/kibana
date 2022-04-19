@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
+import { RuleExecutorOptions, AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
 
 // alert type context provided to actions
