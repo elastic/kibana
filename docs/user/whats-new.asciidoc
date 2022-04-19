@@ -157,7 +157,7 @@ image::images/highlights-alerts-rule-history.png[Rule history table in Alerting]
 ==== Configure rules
 
 *Alerting* introduces configurable guardrails so that as an admin,
-you can apply your policies on a level deeper than RBAC and fully stay on top of
+you can apply your policies on a level deeper than role-based access control (RBAC) and fully stay on top of
 the stress that the alerting system may put on your instance, in case your users misconfigured rules.
 This way you have peace of mind that your instance remains performant.
 
