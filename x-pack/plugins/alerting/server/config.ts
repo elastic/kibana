@@ -16,7 +16,7 @@ const ruleTypeSchema = schema.object({
 
 const connectorTypeSchema = schema.object({
   id: schema.string(),
-  max: schema.maybe(schema.number()),
+  max: schema.maybe(schema.number({ max: 100000 })),
 });
 
 const rulesSchema = schema.object({
