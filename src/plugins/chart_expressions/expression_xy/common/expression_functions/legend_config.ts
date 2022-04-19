@@ -11,39 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { LEGEND_CONFIG } from '../constants';
 import { LegendConfigFn } from '../types';
 
-const errors = {
-  positionUsageWithIsInsideError: () =>
-    i18n.translate(
-      'expressionXY.reusable.function.legendConfig.errors.positionUsageWithIsInsideError',
-      {
-        defaultMessage:
-          '`position` argument is not applied if `isInside = true`. Please, use `horizontalAlignment` and `verticalAlignment` arguments instead.',
-      }
-    ),
-  alignmentUsageWithFalsyIsInsideError: () =>
-    i18n.translate(
-      'expressionXY.reusable.function.legendConfig.errors.alignmentUsageWithFalsyIsInsideError',
-      {
-        defaultMessage:
-          '`horizontalAlignment` and `verticalAlignment` arguments are not applied if `isInside = false`. Please, use the `position` argument instead.',
-      }
-    ),
-  floatingColumnsWithFalsyIsInsideError: () =>
-    i18n.translate(
-      'expressionXY.reusable.function.legendConfig.errors.floatingColumnsWithFalsyIsInsideError',
-      {
-        defaultMessage: '`floatingColumns` arguments are not applied if `isInside = false`.',
-      }
-    ),
-  legendSizeWithFalsyIsInsideError: () =>
-    i18n.translate(
-      'expressionXY.reusable.function.legendConfig.errors.legendSizeWithFalsyIsInsideError',
-      {
-        defaultMessage: '`legendSize` argument is not applied if `isInside = false`.',
-      }
-    ),
-};
-
 export const legendConfigFunction: LegendConfigFn = {
   name: LEGEND_CONFIG,
   aliases: [],
@@ -124,30 +91,8 @@ export const legendConfigFunction: LegendConfigFn = {
       }),
     },
   },
-  fn(input, args) {
-    if (args.isInside) {
-      if (args.position) {
-        throw new Error(errors.positionUsageWithIsInsideError());
-      }
-
-      if (args.legendSize !== undefined) {
-        throw new Error(errors.legendSizeWithFalsyIsInsideError());
-      }
-    }
-
-    if (!args.isInside) {
-      if (args.verticalAlignment || args.horizontalAlignment) {
-        throw new Error(errors.alignmentUsageWithFalsyIsInsideError());
-      }
-
-      if (args.floatingColumns !== undefined) {
-        throw new Error(errors.floatingColumnsWithFalsyIsInsideError());
-      }
-    }
-
-    return {
-      type: LEGEND_CONFIG,
-      ...args,
-    };
+  async fn(input, args, handlers) {
+    const { legendConfigFn } = await import('./legend_config_fn');
+    return await legendConfigFn(input, args, handlers);
   },
 };

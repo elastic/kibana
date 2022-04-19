@@ -344,7 +344,12 @@ export type CommonXYReferenceLineLayerConfigResult =
   | ReferenceLineLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult;
 
-export type XyVisFn = ExpressionFunctionDefinition<typeof XY_VIS, Datatable, XYArgs, XYRender>;
+export type XyVisFn = ExpressionFunctionDefinition<
+  typeof XY_VIS,
+  Datatable,
+  XYArgs,
+  Promise<XYRender>
+>;
 export type LayeredXyVisFn = ExpressionFunctionDefinition<
   typeof LAYERED_XY_VIS,
   Datatable,
@@ -390,5 +395,5 @@ export type LegendConfigFn = ExpressionFunctionDefinition<
   typeof LEGEND_CONFIG,
   null,
   LegendConfig,
-  LegendConfigResult
+  Promise<LegendConfigResult>
 >;
