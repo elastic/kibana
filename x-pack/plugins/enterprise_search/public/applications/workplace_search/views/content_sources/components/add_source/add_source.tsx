@@ -21,15 +21,9 @@ import {
 import { NAV } from '../../../../constants';
 import { SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
 
-import { hasMultipleConnectorOptions } from '../../../../utils';
-
-import { SourcesLogic } from '../../sources_logic';
-
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
-import { ConfigurationChoice } from './configuration_choice';
-import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
 import { Reauthenticate } from './reauthenticate';
@@ -43,21 +37,20 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(AddSourceLogic);
   const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
     sourceConfigData;
-  const { serviceType, configuration, features, objTypes } = props.sourceData;
-  const addPath = getAddPath(serviceType);
+  const { baseServiceType, serviceType, configuration, features, objTypes } = props.sourceData;
   const { isOrganization } = useValues(AppLogic);
-  const { externalConfigured } = useValues(SourcesLogic);
 
   useEffect(() => {
     initializeAddSource(props);
     return resetSourceState;
   }, []);
-
-  const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
-  const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
+  const goToConfigurationIntro = () =>
+    KibanaLogic.values.navigateToUrl(
+      `${getSourcesPath(getAddPath(baseServiceType || serviceType), isOrganization)}/intro`
+    );
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
-  const goToChoice = () => setAddSourceStep(AddSourceSteps.ChoiceStep);
+  const goToConnectInstance = () => setAddSourceStep(AddSourceSteps.ConnectInstanceStep);
   const FORM_SOURCE_ADDED_SUCCESS_MESSAGE = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.contentSource.formSourceAddedSuccessMessage',
     {
@@ -65,11 +58,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       values: { name },
     }
   );
-
-  const goToConnectInstance = () => {
-    setAddSourceStep(AddSourceSteps.ConnectInstanceStep);
-    KibanaLogic.values.navigateToUrl(`${getSourcesPath(addPath, isOrganization)}/connect`);
-  };
 
   const goToFormSourceCreated = () => {
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(SOURCES_PATH, isOrganization)}`);
@@ -81,18 +69,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
 
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
-      {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
-        <ConfigurationIntro
-          name={name}
-          // TODO: Remove this once we can support multiple external connectors
-          advanceStep={
-            hasMultipleConnectorOptions(props.sourceData) && !externalConfigured
-              ? goToChoice
-              : goToSaveConfig
-          }
-          header={header}
-        />
-      )}
       {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig
           name={name}
@@ -129,9 +105,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       )}
       {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
         <Reauthenticate name={name} header={header} />
-      )}
-      {addSourceCurrentStep === AddSourceSteps.ChoiceStep && (
-        <ConfigurationChoice sourceData={props.sourceData} goToInternalStep={goToSaveConfig} />
       )}
     </Layout>
   );

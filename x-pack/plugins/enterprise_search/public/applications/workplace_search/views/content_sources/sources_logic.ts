@@ -312,10 +312,20 @@ export const mergeServerAndStaticData = (
   contentSources: ContentSourceDetails[]
 ): CombinedDataItem[] => {
   const unsortedData = staticData.map((staticItem) => {
-    const serverItem = serverData.find(({ serviceType }) => serviceType === staticItem.serviceType);
-    const connectedSource = contentSources.find(
-      ({ serviceType }) => serviceType === staticItem.serviceType
-    );
+    const serverItem =
+      staticItem.serviceType === 'custom'
+        ? undefined
+        : // this should search by baseServiceType when the BE support baseServiceTypes for external sources
+          serverData.find(({ serviceType }) => serviceType === staticItem.serviceType);
+    const connectedSource =
+      staticItem.serviceType === 'custom'
+        ? contentSources.find(
+            ({ baseServiceType, serviceType }) =>
+              serviceType === staticItem.serviceType &&
+              baseServiceType === staticItem.baseServiceType
+          )
+        : contentSources.find(({ serviceType }) => serviceType === staticItem.serviceType);
+
     return {
       ...staticItem,
       ...serverItem,

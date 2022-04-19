@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -22,11 +22,9 @@ export const ExternalConnectorFormFields: React.FC = () => {
     formDisabled,
     showInsecureUrlCallout,
   } = useValues(ExternalConnectorLogic);
-  const { fetchExternalSource, validateUrl, setExternalConnectorApiKey, setExternalConnectorUrl } =
+  const { validateUrl, setExternalConnectorApiKey, setExternalConnectorUrl } =
     useActions(ExternalConnectorLogic);
-  useEffect(() => {
-    fetchExternalSource();
-  }, []);
+
   return (
     <>
       {showInsecureUrlCallout && (

@@ -17,12 +17,12 @@ import { AppLogic } from '../../../../app_logic';
 import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
+import { hasCustomConnectorOption, hasExternalConnectorOption } from '../../source_data';
+
 import { AddSourceHeader } from './add_source_header';
-import { AddSourceLogic } from './add_source_logic';
 
 interface ConfigurationChoiceProps {
   sourceData: SourceDataItem;
-  goToInternalStep?: () => void;
 }
 
 interface CardProps {
@@ -34,40 +34,23 @@ interface CardProps {
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
-  sourceData: {
-    name,
-    serviceType,
-    externalConnectorAvailable,
-    internalConnectorAvailable,
-    customConnectorAvailable,
-  },
-  goToInternalStep,
+  sourceData: { name, categories, serviceType },
 }) => {
+  const externalConnectorAvailable = hasExternalConnectorOption(serviceType);
+  const customConnectorAvailable = hasCustomConnectorOption(serviceType);
+
   const { isOrganization } = useValues(AppLogic);
-  const { sourceConfigData } = useValues(AddSourceLogic);
-  const { categories } = sourceConfigData;
-  const goToInternal = goToInternalStep
-    ? goToInternalStep
-    : () =>
-        KibanaLogic.values.navigateToUrl(
-          `${getSourcesPath(
-            `${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`,
-            isOrganization
-          )}/`
-        );
+
+  const goToInternal = () =>
+    KibanaLogic.values.navigateToUrl(`${getSourcesPath(getAddPath(serviceType), isOrganization)}/`);
+
   const goToExternal = () =>
     KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/external`,
-        isOrganization
-      )}/`
+      `${getSourcesPath(getAddPath('external', serviceType), isOrganization)}/connector_config`
     );
   const goToCustom = () =>
     KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/custom`,
-        isOrganization
-      )}/`
+      `${getSourcesPath(getAddPath('custom', serviceType), isOrganization)}`
     );
 
   const ConnectorCard: React.FC<CardProps> = ({
@@ -174,10 +157,10 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
 
   return (
     <>
-      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
+      <AddSourceHeader name={name} serviceType={serviceType} categories={categories || []} />
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexStart" direction="row" responsive={false}>
-        {internalConnectorAvailable && <ConnectorCard {...internalConnectorProps} />}
+        <ConnectorCard {...internalConnectorProps} />
         {externalConnectorAvailable && <ConnectorCard {...externalConnectorProps} />}
         {customConnectorAvailable && <ConnectorCard {...customConnectorProps} />}
       </EuiFlexGroup>

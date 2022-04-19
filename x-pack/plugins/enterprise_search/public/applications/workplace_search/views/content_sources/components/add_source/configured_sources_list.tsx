@@ -27,7 +27,8 @@ import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
-import { hasMultipleConnectorOptions } from '../../../../utils';
+
+import { hasMultipleConnectorOptions } from '../../source_data';
 
 import {
   CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,
@@ -128,7 +129,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                       <EuiButtonEmptyTo
                         className="eui-fullWidth"
                         to={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/${
-                          hasMultipleConnectorOptions(sourceData) && isOrganization ? '' : 'connect'
+                          hasMultipleConnectorOptions(serviceType) && isOrganization ? 'choice' : ''
                         }`}
                       >
                         {!connected

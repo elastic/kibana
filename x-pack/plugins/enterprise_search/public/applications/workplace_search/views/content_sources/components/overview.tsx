@@ -81,7 +81,7 @@ import {
   SOURCE_SYNC_CONFIRM_TITLE,
   SOURCE_SYNC_CONFIRM_MESSAGE,
 } from '../constants';
-import { getSourceData } from '../source_data';
+import { getSourceData, staticCustomSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
 import { CustomSourceDeployment } from './custom_source_deployment';
@@ -110,7 +110,7 @@ export const Overview: React.FC = () => {
 
   const serviceType = contentSource.baseServiceType || contentSource.serviceType;
 
-  const sourceData = getSourceData(serviceType);
+  const sourceData = getSourceData(serviceType) || staticCustomSourceData;
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
