@@ -8946,8 +8946,6 @@
     "xpack.cases.caseView.errorsPushServiceCallOutTitle": "选择外部连接器",
     "xpack.cases.caseView.fieldChanged": "已更改连接器字段",
     "xpack.cases.caseView.fieldRequiredError": "必填字段",
-    "xpack.cases.caseView.generatedAlertCommentLabelTitle": "添加自",
-    "xpack.cases.caseView.generatedAlertCountCommentLabelTitle": "{totalCount} 个{totalCount, plural, other {告警}}",
     "xpack.cases.caseView.isolatedHost": "在主机上已提交隔离请求",
     "xpack.cases.caseView.lockedIncidentDesc": "不需要任何更新",
     "xpack.cases.caseView.lockedIncidentTitle": "{ thirdParty } 事件是最新的",
