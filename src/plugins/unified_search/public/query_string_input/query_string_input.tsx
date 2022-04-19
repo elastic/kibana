@@ -24,6 +24,7 @@ import {
   EuiTextArea,
   htmlIdGenerator,
   PopoverAnchorPosition,
+  toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
@@ -697,6 +698,23 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     });
     const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
 
+    const language =
+      this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
+
+    let searchPlaceholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
+      defaultMessage: 'Filter your data using {language} syntax',
+      values: { language },
+    });
+
+    if (this.props.query.language === 'text') {
+      searchPlaceholder = i18n.translate(
+        'unifiedSearch.query.queryBar.searchInputPlaceholderForText',
+        {
+          defaultMessage: 'Filter your data',
+        }
+      );
+    }
+
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
         {this.props.prepend}
@@ -722,12 +740,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           >
             <div role="search" className={inputWrapClassName} ref={this.assignQueryInputDivRef}>
               <EuiTextArea
-                placeholder={
-                  this.props.placeholder ||
-                  i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
-                    defaultMessage: 'Start typing to search or filter...',
-                  })
-                }
+                placeholder={this.props.placeholder || searchPlaceholder}
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}
