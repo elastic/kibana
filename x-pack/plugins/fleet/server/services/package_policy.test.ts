@@ -1442,7 +1442,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyPostCreate',
         packagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
 
