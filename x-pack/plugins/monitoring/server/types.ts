@@ -34,10 +34,10 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { RouteConfig, RouteMethod } from '@kbn/core/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
-import { RouteConfig, RouteMethod } from '../../../../src/core/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;

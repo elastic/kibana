@@ -22,6 +22,7 @@ import {
 } from '@kbn/core/server';
 import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { RouteMethod } from '@kbn/core/server';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
@@ -52,7 +53,6 @@ import {
   RequestHandlerContextMonitoringPlugin,
   MonitoringRouteConfig,
 } from './types';
-import { RouteMethod } from '../../../../src/core/server';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
