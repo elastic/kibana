@@ -35,6 +35,16 @@ PRs should add the labels ":Data Management/Monitoring" and "Team:Data Managemen
 
 The `metrics-*` and `metricbeat-*` mappings are managed by metricbeat and elastic agent, **code locations TBD**.
 
+## Fields
+
+The best place to reference information for each field is in the metricbeat module documentation for each component.
+
+- [Elasticsearch](https://github.com/elastic/beats/blob/main/metricbeat/module/elasticsearch/_meta/README.md)
+- [Kibana](https://github.com/elastic/beats/blob/main/metricbeat/module/kibana/_meta/README.md)
+- [Logstash](https://github.com/elastic/beats/blob/main/metricbeat/module/logstash/_meta/README.md)
+- [Beat](https://github.com/elastic/beats/blob/main/metricbeat/module/beat/_meta/README.md) (\*beat, apm-server, fleet server)
+- [Enterprise Search](https://github.com/elastic/beats/tree/main/x-pack/metricbeat/module/enterprisesearch/_meta/README.md)
+
 ## Aliasing
 
 In order for the Stack Monitoring UI to function across multiple data schemas, aliases are added to newer indices to allow the original queries to continue to work.
