@@ -27,6 +27,7 @@ import {
   getCaseUserActionUrl,
   User,
   CaseMetricsResponse,
+  getCaseCommentDeleteUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -271,6 +272,21 @@ export const patchComment = async ({
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
+};
+
+export const deleteComment = async ({
+  caseId,
+  commentId,
+  signal,
+}: {
+  caseId: string;
+  commentId: string;
+  signal: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentDeleteUrl(caseId, commentId), {
+    method: 'DELETE',
+    signal,
+  });
 };
 
 export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<string> => {
