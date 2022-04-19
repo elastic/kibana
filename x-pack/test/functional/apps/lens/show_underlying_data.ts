@@ -39,9 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
-      await PageObjects.discover.dismissDocumentExplorerCallout();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('discoverChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
@@ -68,7 +67,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-
       await testSubjects.existOrFail('discoverChart');
       expect(await queryBar.getQueryString()).be.eql('');
       await browser.closeCurrentWindow();
