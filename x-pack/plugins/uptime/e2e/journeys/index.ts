@@ -15,3 +15,4 @@ export * from './monitor_name.journey';
 export * from './monitor_management.journey';
 export * from './monitor_management_enablement.journey';
 export * from './monitor_details';
+export * from './locations';
