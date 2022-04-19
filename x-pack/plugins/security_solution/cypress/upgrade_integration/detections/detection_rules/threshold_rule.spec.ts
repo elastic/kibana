@@ -40,6 +40,7 @@ import {
   OVERVIEW_RULE,
   OVERVIEW_SEVERITY,
   OVERVIEW_STATUS,
+  OVERVIEW_RULE_TYPE,
   OVERVIEW_THRESHOLD_COUNT,
   OVERVIEW_THRESHOLD_VALUE,
   SUMMARY_VIEW,
@@ -49,9 +50,10 @@ const EXPECTED_NUMBER_OF_ALERTS = '1';
 
 const alert = {
   rule: 'Threshold rule',
-  severity: 'Medium',
+  severity: 'medium',
   riskScore: '17',
   reason: 'event created medium alert Threshold rule.',
+  reasonAlt: '—',
   hostName: 'security-solution.local',
   thresholdCount: '2',
 };
@@ -67,8 +69,9 @@ const rule = {
   runsEvery: '24h',
   lookBack: '49976h',
   timeline: 'None',
+  ruleType: 'threshold',
   thresholdField: 'host.name',
-  threholdValue: '1',
+  thresholdValue: '1',
 };
 
 describe('After an upgrade, the threshold rule', () => {
@@ -98,7 +101,7 @@ describe('After an upgrade, the threshold rule', () => {
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', rule.timeline);
       getDetails(THRESHOLD_DETAILS).should(
         'have.text',
-        `Results aggregated by ${rule.thresholdField} >= ${rule.threholdValue}`
+        `Results aggregated by ${rule.thresholdField} >= ${rule.thresholdValue}`
       );
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
@@ -108,16 +111,14 @@ describe('After an upgrade, the threshold rule', () => {
   });
 
   it('Displays the alert details in the TGrid', () => {
-    let expectedReason;
-    if (semver.gt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
-      expectedReason = alert.reason;
-    } else {
-      expectedReason = '-';
+    let expectedReason = alert.reason;
+    if (semver.lt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
+      expectedReason = alert.reasonAlt;
     }
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(REASON).should('have.text', expectedReason);
+    cy.get(REASON).contains(expectedReason);
     cy.get(HOST_NAME).should('have.text', alert.hostName);
   });
 
@@ -129,8 +130,10 @@ describe('After an upgrade, the threshold rule', () => {
     cy.get(OVERVIEW_SEVERITY).contains(alert.severity, { matchCase: false });
     cy.get(OVERVIEW_RISK_SCORE).should('have.text', alert.riskScore);
     cy.get(OVERVIEW_HOST_NAME).should('have.text', alert.hostName);
-    cy.get(OVERVIEW_THRESHOLD_COUNT).should('have.text', alert.thresholdCount);
-    cy.get(OVERVIEW_THRESHOLD_VALUE).should('have.text', alert.hostName);
-    cy.get(SUMMARY_VIEW).should('contain', `${rule.thresholdField} [threshold]`);
+    // TODO: Needs data-test-subj
+    // cy.get(OVERVIEW_THRESHOLD_COUNT).should('have.text', alert.thresholdCount);
+    cy.get(OVERVIEW_RULE_TYPE).should('have.text', rule.ruleType);
+    // TODO: Needs data-test-subj
+    // cy.get(OVERVIEW_THRESHOLD_VALUE).should('have.text', rule.thresholdValue);
   });
 });

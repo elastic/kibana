@@ -65,7 +65,8 @@ export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 export const PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
 export const PROCESS_NAME = '[data-test-subj="formatted-field-process.name"]';
 
-export const REASON = '[data-test-subj^=formatted-field][data-test-subj$=reason]';
+export const REASON =
+  '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="kibana.alert.reason"]';
 
 export const RISK_SCORE = '[data-test-subj^=formatted-field][data-test-subj$=risk_score]';
 
