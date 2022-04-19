@@ -4,43 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Filter } from '@kbn/es-query';
 import { type UseQueryResult, useQuery } from 'react-query';
-import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { number } from 'io-ts';
+import type { Filter } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
 import type {
-  DataView,
   EsQuerySortValue,
-  IKibanaSearchResponse,
+  IEsSearchResponse,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { extractErrorMessage } from '../../../common/utils/helpers';
-import type { CspClientPluginStartDeps } from '../../types';
 import * as TEXT from './translations';
 import type { CspFinding } from './types';
-
-interface CspFindings {
-  data: CspFinding[];
-  total: number;
-}
+import { useKibana } from '../../common/hooks/use_kibana';
+import type { FindingsBaseQuery } from './findings_container';
 
 export interface CspFindingsRequest
   extends Required<Pick<SerializedSearchSourceFields, 'sort' | 'size' | 'from' | 'query'>> {
   filters: Filter[];
 }
 
-type ResponseProps = 'data' | 'error' | 'status';
-type Result = UseQueryResult<CspFindings, unknown>;
+type UseFindingsOptions = FindingsBaseQuery & Omit<CspFindingsRequest, 'filters' | 'query'>;
 
-// TODO: use distributive Pick
-export type CspFindingsResponse =
-  | Pick<Extract<Result, { status: 'success' }>, ResponseProps>
-  | Pick<Extract<Result, { status: 'error' }>, ResponseProps>
-  | Pick<Extract<Result, { status: 'idle' }>, ResponseProps>
-  | Pick<Extract<Result, { status: 'loading' }>, ResponseProps>;
+interface CspFindingsData {
+  page: CspFinding[];
+  total: number;
+}
+
+type Result = UseQueryResult<CspFindingsData, unknown>;
+
+export interface CspFindingsResult {
+  loading: Result['isLoading'];
+  error: Result['error'];
+  data: CspFindingsData | undefined;
+}
 
 const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set(['@timestamp']);
 
@@ -65,72 +63,50 @@ const mapEsQuerySortKey = (sort: readonly EsQuerySortValue[]): EsQuerySortValue[
     return acc;
   }, []);
 
-const showResponseErrorToast =
-  ({ toasts }: CoreStart['notifications']) =>
-  (error: unknown): void => {
-    if (error instanceof Error) toasts.addError(error, { title: TEXT.SEARCH_FAILED });
-    else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
-  };
-
-const extractFindings = ({
-  rawResponse: { hits },
-}: IKibanaSearchResponse<
-  SearchResponse<CspFinding, Record<string, AggregationsAggregate>>
->): CspFindings => ({
-  // TODO: use 'fields' instead of '_source' ?
-  data: hits.hits.map((hit) => hit._source!),
-  total: number.is(hits.total) ? hits.total : 0,
-});
-
-const createFindingsSearchSource = (
-  {
-    query,
-    dataView,
-    filters,
-    ...rest
-  }: Omit<CspFindingsRequest, 'queryKey'> & { dataView: DataView },
-  queryService: CspClientPluginStartDeps['data']['query']
-): SerializedSearchSourceFields => {
-  if (query) queryService.queryString.setQuery(query);
-
-  return {
-    ...rest,
-    sort: mapEsQuerySortKey(rest.sort),
-    filter: queryService.filterManager.getFilters(),
-    query: queryService.queryString.getQuery(),
-    index: dataView.id, // TODO: constant
-  };
+export const showErrorToast = (
+  toasts: CoreStart['notifications']['toasts'],
+  error: unknown
+): void => {
+  if (error instanceof Error) toasts.addError(error, { title: TEXT.SEARCH_FAILED });
+  else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
 };
 
-/**
- * @description a react-query#mutation wrapper on the data plugin searchSource
- * @todo use 'searchAfter'. currently limited to 10k docs. see https://github.com/elastic/kibana/issues/116776
- */
-export const useFindings = (
-  dataView: DataView,
-  searchProps: CspFindingsRequest,
-  urlKey?: string // Needed when URL query (searchProps) didn't change (now-15) but require a refetch
-): CspFindingsResponse => {
+export const getFindingsQuery = ({
+  index,
+  query,
+  size,
+  from,
+  sort,
+}: Omit<UseFindingsOptions, 'error'>) => ({
+  index,
+  query,
+  size,
+  from,
+  sort: mapEsQuerySortKey(sort),
+});
+
+export const useFindings = ({ error, index, query, sort, from, size }: UseFindingsOptions) => {
   const {
-    notifications,
-    data: { query, search },
-  } = useKibana<CspClientPluginStartDeps>().services;
+    data,
+    notifications: { toasts },
+  } = useKibana().services;
 
   return useQuery(
-    ['csp_findings', { searchProps, urlKey }],
-    async () => {
-      const source = await search.searchSource.create(
-        createFindingsSearchSource({ ...searchProps, dataView }, query)
-      );
-
-      const response = await lastValueFrom(source.fetch$());
-
-      return response;
-    },
+    ['csp_findings', { from, size, query, sort }],
+    () =>
+      lastValueFrom<IEsSearchResponse<CspFinding>>(
+        data.search.search({
+          params: getFindingsQuery({ index, query, sort, from, size }),
+        })
+      ),
     {
-      cacheTime: 0,
-      onError: showResponseErrorToast(notifications!),
-      select: extractFindings,
+      enabled: !error,
+      select: ({ rawResponse: { hits } }) => ({
+        // TODO: use 'fields' instead of '_source' ?
+        page: hits.hits.map((hit) => hit._source!),
+        total: number.is(hits.total) ? hits.total : 0,
+      }),
+      onError: (err) => showErrorToast(toasts, err),
     }
   );
 };
