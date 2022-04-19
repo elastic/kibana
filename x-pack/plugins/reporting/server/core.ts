@@ -6,8 +6,6 @@
  */
 
 import Hapi from '@hapi/hapi';
-import * as Rx from 'rxjs';
-import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type {
   BasePath,
   IClusterClient,
@@ -19,10 +17,10 @@ import type {
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { KibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   PdfScreenshotResult,
@@ -37,15 +35,16 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
-import { durationToNumber } from '../common/schema_utils';
+import * as Rx from 'rxjs';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingConfig, ReportingSetup } from '.';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import type { ReportingPluginRouter, PngScreenshotOptions, PdfScreenshotOptions } from './types';
+import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -369,21 +368,8 @@ export class ReportingCore {
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        const config = this.getConfig();
         return screenshotting.getScreenshots({
           ...options,
-          timeouts: {
-            loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
-            openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
-            waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
-            renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
-          },
-
-          layout: {
-            zoom: config.get('capture', 'zoom'),
-            ...options.layout,
-          },
-
           urls: options.urls.map((url) =>
             typeof url === 'string'
               ? url

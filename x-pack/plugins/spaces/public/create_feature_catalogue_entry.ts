@@ -6,7 +6,6 @@
  */
 
 import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { getSpacesFeatureDescription } from './constants';
@@ -21,6 +20,6 @@ export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {
     icon: 'spacesApp',
     path: '/app/management/kibana/spaces',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin',
   };
 };

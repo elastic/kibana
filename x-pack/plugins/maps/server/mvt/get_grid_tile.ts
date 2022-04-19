@@ -7,6 +7,7 @@
 
 import { CoreStart, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { IncomingHttpHeaders } from 'http';
 import { Stream } from 'stream';
 import { RENDER_AS } from '../../common/constants';
 import { isAbortError } from './util';
@@ -40,7 +41,7 @@ export async function getEsGridTile({
   renderAs: RENDER_AS;
   gridPrecision: number;
   abortController: AbortController;
-}): Promise<Stream | null> {
+}): Promise<{ stream: Stream | null; headers: IncomingHttpHeaders; statusCode: number }> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
     const body = {
@@ -80,13 +81,15 @@ export async function getEsGridTile({
       }
     );
 
-    return tile.body as Stream;
+    return { stream: tile.body as Stream, headers: tile.headers, statusCode: tile.statusCode };
   } catch (e) {
-    if (!isAbortError(e)) {
-      // These are often circuit breaking exceptions
-      // Should return a tile with some error message
-      logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    if (isAbortError(e)) {
+      return { stream: null, headers: {}, statusCode: 200 };
     }
-    return null;
+
+    // These are often circuit breaking exceptions
+    // Should return a tile with some error message
+    logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    return { stream: null, headers: {}, statusCode: 500 };
   }
 }

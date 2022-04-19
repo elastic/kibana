@@ -47,6 +47,7 @@ const getCreateCommentUserAction = ({
   handleManageMarkdownEditId,
   handleSaveComment,
   handleManageQuote,
+  handleDeleteComment,
   getRuleDetailsHref,
   loadingAlertData,
   onRuleDetailsClick,
@@ -72,6 +73,7 @@ const getCreateCommentUserAction = ({
         handleManageMarkdownEditId,
         handleSaveComment,
         handleManageQuote,
+        handleDeleteComment,
       });
 
       return userBuilder.build();
@@ -114,6 +116,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   onShowAlertDetails,
   handleManageMarkdownEditId,
   handleSaveComment,
+  handleDeleteComment,
   handleManageQuote,
   handleOutlineComment,
   actionsNavigation,
@@ -146,6 +149,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         onShowAlertDetails,
         handleManageMarkdownEditId,
         handleSaveComment,
+        handleDeleteComment,
         handleManageQuote,
         actionsNavigation,
       });
