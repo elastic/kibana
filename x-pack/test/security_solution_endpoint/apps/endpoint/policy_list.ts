@@ -43,6 +43,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('createPackagePolicy_pageTitle')).to.equal(
           'Add Endpoint Security integration'
         );
+      });
+      it('navigates back to the policy list page', async () => {
         const cancelButton = await testSubjects.find('createPackagePolicy_cancelBackLink');
         cancelButton.click();
         pageObjects.policy.ensureIsOnListPage();
@@ -64,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await policyInfo.cleanup();
         }
       });
-      it('shows the policy list table', async () => {
+      it('shows the policy list table with policies', async () => {
         await pageObjects.policy.navigateToPolicyList();
         await testSubjects.existOrFail('policyListTable');
       });
@@ -78,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       describe('when the endpoint count link is clicked', () => {
         it('navigates to the endpoint list page filtered by policy', async () => {
-          const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[0];
+          const endpointCount = (await testSubjects.findAll('policyEndpointCountLink'))[1];
           await endpointCount.click();
           pageObjects.endpoint.ensureIsOnEndpointListPage();
         });
@@ -87,6 +89,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           pageObjects.endpoint.ensureIsOnEndpointListPage();
           expect(await testSubjects.getVisibleText('adminSearchBar')).to.equal(
             `united.endpoint.Endpoint.policy.applied.id : "${expectedPolicyId}"`
+          );
+        });
+        it('endpoint table shows the endpoints associated with selected policy', async () => {
+          const expectedPolicyName = indexedData.integrationPolicies[0].name;
+          pageObjects.endpoint.ensureIsOnEndpointListPage();
+          await testSubjects.existOrFail('endpointListTable');
+          const policyName = (await testSubjects.findAll('policyNameCellLink'))[0];
+          expect(await policyName.getVisibleText()).to.be.equal(
+            expectedPolicyName.substring(0, expectedPolicyName.indexOf('-'))
           );
         });
         it('returns back to the policy list page when the header back button is clicked', async () => {

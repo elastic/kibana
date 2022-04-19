@@ -99,7 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteAllDocsFromMetadataCurrentIndex(getService);
         await deleteAllDocsFromMetadataUnitedIndex(getService);
         if (indexedData) {
-          const returnValue = await endpointTestResources.unloadEndpointData(indexedData);
+          await endpointTestResources.unloadEndpointData(indexedData);
         }
       });
 

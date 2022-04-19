@@ -25,7 +25,7 @@ export const PolicyEndpointCount = memo<
     policyId: string;
     nonLinkCondition: boolean;
   }
->(({ policyId, nonLinkCondition, children, ...otherProps }) => {
+>(({ policyId, nonLinkCondition, 'data-test-subj': dataTestSubj, children, ...otherProps }) => {
   const filterByPolicyQuery = `(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -59,11 +59,15 @@ export const PolicyEndpointCount = memo<
   const clickHandler = useNavigateByRouterEventHandler(toRoutePathWithBackOptions);
 
   if (nonLinkCondition) {
-    return <EuiText size="s">{children}</EuiText>;
+    return (
+      <EuiText size="s" data-test-subj={dataTestSubj}>
+        {children}
+      </EuiText>
+    );
   }
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={toRouteUrl} onClick={clickHandler} {...otherProps}>
+    <EuiLink href={toRouteUrl} data-test-subj={dataTestSubj} onClick={clickHandler} {...otherProps}>
       {children}
     </EuiLink>
   );
