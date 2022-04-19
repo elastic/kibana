@@ -12,7 +12,7 @@ steps:
     parallelism: 8
     agents:
       queue: ci-group-4d
-    timeout_in_minutes: 180
+    timeout_in_minutes: 120
     key: jest
     
   - command: .buildkite/scripts/steps/code_coverage/oss_cigroup.sh
@@ -25,10 +25,10 @@ steps:
 
   - command: .buildkite/scripts/steps/code_coverage/xpack_cigroup.sh
     label: 'Default CI Group'
-    parallelism: 27
+    parallelism: 29
     agents:
       queue: c2-16
-    timeout_in_minutes: 250
+    timeout_in_minutes: 150
     key: default-cigroup
    
   - command: .buildkite/scripts/steps/code_coverage/ingest.sh
@@ -39,7 +39,7 @@ steps:
       - jest
       - oss-cigroup
       - default-cigroup
-    timeout_in_minutes: 60
+    timeout_in_minutes: 30
     key: ingest
           
   - wait: ~
