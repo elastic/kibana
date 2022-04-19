@@ -13,7 +13,9 @@ import {
   EuiPanel,
   EuiHorizontalRule,
   EuiFlexGroup,
+  EuiBetaBadge,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SectionLoading } from '../../shared_imports';
@@ -35,6 +37,10 @@ import {
   useFetchSessionViewAlerts,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
+
+const BETA = i18n.translate('xpack.sessionView.beta', {
+  defaultMessage: 'Beta',
+});
 
 /**
  * The main wrapper component for the session view.
@@ -193,7 +199,10 @@ export const SessionView = ({
     <>
       <div css={styles.sessionViewerComponent}>
         <EuiPanel css={styles.toolBar} hasShadow={false} borderRadius="none">
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
+            </EuiFlexItem>
             <EuiFlexItem
               data-test-subj="sessionView:sessionViewProcessEventsSearch"
               css={styles.searchBar}
@@ -206,7 +215,7 @@ export const SessionView = ({
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+            <EuiFlexItem grow={false}>
               <SessionViewDisplayOptions
                 displayOptions={displayOptions!}
                 onChange={handleOptionChange}
@@ -214,7 +223,7 @@ export const SessionView = ({
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={toggleDetailPanel}
                 iconType="list"
