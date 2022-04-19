@@ -10,9 +10,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SwitchOption } from './switch';
-import { useKibana } from '../../../../kibana_react/public';
-import { FORMATS_UI_SETTINGS } from '../../../../field_formats/common';
 
 export interface PercentageModeOptionProps {
   setValue: (

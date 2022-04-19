@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useAllHost } from './index';
+import { useAllHost } from '.';
 import { HostsType } from '../../store/model';
 
 describe('useAllHost', () => {

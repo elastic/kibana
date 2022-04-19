@@ -6,8 +6,8 @@
  */
 
 import { ActionConnectorWithoutId } from '../../../types';
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
-import { updateActionConnector } from './index';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { updateActionConnector } from '.';
 
 const http = httpServiceMock.createStartContract();
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';

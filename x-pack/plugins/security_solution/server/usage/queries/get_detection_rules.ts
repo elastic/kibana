@@ -10,7 +10,7 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import {
   SIGNALS_ID,
   EQL_RULE_TYPE_ID,

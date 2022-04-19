@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 import { get } from 'lodash';
-import { LicenseType } from '../../../../licensing/common/types';
-import { getCasesDeepLinks } from '../../../../cases/public';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '../types';
-import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   DETECTION_RESPONSE,

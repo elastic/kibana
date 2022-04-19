@@ -8,10 +8,10 @@
 
 import deepEqual from 'fast-deep-equal';
 
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { RangeSliderEditor } from './range_slider_editor';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './types';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
 import {
   createRangeSliderExtract,
   createRangeSliderInject,

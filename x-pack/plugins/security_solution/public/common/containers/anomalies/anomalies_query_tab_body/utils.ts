@@ -7,7 +7,7 @@
 
 import deepmerge from 'deepmerge';
 
-import { MlSummaryJob } from '../../../../../../ml/public';
+import { MlSummaryJob } from '@kbn/ml-plugin/public';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';

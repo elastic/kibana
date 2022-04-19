@@ -6,7 +6,7 @@
  */
 
 import { AggregationsTermsAggregationOrder } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,

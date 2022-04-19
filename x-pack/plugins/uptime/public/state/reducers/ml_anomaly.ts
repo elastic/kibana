@@ -6,6 +6,7 @@
  */
 
 import { handleActions } from 'redux-actions';
+import { MlCapabilitiesResponse, JobExistResult } from '@kbn/ml-plugin/public';
 import {
   getExistingMLJobAction,
   createMLJobAction,
@@ -17,7 +18,6 @@ import {
 } from '../actions';
 import { asyncInitState, handleAsyncAction } from './utils';
 import { AsyncInitState } from './types';
-import { MlCapabilitiesResponse, JobExistResult } from '../../../../../plugins/ml/public';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
 
 export interface MLJobState {

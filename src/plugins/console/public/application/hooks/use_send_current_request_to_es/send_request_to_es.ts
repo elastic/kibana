@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { HttpSetup, IHttpFetchError } from 'kibana/public';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { extractWarningMessages } from '../../../lib/utils';
-import { XJson } from '../../../../../es_ui_shared/public';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';
@@ -88,7 +88,13 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             (response.status >= 200 && response.status < 300) || response.status === 404;
 
           if (isSuccess) {
-            let value = JSON.stringify(body, null, 2);
+            let value;
+            // check if object is ArrayBuffer
+            if (body instanceof ArrayBuffer) {
+              value = body;
+            } else {
+              value = JSON.stringify(body, null, 2);
+            }
 
             const warnings = response.headers.get('warning');
             if (warnings) {
