@@ -151,7 +151,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const {
     flyoutIcon,
     flyoutTitle = i18n.translate('xpack.spaces.shareToSpace.flyoutTitle', {
-      defaultMessage: 'Assign {objectNoun} to spaces',
+      defaultMessage: 'Share {objectNoun} to spaces',
       values: { objectNoun: savedObjectTarget.noun },
     }),
     enableCreateCopyCallout = false,
@@ -216,7 +216,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           ),
           prohibitedSpaces: shareableReferences.objects.reduce((acc, x) => {
             // Whenever we detect that a space contains an object with a matching origin, *and* the list of currently selected spaces does
-            // not include it, then it is prohibited. That means the user cannot assign the object to those spaces.
+            // not include it, then it is prohibited. That means the user cannot share the object to those spaces.
             for (const space of x.spacesWithMatchingOrigins ?? []) {
               if (
                 space !== UNKNOWN_SPACE &&

@@ -77,7 +77,7 @@ const APPEND_CANNOT_DESELECT = (
 const APPEND_PROHIBITED = (
   <EuiIconTip
     title={i18n.translate('xpack.spaces.shareToSpace.prohibitedSpaceTooltipTitle', {
-      defaultMessage: 'Cannot assign to this space',
+      defaultMessage: 'Cannot share to this space',
     })}
     content={i18n.translate('xpack.spaces.shareToSpace.prohibitedSpaceTooltip', {
       defaultMessage: 'A copy of this saved object exists in this space.',

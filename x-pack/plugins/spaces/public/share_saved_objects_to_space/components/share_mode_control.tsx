@@ -71,7 +71,7 @@ const ALL_SPACES_PROHIBITED_TOOLTIP = (
   <EuiIconTip
     title={i18n.translate(
       'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.allSpacesProhibitedTooltipTitle',
-      { defaultMessage: 'Cannot assign to all spaces' }
+      { defaultMessage: 'Cannot share to all spaces' }
     )}
     content={i18n.translate(
       'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.allSpacesProhibitedTooltipContent',
