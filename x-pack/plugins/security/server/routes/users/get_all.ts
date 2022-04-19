@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import type { RouteDefinitionParams } from '../index';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineGetAllUsersRoutes({ router }: RouteDefinitionParams) {

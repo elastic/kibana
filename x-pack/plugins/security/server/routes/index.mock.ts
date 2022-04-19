@@ -7,22 +7,22 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import {
   coreMock,
   httpResourcesMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 
-import { licensingMock } from '../../../licensing/server/mocks';
+import type { RouteDefinitionParams } from '.';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { authenticationServiceMock } from '../authentication/authentication_service.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { sessionMock } from '../session_management/session.mock';
 import type { SecurityRequestHandlerContext } from '../types';
-import type { RouteDefinitionParams } from './';
 
 export const routeDefinitionParamsMock = {
   create: (rawConfig: Record<string, unknown> = {}) => {

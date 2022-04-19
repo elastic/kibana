@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
 

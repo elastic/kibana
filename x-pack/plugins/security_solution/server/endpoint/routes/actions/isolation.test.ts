@@ -8,14 +8,19 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AwaitedProperties } from '@kbn/utility-types';
-import { KibanaRequest, KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
+import {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteConfig,
+} from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
@@ -28,9 +33,9 @@ import { registerHostIsolationRoutes } from './isolation';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { LicenseService } from '../../../../common/license';
 import { Subject } from 'rxjs';
-import { ILicense } from '../../../../../licensing/common/types';
-import { licenseMock } from '../../../../../licensing/common/licensing.mock';
-import { License } from '../../../../../licensing/common/license';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { License } from '@kbn/licensing-plugin/common/license';
 import {
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
@@ -46,11 +51,11 @@ import {
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
-import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '../../../../../fleet/common';
-import { CasesClientMock } from '../../../../../cases/server/client/mocks';
+import { AGENT_ACTIONS_INDEX, ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
+import { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import type { PackageClient } from '../../../../../fleet/server';
-import { createMockPackageService } from '../../../../../fleet/server/mocks';
+import type { PackageClient } from '@kbn/fleet-plugin/server';
+import { createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
 import { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 
 interface CallRouteInterface {

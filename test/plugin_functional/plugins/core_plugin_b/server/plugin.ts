@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CustomRequestHandlerContext } from 'kibana/server';
+import { Plugin, CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginAApiRequestContext } from '../../core_plugin_a/server';
+import { PluginAApiRequestContext } from '@kbn/core-plugin-a-plugin/server';
 
 type PluginBContext = CustomRequestHandlerContext<{
   pluginA: PluginAApiRequestContext;

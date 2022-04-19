@@ -7,10 +7,10 @@
 
 import sinon from 'sinon';
 import { AwaitedProperties } from '@kbn/utility-types';
-import { savedObjectsClientMock, httpServerMock, coreMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeCreateCustomElementRoute } from './create';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {

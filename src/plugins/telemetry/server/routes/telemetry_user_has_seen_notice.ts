@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import {
   TelemetrySavedObject,
   TelemetrySavedObjectAttributes,

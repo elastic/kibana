@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 
 export function registerResolveIndexRoute(router: IRouter): void {
   router.get(

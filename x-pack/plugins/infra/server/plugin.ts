@@ -14,8 +14,8 @@ import {
   Plugin,
   PluginConfigDescriptor,
   PluginInitializerContext,
-} from 'src/core/server';
-import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+} from '@kbn/core/server';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';

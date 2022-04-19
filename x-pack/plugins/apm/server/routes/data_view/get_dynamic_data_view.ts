@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-} from '../../../../../../src/plugins/data/server';
-import { APMRouteHandlerResources } from '../../routes/typings';
+import { IndexPatternsFetcher, FieldDescriptor } from '@kbn/data-plugin/server';
+import { APMRouteHandlerResources } from '../typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { getApmDataViewTitle } from './get_apm_data_view_title';

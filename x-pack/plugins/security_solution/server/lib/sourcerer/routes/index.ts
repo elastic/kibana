@@ -6,12 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
+import type { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 
-import type {
-  DataView,
-  DataViewListItem,
-} from '../../../../../../../src/plugins/data_views/common';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DEFAULT_TIME_FIELD, SOURCERER_API_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';

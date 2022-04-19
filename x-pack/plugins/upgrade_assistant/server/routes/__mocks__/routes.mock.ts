@@ -6,12 +6,12 @@
  */
 
 import { AwaitedProperties } from '@kbn/utility-types';
-import { RequestHandler, RequestHandlerContext } from 'src/core/server';
+import { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   deprecationsServiceMock,
-} from '../../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 export const routeHandlerContextMock = {
   core: {

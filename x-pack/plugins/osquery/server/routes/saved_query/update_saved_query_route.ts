@@ -8,8 +8,8 @@
 import { filter } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';

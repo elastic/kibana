@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 
+import type { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { RequestHandler } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';

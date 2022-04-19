@@ -7,11 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FieldSpec } from 'src/plugins/data_views/common';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { FieldSpec } from '../../../common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchemaFields } from '../util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,

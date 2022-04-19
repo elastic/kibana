@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.object({
   dataStreams: schema.arrayOf(schema.string()),

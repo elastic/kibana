@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, FilterStateStore } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
 import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
-import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
+import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 const mockContext = {
   core: coreMock.createRequestHandlerContext(),

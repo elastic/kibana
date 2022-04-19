@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
+import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { Pipeline } from '../../models/pipeline';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
-import { SecurityPluginSetup } from '../../../../security/server';
 import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';
 

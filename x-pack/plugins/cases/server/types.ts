@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IRouter, CustomRequestHandlerContext } from 'src/core/server';
+import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
 import {
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
   ActionType,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../actions/server/types';
+} from '@kbn/actions-plugin/server/types';
 import { CasesClient } from './client';
 
 export interface CaseRequestContext {

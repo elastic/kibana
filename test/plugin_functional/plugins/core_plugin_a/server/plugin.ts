@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup, CustomRequestHandlerContext } from 'kibana/server';
+import type { Plugin, CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 
 export interface PluginAApiRequestContext {
   ping: () => Promise<string>;

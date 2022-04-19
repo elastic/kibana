@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Privileges } from '../../../../../../src/plugins/es_ui_shared/common';
+import { Privileges } from '@kbn/es-ui-shared-plugin/common';
 
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,

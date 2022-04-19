@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
+import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import type { LogstashPluginRouter } from '../../types';
 import { checkLicense } from '../../lib/check_license';
 

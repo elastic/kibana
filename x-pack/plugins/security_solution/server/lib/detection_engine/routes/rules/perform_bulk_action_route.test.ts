@@ -21,7 +21,7 @@ import {
   getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../rules/read_rules';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());

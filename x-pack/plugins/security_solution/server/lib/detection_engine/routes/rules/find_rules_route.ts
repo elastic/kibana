@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,

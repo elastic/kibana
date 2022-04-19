@@ -7,7 +7,7 @@
 
 import { fetchIndices } from '../../../lib/fetch_indices';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerListRoute({
   router,

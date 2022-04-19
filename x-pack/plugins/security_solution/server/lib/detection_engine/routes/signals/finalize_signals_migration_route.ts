@@ -6,6 +6,7 @@
  */
 
 import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
@@ -16,7 +17,6 @@ import { signalsMigrationService } from '../../migrations/migration_service';
 import { buildSiemResponse } from '../utils';
 
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
 
 export const finalizeSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,

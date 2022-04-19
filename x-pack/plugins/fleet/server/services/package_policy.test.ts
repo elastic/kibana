@@ -10,14 +10,14 @@ import {
   savedObjectsClientMock,
   httpServerMock,
   coreMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
   SavedObjectsClient,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
-import type { KibanaRequest } from 'kibana/server';
+} from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import type {
   PackageInfo,

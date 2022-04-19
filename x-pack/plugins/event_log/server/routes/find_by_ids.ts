@@ -11,7 +11,7 @@ import type {
   IKibanaResponse,
   KibanaResponseFactory,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import type { EventLogRouter, EventLogRequestHandlerContext } from '../types';
 
 import { BASE_EVENT_LOG_API_PATH } from '../../common';

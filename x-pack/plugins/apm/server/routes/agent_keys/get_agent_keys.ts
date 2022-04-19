@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ApiKey } from '@kbn/security-plugin/common/model';
 import { ApmPluginRequestHandlerContext } from '../typings';
-import { ApiKey } from '../../../../security/common/model';
 
 export async function getAgentKeys({
   context,

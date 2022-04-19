@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders } from 'src/core/server';
+import type { RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 

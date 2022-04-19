@@ -10,18 +10,19 @@ import type {
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
-} from 'src/core/server';
+  IScopedClusterClient,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
+
 export * from '../common';
-import {
-  IScopedClusterClient,
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-} from '../../../../src/core/server';
 import {
   Rule,
   RuleTypeParams,
@@ -41,9 +42,8 @@ import {
   RuleMonitoring,
   MappedParams,
 } from '../common';
-import { LicenseType } from '../../licensing/server';
-import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
 import { RuleTypeConfig } from './config';
+
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -174,6 +174,7 @@ export interface RuleType<
   doesSetRecoveryContext?: boolean;
   config?: RuleTypeConfig;
 }
+
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
   RuleTypeState,

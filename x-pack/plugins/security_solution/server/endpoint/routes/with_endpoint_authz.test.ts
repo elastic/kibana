@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  coreMock,
-  httpServerMock,
-  loggingSystemMock,
-} from '../../../../../../src/core/server/mocks';
-import { RequestHandler } from 'kibana/server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { RequestHandler } from '@kbn/core/server';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
 import { EndpointApiNeededAuthz, withEndpointAuthz } from './with_endpoint_authz';
 import { EndpointAuthz } from '../../../common/endpoint/types/authz';

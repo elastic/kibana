@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { TimelineType } from '../../../../../../common/types/timeline';
 
 import {
@@ -74,7 +74,7 @@ describe('get draft timelines', () => {
           persistNote: mockPersistNote,
         }));
 
-        const getDraftTimelinesRoute = jest.requireActual('./index').getDraftTimelinesRoute;
+        const getDraftTimelinesRoute = jest.requireActual('.').getDraftTimelinesRoute;
         getDraftTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 

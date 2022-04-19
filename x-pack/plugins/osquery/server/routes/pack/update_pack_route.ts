@@ -13,8 +13,8 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
-} from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
+} from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';

@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpServiceSetup, StartServicesAccessor } from 'kibana/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { HttpServiceSetup, StartServicesAccessor } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IndexPatternsFetcher } from './fetcher';
 import { routes } from './rest_api_routes';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from 'src/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import { ApmIndicesConfig } from '@kbn/observability-plugin/common/typings';
 import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
@@ -13,7 +14,6 @@ import {
 import { APMConfig } from '../../..';
 import { APMRouteHandlerResources } from '../../typings';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { ApmIndicesConfig } from '../../../../../observability/common/typings';
 import { APMIndices } from '../../../saved_objects/apm_indices';
 
 export type { ApmIndicesConfig };

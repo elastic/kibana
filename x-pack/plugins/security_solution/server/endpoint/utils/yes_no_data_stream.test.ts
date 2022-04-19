@@ -10,7 +10,7 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import { createRouteHandlerContext } from '../mocks';
 import {

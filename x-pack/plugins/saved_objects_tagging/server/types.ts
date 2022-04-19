@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, CustomRequestHandlerContext } from 'src/core/server';
+import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
 import { ITagsClient } from '../common/types';
 import { IAssignmentService } from './services';
 

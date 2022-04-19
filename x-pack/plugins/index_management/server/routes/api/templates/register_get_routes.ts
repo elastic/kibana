@@ -15,7 +15,7 @@ import {
 } from '../../../../common/lib';
 import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(

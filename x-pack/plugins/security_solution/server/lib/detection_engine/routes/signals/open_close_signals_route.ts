@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { setSignalStatusValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/set_signal_status_type_dependents';
 import {
   SetSignalsStatusSchemaDecoded,

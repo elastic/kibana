@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class ElasticsearchClientXPack implements Plugin {
   constructor() {}

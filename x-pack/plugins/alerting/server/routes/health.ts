@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ILicenseState } from '../lib';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,

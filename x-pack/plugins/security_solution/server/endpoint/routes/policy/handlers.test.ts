@@ -11,18 +11,15 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { createMockAgentClient, createMockAgentService } from '../../../../../fleet/server/mocks';
+import { createMockAgentClient, createMockAgentService } from '@kbn/fleet-plugin/server/mocks';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
-import {
-  KibanaResponseFactory,
-  SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
+import { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -31,11 +28,11 @@ import {
   createMockConfig,
   requestContextMock,
 } from '../../../lib/detection_engine/routes/__mocks__';
-import { Agent } from '../../../../../fleet/common/types/models';
-import { AgentClient, AgentService } from '../../../../../fleet/server/services';
+import { Agent } from '@kbn/fleet-plugin/common/types/models';
+import { AgentClient, AgentService } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+import { ScopedClusterClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;

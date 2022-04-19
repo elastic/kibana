@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { ActionsRequestHandlerContext, FindActionResult } from '../types';

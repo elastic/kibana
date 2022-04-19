@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from 'src/core/server';
+import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from '@kbn/core/server';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';

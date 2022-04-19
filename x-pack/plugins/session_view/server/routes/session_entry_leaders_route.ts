@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { SESSION_ENTRY_LEADERS_ROUTE, PROCESS_EVENTS_INDEX } from '../../common/constants';
 
 export const sessionEntryLeadersRoute = (router: IRouter) => {

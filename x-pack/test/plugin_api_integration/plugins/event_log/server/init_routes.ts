@@ -13,9 +13,9 @@ import {
   IRouter,
   Logger,
   RouteValidationResultFactory,
-} from 'kibana/server';
-import { IEventLogService, IEventLogger } from '../../../../../plugins/event_log/server';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server/types';
+} from '@kbn/core/server';
+import { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
 
 export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logger) => {
   router.post(

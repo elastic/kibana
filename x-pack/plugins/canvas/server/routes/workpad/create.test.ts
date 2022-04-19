@@ -6,10 +6,10 @@
  */
 
 import { AwaitedProperties } from '@kbn/utility-types';
-import { savedObjectsClientMock, httpServerMock, coreMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 import { initializeCreateWorkpadRoute } from './create';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
 let mockRouteContext = {

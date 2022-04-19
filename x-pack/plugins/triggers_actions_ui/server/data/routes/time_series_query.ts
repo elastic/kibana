@@ -11,8 +11,8 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from 'kibana/server';
-import { Logger } from '../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { TimeSeriesQueryParameters } from '../lib/time_series_query';
 import { TimeSeriesQuery, TimeSeriesQuerySchema, TimeSeriesResult } from '../lib/time_series_types';
 export type { TimeSeriesQuery, TimeSeriesResult } from '../lib/time_series_types';
