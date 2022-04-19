@@ -30,12 +30,14 @@ export const fetchConnectors = async (): Promise<ActionConnector[]> => {
       connector_type_id: actionTypeId,
       referenced_by_count: referencedByCount,
       is_preconfigured: isPreconfigured,
+      is_deprecated: isDeprecated,
       is_missing_secrets: isMissingSecrets,
       ...res
     }) => ({
       ...res,
       actionTypeId,
       referencedByCount,
+      isDeprecated,
       isPreconfigured,
       isMissingSecrets,
     })
