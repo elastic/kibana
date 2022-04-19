@@ -105,8 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('test.always-firing-SelectOption');
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/126873
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -291,8 +290,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await defineEsQueryAlert(alertName);
 
+      const queryJsonEditor = await testSubjects.find('queryJsonEditor');
+      await queryJsonEditor.clearValue();
       // Invalid query
-      await testSubjects.setValue('queryJsonEditor', '{"query":{"foo":{}}}', {
+      await testSubjects.setValue('queryJsonEditor', JSON.stringify({ query: { foo: {} } }), {
         clearWithKeyboard: true,
       });
       await testSubjects.click('testQuery');
