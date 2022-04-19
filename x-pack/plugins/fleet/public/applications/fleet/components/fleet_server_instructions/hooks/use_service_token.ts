@@ -8,31 +8,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  useStartServices,
-  sendGenerateServiceToken,
-  useGetEnrollmentAPIKeys,
-} from '../../../hooks';
-import { SO_SEARCH_LIMIT } from '../../../constants';
+import { useStartServices, sendGenerateServiceToken } from '../../../hooks';
 
 export const useServiceToken = ({ fleetServerPolicyId }: { fleetServerPolicyId?: string } = {}) => {
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
-  const { data: enrollmentKeys } = useGetEnrollmentAPIKeys({ perPage: SO_SEARCH_LIMIT });
-
-  // Set the initial service token value to the first one found for the given policy if possible
-  useEffect(() => {
-    if (fleetServerPolicyId && enrollmentKeys?.items) {
-      const serviceTokenForPolicy = enrollmentKeys.items.find(
-        (item) => item.policy_id === fleetServerPolicyId
-      );
-
-      if (serviceTokenForPolicy) {
-        setServiceToken(serviceTokenForPolicy.api_key);
-      }
-    }
-  }, [enrollmentKeys, fleetServerPolicyId]);
 
   const generateServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);
@@ -51,6 +32,13 @@ export const useServiceToken = ({ fleetServerPolicyId }: { fleetServerPolicyId?:
       setIsLoadingServiceToken(false);
     }
   }, [notifications.toasts]);
+
+  // Set the initial service token value to the first one found for the given policy if possible
+  useEffect(() => {
+    if (fleetServerPolicyId && !serviceToken) {
+      generateServiceToken();
+    }
+  }, [fleetServerPolicyId, generateServiceToken, serviceToken]);
 
   return { serviceToken, isLoadingServiceToken, generateServiceToken };
 };
