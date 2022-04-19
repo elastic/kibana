@@ -14,6 +14,7 @@ export * from './create_exception_list';
 export * from './create_exception_list_item';
 export * from './create_legacy_rule_action';
 export * from './create_new_action';
+export * from './create_parallel_test_runner';
 export * from './create_rule';
 export * from './create_rule_with_auth';
 export * from './create_rule_with_exception_entries';

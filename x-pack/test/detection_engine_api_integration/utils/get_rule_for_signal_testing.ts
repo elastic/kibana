@@ -14,19 +14,23 @@ import type { QueryCreateSchema } from '@kbn/security-solution-plugin/common/det
  * @param ruleId The optional ruleId which is rule-1 by default.
  * @param enabled Enables the rule on creation or not. Defaulted to true.
  */
+let id = 0;
+
 export const getRuleForSignalTesting = (
   index: string[],
-  ruleId = 'rule-1',
+  ruleId = '',
   enabled = true
-): QueryCreateSchema => ({
-  name: 'Signal Testing Query',
-  description: 'Tests a simple query',
-  enabled,
-  risk_score: 1,
-  rule_id: ruleId,
-  severity: 'high',
-  index,
-  type: 'query',
-  query: '*:*',
-  from: '1900-01-01T00:00:00.000Z',
-});
+): QueryCreateSchema => {
+  return {
+    name: 'Signal Testing Query',
+    description: 'Tests a simple query',
+    enabled,
+    risk_score: 1,
+    rule_id: ruleId ? ruleId : `rule-${++id}`,
+    severity: 'high',
+    index,
+    type: 'query',
+    query: '*:*',
+    from: '1900-01-01T00:00:00.000Z',
+  };
+};

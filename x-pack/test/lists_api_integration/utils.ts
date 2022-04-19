@@ -25,6 +25,8 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { countDownTest } from '../detection_engine_api_integration/utils';
 
+let fileCounter = 0;
+
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
  * This will retry 50 times before giving up and hopefully still not interfere with other tests
@@ -219,12 +221,15 @@ export const deleteAllExceptionsByType = async (
         .set('kbn-xsrf', 'true')
         .send();
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
-      for await (const id of ids) {
-        await supertest
-          .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
-          .set('kbn-xsrf', 'true')
-          .send();
-      }
+      await Promise.all(
+        ids.map((id) =>
+          supertest
+            .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+        )
+      );
+
       const { body: finalCheck } = await supertest
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
@@ -254,13 +259,14 @@ export const importFile = async (
   log: ToolingLog,
   type: Type,
   contents: string[],
-  fileName: string,
+  fileName?: string,
   testValues?: string[]
-): Promise<void> => {
+): Promise<string> => {
+  const finalFilename = fileName ? fileName : `file-${fileCounter++}.txt`;
   const response = await supertest
     .post(`${LIST_ITEM_URL}/_import?type=${type}`)
     .set('kbn-xsrf', 'true')
-    .attach('file', getImportListItemAsBuffer(contents), fileName)
+    .attach('file', getImportListItemAsBuffer(contents), finalFilename)
     .expect('Content-Type', 'application/json; charset=utf-8');
 
   if (response.status !== 200) {
@@ -274,7 +280,8 @@ export const importFile = async (
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
   const testValuesOrContents = testValues ?? contents;
-  await waitForListItems(supertest, log, testValuesOrContents, fileName);
+  await waitForListItems(supertest, log, testValuesOrContents, finalFilename);
+  return finalFilename;
 };
 
 /**
@@ -291,12 +298,13 @@ export const importTextFile = async (
   log: ToolingLog,
   type: Type,
   contents: string[],
-  fileName: string
-): Promise<void> => {
+  fileName: string = ''
+): Promise<string> => {
+  const finalFilename = fileName ? fileName : `file-${fileCounter++}.txt`;
   const response = await supertest
     .post(`${LIST_ITEM_URL}/_import?type=${type}`)
     .set('kbn-xsrf', 'true')
-    .attach('file', getImportListItemAsBuffer(contents), fileName)
+    .attach('file', getImportListItemAsBuffer(contents), finalFilename)
     .expect('Content-Type', 'application/json; charset=utf-8');
 
   if (response.status !== 200) {
@@ -309,7 +317,8 @@ export const importTextFile = async (
 
   // although we have pushed the list and its items, it is async so we
   // have to wait for the contents before continuing
-  await waitForTextListItems(supertest, log, contents, fileName);
+  await waitForTextListItems(supertest, log, contents, finalFilename);
+  return finalFilename;
 };
 
 /**

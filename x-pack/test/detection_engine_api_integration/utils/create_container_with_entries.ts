@@ -15,6 +15,7 @@ import { createExceptionList } from './create_exception_list';
 import { createExceptionListItem } from './create_exception_list_item';
 import { waitFor } from './wait_for';
 
+let listIdCounter = 0;
 /**
  * Convenience testing function where you can pass in just the endpoint entries and you will
  * get a container created with the entries.
@@ -31,11 +32,13 @@ export const createContainerWithEntries = async (
   if (entries.length === 0) {
     return [];
   }
+
+  const listId = `some-list-id-${++listIdCounter}`;
   // Create the rule exception list container
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
     description: 'some description',
-    list_id: 'some-list-id',
+    list_id: listId,
     name: 'some name',
     type: 'detection',
   });
@@ -45,7 +48,7 @@ export const createContainerWithEntries = async (
     entries.map((entry) => {
       const exceptionListItem: CreateExceptionListItemSchema = {
         description: 'some description',
-        list_id: 'some-list-id',
+        list_id: listId,
         name: 'some name',
         type: 'simple',
         entries: entry,
