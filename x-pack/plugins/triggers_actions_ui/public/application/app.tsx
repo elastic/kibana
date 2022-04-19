@@ -7,29 +7,29 @@
 
 import React, { lazy } from 'react';
 import { Switch, Route, Redirect, Router } from 'react-router-dom';
-import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from 'kibana/public';
+import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { KibanaFeature } from '../../../features/common';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
+import { KibanaFeature } from '@kbn/features-plugin/common';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
-import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
-import { PluginStartContract as AlertingStart } from '../../../alerting/public';
-import type { SpacesPluginStart } from '../../../spaces/public';
-
-import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 
 import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';

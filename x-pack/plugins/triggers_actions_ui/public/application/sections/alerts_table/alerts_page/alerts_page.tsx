@@ -16,15 +16,15 @@ import {
 } from '@elastic/eui';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { PLUGIN_ID } from '../../../../common/constants';
 import {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
   RuleRegistrySearchRequestPagination,
-} from '../../../../../../rule_registry/common';
+} from '@kbn/rule-registry-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { AlertsData } from '../../../../types';
 
 const consumers = [

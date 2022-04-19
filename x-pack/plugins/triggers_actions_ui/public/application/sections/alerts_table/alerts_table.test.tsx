@@ -12,7 +12,7 @@ import { PLUGIN_ID } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-jest.mock('../../../../../../../src/plugins/data/public/');
+jest.mock('@kbn/data-plugin/public');
 jest.mock('../../../common/lib/kibana');
 
 const columns = [
