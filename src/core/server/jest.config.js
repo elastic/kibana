@@ -7,8 +7,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/core'],
-  testRunner: 'jasmine2',
+  roots: ['<rootDir>/src/core/server'],
 };

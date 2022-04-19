@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_integration_node',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/core'],
+  roots: ['<rootDir>/src/core/server'],
 };
