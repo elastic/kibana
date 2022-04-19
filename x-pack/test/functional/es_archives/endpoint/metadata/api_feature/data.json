@@ -4,7 +4,7 @@
     "id": "3KVN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
         "version": "6.6.1",
@@ -26,7 +26,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d14",
         "kind": "metric",
         "category": [
@@ -74,7 +74,7 @@
     "id": "3aVN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
         "version": "6.0.0",
@@ -96,7 +96,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d15",
         "kind": "metric",
         "category": [
@@ -143,7 +143,7 @@
     "id": "3qVN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
         "version": "6.8.0",
@@ -165,7 +165,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d16",
         "kind": "metric",
         "category": [
@@ -210,7 +210,7 @@
     "id": "36VN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
         "version": "6.6.1",
@@ -232,7 +232,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d18",
         "kind": "metric",
         "category": [
@@ -280,7 +280,7 @@
     "id": "4KVN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
         "version": "6.0.0",
@@ -302,7 +302,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d19",
         "kind": "metric",
         "category": [
@@ -348,7 +348,7 @@
     "id": "4aVN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
         "version": "6.8.0",
@@ -370,7 +370,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d39",
         "kind": "metric",
         "category": [
@@ -416,7 +416,7 @@
     "id": "4qVN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
         "version": "6.6.1",
@@ -438,7 +438,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d31",
         "kind": "metric",
         "category": [
@@ -485,7 +485,7 @@
     "id": "46VN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
         "version": "6.0.0",
@@ -507,7 +507,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d23",
         "kind": "metric",
         "category": [
@@ -553,7 +553,7 @@
     "id": "5KVN2G8BYQH1gtPUuYk7",
     "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1642522686057,
+      "@timestamp": 1650299756927,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
         "version": "6.8.0",
@@ -575,7 +575,7 @@
         }
       },
       "event": {
-        "created": 1642522686057,
+        "created": 1650299756927,
         "id": "32f5fda2-48e4-4fae-b89e-a18038294d35",
         "kind": "metric",
         "category": [
