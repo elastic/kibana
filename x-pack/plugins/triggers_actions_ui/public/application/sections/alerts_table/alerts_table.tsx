@@ -57,7 +57,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   ) : (
     <EuiEmptyPrompt
       data-test-subj="alerts-table-no-configuration"
-      iconType="logoSecurity"
+      iconType="watchesApp"
       title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
       body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
     />
