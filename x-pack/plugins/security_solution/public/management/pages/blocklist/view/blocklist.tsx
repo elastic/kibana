@@ -87,7 +87,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.blocklist.emptyStateInfo', {
     defaultMessage:
-      'The blocklist prevents selected applications from running on your hosts by extending the list of processes the Endpoint considers malicious.',
+      'The blocklist prevents specified applications from running on your hosts, extending the list of processes that Endpoint Security considers malicious.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.blocklist.emptyStatePrimaryButtonLabel',
