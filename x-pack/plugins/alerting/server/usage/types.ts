@@ -25,12 +25,12 @@ export interface AlertingUsage {
     string,
     Record<string, number>
   >;
-  percentile_num_scheduled_actions_per_day: {
+  percentile_num_generated_actions_per_day: {
     p50: number;
     p90: number;
     p99: number;
   };
-  percentile_num_scheduled_actions_by_type_per_day: {
+  percentile_num_generated_actions_by_type_per_day: {
     p50: Record<string, number>;
     p90: Record<string, number>;
     p99: Record<string, number>;

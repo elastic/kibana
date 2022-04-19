@@ -83,7 +83,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions]"`
     );
   });
 
@@ -95,7 +95,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_scheduled_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions]"`
     );
   });
 
@@ -211,9 +211,9 @@ describe('getExecutionLogAggregation', () => {
                       field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
                     },
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     max: {
-                      field: 'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
                     },
                   },
                   executionDuration: { max: { field: 'event.duration' } },
@@ -298,7 +298,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -383,7 +383,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -463,7 +463,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -482,7 +482,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -532,7 +532,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -620,7 +620,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -700,7 +700,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 0,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -719,7 +719,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -769,7 +769,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 0.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 0.0,
                   },
                   outcomeAndMessage: {
@@ -849,7 +849,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -929,7 +929,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 0,
           num_recovered_alerts: 0,
           num_triggered_actions: 0,
-          num_scheduled_actions: 0,
+          num_generated_actions: 0,
           num_succeeded_actions: 0,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -948,7 +948,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,
@@ -998,7 +998,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -1083,7 +1083,7 @@ describe('formatExecutionLogResult', () => {
                   numTriggeredActions: {
                     value: 5.0,
                   },
-                  numScheduledActions: {
+                  numGeneratedActions: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -1163,7 +1163,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 0,
           num_errored_actions: 5,
           total_search_duration_ms: 0,
@@ -1182,7 +1182,7 @@ describe('formatExecutionLogResult', () => {
           num_new_alerts: 5,
           num_recovered_alerts: 5,
           num_triggered_actions: 5,
-          num_scheduled_actions: 5,
+          num_generated_actions: 5,
           num_succeeded_actions: 5,
           num_errored_actions: 0,
           total_search_duration_ms: 0,

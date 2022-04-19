@@ -94,7 +94,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_new_alerts).to.equal(0);
         expect(log.num_recovered_alerts).to.equal(0);
         expect(log.num_triggered_actions).to.equal(0);
-        expect(log.num_scheduled_actions).to.equal(0);
+        expect(log.num_generated_actions).to.equal(0);
         expect(log.num_succeeded_actions).to.equal(0);
         expect(log.num_errored_actions).to.equal(0);
 
@@ -195,7 +195,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_new_alerts).to.equal(0);
         expect(log.num_recovered_alerts).to.equal(0);
         expect(log.num_triggered_actions).to.equal(0);
-        expect(log.num_scheduled_actions).to.equal(0);
+        expect(log.num_generated_actions).to.equal(0);
         expect(log.num_succeeded_actions).to.equal(0);
         expect(log.num_errored_actions).to.equal(0);
 
@@ -350,7 +350,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_new_alerts).to.equal(1);
         expect(log.num_recovered_alerts).to.equal(0);
         expect(log.num_triggered_actions).to.equal(1);
-        expect(log.num_scheduled_actions).to.equal(1);
+        expect(log.num_generated_actions).to.equal(1);
         expect(log.num_succeeded_actions).to.equal(1);
         expect(log.num_errored_actions).to.equal(0);
       }
@@ -408,7 +408,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
         expect(log.num_new_alerts).to.equal(1);
         expect(log.num_recovered_alerts).to.equal(0);
         expect(log.num_triggered_actions).to.equal(1);
-        expect(log.num_scheduled_actions).to.equal(1);
+        expect(log.num_generated_actions).to.equal(1);
         expect(log.num_succeeded_actions).to.equal(0);
         expect(log.num_errored_actions).to.equal(1);
       }

@@ -50,7 +50,7 @@ export enum RuleExecutionStatusWarningReasons {
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
   numberOfTriggeredActions?: number;
-  numberOfScheduledActions?: number;
+  numberOfGeneratedActions?: number;
   metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;
