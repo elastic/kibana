@@ -18,7 +18,7 @@ import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { setupFleet } from './setup';
 
 jest.mock('./preconfiguration');
-jest.mock('./preconfiguration/index');
+jest.mock('./preconfiguration/outputs');
 jest.mock('./settings');
 jest.mock('./output');
 jest.mock('./epm/packages');

@@ -25,6 +25,7 @@ import {
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerting/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 
@@ -87,6 +88,7 @@ interface PluginsSetup {
 
 interface PluginsStart {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -173,6 +175,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
           charts: pluginsStart.charts,
           alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,

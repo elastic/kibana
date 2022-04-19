@@ -10,6 +10,7 @@ import type { DocLinksStart } from 'kibana/public';
 import type { ComponentType } from 'react';
 import type { ChartsPluginSetup } from 'src/plugins/charts/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import type { UnifiedSearchPublicPluginStart } from 'src/plugins/unified_search/public';
 import type { IconType } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -285,6 +286,7 @@ export interface RuleTypeParamsExpressionProps<
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 

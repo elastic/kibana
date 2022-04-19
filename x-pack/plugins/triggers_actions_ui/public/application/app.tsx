@@ -22,6 +22,7 @@ import {
 } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import { DataViewsPublicPluginStart } from '../../../../../src/plugins/data_views/public';
 import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
 import { PluginStartContract as AlertingStart } from '../../../alerting/public';
 import type { SpacesPluginStart } from '../../../spaces/public';
@@ -40,6 +41,7 @@ const RuleDetailsRoute = lazy(
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;

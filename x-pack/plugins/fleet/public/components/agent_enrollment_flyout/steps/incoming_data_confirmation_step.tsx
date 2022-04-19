@@ -34,14 +34,15 @@ export const IncomingDataConfirmationStep = ({
       : i18n.translate('xpack.fleet.agentEnrollment.stepConfirmIncomingData.completed', {
           defaultMessage: 'Incoming data confirmed',
         }),
-    children: (
-      <ConfirmIncomingData
-        agentIds={agentIds}
-        installedPolicy={installedPolicy}
-        agentDataConfirmed={agentDataConfirmed}
-        setAgentDataConfirmed={setAgentDataConfirmed}
-      />
-    ),
-    status: !agentDataConfirmed ? 'loading' : 'complete',
+    children:
+      agentIds.length > 0 ? (
+        <ConfirmIncomingData
+          agentIds={agentIds}
+          installedPolicy={installedPolicy}
+          agentDataConfirmed={agentDataConfirmed}
+          setAgentDataConfirmed={setAgentDataConfirmed}
+        />
+      ) : null,
+    status: agentIds.length > 0 ? (!agentDataConfirmed ? 'loading' : 'complete') : 'disabled',
   };
 };
