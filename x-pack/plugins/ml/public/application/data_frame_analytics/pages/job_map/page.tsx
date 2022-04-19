@@ -31,7 +31,9 @@ export const Page: FC = () => {
   const mapModelId = globalState?.ml?.modelId;
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!mapJobId && !mapModelId);
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(
+    !mapJobId && !mapModelId
+  );
   const [jobsExist, setJobsExist] = useState(true);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
