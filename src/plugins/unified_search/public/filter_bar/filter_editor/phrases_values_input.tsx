@@ -25,7 +25,7 @@ interface Props extends PhraseSuggestorProps {
 class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
   public render() {
     const { suggestions } = this.state;
-    const { values, intl, onChange, fullWidth } = this.props;
+    const { values, intl, onChange, fullWidth, onParamsUpdate } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
       <EuiFormRow
@@ -47,7 +47,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
           selectedOptions={values || []}
           onSearchChange={this.onSearchChange}
           onCreateOption={(option: string) => {
-            this.props.onParamsUpdate(option.trim());
+            onParamsUpdate(option.trim());
           }}
           onChange={onChange}
           isClearable={false}
