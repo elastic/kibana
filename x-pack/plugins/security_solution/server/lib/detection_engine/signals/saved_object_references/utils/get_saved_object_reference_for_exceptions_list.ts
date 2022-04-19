@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
+import { Logger, SavedObjectReference } from '@kbn/core/server';
 import { EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME } from './constants';
 import { getSavedObjectReference } from './get_saved_object_reference';
 

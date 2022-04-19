@@ -14,7 +14,7 @@ import {
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsBaseOptions,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { signalsMigrationType } from './saved_objects';
 import { SignalsMigrationSOAttributes } from './saved_objects_schema';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { get } from 'lodash';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
+import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/common';
 
 /**
  * This migration script is related to:

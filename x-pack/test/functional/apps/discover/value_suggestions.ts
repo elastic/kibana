@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');

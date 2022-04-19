@@ -14,8 +14,8 @@
  * Side Public License, v 1.
  */
 
-import { Container, EmbeddableFactoryDefinition } from '../../../../embeddable/public';
-import { EmbeddablePersistableStateService } from '../../../../embeddable/common';
+import { Container, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import { ControlGroupInput, CONTROL_GROUP_TYPE } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';

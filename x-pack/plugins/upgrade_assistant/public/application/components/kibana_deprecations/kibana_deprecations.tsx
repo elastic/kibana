@@ -12,7 +12,7 @@ import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import type { DomainDeprecationDetails } from 'kibana/public';
+import type { DomainDeprecationDetails } from '@kbn/core/public';
 import { SectionLoading, GlobalFlyout } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_KIBANA_DEPRECATIONS_PAGE_LOAD } from '../../lib/ui_metric';

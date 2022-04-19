@@ -6,11 +6,11 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { SavedObjectReference } from 'src/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
+import { TableListView } from '@kbn/kibana-react-plugin/public';
 import { goToSpecifiedPath } from '../../render_app';
 import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {

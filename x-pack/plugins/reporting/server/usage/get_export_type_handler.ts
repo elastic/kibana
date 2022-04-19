@@ -6,7 +6,7 @@
  */
 
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { FeaturesAvailability } from './';
+import { FeaturesAvailability } from '.';
 import { JobTypes } from './types';
 
 /*

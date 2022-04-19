@@ -10,9 +10,9 @@ import { createMemoryHistory } from 'history';
 import React, { PropsWithChildren } from 'react';
 import { Router } from 'react-router-dom';
 import { encode } from 'rison-node';
-import { coreMock } from 'src/core/public/mocks';
-import { ScopedHistory } from '../../../../../src/core/public';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { ScopedHistory } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LinkDescriptor, useLinkProps } from './use_link_props';
 
 const PREFIX = '/test-basepath/s/test-space/app/';

@@ -23,14 +23,24 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
-import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
   SavedQueryCreateSchema,
   ThresholdCreateSchema,
-} from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_TIME,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_EVENT_CATEGORY,
+  ALERT_GROUP_ID,
+  ALERT_THRESHOLD_RESULT,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   createRule,
   createSignalsIndex,
@@ -46,17 +56,7 @@ import {
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
-import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_TIME,
-  ALERT_ORIGINAL_EVENT,
-  ALERT_ORIGINAL_EVENT_CATEGORY,
-  ALERT_GROUP_ID,
-  ALERT_THRESHOLD_RESULT,
-} from '../../../../plugins/security_solution/common/field_maps/field_names';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
