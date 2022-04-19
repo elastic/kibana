@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { sendPutSettings, useGetSettings } from '../../../hooks';
 
@@ -27,6 +27,12 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const [error, setError] = useState<string>();
 
   const { data: settings } = useGetSettings();
+
+  useEffect(() => {
+    if (settings?.item.fleet_server_hosts.length) {
+      setFleetServerHost(settings.item.fleet_server_hosts[0]);
+    }
+  }, [settings?.item.fleet_server_hosts]);
 
   const validateFleetServerHost = useCallback(() => {
     if (!fleetServerHost) {
@@ -62,6 +68,12 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     setIsFleetServerHostSubmitted(false);
 
     if (!validateFleetServerHost()) {
+      return;
+    }
+
+    // If the Fleet Server host provided already exists in settings, don't submit it again
+    if (settings?.item.fleet_server_hosts.includes(fleetServerHost!)) {
+      setIsFleetServerHostSubmitted(true);
       return;
     }
 

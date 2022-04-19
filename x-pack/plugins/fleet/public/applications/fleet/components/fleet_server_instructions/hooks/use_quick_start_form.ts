@@ -57,6 +57,12 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
   const { fleetServerPolicyId, setFleetServerPolicyId } = useSelectFleetServerPolicy();
   const { serviceToken, generateServiceToken } = useServiceToken();
 
+  useEffect(() => {
+    if (fleetServerPolicyId) {
+      setStatus('success');
+    }
+  }, [fleetServerPolicyId]);
+
   const onFleetServerHostChange = useCallback(
     (value: string) => {
       setFleetServerHost(value);
