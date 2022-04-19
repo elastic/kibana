@@ -232,6 +232,16 @@ function ObservabilityActions({
             </EuiContextMenuItem>,
           ]
         : []),
+
+      ...[
+        <EuiContextMenuItem
+          key="viewAlertDetails"
+          data-test-subj="viewAlertDetails"
+          onClick={() => setFlyoutAlert(alert)}
+        >
+          {translations.alertsTable.viewAlertDetailsButtonText}
+        </EuiContextMenuItem>,
+      ],
     ];
   }, [casePermissions?.crud, handleAddToExistingCaseClick, handleAddToNewCaseClick, linkToRule]);
 
@@ -243,18 +253,6 @@ function ObservabilityActions({
   return (
     <>
       <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>
-          <EuiToolTip content={translations.alertsTable.viewDetailsTextLabel}>
-            <EuiButtonIcon
-              size="s"
-              iconType="expand"
-              color="text"
-              onClick={() => setFlyoutAlert(alert)}
-              data-test-subj="openFlyoutButton"
-              aria-label={translations.alertsTable.viewDetailsTextLabel}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiToolTip content={translations.alertsTable.viewInAppTextLabel}>
             <EuiButtonIcon
