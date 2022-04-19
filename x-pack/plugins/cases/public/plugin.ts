@@ -6,7 +6,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CasesUiStart, CasesPluginSetup, CasesPluginStart } from './types';
@@ -51,7 +50,7 @@ export class CasesUiPlugin
         icon: 'watchesApp',
         path: APP_PATH,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 

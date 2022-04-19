@@ -35,7 +35,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -239,7 +238,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         icon: 'indexManagementApp',
         showOnHomePage: true,
         path: INTEGRATIONS_BASE_PATH,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         order: 510,
       });
     }

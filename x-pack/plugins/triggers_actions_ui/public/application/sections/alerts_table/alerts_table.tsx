@@ -5,9 +5,16 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiEmptyPrompt } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
+import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
+
+const emptyConfiguration = {
+  id: '',
+  columns: [],
+};
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const { activePage, alertsCount, onPageChange, onSortChange } = props.useFetchAlertsData();
@@ -18,13 +25,22 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageSize: props.pageSize,
   });
 
-  const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
+  const alertsTableConfigurationRegistry = useKibana().services.alertsTableConfigurationRegistry;
+  const hasAlertsTableConfiguration = alertsTableConfigurationRegistry.has(props.configurationId);
 
-  return (
+  const alertsTableConfiguration = hasAlertsTableConfiguration
+    ? alertsTableConfigurationRegistry.get(props.configurationId)
+    : emptyConfiguration;
+
+  const [visibleColumns, setVisibleColumns] = useState(
+    alertsTableConfiguration.columns.map(({ id }) => id)
+  );
+
+  return hasAlertsTableConfiguration ? (
     <section data-test-subj={props['data-test-subj']}>
       <EuiDataGrid
         aria-label="Alerts table"
-        columns={props.columns}
+        columns={alertsTableConfiguration.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
         rowCount={alertsCount}
@@ -38,6 +54,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         }}
       />
     </section>
+  ) : (
+    <EuiEmptyPrompt
+      data-test-subj="alerts-table-no-configuration"
+      iconType="watchesApp"
+      title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
+      body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
+    />
   );
 };
 

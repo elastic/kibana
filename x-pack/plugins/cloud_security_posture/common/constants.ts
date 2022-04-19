@@ -13,11 +13,15 @@ export const UPDATE_RULES_CONFIG_ROUTE_PATH =
 
 export const CSP_FINDINGS_INDEX_NAME = 'findings';
 export const CIS_KUBERNETES_PACKAGE_NAME = 'cis_kubernetes_benchmark';
+export const FINDINGS_DATA_STREAM_NAME =
+  // Currently 'cis_kubernetes_benchmark.findings', To be refactored to 'cloud_security_posture.findings'
+  CIS_KUBERNETES_PACKAGE_NAME + '.' + CSP_FINDINGS_INDEX_NAME;
 export const LATEST_FINDINGS_INDEX_NAME = 'cloud_security_posture.findings_latest';
 export const BENCHMARK_SCORE_INDEX_NAME = 'cloud_security_posture.scores';
 
 export const AGENT_LOGS_INDEX_PATTERN = '.logs-cis_kubernetes_benchmark.metadata*';
-export const CSP_KUBEBEAT_INDEX_PATTERN = 'logs-cis_kubernetes_benchmark.findings*';
+export const CSP_KUBEBEAT_INDEX_PATTERN = 'logs-cis_kubernetes_benchmark.findings-*';
+export const FINDINGS_INDEX_PATTERN = 'logs-' + FINDINGS_DATA_STREAM_NAME + '-default*';
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-' + LATEST_FINDINGS_INDEX_NAME + '-default';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-' + BENCHMARK_SCORE_INDEX_NAME + '-default';
 
