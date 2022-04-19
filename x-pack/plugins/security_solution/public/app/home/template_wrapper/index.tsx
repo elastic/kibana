@@ -80,7 +80,11 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
     const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
     const showEmptyState = useShowPagesWithEmptyView();
     const emptyStateProps = showEmptyState
-      ? { ...NO_DATA_PAGE_TEMPLATE_PROPS, template: 'centeredContent' }
+      ? {
+          ...NO_DATA_PAGE_TEMPLATE_PROPS,
+          template: 'centeredContent',
+          pageContentProps: { verticalPosition: 'top' },
+        }
       : {};
 
     /*
