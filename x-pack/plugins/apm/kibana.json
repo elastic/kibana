@@ -35,7 +35,6 @@
   "configPath": ["xpack", "apm"],
   "requiredBundles": [
     "fleet",
-    "home",
     "kibanaReact",
     "kibanaUtils",
     "ml",

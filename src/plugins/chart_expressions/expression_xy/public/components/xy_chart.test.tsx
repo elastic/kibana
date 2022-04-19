@@ -501,6 +501,7 @@ describe('XYChart component', () => {
         fit: false,
         min: 123,
         max: 456,
+        includeDataFromIds: [],
       });
     });
 
@@ -521,6 +522,7 @@ describe('XYChart component', () => {
         fit: true,
         min: NaN,
         max: NaN,
+        includeDataFromIds: [],
       });
     });
 
@@ -547,6 +549,36 @@ describe('XYChart component', () => {
         fit: false,
         min: NaN,
         max: NaN,
+        includeDataFromIds: [],
+      });
+    });
+
+    test('it does not allow positive lower bound for bar', () => {
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            yLeftExtent: {
+              type: 'axisExtentConfig',
+              mode: 'custom',
+              lowerBound: 123,
+              upperBound: 456,
+            },
+            layers: [
+              {
+                ...(args.layers[0] as DataLayerConfigResult),
+                seriesType: 'bar',
+              },
+            ],
+          }}
+        />
+      );
+      expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
+        fit: false,
+        min: 123,
+        max: 456,
+        includeDataFromIds: [],
       });
     });
 
@@ -556,43 +588,9 @@ describe('XYChart component', () => {
       const component = shallow(<XYChart {...defaultProps} args={refArgs} />);
       expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
         fit: false,
-        min: 0,
-        max: 150,
-      });
-    });
-
-    test('it should ignore referenceLine values when set to custom extents', () => {
-      const { args: refArgs } = sampleArgsWithReferenceLine();
-
-      const component = shallow(
-        <XYChart
-          {...defaultProps}
-          args={{
-            ...refArgs,
-            yLeftExtent: {
-              type: 'axisExtentConfig',
-              mode: 'custom',
-              lowerBound: 123,
-              upperBound: 456,
-            },
-          }}
-        />
-      );
-      expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
-        fit: false,
-        min: 123,
-        max: 456,
-      });
-    });
-
-    test('it should work for negative values in referenceLines', () => {
-      const { args: refArgs } = sampleArgsWithReferenceLine(-150);
-
-      const component = shallow(<XYChart {...defaultProps} args={refArgs} />);
-      expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
-        fit: false,
-        min: -150,
-        max: 5,
+        min: NaN,
+        max: NaN,
+        includeDataFromIds: ['0-referenceLine-a-rect'],
       });
     });
   });

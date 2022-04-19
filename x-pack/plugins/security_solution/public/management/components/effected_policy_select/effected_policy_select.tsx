@@ -88,6 +88,7 @@ export type EffectedPolicySelectProps = Omit<
   description?: string;
   onChange: (selection: EffectedPolicySelection) => void;
   selected?: PolicyData[];
+  disabled?: boolean;
 };
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({
@@ -99,6 +100,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     listProps,
     options,
     selected = [],
+    disabled = false,
     'data-test-subj': dataTestSubj,
     ...otherSelectableProps
   }) => {
@@ -140,7 +142,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               id={htmlIdGenerator()()}
               onChange={NOOP}
               checked={isPolicySelected.has(policy.id)}
-              disabled={isGlobal || !isPlatinumPlus}
+              disabled={isGlobal || !isPlatinumPlus || disabled}
               data-test-subj={`policy-${policy.id}-checkbox`}
             />
           ),
@@ -158,11 +160,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           ),
           policy,
           checked: isPolicySelected.has(policy.id) ? 'on' : undefined,
-          disabled: isGlobal || !isPlatinumPlus,
+          disabled: isGlobal || !isPlatinumPlus || disabled,
           'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
-    }, [getAppUrl, isGlobal, isPlatinumPlus, options, selected]);
+    }, [disabled, getAppUrl, isGlobal, isPlatinumPlus, options, selected]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
@@ -223,7 +225,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             </EuiText>
           </EuiFlexItem>
           <StyledEuiFlexItemButtonGroup grow={1}>
-            <EuiFormRow fullWidth>
+            <EuiFormRow fullWidth isDisabled={disabled}>
               <StyledButtonGroup
                 legend="Global Policy Toggle"
                 options={toggleGlobal}
@@ -231,6 +233,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
                 onChange={handleGlobalButtonChange}
                 color="primary"
                 data-test-subj={getTestId('byPolicyGlobalButtonGroup')}
+                isDisabled={disabled}
               />
             </EuiFormRow>
           </StyledEuiFlexItemButtonGroup>

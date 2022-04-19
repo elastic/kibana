@@ -16,6 +16,7 @@ import {
 
 import {
   deleteCases,
+  deleteComment,
   getActionLicense,
   getCase,
   getCases,
@@ -49,6 +50,7 @@ import {
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
+  basicCaseId,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -526,6 +528,27 @@ describe('Case Configuration API', () => {
     test('should return correct response', async () => {
       const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(resp).toEqual(pushedCase);
+    });
+  });
+
+  describe('deleteComment', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(null);
+    });
+    const commentId = 'ab1234';
+
+    test('should be called with correct check url, method, signal', async () => {
+      const resp = await deleteComment({
+        caseId: basicCaseId,
+        commentId,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments/${commentId}`, {
+        method: 'DELETE',
+        signal: abortCtrl.signal,
+      });
+      expect(resp).toBe(undefined);
     });
   });
 });
