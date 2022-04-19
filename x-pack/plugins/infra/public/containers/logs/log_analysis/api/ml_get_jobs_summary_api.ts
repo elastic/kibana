@@ -47,6 +47,7 @@ const datafeedStateRT = rt.keyof({
   '': null,
 });
 
+// this is the union of the ML API's job state and block reasons
 const jobStateRT = rt.keyof({
   closed: null,
   closing: null,
@@ -54,6 +55,8 @@ const jobStateRT = rt.keyof({
   failed: null,
   opened: null,
   opening: null,
+  resetting: null,
+  reverting: null,
 });
 
 const jobAnalysisConfigRT = rt.partial({
