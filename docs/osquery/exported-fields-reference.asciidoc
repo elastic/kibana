@@ -8,7 +8,7 @@ The following fields can be returned in osquery results. Note the following abou
 
 For more information about osquery tables, see the https://osquery.io/schema[osquery schema documentation].
 
-[width="100%",options="header"]
+[cols="30a,50a,20a", options="header"]
 |===
 |Field |Description |Type
 |*@timestamp* |Date/time when the event originated. This is the
