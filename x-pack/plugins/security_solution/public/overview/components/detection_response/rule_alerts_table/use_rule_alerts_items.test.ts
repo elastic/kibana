@@ -98,7 +98,7 @@ describe('useRuleAlertsItems', () => {
   it('should return new updatedAt', () => {
     const newDateNow = new Date('2022-04-08T14:00:00.000Z').valueOf();
     mockDateNow.mockReturnValue(newDateNow); // setUpdatedAt call
-
+    mockDateNow.mockReturnValueOnce(dateNow); // initialization call
     mockUseQueryAlerts.mockReturnValue({
       ...defaultUseQueryAlertsReturn,
       data: mockSeverityRuleAlertsResponse,
