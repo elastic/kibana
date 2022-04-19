@@ -9,7 +9,7 @@
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import {
   AxisExtentModes,
@@ -40,7 +40,10 @@ import {
   EndValues,
   EXTENDED_Y_CONFIG,
   AvailableReferenceLineIcons,
+  XY_VIS,
+  LAYERED_XY_VIS,
 } from '../constants';
+import { XYRender } from './expression_renderers';
 
 export type EndValue = $Values<typeof EndValues>;
 export type LayerType = $Values<typeof LayerTypes>;
@@ -340,3 +343,52 @@ export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedData
 export type CommonXYReferenceLineLayerConfigResult =
   | ReferenceLineLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult;
+
+export type XyVisFn = ExpressionFunctionDefinition<typeof XY_VIS, Datatable, XYArgs, XYRender>;
+export type LayeredXyVisFn = ExpressionFunctionDefinition<
+  typeof LAYERED_XY_VIS,
+  Datatable,
+  LayeredXYArgs,
+  XYRender
+>;
+
+export type DataLayerFn = ExpressionFunctionDefinition<
+  typeof DATA_LAYER,
+  Datatable,
+  DataLayerArgs,
+  DataLayerConfigResult
+>;
+export type ExtendedDataLayerFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_DATA_LAYER,
+  Datatable,
+  ExtendedDataLayerArgs,
+  ExtendedDataLayerConfigResult
+>;
+
+export type ReferenceLineLayerFn = ExpressionFunctionDefinition<
+  typeof REFERENCE_LINE_LAYER,
+  Datatable,
+  ReferenceLineLayerArgs,
+  ReferenceLineLayerConfigResult
+>;
+export type ExtendedReferenceLineLayerFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_REFERENCE_LINE_LAYER,
+  Datatable,
+  ExtendedReferenceLineLayerArgs,
+  ExtendedReferenceLineLayerConfigResult
+>;
+
+export type YConfigFn = ExpressionFunctionDefinition<typeof Y_CONFIG, null, YConfig, YConfigResult>;
+export type ExtendedYConfigFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_Y_CONFIG,
+  null,
+  ExtendedYConfig,
+  ExtendedYConfigResult
+>;
+
+export type LegendConfigFn = ExpressionFunctionDefinition<
+  typeof LEGEND_CONFIG,
+  null,
+  LegendConfig,
+  LegendConfigResult
+>;

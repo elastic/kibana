@@ -113,4 +113,84 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getDataLayerFnHelp: () =>
+    i18n.translate('expressionXY.dataLayer.help', {
+      defaultMessage: `Configure a layer in the xy chart`,
+    }),
+  getHideHelp: () =>
+    i18n.translate('expressionXY.dataLayer.hide.help', {
+      defaultMessage: 'Show / hide axis',
+    }),
+  getXAccessorHelp: () =>
+    i18n.translate('expressionXY.dataLayer.xAccessor.help', {
+      defaultMessage: 'X-axis',
+    }),
+  getSeriesTypeHelp: () =>
+    i18n.translate('expressionXY.dataLayer.seriesType.help', {
+      defaultMessage: 'The type of chart to display.',
+    }),
+  getXScaleTypeHelp: () =>
+    i18n.translate('expressionXY.dataLayer.xScaleType.help', {
+      defaultMessage: 'The scale type of the x axis',
+    }),
+  getIsHistogramHelp: () =>
+    i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+      defaultMessage: 'Whether to layout the chart as a histogram',
+    }),
+  getYScaleTypeHelp: () =>
+    i18n.translate('expressionXY.dataLayer.yScaleType.help', {
+      defaultMessage: 'The scale type of the y axes',
+    }),
+  getSplitAccessorHelp: () =>
+    i18n.translate('expressionXY.dataLayer.splitAccessor.help', {
+      defaultMessage: 'The column to split by',
+    }),
+  getAccessorsHelp: () =>
+    i18n.translate('expressionXY.dataLayer.accessors.help', {
+      defaultMessage: 'The columns to display on the y axis.',
+    }),
+  getYConfigHelp: () =>
+    i18n.translate('expressionXY.dataLayer.yConfig.help', {
+      defaultMessage: 'Additional configuration for y axes',
+    }),
+  getColumnToLabelHelp: () =>
+    i18n.translate('expressionXY.layer.columnToLabel.help', {
+      defaultMessage: 'JSON key-value pairs of column ID to label',
+    }),
+  getPaletteHelp: () =>
+    i18n.translate('expressionXY.dataLayer.palette.help', {
+      defaultMessage: 'Palette',
+    }),
+  getTableHelp: () =>
+    i18n.translate('expressionXY.layers.table.help', {
+      defaultMessage: 'Table',
+    }),
+  getRLAccessorsHelp: () =>
+    i18n.translate('expressionXY.referenceLineLayer.accessors.help', {
+      defaultMessage: 'The columns to display on the y axis.',
+    }),
+  getRLYConfigHelp: () =>
+    i18n.translate('expressionXY.referenceLineLayer.yConfig.help', {
+      defaultMessage: 'Additional configuration for y axes',
+    }),
+  getRLHelp: () =>
+    i18n.translate('expressionXY.referenceLineLayer.help', {
+      defaultMessage: `Configure a reference line in the xy chart`,
+    }),
+  getYConfigFnHelp: () =>
+    i18n.translate('expressionXY.yConfig.help', {
+      defaultMessage: `Configure the behavior of a xy chart's y axis metric`,
+    }),
+  getForAccessorHelp: () =>
+    i18n.translate('expressionXY.yConfig.forAccessor.help', {
+      defaultMessage: 'The accessor this configuration is for',
+    }),
+  getAxisModeHelp: () =>
+    i18n.translate('expressionXY.yConfig.axisMode.help', {
+      defaultMessage: 'The axis mode of the metric',
+    }),
+  getColorHelp: () =>
+    i18n.translate('expressionXY.yConfig.color.help', {
+      defaultMessage: 'The color of the series',
+    }),
 };

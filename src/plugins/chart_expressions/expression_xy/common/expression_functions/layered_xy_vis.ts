@@ -7,8 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin';
-import { LayeredXYArgs, XYExtendedLayerConfigResult, XYRender } from '../types';
+import { LayeredXyVisFn, XYExtendedLayerConfigResult } from '../types';
 import {
   XY_VIS_RENDERER,
   EXTENDED_DATA_LAYER,
@@ -17,21 +16,16 @@ import {
   ANNOTATION_LAYER,
 } from '../constants';
 import { logDatatables } from '../utils';
-import { commonArgsXY } from './common_args_xy';
+import { commonXYArgs } from './common_xy_args';
 import { strings } from '../i18n';
 
-export const layeredXyVisFunction: ExpressionFunctionDefinition<
-  typeof LAYERED_XY_VIS,
-  Datatable,
-  LayeredXYArgs,
-  XYRender
-> = {
+export const layeredXyVisFunction: LayeredXyVisFn = {
   name: LAYERED_XY_VIS,
   type: 'render',
   inputTypes: ['datatable'],
   help: strings.getXYHelp(),
   args: {
-    ...commonArgsXY,
+    ...commonXYArgs,
     layers: {
       types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER, ANNOTATION_LAYER],
       help: i18n.translate('expressionXY.layeredXyVis.layers.help', {

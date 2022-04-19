@@ -7,51 +7,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import {
   AvailableReferenceLineIcons,
   EXTENDED_Y_CONFIG,
   FillStyles,
   IconPositions,
   LineStyles,
-  YAxisModes,
 } from '../constants';
-import { ExtendedYConfig, ExtendedYConfigResult } from '../types';
+import { strings } from '../i18n';
+import { ExtendedYConfigFn } from '../types';
+import { commonYConfigArgs } from './common_y_config_args';
 
-export const extendedYAxisConfigFunction: ExpressionFunctionDefinition<
-  typeof EXTENDED_Y_CONFIG,
-  null,
-  ExtendedYConfig,
-  ExtendedYConfigResult
-> = {
+export const extendedYAxisConfigFunction: ExtendedYConfigFn = {
   name: EXTENDED_Y_CONFIG,
   aliases: [],
   type: EXTENDED_Y_CONFIG,
-  help: i18n.translate('expressionXY.yConfig.help', {
-    defaultMessage: `Configure the behavior of a xy chart's y axis metric`,
-  }),
+  help: strings.getYConfigFnHelp(),
   inputTypes: ['null'],
   args: {
-    forAccessor: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.forAccessor.help', {
-        defaultMessage: 'The accessor this configuration is for',
-      }),
-    },
-    axisMode: {
-      types: ['string'],
-      options: [...Object.values(YAxisModes)],
-      help: i18n.translate('expressionXY.yConfig.axisMode.help', {
-        defaultMessage: 'The axis mode of the metric',
-      }),
-      strict: true,
-    },
-    color: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.color.help', {
-        defaultMessage: 'The color of the series',
-      }),
-    },
+    ...commonYConfigArgs,
     lineStyle: {
       types: ['string'],
       options: [...Object.values(LineStyles)],

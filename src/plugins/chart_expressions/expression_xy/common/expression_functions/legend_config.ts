@@ -8,9 +8,8 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LEGEND_CONFIG } from '../constants';
-import { LegendConfig, LegendConfigResult } from '../types';
+import { LegendConfigFn } from '../types';
 
 const errors = {
   positionUsageWithIsInsideError: () =>
@@ -45,12 +44,7 @@ const errors = {
     ),
 };
 
-export const legendConfigFunction: ExpressionFunctionDefinition<
-  typeof LEGEND_CONFIG,
-  null,
-  LegendConfig,
-  LegendConfigResult
-> = {
+export const legendConfigFunction: LegendConfigFn = {
   name: LEGEND_CONFIG,
   aliases: [],
   type: LEGEND_CONFIG,

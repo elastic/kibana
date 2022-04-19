@@ -6,50 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { LayerTypes, EXTENDED_REFERENCE_LINE_LAYER, EXTENDED_Y_CONFIG } from '../constants';
-import { ExtendedReferenceLineLayerArgs, ExtendedReferenceLineLayerConfigResult } from '../types';
+import { LayerTypes, EXTENDED_REFERENCE_LINE_LAYER } from '../constants';
+import { ExtendedReferenceLineLayerFn } from '../types';
+import { strings } from '../i18n';
+import { commonReferenceLineLayerArgs } from './common_reference_line_layer_args';
 
-export const extendedReferenceLineLayerFunction: ExpressionFunctionDefinition<
-  typeof EXTENDED_REFERENCE_LINE_LAYER,
-  Datatable,
-  ExtendedReferenceLineLayerArgs,
-  ExtendedReferenceLineLayerConfigResult
-> = {
+export const extendedReferenceLineLayerFunction: ExtendedReferenceLineLayerFn = {
   name: EXTENDED_REFERENCE_LINE_LAYER,
   aliases: [],
   type: EXTENDED_REFERENCE_LINE_LAYER,
-  help: i18n.translate('expressionXY.extendedReferenceLineLayer.help', {
-    defaultMessage: `Configure a reference line in the xy chart`,
-  }),
+  help: strings.getRLHelp(),
   inputTypes: ['datatable'],
   args: {
-    accessors: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.extendedReferenceLineLayer.accessors.help', {
-        defaultMessage: 'The columns to display on the y axis.',
-      }),
-      multi: true,
-    },
-    yConfig: {
-      types: [EXTENDED_Y_CONFIG],
-      help: i18n.translate('expressionXY.extendedReferenceLineLayer.yConfig.help', {
-        defaultMessage: 'Additional configuration for y axes',
-      }),
-      multi: true,
-    },
-    columnToLabel: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.extendedReferenceLineLayer.columnToLabel.help', {
-        defaultMessage: 'JSON key-value pairs of column ID to label',
-      }),
-    },
+    ...commonReferenceLineLayerArgs,
     table: {
       types: ['datatable'],
-      help: i18n.translate('expressionXY.extendedReferenceLineLayer.table.help', {
-        defaultMessage: 'Table',
-      }),
+      help: strings.getTableHelp(),
     },
   },
   fn(input, args) {

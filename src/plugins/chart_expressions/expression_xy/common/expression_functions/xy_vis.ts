@@ -7,14 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import {
   AxisExtentConfigResult,
   DataLayerConfigResult,
-  XYArgs,
   XYLayerConfigResult,
-  XYRender,
+  XyVisFn,
 } from '../types';
 import {
   XY_VIS,
@@ -28,7 +26,7 @@ import {
 } from '../constants';
 import { getLayerDimensions } from '../utils';
 import { strings } from '../i18n';
-import { commonArgsXY } from './common_args_xy';
+import { commonXYArgs } from './common_xy_args';
 
 const errors = {
   extendBoundsAreInvalidError: () =>
@@ -76,18 +74,13 @@ const validateExtent = (
   }
 };
 
-export const xyVisFunction: ExpressionFunctionDefinition<
-  typeof XY_VIS,
-  Datatable,
-  XYArgs,
-  XYRender
-> = {
+export const xyVisFunction: XyVisFn = {
   name: XY_VIS,
   type: 'render',
   inputTypes: ['datatable'],
   help: strings.getXYHelp(),
   args: {
-    ...commonArgsXY,
+    ...commonXYArgs,
     dataLayers: {
       types: [DATA_LAYER],
       help: strings.getDataLayerHelp(),

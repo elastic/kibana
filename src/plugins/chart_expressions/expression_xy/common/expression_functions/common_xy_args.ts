@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import {
   AXIS_EXTENT_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
@@ -20,17 +19,12 @@ import {
   XYCurveTypes,
 } from '../constants';
 import { strings } from '../i18n';
-import { LayeredXYArgs, XYArgs, XYRender } from '../types';
+import { LayeredXyVisFn, XyVisFn } from '../types';
 
-type XYFnArgs = ExpressionFunctionDefinition<
-  string,
-  Datatable,
-  XYArgs | LayeredXYArgs,
-  XYRender
->['args'];
+type CommonXYFn = XyVisFn | LayeredXyVisFn;
 
-export const commonArgsXY: Omit<
-  XYFnArgs,
+export const commonXYArgs: Omit<
+  CommonXYFn['args'],
   'dataLayers' | 'referenceLineLayers' | 'annotationLayers' | 'layers'
 > = {
   xTitle: {
