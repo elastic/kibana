@@ -1454,10 +1454,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@45.1.1":
-  version "45.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-45.1.1.tgz#d65b51ee296138a7e6b3d954fcf9fa41ba379492"
-  integrity sha512-gVk8ZbCBh8fUKxM6Rd61qwhSCgt1zU0wt3y3ZMUe+MdaTFG9I+0SceYrltJR+bf0ycK0wb1yg+WEw0LoN8bEIg==
+"@elastic/charts@46.0.0":
+  version "46.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.0.0.tgz#1714ae3d0cbbaf2d7319170577a429bd1776a190"
+  integrity sha512-saWKUg+UNF47sLw3WFeGppcZwB58qm3hLJzX/dwfI9dxZmba/PsYGSTuQXiGWuDQeHoMPlRXLe1lA+hD1cETzw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -6699,6 +6699,13 @@
   resolved "https://registry.yarnpkg.com/@types/react-intl/-/react-intl-2.3.17.tgz#e1fc6e46e8af58bdef9531259d509380a8a99e8e"
   integrity sha512-FGd6J1GQ7zvl1GZ3BBev83B7nfak8dqoR2PZ+l5MoisKMpd4xOLhZJC1ugpmk3Rz5F85t6HbOg9mYqXW97BsNA==
 
+"@types/react-is@^16.7.1":
+  version "16.7.2"
+  resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-16.7.2.tgz#8c2862013d00d741be189ceb71da8e8d21e8fa7d"
+  integrity sha512-rdQUu9J+RUz4Vcr768UyTzv+fZGzKBy1/PPhaxTfzAfaHSW4+b0olA6czXLZv7PO7/ktbHu41kcpAG7Z46kvDQ==
+  dependencies:
+    "@types/react" "^16"
+
 "@types/react-native@*":
   version "0.60.22"
   resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.60.22.tgz#ba199a441cb0612514244ffb1d0fe6f04c878575"
@@ -6793,7 +6800,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@>=16.9.0", "@types/react@^16.9.36":
+"@types/react@*", "@types/react@>=16.9.0", "@types/react@^16", "@types/react@^16.9.36":
   version "16.9.36"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.36.tgz#ade589ff51e2a903e34ee4669e05dbfa0c1ce849"
   integrity sha512-mGgUb/Rk/vGx4NCvquRuSH0GHBQKb1OqpGS9cT9lFxlTLHZgkksgI60TuIxubmn7JuCb+sENHhQciqa0npm0AQ==
