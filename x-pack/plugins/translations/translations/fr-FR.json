@@ -2122,7 +2122,6 @@
     "unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle": "Syntaxe de requête imbriquée KQL",
     "unifiedSearch.query.queryBar.luceneLanguageName": "Lucene",
     "unifiedSearch.query.queryBar.searchInputAriaLabel": "Commencer à taper pour rechercher et filtrer la page {pageType}",
-    "unifiedSearch.query.queryBar.searchInputPlaceholder": "Recherche",
     "unifiedSearch.search.searchBar.savedQueryDescriptionText": "Enregistrez le texte et les filtres de la requête que vous souhaitez réutiliser.",
     "unifiedSearch.search.searchBar.savedQueryForm.titleConflictText": "Ce nom est en conflit avec une requête enregistrée existante.",
     "unifiedSearch.search.searchBar.savedQueryFormSaveButtonText": "Enregistrer",

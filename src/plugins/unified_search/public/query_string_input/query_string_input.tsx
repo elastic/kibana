@@ -685,6 +685,25 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     this.handleAutoHeight();
   };
 
+  getSearchInputPlaceholder = () => {
+    let placeholder = '';
+    if (!this.props.query.language || this.props.query.language === 'text') {
+      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
+        defaultMessage: 'Filter your data',
+      });
+    } else {
+      const language =
+        this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
+
+      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
+        defaultMessage: 'Filter your data using {language} syntax',
+        values: { language },
+      });
+    }
+
+    return placeholder;
+  };
+
   public render() {
     const isSuggestionsVisible = this.state.isSuggestionsVisible && {
       'aria-controls': 'kbnTypeahead__items',
@@ -697,23 +716,6 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
     });
     const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
-
-    const language =
-      this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
-
-    let searchPlaceholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
-      defaultMessage: 'Filter your data using {language} syntax',
-      values: { language },
-    });
-
-    if (this.props.query.language === 'text') {
-      searchPlaceholder = i18n.translate(
-        'unifiedSearch.query.queryBar.searchInputPlaceholderForText',
-        {
-          defaultMessage: 'Filter your data',
-        }
-      );
-    }
 
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
@@ -740,7 +742,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           >
             <div role="search" className={inputWrapClassName} ref={this.assignQueryInputDivRef}>
               <EuiTextArea
-                placeholder={this.props.placeholder || searchPlaceholder}
+                placeholder={this.props.placeholder || this.getSearchInputPlaceholder()}
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}

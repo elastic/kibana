@@ -29356,7 +29356,6 @@
     "unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle": "KQL ネストされたクエリ構文",
     "unifiedSearch.query.queryBar.luceneLanguageName": "Lucene",
     "unifiedSearch.query.queryBar.searchInputAriaLabel": "{pageType} ページの検索とフィルタリングを行うには入力を開始してください",
-    "unifiedSearch.query.queryBar.searchInputPlaceholder": "検索",
     "unifiedSearch.search.unableToGetSavedQueryToastTitle": "保存したクエリ {savedQueryId} を読み込めません",
     "unifiedSearch.query.queryBar.syntaxOptionsTitle": "構文オプション",
     "unifiedSearch.filter.applyFilterActionTitle": "現在のビューにフィルターを適用",

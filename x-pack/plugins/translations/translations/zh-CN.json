@@ -29387,7 +29387,6 @@
     "unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle": "KQL 嵌套查询语法",
     "unifiedSearch.query.queryBar.luceneLanguageName": "Lucene",
     "unifiedSearch.query.queryBar.searchInputAriaLabel": "开始键入内容，以搜索并筛选 {pageType} 页面",
-    "unifiedSearch.query.queryBar.searchInputPlaceholder": "搜索",
     "unifiedSearch.search.unableToGetSavedQueryToastTitle": "无法加载已保存查询 {savedQueryId}",
     "unifiedSearch.query.queryBar.syntaxOptionsTitle": "语法选项",
     "unifiedSearch.filter.applyFilterActionTitle": "将筛选应用于当前视图",
