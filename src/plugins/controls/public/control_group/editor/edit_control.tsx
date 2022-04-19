@@ -8,7 +8,7 @@
 
 import { isEqual } from 'lodash';
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
@@ -18,12 +18,7 @@ import { ControlEditor } from './control_editor';
 import { pluginServices } from '../../services';
 import { forwardAllContext } from './forward_all_context';
 import { ControlGroupStrings } from '../control_group_strings';
-import {
-  IEditableControlFactory,
-  ControlEmbeddable,
-  ControlOutput,
-  DataControlInput,
-} from '../../types';
+import { IEditableControlFactory, ControlInput } from '../../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 
@@ -55,24 +50,13 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     latestPanelState.current = panels[embeddableId];
   }, [panels, embeddableId]);
 
-  let inputToReturn: Partial<DataControlInput> = {};
-  let embeddable: ControlEmbeddable<DataControlInput, ControlOutput> | undefined;
-  const shouldResetSelections = useMemo(() => {
-    return (
-      inputToReturn.fieldName !== embeddable?.getInput().fieldName ||
-      inputToReturn.dataViewId !== embeddable?.getInput().dataViewId
-    );
-  }, [embeddable, inputToReturn.fieldName, inputToReturn.dataViewId]);
-
   const editControl = async () => {
     const panel = panels[embeddableId];
     const factory = getControlFactory(panel.type);
-    inputToReturn = {};
-    embeddable = (await untilEmbeddableLoaded(embeddableId)) as ControlEmbeddable<
-      DataControlInput,
-      ControlOutput
-    >;
+    const embeddable = await untilEmbeddableLoaded(embeddableId);
     const controlGroup = embeddable.getRoot() as ControlGroupContainer;
+
+    let inputToReturn: Partial<ControlInput> = {};
 
     if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
 
@@ -120,9 +104,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
             const editableFactory = factory as IEditableControlFactory;
             if (editableFactory.presaveTransformFunction) {
               inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
-            }
-            if (shouldResetSelections) {
-              embeddable?.getInput().resetSelections();
             }
             updateInputForChild(embeddableId, inputToReturn);
             flyoutInstance.close();

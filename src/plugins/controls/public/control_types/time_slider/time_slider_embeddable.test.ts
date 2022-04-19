@@ -56,7 +56,7 @@ const partialHighValueFilter = buildFilter(partialHighValue);
 const withinRangeValueFilter = buildFilter(withinRangeValue);
 const outOfRangeValueFilter = buildFilter(outOfRangeValue);
 
-const baseInput: Omit<TimeSliderControlEmbeddableInput, 'resetSelections'> = {
+const baseInput: TimeSliderControlEmbeddableInput = {
   id: 'id',
   fieldName: 'bytes',
   dataViewId: stubLogstashDataView.id!,

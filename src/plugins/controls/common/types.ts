@@ -31,5 +31,4 @@ export type ControlInput = EmbeddableInput & {
 export type DataControlInput = ControlInput & {
   fieldName: string;
   dataViewId: string;
-  resetSelections: () => void;
 };

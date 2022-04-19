@@ -55,7 +55,7 @@ export const TimeSliderEditor = ({
         initialInput?.dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
       let dataView: DataView | undefined;
       if (initialId) {
-        onChange({ dataViewId: initialId });
+        onChange({ dataViewId: initialId, fieldName: initialInput?.fieldName });
         dataView = await get(initialId);
       }
       if (!mounted) return;
