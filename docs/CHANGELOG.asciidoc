@@ -35,7 +35,7 @@ Review the following information about the {kib} 8.1.3 release.
 [[security-update-v8.1.3]]
 === Security update
 
-The 8.1.3 release contains a fix to a potential security vulnerability. For more information, check link:https://discuss.elastic.co/c/announcements/security-announcements/31[Security Announcements].
+The 8.1.3 release contains a fix to a potential security vulnerability. For more information, check link:https://ela.st/esa-2022-051[Security Announcements].
 
 [float]
 [[breaking-changes-8.1.3]]
