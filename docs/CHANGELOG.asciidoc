@@ -82,6 +82,12 @@ coming::[7.17.3]
 Review the following information about the 7.17.3 release.
 
 [float]
+[[security-update-v7.17.3]]
+=== Security update
+
+The 7.17.3 release contains a fix to a potential security vulnerability. For more information, check link:https://ela.st/esa-2022-051[Security Announcements].
+
+[float]
 [[breaking-changes-v7.17.3]]
 === Breaking changes
 
