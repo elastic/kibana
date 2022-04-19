@@ -7,7 +7,7 @@
 
 export default function ({ loadTestFile }) {
   describe('watcher app', function () {
-    this.tags(['ciGroup1', 'includeFirefox']);
+    this.tags(['ciGroup28', 'includeFirefox']);
 
     loadTestFile(require.resolve('./watcher_test'));
   });
