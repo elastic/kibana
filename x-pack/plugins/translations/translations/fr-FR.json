@@ -7661,8 +7661,6 @@
     "xpack.cases.caseView.errorsPushServiceCallOutTitle": "Sélectionner un connecteur externe",
     "xpack.cases.caseView.fieldChanged": "a modifié le champ du connecteur",
     "xpack.cases.caseView.fieldRequiredError": "Champ requis",
-    "xpack.cases.caseView.generatedAlertCommentLabelTitle": "ont été ajoutés à partir de",
-    "xpack.cases.caseView.generatedAlertCountCommentLabelTitle": "{totalCount} {totalCount, plural, =1 {alerte} other {alertes}}",
     "xpack.cases.caseView.isolatedHost": "a soumis une demande d'isolement sur l'hôte",
     "xpack.cases.caseView.lockedIncidentDesc": "Aucune mise à jour n'est requise",
     "xpack.cases.caseView.lockedIncidentTitle": "L'incident { thirdParty } est à jour",

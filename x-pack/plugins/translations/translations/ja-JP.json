@@ -8929,8 +8929,6 @@
     "xpack.cases.caseView.errorsPushServiceCallOutTitle": "外部コネクターを選択",
     "xpack.cases.caseView.fieldChanged": "変更されたコネクターフィールド",
     "xpack.cases.caseView.fieldRequiredError": "必須フィールド",
-    "xpack.cases.caseView.generatedAlertCommentLabelTitle": "から追加されました",
-    "xpack.cases.caseView.generatedAlertCountCommentLabelTitle": "{totalCount} {totalCount, plural, other  {アラート}}",
     "xpack.cases.caseView.isolatedHost": "ホストで分離リクエストが送信されました",
     "xpack.cases.caseView.lockedIncidentDesc": "更新は必要ありません",
     "xpack.cases.caseView.lockedIncidentTitle": "{ thirdParty }インシデントは最新です",
