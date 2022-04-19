@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectAttributes } from 'src/core/server';
-import { RouteInitializerDeps } from '../';
+import { SavedObjectAttributes } from '@kbn/core/server';
+import { RouteInitializerDeps } from '..';
 import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 
 export function initializeFindCustomElementsRoute(deps: RouteInitializerDeps) {

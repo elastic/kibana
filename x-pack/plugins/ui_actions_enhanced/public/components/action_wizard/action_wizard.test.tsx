@@ -16,7 +16,7 @@ import {
   urlDrilldownActionFactory,
 } from './test_data';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
-import { licensingMock } from '../../../../licensing/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { SerializableRecord } from '@kbn/utility-types';
 
 test('Pick and configure action', () => {

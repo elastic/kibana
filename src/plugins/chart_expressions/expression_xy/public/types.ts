@@ -7,12 +7,12 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { DataPublicPluginSetup } from '../../../data/public';
-import { FieldFormatsSetup } from '../../../field_formats/public';
-import { ChartsPluginSetup } from '../../../charts/public';
-import { IFieldFormat, SerializedFieldFormat } from '../../../../plugins/field_formats/common';
-import type { RangeSelectContext, ValueClickContext } from '../../../../plugins/embeddable/public';
-import { ExpressionsServiceStart, ExpressionsSetup } from '../../../expressions/public';
+import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 
 export interface SetupDeps {
   expressions: ExpressionsSetup;

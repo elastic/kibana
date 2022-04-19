@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';

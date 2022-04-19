@@ -6,7 +6,7 @@
  */
 
 import type { FileLayer } from '@elastic/ems-client';
-import type { Datatable } from 'src/plugins/expressions/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { emsAutoSuggest } from '../../ems_autosuggest';
 
 export function getEmsSuggestion(

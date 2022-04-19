@@ -17,7 +17,7 @@ import {
 import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
 
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { createFormatter } from '../../../../../common/formatters';
 import { InventoryFormatterType } from '../../../../../common/inventory_models/types';
 import { SeriesOverrides, VisSectionProps } from '../types';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsServerStart, ExpressionsServerSetup } from '../../../expressions/server';
+import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 
 export type ExpressionXyPluginSetup = void;
 export type ExpressionXyPluginStart = void;

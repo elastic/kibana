@@ -51,26 +51,12 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
-    parallelism: 27
+    parallelism: 30
     agents:
       queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 250
     key: default-cigroup
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
-          limit: 1
-
-  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
-    label: 'Docker CI Group'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 120
-    key: default-cigroup-docker
     retry:
       automatic:
         - exit_status: '-1'

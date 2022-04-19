@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   CasePostRequest,
   CaseSettings,

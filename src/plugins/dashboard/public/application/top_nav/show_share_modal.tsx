@@ -10,7 +10,7 @@ import { EuiCheckboxGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
-import type { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { DashboardSavedObject } from '../..';
 import { shareModalStrings } from '../../dashboard_strings';
 import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
