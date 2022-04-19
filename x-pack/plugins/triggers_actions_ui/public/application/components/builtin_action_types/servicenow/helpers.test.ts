@@ -25,7 +25,11 @@ const deprecatedConnector: ActionConnector = {
   isDeprecated: true,
 };
 
-const validConnector = { ...deprecatedConnector, config: { usesTableApi: false } };
+const validConnector = {
+  ...deprecatedConnector,
+  config: { usesTableApi: false },
+  isDeprecated: false,
+};
 
 describe('helpers', () => {
   describe('isRESTApiError', () => {
@@ -70,21 +74,21 @@ describe('helpers', () => {
   });
 
   describe('getConnectorDescriptiveTitle', () => {
-    it('adds deprecated to the connector name when the connector usesTableApi', () => {
+    it('adds deprecated to the connector name when the connector is deprectaed', () => {
       expect(getConnectorDescriptiveTitle(deprecatedConnector)).toEqual('Test (deprecated)');
     });
 
-    it('does not add deprecated when the connector has usesTableApi:false', () => {
+    it('does not add deprecated when the connector is not deprectaed', () => {
       expect(getConnectorDescriptiveTitle(validConnector)).toEqual('Test');
     });
   });
 
   describe('getSelectedConnectorIcon', () => {
-    it('returns undefined when the connector has usesTableApi:false', () => {
+    it('returns undefined when the connector is not deprectaed', () => {
       expect(getSelectedConnectorIcon(validConnector)).toBeUndefined();
     });
 
-    it('returns a component when the connector has usesTableApi:true', () => {
+    it('returns a component when the connector is deprectaed', () => {
       expect(getSelectedConnectorIcon(deprecatedConnector)).toBeDefined();
     });
   });

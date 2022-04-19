@@ -66,6 +66,7 @@ describe('getActionRoute', () => {
           "actionTypeId": "2",
           "config": Object {},
           "id": "1",
+          "isDeprecated": false,
           "isPreconfigured": false,
           "name": "action name",
         },

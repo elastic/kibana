@@ -44,7 +44,12 @@ describe('createActionRoute', () => {
     };
 
     const createApiResult = {
-      ...omit(createResult, ['actionTypeId', 'isPreconfigured', 'isMissingSecrets']),
+      ...omit(createResult, [
+        'actionTypeId',
+        'isPreconfigured',
+        'isDeprecated',
+        'isMissingSecrets',
+      ]),
       connector_type_id: createResult.actionTypeId,
       is_preconfigured: createResult.isPreconfigured,
       is_deprecated: createResult.isDeprecated,

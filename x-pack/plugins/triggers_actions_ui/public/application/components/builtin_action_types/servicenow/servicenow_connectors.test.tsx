@@ -33,6 +33,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     id: 'test',
     actionTypeId: '.servicenow',
     isPreconfigured: false,
+    isDeprecated: true,
     name: 'SN',
     config: {
       apiUrl: 'https://test/',
@@ -42,6 +43,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
   const usesImportSetApiConnector = {
     ...usesTableApiConnector,
+    isDeprecated: false,
     config: {
       ...usesTableApiConnector.config,
       usesTableApi: false,
