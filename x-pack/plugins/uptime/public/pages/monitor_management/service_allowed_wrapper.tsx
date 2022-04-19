@@ -59,8 +59,6 @@ export const PUBLIC_BETA_DESCRIPTION = i18n.translate(
   'xpack.uptime.monitorManagement.publicBetaDescription',
   {
     defaultMessage:
-      'Monitor management is available only for selected public beta users. With public\n' +
-      'beta access, you will be able to add HTTP, TCP, ICMP and Browser checks which will\n' +
-      "run on Elastic's managed Synthetics service nodes.",
+      "We've got a brand new app on the way. In the meantime, we're excited to give you early access to our globally managed testing infrastructure. This will allow you to upload synthetic monitors using our new point and click script recorder and manage your monitors with a new UI.",
   }
 );
