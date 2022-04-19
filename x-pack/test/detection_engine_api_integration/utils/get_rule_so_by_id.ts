@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Rule } from '@kbn/alerting-plugin/common';
 
