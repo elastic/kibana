@@ -11,7 +11,9 @@ import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[POST] /internal/uptime/service/monitors', () => {
+  // FLAKY https://github.com/elastic/kibana/issues/124601
+  // This feture is unsupported in 8.1. Do not unskip
+  describe.skip('[POST] /internal/uptime/service/monitors', () => {
     const supertest = getService('supertest');
 
     let _httpMonitorJson: HTTPFields;
