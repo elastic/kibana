@@ -243,7 +243,14 @@ function ObservabilityActions({
         </EuiContextMenuItem>,
       ],
     ];
-  }, [casePermissions?.crud, handleAddToExistingCaseClick, handleAddToNewCaseClick, linkToRule]);
+  }, [
+    casePermissions?.crud,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    linkToRule,
+    alert,
+    setFlyoutAlert,
+  ]);
 
   const actionsToolTip =
     actionsMenuItems.length <= 0
