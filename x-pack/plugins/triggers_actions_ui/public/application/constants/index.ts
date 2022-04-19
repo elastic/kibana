@@ -13,13 +13,14 @@ export {
 } from '@kbn/alerting-plugin/common';
 export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 
-export type Section = 'connectors' | 'rules' | 'alerts';
+export type Section = 'connectors' | 'rules' | 'alerts' | '__components_sandbox';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
 export const routeToRuleDetails = `/rule/:ruleId`;
 export const routeToInternalAlerts = `/alerts`;
+export const routeToInternalShareableComponentsSandbox = '/__components_sandbox';
 export const legacyRouteToRules = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
 

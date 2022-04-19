@@ -160,7 +160,6 @@ export const RulesList: React.FunctionComponent = () => {
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
-  const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(null);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -355,13 +354,11 @@ export const RulesList: React.FunctionComponent = () => {
         enableRule={async () => await enableRule({ http, id: item.id })}
         snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
           await snoozeRule({ http, id: item.id, snoozeEndTime });
-          setPreviousSnoozeInterval(interval);
         }}
         unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
-        item={item}
+        rule={item}
         onRuleChanged={() => loadRulesData()}
         isEditable={item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)}
-        previousSnoozeInterval={previousSnoozeInterval}
       />
     );
   };

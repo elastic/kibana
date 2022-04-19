@@ -285,11 +285,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                       await snoozeRule(rule, snoozeEndTime)
                     }
                     unsnoozeRule={async () => await unsnoozeRule(rule)}
-                    item={rule as RuleTableItem}
+                    rule={rule as RuleTableItem}
                     onRuleChanged={requestRefresh}
                     direction="row"
                     isEditable={hasEditButton}
-                    previousSnoozeInterval={null}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
