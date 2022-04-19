@@ -23,7 +23,7 @@ import {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
-import { PaletteRegistry, SeriesLayer } from '@kbn/charts-plugin/public';
+import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { CommonXYDataLayerConfigResult, XScaleType } from '../../common';
 import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
