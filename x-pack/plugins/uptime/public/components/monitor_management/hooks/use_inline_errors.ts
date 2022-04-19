@@ -17,8 +17,8 @@ import { useInlineErrorsCount } from './use_inline_errors_count';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
 const sortFieldMap: Record<string, string> = {
-  name: 'monitor.name',
-  urls: 'url.full',
+  ['name.keyword']: 'monitor.name',
+  ['urls.keyword']: 'url.full',
   '@timestamp': '@timestamp',
 };
 
