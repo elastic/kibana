@@ -18,7 +18,7 @@ import { getPendingActionCounts } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
- * Registers routes for checking status of endpoints based on pending actions
+ * Registers routes for checking status of actions for a given list of endpoints
  */
 export function registerActionStatusRoutes(
   router: SecuritySolutionPluginRouter,

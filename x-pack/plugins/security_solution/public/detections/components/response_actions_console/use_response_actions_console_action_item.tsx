@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
 import { ResponseActionsConsoleContextMenuItem } from './response_actions_console_context_menu_item';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -20,6 +21,8 @@ export const useResponseActionsConsoleActionItem = (
     'responseActionsConsoleEnabled'
   );
 
+  const canManageEndpoints = useUserPrivileges().endpointPrivileges.canAccessEndpointManagement;
+
   const isEndpointAlert = useMemo(() => {
     return isAlertFromEndpointEvent({ data: eventDetailsData || [] });
   }, [eventDetailsData]);
@@ -32,7 +35,7 @@ export const useResponseActionsConsoleActionItem = (
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (!eventDetailsData || !isEndpointAlert || !endpointId) {
+    if (!canManageEndpoints || !eventDetailsData || !isEndpointAlert || !endpointId) {
       return actions;
     }
 
@@ -43,5 +46,12 @@ export const useResponseActionsConsoleActionItem = (
     }
 
     return actions;
-  }, [endpointId, eventDetailsData, isEndpointAlert, isResponseActionsConsoleEnabled, onClick]);
+  }, [
+    canManageEndpoints,
+    endpointId,
+    eventDetailsData,
+    isEndpointAlert,
+    isResponseActionsConsoleEnabled,
+    onClick,
+  ]);
 };
