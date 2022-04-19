@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 
 import type { SecurityLicense } from '../../../common/licensing';
 import {

@@ -6,12 +6,14 @@
  */
 import { min } from 'lodash';
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,
@@ -35,8 +37,6 @@ import {
 import { UNNAMED_LOCATION } from '../../../common/constants';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs, UptimeESClient, createUptimeESClient } from '../lib';
-import { ActionGroupIdsOf } from '../../../../alerting/common';
-import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../observability/common';
 import {
   ALERT_REASON_MSG,
   MESSAGE,

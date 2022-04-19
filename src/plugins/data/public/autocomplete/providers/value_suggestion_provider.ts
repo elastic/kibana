@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 import { IIndexPattern, IFieldType, UI_SETTINGS, ValueSuggestionsMethod } from '../../../common';
 import type { TimefilterSetup } from '../../query';
 import { AutocompleteUsageCollector } from '../collectors';

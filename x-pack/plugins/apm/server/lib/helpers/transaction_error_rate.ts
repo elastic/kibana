@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
+import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../common/event_outcome';
 
 export const getOutcomeAggregation = () => ({
   terms: {

@@ -9,19 +9,16 @@ import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
-import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { ValidLayer, YConfig } from '@kbn/expression-xy-plugin/common';
 import {
   State,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
 } from './types';
-import { OperationMetadata, DatasourcePublicAPI } from '../types';
+import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-import type {
-  ValidLayer,
-  YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -50,7 +47,7 @@ export const getSortedAccessors = (
 
 export const toExpression = (
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType
@@ -107,7 +104,7 @@ const simplifiedLayerExpression = {
 
 export function toPreviewExpression(
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   eventAnnotationService: EventAnnotationServiceType
 ) {
@@ -158,7 +155,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType

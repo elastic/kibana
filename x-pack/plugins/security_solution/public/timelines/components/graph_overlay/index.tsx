@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -29,20 +30,28 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { sourcererSelectors } from '../../../common/store';
 
-const OverlayContainer = styled.div`
+const OverlayStyle = css`
   display: flex;
   flex-direction: column;
   flex: 1;
   width: 100%;
 `;
 
-const FullScreenOverlayContainer = styled.div`
+const OverlayContainer = styled.div`
+  ${OverlayStyle}
+`;
+
+const FullScreenOverlayStyles = css`
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: ${(props) => props.theme.eui.euiZLevel3};
+  z-index: ${euiThemeVars.euiZLevel3};
+`;
+
+const FullScreenOverlayContainer = styled.div`
+  ${FullScreenOverlayStyles}
 `;
 
 const StyledResolver = styled(Resolver)`
@@ -50,7 +59,8 @@ const StyledResolver = styled(Resolver)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+  ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM};
+  background-color: ${theme.eui.euiColorEmptyShade};`}
   overflow: hidden;
   width: 100%;
 `;
@@ -134,26 +144,25 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     [defaultDataView.patternList, isInTimeline, timelinePatterns]
   );
 
-  if (!isInTimeline && sessionViewConfig !== null) {
-    if (fullScreen) {
-      return (
-        <FullScreenOverlayContainer data-test-subj="overlayContainer">
-          <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
-            <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
-            <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
-          </EuiFlexGroup>
-        </FullScreenOverlayContainer>
-      );
-    } else {
-      return (
-        <OverlayContainer data-test-subj="overlayContainer">
-          <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
-            <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
-            <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
-          </EuiFlexGroup>
-        </OverlayContainer>
-      );
+  const sessionContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (fullScreen && sessionContainerRef.current) {
+      sessionContainerRef.current.setAttribute('style', FullScreenOverlayStyles.join(''));
+    } else if (sessionContainerRef.current) {
+      sessionContainerRef.current.setAttribute('style', OverlayStyle.join(''));
     }
+  }, [fullScreen]);
+
+  if (!isInTimeline && sessionViewConfig !== null) {
+    return (
+      <OverlayContainer data-test-subj="overlayContainer" ref={sessionContainerRef}>
+        <EuiFlexGroup alignItems="flexStart" gutterSize="none" direction="column">
+          <EuiFlexItem grow={false}>{Navigation}</EuiFlexItem>
+          <ScrollableFlexItem grow={2}>{SessionView}</ScrollableFlexItem>
+        </EuiFlexGroup>
+      </OverlayContainer>
+    );
   } else if (fullScreen && !isInTimeline) {
     return (
       <FullScreenOverlayContainer data-test-subj="overlayContainer">

@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
-import type { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 

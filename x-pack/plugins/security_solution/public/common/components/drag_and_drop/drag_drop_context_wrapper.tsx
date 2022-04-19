@@ -13,6 +13,10 @@ import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
+import {
+  addFieldToTimelineColumns,
+  getTimelineIdFromColumnDroppableId,
+} from '@kbn/timelines-plugin/public';
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
 import { dragAndDropSelectors } from '../../store';
@@ -37,10 +41,6 @@ import {
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import {
-  addFieldToTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-} from '../../../../../timelines/public';
 import { alertsHeaders } from '../alerts_viewer/default_headers';
 
 // @ts-expect-error

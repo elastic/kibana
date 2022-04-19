@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin } from 'src/core/server';
+import { Plugin } from '@kbn/core/server';
 
 export class VisTypeXYServerPlugin implements Plugin {
   public setup() {

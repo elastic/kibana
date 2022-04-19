@@ -8,8 +8,8 @@
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/common';
-import { useLinkProps } from '../../../../observability/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import {
   FetchLogViewStatusError,
   FetchLogViewError,

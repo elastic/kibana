@@ -8,16 +8,16 @@
 import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  ALERT_WORKFLOW_STATUS,
+  STATUS_VALUES,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import { AlertInfo } from '../../common/types';
 import { UpdateAlertRequest } from '../../client/alerts/types';
-import {
-  ALERT_WORKFLOW_STATUS,
-  STATUS_VALUES,
-} from '../../../../rule_registry/common/technical_rule_data_field_names';
 import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
 export class AlertService {

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { SavedObjectsFindResponse } from 'kibana/server';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { copyAllowlistedFields, packEventFields, savedQueryEventFields } from './filters';
 import type { ESClusterInfo, ESLicense, ListTemplate, TelemetryEvent } from './types';
 

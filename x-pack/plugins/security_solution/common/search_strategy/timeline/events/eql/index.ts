@@ -11,4 +11,4 @@ export type {
   EqlOptionsData,
   EqlOptionsSelected,
   FieldsEqlOptions,
-} from '../../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
