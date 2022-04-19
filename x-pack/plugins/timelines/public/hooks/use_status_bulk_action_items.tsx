@@ -27,7 +27,7 @@ export const useStatusBulkActionItems = ({
   setEventsDeleted,
   onUpdateSuccess,
   onUpdateFailure,
-  timelineId,
+  timelineId = STANDALONE_ID,
 }: StatusBulkActionsProps) => {
   const { updateAlertStatus } = useUpdateAlertsStatus(timelineId !== STANDALONE_ID);
   const { addSuccess, addError, addWarning } = useAppToasts();

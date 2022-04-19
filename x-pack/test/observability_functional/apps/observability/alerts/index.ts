@@ -275,6 +275,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(enabledCheckBoxes.length).to.eql(3);
           });
         });
+
+        it('validate functionality of the single alert actions button', async () => {
+          const singleActions = await testSubjects.findAll('alerts-table-row-action-more');
+          await singleActions[0].click();
+
+          const closeAlertAction = await testSubjects.find('close-alert-status');
+          await closeAlertAction.click();
+
+          await observability.alerts.common.setWorkflowStatusFilter('closed');
+
+          await retry.try(async () => {
+            const enabledCheckBoxes =
+              await observability.alerts.common.getAllEnabledCheckBoxInTable();
+            expect(enabledCheckBoxes.length).to.eql(1);
+          });
+        });
       });
     });
   });
