@@ -29,6 +29,7 @@ describe('updateActionConnector', () => {
     const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'te/st',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'My test',
       config: {},
       secrets: {},
