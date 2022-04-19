@@ -139,6 +139,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           // validate each event
           let executeCount = 0;
+          let numActiveAlerts = 0;
+          let numNewAlerts = 0;
+          let numRecoveredAlerts = 0;
           let currentExecutionId;
           const executionIds = [];
           const executeStatuses = ['ok', 'active', 'active'];
@@ -161,28 +164,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     category: response.body.rule_type_id,
                     license: 'basic',
                     ruleset: 'alertsFixture',
-                  },
-                  consumer: 'alertsFixture',
-                });
-                break;
-              case 'execute':
-                validateEvent(event, {
-                  spaceId: space.id,
-                  savedObjects: [
-                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
-                  ],
-                  outcome: 'success',
-                  message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
-                  status: executeStatuses[executeCount++],
-                  shouldHaveTask: true,
-                  executionId: currentExecutionId,
-                  ruleTypeId: response.body.rule_type_id,
-                  rule: {
-                    id: alertId,
-                    category: response.body.rule_type_id,
-                    license: 'basic',
-                    ruleset: 'alertsFixture',
-                    name: response.body.name,
                   },
                   consumer: 'alertsFixture',
                 });
@@ -210,6 +191,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 });
                 break;
               case 'new-instance':
+                numNewAlerts++;
                 validateInstanceEvent(
                   event,
                   `created new alert: 'instance'`,
@@ -218,6 +200,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 );
                 break;
               case 'recovered-instance':
+                numRecoveredAlerts++;
                 validateInstanceEvent(
                   event,
                   `alert 'instance' has recovered`,
@@ -226,12 +209,41 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 );
                 break;
               case 'active-instance':
+                numActiveAlerts++;
                 validateInstanceEvent(
                   event,
                   `active alert: 'instance' in actionGroup: 'default'`,
                   false,
                   currentExecutionId
                 );
+                break;
+              case 'execute':
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                  ],
+                  outcome: 'success',
+                  message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
+                  status: executeStatuses[executeCount++],
+                  shouldHaveTask: true,
+                  executionId: currentExecutionId,
+                  ruleTypeId: response.body.rule_type_id,
+                  rule: {
+                    id: alertId,
+                    category: response.body.rule_type_id,
+                    license: 'basic',
+                    ruleset: 'alertsFixture',
+                    name: response.body.name,
+                  },
+                  consumer: 'alertsFixture',
+                  numActiveAlerts,
+                  numNewAlerts,
+                  numRecoveredAlerts,
+                });
+                numActiveAlerts = 0;
+                numNewAlerts = 0;
+                numRecoveredAlerts = 0;
                 break;
               // this will get triggered as we add new event actions
               default:
@@ -343,10 +355,22 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           // validate each event
           let currentExecutionId;
+          let numActiveAlerts = 0;
+          let numNewAlerts = 0;
+          let numRecoveredAlerts = 0;
           for (const event of events) {
             switch (event?.event?.action) {
               case 'execute-start':
                 currentExecutionId = event?.kibana?.alert?.rule?.execution?.uuid;
+                break;
+              case 'new-instance':
+                numNewAlerts++;
+                break;
+              case 'recovered-instance':
+                numRecoveredAlerts++;
+                break;
+              case 'active-instance':
+                numActiveAlerts++;
                 break;
               case 'execute':
                 validateEvent(event, {
@@ -369,7 +393,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     name: response.body.name,
                   },
                   consumer: 'alertsFixture',
+                  numActiveAlerts,
+                  numNewAlerts,
+                  numRecoveredAlerts,
                 });
+                numActiveAlerts = 0;
+                numNewAlerts = 0;
+                numRecoveredAlerts = 0;
                 expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(
                   numSearches
                 );
@@ -477,6 +507,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           // validate each event
           let executeCount = 0;
+          let numActiveAlerts = 0;
+          let numNewAlerts = 0;
+          let numRecoveredAlerts = 0;
           let currentExecutionId;
           const executeStatuses = ['ok', 'active', 'active'];
           for (const event of events) {
@@ -497,28 +530,6 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     category: response.body.rule_type_id,
                     license: 'basic',
                     ruleset: 'alertsFixture',
-                  },
-                  consumer: 'alertsFixture',
-                });
-                break;
-              case 'execute':
-                validateEvent(event, {
-                  spaceId: space.id,
-                  savedObjects: [
-                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
-                  ],
-                  outcome: 'success',
-                  message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
-                  status: executeStatuses[executeCount++],
-                  shouldHaveTask: true,
-                  executionId: currentExecutionId,
-                  ruleTypeId: response.body.rule_type_id,
-                  rule: {
-                    id: alertId,
-                    category: response.body.rule_type_id,
-                    license: 'basic',
-                    ruleset: 'alertsFixture',
-                    name: response.body.name,
                   },
                   consumer: 'alertsFixture',
                 });
@@ -551,6 +562,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 });
                 break;
               case 'new-instance':
+                numNewAlerts++;
                 validateInstanceEvent(
                   event,
                   `created new alert: 'instance'`,
@@ -559,6 +571,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 );
                 break;
               case 'recovered-instance':
+                numRecoveredAlerts++;
                 validateInstanceEvent(
                   event,
                   `alert 'instance' has recovered`,
@@ -567,6 +580,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 );
                 break;
               case 'active-instance':
+                numActiveAlerts++;
                 expect(
                   [firstSubgroup, secondSubgroup].includes(
                     event?.kibana?.alerting?.action_subgroup!
@@ -578,6 +592,34 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   false,
                   currentExecutionId
                 );
+                break;
+              case 'execute':
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                  ],
+                  outcome: 'success',
+                  message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
+                  status: executeStatuses[executeCount++],
+                  shouldHaveTask: true,
+                  executionId: currentExecutionId,
+                  ruleTypeId: response.body.rule_type_id,
+                  rule: {
+                    id: alertId,
+                    category: response.body.rule_type_id,
+                    license: 'basic',
+                    ruleset: 'alertsFixture',
+                    name: response.body.name,
+                  },
+                  consumer: 'alertsFixture',
+                  numActiveAlerts,
+                  numNewAlerts,
+                  numRecoveredAlerts,
+                });
+                numActiveAlerts = 0;
+                numNewAlerts = 0;
+                numRecoveredAlerts = 0;
                 break;
               // this will get triggered as we add new event actions
               default:
@@ -687,6 +729,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               ruleset: 'alertsFixture',
             },
             consumer: 'alertsFixture',
+            numActiveAlerts: 0,
+            numNewAlerts: 0,
+            numRecoveredAlerts: 0,
           });
         });
       });
@@ -715,6 +760,9 @@ interface ValidateEventLogParams {
   reason?: string;
   executionId?: string;
   numTriggeredActions?: number;
+  numActiveAlerts?: number;
+  numRecoveredAlerts?: number;
+  numNewAlerts?: number;
   consumer?: string;
   ruleTypeId: string;
   rule?: {
@@ -741,6 +789,9 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     shouldHaveTask,
     executionId,
     numTriggeredActions = 1,
+    numActiveAlerts,
+    numNewAlerts,
+    numRecoveredAlerts,
     consumer,
     ruleTypeId,
   } = params;
@@ -774,6 +825,24 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (consumer) {
     expect(event?.kibana?.alert?.rule?.consumer).to.be(consumer);
+  }
+
+  if (numActiveAlerts) {
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_active_alerts).to.be(
+      numActiveAlerts
+    );
+  }
+
+  if (numRecoveredAlerts) {
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_recovered_alerts).to.be(
+      numRecoveredAlerts
+    );
+  }
+
+  if (numNewAlerts) {
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_new_alerts).to.be(
+      numNewAlerts
+    );
   }
 
   expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);
