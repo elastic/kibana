@@ -52,7 +52,7 @@ import { PLUGIN_ID } from './common/constants';
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
-  alertsTableTypeRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
@@ -201,7 +201,7 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
-      alertsTableTypeRegistry: this.alertsTableConfigurationRegistry,
+      alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
     };
   }
 
