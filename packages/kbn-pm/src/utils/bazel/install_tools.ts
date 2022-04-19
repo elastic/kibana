@@ -15,7 +15,8 @@ import { log } from '../log';
 async function readBazelToolsVersionFile(repoRootPath: string, versionFilename: string) {
   const version = (await readFile(resolve(repoRootPath, versionFilename)))
     .toString()
-    .split('\n')[0];
+    .split('\n')[0]
+    .trim();
 
   if (!version) {
     throw new Error(
