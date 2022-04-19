@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSpacer, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../shared/doc_links';
+import { docLinks } from '../doc_links';
 
 export const ElasticsearchResources: React.FC = () => (
   <EuiPanel hasShadow grow={false} color="subdued">

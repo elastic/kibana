@@ -21,16 +21,17 @@ import './product_card.scss';
 
 interface ProductCardProps {
   // Expects product plugin constants (@see common/constants.ts)
-  product: {
+ product: {
     ID: string;
     NAME: string;
     CARD_DESCRIPTION: string;
     URL: string;
   };
+  image: string;
   url?: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, url }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, image, url }) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { config } = useValues(KibanaLogic);
 
@@ -54,12 +55,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, url }) => {
     <EuiCard
       className="productCard"
       titleElement="h2"
-      textAlign="left"
-      hasBorder
       title={i18n.translate('xpack.enterpriseSearch.overview.productCard.heading', {
         defaultMessage: 'Elastic {productName}',
         values: { productName: product.NAME },
       })}
+      image={
+        <div className="productCard__imageContainer">
+          <img src={image} className="productCard__image" alt="" role="presentation" />
+        </div>
+      }
       paddingSize="l"
       description={<EuiTextColor color="subdued">{product.CARD_DESCRIPTION}</EuiTextColor>}
       footer={

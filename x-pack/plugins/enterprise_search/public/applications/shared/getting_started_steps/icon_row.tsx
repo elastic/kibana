@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiBadge, EuiToolTip, EuiText } fro
 
 import { i18n } from '@kbn/i18n';
 
-import { images } from '../../../workplace_search/components/shared/assets/source_icons';
+import { images } from '../../workplace_search/components/shared/assets/source_icons';
 
 import './icon_row.scss';
 
@@ -82,7 +82,7 @@ const icons = [
 
 export const IconRow: React.FC = () => {
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" className="gettingStartedSteps">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {icons.map((item, index) => {

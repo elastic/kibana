@@ -23,9 +23,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
-import { SEARCH_INDICES_PATH } from '../../../enterprise_search_content/routes';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../common/constants';
+import { SEARCH_INDICES_PATH } from '../../enterprise_search_content/routes';
+import { EuiLinkTo } from '../react_router_helpers';
 
 import searchIndicesIllustration from './search_indices.svg';
 import './add_content_empty_prompt.scss';

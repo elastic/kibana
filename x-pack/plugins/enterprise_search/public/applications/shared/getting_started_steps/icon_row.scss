@@ -1,0 +1,13 @@
+.gettingStartedSteps {
+  .grayscaleSvg {
+      filter: grayscale(1);
+  }
+
+  .addManyMoreButton {
+    border: $euiBorderThin;
+  }
+
+  .iconTooltip {
+    border-bottom: $euiBorderThin;
+  }
+}
