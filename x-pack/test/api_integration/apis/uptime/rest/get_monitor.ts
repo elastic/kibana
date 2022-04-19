@@ -13,7 +13,7 @@ import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[GET] /internal/uptime/service/monitors', () => {
+  describe.skip('[GET] /internal/uptime/service/monitors', () => {
     const supertest = getService('supertest');
 
     let _monitors: MonitorFields[];
