@@ -7,8 +7,11 @@
 
 import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
-import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ActionDetailsRequestSchema,
+  ActionStatusRequestSchema,
+} from '../../../../common/endpoint/schema/actions';
+import { ACTION_DETAILS_ROUTE, ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -18,12 +21,13 @@ import { getPendingActionCounts } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
- * Registers routes for checking status of actions for a given list of endpoints
+ * Registers routes for checking status of actions
  */
 export function registerActionStatusRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
+  // Summary of action status f for a given list of endpoints
   router.get(
     {
       path: ACTION_STATUS_ROUTE,
@@ -36,7 +40,38 @@ export function registerActionStatusRoutes(
       actionStatusRequestHandler(endpointContext)
     )
   );
+
+  // Details for a given action id
+  router.get(
+    {
+      path: ACTION_DETAILS_ROUTE,
+      validate: ActionDetailsRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      endpointContext.logFactory.get('hostIsolationDetails'),
+      actionDetailsRequestHandler(endpointContext)
+    )
+  );
 }
+
+export const actionDetailsRequestHandler = (
+  endpointContext: EndpointAppContext
+): RequestHandler<
+  TypeOf<typeof ActionDetailsRequestSchema.params>,
+  never,
+  never,
+  SecuritySolutionRequestHandlerContext
+> => {
+  return async (context, req, res) => {
+    // FIXME:PT code it
+
+    return res.ok({
+      body: { message: `TODO: ${req.params.action_id}` },
+    });
+  };
+};
 
 export const actionStatusRequestHandler = function (
   endpointContext: EndpointAppContext
