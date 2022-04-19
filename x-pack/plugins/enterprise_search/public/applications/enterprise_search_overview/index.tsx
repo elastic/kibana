@@ -18,7 +18,6 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { ElasticsearchGuide } from './components/elasticsearch_guide';
 import { ErrorConnecting } from './components/error_connecting';
-// import { EnterpriseSearchOverviewHeaderActions } from './components/layout';
 import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
 import { ROOT_PATH, SETUP_GUIDE_PATH, ELASTICSEARCH_GUIDE_PATH } from './routes';

@@ -21,7 +21,7 @@ import './product_card.scss';
 
 interface ProductCardProps {
   // Expects product plugin constants (@see common/constants.ts)
- product: {
+  product: {
     ID: string;
     NAME: string;
     CARD_DESCRIPTION: string;
