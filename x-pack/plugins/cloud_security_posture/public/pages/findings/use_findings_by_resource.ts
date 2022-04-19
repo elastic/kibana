@@ -54,7 +54,7 @@ export const getFindingsByResourceAggQuery = ({
         composite: {
           size: 10 * 1000,
           sources: [
-            { resource_id: { terms: { field: 'resource_id' } } },
+            { resource_id: { terms: { field: 'resource_id.keyword' } } },
             { cluster_id: { terms: { field: 'cluster_id.keyword' } } },
             { cis_section: { terms: { field: 'rule.section' } } },
           ],
