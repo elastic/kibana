@@ -3,7 +3,7 @@ pageLoadAssetSize:
   alerting: 106936
   apm: 64385
   canvas: 1066647
-  charts: 95000
+  charts: 55000
   cloud: 21076
   console: 46091
   core: 435325
