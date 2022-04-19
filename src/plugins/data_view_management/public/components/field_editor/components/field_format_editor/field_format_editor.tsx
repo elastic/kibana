@@ -12,8 +12,8 @@ import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import type {
   FieldFormatEditorFactory,
   FieldFormatEditor as InnerFieldFormatEditor,
-} from 'src/plugins/data_view_field_editor/public';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
+} from '@kbn/data-view-field-editor-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 export interface FieldFormatEditorProps {
   fieldType: string;

@@ -10,7 +10,7 @@ import { Redirect, Route, Router, Switch } from 'react-router-dom';
 import React from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';

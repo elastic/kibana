@@ -12,6 +12,7 @@ import Mustache from 'mustache';
 
 import { run, createFailError } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
+import { getAllRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
 
 import { JestConfigs, CONFIG_NAMES } from './configs';
 
@@ -34,11 +35,11 @@ const roots: string[] = [
   'x-pack/plugins/security_solution/server',
   'x-pack/plugins/security_solution',
   'x-pack/plugins',
-  'packages',
   'src/plugins',
   'test',
   'src/core',
   'src',
+  ...getAllRepoRelativeBazelPackageDirs(),
 ];
 
 export async function runCheckJestConfigsCli() {

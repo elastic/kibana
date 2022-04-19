@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { DataView } from 'src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import type { ElasticSearchHit } from '../../types';
 

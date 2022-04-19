@@ -37,6 +37,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "//packages/kbn-utils",
+  "//packages/kbn-import-resolver",
   "@npm//resolve",
   "@npm//@typescript-eslint/typescript-estree",
   "@npm//eslint",
@@ -55,6 +56,8 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-dev-utils:npm_module_types", # only required for the tests, which are excluded except on windows
+  "//packages/kbn-import-resolver:npm_module_types",
+  "@npm//dedent", # only required for the tests, which are excluded except on windows
   "@npm//@types/eslint",
   "@npm//@types/jest",
   "@npm//@types/node",

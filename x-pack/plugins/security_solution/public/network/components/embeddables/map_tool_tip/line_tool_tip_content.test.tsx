@@ -19,7 +19,7 @@ import {
 import {
   ITooltipProperty,
   TooltipProperty,
-} from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+} from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 
 describe('LineToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [

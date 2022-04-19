@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
 import {
   CASE_CREATED,
@@ -20,7 +21,6 @@ import {
 import { getMaybeDate } from '../../formatted_date/maybe_date';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyTagValue } from '../../empty_value';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { CaseViewMetricsProps } from './types';
 
 export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =

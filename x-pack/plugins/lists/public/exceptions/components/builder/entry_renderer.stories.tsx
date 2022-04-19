@@ -8,15 +8,14 @@
 import { Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-
-import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { fields } from '../../../../../../../src/plugins/data/common/mocks';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import type { AutocompleteStart } from '@kbn/data-plugin/public';
+import { fields } from '@kbn/data-plugin/common/mocks';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
 

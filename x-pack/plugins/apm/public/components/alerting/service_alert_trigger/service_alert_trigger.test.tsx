@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { ServiceAlertTrigger } from './';
+import { ServiceAlertTrigger } from '.';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return <MemoryRouter>{children}</MemoryRouter>;

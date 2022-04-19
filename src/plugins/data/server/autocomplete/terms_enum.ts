@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IFieldType } from '../../common';
+import { FieldSpec } from '../../common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 import { ConfigSchema } from '../../config';
 
@@ -20,7 +20,7 @@ export async function termsEnumSuggestions(
   fieldName: string,
   query: string,
   filters?: estypes.QueryDslQueryContainer[],
-  field?: IFieldType,
+  field?: FieldSpec,
   abortSignal?: AbortSignal
 ) {
   const { tiers } = config.autocomplete.valueSuggestions;

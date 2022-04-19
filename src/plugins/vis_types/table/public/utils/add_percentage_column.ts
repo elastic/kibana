@@ -8,7 +8,7 @@
 
 import { findIndex } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DatatableColumn } from 'src/plugins/expressions';
+import { DatatableColumn } from '@kbn/expressions-plugin';
 import { getFormatService } from '../services';
 import { FormattedColumns, TableContext } from '../types';
 

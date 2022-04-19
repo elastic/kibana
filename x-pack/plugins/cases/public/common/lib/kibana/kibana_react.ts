@@ -10,7 +10,7 @@ import {
   useKibana,
   useUiSetting,
   useUiSetting$,
-} from '../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 import { StartServices } from '../../../types';
 
 const useTypedKibana = () => useKibana<StartServices>();

@@ -6,7 +6,7 @@
  */
 
 import { newJobCapsService } from './new_job_capabilities_service';
-import type { DataView } from '../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 // there is magic happening here. starting the include name with `mock..`
 // ensures it can be lazily loaded by the jest.mock function below.

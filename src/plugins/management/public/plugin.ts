@@ -8,9 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
-import { ManagementSetup, ManagementStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -22,7 +21,8 @@ import {
   AppStatus,
   AppNavLinkStatus,
   AppDeepLink,
-} from '../../../core/public';
+} from '@kbn/core/public';
+import { ManagementSetup, ManagementStart } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
