@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 export const registerFeature = (homePlugin: HomePublicPluginSetup) => {
   homePlugin.featureCatalogue.register({
@@ -20,6 +20,6 @@ export const registerFeature = (homePlugin: HomePublicPluginSetup) => {
     icon: 'grokApp',
     path: '/app/dev_tools#/grokdebugger',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin',
   });
 };
