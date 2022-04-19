@@ -96,7 +96,7 @@ export function mapNodesVersionCompatibility(
 
   // Note: If incompatible and warning nodes are present `message` only contains
   // an incompatibility notice.
-  let message;
+  let message: string | undefined;
   if (incompatibleNodes.length > 0) {
     const incompatibleNodeNames = incompatibleNodes.map((node) => node.name).join(', ');
     if (ignoreVersionMismatch) {
