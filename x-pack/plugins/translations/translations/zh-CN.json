@@ -6420,7 +6420,6 @@
     "visualizations.listing.table.typeColumnName": "类型",
     "visualizations.listingPageTitle": "Visualize 库",
     "visualizations.newChart.conditionalMessage.advancedSettingsLink": "免费的 API 密钥。",
-    "visualizations.newChart.conditionalMessage.newLibrary": "切换到{link}中的旧库",
     "visualizations.newHeatmapChart.notificationMessage": "新的热图图表库尚不支持拆分图表聚合。{conditionalMessage}",
     "visualizations.newVisWizard.aggBasedGroupDescription": "使用我们的经典可视化库，基于聚合创建图表。",
     "visualizations.newVisWizard.aggBasedGroupTitle": "基于聚合",
