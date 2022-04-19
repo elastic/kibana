@@ -1944,7 +1944,7 @@
             }
           }
         },
-        "percentile_num_scheduled_actions_per_day": {
+        "percentile_num_generated_actions_per_day": {
           "properties": {
             "p50": {
               "type": "long"
@@ -1957,7 +1957,7 @@
             }
           }
         },
-        "percentile_num_scheduled_actions_by_type_per_day": {
+        "percentile_num_generated_actions_by_type_per_day": {
           "properties": {
             "p50": {
               "properties": {
