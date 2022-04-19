@@ -97,14 +97,14 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     name: i18n.HOST_ALERTS_HOSTNAME_COLUMN,
     truncateText: true,
     textOnly: true,
-    render: (hostName: string) => (
-      <HostDetailsLink hostName={hostName} data-test-subj="hostSeverityAlertsTable-hostName" />
-    ),
+    render: (hostName: string) => <HostDetailsLink hostName={hostName} />,
   },
   {
     field: 'totalAlerts',
     name: i18n.ALERTS_COLUMN,
-    render: (totalAlerts: number) => <div>{totalAlerts}</div>,
+    render: (totalAlerts: number) => (
+      <div data-test-subj="hostSeverityAlertsTable-totalAlerts">{totalAlerts}</div>
+    ),
   },
   {
     field: 'critical',

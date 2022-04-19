@@ -94,32 +94,10 @@ describe('HostAlertsTable', () => {
     mockUseHostAlertsItemsReturn({ items: [parsedVulnerableHostsAlertsResult[0]] });
     const { getByTestId } = renderComponent();
 
-    expect(getByTestId('hostSeverityAlertsTable-hostName')).toHaveTextContent('Host-342m5gl1g2');
     expect(getByTestId('hostSeverityAlertsTable-totalAlerts')).toHaveTextContent('100');
     expect(getByTestId('hostSeverityAlertsTable-critical')).toHaveTextContent('5');
     expect(getByTestId('hostSeverityAlertsTable-high')).toHaveTextContent('50');
     expect(getByTestId('hostSeverityAlertsTable-medium')).toHaveTextContent('5');
     expect(getByTestId('hostSeverityAlertsTable-low')).toHaveTextContent('40');
-  });
-
-  it('should generate the table items links', () => {
-    mockUseHostAlertsItemsReturn({ items: [parsedVulnerableHostsAlertsResult[0]] });
-
-    const { getByTestId } = renderComponent();
-
-    expect(mockGetAppUrl).toBeCalledWith({
-      deepLinkId: SecurityPageName.hosts,
-      path: `${parsedVulnerableHostsAlertsResult[0].hostName}`,
-    });
-
-    expect(getByTestId('hostSeverityAlertsTable-hostName')).toHaveAttribute(
-      'href',
-      `/app/security/hosts/${parsedVulnerableHostsAlertsResult[0].hostName}`
-    );
-
-    expect(getByTestId('hostSeverityAlertsTable-totalAlerts')).toHaveAttribute(
-      'href',
-      `/app/security/hosts/${parsedVulnerableHostsAlertsResult[0].hostName}`
-    );
   });
 });

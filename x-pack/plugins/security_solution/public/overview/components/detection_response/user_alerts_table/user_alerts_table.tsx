@@ -105,7 +105,9 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
   {
     field: 'totalAlerts',
     name: i18n.ALERTS_COLUMN,
-    render: (totalAlerts: number, { userName }) => <div>{totalAlerts}</div>,
+    render: (totalAlerts: number, { userName }) => (
+      <div data-test-subj="userSeverityAlertsTable-totalAlerts">{totalAlerts}</div>
+    ),
   },
   {
     field: 'critical',

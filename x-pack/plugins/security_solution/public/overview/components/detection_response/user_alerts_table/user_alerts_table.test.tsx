@@ -94,32 +94,10 @@ describe('UserAlertsTable', () => {
     mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
     const { getByTestId } = renderComponent();
 
-    expect(getByTestId('userSeverityAlertsTable-userName')).toHaveTextContent('crffn20qcs');
-    expect(getByTestId('userSeverityAlertsTable-totalAlerts')).toHaveTextContent('4');
     expect(getByTestId('userSeverityAlertsTable-critical')).toHaveTextContent('4');
+    expect(getByTestId('userSeverityAlertsTable-totalAlerts')).toHaveTextContent('4');
     expect(getByTestId('userSeverityAlertsTable-high')).toHaveTextContent('1');
     expect(getByTestId('userSeverityAlertsTable-medium')).toHaveTextContent('1');
     expect(getByTestId('userSeverityAlertsTable-low')).toHaveTextContent('1');
-  });
-
-  it('should generate the table items links', () => {
-    mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
-
-    const { getByTestId } = renderComponent();
-
-    expect(mockGetAppUrl).toBeCalledWith({
-      deepLinkId: SecurityPageName.users,
-      path: `${parsedVulnerableUserAlertsResult[0].userName}`,
-    });
-
-    expect(getByTestId('userSeverityAlertsTable-userName')).toHaveAttribute(
-      'href',
-      `/app/security/users/${parsedVulnerableUserAlertsResult[0].userName}`
-    );
-
-    expect(getByTestId('userSeverityAlertsTable-totalAlerts')).toHaveAttribute(
-      'href',
-      `/app/security/users/${parsedVulnerableUserAlertsResult[0].userName}`
-    );
   });
 });
