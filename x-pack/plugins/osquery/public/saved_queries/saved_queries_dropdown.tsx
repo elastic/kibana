@@ -75,6 +75,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       if (!newSelectedOptions.length) {
         onChange(null);
         setSelectedOptions(newSelectedOptions);
+
         return;
       }
 

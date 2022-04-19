@@ -195,6 +195,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           // @ts-expect-error update types
           acc[value?.field] = [...(acc[value?.field] ?? []), key];
         }
+
         return acc;
       },
       {},
@@ -274,6 +275,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             });
             seen.add(fieldName);
           }
+
           return acc;
         }
 
@@ -291,6 +293,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             });
             seen.add(displayAsText);
           }
+
           return acc;
         }
 

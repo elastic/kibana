@@ -14,10 +14,12 @@ export const useErrorToast = () => {
   const {
     notifications: { toasts },
   } = useKibana().services;
+
   return (error?: unknown, opts?: ErrorToastOptions) => {
     if (errorToast) {
       toasts.remove(errorToast);
     }
+
     if (error) {
       setErrorToast(
         // @ts-expect-error update types

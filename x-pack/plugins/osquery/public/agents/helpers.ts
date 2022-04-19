@@ -30,8 +30,10 @@ export const getNumOverlapped = (
       sum += policies[pol] ?? 0;
     });
   });
+
   return sum;
 };
+
 interface Aggs extends estypes.AggregationsTermsAggregateBase {
   buckets: AggregationDataPoint[];
 }
@@ -51,6 +53,7 @@ export const processAggregations = (aggs: Record<string, estypes.AggregationsAgg
       if (platformPolicies?.buckets && policies.length > 0) {
         overlap[key] = platformPolicies.buckets.reduce((acc: { [key: string]: number }, pol) => {
           acc[pol.key] = pol.doc_count;
+
           return acc;
         }, {} as { [key: string]: number });
       }
@@ -63,13 +66,16 @@ export const processAggregations = (aggs: Record<string, estypes.AggregationsAgg
     policies,
   };
 };
+
 export const generateColorPicker = () => {
   const visColorsBehindText = euiPaletteColorBlindBehindText();
   const typeColors = new Map<AGENT_GROUP_KEY, string>();
+
   return (type: AGENT_GROUP_KEY) => {
     if (!typeColors.has(type)) {
       typeColors.set(type, visColorsBehindText[typeColors.size]);
     }
+
     return typeColors.get(type);
   };
 };
@@ -80,6 +86,7 @@ export const getNumAgentsInGrouping = (selectedGroups: SelectedGroups) => {
     const group = selectedGroups[g];
     sum += Object.keys(group).reduce((acc, k) => acc + group[k], 0);
   });
+
   return sum;
 };
 
@@ -90,6 +97,7 @@ export const generateAgentCheck =
       .map((group) => {
         const selectedGroup = selectedGroups[group];
         const agentGroup = groups[group];
+
         // check if the agent platform/policy is selected
         return selectedGroup[agentGroup];
       })
@@ -124,6 +132,7 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
           // we don't need to calculate diffs when all agents are selected
           selectedGroups.platform[key] = value.size;
         }
+
         newAgentSelection.platformsSelected.push(key);
         break;
       case AGENT_GROUP_KEY.Policy:
@@ -132,6 +141,7 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
           // we don't need to calculate diffs when all agents are selected
           selectedGroups.policy[key] = value.size;
         }
+
         newAgentSelection.policiesSelected.push(key);
         break;
       case AGENT_GROUP_KEY.Agent:
@@ -140,6 +150,7 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
           // we don't need to count how many agents are selected if they are all selected
           selectedAgents.push(value);
         }
+
         newAgentSelection.agents.push(key);
         break;
       default:
@@ -148,5 +159,6 @@ export const generateAgentSelection = (selection: GroupOption[]) => {
         console.error(`unknown group type ${groupType}`);
     }
   }
+
   return { newAgentSelection, selectedGroups, selectedAgents };
 };

@@ -82,6 +82,7 @@ describe('Usage metric recorder', () => {
           count: 0,
           errors: 0,
         };
+
         return acc;
       }, {} as { [key: string]: CounterValue });
       get.mockClear();

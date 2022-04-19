@@ -13,6 +13,7 @@ export const LazyOsqueryManagedCustomButtonExtension = lazy<PackageCustomExtensi
     const { OsqueryManagedCustomButtonExtension } = await import(
       './osquery_managed_custom_button_extension'
     );
+
     return {
       default: OsqueryManagedCustomButtonExtension,
     };

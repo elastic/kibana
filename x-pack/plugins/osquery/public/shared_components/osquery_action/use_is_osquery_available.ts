@@ -39,6 +39,7 @@ export const useIsOsqueryAvailable = (agentId?: string) => {
       'package.name',
       OSQUERY_INTEGRATION_NAME,
     ]);
+
     return osqueryPackageInstalled?.enabled;
   }, [agentPolicyData?.package_policies, policyError]);
 

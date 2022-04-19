@@ -26,6 +26,7 @@ export const generateTablePaginationOptions = (
   limit: number
 ): PaginationInputPaginated => {
   const cursorStart = activePage * limit;
+
   return {
     activePage,
     cursorStart,

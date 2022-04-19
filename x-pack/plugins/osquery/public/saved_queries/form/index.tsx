@@ -73,6 +73,7 @@ const SavedQueryFormComponent = forwardRef<SavedQueryFormRefObject, SavedQueryFo
           if (ecsFieldRef.current) {
             return ecsFieldRef.current.validate();
           }
+
           return Promise.resolve(false);
         },
       }),

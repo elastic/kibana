@@ -65,6 +65,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           });
           onClose();
         }
+
         resolve();
       });
     },

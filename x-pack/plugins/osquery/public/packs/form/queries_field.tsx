@@ -113,6 +113,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         setValue(
           produce((draft) => {
             draft.push(newQuery);
+
             return draft;
           })
         );

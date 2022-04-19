@@ -78,12 +78,14 @@ export class AgentGrouper {
     if (!data?.length || key === AGENT_GROUP_KEY.All) {
       return;
     }
+
     const group = this.groups[key];
     if (append) {
       group.data.push(...data);
     } else {
       group.data = data;
     }
+
     group.size = data.length;
   }
 
@@ -91,6 +93,7 @@ export class AgentGrouper {
     if (total < 0) {
       return;
     }
+
     this.groups[AGENT_GROUP_KEY.All].size = total;
   }
 
@@ -124,6 +127,7 @@ export class AgentGrouper {
           break;
       }
     }
+
     return opts;
   }
 }

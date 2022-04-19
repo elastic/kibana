@@ -135,9 +135,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   if (!has(draft, 'inputs[0].streams')) {
                     set(draft, 'inputs[0].streams', []);
                   }
+
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
                     queries,
                   });
+
                   return draft;
                 })
               );

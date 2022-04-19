@@ -234,6 +234,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   if (!isLensAvailable) {
     return null;
   }
+
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
       <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} disabled={false}>
@@ -335,12 +336,14 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
       });
       setDiscoverUrl(newUrl);
     };
+
     getDiscoverUrl();
   }, [actionId, agentIds, endDate, startDate, locator]);
 
   if (!discoverPermissions.show) {
     return null;
   }
+
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
       <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl} target="_blank">
@@ -618,6 +621,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       setLogsDataView(dataView[0]);
     };
+
     fetchLogsDataView();
   }, [dataViews]);
 
@@ -644,6 +648,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           />
         );
       }
+
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
     [agentIds, itemIdToExpandedRowMap, packName]

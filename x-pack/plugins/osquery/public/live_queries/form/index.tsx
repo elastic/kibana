@@ -444,13 +444,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     if (defaultValue?.agentSelection) {
       setFieldValue('agentSelection', defaultValue?.agentSelection);
     }
+
     if (defaultValue?.query) {
       setFieldValue('query', defaultValue?.query);
     }
+
     // TODO: Set query and ECS mapping from savedQueryId object
     if (defaultValue?.savedQueryId) {
       setFieldValue('savedQueryId', defaultValue?.savedQueryId);
     }
+
     if (!isEmpty(defaultValue?.ecs_mapping)) {
       setFieldValue('ecs_mapping', defaultValue?.ecs_mapping);
     }

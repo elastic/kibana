@@ -141,6 +141,7 @@ const SavedQueriesPageComponent = () => {
       item.attributes.updated_by !== item.attributes.created_by
         ? ` @ ${item.attributes.updated_by}`
         : '';
+
     return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
   }, []);
 

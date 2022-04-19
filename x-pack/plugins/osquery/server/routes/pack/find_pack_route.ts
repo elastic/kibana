@@ -53,6 +53,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
 
         // @ts-expect-error update types
         pack.policy_ids = policyIds;
+
         return pack;
       });
 

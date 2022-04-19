@@ -30,6 +30,7 @@ const aggregateResults = async (
     const { results: additionalResults } = await generator(currPage++, PER_PAGE);
     results.push(...additionalResults);
   }
+
   return uniq<string>(results);
 };
 
@@ -52,6 +53,7 @@ export const parseAgentSelection = async (
         perPage,
         page,
       });
+
       return { results: items.map((it) => it.policy_id), total };
     });
     kueryFragments.push(`policy_id:(${uniq(osqueryPolicies).join(' or ')})`);
@@ -64,6 +66,7 @@ export const parseAgentSelection = async (
           kuery,
           showInactive: false,
         });
+
         return { results: res.agents.map((agent) => agent.id), total: res.total };
       });
       fetchedAgents.forEach(addAgent);
@@ -73,9 +76,11 @@ export const parseAgentSelection = async (
         if (platformsSelected.length) {
           groupFragments.push(`local_metadata.os.platform:(${platformsSelected.join(' or ')})`);
         }
+
         if (policiesSelected.length) {
           groupFragments.push(`policy_id:(${policiesSelected.join(' or ')})`);
         }
+
         kueryFragments.push(`(${groupFragments.join(' or ')})`);
         const kuery = kueryFragments.join(' and ');
         const fetchedAgents = await aggregateResults(async (page, perPage) => {
@@ -85,6 +90,7 @@ export const parseAgentSelection = async (
             kuery,
             showInactive: false,
           });
+
           return { results: res.agents.map((agent) => agent.id), total: res.total };
         });
         fetchedAgents.forEach(addAgent);

@@ -84,10 +84,12 @@ export const usePackQueryForm = ({
         if (isArray(draft.platform)) {
           draft.platform.join(',');
         }
+
         if (draft.platform?.split(',').length === 3) {
           // if all platforms are checked then use undefined
           delete draft.platform;
         }
+
         if (isArray(draft.version)) {
           if (!draft.version.length) {
             delete draft.version;
@@ -95,9 +97,11 @@ export const usePackQueryForm = ({
             draft.version = draft.version[0];
           }
         }
+
         if (isEmpty(draft.ecs_mapping)) {
           delete draft.ecs_mapping;
         }
+
         return draft;
       }),
     // @ts-expect-error update types

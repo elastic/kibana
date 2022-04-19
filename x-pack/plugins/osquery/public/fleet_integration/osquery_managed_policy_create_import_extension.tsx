@@ -245,6 +245,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         } else {
           set(draft, 'inputs[0].config.osquery.value', parsedConfig);
         }
+
         return draft;
       });
 
@@ -322,6 +323,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               policy_template: 'osquery_manager',
             });
           }
+
           return draft;
         });
 

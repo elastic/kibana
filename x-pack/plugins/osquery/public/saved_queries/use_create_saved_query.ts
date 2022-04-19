@@ -45,6 +45,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         }
+
         toasts.addSuccess(
           i18n.translate('xpack.osquery.newSavedQuery.successToastMessageText', {
             defaultMessage: 'Successfully saved "{savedQueryId}" query',

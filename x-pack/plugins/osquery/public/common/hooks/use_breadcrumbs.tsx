@@ -163,6 +163,7 @@ export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
       const href = breadcrumb.href
         ? http.basePath.prepend(`${BASE_PATH}${breadcrumb.href}`)
         : undefined;
+
       return {
         ...breadcrumb,
         href,
@@ -171,6 +172,7 @@ export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
               if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
                 return;
               }
+
               ev.preventDefault();
               application.navigateToUrl(href);
             }

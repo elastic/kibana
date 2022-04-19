@@ -62,6 +62,7 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 draft,
                 `inputs[0].config.osquery.value.packs.${[currentPackSO.attributes.name]}`
               );
+
               return draft;
             })
           )

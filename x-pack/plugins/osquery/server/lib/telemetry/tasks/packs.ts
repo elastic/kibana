@@ -43,6 +43,7 @@ export function createTelemetryPacksTaskConfig() {
 
       if (!packsResponse?.total) {
         logger.debug('no packs found');
+
         return 0;
       }
 
