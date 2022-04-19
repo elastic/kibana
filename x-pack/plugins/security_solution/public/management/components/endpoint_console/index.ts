@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EndpointConsole } from './endpoint_console';
+export { EndpointConsoleCommandService } from './endpoint_console_command_service';
