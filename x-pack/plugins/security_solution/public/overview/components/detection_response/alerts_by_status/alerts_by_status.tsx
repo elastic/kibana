@@ -183,7 +183,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
                     totalCount={donutData?.closed?.total ?? 0}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   {legendItems.length > 0 && <Legend legendItems={legendItems} />}
                 </EuiFlexItem>
               </EuiFlexGroup>
