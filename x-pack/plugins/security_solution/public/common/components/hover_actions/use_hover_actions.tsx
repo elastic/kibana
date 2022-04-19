@@ -7,8 +7,8 @@
 
 import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { HoverActions } from '.';
-import { TimelineContext } from '../../../../../timelines/public';
 
 import { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';

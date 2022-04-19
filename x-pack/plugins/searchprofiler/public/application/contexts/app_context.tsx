@@ -8,7 +8,7 @@
 import React, { useContext, createContext, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { HttpSetup, ToastsSetup } from 'kibana/public';
+import { HttpSetup, ToastsSetup } from '@kbn/core/public';
 import { LicenseStatus } from '../../../common';
 
 export interface ContextArgs {

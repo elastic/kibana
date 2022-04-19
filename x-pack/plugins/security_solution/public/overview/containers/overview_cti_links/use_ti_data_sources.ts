@@ -8,12 +8,12 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { useEffect, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import { useKibana } from '../../../common/lib/kibana';
 import {
   DataPublicPluginStart,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../../../../src/plugins/data/public';
+} from '@kbn/data-plugin/public';
+import { useKibana } from '../../../common/lib/kibana';
 import {
   Bucket,
   CtiQueries,

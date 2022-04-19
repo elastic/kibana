@@ -9,8 +9,8 @@
 import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Filter, FILTERS } from '@kbn/data-plugin/common';
 import { existsOperator, isOneOfOperator } from './filter_operators';
-import { Filter, FILTERS } from '../../../../../data/common';
 import type { FilterLabelStatus } from '../../filter_item';
 
 export interface FilterLabelProps {

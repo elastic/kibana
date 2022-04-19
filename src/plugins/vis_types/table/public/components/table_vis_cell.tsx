@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { DatatableRow } from 'src/plugins/expressions';
+import { DatatableRow } from '@kbn/expressions-plugin';
 import { FormattedColumns } from '../types';
 
 export const createTableVisCell =

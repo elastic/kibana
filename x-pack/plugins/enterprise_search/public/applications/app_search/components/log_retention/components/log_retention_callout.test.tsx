@@ -14,11 +14,10 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
+import { LogRetentionOptions } from '..';
 import { mountWithIntl } from '../../../../test_helpers';
 
-import { LogRetentionOptions } from '../index';
-
-import { LogRetentionCallout } from './';
+import { LogRetentionCallout } from '.';
 
 describe('LogRetentionCallout', () => {
   const actions = { fetchLogRetention: jest.fn() };

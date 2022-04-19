@@ -15,9 +15,9 @@ import {
   fatalErrorsServiceMock,
   injectedMetadataServiceMock,
   docLinksServiceMock,
-} from '../../../../src/core/public/mocks';
-import { HttpService } from '../../../../src/core/public/http';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
+} from '@kbn/core/public/mocks';
+import { HttpService } from '@kbn/core/public/http';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import { PolicyFromES } from '../common/types';
 import { PolicyList } from '../public/application/sections/policy_list/policy_list';
@@ -25,7 +25,7 @@ import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { KibanaContextProvider } from '../public/shared_imports';
 import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
-import { executionContextServiceMock } from 'src/core/public/execution_context/execution_context_service.mock';
+import { executionContextServiceMock } from '@kbn/core/public/execution_context/execution_context_service.mock';
 
 initHttp(
   new HttpService().setup({

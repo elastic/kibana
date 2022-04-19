@@ -10,8 +10,8 @@ import { createTableVisFn } from './table_vis_fn';
 import { tableVisResponseHandler } from './utils';
 import { TableVisConfig } from './types';
 
-import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../expressions/common/expression_types/specs';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 
 jest.mock('./utils', () => ({
   tableVisResponseHandler: jest.fn().mockReturnValue({

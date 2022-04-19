@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { httpServerMock } from 'src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
@@ -17,7 +17,7 @@ import {
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
   defaultIngestErrorHandler,
-} from './index';
+} from '.';
 
 describe('defaultIngestErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;

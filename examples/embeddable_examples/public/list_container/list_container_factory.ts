@@ -13,7 +13,7 @@ import {
   EmbeddableStart,
   EmbeddableFactory,
   ContainerOutput,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { LIST_CONTAINER, ListContainer } from './list_container';
 
 interface StartServices {

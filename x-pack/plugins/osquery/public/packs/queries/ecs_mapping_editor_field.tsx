@@ -404,6 +404,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         } else {
           setValue([trimmedNewOption]);
         }
+
         inputRef.current?.blur();
       } else {
         setValue(trimmedNewOption);
@@ -675,9 +676,11 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
         if (onAdd) {
           onAdd(serializedData);
         }
+
         if (onChange) {
           onChange(serializedData);
         }
+
         reset();
       }
     }, [validate, validateFields, submit, onAdd, onChange, reset]);
@@ -840,6 +843,7 @@ export const ECSMappingEditorField = React.memo(
           const validations = await Promise.all(
             Object.values(formRefs.current).map(async (formRef) => {
               const { data, isValid } = await formRef.validate();
+
               return [data, isValid];
             })
           );
@@ -945,6 +949,7 @@ export const ECSMappingEditorField = React.memo(
                           },
                         }))
                       );
+
                       return acc;
                     },
                     [] as OsquerySchemaOption[]
@@ -961,6 +966,7 @@ export const ECSMappingEditorField = React.memo(
 
                 if (column === '*' && astOsqueryTables[table]) {
                   const { columns: osqueryColumns, order: tableOrder } = astOsqueryTables[table];
+
                   return osqueryColumns.map((osqueryColumn) => ({
                     label: osqueryColumn.name,
                     value: {
@@ -1050,6 +1056,7 @@ export const ECSMappingEditorField = React.memo(
           setValue(
             produce((draft) => {
               draft[newRow.key] = newRow.value;
+
               return draft;
             })
           );
@@ -1085,6 +1092,7 @@ export const ECSMappingEditorField = React.memo(
               if (draft[key]) {
                 delete draft[key];
               }
+
               return draft;
             })
           );

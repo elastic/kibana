@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 export {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
-} from '../../../../alerting/common';
-export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../../../actions/common';
+} from '@kbn/alerting-plugin/common';
+export { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 
 export type Section = 'connectors' | 'rules' | 'alerts';
 
@@ -50,7 +50,7 @@ export const RULE_EXECUTION_LOG_COLUMN_IDS = [
   'num_new_alerts',
   'num_recovered_alerts',
   'num_triggered_actions',
-  'num_scheduled_actions',
+  'num_generated_actions',
   'num_succeeded_actions',
   'num_errored_actions',
   'total_search_duration',
