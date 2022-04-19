@@ -18,7 +18,9 @@ describe('useMonitorName', () => {
     expect(result.current).toStrictEqual({ nameAlreadyExists: false, validName: '' });
     expect(defaultCore.savedObjects.client.find).toHaveBeenCalledWith({
       aggs: {
-        monitorNames: { terms: { field: 'synthetics-monitor.attributes.name', size: 10000 } },
+        monitorNames: {
+          terms: { field: 'synthetics-monitor.attributes.name.keyword', size: 10000 },
+        },
       },
       perPage: 0,
       type: 'synthetics-monitor',

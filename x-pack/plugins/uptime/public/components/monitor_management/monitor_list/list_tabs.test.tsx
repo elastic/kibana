@@ -28,7 +28,7 @@ describe('<MonitorListTabs />', () => {
     expect(onPageStateChange).toHaveBeenCalledWith({
       pageIndex: 1,
       pageSize: 10,
-      sortField: 'name',
+      sortField: 'name.keyword',
       sortOrder: 'asc',
     });
   });

@@ -30,7 +30,7 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
     const aggs = {
       monitorNames: {
         terms: {
-          field: `${syntheticsMonitorType}.attributes.name`,
+          field: `${syntheticsMonitorType}.attributes.name.keyword`,
           size: 10000,
         },
       },

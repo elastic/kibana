@@ -72,7 +72,7 @@ describe('<MonitorManagementList />', () => {
   const pageState: MonitorManagementListPageState = {
     pageIndex: 1,
     pageSize: 10,
-    sortField: ConfigKey.NAME,
+    sortField: `${ConfigKey.NAME}.keyword`,
     sortOrder: 'asc',
   };
 
