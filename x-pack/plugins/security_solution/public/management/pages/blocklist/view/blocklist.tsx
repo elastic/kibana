@@ -71,7 +71,7 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
         <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
           <FormattedMessage
             id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsLink"
-            defaultMessage="Blocklist documentation"
+            defaultMessage="blocklist documentation."
           />
         </EuiLink>
       </>
