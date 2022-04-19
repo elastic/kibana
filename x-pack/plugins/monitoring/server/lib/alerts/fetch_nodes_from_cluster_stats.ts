@@ -9,7 +9,7 @@ import { AlertCluster, AlertClusterStatsNodes } from '../../../common/types/aler
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 function formatNode(
@@ -36,7 +36,7 @@ export async function fetchNodesFromClusterStats(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,

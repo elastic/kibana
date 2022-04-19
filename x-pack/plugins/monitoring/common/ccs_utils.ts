@@ -8,10 +8,6 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { MonitoringConfig } from '../server/config';
 
-export function getConfigCcs(config: MonitoringConfig): boolean {
-  // TODO: (Mat) this function can probably be removed in favor of direct config access where it's used.
-  return config.ui.ccs.enabled;
-}
 /**
  * Prefix all comma separated index patterns within the original {@code indexPattern}.
  *
@@ -23,8 +19,12 @@ export function getConfigCcs(config: MonitoringConfig): boolean {
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(config: MonitoringConfig, indexPattern: string, ccs?: string) {
-  const ccsEnabled = getConfigCcs(config);
+export function prefixIndexPatternWithCcs(
+  config: MonitoringConfig,
+  indexPattern: string,
+  ccs?: string
+) {
+  const ccsEnabled = config.ui.ccs.enabled;
   if (!ccsEnabled || !ccs) {
     return indexPattern;
   }

@@ -28,6 +28,7 @@ import {
   CODE_PATH_BEATS,
   CODE_PATH_APM,
   CODE_PATH_ENTERPRISE_SEARCH,
+  CCS_REMOTE_PATTERN,
 } from '../../../common/constants';
 
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
@@ -62,11 +63,11 @@ export async function getClustersFromRequest(
     clusters.push(getStandaloneClusterDefinition());
   } else {
     // get clusters with stats and cluster state
-    clusters = await getClustersStats(req, clusterUuid, '*');
+    clusters = await getClustersStats(req, clusterUuid, CCS_REMOTE_PATTERN);
   }
 
   if (!clusterUuid && !isStandaloneCluster) {
-    if (await hasStandaloneClusters(req, '*')) {
+    if (await hasStandaloneClusters(req, CCS_REMOTE_PATTERN)) {
       clusters.push(getStandaloneClusterDefinition());
     }
   }
@@ -90,7 +91,7 @@ export async function getClustersFromRequest(
 
     // add ml jobs and alerts data
     const mlJobs = isInCodePath(codePaths, [CODE_PATH_ML])
-      ? await getMlJobsForCluster(req, cluster, '*')
+      ? await getMlJobsForCluster(req, cluster, CCS_REMOTE_PATTERN)
       : null;
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
@@ -113,7 +114,7 @@ export async function getClustersFromRequest(
     }
 
     // update clusters with license check results
-    const getSupportedClusters = flagSupportedClusters(req, '*');
+    const getSupportedClusters = flagSupportedClusters(req, CCS_REMOTE_PATTERN);
     clusters = await getSupportedClusters(clusters);
 
     // add alerts data
@@ -169,7 +170,7 @@ export async function getClustersFromRequest(
   // add kibana data
   const kibanas =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
-      ? await getKibanasForClusters(req, clusters, '*')
+      ? await getKibanasForClusters(req, clusters, CCS_REMOTE_PATTERN)
       : [];
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
@@ -182,8 +183,13 @@ export async function getClustersFromRequest(
 
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
-    const logstashes = await getLogstashForClusters(req, clusters, '*');
-    const pipelines = await getLogstashPipelineIds({ req, clusterUuid, size: 1, ccs: '*' });
+    const logstashes = await getLogstashForClusters(req, clusters, CCS_REMOTE_PATTERN);
+    const pipelines = await getLogstashPipelineIds({
+      req,
+      clusterUuid,
+      size: 1,
+      ccs: CCS_REMOTE_PATTERN,
+    });
     logstashes.forEach((logstash) => {
       const clusterIndex = clusters.findIndex(
         (cluster) =>
@@ -199,7 +205,7 @@ export async function getClustersFromRequest(
 
   // add beats data
   const beatsByCluster = isInCodePath(codePaths, [CODE_PATH_BEATS])
-    ? await getBeatsForClusters(req, clusters, '*')
+    ? await getBeatsForClusters(req, clusters, CCS_REMOTE_PATTERN)
     : [];
   beatsByCluster.forEach((beats) => {
     const clusterIndex = clusters.findIndex(
@@ -211,7 +217,7 @@ export async function getClustersFromRequest(
 
   // add apm data
   const apmsByCluster = isInCodePath(codePaths, [CODE_PATH_APM])
-    ? await getApmsForClusters(req, clusters, '*')
+    ? await getApmsForClusters(req, clusters, CCS_REMOTE_PATTERN)
     : [];
   apmsByCluster.forEach((apm) => {
     const clusterIndex = clusters.findIndex(
@@ -229,7 +235,7 @@ export async function getClustersFromRequest(
 
   // add Enterprise Search data
   const enterpriseSearchByCluster = isInCodePath(codePaths, [CODE_PATH_ENTERPRISE_SEARCH])
-    ? await getEnterpriseSearchForClusters(req, clusters, '*')
+    ? await getEnterpriseSearchForClusters(req, clusters, CCS_REMOTE_PATTERN)
     : [];
   enterpriseSearchByCluster.forEach((entSearch) => {
     const clusterIndex = clusters.findIndex(
@@ -244,7 +250,7 @@ export async function getClustersFromRequest(
   });
 
   // check ccr configuration
-  const isCcrEnabled = await checkCcrEnabled(req, '*');
+  const isCcrEnabled = await checkCcrEnabled(req, CCS_REMOTE_PATTERN);
 
   const kibanaUuid = req.server.instanceUuid;
 
