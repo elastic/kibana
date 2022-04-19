@@ -70,3 +70,11 @@ export const OTHER_ENDPOINTS = (endpoints: number): string =>
     values: { endpoints },
     defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
   });
+
+export const CANCEL_BUTTON = i18n.translate('xpack.cases.caseView.delete.cancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const CONFIRM_BUTTON = i18n.translate('xpack.cases.caseView.delete.confirm', {
+  defaultMessage: 'Delete',
+});
