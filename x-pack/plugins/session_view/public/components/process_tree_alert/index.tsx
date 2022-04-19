@@ -73,7 +73,7 @@ export const ProcessTreeAlert = ({
         data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
         onClick={handleExpandClick}
       />
-      <EuiIcon type="alert" css={styles.alertRowItem} />
+      <EuiIcon type="alert" color="danger" css={styles.alertRowItem} />
       <EuiText size="s" css={styles.alertRuleName}>
         {dataOrDash(name)}
       </EuiText>
