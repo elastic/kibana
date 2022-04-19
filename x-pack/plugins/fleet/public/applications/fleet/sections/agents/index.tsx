@@ -95,21 +95,6 @@ export const AgentsApp: React.FunctionComponent = () => {
 
   const rightColumn = hasOnlyFleetServerMissingRequirement ? (
     <>
-      {isEnrollmentFlyoutOpen && (
-        <EuiPortal>
-          <AgentEnrollmentFlyout
-            defaultMode="standalone"
-            isIntegrationFlow={true}
-            onClose={() => setIsEnrollmentFlyoutOpen(false)}
-          />
-        </EuiPortal>
-      )}
-
-      {isFleetServerFlyoutOpen && (
-        <EuiPortal>
-          <FleetServerFlyout onClose={() => setIsFleetServerFlyoutOpen(false)} />
-        </EuiPortal>
-      )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -152,6 +137,22 @@ export const AgentsApp: React.FunctionComponent = () => {
             </DefaultLayout>
           </Route>
         </Switch>
+
+        {isEnrollmentFlyoutOpen && (
+          <EuiPortal>
+            <AgentEnrollmentFlyout
+              defaultMode="standalone"
+              isIntegrationFlow={true}
+              onClose={() => setIsEnrollmentFlyoutOpen(false)}
+            />
+          </EuiPortal>
+        )}
+
+        {isFleetServerFlyoutOpen && (
+          <EuiPortal>
+            <FleetServerFlyout onClose={() => setIsFleetServerFlyoutOpen(false)} />
+          </EuiPortal>
+        )}
       </Router>
     </agentFlyoutContext.Provider>
   );
