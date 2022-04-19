@@ -164,7 +164,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
-          `--xpack.alerting.rules.execution.actions.connectorTypeOverrides=${JSON.stringify([
+          `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
