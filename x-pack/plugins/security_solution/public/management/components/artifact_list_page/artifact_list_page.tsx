@@ -68,6 +68,9 @@ export interface ArtifactListPageProps {
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
   'data-test-subj'?: string;
+  allowCardEditAction?: boolean;
+  allowCardDeleteAction?: boolean;
+  allowCardCreateAction?: boolean;
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
@@ -79,12 +82,15 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     onFormSubmit,
     flyoutSize,
     'data-test-subj': dataTestSubj,
+    allowCardEditAction = true,
+    allowCardCreateAction = true,
+    allowCardDeleteAction = true,
   }) => {
     const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const isMounted = useIsMounted();
-    const isFlyoutOpened = useIsFlyoutOpened();
+    const isFlyoutOpened = useIsFlyoutOpened(allowCardEditAction, allowCardCreateAction);
     const setUrlParams = useSetUrlParams();
     const {
       urlParams: { filter, includedPolicies },
@@ -141,6 +147,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       cardActionDeleteLabel: labels.cardActionDeleteLabel,
       cardActionEditLabel: labels.cardActionEditLabel,
       dataTestSubj: getTestId('card'),
+      allowCardDeleteAction,
+      allowCardEditAction,
     });
 
     const policiesRequest = useGetEndpointSpecificPolicies({
@@ -234,15 +242,17 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         title={labels.pageTitle}
         subtitle={labels.pageAboutInfo}
         actions={
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            isDisabled={isFlyoutOpened}
-            onClick={handleOpenCreateFlyoutClick}
-            data-test-subj={getTestId('pageAddButton')}
-          >
-            {labels.pageAddButtonTitle}
-          </EuiButton>
+          allowCardCreateAction && (
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              isDisabled={isFlyoutOpened}
+              onClick={handleOpenCreateFlyoutClick}
+              data-test-subj={getTestId('pageAddButton')}
+            >
+              {labels.pageAddButtonTitle}
+            </EuiButton>
+          )
         }
       >
         {isFlyoutOpened && (

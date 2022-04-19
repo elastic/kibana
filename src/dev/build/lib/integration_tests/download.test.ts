@@ -13,12 +13,8 @@ import { readFileSync } from 'fs';
 
 import del from 'del';
 import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
-import {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  createStripAnsiSerializer,
-  createReplaceSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 
 import { mkdirp } from '../fs';
 import { downloadToDisk, downloadToString } from '../download';
