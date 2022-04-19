@@ -17753,7 +17753,6 @@
     "xpack.ml.jobsList.multiJobsActions.startDatafeedsLabel": "开始{jobsCount, plural, other {数据馈送}}",
     "xpack.ml.jobsList.multiJobsActions.stopDatafeedsLabel": "停止{jobsCount, plural, other {数据馈送}}",
     "xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText": "Elastic Cloud 部署",
-    "xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription": "请编辑您的{link}。可以启用免费的 1GB Machine Learning 节点或扩展现有的 ML 配置。",
     "xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableDescription": "没有可用的 ML 节点。",
     "xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableTitle": "没有可用的 ML 节点",
     "xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription": "您将无法创建或运行作业。",
