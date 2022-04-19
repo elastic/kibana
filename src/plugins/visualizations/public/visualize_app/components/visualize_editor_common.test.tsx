@@ -10,7 +10,7 @@ import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeEditorVisInstance } from '../types';
-import { SplitChartWarning } from './split_chart_warning';
+import { VizChartWarning } from './viz_chart_warning';
 
 const mockGetLegacyUrlConflict = jest.fn();
 const mockRedirectLegacyUrl = jest.fn(() => Promise.resolve());
@@ -42,7 +42,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 jest.mock('../../services', () => ({
   getUISettings: jest.fn(() => ({
-    get: jest.fn(),
+    get: jest.fn(
+      (token) =>
+        Boolean(token === 'visualization:visualize:legacyPieChartsLibrary') ||
+        Boolean(token === 'timelion:legacyChartsLibrary')
+    ),
   })),
 }));
 
@@ -157,7 +161,7 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(wrapper.find(SplitChartWarning).length).toBe(1);
+    expect(wrapper.find(VizChartWarning).length).toBe(1);
   });
 
   it('should not display a warning callout for XY charts with split aggs', async () => {
@@ -198,6 +202,88 @@ describe('VisualizeEditorCommon', () => {
         }
       />
     );
-    expect(wrapper.find(SplitChartWarning).length).toBe(0);
+    expect(wrapper.find(VizChartWarning).length).toBe(0);
+  });
+
+  it('should display a warning callout for old pie implementation', async () => {
+    const wrapper = shallowWithIntl(
+      <VisualizeEditorCommon
+        appState={null}
+        hasUnsavedChanges={false}
+        setHasUnsavedChanges={() => {}}
+        hasUnappliedChanges={false}
+        isEmbeddableRendered={false}
+        onAppLeave={() => {}}
+        visEditorRef={React.createRef()}
+        visInstance={
+          {
+            savedVis: {
+              id: 'test',
+              sharingSavedObjectProps: {
+                outcome: 'conflict',
+                aliasTargetId: 'alias_id',
+              },
+            },
+            vis: {
+              type: {
+                title: 'pie',
+                name: 'pie',
+              },
+              data: {
+                aggs: {
+                  aggs: [
+                    {
+                      schema: 'buckets',
+                    },
+                  ],
+                },
+              },
+            },
+          } as unknown as VisualizeEditorVisInstance
+        }
+      />
+    );
+    expect(wrapper.find(VizChartWarning).length).toBe(1);
+  });
+
+  it('should display a warning callout for old timelion implementation', async () => {
+    const wrapper = shallowWithIntl(
+      <VisualizeEditorCommon
+        appState={null}
+        hasUnsavedChanges={false}
+        setHasUnsavedChanges={() => {}}
+        hasUnappliedChanges={false}
+        isEmbeddableRendered={false}
+        onAppLeave={() => {}}
+        visEditorRef={React.createRef()}
+        visInstance={
+          {
+            savedVis: {
+              id: 'test',
+              sharingSavedObjectProps: {
+                outcome: 'conflict',
+                aliasTargetId: 'alias_id',
+              },
+            },
+            vis: {
+              type: {
+                title: 'timelion',
+                name: 'timelion',
+              },
+              data: {
+                aggs: {
+                  aggs: [
+                    {
+                      schema: 'buckets',
+                    },
+                  ],
+                },
+              },
+            },
+          } as unknown as VisualizeEditorVisInstance
+        }
+      />
+    );
+    expect(wrapper.find(VizChartWarning).length).toBe(1);
   });
 });

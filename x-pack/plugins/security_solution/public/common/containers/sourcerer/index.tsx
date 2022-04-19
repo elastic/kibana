@@ -394,11 +394,13 @@ export const useSourcererDataView = (
   );
 };
 
+const detectionsPaths = [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`];
+
 export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
   matchPath(pathname, {
-    path: [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`],
+    path: detectionsPaths,
     strict: false,
   }) == null
     ? SourcererScopeName.default

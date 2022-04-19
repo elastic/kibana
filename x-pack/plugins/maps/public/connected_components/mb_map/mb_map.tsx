@@ -75,6 +75,8 @@ export interface Props {
   updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
+  setTileLoadError(layerId: string, errorMessage: string): void;
+  clearTileLoadError(layerId: string): void;
 }
 
 interface State {
@@ -204,8 +206,15 @@ export class MbMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => {
+        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => {
           this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
+
+          if (errorMessage) {
+            this.props.setTileLoadError(layer.getId(), errorMessage);
+          } else {
+            this.props.clearTileLoadError(layer.getId());
+          }
+
           this._queryForMeta(layer);
         },
       });

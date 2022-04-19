@@ -50,6 +50,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         const [coreStart, depsStart] = await core.getStartServices();
         // Load application bundle
         const { renderApp } = await import('./application');
+
         // Render the application
         return renderApp(
           coreStart,
