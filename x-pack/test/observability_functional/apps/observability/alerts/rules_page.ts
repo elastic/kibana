@@ -160,10 +160,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it(`shows the no permission prompt when the user has no permissions`, async () => {
-        await observability.users.setTestUserRole({
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
-          kibana: [{ spaces: ['*'], base: [], feature: { discover: ['all'] } }],
-        });
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            logs: ['read'],
+          })
+        );
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
           'No permissions prompt',
