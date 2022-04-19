@@ -47,7 +47,6 @@
     "kibanaReact",
     "kibanaUtils",
     "usageCollection",
-    "home",
     "unifiedSearch"
   ]
 }

@@ -68,14 +68,14 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
     unknown: { type: 'long' },
   };
 
-const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_scheduled_actions_per_day'] =
+const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_per_day'] =
   {
     p50: { type: 'long' },
     p90: { type: 'long' },
     p99: { type: 'long' },
   };
 
-const byPercentileSchemaByType: MakeSchemaFrom<AlertingUsage>['percentile_num_scheduled_actions_by_type_per_day'] =
+const byPercentileSchemaByType: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_by_type_per_day'] =
   {
     p50: byTypeSchema,
     p90: byTypeSchema,
@@ -176,12 +176,12 @@ export function createAlertingUsageCollector(
           avg_es_search_duration_by_type_per_day: {},
           avg_total_search_duration_per_day: 0,
           avg_total_search_duration_by_type_per_day: {},
-          percentile_num_scheduled_actions_per_day: {
+          percentile_num_generated_actions_per_day: {
             p50: 0,
             p90: 0,
             p99: 0,
           },
-          percentile_num_scheduled_actions_by_type_per_day: {
+          percentile_num_generated_actions_by_type_per_day: {
             p50: {},
             p90: {},
             p99: {},
@@ -237,8 +237,8 @@ export function createAlertingUsageCollector(
       avg_es_search_duration_by_type_per_day: byTypeSchema,
       avg_total_search_duration_per_day: { type: 'long' },
       avg_total_search_duration_by_type_per_day: byTypeSchema,
-      percentile_num_scheduled_actions_per_day: byPercentileSchema,
-      percentile_num_scheduled_actions_by_type_per_day: byPercentileSchemaByType,
+      percentile_num_generated_actions_per_day: byPercentileSchema,
+      percentile_num_generated_actions_by_type_per_day: byPercentileSchemaByType,
     },
   });
 }
