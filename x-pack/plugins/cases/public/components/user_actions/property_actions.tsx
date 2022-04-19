@@ -69,7 +69,7 @@ const UserActionPropertyActionsComponent = ({
                 label: editLabel,
                 onClick: onEditClick,
               },
-              ...(deleteLabel
+              ...((deleteLabel && onDelete)
                 ? [
                     {
                       iconType: 'trash',
