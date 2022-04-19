@@ -6,37 +6,39 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BoolQuery } from '@kbn/es-query';
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
   RuleType,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertExecutorOptions,
-  AlertServices,
-} from '../../../../../alerting/server';
+  RuleExecutorOptions as AlertingRuleExecutorOptions,
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import { ListClient } from '@kbn/lists-plugin/server';
+import { Logger } from '@kbn/core/server';
+import { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { TermAggregationBucket } from '../../types';
 import {
-  EqlSearchResponse,
   BaseHit,
   RuleAlertAction,
   SearchTypes,
   EqlSequence,
 } from '../../../../common/detection_engine/types';
-import { ListClient } from '../../../../../lists/server';
-import { Logger } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
-import { GenericBulkCreateResponse } from './bulk_create_factory';
-import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
-import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
+import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { BuildReasonMessage } from './reason_formatters';
-import { RACAlert } from '../rule_types/types';
+import {
+  BaseFieldsLatest,
+  DetectionAlert,
+  WrappedFieldsLatest,
+} from '../../../../common/detection_engine/schemas/alerts';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -181,18 +183,15 @@ export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
 };
 export type WrappedEventHit = BaseHit<EventHit>;
 
-export type AlertSearchResponse = estypes.SearchResponse<RACAlert>;
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
-export type AlertSourceHit = estypes.SearchHit<RACAlert>;
+export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
-export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
-
-export type RuleExecutorOptions = AlertExecutorOptions<
+export type RuleExecutorOptions = AlertingRuleExecutorOptions<
   RuleParams,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext
 >;
@@ -204,7 +203,7 @@ export const isAlertExecutor = (
 ): obj is RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   'default'
@@ -215,7 +214,7 @@ export const isAlertExecutor = (
 export type SignalRuleAlertTypeDefinition = RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   'default'
@@ -278,17 +277,10 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
-/**
- * TODO: Remove this if/when the return filter has its own type exposed
- */
-export interface QueryFilter {
-  bool: BoolQuery;
-}
-
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
-export type BulkCreate = <T extends Record<string, unknown>>(
-  docs: Array<BaseHit<T>>
+export type BulkCreate = <T extends BaseFieldsLatest>(
+  docs: Array<WrappedFieldsLatest<T>>
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
@@ -296,12 +288,12 @@ export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 export type WrapHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => SimpleHit[];
+) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
 export type WrapSequences = (
   sequences: Array<EqlSequence<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => SimpleHit[];
+) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
 export interface SearchAfterAndBulkCreateParams {
   tuple: {
@@ -310,16 +302,15 @@ export interface SearchAfterAndBulkCreateParams {
     maxSignals: number;
   };
   completeRule: CompleteRule<RuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
   eventsTelemetry: ITelemetryEventsSender | undefined;
   id: string;
   inputIndexPattern: string[];
-  signalsIndex: string;
   pageSize: number;
-  filter: unknown;
+  filter: estypes.QueryDslQueryContainer;
   buildRuleMessage: BuildRuleMessage;
   buildReasonMessage: BuildReasonMessage;
   enrichment?: SignalsEnrichment;
@@ -370,7 +361,7 @@ export interface ThresholdQueryBucket extends TermAggregationBucket {
   };
 }
 
-export interface ThresholdAlertState extends AlertTypeState {
+export interface ThresholdAlertState extends RuleTypeState {
   initialized: boolean;
   signalHistory: ThresholdSignalHistory;
 }

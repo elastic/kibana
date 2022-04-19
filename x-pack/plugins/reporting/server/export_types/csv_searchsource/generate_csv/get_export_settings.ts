@@ -6,9 +6,9 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IUiSettingsClient } from 'kibana/server';
-import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
-import { ReportingConfig } from '../../../';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import { createEscapeValue } from '@kbn/data-plugin/common';
+import { ReportingConfig } from '../../..';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -16,7 +16,6 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../../../common/constants';
-import { LevelLogger } from '../../../lib';
 
 export interface CsvExportSettings {
   timezone: string;
@@ -37,7 +36,7 @@ export const getExportSettings = async (
   client: IUiSettingsClient,
   config: ReportingConfig,
   timezone: string | undefined,
-  logger: LevelLogger
+  logger: Logger
 ): Promise<CsvExportSettings> => {
   let setTimezone: string;
   if (timezone) {

@@ -5,18 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PaletteOutput } from '../../../../charts/common';
+
+import { $Values } from '@kbn/utility-types';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-} from '../../../../expressions';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { EXPRESSION_NAME } from '../constants';
+} from '@kbn/expressions-plugin';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
 
 interface TagCloudCommonParams {
-  scale: 'linear' | 'log' | 'square root';
-  orientation: 'single' | 'right angled' | 'multiple';
+  scale: $Values<typeof ScaleOptions>;
+  orientation: $Values<typeof Orientation>;
   minFontSize: number;
   maxFontSize: number;
   showLabel: boolean;
@@ -24,14 +26,14 @@ interface TagCloudCommonParams {
 }
 
 export interface TagCloudVisConfig extends TagCloudCommonParams {
-  metric: ExpressionValueVisDimension;
-  bucket?: ExpressionValueVisDimension;
+  metric: ExpressionValueVisDimension | string;
+  bucket?: ExpressionValueVisDimension | string;
 }
 
 export interface TagCloudRendererParams extends TagCloudCommonParams {
   palette: PaletteOutput;
-  metric: ExpressionValueVisDimension;
-  bucket?: ExpressionValueVisDimension;
+  metric: ExpressionValueVisDimension | string;
+  bucket?: ExpressionValueVisDimension | string;
 }
 
 export interface TagcloudRendererConfig {

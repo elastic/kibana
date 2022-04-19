@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../../../../presentation_util/public';
-import { DataPublicPluginStart } from '../../../../data/public';
-import { DataViewField } from '../../../../data_views/common';
+import { of, Observable } from 'rxjs';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { ControlsDataService } from '../data';
 
 let valueSuggestionMethod = ({ field, query }: { field: DataViewField; query: string }) =>
@@ -23,4 +24,22 @@ export const dataServiceFactory: DataServiceFactory = () => ({
     getValueSuggestions: valueSuggestionMethod,
   } as unknown as DataPublicPluginStart['autocomplete'],
   query: {} as unknown as DataPublicPluginStart['query'],
+  searchSource: {
+    create: () => ({
+      setField: () => {},
+      fetch$: () =>
+        of({
+          resp: {
+            rawResponse: { aggregations: { minAgg: { value: 0 }, maxAgg: { value: 1000 } } },
+          },
+        }),
+    }),
+  } as unknown as DataPublicPluginStart['search']['searchSource'],
+  timefilter: {
+    createFilter: () => {},
+  } as unknown as DataPublicPluginStart['query']['timefilter']['timefilter'],
+  fetchFieldRange: () => Promise.resolve({ min: 0, max: 100 }),
+  fetchFieldRange$: () => new Observable<{ min: number; max: number }>(),
+  getDataView: () => Promise.resolve({} as DataView),
+  getDataView$: () => new Observable({} as any),
 });

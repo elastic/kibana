@@ -7,8 +7,8 @@
 
 import { PopoverAnchorPosition } from '@elastic/eui';
 import { Dispatch, SetStateAction } from 'react';
-import { ESFilter } from 'src/core/types/elasticsearch';
-import { IInspectorInfo } from '../../../../../../../src/plugins/data/common';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { IInspectorInfo } from '@kbn/data-plugin/common';
 
 interface CommonProps {
   selectedValue?: string[];
@@ -33,7 +33,7 @@ interface CommonProps {
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {
-  indexPatternTitle?: string;
+  dataViewTitle?: string;
   sourceField: string;
   asCombobox?: boolean;
   onChange: (val?: string[], excludedValue?: string[]) => void;

@@ -20,19 +20,19 @@ import { ArtifactEntryCard } from '../artifact_entry_card';
 import { ArtifactListPageLabels, artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
-import { SearchExceptions } from '../search_exceptions';
+import { SearchExceptions, SearchExceptionsProps } from '../search_exceptions';
 import {
   useArtifactCardPropsProvider,
   UseArtifactCardPropsProviderProps,
 } from './hooks/use_artifact_card_props_provider';
 import { NoDataEmptyState } from './components/no_data_empty_state';
-import { ArtifactFlyoutProps, MaybeArtifactFlyout } from './components/artifact_flyout';
+import { ArtifactFlyoutProps, ArtifactFlyout } from './components/artifact_flyout';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { ArtifactListPageUrlParams } from './types';
-import { useUrlParams } from './hooks/use_url_params';
+import { useUrlParams } from '../hooks/use_url_params';
 import { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
@@ -42,6 +42,7 @@ import { useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
+import { useIsMounted } from '../hooks/use_is_mounted';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -56,10 +57,20 @@ export interface ArtifactListPageProps {
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
   /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
   labels: ArtifactListPageLabels;
+  /**
+   * Define a callback to handle the submission of the form data instead of the internal one in
+   * `ArtifactListPage` being used.
+   * @param item
+   * @param mode
+   */
+  onFormSubmit?: Required<ArtifactFlyoutProps>['submitHandler'];
   /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
   'data-test-subj'?: string;
+  allowCardEditAction?: boolean;
+  allowCardDeleteAction?: boolean;
+  allowCardCreateAction?: boolean;
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
@@ -68,12 +79,18 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     ArtifactFormComponent,
     searchableFields = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
     labels: _labels = {},
+    onFormSubmit,
+    flyoutSize,
     'data-test-subj': dataTestSubj,
+    allowCardEditAction = true,
+    allowCardCreateAction = true,
+    allowCardDeleteAction = true,
   }) => {
     const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
-    const isFlyoutOpened = useIsFlyoutOpened();
+    const isMounted = useIsMounted();
+    const isFlyoutOpened = useIsFlyoutOpened(allowCardEditAction, allowCardCreateAction);
     const setUrlParams = useSetUrlParams();
     const {
       urlParams: { filter, includedPolicies },
@@ -130,6 +147,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       cardActionDeleteLabel: labels.cardActionDeleteLabel,
       cardActionEditLabel: labels.cardActionEditLabel,
       dataTestSubj: getTestId('card'),
+      allowCardDeleteAction,
+      allowCardEditAction,
     });
 
     const policiesRequest = useGetEndpointSpecificPolicies({
@@ -171,33 +190,46 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         [setUrlParams]
       );
 
-    const handleOnSearch = useCallback(
+    const handleOnSearch = useCallback<SearchExceptionsProps['onSearch']>(
       (filterValue: string, selectedPolicies: string, doHardRefresh) => {
+        const didFilterChange =
+          filterValue !== (filter ?? '') || selectedPolicies !== (includedPolicies ?? '');
+
         setUrlParams({
           // `undefined` will drop the param from the url
           filter: filterValue.trim() === '' ? undefined : filterValue,
           includedPolicies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
         });
 
-        if (doHardRefresh) {
+        // We don't want to trigger a refresh of the list twice because the URL above was already
+        // updated, so if the user explicitly clicked the `Refresh` button and nothing has changed
+        // in the filter, then trigger a refresh (since the url update did not actually trigger one)
+        if (doHardRefresh && !didFilterChange) {
           refetchListData();
         }
       },
-      [refetchListData, setUrlParams]
+      [filter, includedPolicies, refetchListData, setUrlParams]
     );
 
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {
-      setSelectedItemForDelete(undefined);
-      refetchListData();
-    }, [refetchListData]);
+      if (isMounted) {
+        setSelectedItemForDelete(undefined);
+        refetchListData();
+      }
+    }, [isMounted, refetchListData]);
 
     const handleArtifactDeleteModalOnCancel = useCallback(() => {
       setSelectedItemForDelete(undefined);
     }, []);
 
     const handleArtifactFlyoutOnSuccess = useCallback(() => {
+      setSelectedItemForEdit(undefined);
       refetchListData();
     }, [refetchListData]);
+
+    const handleArtifactFlyoutOnClose = useCallback(() => {
+      setSelectedItemForEdit(undefined);
+    }, []);
 
     if (isPageInitializing) {
       return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
@@ -210,26 +242,34 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         title={labels.pageTitle}
         subtitle={labels.pageAboutInfo}
         actions={
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            isDisabled={isFlyoutOpened}
-            onClick={handleOpenCreateFlyoutClick}
-            data-test-subj={getTestId('pageAddButton')}
-          >
-            {labels.pageAddButtonTitle}
-          </EuiButton>
+          allowCardCreateAction && (
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              isDisabled={isFlyoutOpened}
+              onClick={handleOpenCreateFlyoutClick}
+              data-test-subj={getTestId('pageAddButton')}
+            >
+              {labels.pageAddButtonTitle}
+            </EuiButton>
+          )
         }
       >
-        {/* Flyout component is driven by URL params and may or may not be displayed based on those */}
-        <MaybeArtifactFlyout
-          apiClient={apiClient}
-          item={selectedItemForEdit}
-          onSuccess={handleArtifactFlyoutOnSuccess}
-          FormComponent={ArtifactFormComponent}
-          labels={labels}
-          data-test-subj={getTestId('flyout')}
-        />
+        {isFlyoutOpened && (
+          <ArtifactFlyout
+            apiClient={apiClient}
+            item={selectedItemForEdit}
+            onSuccess={handleArtifactFlyoutOnSuccess}
+            onClose={handleArtifactFlyoutOnClose}
+            FormComponent={ArtifactFormComponent}
+            labels={labels}
+            size={flyoutSize}
+            submitHandler={onFormSubmit}
+            policies={policiesRequest.data?.items || []}
+            policiesIsLoading={policiesRequest.isLoading}
+            data-test-subj={getTestId('flyout')}
+          />
+        )}
 
         {selectedItemForDelete && (
           <ArtifactDeleteModal
@@ -279,7 +319,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               loading={isLoading}
               pagination={uiPagination}
               contentClassName="card-container"
-              data-test-subj={getTestId('cardContent')}
+              data-test-subj={getTestId('list')}
             />
           </>
         )}

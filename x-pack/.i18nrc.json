@@ -38,7 +38,6 @@
     "xpack.logstash": ["plugins/logstash"],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],
-    "xpack.metricsEntities": "plugins/metrics_entities",
     "xpack.ml": ["plugins/ml"],
     "xpack.monitoring": ["plugins/monitoring"],
     "xpack.osquery": ["plugins/osquery"],
@@ -52,6 +51,7 @@
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",
     "xpack.securitySolution": "plugins/security_solution",
+    "xpack.sessionView": "plugins/session_view",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": ["plugins/saved_objects_tagging"],
@@ -70,6 +70,7 @@
   "exclude": ["examples"],
   "translations": [
     "plugins/translations/translations/zh-CN.json",
-    "plugins/translations/translations/ja-JP.json"
+    "plugins/translations/translations/ja-JP.json",
+    "plugins/translations/translations/fr-FR.json"
   ]
 }

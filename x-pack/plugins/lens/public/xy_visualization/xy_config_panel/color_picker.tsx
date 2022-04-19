@@ -7,11 +7,11 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State } from '../types';
+import { State, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
 import {
@@ -20,9 +20,8 @@ import {
   getColorAssignments,
 } from '../color_assignment';
 import { getSortedAccessors } from '../to_expression';
-import { updateLayer } from '.';
 import { TooltipWrapper } from '../../shared_components';
-import { isReferenceLayer } from '../visualization_helpers';
+import { isReferenceLayer, isAnnotationsLayer, getDataLayers } from '../visualization_helpers';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -39,7 +38,6 @@ const tooltipContent = {
 
 export const ColorPicker = ({
   state,
-  setState,
   layerId,
   accessor,
   frame,
@@ -47,28 +45,36 @@ export const ColorPicker = ({
   paletteService,
   label,
   disableHelpTooltip,
+  disabled,
+  setConfig,
 }: VisualizationDimensionEditorProps<State> & {
   formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
   label?: string;
   disableHelpTooltip?: boolean;
+  disabled?: boolean;
+  setConfig: (config: { color?: string }) => void;
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
-  const disabled = Boolean(layer.splitAccessor);
 
   const overwriteColor = getSeriesColor(layer, accessor);
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
     if (isReferenceLayer(layer)) {
       return defaultReferenceLineColor;
+    } else if (isAnnotationsLayer(layer)) {
+      return defaultAnnotationColor;
     }
 
-    const datasource = frame.datasourceLayers[layer.layerId];
-    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+    const dataLayer: XYDataLayerConfig = layer;
+    const sortedAccessors: string[] = getSortedAccessors(
+      frame.datasourceLayers[layer.layerId] ?? layer.accessors,
+      layer
+    );
 
     const colorAssignments = getColorAssignments(
-      state.layers,
+      getDataLayers(state.layers),
       { tables: frame.activeData },
       formatFactory
     );
@@ -76,8 +82,8 @@ export const ColorPicker = ({
       colorAssignments,
       frame,
       {
-        ...layer,
-        accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+        ...dataLayer,
+        accessors: sortedAccessors.filter((sorted) => dataLayer.accessors.includes(sorted)),
       },
       paletteService
     );
@@ -90,31 +96,10 @@ export const ColorPicker = ({
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
     if (output.isValid || text === '') {
-      updateColorInState(text, output);
+      const newColor = text === '' ? undefined : output.hex;
+      setConfig({ color: newColor });
     }
   };
-
-  const updateColorInState: EuiColorPickerProps['onChange'] = useMemo(
-    () =>
-      debounce((text, output) => {
-        const newYConfigs = [...(layer.yConfig || [])];
-        const existingIndex = newYConfigs.findIndex((yConfig) => yConfig.forAccessor === accessor);
-        if (existingIndex !== -1) {
-          if (text === '') {
-            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: undefined };
-          } else {
-            newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], color: output.hex };
-          }
-        } else {
-          newYConfigs.push({
-            forAccessor: accessor,
-            color: output.hex,
-          });
-        }
-        setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
-      }, 256),
-    [state, setState, layer, accessor, index]
-  );
 
   const inputLabel =
     label ??

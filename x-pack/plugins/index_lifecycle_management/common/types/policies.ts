@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Index as IndexInterface } from '../../../index_management/common/types';
+import { Index as IndexInterface } from '@kbn/index-management-plugin/common/types';
 
 export type Phase = keyof Phases;
 
@@ -229,7 +229,6 @@ export interface IndexLifecyclePolicy {
   step?: string;
   step_info?: {
     reason?: string;
-    stack_trace?: string;
     type?: string;
     message?: string;
   };

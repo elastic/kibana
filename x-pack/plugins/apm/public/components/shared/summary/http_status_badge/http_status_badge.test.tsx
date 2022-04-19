@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { HttpStatusBadge } from './index';
+import { HttpStatusBadge } from '.';
 import {
   successColor,
   neutralColor,

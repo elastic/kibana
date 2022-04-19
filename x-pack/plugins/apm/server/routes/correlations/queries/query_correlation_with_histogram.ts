@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type {
   FieldValuePair,
@@ -32,7 +32,7 @@ export async function fetchTransactionDurationCorrelationWithHistogram(
   histogramRangeSteps: number[],
   totalDocCount: number,
   fieldValuePair: FieldValuePair
-): Promise<LatencyCorrelation | undefined> {
+) {
   const { correlation, ksTest } = await fetchTransactionDurationCorrelation(
     esClient,
     params,
@@ -43,23 +43,28 @@ export async function fetchTransactionDurationCorrelationWithHistogram(
     [fieldValuePair]
   );
 
-  if (
-    correlation !== null &&
-    correlation > CORRELATION_THRESHOLD &&
-    ksTest !== null &&
-    ksTest < KS_TEST_THRESHOLD
-  ) {
-    const logHistogram = await fetchTransactionDurationRanges(
-      esClient,
-      params,
-      histogramRangeSteps,
-      [fieldValuePair]
-    );
-    return {
-      ...fieldValuePair,
-      correlation,
-      ksTest,
-      histogram: logHistogram,
-    };
+  if (correlation !== null && ksTest !== null && !isNaN(ksTest)) {
+    if (correlation > CORRELATION_THRESHOLD && ksTest < KS_TEST_THRESHOLD) {
+      const logHistogram = await fetchTransactionDurationRanges(
+        esClient,
+        params,
+        histogramRangeSteps,
+        [fieldValuePair]
+      );
+      return {
+        ...fieldValuePair,
+        correlation,
+        ksTest,
+        histogram: logHistogram,
+      } as LatencyCorrelation;
+    } else {
+      return {
+        ...fieldValuePair,
+        correlation,
+        ksTest,
+      } as Omit<LatencyCorrelation, 'histogram'>;
+    }
   }
+
+  return undefined;
 }

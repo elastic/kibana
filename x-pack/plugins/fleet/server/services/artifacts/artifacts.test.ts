@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
@@ -148,6 +148,8 @@ describe('When using the artifacts services', () => {
         q: '',
         from: 0,
         size: 20,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
         body: {
           sort: [{ created: { order: 'asc' } }],
         },
@@ -182,6 +184,8 @@ describe('When using the artifacts services', () => {
         ignore_unavailable: true,
         from: 450,
         size: 50,
+        track_total_hits: true,
+        rest_total_hits_as_int: true,
         body: {
           sort: [{ identifier: { order: 'desc' } }],
         },

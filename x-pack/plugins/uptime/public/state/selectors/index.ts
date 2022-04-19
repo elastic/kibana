@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
-import type { AppState } from '../../state';
+import type { AppState } from '..';
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
@@ -94,3 +94,6 @@ export const networkEventsSelector = ({ networkEvents }: AppState) => networkEve
 export const syntheticsSelector = ({ synthetics }: AppState) => synthetics;
 
 export const uptimeWriteSelector = (state: AppState) => state;
+
+export const syntheticsServiceAllowedSelector = (state: AppState) =>
+  state.monitorManagementList.syntheticsService;

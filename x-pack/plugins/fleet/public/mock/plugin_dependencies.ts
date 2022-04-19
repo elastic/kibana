@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { licensingMock } from '../../../licensing/public/mocks';
-import { cloudMock } from '../../../cloud/public/mocks';
-import { homePluginMock } from '../../../../../src/plugins/home/public/mocks';
-import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
-import { customIntegrationsMock } from '../../../../../src/plugins/custom_integrations/public/mocks';
-import { sharePluginMock } from '../../../../../src/plugins/share/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { homePluginMock } from '@kbn/home-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 export const createSetupDepsMock = () => {
   const cloud = cloudMock.createSetup();
@@ -28,7 +27,6 @@ export const createStartDepsMock = () => {
   return {
     licensing: licensingMock.createStart(),
     data: dataPluginMock.createStartContract(),
-    fieldFormats: fieldFormatsServiceMock.createStartContract() as any,
     navigation: navigationPluginMock.createStartContract(),
     customIntegrations: customIntegrationsMock.createStart(),
     share: sharePluginMock.createStartContract(),

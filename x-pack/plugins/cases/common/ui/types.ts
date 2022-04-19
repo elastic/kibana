@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObjectsResolveResponse } from '@kbn/core/public';
 import {
   CaseAttributes,
   CaseConnector,
@@ -16,13 +17,18 @@ import {
   CaseUserActionResponse,
   CaseMetricsResponse,
   CommentResponse,
+  CommentResponseAlertsType,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
+type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
+
 export interface CasesContextFeatures {
-  alerts: { sync: boolean };
+  alerts: { sync?: boolean; enabled?: boolean };
   metrics: CaseMetricsFeature[];
 }
+
+export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 
 export type CasesFeatures = Partial<CasesContextFeatures>;
 
@@ -52,6 +58,7 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type Comment = SnakeToCamelCase<CommentResponse>;
+export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
@@ -82,8 +89,9 @@ export interface Case extends BasicCase {
 
 export interface ResolvedCase {
   case: Case;
-  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export interface QueryParams {
@@ -185,7 +193,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];

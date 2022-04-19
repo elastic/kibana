@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -14,7 +14,7 @@ import {
   isPivotTransformTestData,
   LatestTransformTestData,
   PivotTransformTestData,
-} from './index';
+} from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
@@ -416,6 +416,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
+        destinationDataViewTimeField: 'order_date',
         discoverAdjustSuperDatePicker: true,
         expected: {
           latestPreview: {
@@ -588,8 +589,14 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('displays the create data view switch');
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
+
+          if (testData.destinationDataViewTimeField) {
+            await transform.testExecution.logTestStep('sets the data view time field');
+            await transform.wizard.assertDataViewTimeFieldInputExists();
+            await transform.wizard.setDataViewTimeField(testData.destinationDataViewTimeField);
+          }
 
           await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();

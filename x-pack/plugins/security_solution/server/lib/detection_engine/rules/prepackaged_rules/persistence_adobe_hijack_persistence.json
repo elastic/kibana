@@ -12,7 +12,11 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Adobe Hijack Persistence",
+  "note": "## Triage and analysis\n\n### Investigating Adobe Hijack Persistence\n\nAttackers can replace the `RdrCEF.exe` executable with their own to maintain their access, which will be launched\nwhenever Adobe Acrobat Reader is executed.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree).\n- Identify the user account that performed the action.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Check for similar behavior in other hosts on the environment.\n- Retrieve the file and determine if it is malicious:\n  - Use a private sandboxed malware analysis system to perform analysis.\n    - Observe and collect information about the following activities:\n      - Attempts to contact external domains and addresses.\n      - File and registry access, modification, and creation activities.\n      - Service creation and launch activities.\n      - Scheduled tasks creation.\n  - Use the PowerShell Get-FileHash cmdlet to get the SHA-256 hash value of the file.\n    - Search for the existence and reputation of this file in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n\n### False positive analysis\n\n- This activity is unlikely to happen legitimately. Benign true positives (B-TPs) can be added as exceptions if necessary.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement any temporary network rules, procedures, and segmentation required to contain the malware.\n  - Immediately block the IoCs identified.\n- Remove and block malicious artifacts identified on the triage.\n- Disable the involved accounts, or restrict their ability to log on remotely.\n- Reset passwords for the user account and other potentially compromised accounts (email, services, CRMs, etc.).\n\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type == \"creation\" and\n  file.path : (\"?:\\\\Program Files (x86)\\\\Adobe\\\\Acrobat Reader DC\\\\Reader\\\\AcroCEF\\\\RdrCEF.exe\",\n               \"?:\\\\Program Files\\\\Adobe\\\\Acrobat Reader DC\\\\Reader\\\\AcroCEF\\\\RdrCEF.exe\") and\n  not process.name : \"msiexec.exe\"\n",
+  "references": [
+    "https://twitter.com/pabraeken/status/997997818362155008"
+  ],
   "risk_score": 21,
   "rule_id": "2bf78aa2-9c56-48de-b139-f169bf99cf86",
   "severity": "low",
@@ -49,5 +53,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

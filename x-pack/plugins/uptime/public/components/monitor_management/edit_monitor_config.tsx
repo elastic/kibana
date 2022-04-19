@@ -6,14 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import {
   ConfigKey,
   MonitorFields,
   TLSFields,
   DataStream,
   ScheduleUnit,
+  ThrottlingOptions,
 } from '../../../common/runtime_types';
-import { useTrackPageview } from '../../../../observability/public';
 import { SyntheticsProviders } from '../fleet_package/contexts';
 import { PolicyConfig } from '../fleet_package/types';
 import { MonitorConfig } from './monitor_config/monitor_config';
@@ -21,9 +22,10 @@ import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants';
 
 interface Props {
   monitor: MonitorFields;
+  throttling: ThrottlingOptions;
 }
 
-export const EditMonitorConfig = ({ monitor }: Props) => {
+export const EditMonitorConfig = ({ monitor, throttling }: Props) => {
   useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
   useTrackPageview({ app: 'uptime', path: 'edit-monitor', delay: 15000 });
 
@@ -72,6 +74,7 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
   return (
     <SyntheticsProviders
       policyDefaultValues={{
+        throttling,
         defaultIsTLSEnabled: isTLSEnabled,
         defaultIsZipUrlTLSEnabled: isZipUrlTLSEnabled,
         defaultMonitorType: monitorType,
@@ -81,6 +84,7 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
         isEditable: true,
         isZipUrlSourceEnabled: false,
         allowedScheduleUnits: [ScheduleUnit.MINUTES],
+        runsOnService: true,
       }}
       httpDefaultValues={fullDefaultConfig[DataStream.HTTP]}
       tcpDefaultValues={fullDefaultConfig[DataStream.TCP]}

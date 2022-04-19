@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { RuleExecutorOptions, AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { Params } from './alert_type_params';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
 
 // alert type context provided to actions
 
-type RuleInfo = Pick<AlertExecutorOptions, 'name'>;
+type RuleInfo = Pick<RuleExecutorOptions, 'name'>;
 
 export interface ActionContext extends BaseActionContext {
   // a short pre-constructed message which may be used in an action field

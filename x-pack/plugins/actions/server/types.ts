@@ -6,10 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionTypeRegistry } from './action_type_registry';
-import { PluginSetupContract, PluginStartContract } from './plugin';
-import { ActionsClient } from './actions_client';
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import {
   KibanaRequest,
   SavedObjectsClientContract,
@@ -17,7 +14,10 @@ import {
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectReference,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { ActionTypeRegistry } from './action_type_registry';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { ActionsClient } from './actions_client';
 import { ActionTypeExecutorResult } from '../common';
 import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
@@ -139,6 +139,7 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   params: Record<string, any>;
   apiKey?: string;
   executionId?: string;
+  consumer?: string;
 }
 
 interface PersistedActionTaskExecutorParams {

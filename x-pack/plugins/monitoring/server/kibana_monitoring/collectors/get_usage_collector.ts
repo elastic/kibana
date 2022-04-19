@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { IClusterClient } from 'src/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { IClusterClient } from '@kbn/core/server';
 import { MonitoringConfig } from '../../config';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
 import { fetchLicenseType } from './lib/fetch_license_type';
@@ -18,7 +18,7 @@ export function getMonitoringUsageCollector(
   config: MonitoringConfig,
   getClient: () => IClusterClient
 ) {
-  return usageCollection.makeUsageCollector<MonitoringUsage, true>({
+  return usageCollection.makeUsageCollector<MonitoringUsage>({
     type: 'monitoring',
     isReady: () => true,
     schema: {
@@ -95,13 +95,8 @@ export function getMonitoringUsageCollector(
         },
       },
     },
-    extendFetchContext: {
-      kibanaRequest: true,
-    },
-    fetch: async ({ kibanaRequest }) => {
-      const callCluster = kibanaRequest
-        ? getClient().asScoped(kibanaRequest).asCurrentUser
-        : getClient().asInternalUser;
+    fetch: async () => {
+      const callCluster = getClient().asInternalUser;
       const usageClusters: MonitoringClusterStackProductUsage[] = [];
       const availableCcs = config.ui.ccs.enabled;
       const clusters = await fetchClusters(callCluster);

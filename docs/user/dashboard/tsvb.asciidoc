@@ -35,7 +35,7 @@ When you use only {data-sources}, you are able to:
 
 IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release. By default, you create *TSVB* visualizations with only {data-sources}. To use an {es} index string, contact your administrator, or go to <<advanced-options, Advanced Settings>> and set `metrics:allowStringIndices` to `true`.
 
-. On the dashboard, click *All types*, then select *TSVB*.
+. On the dashboard, click *Select type*, then select *TSVB*.
 
 . In *TSVB*, click *Panel options*, then specify the *Data* settings.
 
@@ -131,6 +131,26 @@ To change this behavior, click *Panel options*, then specify a URL in the *Item 
 ===== Markdown
 
 The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS.
+
+[float]
+[[edit-visualizations-in-lens]]
+==== Edit visualizations in Lens
+
+Open and edit your Time Series *TSVB* visualizations in *Lens*, which is the drag-and-drop visualization editor that provides you with additional visualization types, reference lines, and more.
+
+To get started, click *Edit visualization in Lens* in the toolbar.
+
+For more information, check out <<lens,Create visualizations with Lens>>.
+
+[float]
+[[view-data-and-requests-tsvb]]
+==== View the visualization data requests
+
+View the requests that collect the visualization data.
+
+. In the toolbar, click *Inspect*.
+
+. From the *Request* dropdown, select the series you want to view.
 
 [float]
 [[save-the-tsvb-panel]]
@@ -276,20 +296,4 @@ For other types of month over month calculations, use <<timelion, *Timelion*>> o
 
 Calculating the duration between the start and end of an event is unsupported in *TSVB* because *TSVB* requires correlation between different time periods. 
 *TSVB* requires that the duration is pre-calculated.
-====
-
-[discrete]
-[group-on-multiple-fields]
-.*How do I group on multiple fields?*
-[%collapsible]
-====
-
-To group with multiple fields, create runtime fields in the {data-source} you are visualizing.
-
-. Create a runtime field. Refer to <<managing-data-views, Manage data views>> for more information.
-+
-[role="screenshot"]
-image::images/tsvb_group_by_multiple_fields.png[Group by multiple fields]
-
-. Create a *TSVB* visualization and group by this field.
 ====

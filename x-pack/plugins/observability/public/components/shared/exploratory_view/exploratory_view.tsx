@@ -17,12 +17,12 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
-import { TypedLensByValueInput } from '../../../../../lens/public';
-import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
+import { useAppDataViewContext } from './hooks/use_app_data_view';
 import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
@@ -52,7 +52,7 @@ export function ExploratoryView({
     null
   );
 
-  const { loadIndexPattern, loading } = useAppIndexPatternContext();
+  const { loadDataView, loading } = useAppDataViewContext();
 
   const { firstSeries, allSeries, lastRefresh, reportType, setLastRefresh } = useSeriesStorage();
 
@@ -68,11 +68,11 @@ export function ExploratoryView({
 
   useEffect(() => {
     allSeries.forEach((seriesT) => {
-      loadIndexPattern({
+      loadDataView({
         dataType: seriesT.dataType,
       });
     });
-  }, [allSeries, loadIndexPattern]);
+  }, [allSeries, loadDataView]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);

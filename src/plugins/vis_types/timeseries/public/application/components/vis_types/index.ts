@@ -8,13 +8,13 @@
 
 import React, { lazy } from 'react';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { IUiSettingsClient } from 'src/core/public';
-import { PersistedState } from 'src/plugins/visualizations/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-
+import { IUiSettingsClient } from '@kbn/core/public';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { FieldFormatMap } from '@kbn/data-plugin/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { TimeseriesVisData, PanelData } from '../../../../common/types';
-import type { FieldFormatMap } from '../../../../../../data/common';
+import { FetchedIndexPattern } from '../../../../common/types';
 
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.
@@ -62,5 +62,7 @@ export interface TimeseriesVisProps {
   getConfig: IUiSettingsClient['get'];
   syncColors: boolean;
   palettesService: PaletteRegistry;
+  indexPattern?: FetchedIndexPattern['indexPattern'];
+  /** @deprecated please use indexPattern.fieldFormatMap instead **/
   fieldFormatMap?: FieldFormatMap;
 }

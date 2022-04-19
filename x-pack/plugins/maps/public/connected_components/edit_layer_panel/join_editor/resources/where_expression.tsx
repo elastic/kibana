@@ -9,9 +9,9 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView, Query } from 'src/plugins/data/common';
+import { DataView, Query } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../../common/constants';
-import { getData } from '../../../../kibana_services';
+import { getData, getSearchBar } from '../../../../kibana_services';
 
 interface Props {
   indexPattern: DataView;
@@ -46,7 +46,7 @@ export class WhereExpression extends Component<Props, State> {
   };
 
   render() {
-    const { SearchBar } = getData().ui;
+    const SearchBar = getSearchBar();
     const { whereQuery, indexPattern } = this.props;
     const expressionValue =
       whereQuery && whereQuery.query

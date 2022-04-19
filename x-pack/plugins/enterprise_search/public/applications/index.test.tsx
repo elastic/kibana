@@ -9,17 +9,17 @@ import React from 'react';
 
 import { getContext } from 'kea';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { licensingMock } from '../../../licensing/public/mocks';
-import { securityMock } from '../../../security/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { AppSearch } from './app_search';
-import { EnterpriseSearch } from './enterprise_search';
+import { EnterpriseSearchOverview } from './enterprise_search_overview';
 import { KibanaLogic } from './shared/kibana';
 import { WorkplaceSearch } from './workplace_search';
 
-import { renderApp, renderHeaderActions } from './';
+import { renderApp, renderHeaderActions } from '.';
 
 describe('renderApp', () => {
   const kibanaDeps = {
@@ -62,8 +62,8 @@ describe('renderApp', () => {
   describe('Enterprise Search apps', () => {
     afterEach(() => unmount());
 
-    it('renders EnterpriseSearch', () => {
-      mount(EnterpriseSearch);
+    it('renders EnterpriseSearchOverview', () => {
+      mount(EnterpriseSearchOverview);
       expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
     });
 

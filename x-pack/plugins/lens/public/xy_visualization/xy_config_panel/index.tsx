@@ -9,9 +9,9 @@ import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType, VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AxesSettingsConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
-import { AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
 import { isHorizontalChart } from '../state_helpers';
 import { LegendSettingsPopover } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -20,6 +20,7 @@ import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
+import { getDataLayers } from '../visualization_helpers';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -103,7 +104,7 @@ function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, sta
     axisGroups
       .find((group) => group.groupId === groupId)
       ?.series.some(({ layer: layerId }) =>
-        state?.layers.find(
+        getDataLayers(state?.layers).find(
           (layer) => layer.layerId === layerId && layer.seriesType.includes('percentage')
         )
       )
@@ -115,8 +116,9 @@ export const XyToolbar = memo(function XyToolbar(
 ) {
   const { state, setState, frame, useLegacyTimeAxis } = props;
 
+  const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
-  const axisGroups = getAxesConfiguration(state?.layers, shouldRotate, frame.activeData);
+  const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
   const dataBounds = getDataBounds(frame.activeData, axisGroups);
 
   const tickLabelsVisibilitySettings = {
@@ -196,7 +198,7 @@ export const XyToolbar = memo(function XyToolbar(
     });
   };
 
-  const nonOrdinalXAxis = state?.layers.every(
+  const nonOrdinalXAxis = dataLayers.every(
     (layer) =>
       !layer.xAccessor ||
       getScaleType(
@@ -206,7 +208,7 @@ export const XyToolbar = memo(function XyToolbar(
   );
 
   // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
-  const onChangeEndzoneVisiblity = state?.layers.every(
+  const onChangeEndzoneVisiblity = dataLayers.every(
     (layer) =>
       layer.xAccessor &&
       getScaleType(
@@ -232,7 +234,7 @@ export const XyToolbar = memo(function XyToolbar(
     axisGroups
       .find((group) => group.groupId === 'left')
       ?.series?.some((series) => {
-        const seriesType = state.layers.find((l) => l.layerId === series.layer)?.seriesType;
+        const seriesType = dataLayers.find((l) => l.layerId === series.layer)?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
   );
@@ -249,7 +251,7 @@ export const XyToolbar = memo(function XyToolbar(
     axisGroups
       .find((group) => group.groupId === 'right')
       ?.series?.some((series) => {
-        const seriesType = state.layers.find((l) => l.layerId === series.layer)?.seriesType;
+        const seriesType = dataLayers.find((l) => l.layerId === series.layer)?.seriesType;
         return seriesType?.includes('bar') || seriesType?.includes('area');
       })
   );
@@ -263,12 +265,12 @@ export const XyToolbar = memo(function XyToolbar(
     [setState, state]
   );
 
-  const filteredBarLayers = state?.layers.filter((layer) => layer.seriesType.includes('bar'));
+  const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
   const chartHasMoreThanOneBarSeries =
     filteredBarLayers.length > 1 ||
     filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessor);
 
-  const isTimeHistogramModeEnabled = state?.layers.some(
+  const isTimeHistogramModeEnabled = dataLayers.some(
     ({ xAccessor, layerId, seriesType, splitAccessor }) => {
       if (!xAccessor) {
         return false;
@@ -292,14 +294,15 @@ export const XyToolbar = memo(function XyToolbar(
   ).truncateText;
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <VisualOptionsPopover
             state={state}
             setState={setState}
             datasourceLayers={frame.datasourceLayers}
           />
+
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
@@ -392,11 +395,22 @@ export const XyToolbar = memo(function XyToolbar(
                 valuesInLegend: !state.valuesInLegend,
               });
             }}
+            legendSize={state.legend.legendSize}
+            onLegendSizeChange={(legendSize) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  legendSize,
+                },
+              });
+            }}
           />
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -434,6 +448,7 @@ export const XyToolbar = memo(function XyToolbar(
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
             />
           </TooltipWrapper>
+
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
@@ -455,6 +470,7 @@ export const XyToolbar = memo(function XyToolbar(
               isTimeHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate
             }
           />
+
           <TooltipWrapper
             tooltipContent={
               shouldRotate

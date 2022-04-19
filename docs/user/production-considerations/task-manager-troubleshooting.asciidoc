@@ -6,7 +6,7 @@
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Reporting, and Telemetry.
+Task Manager is used by a wide range of services in {kib}, such as <<alerting-production-considerations, Alerting>>, Actions, Reporting, and Telemetry.
 Unexpected behavior in these services might be a downstream issue originating in Task Manager.
 
 This page describes how to resolve common problems you might encounter with Task Manager.
@@ -412,7 +412,7 @@ This assessment is based on the following:
 
 * Comparing the `last_successful_poll` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where you can see the last polling cycle took place 1 second before the monitoring stats were exposed by the health monitoring API.
 * Comparing the `last_polling_delay` to the `timestamp` (value of `2021-02-16T11:38:10.077Z`) at the root, where you can see the last polling cycle delay took place 2 days ago, suggesting {kib} instances are not conflicting often.
-* The `p50` of the `duration` shows that at least 50% of polling cycles take, at most, 13 millisconds to complete.
+* The `p50` of the `duration` shows that at least 50% of polling cycles take, at most, 13 milliseconds to complete.
 * Evaluating the `result_frequency_percent_as_number`:
 ** 80% of the polling cycles completed without claiming any tasks (suggesting that there aren't any overdue tasks).
 ** 20% completed with Task Manager claiming tasks that were then executed.
@@ -508,7 +508,7 @@ For details on achieving higher throughput by adjusting your scaling strategy, s
 Tasks run for too long, overrunning their schedule
 
 *Diagnosis*:
-The <<task-manager-theory-insufficient-throughput,Insufficient throughtput to handle the scheduled workload>> theory analyzed a hypothetical scenario where both drift and load were unusually high.
+The <<task-manager-theory-insufficient-throughput,Insufficient throughput to handle the scheduled workload>> theory analyzed a hypothetical scenario where both drift and load were unusually high.
 
 Suppose an alternate scenario, where `drift` is high, but `load` is not, such as the following:
 
@@ -688,7 +688,7 @@ Keep in mind that these stats give you a glimpse at a moment in time, and even t
 [[task-manager-health-evaluate-the-workload]]
 ===== Evaluate the Workload
 
-Predicting the required throughput a deplyment might need to support Task Manager is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
+Predicting the required throughput a deployment might need to support Task Manager is difficult, as features can schedule an unpredictable number of tasks at a variety of scheduled cadences.
 
 <<task-manager-health-monitoring>> provides statistics that make it easier to monitor the adequacy of the existing throughput.
 By evaluating the workload, the required throughput can be estimated, which is used when following the Task Manager <<task-manager-scaling-guidance>>.

@@ -9,12 +9,16 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const pkgMap = require('@kbn/synthetic-package-map').readPackageMap();
+
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
+  coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts', 'jest\\.config\\.js'],
 
   // A list of reporter names that Jest uses when writing coverage reports
   coverageReporters: !!process.env.CODE_COVERAGE
@@ -34,13 +38,17 @@ module.exports = {
     '\\.(css|less|scss)$': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/style_mock.js',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/file_mock.js',
-    '\\.ace\\.worker.js$':
+    '\\.ace\\.worker$':
       '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/worker_module_mock.js',
-    '\\.editor\\.worker.js$':
+    '\\.editor\\.worker(\\.js)?$':
       '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/node_modules/@kbn/test/target_node/jest/mocks/file_mock.js',
-    '^src/core/(.*)': '<rootDir>/src/core/$1',
-    '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
+    ...Object.fromEntries(
+      Array.from(pkgMap.entries()).map(([pkgId, repoRelativeDir]) => [
+        `^${pkgId}(/?.*)$`,
+        `<rootDir>/${repoRelativeDir}$1`,
+      ])
+    ),
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -82,7 +90,7 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
-    '<rootDir>/node_modules/@emotion/jest/serializer',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/emotion.js',
   ],
 
   // The test environment that will be used for testing
@@ -128,4 +136,6 @@ module.exports = {
 
   // A custom resolver to preserve symlinks by default
   resolver: '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/preserve_symlinks_resolver.js',
+
+  watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 };

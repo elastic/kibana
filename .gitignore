@@ -10,6 +10,7 @@
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
+!/packages/kbn-import-resolver/src/__fixtures__/node_modules
 trash
 /optimize
 /built_assets
@@ -20,6 +21,7 @@ target
 *.iml
 *.log
 types.eslint.config.js
+__tmp__
 
 # Ignore example plugin builds
 /examples/*/build
@@ -68,6 +70,9 @@ npm-debug.log*
 .vagrant
 .envrc
 
+## Snyk
+.dccache
+
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 
@@ -94,4 +99,5 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
+/packages/kbn-synthetic-package-map/synthetic-packages.json
 

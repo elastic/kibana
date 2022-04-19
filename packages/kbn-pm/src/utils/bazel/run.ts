@@ -10,7 +10,7 @@ import chalk from 'chalk';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { observeLines } from '@kbn/dev-utils/stdio';
+import { observeLines } from '@kbn/stdio-dev-helpers';
 import { spawn } from '../child_process';
 import { log } from '../log';
 import { CliError } from '../errors';
@@ -52,6 +52,9 @@ async function runBazelCommandWithRunner(
   try {
     await bazelProc;
   } catch {
+    log.error(
+      'HINT: If experiencing problems with node_modules try `yarn kbn bootstrap --force-install` or as last resort `yarn kbn reset && yarn kbn bootstrap`'
+    );
     throw new CliError(`The bazel command that was running failed to complete.`);
   }
   await bazelLogs$.toPromise();

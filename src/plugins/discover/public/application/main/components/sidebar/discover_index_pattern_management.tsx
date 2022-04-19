@@ -15,8 +15,8 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DataView } from '../../../../../../data/common';
 
 export interface DiscoverIndexPatternManagementProps {
   /**

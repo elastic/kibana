@@ -12,11 +12,11 @@ import { APP_ID } from '../../../../common/constants';
 
 const MAX_CASES_TO_SHOW = 3;
 const RecentCasesComponent = () => {
-  const { cases: casesUi } = useKibana().services;
+  const { cases } = useKibana().services;
 
   const userCanCrud = useGetUserCasesPermissions()?.crud ?? false;
 
-  return casesUi.getRecentCases({
+  return cases.ui.getRecentCases({
     userCanCrud,
     maxCasesToShow: MAX_CASES_TO_SHOW,
     owner: [APP_ID],

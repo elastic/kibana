@@ -36,14 +36,13 @@ describe('ConnectInstance', () => {
   const getSourceConnectData = jest.fn((_, redirectOauth) => {
     redirectOauth();
   });
-  const createContentSource = jest.fn((_, redirectFormCreated, handleFormSubmitError) => {
+  const createContentSource = jest.fn((_, redirectFormCreated) => {
     redirectFormCreated();
-    handleFormSubmitError();
   });
 
-  const credentialsSourceData = staticSourceData[13];
-  const oauthSourceData = staticSourceData[0];
-  const subdomainSourceData = staticSourceData[18];
+  const credentialsSourceData = staticSourceData[15]; // salesforce_sandbox
+  const oauthSourceData = staticSourceData[0]; // box
+  const subdomainSourceData = staticSourceData[21]; // zendesk
 
   const props = {
     ...credentialsSourceData,

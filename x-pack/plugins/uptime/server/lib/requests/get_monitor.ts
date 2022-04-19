@@ -5,19 +5,36 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
-import { SyntheticsMonitor } from '../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  SyntheticsMonitorWithSecrets,
+  EncryptedSyntheticsMonitor,
+} from '../../../common/runtime_types';
+import { syntheticsMonitor, syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 
 export const getSyntheticsMonitor = async ({
   monitorId,
+  encryptedSavedObjectsClient,
   savedObjectsClient,
 }: {
   monitorId: string;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   savedObjectsClient: SavedObjectsClientContract;
-}): Promise<SavedObject<SyntheticsMonitor>> => {
+}): Promise<SavedObject<SyntheticsMonitorWithSecrets>> => {
   try {
-    return await savedObjectsClient.get(syntheticsMonitorType, monitorId);
+    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
+      syntheticsMonitorType,
+      monitorId
+    );
+
+    return await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+      syntheticsMonitor.name,
+      monitorId,
+      {
+        namespace: encryptedMonitor.namespaces?.[0],
+      }
+    );
   } catch (e) {
     throw e;
   }

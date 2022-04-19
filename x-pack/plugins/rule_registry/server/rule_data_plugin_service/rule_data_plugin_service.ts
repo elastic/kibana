@@ -8,13 +8,13 @@
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { INDEX_PREFIX } from '../config';
 import { IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
 import { Dataset, IndexOptions } from './index_options';
-import { ResourceInstaller } from './resource_installer';
+import { IResourceInstaller, ResourceInstaller } from './resource_installer';
 import { joinWithDash } from './utils';
 
 /**
@@ -89,7 +89,7 @@ interface ConstructorOptions {
 export class RuleDataService implements IRuleDataService {
   private readonly indicesByBaseName: Map<string, IndexInfo>;
   private readonly indicesByFeatureId: Map<string, IndexInfo[]>;
-  private readonly resourceInstaller: ResourceInstaller;
+  private readonly resourceInstaller: IResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
 

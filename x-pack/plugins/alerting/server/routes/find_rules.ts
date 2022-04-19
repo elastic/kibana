@@ -6,14 +6,14 @@
  */
 
 import { omit } from 'lodash';
-import { IRouter } from 'kibana/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { IRouter } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { FindOptions, FindResult } from '../rules_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
@@ -62,7 +62,7 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
   perPage,
   data,
   ...restOfResult
@@ -84,6 +84,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         executionStatus,
         actions,
         scheduledTaskId,
+        snoozeEndTime,
         ...rest
       }) => ({
         ...rest,
@@ -97,6 +98,8 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         mute_all: muteAll,
         muted_alert_ids: mutedInstanceIds,
         scheduled_task_id: scheduledTaskId,
+        // Remove this object spread boolean check after snoozeEndTime is added to the public API
+        ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
         execution_status: executionStatus && {
           ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
           last_execution_date: executionStatus.lastExecutionDate,

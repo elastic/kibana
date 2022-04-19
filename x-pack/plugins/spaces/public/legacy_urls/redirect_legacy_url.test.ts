@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { createRedirectLegacyUrl } from './redirect_legacy_url';
 
@@ -29,14 +29,26 @@ describe('#redirectLegacyUrl', () => {
     return { redirectLegacyUrl, toasts, application };
   };
 
-  it('creates a toast and redirects to the given path in the current app', async () => {
+  it('redirects to the given path in the current app and creates a toast when aliasPurpose is "savedObjectConversion"', async () => {
     const { redirectLegacyUrl, toasts, application } = setup();
 
     const path = '/foo?bar#baz';
-    await redirectLegacyUrl(path);
+    await redirectLegacyUrl({ path, aliasPurpose: 'savedObjectConversion' });
 
     expect(toasts.addInfo).toHaveBeenCalledTimes(1);
     expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+    expect(application.navigateToApp).toHaveBeenCalledWith(APP_ID, { replace: true, path });
+  });
+
+  it('redirects to the given path in the current app and does not create a toast when aliasPurpose is not "savedObjectConversion"', async () => {
+    const { redirectLegacyUrl, toasts, application } = setup();
+
+    const path = '/foo?bar#baz';
+    await redirectLegacyUrl({ path, aliasPurpose: undefined });
+    await redirectLegacyUrl({ path, aliasPurpose: 'savedObjectImport' });
+
+    expect(toasts.addInfo).not.toHaveBeenCalled();
+    expect(application.navigateToApp).toHaveBeenCalledTimes(2);
     expect(application.navigateToApp).toHaveBeenCalledWith(APP_ID, { replace: true, path });
   });
 });

@@ -7,7 +7,7 @@
 
 import type { RulesSchema } from '../../common/detection_engine/schemas/response';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
+import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
@@ -59,6 +59,7 @@ export interface CustomRule {
   timeline: CompleteTimeline;
   maxSignals: number;
   buildingBlockType?: string;
+  exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -311,7 +312,7 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
   thresholdField: 'host.name',
-  threshold: '10',
+  threshold: '1',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
@@ -335,7 +336,7 @@ export const getMachineLearningRule = (): MachineLearningRule => ({
 });
 
 export const getEqlRule = (): CustomRule => ({
-  customQuery: 'any where process.name == "which"',
+  customQuery: 'any where process.name == "zsh"',
   name: 'New EQL Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',
@@ -373,8 +374,8 @@ export const getCCSEqlRule = (): CustomRule => ({
 export const getEqlSequenceRule = (): CustomRule => ({
   customQuery:
     'sequence with maxspan=30s\
-     [any where process.name == "which"]\
-     [any where process.name == "xargs"]',
+     [any where agent.name == "test.local"]\
+     [any where host.name == "test.local"]',
   name: 'New EQL Sequence Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',

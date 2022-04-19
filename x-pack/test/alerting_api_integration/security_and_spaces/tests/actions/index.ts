@@ -32,6 +32,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./builtin_action_types/resilient'));
     loadTestFile(require.resolve('./builtin_action_types/slack'));
     loadTestFile(require.resolve('./builtin_action_types/webhook'));
+    loadTestFile(require.resolve('./builtin_action_types/xmatters'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));

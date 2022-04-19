@@ -8,8 +8,14 @@
 import expect from '@kbn/expect';
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  toNdJsonString,
+  getImportExceptionsListItemSchemaMock,
+  getImportExceptionsListSchemaMock,
+} from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -22,12 +28,8 @@ import {
   removeServerGeneratedProperties,
   ruleToNdjson,
 } from '../../utils';
-import {
-  toNdJsonString,
-  getImportExceptionsListItemSchemaMock,
-  getImportExceptionsListSchemaMock,
-} from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 const getImportRuleBuffer = (connectorId: string) => {
   const rule1 = {
@@ -95,8 +97,127 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('import_rules', () => {
+    describe('importing rules with different roles', () => {
+      before(async () => {
+        await createUserAndRole(getService, ROLES.hunter_no_actions);
+        await createUserAndRole(getService, ROLES.hunter);
+      });
+      after(async () => {
+        await deleteUserAndRole(getService, ROLES.hunter_no_actions);
+        await deleteUserAndRole(getService, ROLES.hunter);
+      });
+      beforeEach(async () => {
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+      it('should successfully import rules without actions when user has no actions privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter_no_actions, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+      });
+      it('should successfully import rules with actions when user has "read" actions privileges', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          errors: [],
+          success: true,
+          success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+      });
+      it('should not import rules with actions when a user has no actions privileges', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .auth(ROLES.hunter_no_actions, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+        expect(body).to.eql({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              error: {
+                message:
+                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                status_code: 403,
+              },
+              rule_id: '(unknown id)',
+            },
+            {
+              error: {
+                message: `1 connector is missing. Connector id missing is: ${hookAction.id}`,
+                status_code: 404,
+              },
+              rule_id: 'rule-1',
+            },
+          ],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+      });
+    });
     describe('importing rules with an index', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);

@@ -7,11 +7,13 @@
 /// <reference types="node" />
 
 import { Action } from 'history';
+import { AnalyticsClient } from '@elastic/analytics';
 import Boom from '@hapi/boom';
 import type { ButtonColor } from '@elastic/eui';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Client } from '@elastic/elasticsearch';
 import { ConfigPath } from '@kbn/config';
+import { ContextProviderOpts } from '@elastic/analytics';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { EnvironmentMode } from '@kbn/config';
@@ -22,10 +24,15 @@ import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EuiOverlayMaskProps } from '@elastic/eui';
+import { Event as Event_2 } from '@elastic/analytics';
+import { EventContext } from '@elastic/analytics';
+import { EventType } from '@elastic/analytics';
+import { EventTypeOpts } from '@elastic/analytics';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
+import { IShipper } from '@elastic/analytics';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -33,16 +40,19 @@ import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { OptInConfig } from '@elastic/analytics';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
+import { ShipperClassConstructor } from '@elastic/analytics';
+import { TelemetryCounter } from '@elastic/analytics';
+import { TelemetryCounterType } from '@elastic/analytics';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { TransitionPromptHook } from 'history';
 import { Type } from '@kbn/config-schema';
@@ -50,10 +60,21 @@ import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { URL as URL_2 } from 'url';
-import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
 export function __kbnBootstrap__(): Promise<void>;
+
+export { AnalyticsClient }
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceSetup = AnalyticsClient;
+
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+//
+// @public
+export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
@@ -160,7 +181,7 @@ export interface ApplicationStart {
         deepLinkId?: string;
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
-    navigateToUrl(url: string): Promise<void>;
+    navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 }
 
 // @public
@@ -208,16 +229,6 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'searcha
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
-
-// @public @deprecated
-export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
-    // (undocumented)
-    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-    // (undocumented)
-    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-    // (undocumented)
-    stop?(): void;
-}
 
 // @public
 export interface Capabilities {
@@ -383,6 +394,8 @@ export interface ChromeUserBanner {
     content: MountPoint<HTMLDivElement>;
 }
 
+export { ContextProviderOpts }
+
 // @internal (undocumented)
 export interface CoreContext {
     // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
@@ -399,7 +412,11 @@ export interface CoreContext {
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
+    analytics: AnalyticsServiceSetup;
+    // (undocumented)
     application: ApplicationSetup;
+    // (undocumented)
+    executionContext: ExecutionContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
@@ -421,6 +438,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 // @public
 export interface CoreStart {
     // (undocumented)
+    analytics: AnalyticsServiceStart;
+    // (undocumented)
     application: ApplicationStart;
     // (undocumented)
     chrome: ChromeStart;
@@ -428,6 +447,8 @@ export interface CoreStart {
     deprecations: DeprecationsServiceStart;
     // (undocumented)
     docLinks: DocLinksStart;
+    // (undocumented)
+    executionContext: ExecutionContextStart;
     // (undocumented)
     fatalErrors: FatalErrorsStart;
     // (undocumented)
@@ -461,6 +482,7 @@ export class CoreSystem {
     // (undocumented)
     start(): Promise<{
         application: InternalApplicationStart;
+        executionContext: ExecutionContextSetup;
     } | undefined>;
     // (undocumented)
     stop(): void;
@@ -510,6 +532,28 @@ export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
+
+export { Event_2 as Event }
+
+export { EventContext }
+
+export { EventType }
+
+export { EventTypeOpts }
+
+// @public
+export interface ExecutionContextSetup {
+    clear(): void;
+    context$: Observable<KibanaExecutionContext>;
+    get(): KibanaExecutionContext;
+    // Warning: (ae-forgotten-export) The symbol "Labels" needs to be exported by the entry point index.d.ts
+    getAsLabels(): Labels_2;
+    set(c$: KibanaExecutionContext): void;
+    withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
+}
+
+// @public
+export type ExecutionContextStart = ExecutionContextSetup;
 
 // @public
 export interface FatalErrorInfo {
@@ -727,6 +771,8 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
     readonly response?: Readonly<Response>;
 }
 
+export { IShipper }
+
 // @public
 export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
@@ -734,7 +780,7 @@ export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' |
 export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
-    getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
+    getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
     getUpdate$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -751,9 +797,10 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
     readonly description?: string;
     readonly url?: string;
     child?: KibanaExecutionContext;
@@ -768,7 +815,14 @@ export interface NavigateToAppOptions {
     openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
+    skipAppLeave?: boolean;
     state?: unknown;
+}
+
+// @public
+export interface NavigateToUrlOptions {
+    forceRedirect?: boolean;
+    skipAppLeave?: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -787,6 +841,8 @@ export interface NotificationsStart {
     // (undocumented)
     toasts: ToastsStart;
 }
+
+export { OptInConfig }
 
 // @public (undocumented)
 export interface OverlayBannersStart {
@@ -818,6 +874,8 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
+    // (undocumented)
+    outsideClickCloses?: boolean;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
@@ -900,7 +958,7 @@ interface Plugin_2<TSetup = void, TStart = void, TPluginsSetup extends object = 
 export { Plugin_2 as Plugin }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema extends object = object> {
@@ -952,6 +1010,7 @@ export type ResolveDeprecationResponse = {
 
 // @public
 export interface ResolvedSimpleSavedObject<T = unknown> {
+    alias_purpose?: SavedObjectsResolveResponse['alias_purpose'];
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
@@ -1030,8 +1089,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 
@@ -1108,7 +1169,7 @@ export class SavedObjectsClient {
     }>) => Promise<{
         resolved_objects: ResolvedSimpleSavedObject<T>[];
     }>;
-    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<T>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
@@ -1235,8 +1296,6 @@ export interface SavedObjectsImportFailure {
         icon?: string;
     };
     overwrite?: boolean;
-    // @deprecated (undocumented)
-    title?: string;
     // (undocumented)
     type: string;
 }
@@ -1339,6 +1398,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
+    alias_purpose?: 'savedObjectConversion' | 'savedObjectImport';
     alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
@@ -1379,9 +1439,11 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History_2<
     replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
 }
 
+export { ShipperClassConstructor }
+
 // @public
 export class SimpleSavedObject<T = unknown> {
-    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated_at: updatedAt, }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -1408,11 +1470,17 @@ export class SimpleSavedObject<T = unknown> {
     // (undocumented)
     type: SavedObject<T>['type'];
     // (undocumented)
+    updatedAt: SavedObject<T>['updated_at'];
+    // (undocumented)
     _version?: SavedObject<T>['version'];
 }
 
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+export { TelemetryCounter }
+
+export { TelemetryCounterType }
 
 // @public (undocumented)
 export interface ThemeServiceSetup {
@@ -1500,7 +1568,7 @@ export interface UiSettingsParams<T = unknown> {
 // @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)
-    [key: string]: PublicUiSettingsParams_2 & UserProvidedValues_2;
+    [key: string]: PublicUiSettingsParams & UserProvidedValues;
 }
 
 // @public
@@ -1522,6 +1590,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:192:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

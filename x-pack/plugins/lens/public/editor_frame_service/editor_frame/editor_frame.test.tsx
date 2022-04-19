@@ -31,7 +31,7 @@ import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { EditorFrame, EditorFrameProps } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { fromExpression } from '@kbn/interpreter';
 import {
   createMockVisualization,
@@ -40,12 +40,12 @@ import {
   createExpressionRendererMock,
   mockStoreDeps,
 } from '../../mocks';
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { DragDrop } from '../../drag_drop';
-import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
-import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
-import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
@@ -408,8 +408,7 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -476,6 +475,8 @@ describe('editor_frame', () => {
         getOperationForColumnId: jest.fn(),
         getTableSpec: jest.fn(),
         getVisualDefaults: jest.fn(),
+        getSourceId: jest.fn(),
+        getFilters: jest.fn(),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
@@ -485,8 +486,7 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -845,8 +845,7 @@ describe('editor_frame', () => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
@@ -926,7 +925,7 @@ describe('editor_frame', () => {
               },
               {
                 score: 0.6,
-                state: {},
+                state: suggestionVisState,
                 title: 'Suggestion2',
                 previewIcon: 'empty',
               },
@@ -937,7 +936,7 @@ describe('editor_frame', () => {
             getSuggestions: () => [
               {
                 score: 0.8,
-                state: suggestionVisState,
+                state: {},
                 title: 'Suggestion3',
                 previewIcon: 'empty',
               },
@@ -978,6 +977,8 @@ describe('editor_frame', () => {
         })
       ).instance;
 
+      instance.update();
+
       act(() => {
         instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
           {
@@ -990,7 +991,7 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1033,20 +1034,8 @@ describe('editor_frame', () => {
         visualizationMap: {
           testVis: {
             ...mockVisualization,
-            getSuggestions: () => [
-              {
-                score: 0.2,
-                state: {},
-                title: 'Suggestion1',
-                previewIcon: 'empty',
-              },
-              {
-                score: 0.6,
-                state: {},
-                title: 'Suggestion2',
-                previewIcon: 'empty',
-              },
-            ],
+            // do not return suggestions for the currently active vis, otherwise it will be chosen
+            getSuggestions: () => [],
           },
           testVis2: {
             ...mockVisualization2,
@@ -1077,6 +1066,7 @@ describe('editor_frame', () => {
       } as EditorFrameProps;
 
       instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+      instance.update();
 
       act(() => {
         instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(

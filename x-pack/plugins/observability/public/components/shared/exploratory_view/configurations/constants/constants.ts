@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OperationType } from '../../../../../../../lens/public';
+import { OperationType } from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
 import { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
@@ -17,6 +18,7 @@ import {
 } from './elasticsearch_fieldnames';
 import {
   AGENT_HOST_LABEL,
+  AGENT_TYPE_LABEL,
   BROWSER_FAMILY_LABEL,
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
@@ -43,6 +45,7 @@ import {
   PORT_LABEL,
   REQUEST_METHOD,
   SERVICE_NAME_LABEL,
+  SERVICE_TYPE_LABEL,
   TAGS_LABEL,
   TBT_LABEL,
   URL_LABEL,
@@ -52,6 +55,8 @@ import {
   LABELS_FIELD,
   STEP_NAME_LABEL,
   STEP_DURATION_LABEL,
+  EVENT_DATASET_LABEL,
+  MESSAGE_LABEL,
 } from './labels';
 import {
   MONITOR_DURATION_US,
@@ -63,7 +68,6 @@ import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
 } from './field_names/synthetics';
-import { DOCUMENT_FIELD_NAME } from '../../../../../../../lens/common/constants';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
@@ -79,6 +83,9 @@ export const FieldLabels: Record<string, string> = {
   'observer.geo.name': OBSERVER_LOCATION_LABEL,
   'service.name': SERVICE_NAME_LABEL,
   'service.environment': ENVIRONMENT_LABEL,
+  'service.type': SERVICE_TYPE_LABEL,
+  'event.dataset': EVENT_DATASET_LABEL,
+  message: MESSAGE_LABEL,
 
   [LCP_FIELD]: LCP_LABEL,
   [FCP_FIELD]: FCP_LABEL,
@@ -101,6 +108,7 @@ export const FieldLabels: Record<string, string> = {
   [SYNTHETICS_STEP_NAME]: STEP_NAME_LABEL,
 
   'agent.hostname': AGENT_HOST_LABEL,
+  'agent.type': AGENT_TYPE_LABEL,
   'host.hostname': HOST_NAME_LABEL,
   'monitor.name': MONITOR_NAME_LABEL,
   'monitor.type': MONITOR_TYPE_LABEL,
@@ -137,6 +145,7 @@ export enum DataTypes {
   UX = 'ux',
   MOBILE = 'mobile',
   METRICS = 'infra_metrics',
+  LOGS = 'infra_logs',
 }
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';

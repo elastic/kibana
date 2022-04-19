@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
@@ -25,7 +25,8 @@ export const useMonitorManagementBreadcrumbs = ({
   useBreadcrumbs([
     {
       text: MONITOR_MANAGEMENT_CRUMB,
-      href: isAddMonitor || isEditMonitor ? `${appPath}/${MONITOR_MANAGEMENT_ROUTE}` : undefined,
+      href:
+        isAddMonitor || isEditMonitor ? `${appPath}/${MONITOR_MANAGEMENT_ROUTE}/all` : undefined,
     },
     ...(isAddMonitor
       ? [
@@ -47,7 +48,7 @@ export const useMonitorManagementBreadcrumbs = ({
 export const MONITOR_MANAGEMENT_CRUMB = i18n.translate(
   'xpack.uptime.monitorManagement.monitorManagementCrumb',
   {
-    defaultMessage: 'Monitor management',
+    defaultMessage: 'Monitor Management',
   }
 );
 

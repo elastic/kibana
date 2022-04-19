@@ -9,7 +9,7 @@ import { pick } from 'lodash';
 import type { Request } from '@hapi/hapi';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
-import { addSpaceIdToPath } from '../../../spaces/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -17,11 +17,11 @@ import {
   SavedObjectReference,
   IBasePath,
   SavedObject,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { RunContext } from '@kbn/task-manager-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
-import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -34,6 +34,7 @@ import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects
 import { asSavedObjectExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
+import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -48,9 +49,11 @@ export class TaskRunnerFactory {
   private isInitialized = false;
   private taskRunnerContext?: TaskRunnerContext;
   private readonly actionExecutor: ActionExecutorContract;
+  private readonly inMemoryMetrics: InMemoryMetrics;
 
-  constructor(actionExecutor: ActionExecutorContract) {
+  constructor(actionExecutor: ActionExecutorContract, inMemoryMetrics: InMemoryMetrics) {
     this.actionExecutor = actionExecutor;
+    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   public initialize(taskRunnerContext: TaskRunnerContext) {
@@ -66,7 +69,7 @@ export class TaskRunnerFactory {
       throw new Error('TaskRunnerFactory not initialized');
     }
 
-    const { actionExecutor } = this;
+    const { actionExecutor, inMemoryMetrics } = this;
     const {
       logger,
       encryptedSavedObjectsClient,
@@ -86,7 +89,7 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, params, apiKey, executionId, relatedSavedObjects },
+          attributes: { actionId, params, apiKey, executionId, consumer, relatedSavedObjects },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -115,6 +118,7 @@ export class TaskRunnerFactory {
             ...getSourceFromReferences(references),
             taskInfo,
             executionId,
+            consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
@@ -130,12 +134,14 @@ export class TaskRunnerFactory {
           }
         }
 
+        inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
         if (
           executorResult &&
           executorResult?.status === 'error' &&
           executorResult?.retry !== undefined &&
           isRetryableBasedOnAttempts
         ) {
+          inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
           logger.error(
             `Action '${actionId}' failed ${
               !!executorResult.retry ? willRetryMessage : willNotRetryMessage
@@ -149,6 +155,7 @@ export class TaskRunnerFactory {
             executorResult.retry as boolean | Date
           );
         } else if (executorResult && executorResult?.status === 'error') {
+          inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
           logger.error(
             `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
           );
@@ -179,7 +186,7 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, apiKey, executionId, relatedSavedObjects },
+          attributes: { actionId, apiKey, executionId, consumer, relatedSavedObjects },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -194,10 +201,13 @@ export class TaskRunnerFactory {
         await actionExecutor.logCancellation({
           actionId,
           request,
+          consumer,
           executionId,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           ...getSourceFromReferences(references),
         });
+
+        inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
 
         logger.debug(
           `Cancelling action task for action with id ${actionId} - execution error due to timeout.`

@@ -5,32 +5,35 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
-import { FeaturesPluginStart } from '../../features/public';
-import { KibanaFeature } from '../../features/common';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import { KibanaFeature } from '@kbn/features-plugin/common';
+import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { TypeRegistry } from './application/type_registry';
-import {
-  ManagementAppMountParams,
-  ManagementSetup,
-} from '../../../../src/plugins/management/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerting/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { SpacesPluginStart } from '../../spaces/public';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { getAlertsTableLazy } from './common/get_alerts_table';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
+import {
+  ExperimentalFeatures,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
 
 import type {
   ActionTypeModel,
@@ -39,16 +42,23 @@ import type {
   RuleTypeModel,
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
+  AlertsTableProps,
+  AlertsTableConfigurationRegistry,
 } from './types';
+import { TriggersActionsUiConfigType } from '../common/types';
+import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
+import { PLUGIN_ID } from './common/constants';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
+  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
+  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorAddFlyoutProps>;
@@ -61,6 +71,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditAlertFlyout: (
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
+  getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
 }
 
 interface PluginsSetup {
@@ -71,11 +82,13 @@ interface PluginsSetup {
 
 interface PluginsStart {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
   features: FeaturesPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export class Plugin
@@ -89,15 +102,24 @@ export class Plugin
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
+  private alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  private config: TriggersActionsUiConfigType;
+  readonly experimentalFeatures: ExperimentalFeatures;
 
-  constructor() {
+  constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+    this.alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
+    this.config = ctx.config.get();
+    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
+    const alertsTableConfigurationRegistry = this.alertsTableConfigurationRegistry;
+
+    ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
       defaultMessage: 'Rules and Connectors',
@@ -111,18 +133,18 @@ export class Plugin
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
-        id: 'triggersActions',
+        id: PLUGIN_ID,
         title: featureTitle,
         description: featureDescription,
         icon: 'watchesApp',
         path: '/app/management/insightsAndAlerting/triggersActions',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
     plugins.management.sections.section.insightsAndAlerting.registerApp({
-      id: 'triggersActions',
+      id: PLUGIN_ID,
       title: featureTitle,
       order: 0,
       async mount(params: ManagementAppMountParams) {
@@ -147,9 +169,11 @@ export class Plugin
         return renderApp({
           ...coreStart,
           data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
           charts: pluginsStart.charts,
           alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,
+          unifiedSearch: pluginsStart.unifiedSearch,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
           theme$: params.theme$,
@@ -158,6 +182,7 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           ruleTypeRegistry,
+          alertsTableConfigurationRegistry,
           kibanaFeatures,
         });
       },
@@ -167,9 +192,16 @@ export class Plugin
       actionTypeRegistry: this.actionTypeRegistry,
     });
 
+    if (this.experimentalFeatures.internalAlertsTable) {
+      registerAlertsTableConfiguration({
+        alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
+      });
+    }
+
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
     };
   }
 
@@ -177,6 +209,7 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
       getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
       },
@@ -201,6 +234,9 @@ export class Plugin
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
         });
+      },
+      getAlertsTable: (props: AlertsTableProps) => {
+        return getAlertsTableLazy(props);
       },
     };
   }

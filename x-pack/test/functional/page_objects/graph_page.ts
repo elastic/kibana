@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrService } from '../ftr_provider_context';
 
 interface Node {
@@ -52,7 +52,7 @@ export class GraphPageObject extends FtrService {
   }
 
   async selectField(field: string) {
-    await this.testSubjects.setValue('graph-field-search', field);
+    await this.testSubjects.setValue('graph-field-search', field, { clearWithKeyboard: true });
     await this.find.clickDisplayedByCssSelector(`[title="${field}"]`);
   }
 

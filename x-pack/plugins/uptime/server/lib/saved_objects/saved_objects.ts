@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsErrorHelpers,
-  SavedObjectsServiceSetup,
-} from '../../../../../../src/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
+import { SavedObjectsErrorHelpers, SavedObjectsServiceSetup } from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { secretKeys } from '../../../common/constants/monitor_management';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../adapters';
 import { UptimeConfig } from '../../../common/config';
@@ -33,6 +31,20 @@ export const registerUptimeSavedObjects = (
     encryptedSavedObjects.registerType({
       type: syntheticsServiceApiKey.name,
       attributesToEncrypt: new Set(['apiKey']),
+    });
+
+    encryptedSavedObjects.registerType({
+      type: syntheticsMonitor.name,
+      attributesToEncrypt: new Set([
+        'secrets',
+        /* adding secretKeys to the list of attributes to encrypt ensures
+         * that secrets are never stored on the resulting saved object,
+         * even in the presence of developer error.
+         *
+         * In practice, all secrets should be stored as a single JSON
+         * payload on the `secrets` key. This ensures performant decryption. */
+        ...secretKeys,
+      ]),
     });
   }
 };

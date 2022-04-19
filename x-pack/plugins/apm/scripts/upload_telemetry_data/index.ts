@@ -14,7 +14,8 @@
 
 import { merge, chunk, flatten, omit } from 'lodash';
 import { argv } from 'yargs';
-import { Logger } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Logger } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CollectTelemetryParams } from '../../server/lib/apm_telemetry/collect_data_telemetry';
 import { downloadTelemetryTemplate } from '../shared/download_telemetry_template';

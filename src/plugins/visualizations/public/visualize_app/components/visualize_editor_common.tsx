@@ -11,13 +11,13 @@ import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
-import { useKibana } from '../../../../kibana_react/public';
-import { urlFor } from '../../../../visualizations/public';
+import { urlFor } from '../..';
 import { getUISettings } from '../../services';
-import { SplitChartWarning, NEW_HEATMAP_CHARTS_LIBRARY } from './split_chart_warning';
+import { VizChartWarning } from './viz_chart_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -25,6 +25,12 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
+import {
+  CHARTS_CONFIG_TOKENS,
+  CHARTS_WITHOUT_SMALL_MULTIPLES,
+  CHARTS_TO_BE_DEPRECATED,
+  isSplitChart as isSplitChartFn,
+} from '../utils/split_chart_warning_helpers';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -70,15 +76,16 @@ export const VisualizeEditorCommon = ({
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
         const newObjectId = sharingSavedObjectProps?.aliasTargetId; // This is always defined if outcome === 'aliasMatch'
         const newPath = `${urlFor(newObjectId!)}${services.history.location.search}`;
-        await services.spaces.ui.redirectLegacyUrl(
-          newPath,
-          i18n.translate('visualizations.legacyUrlConflict.objectNoun', {
+        await services.spaces.ui.redirectLegacyUrl({
+          path: newPath,
+          aliasPurpose: sharingSavedObjectProps.aliasPurpose,
+          objectNoun: i18n.translate('visualizations.legacyUrlConflict.objectNoun', {
             defaultMessage: '{visName} visualization',
             values: {
               visName: visInstance?.vis?.type.title,
             },
-          })
-        );
+          }),
+        });
         return;
       }
     }
@@ -110,8 +117,19 @@ export const VisualizeEditorCommon = ({
     return null;
   }, [visInstance?.savedVis, services, visInstance?.vis?.type.title]);
   // Adds a notification for split chart on the new implementation as it is not supported yet
-  const isSplitChart = visInstance?.vis?.data?.aggs?.aggs.some((agg) => agg.schema === 'split');
-  const hasHeatmapLegacyhartsEnabled = getUISettings().get(NEW_HEATMAP_CHARTS_LIBRARY);
+  const chartName = visInstance?.vis.type.name;
+  const isSplitChart = isSplitChartFn(chartName, visInstance?.vis?.data?.aggs);
+
+  const chartsWithoutSmallMultiples: string[] = Object.values(CHARTS_WITHOUT_SMALL_MULTIPLES);
+  const chartNeedsWarning = chartName ? chartsWithoutSmallMultiples.includes(chartName) : false;
+  const deprecatedCharts: string[] = Object.values(CHARTS_TO_BE_DEPRECATED);
+  const deprecatedChartsNeedWarning = chartName ? deprecatedCharts.includes(chartName) : false;
+  const chartToken =
+    chartName && (chartNeedsWarning || deprecatedChartsNeedWarning)
+      ? CHARTS_CONFIG_TOKENS[chartName as CHARTS_WITHOUT_SMALL_MULTIPLES]
+      : undefined;
+
+  const hasLegacyChartsEnabled = chartToken ? getUISettings().get(chartToken) : true;
 
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
@@ -134,9 +152,19 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
-      {!hasHeatmapLegacyhartsEnabled &&
-        isSplitChart &&
-        visInstance?.vis.type.name === 'heatmap' && <SplitChartWarning />}
+      {!hasLegacyChartsEnabled && isSplitChart && chartNeedsWarning && chartToken && chartName && (
+        <VizChartWarning
+          chartType={chartName as CHARTS_WITHOUT_SMALL_MULTIPLES}
+          chartConfigToken={chartToken}
+        />
+      )}
+      {hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName && (
+        <VizChartWarning
+          chartType={chartName as CHARTS_TO_BE_DEPRECATED}
+          chartConfigToken={chartToken}
+          mode="new"
+        />
+      )}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {getLegacyUrlConflictCallout()}
       {visInstance && (

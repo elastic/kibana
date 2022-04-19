@@ -101,11 +101,11 @@ Scaling {kib} instances horizontally requires a higher degree of coordination, w
 A recommended strategy is to follow these steps:
 
 1. Produce a <<task-manager-rough-throughput-estimation,rough throughput estimate>> as a guide to provisioning as many {kib} instances as needed. Include any growth in tasks that you predict experiencing in the near future, and a buffer to better address ad-hoc tasks.
-2. After provisioning a deployment, assess whether the provisioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described in <<task-manager-theory-insufficient-throughput, Insufficient throughtput to handle the scheduled workload>>.
+2. After provisioning a deployment, assess whether the provisioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described in <<task-manager-theory-insufficient-throughput, Insufficient throughput to handle the scheduled workload>>.
 3. If the throughput is insufficient, and {kib} instances exhibit low resource usage, incrementally scale vertically while <<kibana-page,monitoring>> the impact of these changes.
 4. If the throughput is insufficient, and {kib} instances are exhibiting high resource usage, incrementally scale horizontally by provisioning new {kib} instances and reassess.
 
-Task Manager, like the rest of the Elastic Stack, is designed to scale horizontally. Take advantage of this ability to ensure mission critical services, such as Alerting and Reporting, always have the capacity they need.
+Task Manager, like the rest of the Elastic Stack, is designed to scale horizontally. Take advantage of this ability to ensure mission critical services, such as Alerting, Actions, and Reporting, always have the capacity they need.
 
 Scaling horizontally requires a higher degree of coordination between {kib} instances. One way Task Manager coordinates with other instances is by delaying its polling schedule to avoid conflicts with other instances.
 By using <<task-manager-health-monitoring, health monitoring>> to evaluate the <<task-manager-health-evaluate-the-runtime,date of the `last_polling_delay`>> across a deployment, you can estimate the frequency at which Task Manager resets its delay mechanism.

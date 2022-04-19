@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsService } from '../../../../../../data/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { from } from 'rxjs';
 
 import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
-import type { FieldSpec } from '../../../../../../data/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -56,7 +56,7 @@ describe('AbstractSearchStrategy', () => {
       {
         getDefault: jest.fn(),
         getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
-      } as unknown as IndexPatternsService,
+      } as unknown as DataViewsService,
       (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher
     );
 

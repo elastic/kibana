@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { MonitorSummary } from '@kbn/uptime-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
-import { MonitorSummary } from '../../../../../plugins/uptime/common/runtime_types';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -82,15 +82,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         dateRangeEnd = new Date().toISOString();
         nonSummaryIp = checks[0][0].monitor.ip;
-      });
-
-      it('should match non summary documents without a status filter', async () => {
-        const filters = makeApiParams(testMonitorId, [{ match: { 'monitor.ip': nonSummaryIp } }]);
-
-        const url = getBaseUrl(dateRangeStart, dateRangeEnd) + `&filters=${filters}`;
-        const apiResponse = await supertest.get(url);
-        const nonSummaryRes = apiResponse.body;
-        expect(nonSummaryRes.summaries.length).to.eql(1);
       });
 
       it('should not match non summary documents if the check status does not match the document status', async () => {

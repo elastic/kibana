@@ -11,12 +11,13 @@ import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { PackagePolicy } from '../../../fleet/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from '../agent_policies/use_agent_policies';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
+import { PACKS_ID } from './constants';
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
   margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
@@ -55,7 +56,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
     options: {
       // @ts-expect-error update types
       onSuccess: (response) => {
-        queryClient.invalidateQueries('packList');
+        queryClient.invalidateQueries(PACKS_ID);
         setErrorToast();
         toasts.addSuccess(
           response.attributes.enabled

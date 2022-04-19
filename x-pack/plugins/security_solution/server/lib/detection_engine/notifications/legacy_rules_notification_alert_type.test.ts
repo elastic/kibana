@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getAlertMock } from '../routes/__mocks__/request_responses';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationAlertType } from './legacy_rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyNotificationExecutorOptions } from './legacy_types';
 import {
@@ -30,10 +30,10 @@ describe('legacyRules_notification_alert_type', () => {
   let payload: LegacyNotificationExecutorOptions;
   let alert: ReturnType<typeof legacyRulesNotificationAlertType>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let alertServices: AlertServicesMock;
+  let alertServices: RuleExecutorServicesMock;
 
   beforeEach(() => {
-    alertServices = alertsMock.createAlertServices();
+    alertServices = alertsMock.createRuleExecutorServices();
     logger = loggingSystemMock.createLogger();
 
     payload = {

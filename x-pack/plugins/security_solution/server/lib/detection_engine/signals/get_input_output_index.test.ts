@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { getInputIndex, GetInputIndex } from './get_input_output_index';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 describe('get_input_output_index', () => {
-  let servicesMock: AlertServicesMock;
+  let servicesMock: RuleExecutorServicesMock;
 
   beforeAll(() => {
     jest.resetAllMocks();
@@ -22,7 +22,7 @@ describe('get_input_output_index', () => {
   });
   let defaultProps: GetInputIndex;
   beforeEach(() => {
-    servicesMock = alertsMock.createAlertServices();
+    servicesMock = alertsMock.createRuleExecutorServices();
     servicesMock.savedObjectsClient.get.mockImplementation(async (type: string, id: string) => ({
       id,
       type,

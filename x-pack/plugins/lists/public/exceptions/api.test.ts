@@ -19,8 +19,8 @@ import {
   updateExceptionList,
   updateExceptionListItem,
 } from '@kbn/securitysolution-list-api';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
 import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListSchemaMock } from '../../common/schemas/request/create_exception_list_schema.mock';
@@ -272,6 +272,31 @@ describe('Exceptions Lists API', () => {
         pagination: {
           page: 1,
           perPage: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
+    });
+
+    test('it returns expected exception lists when empty filter', async () => {
+      const exceptionResponse = await fetchExceptionLists({
+        filters: '',
+        http: httpMock,
+        namespaceTypes: 'single,agnostic',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_find', {
+        method: 'GET',
+        query: {
+          namespace_type: 'single,agnostic',
+          page: '1',
+          per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
         },
         signal: abortCtrl.signal,
       });

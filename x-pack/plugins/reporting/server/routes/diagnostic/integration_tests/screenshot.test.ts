@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
+import { ReportingCore } from '../../..';
 import { generatePngObservable } from '../../../export_types/common';
 import {
   createMockConfigSchema,
-  createMockLevelLogger,
   createMockPluginSetup,
   createMockReportingCore,
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseScreenshot } from '../screenshot';
+import { defer } from 'rxjs';
 
 jest.mock('../../../export_types/common/generate_png');
 
@@ -30,15 +31,14 @@ describe('POST /diagnose/screenshot', () => {
 
   const setScreenshotResponse = (resp: object | Error) => {
     const generateMock = {
-      pipe: () => ({
-        toPromise: () => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp)),
-      }),
+      pipe: () =>
+        defer(() => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp))),
     };
     (generatePngObservable as jest.Mock).mockReturnValue(generateMock);
   };
 
   const config = createMockConfigSchema({ queue: { timeout: 120000 } });
-  const mockLogger = createMockLevelLogger();
+  const mockLogger = loggingSystemMock.createLogger();
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));

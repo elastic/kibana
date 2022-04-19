@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   IndexSettings,
   LegacyTemplateSerialized,
   TemplateFromEs,
-} from '../../../../../index_management/common/types';
+} from '@kbn/index-management-plugin/common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
@@ -74,6 +74,7 @@ async function fetchTemplates(
   const response = isLegacy
     ? await client.indices.getTemplate({}, options)
     : await client.indices.getIndexTemplate({}, options);
+  // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
   return response;
 }
 

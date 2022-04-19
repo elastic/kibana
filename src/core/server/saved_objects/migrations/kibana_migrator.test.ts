@@ -16,6 +16,7 @@ import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
 import { DocumentMigrator } from './core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { lastValueFrom } from 'rxjs';
 
 jest.mock('./core/document_migrator', () => {
   return {
@@ -110,10 +111,16 @@ describe('KibanaMigrator', () => {
 
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
-
       options.client.indices.get.mockResponse({}, { statusCode: 404 });
       options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
 
+      options.client.cluster.getSettings.mockResponse(
+        {
+          transient: {},
+          persistent: {},
+        },
+        { statusCode: 404 }
+      );
       const migrator = new KibanaMigrator(options);
 
       migrator.prepareMigrations();
@@ -128,7 +135,7 @@ describe('KibanaMigrator', () => {
     it('emits results on getMigratorResult$()', async () => {
       const options = mockV2MigrationOptions();
       const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+      const migratorStatus = lastValueFrom(migrator.getStatus$().pipe(take(3)));
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
@@ -197,6 +204,13 @@ type MockedOptions = KibanaMigratorOptions & {
 
 const mockV2MigrationOptions = () => {
   const options = mockOptions();
+  options.client.cluster.getSettings.mockResponse(
+    {
+      transient: {},
+      persistent: {},
+    },
+    { statusCode: 200 }
+  );
 
   options.client.indices.get.mockResponse(
     {

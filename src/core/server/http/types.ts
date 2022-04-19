@@ -313,14 +313,6 @@ export interface HttpServiceSetup {
   basePath: IBasePath;
 
   /**
-   * Auth status.
-   * See {@link HttpAuth}
-   *
-   * @deprecated use {@link HttpServiceStart.auth | the start contract} instead.
-   */
-  auth: HttpAuth;
-
-  /**
    * The CSP config used for Kibana.
    */
   csp: ICspConfig;

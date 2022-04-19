@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {
@@ -112,10 +112,14 @@ export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest
             let expectedMetadata;
             if (testCase.fail409Param === 'unresolvableConflict') {
               expectedMetadata = { isNotOverwritable: true };
+            } else if (testCase.fail409Param === 'aliasConflictDefaultSpace') {
+              expectedMetadata = { spacesWithConflictingAliases: ['default'] };
             } else if (testCase.fail409Param === 'aliasConflictSpace1') {
               expectedMetadata = { spacesWithConflictingAliases: ['space_1'] };
             } else if (testCase.fail409Param === 'aliasConflictAllSpaces') {
-              expectedMetadata = { spacesWithConflictingAliases: ['space_1', 'space_x'] };
+              expectedMetadata = {
+                spacesWithConflictingAliases: ['default', 'space_1', 'space_x'],
+              };
             }
             const expectedError = SavedObjectsErrorHelpers.createConflictError(type, id).output
               .payload;

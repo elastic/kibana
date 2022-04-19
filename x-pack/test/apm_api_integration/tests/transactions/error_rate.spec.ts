@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import { format } from 'url';
 import moment from 'moment';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -51,8 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionType,
             start: moment(end).subtract(15, 'minutes').toISOString(),
             end,
-            comparisonStart: start,
-            comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+            offset: '15m',
             environment: 'ENVIRONMENT_ALL',
             kuery: '',
           },
@@ -137,8 +136,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionType,
                 start: moment(end).subtract(15, 'minutes').toISOString(),
                 end,
-                comparisonStart: start,
-                comparisonEnd: moment(start).add(15, 'minutes').toISOString(),
+                offset: '15m',
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
               },

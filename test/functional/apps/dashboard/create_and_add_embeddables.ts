@@ -8,30 +8,48 @@
 
 import expect from '@kbn/expect';
 
-import { VisualizeConstants } from '../../../../src/plugins/visualizations/common/constants';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '@kbn/visualizations-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('create and add embeddables', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+    });
+
+    it('ensure toolbar popover closes on add', async () => {
       await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.switchToEditMode();
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewEmbeddableLink('LOG_STREAM_EMBEDDABLE');
+      await dashboardAddPanel.expectEditorMenuClosed();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('add new visualization link', () => {
+      before(async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.preserveCrossAppState();
+        await PageObjects.dashboard.loadSavedDashboard('few panels');
+      });
+
       it('adds new visualization via the top nav link', async () => {
         const originalPanelCount = await PageObjects.dashboard.getPanelCount();
         await PageObjects.dashboard.switchToEditMode();

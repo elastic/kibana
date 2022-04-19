@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import type { IClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
+import type { IClusterClient, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { ILicense } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
@@ -49,12 +49,14 @@ export interface LicensingPluginSetup {
   /**
    * Steam of licensing information {@link ILicense}.
    * @deprecated in favour of the counterpart provided from start contract
+   * @removeBy 8.8.0
    */
   license$: Observable<ILicense>;
 
   /**
    * Triggers licensing information re-fetch.
    * @deprecated in favour of the counterpart provided from start contract
+   * @removeBy 8.8.0
    */
   refresh(): Promise<ILicense>;
 

@@ -7,10 +7,14 @@
 
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
-import type { AppMountParameters } from 'kibana/public';
-import type { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { MapApp } from './map_app';
-import { SavedMap, getInitialLayersFromUrlParam } from './saved_map';
+import {
+  SavedMap,
+  getInitialLayersFromUrlParam,
+  getOpenLayerWizardFromUrlParam,
+} from './saved_map';
 import { MapEmbeddableInput } from '../../embeddable/types';
 
 interface Props {
@@ -47,6 +51,7 @@ export class MapPage extends Component<Props, State> {
         originatingPath: props.originatingPath,
         stateTransfer: props.stateTransfer,
         onSaveCallback: this.updateSaveCounter,
+        defaultLayerWizard: getOpenLayerWizardFromUrlParam() || '',
       }),
       saveCounter: 0,
     };

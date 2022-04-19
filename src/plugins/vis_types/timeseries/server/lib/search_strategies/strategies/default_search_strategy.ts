@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
 
-import type { IndexPatternsService } from '../../../../../../data/server';
 import type { FetchedIndexPattern } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -36,7 +36,7 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
 
   async getFieldsForWildcard(
     fetchedIndexPattern: FetchedIndexPattern,
-    indexPatternsService: IndexPatternsService,
+    indexPatternsService: DataViewsService,
     capabilities?: unknown
   ) {
     return super.getFieldsForWildcard(fetchedIndexPattern, indexPatternsService, capabilities);

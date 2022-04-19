@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SectionContainer } from '../';
+import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import CoreVitals from '../../../shared/core_web_vitals';
 import { BucketSize } from '../../../../pages/overview';
 
@@ -21,13 +21,14 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
   const { data, status } = useFetcher(
     () => {
-      if (serviceName && bucketSize) {
+      if (serviceName && bucketSize && absoluteStart && absoluteEnd) {
         return getDataHandler('ux')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
@@ -36,9 +37,18 @@ export function UXSection({ bucketSize }: Props) {
         });
       }
     },
-    // Absolute times shouldn't be used here, since it would refetch on every render
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, forceUpdate, serviceName]
+    [
+      bucketSize,
+      relativeStart,
+      relativeEnd,
+      absoluteStart,
+      absoluteEnd,
+      forceUpdate,
+      serviceName,
+      lastUpdated,
+    ]
   );
 
   if (!uxHasDataResponse?.hasData) {

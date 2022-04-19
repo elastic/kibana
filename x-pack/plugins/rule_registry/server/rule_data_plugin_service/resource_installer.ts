@@ -8,8 +8,9 @@
 import { get, isEmpty } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
@@ -31,6 +32,7 @@ interface ConstructorOptions {
   disabledRegistrationContexts: string[];
 }
 
+export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
 export class ResourceInstaller {
   constructor(private readonly options: ConstructorOptions) {}
 

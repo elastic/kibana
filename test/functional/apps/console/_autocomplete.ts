@@ -13,18 +13,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'console']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/126421
-  describe.skip('console autocomplete feature', function describeIndexTests() {
+  describe('console autocomplete feature', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.dismissTutorial();
+      await PageObjects.console.clearTextArea();
     });
 
     it('should provide basic auto-complete functionality', async () => {
       await PageObjects.console.enterRequest();
+      await PageObjects.console.enterText(`{\n\t"query": {`);
+      await PageObjects.console.pressEnter();
       await PageObjects.console.promptAutocomplete();
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });

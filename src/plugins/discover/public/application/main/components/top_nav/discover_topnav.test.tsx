@@ -11,16 +11,16 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
-import { TopNavMenuData } from '../../../../../../navigation/public';
-import { ISearchSource, Query } from '../../../../../../data/common';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { ISearchSource, Query } from '@kbn/data-plugin/public';
 import { GetStateReturn } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 
 setHeaderActionMenuMounter(jest.fn());
 
-jest.mock('../../../../../../kibana_react/public', () => ({
-  ...jest.requireActual('../../../../../../kibana_react/public'),
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: () => ({
     services: jest.requireActual('../../../../__mocks__/services').discoverServiceMock,
   }),

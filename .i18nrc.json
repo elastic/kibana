@@ -26,11 +26,13 @@
     "expressionMetric": "src/plugins/expression_metric",
     "expressionMetricVis": "src/plugins/chart_expressions/expression_metric",
     "expressionPartitionVis": "src/plugins/chart_expressions/expression_partition_vis",
+    "expressionXY": "src/plugins/chart_expressions/expression_xy",
     "expressionRepeatImage": "src/plugins/expression_repeat_image",
     "expressionRevealImage": "src/plugins/expression_reveal_image",
     "expressions": "src/plugins/expressions",
     "expressionShape": "src/plugins/expression_shape",
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
+    "eventAnnotation": "src/plugins/event_annotation",
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
     "home": "src/plugins/home",
@@ -50,7 +52,10 @@
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
     "lists": "packages/kbn-securitysolution-list-utils/src",
-    "management": ["src/legacy/core_plugins/management", "src/plugins/management"],
+    "management": [
+      "src/legacy/core_plugins/management",
+      "src/plugins/management"
+    ],
     "monaco": "packages/kbn-monaco/src",
     "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
@@ -60,13 +65,23 @@
     "server": "src/legacy/server",
     "share": "src/plugins/share",
     "sharedUX": "src/plugins/shared_ux",
+    "sharedUXComponents": "packages/kbn-shared-ux-components/src",
+    "sharedUXPackages": "packages/shared-ux",
+    "coloring": "packages/kbn-coloring/src",
     "statusPage": "src/legacy/core_plugins/status_page",
-    "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
-    "timelion": ["src/plugins/vis_types/timelion"],
+    "telemetry": [
+      "src/plugins/telemetry",
+      "src/plugins/telemetry_management_section"
+    ],
+    "timelion": [
+      "src/plugins/vis_types/timelion"
+    ],
     "uiActions": "src/plugins/ui_actions",
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/plugins/usage_collection",
+    "utils": "packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/plugins/vis_default_editor",
+    "visTypeGauge": "src/plugins/vis_types/gauge",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",
     "visTypeMarkdown": "src/plugins/vis_type_markdown",
     "visTypeMetric": "src/plugins/vis_types/metric",
@@ -77,7 +92,8 @@
     "visTypeVega": "src/plugins/vis_types/vega",
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
-    "visualizations": "src/plugins/visualizations"
+    "visualizations": "src/plugins/visualizations",
+    "unifiedSearch": "src/plugins/unified_search"
   },
   "translations": []
 }

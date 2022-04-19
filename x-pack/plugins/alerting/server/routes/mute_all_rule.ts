@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState, AlertTypeDisabledError } from '../lib';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { trackDeprecatedRouteUsage } from '../lib/track_deprecated_route_usage';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -17,7 +19,8 @@ const paramSchema = schema.object({
 
 export const muteAllRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.post(
     {
@@ -30,11 +33,12 @@ export const muteAllRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = context.alerting.getRulesClient();
         const { id } = req.params;
+        trackDeprecatedRouteUsage('muteAll', usageCounter);
         try {
           await rulesClient.muteAll({ id });
           return res.noContent();
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);
           }
           throw e;

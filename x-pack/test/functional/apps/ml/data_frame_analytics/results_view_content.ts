@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('results view content and total feature importance', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/126422
+  describe.skip('results view content and total feature importance', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;

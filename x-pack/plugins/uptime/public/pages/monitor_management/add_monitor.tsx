@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview } from '../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { ScheduleUnit } from '../../../common/runtime_types';
 import { SyntheticsProviders } from '../../components/fleet_package/contexts';
 import { Loader } from '../../components/monitor_management/loader/loader';
@@ -19,7 +19,7 @@ export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 
-  const { error, loading, locations } = useLocations();
+  const { error, loading, locations, throttling } = useLocations();
 
   useMonitorManagementBreadcrumbs({ isAddMonitor: true });
 
@@ -33,6 +33,8 @@ export const AddMonitorPage: React.FC = () => {
     >
       <SyntheticsProviders
         policyDefaultValues={{
+          throttling,
+          runsOnService: true,
           isZipUrlSourceEnabled: false,
           allowedScheduleUnits: [ScheduleUnit.MINUTES],
         }}
@@ -50,7 +52,7 @@ const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.addMonitorL
 const ERROR_HEADING_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.addMonitorLoadingError',
   {
-    defaultMessage: 'Error loading monitor management',
+    defaultMessage: 'Error loading Monitor Management',
   }
 );
 

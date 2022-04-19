@@ -9,15 +9,15 @@ import { set } from '@elastic/safer-lodash-set';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import { Logger } from '@kbn/core/server';
+import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
 import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
 import type { SignalSearchResponse } from '../types';
@@ -26,7 +26,7 @@ interface FindThresholdSignalsParams {
   from: string;
   to: string;
   inputIndexPattern: string[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   filter: unknown;
   threshold: ThresholdNormalized;

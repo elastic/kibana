@@ -9,9 +9,10 @@ import React from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
-import { AppDeepLink } from 'kibana/public';
+import { AppDeepLink } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
@@ -22,13 +23,12 @@ import { managementMiddlewareFactory } from '../../../management/store/middlewar
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { PLUGIN_ID } from '../../../../../fleet/common';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/mocks';
 
-type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+export type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 // hide react-query output in console
 setLogger({
@@ -69,7 +69,7 @@ export interface AppContextTestRender {
   setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
 }
 
-// Defined a private custom reducer that reacts to an action that enables us to updat the
+// Defined a private custom reducer that reacts to an action that enables us to update the
 // store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,
 // and its not exported the action can only be `dispatch`'d from this module
 const UpdateExperimentalFeaturesTestActionType = Symbol('updateExperimentalFeaturesTestAction');
@@ -143,7 +143,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
 
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
-      wrapper: AppWrapper as React.ComponentType,
+      wrapper: AppWrapper,
       ...options,
     });
   };

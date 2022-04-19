@@ -22,12 +22,12 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { SectionContainer } from '../';
+import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
@@ -43,11 +43,12 @@ export function UptimeSection({ bucketSize }: Props) {
   const chartTheme = useChartTheme();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
 
   const { data, status } = useFetcher(
     () => {
-      if (bucketSize) {
+      if (bucketSize && absoluteStart && absoluteEnd) {
         return getDataHandler('synthetics')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
@@ -55,9 +56,9 @@ export function UptimeSection({ bucketSize }: Props) {
         });
       }
     },
-    // Absolute times shouldn't be used here, since it would refetch on every render
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, forceUpdate]
+    [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
   );
 
   if (!hasDataMap.synthetics?.hasData) {

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IndexPatternDimensionEditorProps } from '../dimension_panel';
 import { onDrop } from './on_drop_handler';
 import { getDropProps } from './get_drop_props';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpSetup,
+  CoreSetup,
+} from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { IndexPatternLayer, IndexPatternPrivateState } from '../../types';
 import { documentField } from '../../document_field';
 import { OperationMetadata, DropType } from '../../../types';
@@ -144,7 +149,7 @@ const multipleColumnsLayer: IndexPatternLayer = {
   columns: {
     col1: oneColumnLayer.columns.col1,
     col2: {
-      label: 'Top values of src',
+      label: 'Top 10 values of src',
       dataType: 'string',
       isBucketed: true,
       // Private
@@ -157,7 +162,7 @@ const multipleColumnsLayer: IndexPatternLayer = {
       sourceField: 'src',
     } as TermsIndexPatternColumn,
     col3: {
-      label: 'Top values of dest',
+      label: 'Top 10 values of dest',
       dataType: 'string',
       isBucketed: true,
 
@@ -1620,7 +1625,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             col1: testState.layers.first.columns.col1,
 
             col2: {
-              label: 'Top values of src',
+              label: 'Top 10 values of src',
               dataType: 'string',
               isBucketed: true,
 
@@ -2192,7 +2197,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: testState.layers.first.columns.col1,
                   col2: {
                     isBucketed: true,
-                    label: 'Top values of bytes',
+                    label: 'Top 10 values of bytes',
                     operationType: 'terms',
                     sourceField: 'bytes',
                     dataType: 'number',
@@ -2284,7 +2289,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col1: testState.layers.first.columns.col1,
                   col2: {
                     isBucketed: true,
-                    label: 'Top values of bytes',
+                    label: 'Top 10 values of bytes',
                     operationType: 'terms',
                     sourceField: 'bytes',
                     dataType: 'number',
@@ -2306,7 +2311,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
                     sourceField: 'src',
                     timeShift: undefined,
                     dataType: 'number',
-                    params: undefined,
+                    params: {
+                      emptyAsNull: true,
+                    },
                     scale: 'ratio',
                   },
                 },

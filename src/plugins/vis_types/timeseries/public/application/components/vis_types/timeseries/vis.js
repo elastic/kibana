@@ -18,8 +18,8 @@ import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
-import { MarkdownSimple } from '../../../../../../../../plugins/kibana_react/public';
-import { LEGACY_TIME_AXIS } from '../../../../../../../../plugins/charts/common';
+import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { replaceVars } from '../../lib/replace_vars';
 import { getInterval } from '../../lib/get_interval';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
@@ -85,8 +85,8 @@ class TimeseriesVisualization extends Component {
     const axisMin = get(model, 'axis_min', '').toString();
     const axisMax = get(model, 'axis_max', '').toString();
     const fit = model.series
-      ? model.series.filter(({ hidden }) => !hidden).every(({ fill }) => fill === '0')
-      : model.fill === '0';
+      ? model.series.filter(({ hidden }) => !hidden).every(({ fill }) => Number(fill) === 0)
+      : Number(model.fill) === 0;
 
     return {
       min: axisMin.length ? Number(axisMin) : undefined,

@@ -23,6 +23,7 @@ export {
   defaultState,
   makeLensStore,
   mountWithProvider,
+  getMountWithProviderParams,
 } from './store_mocks';
 export { lensPluginMock } from './lens_plugin_mock';
 
@@ -30,6 +31,7 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 
 export const createMockFramePublicAPI = (): FrameMock => ({
   datasourceLayers: {},
+  dateRange: { fromDate: 'now-7d', toDate: 'now' },
 });
 
 export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;

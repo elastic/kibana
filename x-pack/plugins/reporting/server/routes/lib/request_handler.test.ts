@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../..';
 import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../types';
 import { RequestHandler } from './request_handler';
 
@@ -43,7 +39,7 @@ const getMockResponseFactory = () =>
     unauthorized: (obj: unknown) => obj,
   } as unknown as KibanaResponseFactory);
 
-const mockLogger = createMockLevelLogger();
+const mockLogger = loggingSystemMock.createLogger();
 
 describe('Handle request to generate', () => {
   let reportingCore: ReportingCore;

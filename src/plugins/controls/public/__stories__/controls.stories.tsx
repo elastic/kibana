@@ -15,15 +15,17 @@ import {
   getFlightOptionsAsync,
   getFlightSearchOptions,
   storybookFlightsDataView,
-} from '../../../presentation_util/public/mocks';
+} from '@kbn/presentation-util-plugin/public/mocks';
+
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import {
   ControlGroupContainerFactory,
   OptionsListEmbeddableInput,
+  RangeSliderEmbeddableInput,
   OPTIONS_LIST_CONTROL,
-} from '../';
-
-import { ViewMode } from '../../../embeddable/public';
-import { EmbeddablePersistableStateService } from '../../../embeddable/common';
+  RANGE_SLIDER_CONTROL,
+} from '..';
 
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
@@ -61,7 +63,7 @@ const storybookStubOptionsListRequest = async (
   );
 replaceOptionsListMethod(storybookStubOptionsListRequest);
 
-const ControlGroupStoryComponent: FC<{
+export const ControlGroupStoryComponent: FC<{
   panels?: ControlsPanels;
   edit?: boolean;
 }> = ({ panels, edit }) => {
@@ -89,6 +91,7 @@ const ControlGroupStoryComponent: FC<{
       );
       const controlGroupContainerEmbeddable = await factory.create({
         controlStyle: 'oneLine',
+        chainingSystem: 'NONE', // a chaining system doesn't make sense in storybook since the controls aren't backed by elasticsearch
         panels: panels ?? {},
         id: uuid.v4(),
         viewMode,
@@ -158,7 +161,7 @@ export const ConfiguredControlGroupStory = () => (
         } as OptionsListEmbeddableInput,
       },
       optionsList3: {
-        type: OPTIONS_LIST_CONTROL,
+        type: 'TIME_SLIDER',
         order: 3,
         width: 'auto',
         explicitInput: {
@@ -167,6 +170,65 @@ export const ConfiguredControlGroupStory = () => (
           dataViewId: 'demoDataFlights',
           fieldName: 'Carrier',
         } as OptionsListEmbeddableInput,
+      },
+      rangeSlider1: {
+        type: RANGE_SLIDER_CONTROL,
+        order: 4,
+        width: 'auto',
+        explicitInput: {
+          id: 'rangeSlider1',
+          title: 'Average ticket price',
+          dataViewId: 'demoDataFlights',
+          fieldName: 'AvgTicketPrice',
+          value: ['4', '12'],
+          step: 2,
+        } as RangeSliderEmbeddableInput,
+      },
+    }}
+  />
+);
+
+export const RangeSliderControlGroupStory = () => (
+  <ControlGroupStoryComponent
+    panels={{
+      rangeSlider1: {
+        type: RANGE_SLIDER_CONTROL,
+        order: 1,
+        width: 'auto',
+        explicitInput: {
+          id: 'rangeSlider1',
+          title: 'Average ticket price',
+          dataViewId: 'demoDataFlights',
+          fieldName: 'AvgTicketPrice',
+          value: ['4', '12'],
+          step: 2,
+        } as RangeSliderEmbeddableInput,
+      },
+      rangeSlider2: {
+        type: RANGE_SLIDER_CONTROL,
+        order: 2,
+        width: 'auto',
+        explicitInput: {
+          id: 'rangeSlider2',
+          title: 'Total distance in miles',
+          dataViewId: 'demoDataFlights',
+          fieldName: 'DistanceMiles',
+          value: ['0', '100'],
+          step: 10,
+        } as RangeSliderEmbeddableInput,
+      },
+      rangeSlider3: {
+        type: RANGE_SLIDER_CONTROL,
+        order: 3,
+        width: 'auto',
+        explicitInput: {
+          id: 'rangeSlider3',
+          title: 'Flight duration in hour',
+          dataViewId: 'demoDataFlight',
+          fieldName: 'FlightTimeHour',
+          value: ['30', '600'],
+          step: 30,
+        } as RangeSliderEmbeddableInput,
       },
     }}
   />

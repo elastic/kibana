@@ -15,7 +15,7 @@ import {
 } from '../../../../common/lib';
 import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
@@ -34,6 +34,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
           legacyTemplatesEs,
           cloudManagedTemplatePrefix
         );
+        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
         const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
         const body = {
@@ -92,6 +93,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
           if (indexTemplates.length > 0) {
             return response.ok({
               body: deserializeTemplate(
+                // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
                 { ...indexTemplates[0].index_template, name },
                 cloudManagedTemplatePrefix
               ),

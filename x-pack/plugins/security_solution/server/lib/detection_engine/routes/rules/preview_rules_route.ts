@@ -7,7 +7,18 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeState,
+  parseDuration,
+} from '@kbn/alerting-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorType } from '@kbn/alerting-plugin/server/types';
+import { Alert } from '@kbn/alerting-plugin/server';
+import type { StartPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -19,22 +30,17 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
+import {
+  DEFAULT_PREVIEW_INDEX,
+  DETECTION_ENGINE_RULES_PREVIEW,
+} from '../../../../../common/constants';
+import { wrapScopedClusterClient } from './utils/wrap_scoped_cluster_client';
 import {
   previewRulesSchema,
   RulePreviewLogs,
 } from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeState,
-  parseDuration,
-} from '../../../../../../alerting/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorType } from '../../../../../../alerting/server/types';
-import { Alert, createAbortableEsClientFactory } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
@@ -47,6 +53,9 @@ import {
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
+import { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
+
+const PREVIEW_TIMEOUT_SECONDS = 60;
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -55,7 +64,8 @@ export const previewRulesRoute = async (
   security: SetupPlugins['security'],
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient
+  previewRuleDataClient: IRuleDataClient,
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
     {
@@ -74,6 +84,8 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
+        const [, { data, security: securityService }] = await getStartServices();
+        const searchSourceClient = data.search.searchSource.asScoped(request);
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
 
@@ -87,13 +99,7 @@ export const previewRulesRoute = async (
           ].includes(invocationCount)
         ) {
           return response.ok({
-            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [] }] },
-          });
-        }
-
-        if (request.body.type === 'threat_match') {
-          return response.ok({
-            body: { logs: [{ errors: ['Preview for rule type not supported'], warnings: [] }] },
+            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [], duration: 0 }] },
           });
         }
 
@@ -112,9 +118,39 @@ export const previewRulesRoute = async (
         const spaceId = siemClient.getSpaceId();
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
-        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger();
+        const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
+        const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
         const runState: Record<string, unknown> = {};
         const logs: RulePreviewLogs[] = [];
+        let isAborted = false;
+
+        const { hasAllRequested } = await securityService.authz
+          .checkPrivilegesWithRequest(request)
+          .atSpace(spaceId, {
+            elasticsearch: {
+              index: {
+                [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
+                [`.internal${DEFAULT_PREVIEW_INDEX}-`]: ['read'],
+              },
+              cluster: [],
+            },
+          });
+
+        if (!hasAllRequested) {
+          return response.ok({
+            body: {
+              logs: [
+                {
+                  errors: [
+                    'Missing "read" privileges for the ".preview.alerts-security.alerts" or ".internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
+                  ],
+                  warnings: [],
+                  duration: 0,
+                },
+              ],
+            },
+          });
+        }
 
         const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
           ...securityRuleTypeOptions,
@@ -124,7 +160,7 @@ export const previewRulesRoute = async (
 
         const runExecutors = async <
           TParams extends RuleParams,
-          TState extends AlertTypeState,
+          TState extends RuleTypeState,
           TInstanceState extends AlertInstanceState,
           TInstanceContext extends AlertInstanceContext,
           TActionGroupIds extends string = ''
@@ -158,6 +194,12 @@ export const previewRulesRoute = async (
         ) => {
           let statePreview = runState as TState;
 
+          const abortController = new AbortController();
+          setTimeout(() => {
+            abortController.abort();
+            isAborted = true;
+          }, PREVIEW_TIMEOUT_SECONDS * 1000);
+
           const startedAt = moment();
           const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
           startedAt.subtract(moment.duration(parsedDuration * (invocationCount - 1)));
@@ -175,7 +217,11 @@ export const previewRulesRoute = async (
             updatedBy: username ?? 'preview-updated-by',
           };
 
-          while (invocationCount > 0) {
+          let invocationStartTime;
+
+          while (invocationCount > 0 && !isAborted) {
+            invocationStartTime = moment();
+
             statePreview = (await executor({
               alertId: previewId,
               createdBy: rule.createdBy,
@@ -188,13 +234,12 @@ export const previewRulesRoute = async (
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
                 alertFactory,
-                // Just use es client always for preview
-                search: createAbortableEsClientFactory({
-                  scopedClusterClient: context.core.elasticsearch.client,
-                  abortController: new AbortController(),
-                }),
                 savedObjectsClient: context.core.savedObjects.client,
-                scopedClusterClient: context.core.elasticsearch.client,
+                scopedClusterClient: wrapScopedClusterClient({
+                  abortController,
+                  scopedClusterClient: context.core.elasticsearch.client,
+                }),
+                searchSourceClient,
                 uiSettingsClient: context.core.uiSettings.client,
               },
               spaceId,
@@ -204,12 +249,11 @@ export const previewRulesRoute = async (
               updatedBy: rule.updatedBy,
             })) as TState;
 
-            // Save and reset error and warning logs
-            const errors = previewRuleExecutionLogger.logged.statusChanges
+            const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
               .map((item) => item.message ?? 'Unkown Error');
 
-            const warnings = previewRuleExecutionLogger.logged.statusChanges
+            const warnings = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])
               .map((item) => item.message ?? 'Unknown Warning');
 
@@ -217,9 +261,14 @@ export const previewRulesRoute = async (
               errors,
               warnings,
               startedAt: startedAt.toDate().toISOString(),
+              duration: moment().diff(invocationStartTime, 'milliseconds'),
             });
 
-            previewRuleExecutionLogger.clearLogs();
+            loggedStatusChanges.length = 0;
+
+            if (errors.length) {
+              break;
+            }
 
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
@@ -301,6 +350,7 @@ export const previewRulesRoute = async (
           body: {
             previewId,
             logs,
+            isAborted,
           },
         });
       } catch (err) {

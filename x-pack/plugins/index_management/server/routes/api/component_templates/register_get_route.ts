@@ -13,7 +13,7 @@ import {
 } from '../../../../common/lib';
 import { ComponentTemplateFromEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   name: schema.string(),
@@ -36,6 +36,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
         const body = componentTemplates.map((componentTemplate: ComponentTemplateFromEs) => {
           const deserializedComponentTemplateListItem = deserializeComponentTemplateList(
             componentTemplate,
+            // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
             indexTemplates
           );
           return deserializedComponentTemplateListItem;
@@ -70,6 +71,7 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
           await client.asCurrentUser.indices.getIndexTemplate();
 
         return response.ok({
+          // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
           body: deserializeComponentTemplate(componentTemplates[0], indexTemplates),
         });
       } catch (error) {

@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { SimpleSavedObject } from 'kibana/public';
-import { SyntheticsMonitor } from '../runtime_types';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { EncryptedSyntheticsMonitor, SyntheticsMonitor } from '../runtime_types';
 
 export interface MonitorIdParam {
   monitorId: string;
 }
 
-export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor> & {
+export type SyntheticsMonitorSavedObject = SimpleSavedObject<EncryptedSyntheticsMonitor> & {
   updated_at: string;
 };
+
+export type DecryptedSyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor> & {
+  updated_at: string;
+};
+
+export interface SyntheticsServiceAllowed {
+  serviceAllowed: boolean;
+  signupUrl: string;
+}

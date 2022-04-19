@@ -10,12 +10,10 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from 'rison-node';
-import { SimpleSavedObject } from 'kibana/public';
+import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   IndexDataVisualizerViewProps,
@@ -31,7 +29,6 @@ import {
   isRisonSerializationRequired,
 } from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { DataView } from '../../../../../../src/plugins/data/common';
 import { ResultLink } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
@@ -45,7 +42,7 @@ export interface DataVisualizerUrlStateContextProviderProps {
 }
 
 export const getLocatorParams = (params: {
-  indexPatternId?: string;
+  dataViewId?: string;
   savedSearchId?: string;
   urlSearchString: string;
   searchSessionId?: string;
@@ -54,7 +51,7 @@ export const getLocatorParams = (params: {
   const urlState = parseUrlState(params.urlSearchString);
 
   let locatorParams: IndexDataVisualizerLocatorParams = {
-    indexPatternId: urlState.index,
+    dataViewId: urlState.index,
     searchSessionId: params.searchSessionId,
   };
 
@@ -79,14 +76,15 @@ export const DataVisualizerUrlStateContextProvider: FC<
 > = ({ IndexDataVisualizerComponent, additionalLinks }) => {
   const { services } = useDataVisualizerKibana();
   const {
-    data: { indexPatterns, search },
+    data: { dataViews, search },
     savedObjects: { client: savedObjectsClient },
     notifications: { toasts },
   } = services;
+
   const history = useHistory();
   const { search: urlSearchString } = useLocation();
 
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView | undefined>(undefined);
+  const [currentDataView, setCurrentDataView] = useState<DataView | undefined>(undefined);
   const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
     null
   );
@@ -108,7 +106,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
             initialState: getLocatorParams({
               ...services,
               urlSearchString,
-              indexPatternId: currentIndexPattern?.id,
+              dataViewId: currentDataView?.id,
               savedSearchId: currentSavedSearch?.id,
               shouldRestoreSearchSession: false,
               searchSessionId: search.session.getSessionId(),
@@ -116,7 +114,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
             restoreState: getLocatorParams({
               ...services,
               urlSearchString,
-              indexPatternId: currentIndexPattern?.id,
+              dataViewId: currentDataView?.id,
               savedSearchId: currentSavedSearch?.id,
               shouldRestoreSearchSession: true,
               searchSessionId: search.session.getSessionId(),
@@ -144,19 +142,17 @@ export const DataVisualizerUrlStateContextProvider: FC<
     const prevSearchString = urlSearchString;
     const parsedQueryString = parse(prevSearchString, { sort: false });
 
-    const getIndexPattern = async () => {
+    const getDataView = async () => {
       if (typeof parsedQueryString?.savedSearchId === 'string') {
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
           const savedSearch = await savedObjectsClient.get('search', savedSearchId);
-          const indexPatternId = savedSearch.references.find(
-            (ref) => ref.type === 'index-pattern'
-          )?.id;
-          if (indexPatternId !== undefined && savedSearch) {
+          const dataViewId = savedSearch.references.find((ref) => ref.type === 'index-pattern')?.id;
+          if (dataViewId !== undefined && savedSearch) {
             try {
-              const indexPattern = await indexPatterns.get(indexPatternId);
+              const dataView = await dataViews.get(dataViewId);
               setCurrentSavedSearch(savedSearch);
-              setCurrentIndexPattern(indexPattern);
+              setCurrentDataView(dataView);
             } catch (e) {
               toasts.addError(e, {
                 title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
@@ -176,12 +172,12 @@ export const DataVisualizerUrlStateContextProvider: FC<
       }
 
       if (typeof parsedQueryString?.index === 'string') {
-        const indexPattern = await indexPatterns.get(parsedQueryString.index);
-        setCurrentIndexPattern(indexPattern);
+        const dataView = await dataViews.get(parsedQueryString.index);
+        setCurrentDataView(dataView);
       }
     };
-    getIndexPattern();
-  }, [savedObjectsClient, toasts, indexPatterns, urlSearchString]);
+    getDataView();
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -247,9 +243,9 @@ export const DataVisualizerUrlStateContextProvider: FC<
 
   return (
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-      {currentIndexPattern ? (
+      {currentDataView ? (
         <IndexDataVisualizerComponent
-          currentIndexPattern={currentIndexPattern}
+          currentDataView={currentDataView}
           currentSavedSearch={currentSavedSearch}
           additionalLinks={additionalLinks}
           currentSessionId={currentSessionId}
@@ -275,6 +271,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     dataViewFieldEditor,
     uiActions,
     charts,
+    unifiedSearch,
   } = getPluginsStart();
   const services = {
     data,
@@ -288,6 +285,7 @@ export const IndexDataVisualizer: FC<{ additionalLinks: ResultLink[] }> = ({ add
     dataViewFieldEditor,
     uiActions,
     charts,
+    unifiedSearch,
     ...coreStart,
   };
 

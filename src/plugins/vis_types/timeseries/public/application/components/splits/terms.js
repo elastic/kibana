@@ -7,7 +7,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { get, find } from 'lodash';
 import { GroupBySelect } from './group_by_select';
 import { createTextHandler } from '../lib/create_text_handler';
@@ -25,7 +25,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
-import { KBN_FIELD_TYPES } from '../../../../../../data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
@@ -91,6 +91,15 @@ export const SplitByTermsUI = ({
   const selectedField = find(fields[fieldsSelector], ({ name }) => name === model.terms_field);
   const selectedFieldType = get(selectedField, 'type');
 
+  const onTermsFieldChange = useCallback(
+    (selectedOptions) => {
+      onChange({
+        terms_field: selectedOptions.length === 1 ? selectedOptions[0] : selectedOptions,
+      });
+    },
+    [onChange]
+  );
+
   if (
     seriesQuantity &&
     model.stacked === STACKED_OPTIONS.PERCENT &&
@@ -142,11 +151,12 @@ export const SplitByTermsUI = ({
             ]}
             data-test-subj="groupByField"
             indexPattern={indexPattern}
-            onChange={handleSelectChange('terms_field')}
+            onChange={onTermsFieldChange}
             value={model.terms_field}
             fields={fields}
             uiRestrictions={uiRestrictions}
             type={'terms'}
+            allowMultiSelect={true}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

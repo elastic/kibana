@@ -24,10 +24,12 @@ import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { uniqBy } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getObservabilityAlerts } from '../../../../services/get_observability_alerts';
 import { paths } from '../../../../config';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 const ALL_TYPES = 'ALL_TYPES';
 const allTypes = {
@@ -38,15 +40,14 @@ const allTypes = {
 };
 
 export function AlertsSection() {
-  const { config, core } = usePluginContext();
+  const { config } = usePluginContext();
+  const { http } = useKibana<ObservabilityAppServices>().services;
   const [filter, setFilter] = useState(ALL_TYPES);
   const manageLink = config.unsafe.alertingExperience.enabled
-    ? core.http.basePath.prepend(paths.observability.alerts)
-    : core.http.basePath.prepend(paths.management.rules);
+    ? http.basePath.prepend(paths.observability.alerts)
+    : http.basePath.prepend(paths.management.rules);
 
-  const { data, status } = useFetcher(() => {
-    return getObservabilityAlerts({ core });
-  }, [core]);
+  const { data, status } = useFetcher(() => getObservabilityAlerts({ http }), [http]);
 
   const alerts = useMemo(() => data ?? [], [data]);
 
@@ -144,7 +145,7 @@ export function AlertsSection() {
                     <EuiFlexGroup direction="column" gutterSize="s" key={alert.id}>
                       <EuiFlexItem grow={false}>
                         <EuiLink
-                          href={core.http.basePath.prepend(paths.management.alertDetails(alert.id))}
+                          href={http.basePath.prepend(paths.management.alertDetails(alert.id))}
                         >
                           <EuiText size="s">{alert.name}</EuiText>
                         </EuiLink>

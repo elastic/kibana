@@ -11,6 +11,8 @@ import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
 import {
+  useEuiTheme,
+  EuiFormLabel,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiSelectableTemplateSitewide,
@@ -19,13 +21,13 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import type {
   GlobalSearchPluginStart,
   GlobalSearchResult,
   GlobalSearchFindParams,
-} from '../../../global_search/public';
-import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+} from '@kbn/global-search-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { parseSearchParams } from '../search_syntax';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { resultToOption, suggestionToOption } from '../lib';
@@ -34,17 +36,6 @@ import { PopoverPlaceholder } from './popover_placeholder';
 import './search_bar.scss';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-const setFieldValue = (field: HTMLInputElement, value: string) => {
-  const nativeInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-  const nativeInputValueSetter = nativeInputValue ? nativeInputValue.set : undefined;
-  if (nativeInputValueSetter) {
-    nativeInputValueSetter.call(field, value);
-  }
-  field.dispatchEvent(new Event('change'));
-};
-
-const clearField = (field: HTMLInputElement) => setFieldValue(field, '');
 
 const blurEvent = new FocusEvent('blur');
 
@@ -80,6 +71,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   darkMode,
 }) => {
   const isMounted = useMountedState();
+  const { euiTheme } = useEuiTheme();
   const [initialLoad, setInitialLoad] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -88,6 +80,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   const searchSubscription = useRef<Subscription | null>(null);
   const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
+  const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
 
   useEffect(() => {
@@ -225,7 +218,6 @@ export const SearchBar: FC<SearchBarProps> = ({
       // if the type is a suggestion, we change the query on the input and trigger a new search
       // by setting the searchValue (only setting the field value does not trigger a search)
       if (type === '__suggestion__') {
-        setFieldValue(searchRef!, suggestion);
         setSearchValue(suggestion);
         return;
       }
@@ -253,17 +245,36 @@ export const SearchBar: FC<SearchBarProps> = ({
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
-        clearField(searchRef);
+        clearField();
         searchRef.dispatchEvent(blurEvent);
       }
     },
     [trackUiMetric, navigateToUrl, searchRef]
   );
 
+  const clearField = () => setSearchValue('');
+
   const emptyMessage = <PopoverPlaceholder darkMode={darkMode} basePath={basePathUrl} />;
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Search Elastic',
+    defaultMessage: 'Find apps, content, and more. Ex: Discover',
   });
+  const keyboardShortcutTooltip = `${i18n.translate(
+    'xpack.globalSearchBar.searchBar.shortcutTooltip.description',
+    {
+      defaultMessage: 'Keyboard shortcut',
+    }
+  )}: ${
+    isMac
+      ? i18n.translate('xpack.globalSearchBar.searchBar.shortcutTooltip.macCommandDescription', {
+          defaultMessage: 'Command + /',
+        })
+      : i18n.translate(
+          'xpack.globalSearchBar.searchBar.shortcutTooltip.windowsCommandDescription',
+          {
+            defaultMessage: 'Control + /',
+          }
+        )
+  }`;
 
   useEvent('keydown', onKeyDown);
 
@@ -276,6 +287,7 @@ export const SearchBar: FC<SearchBarProps> = ({
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
       searchProps={{
+        value: searchValue,
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
@@ -286,7 +298,20 @@ export const SearchBar: FC<SearchBarProps> = ({
         onFocus: () => {
           trackUiMetric(METRIC_TYPE.COUNT, 'search_focus');
           setInitialLoad(true);
+          setShowAppend(false);
         },
+        onBlur: () => {
+          setShowAppend(true);
+        },
+        fullWidth: true,
+        append: showAppend ? (
+          <EuiFormLabel
+            title={keyboardShortcutTooltip}
+            css={{ fontFamily: euiTheme.font.familyCode }}
+          >
+            {isMac ? '⌘/' : '^/'}
+          </EuiFormLabel>
+        ) : undefined,
       }}
       emptyMessage={emptyMessage}
       noMatchesMessage={emptyMessage}

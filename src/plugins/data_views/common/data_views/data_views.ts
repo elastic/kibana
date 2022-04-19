@@ -11,7 +11,13 @@
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, FLEET_ASSETS_TO_IGNORE, SavedObjectsClientCommon } from '..';
+import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  DEFAULT_ASSETS_TO_IGNORE,
+  SavedObjectsClientCommon,
+} from '..';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
@@ -30,9 +36,7 @@ import {
   DataViewFieldMap,
   TypeMeta,
 } from '../types';
-import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../field_formats/common/';
-import { META_FIELDS, SavedObject } from '../../common';
-import { SavedObjectNotFound } from '../../../kibana_utils/common';
+import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
@@ -63,6 +67,44 @@ export interface DataViewsServiceDeps {
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
   getCanSave: () => Promise<boolean>;
+}
+
+export interface DataViewsServicePublicMethods {
+  clearCache: (id?: string | undefined) => void;
+  create: (spec: DataViewSpec, skipFetchFields?: boolean) => Promise<DataView>;
+  createAndSave: (
+    spec: DataViewSpec,
+    override?: boolean,
+    skipFetchFields?: boolean
+  ) => Promise<DataView>;
+  createSavedObject: (indexPattern: DataView, override?: boolean) => Promise<DataView>;
+  delete: (indexPatternId: string) => Promise<{}>;
+  ensureDefaultDataView: EnsureDefaultDataView;
+  fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => DataViewFieldMap;
+  find: (search: string, size?: number) => Promise<DataView[]>;
+  get: (id: string) => Promise<DataView>;
+  getCache: () => Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>;
+  getCanSave: () => Promise<boolean>;
+  getDefault: () => Promise<DataView | null>;
+  getDefaultId: () => Promise<string | null>;
+  getDefaultDataView: () => Promise<DataView | null>;
+  getFieldsForIndexPattern: (
+    indexPattern: DataView | DataViewSpec,
+    options?: GetFieldsOptions | undefined
+  ) => Promise<FieldSpec[]>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
+  getIds: (refresh?: boolean) => Promise<string[]>;
+  getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
+  getTitles: (refresh?: boolean) => Promise<string[]>;
+  hasUserDataView: () => Promise<boolean>;
+  refreshFields: (indexPattern: DataView) => Promise<void>;
+  savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
+  setDefault: (id: string | null, force?: boolean) => Promise<void>;
+  updateSavedObject: (
+    indexPattern: DataView,
+    saveAttempts?: number,
+    ignoreErrors?: boolean
+  ) => Promise<void | Error>;
 }
 
 export class DataViewsService {
@@ -424,7 +466,7 @@ export class DataViewsService {
     );
 
     if (!savedObject.version) {
-      throw new SavedObjectNotFound(DATA_VIEW_SAVED_OBJECT_TYPE, id, 'management/kibana/dataViews');
+      throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
     }
 
     return this.initFromSavedObject(savedObject);
@@ -731,8 +773,8 @@ export class DataViewsService {
       // otherwise fallback to any data view
       const userDataViews = patterns.filter(
         (pattern) =>
-          pattern.title !== FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
-          pattern.title !== FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
+          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
+          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
       );
 
       defaultId = userDataViews[0]?.id ?? patterns[0].id;

@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LAYER_WIZARD_CATEGORY } from '../../../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../../common/constants';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { ObservabilityLayerTemplate } from './observability_layer_template';
 import { APM_INDEX_PATTERN_ID } from './create_layer_descriptor';
 import { getIndexPatternService } from '../../../../../kibana_services';
 
 export const ObservabilityLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.OBSERVABILITY,
   order: 20,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
   getIsDisabled: async () => {

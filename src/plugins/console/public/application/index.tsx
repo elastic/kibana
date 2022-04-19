@@ -15,9 +15,9 @@ import {
   I18nStart,
   CoreTheme,
   DocLinksStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
-import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '../shared_imports';
 import { createStorage, createHistory, createSettings } from '../services';
 import { createUsageTracker } from '../services/tracker';
@@ -75,6 +75,7 @@ export function renderApp({
               notifications,
               trackUiMetric,
               objectStorageClient,
+              http,
             },
             theme$,
           }}

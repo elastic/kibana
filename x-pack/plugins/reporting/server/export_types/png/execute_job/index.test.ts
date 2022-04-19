@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
 import * as Rx from 'rxjs';
-import { ReportingCore } from '../../../';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { Writable } from 'stream';
+import { ReportingCore } from '../../..';
 import { CancellationToken } from '../../../../common/cancellation_token';
-import { cryptoFactory, LevelLogger } from '../../../lib';
+import { cryptoFactory } from '../../../lib';
 import {
   createMockConfig,
   createMockConfigSchema,
@@ -17,7 +18,7 @@ import {
 } from '../../../test_helpers';
 import { generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';
-import { runTaskFnFactory } from './';
+import { runTaskFnFactory } from '.';
 
 jest.mock('../../common/generate_png');
 
@@ -29,14 +30,7 @@ const cancellationToken = {
   on: jest.fn(),
 } as unknown as CancellationToken;
 
-const mockLoggerFactory = {
-  get: jest.fn().mockImplementation(() => ({
-    error: jest.fn(),
-    debug: jest.fn(),
-    warn: jest.fn(),
-  })),
-};
-const getMockLogger = () => new LevelLogger(mockLoggerFactory);
+const getMockLogger = () => loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'abcabcsecuresecret';
 const encryptHeaders = async (headers: Record<string, string>) => {

@@ -12,7 +12,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '../../../../kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',
@@ -25,12 +25,14 @@ interface JsonCodeEditorCommonProps {
   jsonValue: string;
   onEditorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   width?: string | number;
+  height?: string | number;
   hasLineNumbers?: boolean;
 }
 
 export const JsonCodeEditorCommon = ({
   jsonValue,
   width,
+  height,
   hasLineNumbers,
   onEditorDidMount,
 }: JsonCodeEditorCommonProps) => {
@@ -55,6 +57,7 @@ export const JsonCodeEditorCommon = ({
         <CodeEditor
           languageId={XJsonLang.ID}
           width={width}
+          height={height}
           value={jsonValue || ''}
           editorDidMount={onEditorDidMount}
           aria-label={codeEditorAriaLabel}

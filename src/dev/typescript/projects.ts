@@ -9,6 +9,7 @@
 import glob from 'glob';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
+import { BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
 import { Project, ProjectOptions } from './project';
 
 /**
@@ -45,7 +46,7 @@ export const PROJECTS = [
     { name: 'enterprise_search/shared/cypress' }
   ),
   createProject(
-    'x-pack/plugins/enterprise_search/public/applications/enterprise_search/cypress/tsconfig.json',
+    'x-pack/plugins/enterprise_search/public/applications/enterprise_search_overview/cypress/tsconfig.json',
     { name: 'enterprise_search/overview/cypress' }
   ),
   createProject(
@@ -72,7 +73,6 @@ export const PROJECTS = [
     disableTypeCheck: true,
   }),
 
-  ...findProjects('packages/*/tsconfig.json'),
   ...findProjects('src/plugins/*/tsconfig.json'),
   ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
   ...findProjects('src/plugins/vis_types/*/tsconfig.json'),
@@ -82,4 +82,7 @@ export const PROJECTS = [
   ...findProjects('test/plugin_functional/plugins/*/tsconfig.json'),
   ...findProjects('test/interpreter_functional/plugins/*/tsconfig.json'),
   ...findProjects('test/server_integration/__fixtures__/plugins/*/tsconfig.json'),
+  ...findProjects('packages/kbn-type-summarizer/tests/tsconfig.json'),
+
+  ...BAZEL_PACKAGE_DIRS.flatMap((dir) => findProjects(`${dir}/*/tsconfig.json`)),
 ];

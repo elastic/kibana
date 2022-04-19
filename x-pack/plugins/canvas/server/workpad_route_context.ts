@@ -10,8 +10,8 @@ import {
   RequestHandlerContextProvider,
   SavedObject,
   SavedObjectsResolveResponse,
-} from 'kibana/server';
-import { ExpressionsService } from 'src/plugins/expressions';
+} from '@kbn/core/server';
+import { ExpressionsServiceStart } from '@kbn/expressions-plugin';
 import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { injectReferences, extractReferences } from './saved_objects/workpad_references';
@@ -34,7 +34,7 @@ export interface CanvasRouteHandlerContext extends RequestHandlerContext {
 }
 
 interface Deps {
-  expressions: ExpressionsService;
+  expressions: ExpressionsServiceStart;
 }
 
 export const createWorkpadRouteContext: (

@@ -7,16 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { SearchSessionRequestInfo } from '@kbn/data-plugin/common';
+import { AsyncSearchStatusResponse } from '@kbn/data-plugin/server';
 import { SearchStatus } from './types';
-import { SearchSessionRequestInfo } from '../../../../../../src/plugins/data/common';
-import { AsyncSearchStatusResponse } from '../../../../../../src/plugins/data/server';
 
 export async function getSearchStatus(
   client: ElasticsearchClient,
   asyncId: string
 ): Promise<Pick<SearchSessionRequestInfo, 'status' | 'error'>> {
   // TODO: Handle strategies other than the default one
+  // https://github.com/elastic/kibana/issues/127880
   try {
     // @ts-expect-error start_time_in_millis: EpochMillis is string | number
     const apiResponse: TransportResult<AsyncSearchStatusResponse> = await client.asyncSearch.status(

@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
@@ -40,6 +41,7 @@ export interface InputControlVisPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /** @internal */

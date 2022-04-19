@@ -8,7 +8,9 @@
 
 import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
-import { getTransactionMetrics } from '../../lib/apm/utils/get_transaction_metrics';
+import { getTransactionMetrics } from '../../lib/apm/processors/get_transaction_metrics';
+import { StreamProcessor } from '../../lib/stream_processor';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
 describe('transaction metrics', () => {
   let events: Array<Record<string, any>>;
@@ -18,36 +20,29 @@ describe('transaction metrics', () => {
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(
-      new Date('2021-01-01T00:00:00.000Z').getTime(),
-      new Date('2021-01-01T00:15:00.000Z').getTime()
+      new Date('2021-01-01T00:00:00.000Z'),
+      new Date('2021-01-01T00:15:00.000Z')
     );
 
-    events = getTransactionMetrics(
-      range
-        .interval('1m')
-        .rate(25)
-        .flatMap((timestamp) =>
-          javaInstance
-            .transaction('GET /api/product/list')
-            .duration(1000)
-            .success()
-            .timestamp(timestamp)
-            .serialize()
-        )
-        .concat(
-          range
-            .interval('1m')
-            .rate(50)
-            .flatMap((timestamp) =>
-              javaInstance
-                .transaction('GET /api/product/list')
-                .duration(1000)
-                .failure()
-                .timestamp(timestamp)
-                .serialize()
-            )
-        )
-    );
+    const span = (timestamp: number) =>
+      javaInstance.transaction('GET /api/product/list').duration(1000).timestamp(timestamp);
+
+    const processor = new StreamProcessor<ApmFields>({
+      processors: [getTransactionMetrics],
+      flushInterval: '15m',
+    });
+    events = processor
+      .streamToArray(
+        range
+          .interval('1m')
+          .rate(25)
+          .generator((timestamp) => span(timestamp).success()),
+        range
+          .interval('1m')
+          .rate(50)
+          .generator((timestamp) => span(timestamp).failure())
+      )
+      .filter((fields) => fields['metricset.name'] === 'transaction');
   });
 
   it('generates the right amount of transaction metrics', () => {

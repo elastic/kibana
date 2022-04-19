@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }) {
           'meta_for_geoshape_data_reader',
           'global_dashboard_read',
         ],
-        false
+        { skipBrowserRefresh: true }
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',

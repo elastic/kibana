@@ -6,13 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import apmClusterFixture from './fixtures/cluster';
+import apmClusterFixture from './fixtures/cluster.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('overview', () => {
+  describe('overview', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup APM server present by default on cloud deployments
+    this.tags(['skipCloud']);
+
     const archive = 'x-pack/test/functional/es_archives/monitoring/apm';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',

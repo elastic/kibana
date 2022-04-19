@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { ConfigDeprecationFactory, ConfigDeprecation } from 'kibana/server';
+import { ConfigDeprecationFactory, ConfigDeprecation } from '@kbn/core/server';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
 
 /**
@@ -78,6 +78,7 @@ export const deprecations = ({
     }),
 
     unused('cluster_alerts.allowedSpaces', { level: 'warning' }),
+    unused('monitoring.ui.metricbeat.index', { level: 'warning' }),
 
     // TODO: Add deprecations for "monitoring.ui.elasticsearch.username: elastic" and "monitoring.ui.elasticsearch.username: kibana".
     // TODO: Add deprecations for using "monitoring.ui.elasticsearch.ssl.certificate" without "monitoring.ui.elasticsearch.ssl.key", and

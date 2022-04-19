@@ -18,7 +18,8 @@ import {
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
 import { APMLink } from '../../../../../shared/links/apm/apm_link';
-
+import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
+import { SERVICE_NAME } from '../../../../../../../common/elasticsearch_fieldnames';
 interface Props {
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -26,17 +27,6 @@ interface Props {
 }
 
 export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
-  const { data: serviceNamesData, status: serviceNamesStatus } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /api/apm/settings/agent-configuration/services', {
-        isCachable: true,
-      });
-    },
-    [],
-    { preservePreviousData: false }
-  );
-  const serviceNames = serviceNamesData?.serviceNames ?? [];
-
   const { data: environmentsData, status: environmentsStatus } = useFetcher(
     (callApmApi) => {
       if (newConfig.service.name) {
@@ -81,14 +71,10 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     { defaultMessage: 'already configured' }
   );
 
-  const serviceNameOptions = serviceNames.map((name) => ({
-    text: getOptionLabel(name),
-    value: name,
-  }));
   const environmentOptions = environments.map(
     ({ name, alreadyConfigured }) => ({
       disabled: alreadyConfigured,
-      text: `${getOptionLabel(name)} ${
+      label: `${getOptionLabel(name)} ${
         alreadyConfigured ? `(${ALREADY_CONFIGURED_TRANSLATED})` : ''
       }`,
       value: name,
@@ -98,7 +84,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   return (
     <>
       {/* Service name options */}
-      <FormRowSelect
+      <FormRowSuggestionsSelect
         title={i18n.translate(
           'xpack.apm.agentConfig.servicePage.service.title',
           { defaultMessage: 'Service' }
@@ -111,20 +97,16 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           'xpack.apm.agentConfig.servicePage.service.fieldLabel',
           { defaultMessage: 'Service name' }
         )}
-        isLoading={serviceNamesStatus === FETCH_STATUS.LOADING}
-        options={serviceNameOptions}
+        field={SERVICE_NAME}
         value={newConfig.service.name}
-        disabled={serviceNamesStatus === FETCH_STATUS.LOADING}
-        onChange={(e) => {
-          e.preventDefault();
-          const name = e.target.value;
+        onChange={(name) => {
           setNewConfig((prev) => ({
             ...prev,
             service: { name, environment: '' },
           }));
         }}
+        dataTestSubj="serviceNameComboBox"
       />
-
       {/* Environment options */}
       <FormRowSelect
         title={i18n.translate(
@@ -145,21 +127,18 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         isLoading={environmentsStatus === FETCH_STATUS.LOADING}
         options={environmentOptions}
         value={newConfig.service.environment}
-        disabled={
+        isDisabled={
           !newConfig.service.name || environmentsStatus === FETCH_STATUS.LOADING
         }
-        onChange={(e) => {
-          e.preventDefault();
-          const environment = e.target.value;
+        onChange={(environment) => {
           setNewConfig((prev) => ({
             ...prev,
             service: { name: prev.service.name, environment },
           }));
         }}
+        dataTestSubj="serviceEnviromentComboBox"
       />
-
       <EuiSpacer />
-
       <EuiFlexGroup justifyContent="flexEnd">
         {/* Cancel button */}
         <EuiFlexItem grow={false}>

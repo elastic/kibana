@@ -14,13 +14,9 @@ import {
   EuiFlexGroup,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import { CustomizablePalette, FIXED_PROGRESSION, PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../types';
-import {
-  CustomizablePalette,
-  FIXED_PROGRESSION,
-  PalettePanelContainer,
-} from '../shared_components/';
+import { PalettePanelContainer } from '../shared_components';
 import './dimension_editor.scss';
 import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';
@@ -46,73 +42,75 @@ export function HeatmapDimensionEditor(
   );
 
   return (
-    <EuiFormRow
-      className="lnsDynamicColoringRow"
-      display="columnCompressed"
-      fullWidth
-      label={i18n.translate('xpack.lens.paletteHeatmapGradient.label', {
-        defaultMessage: 'Color',
-      })}
-    >
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-        className="lnsDynamicColoringClickable"
+    <>
+      <EuiFormRow
+        className="lnsDynamicColoringRow"
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.paletteHeatmapGradient.label', {
+          defaultMessage: 'Color',
+        })}
       >
-        <EuiFlexItem>
-          <EuiColorPaletteDisplay
-            data-test-subj="lnsHeatmap_dynamicColoring_palette"
-            palette={displayStops.map(({ color }) => color)}
-            type={FIXED_PROGRESSION}
-            onClick={() => {
-              setIsPaletteOpen(!isPaletteOpen);
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="lnsHeatmap_dynamicColoring_trigger"
-            aria-label={i18n.translate('xpack.lens.paletteHeatmapGradient.customizeLong', {
-              defaultMessage: 'Edit palette',
-            })}
-            iconType="controlsHorizontal"
-            onClick={() => {
-              setIsPaletteOpen(!isPaletteOpen);
-            }}
-            size="xs"
-            flush="both"
-          >
-            {i18n.translate('xpack.lens.paletteHeatmapGradient.customize', {
-              defaultMessage: 'Edit',
-            })}
-          </EuiButtonEmpty>
-          <PalettePanelContainer
-            siblingRef={props.panelRef}
-            isOpen={isPaletteOpen}
-            handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
-          >
-            {activePalette && (
-              <CustomizablePalette
-                palettes={props.paletteService}
-                activePalette={activePalette}
-                dataBounds={currentMinMax}
-                setPalette={(newPalette) => {
-                  // make sure to always have a list of stops
-                  if (newPalette.params && !newPalette.params.stops) {
-                    newPalette.params.stops = displayStops;
-                  }
-                  (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
-                  setState({
-                    ...state,
-                    palette: newPalette as HeatmapVisualizationState['palette'],
-                  });
-                }}
-              />
-            )}
-          </PalettePanelContainer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          className="lnsDynamicColoringClickable"
+        >
+          <EuiFlexItem>
+            <EuiColorPaletteDisplay
+              data-test-subj="lnsHeatmap_dynamicColoring_palette"
+              palette={displayStops.map(({ color }) => color)}
+              type={FIXED_PROGRESSION}
+              onClick={() => {
+                setIsPaletteOpen(!isPaletteOpen);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="lnsHeatmap_dynamicColoring_trigger"
+              aria-label={i18n.translate('xpack.lens.paletteHeatmapGradient.customizeLong', {
+                defaultMessage: 'Edit palette',
+              })}
+              iconType="controlsHorizontal"
+              onClick={() => {
+                setIsPaletteOpen(!isPaletteOpen);
+              }}
+              size="xs"
+              flush="both"
+            >
+              {i18n.translate('xpack.lens.paletteHeatmapGradient.customize', {
+                defaultMessage: 'Edit',
+              })}
+            </EuiButtonEmpty>
+            <PalettePanelContainer
+              siblingRef={props.panelRef}
+              isOpen={isPaletteOpen}
+              handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+            >
+              {activePalette && (
+                <CustomizablePalette
+                  palettes={props.paletteService}
+                  activePalette={activePalette}
+                  dataBounds={currentMinMax}
+                  setPalette={(newPalette) => {
+                    // make sure to always have a list of stops
+                    if (newPalette.params && !newPalette.params.stops) {
+                      newPalette.params.stops = displayStops;
+                    }
+                    (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
+                    setState({
+                      ...state,
+                      palette: newPalette as HeatmapVisualizationState['palette'],
+                    });
+                  }}
+                />
+              )}
+            </PalettePanelContainer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+    </>
   );
 }

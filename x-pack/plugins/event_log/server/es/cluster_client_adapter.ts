@@ -9,12 +9,12 @@ import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined, isNumber, pick } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, ElasticsearchClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
-import { FindOptionsType } from '../event_log_client';
+import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
@@ -47,8 +47,19 @@ interface QueryOptionsEventsBySavedObjectFilter {
   namespace: string | undefined;
   type: string;
   ids: string[];
-  findOptions: FindOptionsType;
   legacyIds?: string[];
+}
+
+export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
+  findOptions: FindOptionsType;
+};
+
+export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
+  aggregateOptions: AggregateOptionsType;
+};
+
+export interface AggregateEventsBySavedObjectResult {
+  aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,7 +123,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     for (const doc of docs) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: { _index: doc.index } });
+      bulkBody.push({ create: { _index: doc.index, require_alias: true } });
       bulkBody.push(doc.body);
     }
 
@@ -327,189 +338,26 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   }
 
   public async queryEventsBySavedObjects(
-    queryOptions: QueryOptionsEventsBySavedObjectFilter
+    queryOptions: FindEventsOptionsBySavedObjectFilter
   ): Promise<QueryEventsBySavedObjectResult> {
-    const { index, namespace, type, ids, findOptions, legacyIds } = queryOptions;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { page, per_page: perPage, start, end, sort_field, sort_order, filter } = findOptions;
-
-    const defaultNamespaceQuery = {
-      bool: {
-        must_not: {
-          exists: {
-            field: 'kibana.saved_objects.namespace',
-          },
-        },
-      },
-    };
-    const namedNamespaceQuery = {
-      term: {
-        'kibana.saved_objects.namespace': {
-          value: namespace,
-        },
-      },
-    };
-    const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+    const { index, type, ids, findOptions } = queryOptions;
+    const { page, per_page: perPage, sort } = findOptions;
 
     const esClient = await this.elasticsearchClientPromise;
-    let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
-    try {
-      dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : [];
-    } catch (err) {
-      this.debug(`Invalid kuery syntax for the filter (${filter}) error:`, {
-        message: err.message,
-        statusCode: err.statusCode,
-      });
-      throw err;
-    }
-    const savedObjectsQueryMust: estypes.QueryDslQueryContainer[] = [
-      {
-        term: {
-          'kibana.saved_objects.rel': {
-            value: SAVED_OBJECT_REL_PRIMARY,
-          },
-        },
-      },
-      {
-        term: {
-          'kibana.saved_objects.type': {
-            value: type,
-          },
-        },
-      },
-      // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
-      namespaceQuery,
-    ];
 
-    const musts: estypes.QueryDslQueryContainer[] = [
-      {
-        nested: {
-          path: 'kibana.saved_objects',
-          query: {
-            bool: {
-              must: reject(savedObjectsQueryMust, isUndefined),
-            },
-          },
-        },
-      },
-    ];
-
-    const shouldQuery = [];
-
-    shouldQuery.push({
-      bool: {
-        must: [
-          {
-            nested: {
-              path: 'kibana.saved_objects',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      terms: {
-                        // default maximum of 65,536 terms, configurable by index.max_terms_count
-                        'kibana.saved_objects.id': ids,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          {
-            range: {
-              'kibana.version': {
-                gte: LEGACY_ID_CUTOFF_VERSION,
-              },
-            },
-          },
-        ],
-      },
-    });
-
-    if (legacyIds && legacyIds.length > 0) {
-      shouldQuery.push({
-        bool: {
-          must: [
-            {
-              nested: {
-                path: 'kibana.saved_objects',
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          // default maximum of 65,536 terms, configurable by index.max_terms_count
-                          'kibana.saved_objects.id': legacyIds,
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-            {
-              bool: {
-                should: [
-                  {
-                    range: {
-                      'kibana.version': {
-                        lt: LEGACY_ID_CUTOFF_VERSION,
-                      },
-                    },
-                  },
-                  {
-                    bool: {
-                      must_not: {
-                        exists: {
-                          field: 'kibana.version',
-                        },
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      });
-    }
-
-    musts.push({
-      bool: {
-        should: shouldQuery,
-      },
-    });
-
-    if (start) {
-      musts.push({
-        range: {
-          '@timestamp': {
-            gte: start,
-          },
-        },
-      });
-    }
-    if (end) {
-      musts.push({
-        range: {
-          '@timestamp': {
-            lte: end,
-          },
-        },
-      });
-    }
+    const query = getQueryBody(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.findOptions, ['start', 'end', 'filter'])
+    );
 
     const body: estypes.SearchRequest['body'] = {
       size: perPage,
       from: (page - 1) * perPage,
-      sort: [{ [sort_field]: { order: sort_order } }],
-      query: {
-        bool: {
-          filter: dslFilterQuery,
-          must: reject(musts, isUndefined),
-        },
-      },
+      query,
+      ...(sort
+        ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
+        : {}),
     };
 
     try {
@@ -533,8 +381,225 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  private debug(message: string, object?: unknown) {
-    const objectString = object == null ? '' : JSON.stringify(object);
-    this.logger.debug(`esContext: ${message} ${objectString}`);
+  public async aggregateEventsBySavedObjects(
+    queryOptions: AggregateEventsOptionsBySavedObjectFilter
+  ): Promise<AggregateEventsBySavedObjectResult> {
+    const { index, type, ids, aggregateOptions } = queryOptions;
+    const { aggs } = aggregateOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    const query = getQueryBody(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
+    );
+
+    const body: estypes.SearchRequest['body'] = {
+      size: 0,
+      query,
+      aggs,
+    };
+
+    try {
+      const { aggregations } = await esClient.search<IValidatedEvent>({
+        index,
+        body,
+      });
+      return {
+        aggregations,
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
   }
+}
+
+function getNamespaceQuery(namespace?: string) {
+  const defaultNamespaceQuery = {
+    bool: {
+      must_not: {
+        exists: {
+          field: 'kibana.saved_objects.namespace',
+        },
+      },
+    },
+  };
+  const namedNamespaceQuery = {
+    term: {
+      'kibana.saved_objects.namespace': {
+        value: namespace,
+      },
+    },
+  };
+  return namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+}
+
+export function getQueryBody(
+  logger: Logger,
+  opts: FindEventsOptionsBySavedObjectFilter | AggregateEventsOptionsBySavedObjectFilter,
+  queryOptions: QueryOptionsType
+) {
+  const { namespace, type, ids, legacyIds } = opts;
+  const { start, end, filter } = queryOptions ?? {};
+
+  const namespaceQuery = getNamespaceQuery(namespace);
+  let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+  try {
+    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
+  } catch (err) {
+    logger.debug(
+      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+        message: err.message,
+        statusCode: err.statusCode,
+      })}`
+    );
+    throw err;
+  }
+
+  const savedObjectsQueryMust: estypes.QueryDslQueryContainer[] = [
+    {
+      term: {
+        'kibana.saved_objects.rel': {
+          value: SAVED_OBJECT_REL_PRIMARY,
+        },
+      },
+    },
+    {
+      term: {
+        'kibana.saved_objects.type': {
+          value: type,
+        },
+      },
+    },
+    // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
+    namespaceQuery,
+  ];
+
+  const musts: estypes.QueryDslQueryContainer[] = [
+    {
+      nested: {
+        path: 'kibana.saved_objects',
+        query: {
+          bool: {
+            must: reject(savedObjectsQueryMust, isUndefined),
+          },
+        },
+      },
+    },
+  ];
+
+  const shouldQuery = [];
+  shouldQuery.push({
+    bool: {
+      must: [
+        {
+          nested: {
+            path: 'kibana.saved_objects',
+            query: {
+              bool: {
+                must: [
+                  {
+                    terms: {
+                      // default maximum of 65,536 terms, configurable by index.max_terms_count
+                      'kibana.saved_objects.id': ids,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        {
+          range: {
+            'kibana.version': {
+              gte: LEGACY_ID_CUTOFF_VERSION,
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  if (legacyIds && legacyIds.length > 0) {
+    shouldQuery.push({
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'kibana.saved_objects',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      terms: {
+                        // default maximum of 65,536 terms, configurable by index.max_terms_count
+                        'kibana.saved_objects.id': legacyIds,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    'kibana.version': {
+                      lt: LEGACY_ID_CUTOFF_VERSION,
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'kibana.version',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  }
+
+  musts.push({
+    bool: {
+      should: shouldQuery,
+    },
+  });
+
+  if (start) {
+    musts.push({
+      range: {
+        '@timestamp': {
+          gte: start,
+        },
+      },
+    });
+  }
+  if (end) {
+    musts.push({
+      range: {
+        '@timestamp': {
+          lte: end,
+        },
+      },
+    });
+  }
+
+  return {
+    bool: {
+      ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+      must: reject(musts, isUndefined),
+    },
+  };
 }

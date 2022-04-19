@@ -6,10 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { SimpleSavedObject } from 'kibana/public';
-import { MonitorFields } from '../../../../../plugins/uptime/common/runtime_types';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { MonitorFields } from '@kbn/uptime-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+import { formatSecrets } from '@kbn/uptime-plugin/server/lib/synthetics_service/utils/secrets';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -29,7 +30,9 @@ export default function ({ getService }: FtrProviderContext) {
       return res.body as SimpleSavedObject<MonitorFields>;
     };
 
-    before(() => {
+    before(async () => {
+      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+
       _monitors = [
         getFixtureJson('icmp_monitor'),
         getFixtureJson('tcp_monitor'),
@@ -85,13 +88,17 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('get one monitor', () => {
       it('should get by id', async () => {
-        const [{ id: id1, attributes: mon1 }] = await Promise.all(monitors.map(saveMonitor));
+        const [{ id: id1 }] = await Promise.all(monitors.map(saveMonitor));
 
         const apiResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS + '/' + id1)
           .expect(200);
 
-        expect(apiResponse.body.attributes).eql(mon1);
+        expect(apiResponse.body.attributes).eql({
+          ...monitors[0],
+          revision: 1,
+          secrets: formatSecrets(monitors[0]).secrets,
+        });
       });
 
       it('returns 404 if monitor id is not found', async () => {

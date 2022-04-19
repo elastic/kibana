@@ -9,9 +9,9 @@ import { useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { HttpFetchError } from 'kibana/public';
+import type { HttpFetchError } from '@kbn/core/public';
 
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {
@@ -226,14 +226,14 @@ export const useApi = () => {
         }
       },
       async getHistogramsForFields(
-        indexPatternTitle: string,
+        dataViewTitle: string,
         fields: FieldHistogramRequestConfig[],
         query: string | SavedSearchQuery,
         runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
       ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
         try {
-          return await http.post(`${API_BASE_PATH}field_histograms/${indexPatternTitle}`, {
+          return await http.post(`${API_BASE_PATH}field_histograms/${dataViewTitle}`, {
             body: JSON.stringify({
               query,
               fields,

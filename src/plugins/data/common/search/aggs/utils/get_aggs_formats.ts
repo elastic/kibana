@@ -12,10 +12,11 @@ import { i18n } from '@kbn/i18n';
 import {
   FieldFormat,
   FieldFormatInstanceType,
+  FieldFormatParams,
   FieldFormatsContentType,
   IFieldFormat,
   SerializedFieldFormat,
-} from '../../../../../field_formats/common';
+} from '@kbn/field-formats-plugin/common';
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
@@ -42,6 +43,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
       textConvert = (range: any) => {
         const params = this._params;
+
+        if (range == null) {
+          return '';
+        }
 
         if (range.label) {
           return range.label;
@@ -89,6 +94,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       textConvert = (range: DateRange) => {
+        if (range == null) {
+          return '';
+        }
+
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = getFieldFormat({
           id: nestedFormatter.id,
@@ -102,6 +111,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       textConvert = (range: IpRangeKey) => {
+        if (range == null) {
+          return '';
+        }
+
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = getFieldFormat({
           id: nestedFormatter.id,
@@ -133,11 +146,18 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'multi_terms';
       static hidden = true;
 
+      private formatCache: Map<SerializedFieldFormat<FieldFormatParams>, FieldFormat> = new Map();
+
       convert = (val: unknown, type: FieldFormatsContentType) => {
         const params = this._params;
-        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) =>
-          getFieldFormat({ id: fieldParams.id, params: fieldParams })
-        );
+        const formats = (params.paramsPerField as SerializedFieldFormat[]).map((fieldParams) => {
+          const isCached = this.formatCache.has(fieldParams);
+          const cachedFormat = this.formatCache.get(fieldParams) || getFieldFormat(fieldParams);
+          if (!isCached) {
+            this.formatCache.set(fieldParams, cachedFormat);
+          }
+          return cachedFormat;
+        });
 
         if (String(val) === '__other__') {
           return params.otherBucketLabel;

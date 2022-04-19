@@ -23,11 +23,11 @@ import {
   EuiHorizontalRule,
   EuiCode,
   EuiText,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { FieldSelect } from '../aggs/field_select';
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
@@ -42,7 +42,6 @@ import { BUCKET_TYPES } from '../../../../common/enums';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-import { KBN_FIELD_TYPES } from '../../../../../../data/public';
 
 export class TablePanelConfig extends Component<
   PanelConfigProps,
@@ -65,16 +64,27 @@ export class TablePanelConfig extends Component<
     this.setState({ selectedTab });
   }
 
-  handlePivotChange = (selectedOption: Array<EuiComboBoxOptionOption<string>>) => {
+  handlePivotChange = (selectedOptions: Array<string | null>) => {
     const { fields, model } = this.props;
-    const pivotId = get(selectedOption, '[0].value', null);
-    const field = fields[getIndexPatternKey(model.index_pattern)].find((f) => f.name === pivotId);
-    const pivotType = get(field, 'type', model.pivot_type);
 
-    this.props.onChange({
-      pivot_id: pivotId,
-      pivot_type: pivotType,
-    });
+    const getPivotType = (fieldName?: string | null): KBN_FIELD_TYPES | null => {
+      const field = fields[getIndexPatternKey(model.index_pattern)].find(
+        (f) => f.name === fieldName
+      );
+      return get(field, 'type', null);
+    };
+
+    this.props.onChange(
+      selectedOptions.length === 1
+        ? {
+            pivot_id: selectedOptions[0] || undefined,
+            pivot_type: getPivotType(selectedOptions[0]) || undefined,
+          }
+        : {
+            pivot_id: selectedOptions,
+            pivot_type: selectedOptions.map((item) => getPivotType(item)),
+          }
+    );
   };
 
   handleTextChange =
@@ -129,6 +139,8 @@ export class TablePanelConfig extends Component<
                     onChange={this.handlePivotChange}
                     uiRestrictions={this.context.uiRestrictions}
                     type={BUCKET_TYPES.TERMS}
+                    allowMultiSelect={true}
+                    fullWidth={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>

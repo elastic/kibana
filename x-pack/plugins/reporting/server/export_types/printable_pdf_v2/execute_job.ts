@@ -8,7 +8,8 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PDF_JOB_TYPE_V2, REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
+import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
+import type { PdfScreenshotOptions } from '../../types';
 import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders, getCustomLogo } from '../common';
@@ -21,7 +22,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
     const encryptionKey = config.get('encryptionKey');
 
     return async function runTask(jobId, job, cancellationToken, stream) {
-      const jobLogger = parentLogger.clone([PDF_JOB_TYPE_V2, 'execute-job', jobId]);
+      const jobLogger = parentLogger.get(`execute-job:${jobId}`);
       const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
       const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePdf: { end: () => void } | null | undefined;
@@ -34,19 +35,19 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
           apmGetAssets?.end();
 
           apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
-          return generatePdfObservable(
-            reporting,
-            jobLogger,
-            job,
+          return generatePdfObservable(reporting, job, locatorParams, {
+            format: 'pdf',
             title,
-            locatorParams,
-            {
-              browserTimezone,
-              headers,
-              layout,
-            },
-            logo
-          );
+            logo,
+            browserTimezone,
+            headers,
+            layout: {
+              ...layout,
+              // TODO: We do not do a runtime check for supported layout id types for now. But technically
+              // we should.
+              id: layout?.id,
+            } as PdfScreenshotOptions['layout'],
+          });
         }),
         tap(({ buffer }) => {
           apmGeneratePdf?.end();
@@ -69,6 +70,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDFV2>> =
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
       apmTrans?.end();
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };

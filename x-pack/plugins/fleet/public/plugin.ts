@@ -12,39 +12,35 @@ import type {
   Plugin,
   PluginInitializerContext,
   CoreStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import type {
   CustomIntegrationsStart,
   CustomIntegrationsSetup,
-} from 'src/plugins/custom_integrations/public';
+} from '@kbn/custom-integrations-plugin/public';
 
-import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { once } from 'lodash';
 
-import type { SpacesPluginStart } from '../../spaces/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import type { CloudStart } from '../../cloud/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import type { FieldFormatsStart } from '../../../../src/plugins/field_formats/public/index';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { LicensingPluginStart } from '../../licensing/public';
-import type { CloudSetup } from '../../cloud/public';
-import type { GlobalSearchPluginSetup } from '../../global_search/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+
 import {
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
@@ -96,7 +92,6 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
-  fieldFormats: FieldFormatsStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
@@ -240,7 +235,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         icon: 'indexManagementApp',
         showOnHomePage: true,
         path: INTEGRATIONS_BASE_PATH,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         order: 510,
       });
     }

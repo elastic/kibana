@@ -7,17 +7,18 @@
 
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-import type { CoreSetup, CoreStart } from 'kibana/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
 import { setDependencyCache, clearCache } from '../../util/dependency_cache';
 import './_index.scss';
-import type { SharePluginStart } from '../../../../../../../src/plugins/share/public';
-import type { SpacesPluginStart } from '../../../../../spaces/public';
 
 const renderApp = (
   element: HTMLElement,
@@ -25,6 +26,7 @@ const renderApp = (
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
+  fieldFormats: FieldFormatsStart,
   spacesApi?: SpacesPluginStart,
   usageCollection?: UsageCollectionSetup
 ) => {
@@ -36,6 +38,7 @@ const renderApp = (
       data,
       spacesApi,
       usageCollection,
+      fieldFormats,
     }),
     element
   );
@@ -66,6 +69,7 @@ export async function mountApp(
     coreStart,
     pluginsStart.share,
     pluginsStart.data,
+    pluginsStart.fieldFormats,
     pluginsStart.spaces,
     deps.usageCollection
   );

@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
@@ -31,10 +32,16 @@ export interface DocUrlParams {
 
 const SingleDoc = ({ id }: SingleDocRouteProps) => {
   const services = useDiscoverServices();
-  const { chrome, timefilter } = services;
+  const { chrome, timefilter, core } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
   const breadcrumb = useMainRouteBreadcrumb();
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'single-doc',
+    id: indexPatternId,
+  });
 
   useEffect(() => {
     chrome.setBreadcrumbs([

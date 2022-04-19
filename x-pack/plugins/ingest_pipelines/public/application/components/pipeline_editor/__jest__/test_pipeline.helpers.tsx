@@ -7,26 +7,24 @@
 
 import { act } from 'react-dom/test-utils';
 import React from 'react';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
-import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { HttpSetup } from '@kbn/core/public';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 
 /* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
-import '../../../../../../../../src/plugins/es_ui_shared/public/components/code_editor/jest_mock';
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { uiMetricService, apiService } from '../../../services';
-import { Props } from '../';
+import { Props } from '..';
 import { initHttpRequests } from './http_requests.helpers';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
 stubWebWorker();
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,
@@ -62,6 +60,7 @@ const testBedSetup = registerTestBed<TestSubject>(
 );
 
 export interface SetupResult extends TestBed<TestSubject> {
+  httpSetup: HttpSetup;
   actions: ReturnType<typeof createActions>;
 }
 
@@ -189,29 +188,22 @@ const createActions = (testBed: TestBed<TestSubject>) => {
   };
 };
 
-export const setup = async (props: Props): Promise<SetupResult> => {
-  const testBed = await testBedSetup(props);
+export const setup = async (httpSetup: HttpSetup, props: Props): Promise<SetupResult> => {
+  // Initialize mock services
+  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
+  // @ts-ignore
+  apiService.setup(httpSetup, uiMetricService);
+
+  const testBed = testBedSetup(props);
+
   return {
     ...testBed,
+    httpSetup,
     actions: createActions(testBed),
   };
 };
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-export const setupEnvironment = () => {
-  // Initialize mock services
-  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  // @ts-ignore
-  apiService.setup(mockHttpClient, uiMetricService);
-
-  const { server, httpRequestsMockHelpers } = initHttpRequests();
-
-  return {
-    server,
-    httpRequestsMockHelpers,
-  };
-};
+export const setupEnvironment = initHttpRequests;
 
 type TestSubject =
   | 'addDocumentsButton'

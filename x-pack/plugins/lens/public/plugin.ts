@@ -5,37 +5,47 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import type { FieldFormatsSetup, FieldFormatsStart } from 'src/plugins/field_formats/public';
+import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
-} from 'src/plugins/usage_collection/public';
-import type {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
-import type { SpacesPluginStart } from '../../spaces/public';
+} from '@kbn/usage-collection-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+} from '@kbn/embeddable-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ExpressionsServiceSetup,
   ExpressionsSetup,
   ExpressionsStart,
-} from '../../../../src/plugins/expressions/public';
-import type {
-  VisualizationsSetup,
-  VisualizationsStart,
-} from '../../../../src/plugins/visualizations/public';
-import type { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-import type { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
-import type { GlobalSearchPluginSetup } from '../../global_search/public';
-import type { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
-import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
+} from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
+import {
+  UiActionsStart,
+  ACTION_VISUALIZE_FIELD,
+  VISUALIZE_FIELD_TRIGGER,
+} from '@kbn/ui-actions-plugin/public';
+import { VISUALIZE_EDITOR_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
-import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
@@ -59,16 +69,7 @@ import type {
 } from './pie_visualization';
 import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
 import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
-import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
-import { AppNavLinkStatus } from '../../../../src/core/public';
-
-import {
-  UiActionsStart,
-  ACTION_VISUALIZE_FIELD,
-  VISUALIZE_FIELD_TRIGGER,
-} from '../../../../src/plugins/ui_actions/public';
-import { VISUALIZE_EDITOR_TRIGGER } from '../../../../src/plugins/visualizations/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
 import type {
@@ -78,6 +79,7 @@ import type {
   LensTopNavMenuEntryGenerator,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 
@@ -90,7 +92,6 @@ import {
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
-import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 
@@ -102,12 +103,15 @@ export interface LensPluginSetupDependencies {
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  eventAnnotation: EventAnnotationPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  discover?: DiscoverSetup;
 }
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
@@ -116,12 +120,14 @@ export interface LensPluginStartDependencies {
   visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
+  eventAnnotation: EventAnnotationPluginSetup;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
+  discover?: DiscoverStart;
 }
 
 export interface LensPublicSetup {
@@ -230,6 +236,7 @@ export class LensPlugin {
       embeddable,
       visualizations,
       charts,
+      eventAnnotation,
       globalSearch,
       usageCollection,
     }: LensPluginSetupDependencies
@@ -246,10 +253,11 @@ export class LensPlugin {
         charts,
         expressions,
         fieldFormats,
-        plugins.fieldFormats.deserialize
+        plugins.fieldFormats.deserialize,
+        eventAnnotation
       );
-
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
+      const datasourceMap = await this.editorFrameService!.loadDatasources();
 
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
@@ -260,7 +268,8 @@ export class LensPlugin {
         documentToExpression: this.editorFrameService!.documentToExpression,
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
-        indexPatternService: plugins.data.indexPatterns,
+        datasourceMap,
+        indexPatternService: plugins.dataViews,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
@@ -287,10 +296,10 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultDataView = async () => {
+    const ensureDefaultDataView = () => {
       // make sure a default index pattern exists
       // if not, the page will be redirected to management and visualize won't be rendered
-      await startServices().plugins.data.indexPatterns.ensureDefaultDataView();
+      startServices().plugins.dataViews.ensureDefaultDataView();
     };
 
     core.application.register({
@@ -300,22 +309,25 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
-        await this.initParts(
-          core,
-          data,
-          charts,
-          expressions,
-          fieldFormats,
-          deps.fieldFormats.deserialize
-        );
+        await Promise.all([
+          this.initParts(
+            core,
+            data,
+            charts,
+            expressions,
+            fieldFormats,
+            deps.fieldFormats.deserialize,
+            eventAnnotation
+          ),
+          ensureDefaultDataView(),
+        ]);
 
         const { mountApp, stopReportManager, getLensAttributeService } = await import(
           './async_services'
         );
-        const frameStart = this.editorFrameService!.start(coreStart, deps);
-
         this.stopReportManager = stopReportManager;
-        await ensureDefaultDataView();
+
+        const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
           attributeService: getLensAttributeService(coreStart, deps),
@@ -362,7 +374,8 @@ export class LensPlugin {
     charts: ChartsPluginSetup,
     expressions: ExpressionsServiceSetup,
     fieldFormats: FieldFormatsSetup,
-    formatFactory: FormatFactory
+    formatFactory: FormatFactory,
+    eventAnnotation: EventAnnotationPluginSetup
   ) {
     const {
       DatatableVisualization,
@@ -396,6 +409,7 @@ export class LensPlugin {
       charts,
       editorFrame: editorFrameSetupInterface,
       formatFactory,
+      eventAnnotation,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
@@ -424,6 +438,14 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_EDITOR_TRIGGER,
       visualizeTSVBAction(core.application)
+    );
+
+    startDependencies.uiActions.addTriggerAction(
+      CONTEXT_MENU_TRIGGER,
+      createOpenInDiscoverAction(
+        startDependencies.discover!,
+        core.application.capabilities.discover.show as boolean
+      )
     );
 
     return {

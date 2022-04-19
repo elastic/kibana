@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fields } from '@kbn/data-plugin/common/mocks';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { fields } from '../../../../../../../src/plugins/data/common/mocks';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 
@@ -53,6 +53,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onChangeExceptionItem={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
+            setWarningsExist={jest.fn()}
           />
         </EuiThemeProvider>
       );
@@ -84,6 +85,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onChangeExceptionItem={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
+            setWarningsExist={jest.fn()}
           />
         </EuiThemeProvider>
       );
@@ -113,6 +115,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onChangeExceptionItem={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
+            setWarningsExist={jest.fn()}
           />
         </EuiThemeProvider>
       );
@@ -144,6 +147,7 @@ describe('BuilderExceptionListItemComponent', () => {
             onChangeExceptionItem={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             setErrorsExist={jest.fn()}
+            setWarningsExist={jest.fn()}
           />
         </EuiThemeProvider>
       );
@@ -182,6 +186,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 
@@ -212,6 +217,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 
@@ -243,6 +249,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 
@@ -272,6 +279,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 
@@ -303,6 +311,7 @@ describe('BuilderExceptionListItemComponent', () => {
           onChangeExceptionItem={jest.fn()}
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
           setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
         />
       );
 

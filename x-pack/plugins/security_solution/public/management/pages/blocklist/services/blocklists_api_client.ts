@@ -5,22 +5,61 @@
  * 2.0.
  */
 
+import {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { HttpStart } from 'kibana/public';
+
+import { HttpStart } from '@kbn/core/public';
+import { ConditionEntry } from '../../../../../common/endpoint/types';
+import {
+  conditionEntriesToEntries,
+  entriesToConditionEntries,
+} from '../../../../common/utils/exception_list_items';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { BLOCKLISTS_LIST_DEFINITION } from '../constants';
 
+function readTransform(item: ExceptionListItemSchema): ExceptionListItemSchema {
+  return {
+    ...item,
+    entries: entriesToConditionEntries(item.entries) as ExceptionListItemSchema['entries'],
+  };
+}
+
+function writeTransform<T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema>(
+  item: T
+): T {
+  return {
+    ...item,
+    entries: conditionEntriesToEntries(item.entries as ConditionEntry[]),
+  } as T;
+}
+
 /**
  * Blocklist exceptions Api client class using ExceptionsListApiClient as base class
- * It follow the Singleton pattern.
+ * It follows the Singleton pattern.
  * Please, use the getInstance method instead of creating a new instance when using this implementation.
  */
 export class BlocklistsApiClient extends ExceptionsListApiClient {
   constructor(http: HttpStart) {
-    super(http, ENDPOINT_BLOCKLISTS_LIST_ID, BLOCKLISTS_LIST_DEFINITION);
+    super(
+      http,
+      ENDPOINT_BLOCKLISTS_LIST_ID,
+      BLOCKLISTS_LIST_DEFINITION,
+      readTransform,
+      writeTransform
+    );
   }
 
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
-    return super.getInstance(http, ENDPOINT_BLOCKLISTS_LIST_ID, BLOCKLISTS_LIST_DEFINITION);
+    return super.getInstance(
+      http,
+      ENDPOINT_BLOCKLISTS_LIST_ID,
+      BLOCKLISTS_LIST_DEFINITION,
+      readTransform,
+      writeTransform
+    );
   }
 }

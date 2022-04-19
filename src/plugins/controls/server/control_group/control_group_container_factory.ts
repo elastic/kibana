@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddablePersistableStateService } from '../../../embeddable/common';
-import { EmbeddableRegistryDefinition } from '../../../embeddable/server';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import { CONTROL_GROUP_TYPE } from '../../common';
 import {
   createControlGroupExtract,
   createControlGroupInject,
+  migrations,
 } from '../../common/control_group/control_group_persistable_state';
 
 export const controlGroupContainerPersistableStateServiceFactory = (
@@ -21,5 +22,6 @@ export const controlGroupContainerPersistableStateServiceFactory = (
     id: CONTROL_GROUP_TYPE,
     extract: createControlGroupExtract(persistableStateService),
     inject: createControlGroupInject(persistableStateService),
+    migrations,
   };
 };

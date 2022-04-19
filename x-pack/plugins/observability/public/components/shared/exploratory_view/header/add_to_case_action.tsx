@@ -8,14 +8,14 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import { toMountPoint, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityAppServices } from '../../../../application/types';
+import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   CasesDeepLinkId,
   generateCaseViewPath,
   GetAllCasesSelectorModalProps,
-} from '../../../../../../cases/public';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
+} from '@kbn/cases-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { ObservabilityAppServices } from '../../../../application/types';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { observabilityFeatureId, observabilityAppId } from '../../../../../common';
 import { parseRelativeDate } from '../components/date_range_picker';
@@ -114,7 +114,7 @@ export function AddToCaseAction({
       )}
       {isCasesOpen &&
         lensAttributes &&
-        cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
+        cases.ui.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}
     </>
   );
 }

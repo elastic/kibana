@@ -14,10 +14,10 @@ import { join, relative } from 'path';
 import { isBazelBinAvailable, runBazel } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
-import { ICommand } from './';
+import { ICommand } from '.';
 
 export const CleanCommand: ICommand = {
-  description: 'Deletes output directories, node_modules and resets internal caches.',
+  description: 'Deletes output directories and resets internal caches.',
   name: 'clean',
 
   reportTiming: {
@@ -25,22 +25,17 @@ export const CleanCommand: ICommand = {
     id: 'total',
   },
 
-  async run(projects) {
+  async run(projects, projectGraph, { kbn }) {
     log.warning(dedent`
-      This command is only necessary for the rare circumstance where you need to recover a consistent
+      This command is only necessary for the circumstance where you need to recover a consistent
       state when problems arise. If you need to run this command often, please let us know by
-      filling out this form: https://ela.st/yarn-kbn-clean
+      filling out this form: https://ela.st/yarn-kbn-clean.
+      Please not it might not solve problems with node_modules. To solve problems around node_modules
+      you might need to run 'yarn kbn reset'.
     `);
 
     const toDelete = [];
     for (const project of projects.values()) {
-      if (await isDirectory(project.nodeModulesLocation)) {
-        toDelete.push({
-          cwd: project.path,
-          pattern: relative(project.path, project.nodeModulesLocation),
-        });
-      }
-
       if (await isDirectory(project.targetLocation)) {
         toDelete.push({
           cwd: project.path,
@@ -58,7 +53,7 @@ export const CleanCommand: ICommand = {
     }
 
     // Runs Bazel soft clean
-    if (await isBazelBinAvailable()) {
+    if (await isBazelBinAvailable(kbn.getAbsolute())) {
       await runBazel(['clean']);
       log.success('Soft cleaned bazel');
     }

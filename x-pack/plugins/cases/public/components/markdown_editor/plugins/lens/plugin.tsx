@@ -27,15 +27,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import type { TypedLensByValueInput } from '../../../../../../lens/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { ModalContainer } from './modal_container';
-import type { EmbeddablePackageState } from '../../../../../../../../src/plugins/embeddable/public';
 import { SavedObjectFinderUi } from './saved_objects_finder';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { VISUALIZATION } from './translations';
+import { useIsMainApplication } from '../../../../common/hooks';
 
 const BetaBadgeWrapper = styled.span`
   display: inline-flex;
@@ -84,6 +85,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   const { draftComment, clearDraftComment } = useLensDraftComment();
   const commentEditorContext = useContext(CommentEditorContext);
   const markdownContext = useContext(EuiMarkdownContext);
+  const isMainApplication = useIsMainApplication();
 
   const handleClose = useCallback(() => {
     if (currentAppId) {
@@ -126,8 +128,11 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   );
 
   const originatingPath = useMemo(
-    () => `${location.pathname}${location.search}`,
-    [location.pathname, location.search]
+    () =>
+      isMainApplication
+        ? `/insightsAndAlerting/cases${location.pathname}${location.search}`
+        : `${location.pathname}${location.search}`,
+    [isMainApplication, location.pathname, location.search]
   );
 
   const handleCreateInLensClick = useCallback(() => {

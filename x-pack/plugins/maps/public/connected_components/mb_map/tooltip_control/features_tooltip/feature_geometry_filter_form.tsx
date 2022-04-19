@@ -9,11 +9,11 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Geometry, Polygon } from 'geojson';
 import rison, { RisonObject } from 'rison-node';
-import { URL_MAX_LENGTH } from '../../../../../../../../src/core/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
+import { URL_MAX_LENGTH } from '@kbn/core/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import {
   createSpatialFilterWithGeometry,
   PreIndexedShape,

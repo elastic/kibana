@@ -10,13 +10,13 @@ import {
   HttpStart,
   OverlayStart,
   SavedObjectsClientContract,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
-import { ChromeStart } from 'kibana/public';
+import { ChromeStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace } from '../types';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 export interface MockedGraphEnvironment {
   store: GraphStore;
@@ -63,7 +63,7 @@ export function createMockGraphStore({
         if (id === 'missing-dataview') {
           throw Error('No data view with this id');
         }
-        return { id: '123', title: 'test-pattern' } as unknown as IndexPattern;
+        return { id: '123', title: 'test-pattern' } as unknown as DataView;
       }),
     },
     I18nContext: jest

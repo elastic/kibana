@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CaseResponse, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   postCaseReq,
   postCommentUserReq,
@@ -23,7 +24,6 @@ import {
   updateCase,
   createComment,
 } from '../../../../common/lib/utils';
-import { CaseResponse, CaseStatuses } from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,
@@ -47,6 +47,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('find_cases', () => {
     describe('basic tests', () => {
@@ -190,8 +192,106 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_in_progress_cases).to.eql(1);
       });
 
+      it('returns the correct fields', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
+          'title',
+          ['title', 'description'],
+        ];
+
+        for (const fields of queryFields) {
+          const cases = await findCases({ supertest, query: { fields } });
+          const fieldsAsArray = Array.isArray(fields) ? fields : [fields];
+
+          const expectedValues = fieldsAsArray.reduce(
+            (theCase, field) => ({
+              ...theCase,
+              [field]: postedCase[field],
+            }),
+            {}
+          );
+
+          expect(cases).to.eql({
+            ...findCasesResp,
+            total: 1,
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                external_service: postedCase.external_service,
+                owner: postedCase.owner,
+                connector: postedCase.connector,
+                comments: [],
+                totalAlerts: 0,
+                totalComment: 0,
+                ...expectedValues,
+              },
+            ],
+            count_open_cases: 1,
+          });
+        }
+      });
+
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
+      });
+    });
+
+    describe('alerts', () => {
+      const defaultSignalsIndex = '.siem-signals-default-000001';
+      const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
+      const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
+
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+        await deleteAllCaseItems(es);
+      });
+
+      it('correctly counts alerts ignoring duplicates', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        /**
+         * Adds three comments of type alerts.
+         * The first two have the same alertId.
+         * The third has different alertId.
+         */
+        for (const alertId of [signalID, signalID, signalID2]) {
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: {
+              alertId,
+              index: defaultSignalsIndex,
+              rule: { id: 'test-rule-id', name: 'test-index-id' },
+              type: CommentType.alert,
+              owner: 'securitySolutionFixture',
+            },
+          });
+        }
+
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+
+        const cases = await findCases({ supertest });
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [
+            {
+              ...patchedCase,
+              comments: [],
+              totalAlerts: 2,
+              totalComment: 1,
+            },
+          ],
+          count_open_cases: 1,
+        });
       });
     });
 
@@ -372,6 +472,53 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_open_cases).to.eql(10);
         expect(cases.count_closed_cases).to.eql(0);
         expect(cases.count_in_progress_cases).to.eql(0);
+      });
+    });
+
+    describe('range queries', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('returns all cases without a range filter', async () => {
+        const EXPECTED_CASES = 3;
+        const cases = await findCases({ supertest });
+
+        expect(cases.total).to.be(EXPECTED_CASES);
+        expect(cases.count_open_cases).to.be(EXPECTED_CASES);
+        expect(cases.cases.length).to.be(EXPECTED_CASES);
+      });
+
+      it('respects the range parameters', async () => {
+        const queries = [
+          { expectedCases: 2, query: { from: '2022-03-16' } },
+          { expectedCases: 2, query: { to: '2022-03-21' } },
+          { expectedCases: 2, query: { from: '2022-03-15', to: '2022-03-21' } },
+        ];
+
+        for (const query of queries) {
+          const cases = await findCases({
+            supertest,
+            query: query.query,
+          });
+
+          expect(cases.total).to.be(query.expectedCases);
+          expect(cases.count_open_cases).to.be(query.expectedCases);
+          expect(cases.cases.length).to.be(query.expectedCases);
+        }
+      });
+
+      it('returns a bad request on malformed parameter', async () => {
+        await findCases({ supertest, query: { from: '<' }, expectedHttpCode: 400 });
       });
     });
 
@@ -613,6 +760,40 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Only security solution cases are being returned
         ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+      });
+
+      describe('range queries', () => {
+        before(async () => {
+          await kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+          await deleteAllCaseItems(es);
+        });
+
+        it('should respect the owner filter when using range queries', async () => {
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              from: '2022-03-15',
+              to: '2022-03-21',
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+        });
       });
     });
   });

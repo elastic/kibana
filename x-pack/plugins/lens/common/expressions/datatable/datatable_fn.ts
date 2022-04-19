@@ -6,14 +6,13 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
+import type { DatatableColumnMeta, ExecutionContext } from '@kbn/expressions-plugin';
 import { FormatFactory, LensMultiTable } from '../../types';
 import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
 import { getSortingCriteria } from './sorting';
-import type {
-  DatatableColumnMeta,
-  ExecutionContext,
-} from '../../../../../../src/plugins/expressions';
 import type { DatatableExpressionFunction } from './types';
 
 function isRange(meta: { params?: { id?: string } } | undefined) {
@@ -25,9 +24,26 @@ export const datatableFn =
     getFormatFactory: (context: ExecutionContext) => FormatFactory | Promise<FormatFactory>
   ): DatatableExpressionFunction['fn'] =>
   async (data, args, context) => {
+    const [firstTable] = Object.values(data.tables);
+    if (context?.inspectorAdapters?.tables) {
+      const logTable = prepareLogTable(
+        Object.values(data.tables)[0],
+        [
+          [
+            args.columns.map((column) => column.columnId),
+            i18n.translate('xpack.lens.datatable.column.help', {
+              defaultMessage: 'Datatable column',
+            }),
+          ],
+        ],
+        true
+      );
+
+      context.inspectorAdapters.tables.logDatatable('default', logTable);
+    }
+
     let untransposedData: LensMultiTable | undefined;
     // do the sorting at this level to propagate it also at CSV download
-    const [firstTable] = Object.values(data.tables);
     const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);

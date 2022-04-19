@@ -24,10 +24,12 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { DISCOVER_APP_LOCATOR } from '../../../../../../../../../src/plugins/discover/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/public';
 
+import { DuplicateDataViewError } from '@kbn/data-plugin/public';
+import type { RuntimeField } from '@kbn/data-plugin/common';
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
@@ -43,12 +45,10 @@ import { useApi } from '../../../../hooks/use_api';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
-import { DuplicateDataViewError } from '../../../../../../../../../src/plugins/data/public';
 import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
-import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common';
 import { isPopulatedObject } from '../../../../../../common/shared_imports';
 import { isContinuousTransform, isLatestTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
@@ -56,19 +56,19 @@ import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting
 export interface StepDetailsExposedState {
   created: boolean;
   started: boolean;
-  indexPatternId: string | undefined;
+  dataViewId: string | undefined;
 }
 
 export function getDefaultStepCreateState(): StepDetailsExposedState {
   return {
     created: false,
     started: false,
-    indexPatternId: undefined,
+    dataViewId: undefined,
   };
 }
 
 export interface StepCreateFormProps {
-  createIndexPattern: boolean;
+  createDataView: boolean;
   transformId: string;
   transformConfig: PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema;
   overrides: StepDetailsExposedState;
@@ -77,7 +77,7 @@ export interface StepCreateFormProps {
 }
 
 export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
-  ({ createIndexPattern, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
+  ({ createDataView, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
@@ -86,7 +86,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [created, setCreated] = useState(defaults.created);
     const [started, setStarted] = useState(defaults.started);
     const [alertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
-    const [indexPatternId, setIndexPatternId] = useState(defaults.indexPatternId);
+    const [dataViewId, setDataViewId] = useState(defaults.dataViewId);
     const [progressPercentComplete, setProgressPercentComplete] = useState<undefined | number>(
       undefined
     );
@@ -94,14 +94,14 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
 
     const deps = useAppDependencies();
     const { share } = deps;
-    const indexPatterns = deps.data.indexPatterns;
+    const dataViews = deps.data.dataViews;
     const toastNotifications = useToastNotifications();
     const isDiscoverAvailable = deps.application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
       let unmounted = false;
 
-      onChange({ created, started, indexPatternId });
+      onChange({ created, started, dataViewId });
 
       const getDiscoverUrl = async (): Promise<void> => {
         const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
@@ -109,7 +109,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
         if (!locator) return;
 
         const discoverUrl = await locator.getUrl({
-          indexPatternId,
+          indexPatternId: dataViewId,
         });
 
         if (!unmounted) {
@@ -117,7 +117,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
         }
       };
 
-      if (started === true && indexPatternId !== undefined && isDiscoverAvailable) {
+      if (started === true && dataViewId !== undefined && isDiscoverAvailable) {
         getDiscoverUrl();
       }
 
@@ -126,7 +126,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       };
       // custom comparison
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [created, started, indexPatternId]);
+    }, [created, started, dataViewId]);
 
     const { overlays, theme } = useAppDependencies();
     const api = useApi();
@@ -174,8 +174,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       setCreated(true);
       setLoading(false);
 
-      if (createIndexPattern) {
-        createKibanaIndexPattern();
+      if (createDataView) {
+        createKibanaDataView();
       }
 
       return true;
@@ -228,7 +228,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       }
     }
 
-    const createKibanaIndexPattern = async () => {
+    const createKibanaDataView = async () => {
       setLoading(true);
       const dataViewName = transformConfig.dest.index;
       const runtimeMappings = transformConfig.source.runtime_mappings as Record<
@@ -237,7 +237,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       >;
 
       try {
-        const newIndexPattern = await indexPatterns.createAndSave(
+        const newDataView = await dataViews.createAndSave(
           {
             title: dataViewName,
             timeFieldName,
@@ -256,7 +256,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           })
         );
 
-        setIndexPatternId(newIndexPattern.id);
+        setDataViewId(newDataView.id);
         setLoading(false);
         return true;
       } catch (e) {
@@ -529,7 +529,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                     data-test-subj="transformWizardCardManagement"
                   />
                 </EuiFlexItem>
-                {started === true && createIndexPattern === true && indexPatternId === undefined && (
+                {started === true && createDataView === true && dataViewId === undefined && (
                   <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
                     <EuiPanel style={{ position: 'relative' }}>
                       <EuiProgress size="xs" color="primary" position="absolute" />

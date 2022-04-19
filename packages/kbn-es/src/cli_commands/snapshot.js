@@ -8,7 +8,8 @@
 
 const dedent = require('dedent');
 const getopts = require('getopts');
-import { ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 const { Cluster } = require('../cluster');
 const { parseTimeoutToMs } = require('../utils');
 
@@ -33,6 +34,8 @@ exports.help = (defaults = {}) => {
       --use-cached      Skips cache verification and use cached ES snapshot.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+      --plugins         Comma seperated list of Elasticsearch plugins to install
+      --secure-files     Comma seperated list of secure_setting_name=/path pairs
 
     Example:
 
@@ -58,6 +61,7 @@ exports.run = async (defaults = {}) => {
       useCached: 'use-cached',
       skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
+      secureFiles: 'secure-files',
     },
 
     string: ['version', 'ready-timeout'],
@@ -75,6 +79,13 @@ exports.run = async (defaults = {}) => {
 
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
+    }
+    if (options.plugins) {
+      await cluster.installPlugins(installPath, options.plugins, options);
+    }
+    if (options.secureFiles) {
+      const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));
+      await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
     }
 
     reportTime(installStartTime, 'installed', {

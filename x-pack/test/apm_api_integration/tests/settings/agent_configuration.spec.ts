@@ -9,8 +9,8 @@ import { inspect } from 'util';
 
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
-import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
-import { AgentConfigSearchParams } from '../../../../plugins/apm/server/routes/settings/agent_configuration/route';
+import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
+import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -21,12 +21,6 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
   const log = getService('log');
 
   const archiveName = 'apm_8.0.0';
-
-  function getServices() {
-    return apmApiClient.readUser({
-      endpoint: 'GET /api/apm/settings/agent-configuration/services',
-    });
-  }
 
   async function getEnvironments(serviceName: string) {
     return apmApiClient.readUser({
@@ -87,11 +81,6 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     'agent configuration when no data is loaded',
     { config: 'basic', archives: [] },
     () => {
-      it('handles the empty state for services', async () => {
-        const { body } = await getServices();
-        expect(body.serviceNames).to.eql(['ALL_OPTION_VALUE']);
-      });
-
       it('handles the empty state for environments', async () => {
         const { body } = await getEnvironments('myservice');
         expect(body.environments).to.eql([{ name: 'ALL_OPTION_VALUE', alreadyConfigured: false }]);
@@ -386,25 +375,6 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     'agent configuration when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      it('returns all services', async () => {
-        const { body } = await getServices();
-        expectSnapshot(body).toMatchInline(`
-          Object {
-            "serviceNames": Array [
-              "ALL_OPTION_VALUE",
-              "auditbeat",
-              "opbeans-dotnet",
-              "opbeans-go",
-              "opbeans-java",
-              "opbeans-node",
-              "opbeans-python",
-              "opbeans-ruby",
-              "opbeans-rum",
-            ],
-          }
-        `);
-      });
-
       it('returns the environments, all unconfigured', async () => {
         const { body } = await getEnvironments('opbeans-node');
         const { environments } = body;

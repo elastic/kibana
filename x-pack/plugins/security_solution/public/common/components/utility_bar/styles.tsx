@@ -114,12 +114,12 @@ BarGroup.displayName = 'BarGroup';
 
 export const BarText = styled.p.attrs({
   className: 'siemUtilityBar__text',
-})`
-  ${({ theme }) => css`
+})<{ shouldWrap: boolean }>`
+  ${({ shouldWrap, theme }) => css`
     color: ${theme.eui.euiTextSubduedColor};
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
-    white-space: nowrap;
+    white-space: ${shouldWrap ? 'normal' : 'nowrap'};
   `}
 `;
 BarText.displayName = 'BarText';

@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner, Task, GlobalTask } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerContextUseLocalArtifact: boolean | null;
+  dockerCrossCompile: boolean;
   dockerPush: boolean;
   dockerTagQualifier: string | null;
   downloadFreshNode: boolean;

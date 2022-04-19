@@ -58,6 +58,10 @@ export interface TelemetryEvent {
     };
   };
   license?: ESLicense;
+  event?: {
+    id?: string;
+    kind?: string;
+  };
 }
 
 // EP Policy Response
@@ -204,6 +208,10 @@ export interface EndpointMetrics {
     registry_events: DocumentsVolumeMetrics;
     network_events: DocumentsVolumeMetrics;
     overall: DocumentsVolumeMetrics;
+    alerts: DocumentsVolumeMetrics;
+    diagnostic_alerts: DocumentsVolumeMetrics;
+    dns_events: DocumentsVolumeMetrics;
+    security_events: DocumentsVolumeMetrics;
   };
   malicious_behavior_rules: Array<{ id: string; endpoint_uptime_percent: number }>;
   system_impact: Array<{
@@ -237,6 +245,44 @@ interface EndpointMetricOS {
   version: string;
   platform: string;
   full: string;
+}
+
+// EP Metadata
+
+export interface EndpointMetadataAggregation {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    endpoint_metadata: {
+      buckets: Array<{ key: string; doc_count: number; latest_metadata: EndpointMetadataHits }>;
+    };
+  };
+}
+
+interface EndpointMetadataHits {
+  hits: {
+    total: { value: number };
+    hits: EndpointMetadataDocument[];
+  };
+}
+
+export interface EndpointMetadataDocument {
+  _source: {
+    '@timestamp': string;
+    agent: {
+      id: string;
+      version: string;
+    };
+    Endpoint: {
+      capabilities: string[];
+    };
+    elastic: {
+      agent: {
+        id: string;
+      };
+    };
+  };
 }
 
 // List HTTP Types

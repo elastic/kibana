@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IValidatedEvent } from '../../../../plugins/event_log/server';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { getUrlPrefix } from '.';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -39,7 +39,7 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
   const supertest = getService('supertest');
 
   const spacePrefix = getUrlPrefix(spaceId);
-  const url = `${spacePrefix}/api/event_log/${type}/${id}/_find?per_page=5000${
+  const url = `${spacePrefix}/internal/event_log/${type}/${id}/_find?per_page=5000${
     params.filter ? `&filter=${params.filter}` : ''
   }`;
 

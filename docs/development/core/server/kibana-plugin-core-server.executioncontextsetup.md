@@ -15,5 +15,6 @@ export interface ExecutionContextSetup
 
 |  Method | Description |
 |  --- | --- |
+|  [getAsLabels()](./kibana-plugin-core-server.executioncontextsetup.getaslabels.md) |  |
 |  [withContext(context, fn)](./kibana-plugin-core-server.executioncontextsetup.withcontext.md) | Keeps track of execution context while the passed function is executed. Data are carried over all async operations spawned by the passed function. The nested calls stack the registered context on top of each other. |
 

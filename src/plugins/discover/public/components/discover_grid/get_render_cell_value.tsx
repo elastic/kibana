@@ -8,15 +8,14 @@
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
-
-import type { DataView, DataViewField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   EuiDataGridCellValueElementProps,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '../../../../field_formats/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';

@@ -6,10 +6,10 @@
  */
 
 import type { DataViewBase, Query } from '@kbn/es-query';
-import { CoreStart, HttpStart } from 'kibana/public';
+import { CoreStart, HttpStart } from '@kbn/core/public';
 import { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
   ENDPOINT_ACTION_LOG_ROUTE,
@@ -46,7 +46,7 @@ import {
   sendGetAgentPolicyList,
   sendGetEndpointSecurityPackage,
   sendGetFleetAgentsWithEndpoint,
-} from '../../policy/store/services/ingest';
+} from '../../../services/policies/ingest';
 import { GetPolicyListResponse } from '../../policy/types';
 import {
   AgentIdsPendingActions,

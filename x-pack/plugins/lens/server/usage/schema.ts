@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { LensUsage } from './types';
 
 const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
@@ -24,6 +24,12 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   open_formula_popover: {
     type: 'long',
     _meta: { description: 'Number of times the user opened the in-product formula help popover.' },
+  },
+  toggle_autoapply: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user toggled auto-apply.',
+    },
   },
   toggle_fullscreen_formula: {
     type: 'long',

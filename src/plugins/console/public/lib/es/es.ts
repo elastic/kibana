@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import $ from 'jquery';
-import { stringify } from 'query-string';
-
-interface SendOptions {
-  asSystemRequest?: boolean;
-}
+import type { HttpFetchOptions, HttpResponse, HttpSetup } from '@kbn/core/public';
+import { API_BASE_PATH } from '../../../common/constants';
 
 const esVersion: string[] = [];
 
@@ -24,44 +20,33 @@ export function getContentType(body: unknown) {
   return 'application/json';
 }
 
-export function send(
-  method: string,
-  path: string,
-  data: string | object,
-  { asSystemRequest }: SendOptions = {},
-  withProductOrigin: boolean = false
-) {
-  const wrappedDfd = $.Deferred();
+interface SendProps {
+  http: HttpSetup;
+  method: string;
+  path: string;
+  data?: string;
+  asSystemRequest?: boolean;
+  withProductOrigin?: boolean;
+  asResponse?: boolean;
+}
 
-  const options: JQuery.AjaxSettings = {
-    url:
-      '../api/console/proxy?' +
-      stringify({ path, method, ...(withProductOrigin && { withProductOrigin }) }, { sort: false }),
-    headers: {
-      'kbn-xsrf': 'kibana',
-      ...(asSystemRequest && { 'kbn-system-request': 'true' }),
-    },
-    data,
-    contentType: getContentType(data),
-    cache: false,
-    crossDomain: true,
-    type: 'POST',
-    dataType: 'text', // disable automatic guessing
+export async function send({
+  http,
+  method,
+  path,
+  data,
+  asSystemRequest = false,
+  withProductOrigin = false,
+  asResponse = false,
+}: SendProps) {
+  const options: HttpFetchOptions = {
+    query: { path, method, ...(withProductOrigin && { withProductOrigin }) },
+    body: data,
+    asResponse,
+    asSystemRequest,
   };
 
-  $.ajax(options).then(
-    (responseData, textStatus: string, jqXHR: unknown) => {
-      wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);
-    },
-    ((jqXHR: { status: number; responseText: string }, textStatus: string, errorThrown: Error) => {
-      if (jqXHR.status === 0) {
-        jqXHR.responseText =
-          "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
-      }
-      wrappedDfd.rejectWith({}, [jqXHR, textStatus, errorThrown]);
-    }) as any
-  );
-  return wrappedDfd;
+  return await http.post<HttpResponse>(`${API_BASE_PATH}/proxy`, options);
 }
 
 export function constructESUrl(baseUri: string, path: string) {

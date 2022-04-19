@@ -9,11 +9,9 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 
-import { RiskyHosts } from './';
+import { RiskyHosts } from '.';
 import { TestProviders } from '../../../../common/mock';
-import { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common/search_strategy';
-
-jest.mock('../../../containers/kpi_hosts/risky_hosts');
+import { KpiRiskScoreStrategyResponse } from '../../../../../common/search_strategy';
 
 describe('RiskyHosts', () => {
   const defaultProps = {
@@ -38,7 +36,7 @@ describe('RiskyHosts', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('hostsKpiLoader')).toBeInTheDocument();
+    expect(getByTestId('KpiLoader')).toBeInTheDocument();
   });
 
   test('it displays 0 risky hosts when initializing', () => {
@@ -54,9 +52,9 @@ describe('RiskyHosts', () => {
   });
 
   test('it displays risky hosts quantity returned by the API', () => {
-    const data: HostsKpiRiskyHostsStrategyResponse = {
-      rawResponse: {} as HostsKpiRiskyHostsStrategyResponse['rawResponse'],
-      riskyHosts: {
+    const data: KpiRiskScoreStrategyResponse = {
+      rawResponse: {} as KpiRiskScoreStrategyResponse['rawResponse'],
+      kpiRiskScore: {
         Critical: 1,
         High: 1,
         Unknown: 0,

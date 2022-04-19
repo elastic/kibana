@@ -10,7 +10,7 @@ import { NarrowDateRange } from '../../../components/ml/types';
 import { UpdateDateRange } from '../../../components/charts/common';
 import { GlobalTimeArgs } from '../../use_global_time';
 import { HostsType } from '../../../../hosts/store/model';
-import { NetworkType } from '../../../../network/store//model';
+import { NetworkType } from '../../../../network/store/model';
 import { FlowTarget } from '../../../../../common/search_strategy';
 import { UsersType } from '../../../../users/store/model';
 
@@ -35,4 +35,5 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   hideHistogramIfEmpty?: boolean;
   ip?: string;
   hostName?: string;
+  userName?: string;
 };

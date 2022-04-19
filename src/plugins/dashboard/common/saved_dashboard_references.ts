@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 import semverGt from 'semver/functions/gt';
-import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
+import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 import {
   DashboardContainerControlGroupInput,
   DashboardContainerStateWithType,
   DashboardPanelState,
   RawControlGroupAttributes,
 } from './types';
-import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from './embeddable/embeddable_saved_object_converters';
 import { SavedDashboardPanel } from './types';
-import { CONTROL_GROUP_TYPE } from '../../controls/common';
 
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
@@ -51,7 +50,6 @@ function dashboardAttributesToState(attributes: SavedObjectAttributes): {
       if (controlGroupPanels && typeof controlGroupPanels === 'object') {
         controlGroupInput = {
           ...rawControlGroupInput,
-          type: CONTROL_GROUP_TYPE,
           panels: controlGroupPanels,
         };
       }

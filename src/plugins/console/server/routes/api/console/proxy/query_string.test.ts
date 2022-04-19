@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IKibanaResponse } from 'src/core/server';
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 import { createResponseStub } from './stubs';
 import * as requestModule from '../../../../lib/proxy_request';
@@ -16,6 +16,8 @@ import { createHandler } from './create_handler';
 
 describe('Console Proxy Route', () => {
   let request: (method: string, path: string) => Promise<IKibanaResponse> | IKibanaResponse;
+  const proxyRequestMock = requestModule.proxyRequest as jest.Mock;
+
   beforeEach(() => {
     (requestModule.proxyRequest as jest.Mock).mockResolvedValue(createResponseStub('foo'));
 
@@ -39,7 +41,7 @@ describe('Console Proxy Route', () => {
       describe('contains full url', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
+          expect(proxyRequestMock.mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
           expect(args.uri.href).toBe('http://localhost:9200/http://evil.com/test?pretty=true');
         });
@@ -47,7 +49,7 @@ describe('Console Proxy Route', () => {
       describe('starts with a slash', () => {
         it('combines well with the base url', async () => {
           await request('GET', '/index/id');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
+          expect(proxyRequestMock.mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
           expect(args.uri.href).toBe('http://localhost:9200/index/id?pretty=true');
         });
@@ -55,9 +57,22 @@ describe('Console Proxy Route', () => {
       describe(`doesn't start with a slash`, () => {
         it('combines well with the base url', async () => {
           await request('GET', 'index/id');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
+          expect(proxyRequestMock.mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
           expect(args.uri.href).toBe('http://localhost:9200/index/id?pretty=true');
+        });
+      });
+      describe('contains special characters', () => {
+        it('correctly encodes plus sign', async () => {
+          const path = '/_search?q=create_date:[2022-03-10T08:00:00.000+08:00 TO *]';
+
+          const { status } = await request('GET', path);
+          expect(status).toBe(200);
+          expect(proxyRequestMock.mock.calls.length).toBe(1);
+          const [[args]] = proxyRequestMock.mock.calls;
+          expect(args.uri.search).toEqual(
+            '?q=create_date%3A%5B2022-03-10T08%3A00%3A00.000%2B08%3A00+TO+*%5D&pretty=true'
+          );
         });
       });
     });

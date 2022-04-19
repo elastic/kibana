@@ -121,6 +121,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
       },
       symlinks: false,
     },
@@ -139,13 +140,13 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       const options = (loader.options = { ...(loader.options as Record<string, any>) });
 
       // capture the plugins defined at the root level
-      const plugins: string[] = options.plugins;
+      const plugins: string[] = options.plugins ?? [];
       options.plugins = [];
 
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
         {
-          plugins,
+          plugins: [...plugins, require.resolve('@kbn/babel-plugin-synthetic-packages')],
         },
         ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
           const tsPreset = getTsPreset(preset);

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import {
@@ -12,21 +12,22 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { ActionGroupIdsOf } from '../../../../alerting/common';
-import { updateState, generateAlertMessage } from './common';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
+import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
+import { updateState, generateAlertMessage, getViewInAppUrl } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
-import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
-import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
 
 import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../common/translations';
+import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 
 import { createUptimeESClient } from '../lib';
-import { ALERT_REASON_MSG, ACTION_VARIABLES } from './action_variables';
+import { ALERT_REASON_MSG, ACTION_VARIABLES, VIEW_IN_APP_URL } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
@@ -72,7 +73,7 @@ const getAnomalies = async (
 };
 
 export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
-  _server,
+  server,
   libs,
   plugins
 ) => ({
@@ -93,20 +94,23 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     },
   ],
   actionVariables: {
-    context: [ACTION_VARIABLES[ALERT_REASON_MSG]],
+    context: [ACTION_VARIABLES[ALERT_REASON_MSG], ACTION_VARIABLES[VIEW_IN_APP_URL]],
     state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
   },
   isExportable: true,
   minimumLicenseRequired: 'platinum',
   async executor({
     params,
-    services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient },
+    services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient, getAlertStartedDate },
     state,
+    startedAt,
   }) {
     const uptimeEsClient = createUptimeESClient({
       esClient: scopedClusterClient.asCurrentUser,
       savedObjectsClient,
     });
+    const { basePath } = server;
+
     const { anomalies } =
       (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt as string)) ??
       {};
@@ -128,8 +132,16 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
           summary
         );
 
+        const alertId = DURATION_ANOMALY.id + index;
+        const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
+        const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
+          monitorId: DURATION_ANOMALY.id + index,
+          dateRangeEnd: 'now',
+          dateRangeStart: indexedStartedAt,
+        });
+
         const alertInstance = alertWithLifecycle({
-          id: DURATION_ANOMALY.id + index,
+          id: alertId,
           fields: {
             'monitor.id': params.monitorId,
             'url.full': summary.monitorUrl,
@@ -147,6 +159,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         });
         alertInstance.scheduleActions(DURATION_ANOMALY.id, {
           [ALERT_REASON_MSG]: alertReasonMessage,
+          [VIEW_IN_APP_URL]: getViewInAppUrl(relativeViewInAppUrl, basePath),
         });
       });
     }

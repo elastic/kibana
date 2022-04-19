@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec, IndexPatternField } from '../../../../../../../data_views/common';
+import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
 
 export const fieldSpecMap: Record<string, FieldSpec> = {
   'machine.os': {
@@ -39,7 +39,7 @@ export const fieldSpecMap: Record<string, FieldSpec> = {
   },
 };
 
-export const numericField = new IndexPatternField({
+export const numericField = new DataViewField({
   name: 'bytes',
   type: 'number',
   esTypes: ['long'],

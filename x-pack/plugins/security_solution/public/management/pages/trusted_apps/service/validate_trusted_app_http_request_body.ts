@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { HttpStart } from 'kibana/public';
+import type { HttpStart } from '@kbn/core/public';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   PostTrustedAppCreateRequest,
   PutTrustedAppUpdateRequest,
 } from '../../../../../common/endpoint/types';
 import { HttpRequestValidationError } from './errors';
-import { sendGetAgentPolicyList } from '../../policy/store/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
+import { sendGetAgentPolicyList } from '../../../services/policies/ingest';
 
 /**
  * Validates that the Trusted App is valid for sending to the API (`POST` + 'PUT')

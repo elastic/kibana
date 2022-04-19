@@ -7,12 +7,29 @@
 
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { setState, LensDispatch, LensStoreDeps, navigateAway } from '..';
-import { LensAppState } from '../types';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  setState,
+  LensDispatch,
+  LensStoreDeps,
+  navigateAway,
+  applyChanges,
+  selectAutoApplyEnabled,
+} from '..';
+import { LensAppState, LensState } from '../types';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
 import { subscribeToExternalContext } from './subscribe_to_external_context';
 import { onActiveDataChange } from '../lens_slice';
+import { DatasourceMap } from '../../types';
+
+function isTimeBased(state: LensState, datasourceMap: DatasourceMap) {
+  const { activeDatasourceId, datasourceStates } = state.lens;
+  return Boolean(
+    activeDatasourceId &&
+      datasourceStates[activeDatasourceId] &&
+      datasourceMap[activeDatasourceId].isTimeBased?.(datasourceStates[activeDatasourceId].state)
+  );
+}
 
 export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: MiddlewareAPI) => {
   const unsubscribeFromExternalContext = subscribeToExternalContext(
@@ -20,8 +37,13 @@ export const contextMiddleware = (storeDeps: LensStoreDeps) => (store: Middlewar
     store.getState,
     store.dispatch
   );
-  return (next: Dispatch) => (action: PayloadAction<Partial<LensAppState>>) => {
-    if (!action.payload?.searchSessionId && !onActiveDataChange.match(action)) {
+  return (next: Dispatch) => (action: PayloadAction<unknown>) => {
+    if (
+      !(action.payload as Partial<LensAppState>)?.searchSessionId &&
+      !onActiveDataChange.match(action) &&
+      (selectAutoApplyEnabled(store.getState()) || applyChanges.match(action)) &&
+      isTimeBased(store.getState(), storeDeps.datasourceMap)
+    ) {
       updateTimeRange(storeDeps.lensServices.data, store.dispatch);
     }
     if (navigateAway.match(action)) {

@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { TaskManagerPlugin } from './plugin';
 import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
 
@@ -32,6 +32,10 @@ export {
 } from './task_running';
 export type { RunNowResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
+export {
+  IdleTaskWithExpiredRunAt,
+  RunningOrClaimingTaskWithExpiredRetryAt,
+} from './queries/mark_available_tasks_as_claimed';
 
 export type {
   TaskManagerPlugin as TaskManager,

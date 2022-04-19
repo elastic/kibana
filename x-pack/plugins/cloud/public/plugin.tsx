@@ -6,23 +6,28 @@
  */
 
 import React, { FC } from 'react';
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
   HttpStart,
   IBasePath,
-  ApplicationStart,
-} from 'src/core/public';
+  ExecutionContextStart,
+  AnalyticsServiceSetup,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, from, of, Subscription } from 'rxjs';
+import { exhaustMap, filter, map } from 'rxjs/operators';
+import { compact } from 'lodash';
+
 import type {
   AuthenticatedUser,
   SecurityPluginSetup,
   SecurityPluginStart,
-} from '../../security/public';
+} from '@kbn/security-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {
   ELASTIC_SUPPORT_LINK,
@@ -30,7 +35,6 @@ import {
   GET_CHAT_USER_DATA_ROUTE_PATH,
 } from '../common/constants';
 import type { GetChatUserDataResponseBody } from '../common/types';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
 import { ChatConfig, ServicesProvider } from './services';
@@ -82,9 +86,14 @@ export interface CloudSetup {
   isCloudEnabled: boolean;
 }
 
-interface SetupFullstoryDeps extends CloudSetupDependencies {
-  application?: Promise<ApplicationStart>;
+interface SetupFullStoryDeps {
+  analytics: AnalyticsServiceSetup;
   basePath: IBasePath;
+}
+interface SetupTelemetryContextDeps extends CloudSetupDependencies {
+  analytics: AnalyticsServiceSetup;
+  executionContextPromise: Promise<ExecutionContextStart>;
+  esOrgId?: string;
 }
 
 interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
@@ -92,7 +101,7 @@ interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
-  private config!: CloudConfigType;
+  private readonly config: CloudConfigType;
   private isCloudEnabled: boolean;
   private appSubscription?: Subscription;
   private chatConfig$ = new BehaviorSubject<ChatConfig>({ enabled: false });
@@ -103,11 +112,21 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
-    const application = core.getStartServices().then(([coreStart]) => {
-      return coreStart.application;
+    const executionContextPromise = core.getStartServices().then(([coreStart]) => {
+      return coreStart.executionContext;
     });
 
-    this.setupFullstory({ basePath: core.http.basePath, security, application }).catch((e) =>
+    this.setupTelemetryContext({
+      analytics: core.analytics,
+      security,
+      executionContextPromise,
+      esOrgId: this.config.id,
+    }).catch((e) => {
+      // eslint-disable-next-line no-console
+      console.debug(`Error setting up TelemetryContext: ${e.toString()}`);
+    });
+
+    this.setupFullStory({ analytics: core.analytics, basePath: core.http.basePath }).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
     );
@@ -223,74 +242,143 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     return user?.roles.includes('superuser') ?? true;
   }
 
-  private async setupFullstory({ basePath, security, application }: SetupFullstoryDeps) {
-    const { enabled, org_id: orgId } = this.config.full_story;
-    if (!enabled || !orgId) {
-      return; // do not load any fullstory code in the browser if not enabled
+  /**
+   * If the right config is provided, register the FullStory shipper to the analytics client.
+   * @param analytics Core's Analytics service's setup contract.
+   * @param basePath Core's http.basePath helper.
+   * @private
+   */
+  private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
+    const { enabled, org_id: fullStoryOrgId } = this.config.full_story;
+    if (!enabled || !fullStoryOrgId) {
+      return; // do not load any FullStory code in the browser if not enabled
     }
 
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
-    const fullStoryChunkPromise = import('./fullstory');
-    const userIdPromise: Promise<string | undefined> = security
-      ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
-      : Promise.resolve(undefined);
+    const { FullStoryShipper } = await import('@elastic/analytics');
+    analytics.registerShipper(FullStoryShipper, {
+      fullStoryOrgId,
+      // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
+      scriptUrl: basePath.prepend(
+        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
+      ),
+      namespace: 'FSKibana',
+    });
+  }
 
-    // We need to call FS.identify synchronously after FullStory is initialized, so we must load the user upfront
-    const [{ initializeFullStory }, userId] = await Promise.all([
-      fullStoryChunkPromise,
-      userIdPromise,
-    ]);
-
-    const { fullStory, sha256 } = initializeFullStory({
-      basePath,
-      orgId,
-      packageInfo: this.initializerContext.env.packageInfo,
+  /**
+   * Set up the Analytics context providers.
+   * @param analytics Core's Analytics service. The Setup contract.
+   * @param security The security plugin.
+   * @param executionContextPromise Core's executionContext's start contract.
+   * @param esOrgId The Cloud Org ID.
+   * @private
+   */
+  private async setupTelemetryContext({
+    analytics,
+    security,
+    executionContextPromise,
+    esOrgId,
+  }: SetupTelemetryContextDeps) {
+    // Some context providers can be moved to other places for better domain isolation.
+    // Let's use https://github.com/elastic/kibana/issues/125690 for that purpose.
+    analytics.registerContextProvider({
+      name: 'kibana_version',
+      context$: of({ version: this.initializerContext.env.packageInfo.version }),
+      schema: { version: { type: 'keyword', _meta: { description: 'The version of Kibana' } } },
     });
 
-    // Very defensive try/catch to avoid any UnhandledPromiseRejections
-    try {
-      // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
-      // across domains work
-      if (userId) {
-        // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
-        const hashedId = sha256(userId.toString());
-        application
-          ?.then(async () => {
-            const appStart = await application;
-            this.appSubscription = appStart.currentAppId$.subscribe((appId) => {
-              // Update the current application every time it changes
-              fullStory.setUserVars({
-                app_id_str: appId ?? 'unknown',
-              });
-            });
+    analytics.registerContextProvider({
+      name: 'cloud_org_id',
+      context$: of({ esOrgId }),
+      schema: {
+        esOrgId: {
+          type: 'keyword',
+          _meta: { description: 'The Cloud Organization ID', optional: true },
+        },
+      },
+    });
+
+    // This needs to be called synchronously to be sure that we populate the user ID soon enough to make sessions merging
+    // across domains work
+    if (security) {
+      analytics.registerContextProvider({
+        name: 'cloud_user_id',
+        context$: from(loadUserId({ getCurrentUser: security.authc.getCurrentUser })).pipe(
+          filter((userId): userId is string => Boolean(userId)),
+          exhaustMap(async (userId) => {
+            const { sha256 } = await import('js-sha256');
+            // Join the cloud org id and the user to create a truly unique user id.
+            // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
+            return { userId: sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`) };
           })
-          .catch((e) => {
-            // eslint-disable-next-line no-console
-            console.error(
-              `[cloud.full_story] Could not retrieve application service due to error: ${e.toString()}`,
-              e
-            );
-          });
-        const kibanaVer = this.initializerContext.env.packageInfo.version;
-        // TODO: use semver instead
-        const parsedVer = (kibanaVer.indexOf('.') > -1 ? kibanaVer.split('.') : []).map((s) =>
-          parseInt(s, 10)
-        );
-        // `str` suffix is required for evn vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
-        fullStory.identify(hashedId, {
-          version_str: kibanaVer,
-          version_major_int: parsedVer[0] ?? -1,
-          version_minor_int: parsedVer[1] ?? -1,
-          version_patch_int: parsedVer[2] ?? -1,
-        });
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `[cloud.full_story] Could not call FS.identify due to error: ${e.toString()}`,
-        e
-      );
+        ),
+        schema: {
+          userId: {
+            type: 'keyword',
+            _meta: { description: 'The user id scoped as seen by Cloud (hashed)' },
+          },
+        },
+      });
     }
+
+    const executionContext = await executionContextPromise;
+    analytics.registerContextProvider({
+      name: 'execution_context',
+      context$: executionContext.context$.pipe(
+        // Update the current context every time it changes
+        map(({ name, page, id }) => ({
+          pageName: `${compact([name, page]).join(':')}`,
+          applicationId: name ?? 'unknown',
+          page,
+          entityId: id,
+        }))
+      ),
+      schema: {
+        pageName: {
+          type: 'keyword',
+          _meta: { description: 'The name of the current page' },
+        },
+        page: {
+          type: 'keyword',
+          _meta: { description: 'The current page', optional: true },
+        },
+        applicationId: {
+          type: 'keyword',
+          _meta: { description: 'The id of the current application' },
+        },
+        entityId: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'The id of the current entity (dashboard, visualization, canvas, lens, etc)',
+            optional: true,
+          },
+        },
+      },
+    });
+
+    analytics.registerEventType({
+      eventType: 'Loaded Kibana',
+      schema: {
+        kibana_version: {
+          type: 'keyword',
+          _meta: { description: 'The version of Kibana', optional: true },
+        },
+        memory_js_heap_size_limit: {
+          type: 'long',
+          _meta: { description: 'The maximum size of the heap', optional: true },
+        },
+        memory_js_heap_size_total: {
+          type: 'long',
+          _meta: { description: 'The total size of the heap', optional: true },
+        },
+        memory_js_heap_size_used: {
+          type: 'long',
+          _meta: { description: 'The used size of the heap', optional: true },
+        },
+      },
+    });
 
     // Get performance information from the browser (non standard property
     // @ts-expect-error 2339
@@ -298,15 +386,14 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     let memoryInfo = {};
     if (memory) {
       memoryInfo = {
-        memory_js_heap_size_limit_int: memory.jsHeapSizeLimit,
-        memory_js_heap_size_total_int: memory.totalJSHeapSize,
-        memory_js_heap_size_used_int: memory.usedJSHeapSize,
+        memory_js_heap_size_limit: memory.jsHeapSizeLimit,
+        memory_js_heap_size_total: memory.totalJSHeapSize,
+        memory_js_heap_size_used: memory.usedJSHeapSize,
       };
     }
-    // Record an event that Kibana was opened so we can easily search for sessions that use Kibana
-    fullStory.event('Loaded Kibana', {
-      // `str` suffix is required, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
-      kibana_version_str: this.initializerContext.env.packageInfo.version,
+
+    analytics.reportEvent('Loaded Kibana', {
+      kibana_version: this.initializerContext.env.packageInfo.version,
       ...memoryInfo,
     });
   }
@@ -350,7 +437,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 }
 
 /** @internal exported for testing */
-export const loadFullStoryUserId = async ({
+export const loadUserId = async ({
   getCurrentUser,
 }: {
   getCurrentUser: () => Promise<AuthenticatedUser>;
@@ -365,7 +452,7 @@ export const loadFullStoryUserId = async ({
     if (!currentUser.username) {
       // eslint-disable-next-line no-console
       console.debug(
-        `[cloud.full_story] username not specified. User metadata: ${JSON.stringify(
+        `[cloud.analytics] username not specified. User metadata: ${JSON.stringify(
           currentUser.metadata
         )}`
       );
@@ -374,7 +461,7 @@ export const loadFullStoryUserId = async ({
     return currentUser.username;
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);
+    console.error(`[cloud.analytics] Error loading the current user: ${e.toString()}`, e);
     return undefined;
   }
 };

@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -22,14 +23,10 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiUniqueFlowsQuery';
+export const ID = 'networkKpiUniqueFlowsQuery';
 
 export interface NetworkKpiUniqueFlowsArgs {
   uniqueFlowId: number;
@@ -84,7 +81,6 @@ export const useNetworkKpiUniqueFlows = ({
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
         searchSubscription$.current = data.search
           .search<NetworkKpiUniqueFlowsRequestOptions, NetworkKpiUniqueFlowsStrategyResponse>(
             request,
@@ -154,6 +150,14 @@ export const useNetworkKpiUniqueFlows = ({
       abortCtrl.current.abort();
     };
   }, [networkKpiUniqueFlowsRequest, networkKpiUniqueFlowsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkKpiUniqueFlowsResponse];
 };

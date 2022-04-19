@@ -7,9 +7,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 import { TransformId } from '../../../../common/types/transform';
 import type { FieldHistogramsResponseSchema } from '../../../../common/api_schemas/field_histograms';
@@ -166,7 +166,7 @@ const apiFactory = () => ({
     return Promise.resolve([]);
   },
   async getHistogramsForFields(
-    indexPatternTitle: string,
+    dataViewTitle: string,
     fields: FieldHistogramRequestConfig[],
     query: string | SavedSearchQuery,
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE

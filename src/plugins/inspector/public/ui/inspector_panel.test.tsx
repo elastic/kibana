@@ -11,9 +11,10 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
-import type { ApplicationStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
-import { SharePluginStart } from '../../../share/public';
-import { applicationServiceMock } from '../../../../core/public/mocks';
+import type { ApplicationStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
@@ -21,7 +22,7 @@ describe('InspectorPanel', () => {
   const dependencies = {
     application: applicationServiceMock.createStartContract(),
     http: {},
-    share: {},
+    share: sharePluginMock.createStartContract(),
     uiSettings: {},
   } as unknown as {
     application: ApplicationStart;

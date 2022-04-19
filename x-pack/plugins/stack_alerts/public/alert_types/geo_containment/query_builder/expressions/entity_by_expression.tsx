@@ -9,21 +9,21 @@ import React, { FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   errors: IErrorObject;
   entity: string;
   setAlertParamsEntity: (entity: string) => void;
-  indexFields: IFieldType[];
+  indexFields: DataViewField[];
   isInvalid: boolean;
 }
 
 const ENTITY_TYPES = ['string', 'number', 'ip'];
-export function getValidIndexPatternFields(fields: IFieldType[]): IFieldType[] {
+export function getValidIndexPatternFields(fields: DataViewField[]): DataViewField[] {
   return fields.filter((field) => {
     const isSpecifiedSupportedField = ENTITY_TYPES.includes(field.type);
     const hasLeadingUnderscore = field.name.startsWith('_');
@@ -49,7 +49,7 @@ export const EntityByExpression: FunctionComponent<Props> = ({
 
   const oldIndexFields = usePrevious(indexFields);
   const fields = useRef<{
-    indexFields: IFieldType[];
+    indexFields: DataViewField[];
   }>({
     indexFields: [],
   });

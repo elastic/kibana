@@ -9,7 +9,7 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
@@ -33,6 +33,7 @@ export const config: PluginConfigDescriptor = {
     }),
     unsafe: schema.object({
       alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+      rules: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
       cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
       overviewNext: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),

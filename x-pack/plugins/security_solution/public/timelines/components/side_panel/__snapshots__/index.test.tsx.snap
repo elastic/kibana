@@ -99,7 +99,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                 <button
                   aria-label="close"
                   className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                  disabled={false}
                   onClick={[Function]}
                   type="button"
                 >
@@ -239,6 +238,76 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       </span>
     </EuiLoadingContent>
   </ExpandableEvent>
+  <Connect(Component)
+    detailsData={null}
+    detailsEcsData={null}
+    expandedEvent={
+      Object {
+        "eventId": "my-id",
+        "indexName": "my-index",
+      }
+    }
+    handleOnEventClosed={[Function]}
+    isHostIsolationPanelOpen={false}
+    loadingEventDetails={true}
+    onAddIsolationStatusClick={[Function]}
+    refetchFlyoutData={[Function]}
+    timelineId="test"
+  >
+    <Memo()
+      detailsData={null}
+      detailsEcsData={null}
+      dispatch={[Function]}
+      expandedEvent={
+        Object {
+          "eventId": "my-id",
+          "indexName": "my-index",
+        }
+      }
+      globalQuery={Array []}
+      handleOnEventClosed={[Function]}
+      isHostIsolationPanelOpen={false}
+      loadingEventDetails={true}
+      onAddIsolationStatusClick={[Function]}
+      refetchFlyoutData={[Function]}
+      timelineId="test"
+      timelineQuery={
+        Object {
+          "id": "",
+          "inspect": null,
+          "isInspected": false,
+          "loading": false,
+          "refetch": null,
+          "selectedInspectIndex": 0,
+        }
+      }
+    >
+      <EuiFlyoutFooter
+        data-test-subj="side-panel-flyout-footer"
+      >
+        <div
+          className="euiFlyoutFooter"
+          data-test-subj="side-panel-flyout-footer"
+        >
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+        </div>
+      </EuiFlyoutFooter>
+    </Memo()>
+  </Connect(Component)>
 </EventDetailsPanelComponent>
 `;
 
@@ -282,6 +351,7 @@ Array [
       role="dialog"
     >
       <button
+        aria-label="Close this dialog"
         data-test-subj="euiFlyoutCloseButton"
         onClick={[Function]}
         type="button"
@@ -479,6 +549,7 @@ Array [
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          refetchFlyoutData={[Function]}
           timelineId="test"
         >
           <Memo()
@@ -496,6 +567,7 @@ Array [
             isHostIsolationPanelOpen={false}
             loadingEventDetails={true}
             onAddIsolationStatusClick={[Function]}
+            refetchFlyoutData={[Function]}
             timelineId="test"
             timelineQuery={
               Object {
@@ -508,9 +580,12 @@ Array [
               }
             }
           >
-            <EuiFlyoutFooter>
+            <EuiFlyoutFooter
+              data-test-subj="side-panel-flyout-footer"
+            >
               <div
                 className="euiFlyoutFooter"
+                data-test-subj="side-panel-flyout-footer"
               >
                 <EuiFlexGroup
                   justifyContent="flexEnd"
@@ -566,6 +641,7 @@ Array [
     role="dialog"
   >
     <button
+      aria-label="Close this dialog"
       data-test-subj="euiFlyoutCloseButton"
       onClick={[Function]}
       type="button"
@@ -763,6 +839,7 @@ Array [
         isHostIsolationPanelOpen={false}
         loadingEventDetails={true}
         onAddIsolationStatusClick={[Function]}
+        refetchFlyoutData={[Function]}
         timelineId="test"
       >
         <Memo()
@@ -780,6 +857,7 @@ Array [
           isHostIsolationPanelOpen={false}
           loadingEventDetails={true}
           onAddIsolationStatusClick={[Function]}
+          refetchFlyoutData={[Function]}
           timelineId="test"
           timelineQuery={
             Object {
@@ -792,9 +870,12 @@ Array [
             }
           }
         >
-          <EuiFlyoutFooter>
+          <EuiFlyoutFooter
+            data-test-subj="side-panel-flyout-footer"
+          >
             <div
               className="euiFlyoutFooter"
+              data-test-subj="side-panel-flyout-footer"
             >
               <EuiFlexGroup
                 justifyContent="flexEnd"
@@ -2578,11 +2659,12 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
                                                 type="popout"
                                               >
                                                 <span
-                                                  aria-label="External link"
                                                   className="euiLink__externalIcon"
                                                   data-euiicon-type="popout"
                                                   size="s"
-                                                />
+                                                >
+                                                  External link
+                                                </span>
                                               </EuiIcon>
                                               <EuiScreenReaderOnly>
                                                 <span

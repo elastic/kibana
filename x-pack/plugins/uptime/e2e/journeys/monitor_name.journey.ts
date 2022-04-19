@@ -11,21 +11,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { journey, step, expect, after, before, Page } from '@elastic/synthetics';
+import uuid from 'uuid';
+import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 import { byTestId } from './utils';
 
 journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => {
+  const name = `Test monitor ${uuid.v4()}`;
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
+
+  const createBasicMonitor = async () => {
+    await uptime.createBasicMonitorDetails({
+      name,
+      locations: ['US Central'],
+      apmServiceName: 'synthetics',
+    });
+    await uptime.fillByTestSubj('syntheticsUrlField', 'https://www.google.com');
+  };
 
   before(async () => {
     await uptime.waitForLoadingToFinish();
-  });
-
-  after(async () => {
-    await uptime.navigateToMonitorManagement();
-    await uptime.deleteMonitor();
   });
 
   step('Go to monitor-management', async () => {
@@ -38,10 +43,17 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
     expect(await invalid.isVisible()).toBeFalsy();
   });
 
-  step(`shows error if name already exists`, async () => {
+  step('create basic monitor', async () => {
+    await uptime.enableMonitorManagement();
     await uptime.clickAddMonitor();
+    await createBasicMonitor();
+    await uptime.confirmAndSave();
+  });
+
+  step(`shows error if name already exists`, async () => {
+    await uptime.navigateToAddMonitor();
     await uptime.createBasicMonitorDetails({
-      name: 'Test monitor',
+      name,
       locations: ['US Central'],
       apmServiceName: 'synthetics',
     });
@@ -60,5 +72,11 @@ journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => 
     });
 
     expect(await page.isEnabled(byTestId('monitorTestNowRunBtn'))).toBeTruthy();
+  });
+
+  step('delete monitor', async () => {
+    await uptime.navigateToMonitorManagement();
+    await uptime.deleteMonitors();
+    await uptime.enableMonitorManagement(false);
   });
 });

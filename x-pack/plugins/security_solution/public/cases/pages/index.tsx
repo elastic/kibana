@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { CaseViewRefreshPropInterface } from '../../../../cases/common';
+import { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
@@ -43,7 +43,7 @@ const TimelineDetailsPanel = () => {
 };
 
 const CaseContainerComponent: React.FC = () => {
-  const { cases: casesUi } = useKibana().services;
+  const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userPermissions = useGetUserCasesPermissions();
   const dispatch = useDispatch();
@@ -98,7 +98,7 @@ const CaseContainerComponent: React.FC = () => {
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
-        {casesUi.getCases({
+        {cases.ui.getCases({
           basePath: CASES_PATH,
           owner: [APP_ID],
           features: {

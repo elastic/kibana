@@ -16,6 +16,19 @@
       ]
     },
     {
+      "label": "Contributing",
+      "items": [
+        { "id": "kibDevPrinciples" },
+        { "id": "kibRepoStructure" },
+        { "id": "kibStandards" },
+        { "id": "kibBestPractices" },
+        { "id": "kibDocumentation" },
+        { "id": "kibStyleGuide" },
+        { "id": "ktRFCProcess" },
+        { "id": "kibGitHub" }
+      ]
+    },
+    {
       "label": "Key concepts",
       "items": [
         { "id": "kibPlatformIntro" },
@@ -48,25 +61,15 @@
         },
         { "id": "kibDevTutorialCI" },
         { "id": "kibDevTutorialServerEndpoint" },
-        { "id": "kibDevTutorialAdvancedSettings"},
-        { "id": "kibDevSharePluginReadme"}
-      ]
-    },
-    {
-      "label": "Contributing",
-      "items": [
-        { "id": "kibRepoStructure" },
-        { "id": "kibDevPrinciples" },
-        { "id": "kibStandards" },
-        { "id": "ktRFCProcess" },
-        { "id": "kibBestPractices" },
-        { "id": "kibStyleGuide" },
-        { "id": "kibGitHub" }
+        { "id": "kibDevTutorialAdvancedSettings" },
+        { "id": "kibDevSharePluginReadme" },
+        { "id": "kibDevTutorialScreenshotting" }
       ]
     },
     {
       "label": "Contributors Newsletters",
       "items": [
+        { "id": "kibMarch2022ContributorNewsletter" },
         { "id": "kibFebruary2022ContributorNewsletter" },
         { "id": "kibJanuary2022ContributorNewsletter" },
         { "id": "kibDecember2021ContributorNewsletter" },
@@ -101,7 +104,6 @@
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
         { "id": "kibDataSearchPluginApi" },
-        { "id": "kibDataUiPluginApi" },
         { "id": "kibBfetchPluginApi" },
         { "id": "kibAlertingPluginApi" },
         { "id": "kibTaskManagerPluginApi" },
@@ -145,6 +147,7 @@
         { "id": "kibSavedObjectsTaggingOssPluginApi" },
         { "id": "kibSavedObjectsTaggingPluginApi" },
         { "id": "kibSavedObjectsPluginApi" },
+        { "id": "kibScreenshottingPluginApi" },
         { "id": "kibSecuritySolutionPluginApi" },
         { "id": "kibSecurityPluginApi" },
         { "id": "kibSharePluginApi" },

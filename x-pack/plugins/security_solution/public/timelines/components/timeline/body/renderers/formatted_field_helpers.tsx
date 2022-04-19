@@ -32,17 +32,21 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
+import { GenericLinkButton } from '../../../../../common/components/links/helpers';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
 `;
 
 interface RenderRuleNameProps {
+  children?: React.ReactNode;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
   fieldName: string;
   isDraggable: boolean;
+  isButton?: boolean;
+  onClick?: () => void;
   linkValue: string | null | undefined;
   truncate?: boolean;
   title?: string;
@@ -50,11 +54,14 @@ interface RenderRuleNameProps {
 }
 
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
+  children,
   Component,
   contextId,
   eventId,
   fieldName,
   isDraggable,
+  isButton,
+  onClick,
   linkValue,
   truncate,
   title,
@@ -64,11 +71,6 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const ruleId = linkValue;
   const { search } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
-  const content = truncate ? (
-    <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
-  ) : (
-    value
-  );
 
   const goToRuleDetails = useCallback(
     (ev) => {
@@ -90,24 +92,59 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     [getUrlForApp, ruleId, search]
   );
   const id = `event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`;
+  const link = useMemo(() => {
+    const content = truncate ? (
+      <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
+    ) : (
+      value
+    );
+    if (isButton) {
+      return (
+        <GenericLinkButton
+          Component={Component}
+          dataTestSubj="data-grid-host-details"
+          href={href}
+          iconType="expand"
+          onClick={onClick ?? goToRuleDetails}
+          title={title ?? ruleName}
+        >
+          {children}
+        </GenericLinkButton>
+      );
+    } else if (Component) {
+      return (
+        <Component
+          aria-label={title}
+          data-test-subj={`view-${fieldName}`}
+          iconType="link"
+          onClick={goToRuleDetails}
+          title={title}
+        >
+          {title ?? value}
+        </Component>
+      );
+    } else {
+      return (
+        <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="ruleName">
+          {content}
+        </LinkAnchor>
+      );
+    }
+  }, [
+    Component,
+    children,
+    fieldName,
+    goToRuleDetails,
+    href,
+    isButton,
+    onClick,
+    ruleName,
+    title,
+    truncate,
+    value,
+  ]);
 
   if (isString(value) && ruleName.length > 0 && ruleId != null) {
-    const link = Component ? (
-      <Component
-        aria-label={title}
-        data-test-subj={`view-${fieldName}`}
-        iconType="link"
-        onClick={goToRuleDetails}
-        title={title}
-      >
-        {title ?? value}
-      </Component>
-    ) : (
-      <LinkAnchor onClick={goToRuleDetails} href={href}>
-        {content}
-      </LinkAnchor>
-    );
-
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}

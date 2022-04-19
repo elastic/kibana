@@ -100,6 +100,9 @@ describe('Multi Terms Agg', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {
+                          "emptyAsNull": Array [
+                            false,
+                          ],
                           "enabled": Array [
                             true,
                           ],
@@ -187,5 +190,28 @@ describe('Multi Terms Agg', () => {
     );
     const { [BUCKET_TYPES.MULTI_TERMS]: params } = aggConfigs.aggs[0].toDsl();
     expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
+  });
+
+  test('optionally supports shard_size', () => {
+    const aggConfigs = getAggConfigs({
+      fields: ['string_field'],
+      shardSize: 1000,
+      orderAgg: {
+        type: 'count',
+      },
+    });
+    const { [BUCKET_TYPES.MULTI_TERMS]: params } = aggConfigs.aggs[0].toDsl();
+    expect(params.shard_size).toEqual(1000);
+  });
+
+  test('should report precision errors', () => {
+    const aggConfigs = getAggConfigs();
+    const { type } = aggConfigs.aggs[0];
+
+    expect(type.hasPrecisionError).toBeInstanceOf(Function);
+
+    expect(type.hasPrecisionError!({})).toBeFalsy();
+    expect(type.hasPrecisionError!({ doc_count_error_upper_bound: 0 })).toBeFalsy();
+    expect(type.hasPrecisionError!({ doc_count_error_upper_bound: -1 })).toBeTruthy();
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexTimestamp } from '../../plugins/reporting/server/lib/store/index_timestamp';
+import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
 import { services as xpackServices } from '../functional/services';
 import { services as apiIntegrationServices } from '../api_integration/services';
 import { FtrProviderContext } from './ftr_provider_context';
@@ -47,33 +47,34 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
   const retry = getService('retry');
+  const config = getService('config');
 
   return {
-    async waitForJobToFinish(downloadReportPath: string) {
-      log.debug(`Waiting for job to finish: ${downloadReportPath}`);
-      const JOB_IS_PENDING_CODE = 503;
-
-      const statusCode = await new Promise((resolve) => {
-        const intervalId = setInterval(async () => {
-          const response = (await supertest
+    async waitForJobToFinish(downloadReportPath: string, options?: { timeout?: number }) {
+      await retry.waitForWithTimeout(
+        `job ${downloadReportPath} finished`,
+        options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),
+        async () => {
+          const response = await supertest
             .get(downloadReportPath)
             .responseType('blob')
-            .set('kbn-xsrf', 'xxx')) as any;
-          if (response.statusCode === 503) {
-            log.debug(`Report at path ${downloadReportPath} is pending`);
-          } else if (response.statusCode === 200) {
-            log.debug(`Report at path ${downloadReportPath} is complete`);
-          } else {
-            log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
-          }
-          if (response.statusCode !== JOB_IS_PENDING_CODE) {
-            clearInterval(intervalId);
-            resolve(response.statusCode);
-          }
-        }, 1500);
-      });
+            .set('kbn-xsrf', 'xxx');
 
-      expect(statusCode).to.be(200);
+          if (response.status === 503) {
+            log.debug(`Report at path ${downloadReportPath} is pending`);
+            return false;
+          }
+
+          log.debug(`Report at path ${downloadReportPath} returned code ${response.status}`);
+
+          if (response.status === 200) {
+            log.debug(`Report at path ${downloadReportPath} is complete`);
+            return true;
+          }
+
+          throw new Error(`unexpected status code ${response.status}`);
+        }
+      );
     },
 
     async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {

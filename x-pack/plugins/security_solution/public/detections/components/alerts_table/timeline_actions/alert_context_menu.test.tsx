@@ -12,6 +12,7 @@ import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { Ecs } from '../../../../../common/ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -51,6 +52,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       application: {
         capabilities: { siem: { crud_alerts: true, read_alerts: true } },
       },
+      cases: mockCasesContract(),
     },
   }),
   useGetUserCasesPermissions: jest.fn().mockReturnValue({
@@ -59,12 +61,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
   }),
 }));
 
-jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
-  () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
-  })
-);
+jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+}));
 
 const actionMenuButton = '[data-test-subj="timeline-context-menu-button"] button';
 const addToExistingCaseButton = '[data-test-subj="add-to-existing-case-action"]';

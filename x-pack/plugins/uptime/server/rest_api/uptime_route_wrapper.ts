@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaResponse } from '@kbn/core/server/http/router';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { UMKibanaRouteWrapper } from './types';
 import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaResponse } from '../../../../../src/core/server/http/router';
-import { enableInspectEsQueries } from '../../../observability/common';
 import { syntheticsServiceApiKey } from '../lib/saved_objects/service_api_key';
 import { API_URLS } from '../../common/constants';
 
@@ -23,7 +23,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
   handler: async (context, request, response) => {
     const { client: esClient } = context.core.elasticsearch;
     let savedObjectsClient: SavedObjectsClientContract;
-    if (server.config?.ui?.monitorManagement?.enabled) {
+    if (server.config?.service) {
       savedObjectsClient = context.core.savedObjects.getClient({
         includedHiddenTypes: [syntheticsServiceApiKey.name],
       });
@@ -41,12 +41,16 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     const uptimeEsClient = createUptimeESClient({
       request,
       savedObjectsClient,
+      isInspectorEnabled,
       esClient: esClient.asCurrentUser,
     });
 
     server.uptimeEsClient = uptimeEsClient;
 
-    if (isInspectorEnabled) {
+    if (
+      (isInspectorEnabled || server.isDev) &&
+      server.config.service?.username !== 'localKibanaIntegrationTestsUser'
+    ) {
       inspectableEsQueriesMap.set(request, []);
     }
 
@@ -66,7 +70,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     return response.ok({
       body: {
         ...res,
-        ...(isInspectorEnabled && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
+        ...((isInspectorEnabled || server.isDev) && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
           ? { _inspect: inspectableEsQueriesMap.get(request) }
           : {}),
       },

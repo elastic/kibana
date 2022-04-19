@@ -13,8 +13,9 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { ScopedHistory } from '../../../../../src/core/public';
-import { getStorybookContextProvider } from '../../../../../src/plugins/custom_integrations/storybook';
+import { ScopedHistory } from '@kbn/core/public';
+import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
+
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
 
@@ -31,6 +32,7 @@ import { stubbedStartServices } from './stubs';
 import { getDocLinks } from './doc_links';
 import { getCloud } from './cloud';
 import { getShare } from './share';
+import { getExecutionContext } from './execution_context';
 
 // TODO: clintandrewhall - this is not ideal, or complete.  The root context of Fleet applications
 // requires full start contracts of its dependencies.  As a result, we have to mock all of those contracts
@@ -51,7 +53,16 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   const startServices: FleetStartServices = useMemo(
     () => ({
       ...stubbedStartServices,
+      analytics: {
+        registerContextProvider: () => {},
+        registerEventType: () => {},
+        registerShipper: () => {},
+        reportEvent: () => {},
+        optIn: () => {},
+        telemetryCounter$: EMPTY,
+      },
       application: getApplication(),
+      executionContext: getExecutionContext(),
       chrome: getChrome(),
       cloud: {
         ...getCloud({ isCloudEnabled }),

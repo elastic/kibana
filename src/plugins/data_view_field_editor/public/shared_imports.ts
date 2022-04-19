@@ -6,19 +6,27 @@
  * Side Public License, v 1.
  */
 
-export type { DataPublicPluginStart } from '../../data/public';
+export type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-export type { DataViewsPublicPluginStart, DataView, DataViewField } from '../../data_views/public';
-export type { FieldFormatsStart } from '../../field_formats/public';
+export type {
+  DataViewsPublicPluginStart,
+  DataView,
+  DataViewField,
+} from '@kbn/data-views-plugin/public';
+export type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-export type { UsageCollectionStart } from '../../usage_collection/public';
+export type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
-export type { RuntimeType, RuntimeField } from '../../data/common';
-export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
+export type { RuntimeType, RuntimeField } from '@kbn/data-plugin/common';
+export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
-export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
+export {
+  createKibanaReactContext,
+  toMountPoint,
+  CodeEditor,
+} from '@kbn/kibana-react-plugin/public';
 
-export { FieldFormat } from '../../field_formats/common';
+export { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 export type {
   FormSchema,
@@ -26,7 +34,7 @@ export type {
   ValidationFunc,
   FieldConfig,
   ValidationCancelablePromise,
-} from '../../es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   useForm,
@@ -36,10 +44,14 @@ export {
   Form,
   UseField,
   useBehaviorSubject,
-} from '../../es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';
+export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
-export { TextField, ToggleField, NumericField } from '../../es_ui_shared/static/forms/components';
+export {
+  TextField,
+  ToggleField,
+  NumericField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-export { sendRequest } from '../../es_ui_shared/public';
+export { sendRequest } from '@kbn/es-ui-shared-plugin/public';

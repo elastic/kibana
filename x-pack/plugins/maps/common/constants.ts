@@ -30,6 +30,7 @@ export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
+export const OPEN_LAYER_WIZARD = 'openLayerWizard';
 
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
@@ -144,6 +145,7 @@ export enum DRAW_SHAPE {
   LINE = 'LINE',
   SIMPLE_SELECT = 'SIMPLE_SELECT',
   DELETE = 'DELETE',
+  WAIT = 'WAIT',
 }
 
 export const AGG_DELIMITER = '_of_';
@@ -162,6 +164,7 @@ export enum RENDER_AS {
   HEATMAP = 'heatmap',
   POINT = 'point',
   GRID = 'grid',
+  HEX = 'hex',
 }
 
 export enum GRID_RESOLUTION {
@@ -215,6 +218,17 @@ export enum LABEL_BORDER_SIZES {
 }
 
 export const DEFAULT_ICON = 'marker';
+export const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
+export const DEFAULT_CUSTOM_ICON_RADIUS = 0.25;
+export const CUSTOM_ICON_SIZE = 64;
+export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
+export const MAKI_ICON_SIZE = 16;
+export const HALF_MAKI_ICON_SIZE = MAKI_ICON_SIZE / 2;
+
+export enum ICON_SOURCE {
+  CUSTOM = 'CUSTOM',
+  MAKI = 'MAKI',
+}
 
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',
@@ -285,3 +299,23 @@ export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
 export const emsWorldLayerId = 'world_countries';
+
+export enum WIZARD_ID {
+  CHOROPLETH = 'choropleth',
+  GEO_FILE = 'uploadGeoFile',
+  NEW_VECTOR = 'newVectorLayer',
+  OBSERVABILITY = 'observabilityLayer',
+  SECURITY = 'securityLayer',
+  EMS_BOUNDARIES = 'emsBoundaries',
+  EMS_BASEMAP = 'emsBaseMap',
+  CLUSTERS = 'clusters',
+  HEATMAP = 'heatmap',
+  GEO_LINE = 'geoLine',
+  POINT_2_POINT = 'point2Point',
+  ES_DOCUMENT = 'esDocument',
+  ES_TOP_HITS = 'esTopHits',
+  KIBANA_BASEMAP = 'kibanaBasemap',
+  MVT_VECTOR = 'mvtVector',
+  WMS_LAYER = 'wmsLayer',
+  TMS_LAYER = 'tmsLayer',
+}

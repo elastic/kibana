@@ -37,6 +37,7 @@ Once the tests finish, the instances will be terminated.
 ```
 node scripts/test/api --server
 ```
+
 Start Elasticsearch and Kibana instances.
 
 ### Run all tests
@@ -44,6 +45,7 @@ Start Elasticsearch and Kibana instances.
 ```
 node scripts/test/api --runner
 ```
+
 Run all tests. The test server needs to be running, see [Start Test Server](#start-test-server).
 
 ### Update snapshots (from Kibana root)
@@ -53,6 +55,7 @@ To update snapshots append `--updateSnapshots` to the `functional_test_runner` c
 ```
 node scripts/functional_test_runner --config x-pack/test/apm_api_integration/[basic | trial]/config.ts --quiet --updateSnapshots
 ```
+
 The test server needs to be running, see [Start Test Server](#start-test-server).
 
 The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/apm_api_integration/).
@@ -66,11 +69,23 @@ The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/a
 
 ## E2E Tests (Cypress)
 
+The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e)
+
+### Start test server
+
 ```
-node scripts/test/e2e [--trial] [--help]
+node x-pack/plugins/apm/scripts/test/e2e.js --server
 ```
 
-The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e)
+### Run tests
+
+```
+node x-pack/plugins/apm/scripts/test/e2e.js --open
+```
+
+### A11y checks
+
+Accessibility tests are added on the e2e with `checkA11y()`, they will run together with cypress.
 
 ---
 

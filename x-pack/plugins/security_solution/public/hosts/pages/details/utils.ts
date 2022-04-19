@@ -7,7 +7,7 @@
 
 import { get, isEmpty } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { getHostDetailsUrl } from '../../../common/components/link_to/redirect_to_hosts';
@@ -28,6 +28,7 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.events]: i18n.NAVIGATION_EVENTS_TITLE,
   [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
   [HostsTableType.risk]: i18n.NAVIGATION_HOST_RISK_TITLE,
+  [HostsTableType.sessions]: i18n.NAVIGATION_SESSIONS_TITLE,
 };
 
 export const getBreadcrumbs = (

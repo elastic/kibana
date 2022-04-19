@@ -6,27 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { appContextService } from '@kbn/fleet-plugin/server/services';
+import { getTemplate } from '@kbn/fleet-plugin/server/services/epm/elasticsearch/template/template';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { appContextService } from '../../../../plugins/fleet/server/services';
-import { getTemplate } from '../../../../plugins/fleet/server/services/epm/elasticsearch/template/template';
 
 export default function ({ getService }: FtrProviderContext) {
   const templateName = 'bar';
   const templateIndexPattern = 'bar-*';
   const es = getService('es');
-  const mappings = {
-    properties: {
-      foo: {
-        type: 'keyword',
-      },
-    },
-  };
-  const fields = [
-    {
-      name: 'foo',
-      type: 'keyword',
-    },
-  ];
 
   // This test was inspired by https://github.com/elastic/kibana/blob/main/x-pack/test/api_integration/apis/monitoring/common/mappings_exist.js
   describe('EPM - template', async () => {
@@ -43,10 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('can be loaded', async () => {
       const template = getTemplate({
-        type: 'logs',
         templateIndexPattern,
-        fields,
-        mappings,
         packageName: 'system',
         composedOfTemplates: [],
         templatePriority: 200,

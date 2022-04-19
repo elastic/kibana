@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
-import { Unit } from '@elastic/datemath';
-import { inputsModel } from '../../../common/store';
+import { Unit } from '@kbn/datemath';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import { inputsModel } from '../../store';
 
-import type { EqlSearchStrategyResponse } from '../../../../../../../src/plugins/data/common';
 import { InspectResponse } from '../../../types';
 import { EqlPreviewResponse, Source } from './types';
 import { BaseHit, EqlSearchResponse } from '../../../../common/detection_engine/types';

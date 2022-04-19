@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { actionTypeRegistryMock } from '../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { triggersActionsUiMock } from '../../../triggers_actions_ui/public/mocks';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { getConnectorIcon, isDeprecatedConnector } from './utils';
 
 describe('Utils', () => {

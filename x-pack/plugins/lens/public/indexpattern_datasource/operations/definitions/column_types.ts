@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/data-plugin/public';
 import type { Operation } from '../../../types';
 import type { TimeScaleUnit } from '../../../../common/expressions';
-import type { OperationType } from '../definitions';
+import type { OperationType } from '.';
 
 export interface BaseIndexPatternColumn extends Operation {
   // Private
@@ -19,15 +19,18 @@ export interface BaseIndexPatternColumn extends Operation {
   timeShift?: string;
 }
 
+export interface ValueFormatConfig {
+  id: string;
+  params?: {
+    decimals: number;
+    suffix?: string;
+  };
+}
+
 // Formatting can optionally be added to any column
 export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
   params?: {
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
+    format?: ValueFormatConfig;
   };
 }
 

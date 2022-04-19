@@ -40,6 +40,7 @@ RUNTIME_DEPS = [
   "@npm//babel-plugin-add-module-exports",
   "@npm//babel-plugin-styled-components",
   "@npm//babel-plugin-transform-react-remove-prop-types",
+  "//packages/kbn-babel-plugin-synthetic-packages",
 ]
 
 js_library(

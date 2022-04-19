@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import sinon, { SinonFakeServer } from 'sinon';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import {
@@ -15,203 +15,139 @@ import {
   ResponseError,
 } from '../../../common/types';
 
+type HttpMethod = 'GET' | 'PUT' | 'DELETE' | 'POST';
+
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadCloudBackupStatusResponse = (
-    response?: CloudBackupStatus,
-    error?: ResponseError
-  ) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
+const registerHttpRequestMockHelpers = (
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>,
+  shouldDelayResponse: () => boolean
+) => {
+  const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
+    ['GET', 'PUT', 'DELETE', 'POST'].map(
+      (method) => [method, new Map()] as [HttpMethod, Map<string, Promise<unknown>>]
+    )
+  );
 
-    server.respondWith('GET', `${API_BASE_PATH}/cloud_backup_status`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
+  const mockMethodImplementation = (method: HttpMethod, path: string) => {
+    const responsePromise = mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+    if (shouldDelayResponse()) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(responsePromise), 1000);
+      });
+    }
+
+    return responsePromise;
   };
 
-  const setLoadEsDeprecationsResponse = (response?: ESUpgradeStatus, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
+  httpSetup.get.mockImplementation((path) =>
+    mockMethodImplementation('GET', path as unknown as string)
+  );
+  httpSetup.delete.mockImplementation((path) =>
+    mockMethodImplementation('DELETE', path as unknown as string)
+  );
+  httpSetup.post.mockImplementation((path) =>
+    mockMethodImplementation('POST', path as unknown as string)
+  );
+  httpSetup.put.mockImplementation((path) =>
+    mockMethodImplementation('PUT', path as unknown as string)
+  );
 
-    server.respondWith('GET', `${API_BASE_PATH}/es_deprecations`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
+  const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
+    const defuse = (promise: Promise<unknown>) => {
+      promise.catch(() => {});
+      return promise;
+    };
+
+    return mockResponses
+      .get(method)!
+      .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
+
+  const setLoadCloudBackupStatusResponse = (response?: CloudBackupStatus, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/cloud_backup_status`, response, error);
+
+  const setLoadEsDeprecationsResponse = (response?: ESUpgradeStatus, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/es_deprecations`, response, error);
 
   const setLoadDeprecationLoggingResponse = (
     response?: DeprecationLoggingStatus,
     error?: ResponseError
-  ) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/deprecation_logging`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  ) => mockResponse('GET', `${API_BASE_PATH}/deprecation_logging`, response, error);
 
   const setLoadDeprecationLogsCountResponse = (
     response?: { count: number },
     error?: ResponseError
-  ) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
+  ) => mockResponse('GET', `${API_BASE_PATH}/deprecation_logging/count`, response, error);
 
-    server.respondWith('GET', `${API_BASE_PATH}/deprecation_logging/count`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setDeleteLogsCacheResponse = (response?: string, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-    server.respondWith('DELETE', `${API_BASE_PATH}/deprecation_logging/cache`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
+  const setDeleteLogsCacheResponse = (response?: string, error?: ResponseError) =>
+    mockResponse('DELETE', `${API_BASE_PATH}/deprecation_logging/cache`, response, error);
 
   const setUpdateDeprecationLoggingResponse = (
     response?: DeprecationLoggingStatus,
     error?: ResponseError
-  ) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
+  ) => mockResponse('PUT', `${API_BASE_PATH}/deprecation_logging`, response, error);
 
-    server.respondWith('PUT', `${API_BASE_PATH}/deprecation_logging`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
+  const setUpdateIndexSettingsResponse = (
+    indexName: string,
+    response?: object,
+    error?: ResponseError
+  ) => mockResponse('POST', `${API_BASE_PATH}/${indexName}/index_settings`, response, error);
+
+  const setUpgradeMlSnapshotResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/ml_snapshots`, response, error);
+
+  const setUpgradeMlSnapshotStatusResponse = (
+    response?: Record<string, unknown>,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/ml_snapshots/${response?.jobId}/${response?.snapshotId}`,
+      response,
+      error
+    );
+
+  const setReindexStatusResponse = (
+    indexName: string,
+    response?: Record<string, any>,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/reindex/${indexName}`, response, error);
+
+  const setStartReindexingResponse = (
+    indexName: string,
+    response?: object,
+    error?: ResponseError
+  ) => mockResponse('POST', `${API_BASE_PATH}/reindex/${indexName}`, response, error);
+
+  const setDeleteMlSnapshotResponse = (
+    jobId: string,
+    snapshotId: string,
+    response?: object,
+    error?: ResponseError
+  ) =>
+    mockResponse('DELETE', `${API_BASE_PATH}/ml_snapshots/${jobId}/${snapshotId}`, response, error);
+
+  const setLoadSystemIndicesMigrationStatus = (response?: object, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/system_indices_migration`, response, error);
+
+  const setLoadMlUpgradeModeResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/ml_upgrade_mode`, response, error);
+
+  const setSystemIndicesMigrationResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/system_indices_migration`, response, error);
+
+  const setGetUpgradeStatusResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/status`, response, error);
+
+  const setLoadRemoteClustersResponse = (response?: object, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/remote_clusters`, response, error);
+
+  const setLoadNodeDiskSpaceResponse = (response?: object, error?: ResponseError) => {
+    mockResponse('GET', `${API_BASE_PATH}/node_disk_space`, response, error);
   };
 
-  const setUpdateIndexSettingsResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-    server.respondWith('POST', `${API_BASE_PATH}/:indexName/index_settings`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setUpgradeMlSnapshotResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('POST', `${API_BASE_PATH}/ml_snapshots`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setUpgradeMlSnapshotStatusResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/ml_snapshots/:jobId/:snapshotId`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setReindexStatusResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/reindex/:indexName`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setStartReindexingResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('POST', `${API_BASE_PATH}/reindex/:indexName`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setDeleteMlSnapshotResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('DELETE', `${API_BASE_PATH}/ml_snapshots/:jobId/:snapshotId`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setLoadSystemIndicesMigrationStatus = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/system_indices_migration`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setLoadMlUpgradeModeResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/ml_upgrade_mode`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setSystemIndicesMigrationResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('POST', `${API_BASE_PATH}/system_indices_migration`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setGetUpgradeStatusResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/status`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
-  };
-
-  const setLoadRemoteClustersResponse = (response?: object, error?: ResponseError) => {
-    const status = error ? error.statusCode || 400 : 200;
-    const body = error ? error : response;
-
-    server.respondWith('GET', `${API_BASE_PATH}/remote_clusters`, [
-      status,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(body),
-    ]);
+  const setClusterSettingsResponse = (response?: object, error?: ResponseError) => {
+    mockResponse('POST', `${API_BASE_PATH}/cluster_settings`, response, error);
   };
 
   return {
@@ -232,33 +168,24 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setLoadMlUpgradeModeResponse,
     setGetUpgradeStatusResponse,
     setLoadRemoteClustersResponse,
+    setLoadNodeDiskSpaceResponse,
+    setClusterSettingsResponse,
   };
 };
 
 export const init = () => {
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
-
-  // Define default response for unhandled requests.
-  // We make requests to APIs which don't impact the component under test, e.g. UI metric telemetry,
-  // and we can mock them all with a 200 instead of mocking each one individually.
-  server.respondWith([200, {}, 'DefaultMockedResponse']);
-
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
-
-  const setServerAsync = (isAsync: boolean, timeout: number = 200) => {
-    if (isAsync) {
-      server.autoRespond = true;
-      server.autoRespondAfter = 1000;
-      server.respondImmediately = false;
-    } else {
-      server.respondImmediately = true;
-    }
+  let isResponseDelayed = false;
+  const getDelayResponse = () => isResponseDelayed;
+  const setDelayResponse = (shouldDelayResponse: boolean) => {
+    isResponseDelayed = shouldDelayResponse;
   };
 
+  const httpSetup = httpServiceMock.createSetupContract();
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup, getDelayResponse);
+
   return {
-    server,
-    setServerAsync,
+    setDelayResponse,
+    httpSetup,
     httpRequestsMockHelpers,
   };
 };

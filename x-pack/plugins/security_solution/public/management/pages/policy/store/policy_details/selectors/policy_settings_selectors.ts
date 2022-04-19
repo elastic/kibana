@@ -7,7 +7,7 @@
 
 import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import { ILicense } from '../../../../../../../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../../types';
 import {
@@ -23,6 +23,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
 } from '../../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
@@ -31,6 +32,7 @@ import {
   isOnPolicyEventFiltersView,
   isOnHostIsolationExceptionsView,
   isOnPolicyFormView,
+  isOnBlocklistsView,
 } from './policy_common_selectors';
 
 /** Returns the policy details */
@@ -93,7 +95,8 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
   isOnPolicyFormView(state) ||
   isOnPolicyTrustedAppsView(state) ||
   isOnPolicyEventFiltersView(state) ||
-  isOnHostIsolationExceptionsView(state);
+  isOnHostIsolationExceptionsView(state) ||
+  isOnBlocklistsView(state);
 
 /** Returns the license info fetched from the license service */
 export const license = (state: Immutable<PolicyDetailsState>) => {
@@ -111,6 +114,7 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
           MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
         ],
         exact: true,
       })?.params?.policyId ?? ''

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { CorrelationsParams } from '../../../../common/correlations/types';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
@@ -16,7 +16,7 @@ import { splitAllSettledPromises } from '../utils';
 import {
   fetchFailedTransactionsCorrelationPValues,
   fetchTransactionDurationHistogramRangeSteps,
-} from './index';
+} from '.';
 
 export const fetchPValues = async (
   esClient: ElasticsearchClient,
@@ -41,18 +41,39 @@ export const fetchPValues = async (
     )
   );
 
-  const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
-    fulfilled
-      .flat()
-      .filter(
-        (record) =>
-          record &&
-          typeof record.pValue === 'number' &&
-          record.pValue < ERROR_CORRELATION_THRESHOLD
-      );
+  const flattenedResults = fulfilled.flat();
+
+  const failedTransactionsCorrelations: FailedTransactionsCorrelation[] = [];
+  let fallbackResult: FailedTransactionsCorrelation | undefined;
+
+  flattenedResults.forEach((record) => {
+    if (
+      record &&
+      typeof record.pValue === 'number' &&
+      record.pValue < ERROR_CORRELATION_THRESHOLD
+    ) {
+      failedTransactionsCorrelations.push(record);
+    } else {
+      // If there's no result matching the criteria
+      // Find the next highest/closest result to the threshold
+      // to use as a fallback result
+      if (!fallbackResult) {
+        fallbackResult = record;
+      } else {
+        if (
+          record.pValue !== null &&
+          fallbackResult &&
+          fallbackResult.pValue !== null &&
+          record.pValue < fallbackResult.pValue
+        ) {
+          fallbackResult = record;
+        }
+      }
+    }
+  });
 
   const ccsWarning =
     rejected.length > 0 && paramsWithIndex?.index.includes(':');
 
-  return { failedTransactionsCorrelations, ccsWarning };
+  return { failedTransactionsCorrelations, ccsWarning, fallbackResult };
 };

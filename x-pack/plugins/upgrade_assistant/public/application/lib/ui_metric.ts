@@ -6,7 +6,7 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const UIM_APP_NAME = 'upgrade_assistant';
 export const UIM_ES_DEPRECATIONS_PAGE_LOAD = 'es_deprecations_page_load';
@@ -26,6 +26,7 @@ export const UIM_ML_SNAPSHOT_UPGRADE_CLICK = 'ml_snapshot_upgrade_click';
 export const UIM_ML_SNAPSHOT_DELETE_CLICK = 'ml_snapshot_delete_click';
 export const UIM_INDEX_SETTINGS_DELETE_CLICK = 'index_settings_delete_click';
 export const UIM_KIBANA_QUICK_RESOLVE_CLICK = 'kibana_quick_resolve_click';
+export const UIM_CLUSTER_SETTINGS_DELETE_CLICK = 'cluster_settings_delete_click';
 
 export class UiMetricService {
   private usageCollection: UsageCollectionSetup | undefined;

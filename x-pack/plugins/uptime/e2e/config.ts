@@ -26,7 +26,7 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
 
   const manifestUrl = process.env.SYNTHETICS_SERVICE_MANIFEST ?? kibanaConfig[MANIFEST_KEY];
   const serviceUsername = process.env.SYNTHETICS_SERVICE_USERNAME ?? kibanaConfig[SERVICE_USERNAME];
-  const servicPassword = process.env.SYNTHETICS_SERVICE_PASSWORD ?? kibanaConfig[SERVICE_PASSWORD];
+  const servicePassword = process.env.SYNTHETICS_SERVICE_PASSWORD ?? kibanaConfig[SERVICE_PASSWORD];
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
@@ -57,9 +57,12 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.password=changeme`,
         '--xpack.reporting.enabled=false',
         `--xpack.uptime.service.manifestUrl=${manifestUrl}`,
-        `--xpack.uptime.service.username=${serviceUsername}`,
-        `--xpack.uptime.service.password=${servicPassword}`,
-        '--xpack.uptime.ui.monitorManagement.enabled=true',
+        `--xpack.uptime.service.username=${
+          process.env.SYNTHETICS_REMOTE_ENABLED
+            ? serviceUsername
+            : 'localKibanaIntegrationTestsUser'
+        }`,
+        `--xpack.uptime.service.password=${servicePassword}`,
       ],
     },
   };

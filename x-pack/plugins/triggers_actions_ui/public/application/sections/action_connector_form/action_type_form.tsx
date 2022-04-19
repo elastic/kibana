@@ -25,7 +25,7 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import { partition } from 'lodash';
-import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
+import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import {
   IErrorObject,
   RuleAction,
@@ -49,7 +49,7 @@ export type ActionTypeFormProps = {
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
-  setActionParamsProperty: (key: string, value: AlertActionParam, index: number) => void;
+  setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ScaleContinuousType } from '@elastic/charts';
+import { Fit, ScaleContinuousType } from '@elastic/charts';
 
-import { Datatable } from '../../../../expressions/public';
-import { BUCKET_TYPES } from '../../../../data/public';
-import { DateHistogramParams } from '../../../../visualizations/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import { DateHistogramParams } from '@kbn/visualizations-plugin/public';
 
 import {
   Aspect,
@@ -27,7 +27,7 @@ import { getTooltip } from './get_tooltip';
 import { getLegend } from './get_legend';
 import { getAxis } from './get_axis';
 import { getAspects } from './get_aspects';
-import { ChartType } from '../index';
+import { ChartType } from '..';
 import { getSafeId } from '../utils/accessors';
 
 export function getConfig(
@@ -92,7 +92,7 @@ export function getConfig(
   return {
     // NOTE: downscale ratio to match current vislib implementation
     markSizeRatio: radiusRatio * 0.6,
-    fittingFunction,
+    fittingFunction: fittingFunction ?? Fit.Linear,
     fillOpacity,
     detailedTooltip,
     orderBucketsBySum,

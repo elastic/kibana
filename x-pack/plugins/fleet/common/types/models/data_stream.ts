@@ -14,6 +14,7 @@ export interface DataStream {
   package_version: string;
   last_activity_ms: number;
   size_in_bytes: number;
+  size_in_bytes_formatted: number | string;
   dashboards: Array<{
     id: string;
     title: string;

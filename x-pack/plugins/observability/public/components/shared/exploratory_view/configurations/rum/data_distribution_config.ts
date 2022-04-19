@@ -45,7 +45,7 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getRumDistributionConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: 'line',
@@ -90,8 +90,8 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
       { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: {
       ...FieldLabels,

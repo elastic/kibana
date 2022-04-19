@@ -11,21 +11,22 @@ import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
 import { LogsTab } from './tabs/logs';
 import { ProcessesTab } from './tabs/processes';
-import { PropertiesTab } from './tabs/properties/index';
+import { PropertiesTab } from './tabs/properties';
 import { AnomaliesTab } from './tabs/anomalies/anomalies';
 import { OsqueryTab } from './tabs/osquery';
 import { OVERLAY_Y_START, OVERLAY_BOTTOM_MARGIN } from './tabs/shared';
-import { useLinkProps } from '../../../../../../../observability/public';
 import { getNodeDetailUrl } from '../../../../link_to';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
-import { createUptimeLink } from '../../lib/create_uptime_link';
+import { navigateToUptime } from '../../lib/navigate_to_uptime';
+import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 
 interface Props {
   isOpen: boolean;
@@ -49,7 +50,8 @@ export const NodeContextPopover = ({
   const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab, AnomaliesTab, OsqueryTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const { application, share } = useKibana<InfraClientCoreStart & InfraClientStartDeps>().services;
+  const uiCapabilities = application?.capabilities;
   const canCreateAlerts = useMemo(
     () => Boolean(uiCapabilities?.infrastructure?.save),
     [uiCapabilities]
@@ -91,7 +93,6 @@ export const NodeContextPopover = ({
       kuery: `${apmField}:"${node.id}"`,
     },
   });
-  const uptimeMenuItemLinkProps = useLinkProps(createUptimeLink(options, nodeType, node));
 
   if (!isOpen) {
     return null;
@@ -164,7 +165,7 @@ export const NodeContextPopover = ({
                   defaultMessage="APM"
                 />
               </EuiTab>
-              <EuiTab {...uptimeMenuItemLinkProps}>
+              <EuiTab onClick={() => navigateToUptime(share.url.locators, nodeType, node)}>
                 <EuiIcon type="popout" />{' '}
                 <FormattedMessage
                   id="xpack.infra.infra.nodeDetails.updtimeTabLabel"
