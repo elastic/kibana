@@ -14,7 +14,7 @@ const config = {
     value: '2m',
     enforce: false,
   },
-  execution: {
+  run: {
     timeout: '1m',
     actions: { max: 1000 },
   },
@@ -22,8 +22,8 @@ const config = {
 
 const configWithRuleType = {
   ...config,
-  execution: {
-    ...config.execution,
+  run: {
+    ...config.run,
     ruleTypeOverrides: [
       {
         id: ruleTypeId,
@@ -36,7 +36,7 @@ const configWithRuleType = {
 describe('get rules config', () => {
   test('returns the rule type specific config and keeps the default values that are not overwritten', () => {
     expect(getExecutionConfigForRuleType({ config: configWithRuleType, ruleTypeId })).toEqual({
-      execution: {
+      run: {
         id: ruleTypeId,
         timeout: '1m',
         actions: { max: 20 },
@@ -46,7 +46,7 @@ describe('get rules config', () => {
 
   test('returns the default config when there is no rule type specific config', () => {
     expect(getExecutionConfigForRuleType({ config, ruleTypeId })).toEqual({
-      execution: config.execution,
+      run: config.run,
     });
   });
 });

@@ -92,7 +92,7 @@ export function getBeforeSetup(
     async executor() {},
     producer: 'alerts',
     config: {
-      execution: {
+      run: {
         actions: { max: 1000 },
       },
     },

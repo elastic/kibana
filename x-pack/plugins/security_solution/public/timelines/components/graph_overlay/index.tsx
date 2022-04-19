@@ -59,7 +59,8 @@ const StyledResolver = styled(Resolver)`
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
+  ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM};
+  background-color: ${theme.eui.euiColorEmptyShade};`}
   overflow: hidden;
   width: 100%;
 `;
