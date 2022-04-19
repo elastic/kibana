@@ -82,7 +82,7 @@ Array [
     id="event_range"
     key="event_range"
     outside={false}
-    outsideDimension={24}
+    outsideDimension={16}
     style={
       Object {
         "fill": "#f04e98",
@@ -289,7 +289,7 @@ Array [
     id="event_range"
     key="event_range"
     outside={false}
-    outsideDimension={24}
+    outsideDimension={16}
     style={
       Object {
         "fill": "#f04e98",

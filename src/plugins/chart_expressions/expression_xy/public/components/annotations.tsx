@@ -168,8 +168,8 @@ export const getAnnotationsGroupedByInterval = (
 // todo: remove when closed https://github.com/elastic/elastic-charts/issues/1647
 RectAnnotation.displayName = 'RectAnnotation';
 
-const OUTLINE_RECT_ANNOTATION_WIDTH = 16;
-const OUTLINE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
+const OUTSIDE_RECT_ANNOTATION_WIDTH = 16;
+const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
 
 export const Annotations = ({
   groupedLineAnnotations,
@@ -284,7 +284,7 @@ export const Annotations = ({
             style={{ fill: color || defaultAnnotationColor }}
             outside={Boolean(outside)}
             outsideDimension={
-              hide ? OUTLINE_RECT_ANNOTATION_WIDTH_SUGGESTION : OUTLINE_RECT_ANNOTATION_WIDTH
+              hide ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION : OUTSIDE_RECT_ANNOTATION_WIDTH
             }
           />
         );
