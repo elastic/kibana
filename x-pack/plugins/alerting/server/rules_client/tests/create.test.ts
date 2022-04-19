@@ -113,6 +113,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     taskManager.schedule.mockResolvedValue({
@@ -687,6 +688,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -702,6 +704,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -857,6 +860,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -872,6 +876,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'another email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -887,6 +892,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
+        isDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -2538,6 +2544,7 @@ describe('create()', () => {
         isMissingSecrets: true,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
