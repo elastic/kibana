@@ -7,6 +7,7 @@
 
 import { CoreStart, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { IncomingHttpHeaders } from 'http';
 import { Stream } from 'stream';
 import { RENDER_AS } from '../../common/constants';
 import { isAbortError } from './util';
