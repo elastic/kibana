@@ -22,7 +22,7 @@ describe('ServiceNow validator', () => {
       expect(connectorValidator(invalidConnector)).toEqual({ message: 'Deprecated connector' });
     });
 
-    test('it does not returns an error message if the connector does not uses the table API', () => {
+    test('it does not return an error message if the connector does not uses the table API', () => {
       const invalidConnector = {
         ...connector,
         config: {
@@ -34,14 +34,14 @@ describe('ServiceNow validator', () => {
       expect(connectorValidator(invalidConnector)).toBeFalsy();
     });
 
-    test('it does not returns an error message if the config of the connector is undefined', () => {
+    test('it does not return an error message if the config of the connector is undefined', () => {
       const { config, ...invalidConnector } = connector;
 
       // @ts-expect-error
       expect(connectorValidator(invalidConnector)).toBeFalsy();
     });
 
-    test('it does not returns an error message if the config of the connector is preconfigured', () => {
+    test('it does not return an error message if the config of the connector is preconfigured', () => {
       expect(connectorValidator({ ...connector, isPreconfigured: true })).toBeFalsy();
     });
   });
