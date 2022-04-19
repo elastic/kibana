@@ -30,7 +30,7 @@ function getFilterExpression(
   hasJoins: boolean,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
-  const allFilters: FilterSpecification = [...filters];
+  const allFilters: FilterSpecification[] = [...filters];
 
   if (hasJoins) {
     allFilters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
