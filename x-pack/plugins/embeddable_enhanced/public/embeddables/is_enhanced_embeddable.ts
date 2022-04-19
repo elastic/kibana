@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { EnhancedEmbeddable } from '../types';
 
 export const isEnhancedEmbeddable = <E>(

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import 'brace/theme/github';
 
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { RuleTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryAlertParams } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';

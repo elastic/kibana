@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../common';
 
 export const configMock = {

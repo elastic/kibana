@@ -7,7 +7,7 @@
 
 import { createStaticDataView } from './create_static_data_view';
 import { Setup } from '../../lib/helpers/setup_request';
-import * as HistoricalAgentData from '../../routes/historical_data/has_historical_agent_data';
+import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
 import { InternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { APMConfig } from '../..';
 

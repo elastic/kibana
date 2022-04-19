@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from 'kibana/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { RuleAction } from '../../../../../alerting/common';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';

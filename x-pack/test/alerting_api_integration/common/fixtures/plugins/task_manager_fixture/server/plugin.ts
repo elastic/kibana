@@ -13,10 +13,10 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { TaskManagerStartContract } from '../../../../../../../plugins/task_manager/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export interface SampleTaskManagerFixtureStartDeps {
   taskManager: TaskManagerStartContract;

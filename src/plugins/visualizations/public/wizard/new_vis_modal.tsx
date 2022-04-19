@@ -17,13 +17,13 @@ import {
   IUiSettingsClient,
   SavedObjectsStart,
   DocLinksStart,
-} from '../../../../core/public';
+} from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
 import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
-import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
-import { EmbeddableStateTransfer } from '../../../embeddable/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import './dialog.scss';
 

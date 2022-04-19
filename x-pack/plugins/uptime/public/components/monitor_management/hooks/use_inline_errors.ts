@@ -8,12 +8,13 @@
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { useMemo } from 'react';
-import { monitorManagementListSelector, selectDynamicSettings } from '../../../state/selectors';
-import { useEsSearch } from '../../../../../observability/public';
+import { useEsSearch } from '@kbn/observability-plugin/public';
+import { monitorManagementListSelector } from '../../../state/selectors';
 import { Ping } from '../../../../common/runtime_types';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 import { useInlineErrorsCount } from './use_inline_errors_count';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
 const sortFieldMap: Record<string, string> = {
   name: 'monitor.name',
@@ -71,8 +72,6 @@ export function useInlineErrors({
 }) {
   const monitorList = useSelector(monitorManagementListSelector);
 
-  const { settings } = useSelector(selectDynamicSettings);
-
   const { lastRefresh } = useUptimeRefreshContext();
 
   const configIds = monitorList.list.monitors.map((monitor) => monitor.id);
@@ -81,7 +80,7 @@ export function useInlineErrors({
 
   const { data, loading } = useEsSearch(
     {
-      index: doFetch ? settings?.heartbeatIndices : '',
+      index: doFetch ? SYNTHETICS_INDEX_PATTERN : '',
       body: {
         size: 1000,
         query: {
@@ -93,7 +92,7 @@ export function useInlineErrors({
         sort: [{ [sortFieldMap[sortField]]: sortOrder }],
       },
     },
-    [settings?.heartbeatIndices, monitorList, lastRefresh, doFetch, sortField, sortOrder],
+    [monitorList, lastRefresh, doFetch, sortField, sortOrder],
     { name: 'getInvalidMonitors' }
   );
 

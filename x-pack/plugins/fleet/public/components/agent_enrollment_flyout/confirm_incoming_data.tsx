@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
@@ -17,6 +18,7 @@ interface Props {
   installedPolicy?: InstalledIntegrationPolicy;
   agentDataConfirmed: boolean;
   setAgentDataConfirmed: (v: boolean) => void;
+  troubleshootLink: string;
 }
 
 export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
@@ -24,6 +26,7 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
   installedPolicy,
   agentDataConfirmed,
   setAgentDataConfirmed,
+  troubleshootLink,
 }) => {
   const { incomingData, isLoading } = usePollingIncomingData(agentIds);
 
@@ -37,11 +40,21 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
   }
   if (!agentDataConfirmed) {
     return (
-      <EuiText size="s">
-        {i18n.translate('xpack.fleet.confirmIncomingData.loading', {
-          defaultMessage:
-            'It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our troubleshooting guide. You may close this dialog and check later by viewing our integration assets.',
-        })}
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.confirmIncomingData.loading"
+          defaultMessage="It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our {link}. You may close this dialog and check later by viewing your integration assets."
+          values={{
+            link: (
+              <EuiLink target="_blank" external href={troubleshootLink}>
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+                  defaultMessage="troubleshooting guide"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       </EuiText>
     );
   }

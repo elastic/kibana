@@ -8,7 +8,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { QuerySuggestion, QuerySuggestionTypes } from '../../../data/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/data-plugin/public';
 import { SuggestionComponent } from './suggestion_component';
 
 const noop = () => {

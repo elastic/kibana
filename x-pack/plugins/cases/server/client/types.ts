@@ -6,7 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -17,8 +19,6 @@ import {
   AttachmentService,
   AlertService,
 } from '../services';
-import { ActionsClient } from '../../../actions/server';
-import { LensServerPluginSetup } from '../../../lens/server';
 
 /**
  * Parameters for initializing a cases client

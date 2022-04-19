@@ -10,8 +10,10 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
-import type { DataViewField, DataView } from 'src/plugins/data/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { SortDirection, SortDirectionNumeric, TimeRange } from '@kbn/data-plugin/common';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -52,12 +54,6 @@ import {
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import {
-  SortDirection,
-  SortDirectionNumeric,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, IMvtVectorSource, SourceStatus } from '../vector_source';

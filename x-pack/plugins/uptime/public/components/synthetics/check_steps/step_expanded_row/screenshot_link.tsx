@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { Ping } from '../../../../../common/runtime_types/ping/ping';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 
 const LabelLink = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
