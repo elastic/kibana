@@ -115,6 +115,7 @@ describe('After an upgrade, the threshold rule', () => {
     if (semver.lt(Cypress.env('ORIGINAL_VERSION'), '7.15.0')) {
       expectedReason = alert.reasonAlt;
     }
+    cy.scrollTo('bottom');
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);

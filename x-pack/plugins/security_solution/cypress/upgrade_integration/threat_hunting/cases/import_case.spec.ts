@@ -46,8 +46,7 @@ const importedCase = {
   user: 'glo',
   reporter: 'glo@test.co',
   tags: 'export case',
-  numberOfAlerts: '2',
-  numberOfAlertsAlt: '1',
+  numberOfAlerts: '1',
   numberOfComments: '2',
   description:
     "This is the description of the 7.16 case that I'm going to import in future versions.",
@@ -74,7 +73,7 @@ const FIRST_ALERT_UPDATE = 1;
 const SECOND_ALERT_UPDATE = 2;
 const INCIDENT_MANAGEMENT_SYSTEM_UPDATE = 3;
 const EXPECTED_NUMBER_OF_UPDATES = 4;
-const EXPECTED_NUMBER_OF_PARTICIPANTS = 4;
+const EXPECTED_NUMBER_OF_PARTICIPANTS = 3;
 const REPORTER = 0;
 const FIRST_PARTICIPANT = 1;
 const SECOND_PARTICIPANT = 2;
@@ -112,13 +111,9 @@ describe('Import case after upgrade', () => {
   });
 
   it('Displays the correct case details on the cases page', () => {
-    let expectedNumAlerts = importedCase.numberOfAlerts;
-    if (semver.lt(Cypress.env('ORIGINAL_VERSION'), '7.16.0')) {
-      expectedNumAlerts = importedCase.numberOfAlertsAlt;
-    }
     cy.get(ALL_CASES_NAME).should('have.text', importedCase.title);
     cy.get(ALL_CASES_REPORTER).should('have.text', importedCase.user);
-    cy.get(ALL_CASES_NUMBER_OF_ALERTS).should('have.text', expectedNumAlerts);
+    cy.get(ALL_CASES_NUMBER_OF_ALERTS).should('have.text', importedCase.numberOfAlerts);
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', importedCase.numberOfComments);
     cy.get(ALL_CASES_NOT_PUSHED).should('be.visible');
     cy.get(ALL_CASES_IN_PROGRESS_STATUS).should('be.visible');
