@@ -8,9 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { handleActions, Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
+import type {
+  ActionConnector as RawActionConnector,
+  Rule,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { createAsyncAction } from '../actions/utils';
 import { asyncInitState, handleAsyncAction } from '../reducers/utils';
-import type { AppState } from '../../state';
+import type { AppState } from '..';
 import { AsyncInitState } from '../reducers/types';
 import { fetchEffectFactory } from '../effects/fetch_effect';
 import {
@@ -21,10 +25,6 @@ import {
   fetchMonitorAlertRecords,
   NewAlertParams,
 } from '../api/alerts';
-import type {
-  ActionConnector as RawActionConnector,
-  Rule,
-} from '../../../../triggers_actions_ui/public';
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
 import { AlertsResult, MonitorIdParam } from '../actions/types';

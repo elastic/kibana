@@ -14,7 +14,7 @@ import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';

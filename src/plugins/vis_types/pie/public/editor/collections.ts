@@ -11,7 +11,7 @@ import {
   LabelPositions,
   ValueFormats,
   EmptySizeRatios,
-} from '../../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/expression-partition-vis-plugin/common';
 
 export const getLabelPositions = [
   {

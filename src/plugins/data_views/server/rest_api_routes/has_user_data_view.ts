@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsService } from 'src/plugins/data_views/common';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
-import { IRouter, StartServicesAccessor } from '../../../../core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../constants';
 

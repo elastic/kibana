@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
-import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/unified_search/public';
-import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 
 export type ActionContext = ApplyGlobalFilterActionContext & { embeddable: IEmbeddable };
 

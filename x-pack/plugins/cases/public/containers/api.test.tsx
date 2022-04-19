@@ -8,7 +8,11 @@
 import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
-import { CASES_URL, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  CASES_URL,
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  SECURITY_SOLUTION_OWNER,
+} from '../../common/constants';
 
 import {
   deleteCases,
@@ -24,7 +28,7 @@ import {
   patchCasesStatus,
   patchComment,
   postCase,
-  postComment,
+  createAttachments,
   pushCase,
   resolveCase,
 } from './api';
@@ -460,28 +464,43 @@ describe('Case Configuration API', () => {
     });
   });
 
-  describe('postComment', () => {
+  describe('createAttachments', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
-    const data = {
-      comment: 'comment',
-      owner: SECURITY_SOLUTION_OWNER,
-      type: CommentType.user as const,
-    };
+    const data = [
+      {
+        comment: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
+        type: CommentType.user as const,
+      },
+      {
+        alertId: 'test-id',
+        index: 'test-index',
+        rule: {
+          id: 'test-rule',
+          name: 'Test',
+        },
+        owner: SECURITY_SOLUTION_OWNER,
+        type: CommentType.alert as const,
+      },
+    ];
 
     test('should be called with correct check url, method, signal', async () => {
-      await postComment(data, basicCase.id, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        signal: abortCtrl.signal,
-      });
+      await createAttachments(data, basicCase.id, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(
+        INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', basicCase.id),
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+          signal: abortCtrl.signal,
+        }
+      );
     });
 
     test('should return correct response', async () => {
-      const resp = await postComment(data, basicCase.id, abortCtrl.signal);
+      const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
   });

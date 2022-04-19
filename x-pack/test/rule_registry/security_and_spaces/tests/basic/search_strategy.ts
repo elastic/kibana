@@ -7,8 +7,9 @@
 import expect from '@kbn/expect';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
+import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { RuleRegistrySearchResponse } from '../../../../../plugins/rule_registry/common/search_strategy';
 import {
   deleteSignalsIndex,
   createSignalsIndex,
@@ -19,7 +20,6 @@ import {
   waitForRuleSuccessOrStatus,
 } from '../../../../detection_engine_api_integration/utils';
 import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/tests/generating_signals';
-import { QueryCreateSchema } from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import {
   obsOnlySpacesAllEsRead,
   obsOnlySpacesAll,
@@ -42,7 +42,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const SPACE1 = 'space1';
 
-  describe('ruleRegistryAlertsSearchStrategy', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/129219
+  describe.skip('ruleRegistryAlertsSearchStrategy', () => {
     let kibanaVersion: string;
     before(async () => {
       kibanaVersion = await kbnClient.version.get();

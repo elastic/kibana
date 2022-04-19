@@ -7,13 +7,13 @@
 
 import * as Rx from 'rxjs';
 
-import { kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';

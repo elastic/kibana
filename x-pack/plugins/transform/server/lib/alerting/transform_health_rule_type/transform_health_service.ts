@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy } from 'lodash';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
@@ -22,7 +23,6 @@ import {
   NotStartedTransformResponse,
   TransformHealthAlertContext,
 } from './register_transform_health_rule_type';
-import type { RulesClient } from '../../../../../alerting/server';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
 import { isContinuousTransform } from '../../../../common/types/transform';
 import { ML_DF_NOTIFICATION_INDEX_PATTERN } from '../../../routes/api/transforms_audit_messages';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Schema } from '../../visualizations/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 
 export const getSchemaByName = (schemas: Schema[], schemaName?: string) => {
   return schemas.find((s) => s.name === schemaName) || ({} as Schema);

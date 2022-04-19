@@ -10,10 +10,10 @@ import { handleResponse } from './handle_response';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
+import { notificationServiceMock } from '@kbn/core/public/notifications/notifications_service.mock';
 import { setNotifications } from '../../services';
-import { IKibanaSearchResponse } from 'src/plugins/data/common';
-import { themeServiceMock } from 'src/core/public/mocks';
+import { IKibanaSearchResponse } from '../../../common';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('@kbn/i18n', () => {
   return {

@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { useFetcher } from '../../../../../observability/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { Ping, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 

@@ -9,9 +9,9 @@ import { EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 
+import { KibanaFeature } from '@kbn/features-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { KibanaFeature } from '../../../../../../../../features/public';
 import type { Role } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';

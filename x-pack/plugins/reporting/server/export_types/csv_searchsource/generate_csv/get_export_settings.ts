@@ -6,9 +6,9 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { IUiSettingsClient, Logger } from 'kibana/server';
-import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
-import { ReportingConfig } from '../../../';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import { createEscapeValue } from '@kbn/data-plugin/common';
+import { ReportingConfig } from '../../..';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
