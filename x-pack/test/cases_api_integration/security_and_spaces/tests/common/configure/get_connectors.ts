@@ -8,20 +8,48 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { getCaseConnectors } from '../../../../common/lib/utils';
+import {
+  createConnector,
+  getCaseConnectors,
+  getServiceNowConnector,
+  getWebhookConnector,
+} from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
+  /**
+   * Preconfigured connectors are being registered here:
+   * x-pack/test/cases_api_integration/common/config.ts
+   */
   describe('get_connectors', () => {
-    it('should return an empty find body correctly if no connectors are loaded', async () => {
+    it('should return only supported connectors including preconfigured connectors', async () => {
+      await createConnector({ supertest, req: getServiceNowConnector() });
+      await createConnector({ supertest, req: getWebhookConnector() });
       const connectors = await getCaseConnectors({ supertest });
-      expect(connectors).to.eql([]);
-    });
 
-    it.skip('filters out connectors that are not enabled in license', async () => {
-      // TODO: Should find a way to downgrade license to gold and upgrade back to trial
+      expect(connectors).to.eql([
+        {
+          actionTypeId: '.servicenow',
+          id: 'preconfigured-servicenow',
+          isPreconfigured: true,
+          name: 'preconfigured-servicenow',
+          referencedByCount: 0,
+        },
+        {
+          actionTypeId: '.servicenow',
+          config: {
+            apiUrl: 'http://some.non.existent.com',
+            usesTableApi: false,
+          },
+          id: '35e75fd0-bfbe-11ec-b200-cdb35f39b10d',
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          name: 'ServiceNow Connector',
+          referencedByCount: 0,
+        },
+      ]);
     });
   });
 };

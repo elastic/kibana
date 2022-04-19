@@ -20,7 +20,6 @@ interface CreateTestConfigOptions {
   testFiles?: string[];
 }
 
-// test.not-enabled is specifically not enabled
 const enabledActionTypes = [
   '.email',
   '.index',
@@ -139,6 +138,19 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
+          `--xpack.actions.preconfigured=${JSON.stringify({
+            'preconfigured-servicenow': {
+              name: 'preconfigured-servicenow',
+              actionTypeId: '.servicenow',
+              config: {
+                apiUrl: 'https://example.com',
+              },
+              secrets: {
+                username: 'elastic',
+                password: 'elastic',
+              },
+            },
+          })}`,
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
