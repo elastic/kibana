@@ -34,7 +34,7 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({ setIsIdSelectorFlyoutVi
         <EuiButtonEmpty
           size="xs"
           iconType="pencil"
-          onClick={() => setIsIdSelectorFlyoutVisible(true)}
+          onClick={setIsIdSelectorFlyoutVisible.bind(null, true)}
           data-test-subj="mlButtonEditAnalyticsIdSelection"
         >
           <FormattedMessage

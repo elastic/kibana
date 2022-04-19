@@ -27,12 +27,13 @@ import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_p
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(true);
-  const [jobsExist, setJobsExist] = useState(true);
-  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const mapJobId = globalState?.ml?.jobId;
   const mapModelId = globalState?.ml?.modelId;
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!mapJobId && !mapModelId);
+  const [jobsExist, setJobsExist] = useState(true);
+  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
   const {
     services: { docLinks },
@@ -76,12 +77,6 @@ export const Page: FC = () => {
     }
     return (
       <>
-        {isIdSelectorFlyoutVisible ? (
-          <AnalyticsIdSelector
-            setAnalyticsId={setAnalyticsId}
-            setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
-          />
-        ) : null}
         <EuiEmptyPrompt
           iconType="alert"
           title={
@@ -104,6 +99,12 @@ export const Page: FC = () => {
   return (
     <>
       <AnalyticsIdSelectorControls setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible} />
+      {isIdSelectorFlyoutVisible ? (
+        <AnalyticsIdSelector
+          setAnalyticsId={setAnalyticsId}
+          setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        />
+      ) : null}
       {jobId === undefined && modelId === undefined ? (
         <MlPageHeader>
           <FormattedMessage

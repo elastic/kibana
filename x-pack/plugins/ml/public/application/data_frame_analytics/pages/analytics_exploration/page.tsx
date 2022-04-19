@@ -31,7 +31,7 @@ export const Page: FC<{
   analysisType: DataFrameAnalysisConfigType;
 }> = ({ jobId, analysisType }) => {
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
-  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(true);
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!jobId);
   const [jobsExist, setJobsExist] = useState(true);
   const {
     services: { docLinks },
@@ -79,12 +79,6 @@ export const Page: FC<{
     }
     return (
       <>
-        {isIdSelectorFlyoutVisible ? (
-          <AnalyticsIdSelector
-            setAnalyticsId={setAnalyticsId}
-            setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
-          />
-        ) : null}
         <EuiEmptyPrompt
           iconType="alert"
           title={
@@ -104,6 +98,12 @@ export const Page: FC<{
   return (
     <>
       <AnalyticsIdSelectorControls setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible} />
+      {isIdSelectorFlyoutVisible ? (
+        <AnalyticsIdSelector
+          setAnalyticsId={setAnalyticsId}
+          setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        />
+      ) : null}
       {jobIdToUse !== undefined && (
         <MlPageHeader>
           <FormattedMessage
