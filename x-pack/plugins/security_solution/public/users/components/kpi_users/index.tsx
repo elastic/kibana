@@ -31,13 +31,14 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
                 type: 'primary',
                 id: 'userRiskModule',
                 title: i18n.ENABLE_USER_RISK_TEXT,
+
                 description: (
                   <>
-                    {/* // TODO PENDING ON USER RISK DOCUMENTATION
-                    {i18n.LEARN_MORE}{' '}
-                    {/* <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
-                      {i18n.HOST_RISK_DATA}
-                    </EuiLink> */}
+                    {/*
+                    TODO PENDING ON USER RISK DOCUMENTATION}
+                    <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank"> */}
+                    {i18n.LEARN_MORE} {i18n.USER_RISK_DATA}
+                    {/* </EuiLink> */}
                     <EuiSpacer />
                   </>
                 ),
@@ -76,4 +77,4 @@ export const UsersKpiComponent = React.memo<UsersKpiProps>(
   }
 );
 
-UsersKpiComponent.displayName = 'HostsKpiComponent';
+UsersKpiComponent.displayName = 'UsersKpiComponent';

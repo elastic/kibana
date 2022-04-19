@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import * as i18n from '../translations';
 
@@ -17,8 +18,13 @@ import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/containers';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { UsersComponentsQueryProps } from './types';
+import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
 
 const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
+
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+`;
 
 const UserRiskTabBodyComponent: React.FC<
   Pick<UsersComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
@@ -96,8 +102,9 @@ const UserRiskTabBodyComponent: React.FC<
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {/* // TODO PENDING ON USER RISK DOCUMENTATION
+
       <StyledEuiFlexGroup gutterSize="s">
+        {/* // TODO PENDING ON USER RISK DOCUMENTATION
         <EuiFlexItem grow={false}>
           <EuiButton
             href={buttonHref}
@@ -107,11 +114,11 @@ const UserRiskTabBodyComponent: React.FC<
           >
             {i18n.VIEW_DASHBOARD_BUTTON}
           </EuiButton>
-        </EuiFlexItem>
+        </EuiFlexItem> */}
         <EuiFlexItem grow={false}>
-          <HostRiskInformationButtonEmpty />
+          <UserRiskInformationButtonEmpty />
         </EuiFlexItem>
-      </StyledEuiFlexGroup> */}
+      </StyledEuiFlexGroup>
     </>
   );
 };
