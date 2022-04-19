@@ -400,6 +400,10 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_osquery_pack_asset',
             type: 'osquery-pack-asset',
           },
+          {
+            id: 'sample_osquery_saved_query',
+            type: 'osquery-saved-query',
+          },
         ],
         installed_es: [
           {
