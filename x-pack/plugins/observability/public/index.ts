@@ -36,7 +36,6 @@ export interface ConfigSchema {
     alertingExperience: { enabled: boolean };
     rules: { enabled: boolean };
     cases: { enabled: boolean };
-    overviewNext: { enabled: boolean };
   };
 }
 
