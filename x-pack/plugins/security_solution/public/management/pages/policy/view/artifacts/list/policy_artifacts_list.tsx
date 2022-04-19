@@ -29,18 +29,14 @@ import { ExceptionsListApiClient } from '../../../../../services/exceptions_list
 import { useListArtifact } from '../../../../../hooks/artifacts';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import type { ArtifactListPageLocation } from '../../../../../types';
-import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
+import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsListProps {
   policy: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
   searchableFields: string[];
   getArtifactPath: (
-    location?:
-      | Partial<EventFiltersPageLocation>
-      | Partial<ArtifactListPageLocation>
-      | Partial<HostIsolationExceptionsPageLocation>
+    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
   ) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;

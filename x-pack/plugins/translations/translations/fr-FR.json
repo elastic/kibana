@@ -15574,7 +15574,6 @@
     "xpack.ml.jobsList.multiJobsActions.startDatafeedsLabel": "Démarrer {jobsCount, plural, one {le flux de données} other {les flux de données}}",
     "xpack.ml.jobsList.multiJobsActions.stopDatafeedsLabel": "Arrêter {jobsCount, plural, one {le flux de données} other {les flux de données}}",
     "xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText": "Déploiement Elastic Cloud",
-    "xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription": "Veuillez modifier votre {link}. Vous pouvez activer un nœud de Machine Learning de 1 Go ou développer votre configuration de ML existante.",
     "xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableDescription": "Aucun nœud de ML n'est disponible.",
     "xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableTitle": "Aucun nœud de ML disponible",
     "xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription": "Vous ne pourrez ni créer ni exécuter de tâches.",

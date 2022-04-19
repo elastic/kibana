@@ -11,18 +11,14 @@ import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/end
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import type { ArtifactListPageLocation } from '../../../../../types';
-import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
+import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 export const useGetLinkTo = (
   policyId: string,
   policyName: string,
   getPolicyArtifactsPath: (policyId: string) => string,
   getArtifactPath: (
-    location?:
-      | Partial<EventFiltersPageLocation>
-      | Partial<ArtifactListPageLocation>
-      | Partial<HostIsolationExceptionsPageLocation>
+    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
   ) => string,
   location?: Partial<{ show: 'create' }>
 ) => {

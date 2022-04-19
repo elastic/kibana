@@ -25,7 +25,6 @@ import {
 } from '../../../../common/routing';
 import { useHttp } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
-import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import {
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
@@ -51,6 +50,7 @@ import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../e
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
 import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { useListArtifact } from '../../../../hooks/artifacts';
 
 const enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -79,13 +79,18 @@ export const PolicyTabs = React.memo(() => {
   const privileges = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
-  const allPolicyHostIsolationExceptionsListRequest = useFetchHostIsolationExceptionsList({
-    page: 1,
-    perPage: 100,
-    policies: [policyId, 'all'],
-    // only enable if privileges are not loading and can not isolate a host
-    enabled: !privileges.loading && !privileges.canIsolateHost,
-  });
+  const allPolicyHostIsolationExceptionsListRequest = useListArtifact(
+    HostIsolationExceptionsApiClient.getInstance(http),
+    {
+      page: 1,
+      perPage: 100,
+      policies: [policyId, 'all'],
+    },
+    HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS,
+    {
+      enabled: !privileges.loading && !privileges.canIsolateHost,
+    }
+  );
 
   const canSeeHostIsolationExceptions =
     privileges.canIsolateHost ||
