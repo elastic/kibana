@@ -14,7 +14,7 @@ export const ALERTS_TABLE_CONF_ERROR_TITLE = i18n.translate(
 );
 
 export const ALERTS_TABLE_CONF_ERROR_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.configuration.errorTitle',
+  'xpack.triggersActionsUI.alertsTable.configuration.errorBody',
   {
     defaultMessage:
       'There was an error loading the alerts table. This table is missing the necessary configuration. Please contact your administrator for help',
