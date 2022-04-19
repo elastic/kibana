@@ -845,6 +845,12 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     );
   }
 
+  if (numActiveAlerts && numRecoveredAlerts) {
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_number_of_alerts).to.be(
+      numActiveAlerts + numRecoveredAlerts
+    );
+  }
+
   expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);
   expect(event?.kibana?.space_ids?.[0]).to.equal(spaceId);
 

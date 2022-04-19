@@ -90,6 +90,9 @@ exports.EcsCustomPropertyMappings = {
                       number_of_recovered_alerts: {
                         type: 'long',
                       },
+                      total_number_of_alerts: {
+                        type: 'long',
+                      },
                       number_of_searches: {
                         type: 'long',
                       },

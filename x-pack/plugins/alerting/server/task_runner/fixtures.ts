@@ -250,6 +250,9 @@ export const generateEventLog = ({
               number_of_active_alerts: numberOfActiveAlerts ?? 0,
               number_of_new_alerts: numberOfNewAlerts ?? 0,
               number_of_recovered_alerts: numberOfRecoveredAlerts ?? 0,
+              total_number_of_alerts:
+                ((numberOfActiveAlerts ?? 0) as number) +
+                ((numberOfRecoveredAlerts ?? 0) as number),
               number_of_searches: 3,
               es_search_duration_ms: 33,
               total_search_duration_ms: 23423,

@@ -1335,6 +1335,7 @@ instanceStateValue: true
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_active_alerts).to.be(1);
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_new_alerts).to.be(1);
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_recovered_alerts).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_number_of_alerts).to.be(1);
 
     expect(event?.rule).to.eql({
       id: alertId,

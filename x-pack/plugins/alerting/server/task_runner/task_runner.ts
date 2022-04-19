@@ -845,6 +845,12 @@ export class TaskRunner<
         );
         set(
           event,
+          'kibana.alert.rule.execution.metrics.total_number_of_alerts',
+          (executionMetrics.numberOfActiveAlerts ?? 0) +
+            (executionMetrics.numberOfRecoveredAlerts ?? 0)
+        );
+        set(
+          event,
           'kibana.alert.rule.execution.metrics.number_of_recovered_alerts',
           executionMetrics.numberOfRecoveredAlerts
         );
