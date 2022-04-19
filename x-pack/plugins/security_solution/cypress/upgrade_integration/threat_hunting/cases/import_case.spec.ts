@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import semver from 'semver';
 import {
   ALL_CASES_CLOSED_CASES_STATS,
   ALL_CASES_COMMENTS_COUNT,
