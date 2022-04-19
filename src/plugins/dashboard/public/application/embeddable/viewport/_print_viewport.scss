@@ -1,11 +1,5 @@
-@import './shared_poc_print'; // Bring in the shared print styling
+@import './print_media/styling/index';
 
-/*
-Dashboard styling
-
-It is up to dashboard to decide how the visualizations should look on an A4 page. The assumption
-is that we want to preserve current behaviour of 2 visualizations per page.
-*/
 $visualisationsPerPage: 2;
 $visPadding: 4mm;
 
@@ -15,21 +9,22 @@ we don't hit a race condition where padding is being updated while the print ima
 is being formed. This can result in parts of the vis being cut out.
 */
 @mixin visualizationPadding {
+  // Open space from page margin
   padding-left: $visPadding;
   padding-right: $visPadding;
 
+  // First vis on a page
   &:nth-child(#{$visualisationsPerPage}n - #{$visualisationsPerPage - 1}) {
-    padding-top: $visPadding;
+    padding-top: calc(#{$visPadding} * 2); // Create a bit more vertical space between the page title and the vis
   }
 
+  // Last vis on the page
   &:nth-child(#{$visualisationsPerPage}n) {
     page-break-after: always;
     padding-top: $visPadding;
     padding-bottom: $visPadding;
   }
 }
-
-@include globalSharedRules();
 
 @media screen, projection {
   .printViewport {

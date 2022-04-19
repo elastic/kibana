@@ -1,0 +1,40 @@
+
+@media screen, projection {
+  .printFooter, .printHeader {
+    display: none;
+  }
+}
+
+@media print {
+  .printHeader {
+    display: table-header-group;
+    position: fixed;
+    top: 0;
+    padding-top: 2mm;
+
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .printFooter {
+    display: table-footer-group;
+    position: fixed;
+    bottom: 0;
+    margin: 0 2mm 2mm 5mm;
+    > img {
+      height: 8mm;
+    }
+  }
+
+  // There is a known limitation that Chrome does not increment the counter of fixed elements even though
+  // they appear for each page. So we leave this out for now.
+  // See https://bugs.chromium.org/p/chromium/issues/detail?id=774830
+  // .printFooter::after {
+  //   position: fixed;
+  //   bottom: 2mm;
+  //   left: 50%;
+  //   transform: translateX(-50%);
+  //   content: 'Page ' counter(x);
+  // }
+
+}
