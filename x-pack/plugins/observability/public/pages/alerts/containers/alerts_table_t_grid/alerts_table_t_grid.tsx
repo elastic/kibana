@@ -68,8 +68,6 @@ import { addDisplayNames } from './add_display_names';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
 
-// const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
-
 interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
