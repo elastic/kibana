@@ -9,6 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const strings = {
+  getXYHelp: () =>
+    i18n.translate('expressionXY.xyVis.help', {
+      defaultMessage: 'An X/Y chart',
+    }),
   getMetricHelp: () =>
     i18n.translate('expressionXY.xyVis.logDatatable.metric', {
       defaultMessage: 'Vertical axis',
@@ -24,5 +28,89 @@ export const strings = {
   getReferenceLineHelp: () =>
     i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
       defaultMessage: 'Break down by',
+    }),
+  getXTitleHelp: () =>
+    i18n.translate('expressionXY.xyVis.xTitle.help', {
+      defaultMessage: 'X axis title',
+    }),
+  getYTitleHelp: () =>
+    i18n.translate('expressionXY.xyVis.yLeftTitle.help', {
+      defaultMessage: 'Y left axis title',
+    }),
+  getYRightTitleHelp: () =>
+    i18n.translate('expressionXY.xyVis.yRightTitle.help', {
+      defaultMessage: 'Y right axis title',
+    }),
+  getYLeftExtentHelp: () =>
+    i18n.translate('expressionXY.xyVis.yLeftExtent.help', {
+      defaultMessage: 'Y left axis extents',
+    }),
+  getYRightExtentHelp: () =>
+    i18n.translate('expressionXY.xyVis.yRightExtent.help', {
+      defaultMessage: 'Y right axis extents',
+    }),
+  getLegendHelp: () =>
+    i18n.translate('expressionXY.xyVis.legend.help', {
+      defaultMessage: 'Configure the chart legend.',
+    }),
+  getFittingFunctionHelp: () =>
+    i18n.translate('expressionXY.xyVis.fittingFunction.help', {
+      defaultMessage: 'Define how missing values are treated',
+    }),
+  getEndValueHelp: () =>
+    i18n.translate('expressionXY.xyVis.endValue.help', {
+      defaultMessage: 'End value',
+    }),
+  getValueLabelsHelp: () =>
+    i18n.translate('expressionXY.xyVis.valueLabels.help', {
+      defaultMessage: 'Value labels mode',
+    }),
+  getTickLabelsVisibilitySettingsHelp: () =>
+    i18n.translate('expressionXY.xyVis.tickLabelsVisibilitySettings.help', {
+      defaultMessage: 'Show x and y axes tick labels',
+    }),
+  getLabelsOrientationHelp: () =>
+    i18n.translate('expressionXY.xyVis.labelsOrientation.help', {
+      defaultMessage: 'Defines the rotation of the axis labels',
+    }),
+  getGridlinesVisibilitySettingsHelp: () =>
+    i18n.translate('expressionXY.xyVis.gridlinesVisibilitySettings.help', {
+      defaultMessage: 'Show x and y axes gridlines',
+    }),
+  getAxisTitlesVisibilitySettingsHelp: () =>
+    i18n.translate('expressionXY.xyVis.axisTitlesVisibilitySettings.help', {
+      defaultMessage: 'Show x and y axes titles',
+    }),
+  getDataLayerHelp: () =>
+    i18n.translate('expressionXY.xyVis.dataLayer.help', {
+      defaultMessage: 'Data layer of visual series',
+    }),
+  getReferenceLineLayerHelp: () =>
+    i18n.translate('expressionXY.xyVis.referenceLineLayer.help', {
+      defaultMessage: 'Reference line layer',
+    }),
+  getAnnotationLayerHelp: () =>
+    i18n.translate('expressionXY.xyVis.annotationLayer.help', {
+      defaultMessage: 'Annotation layer',
+    }),
+  getCurveTypeHelp: () =>
+    i18n.translate('expressionXY.xyVis.curveType.help', {
+      defaultMessage: 'Define how curve type is rendered for a line chart',
+    }),
+  getFillOpacityHelp: () =>
+    i18n.translate('expressionXY.xyVis.fillOpacity.help', {
+      defaultMessage: 'Define the area chart fill opacity',
+    }),
+  getHideEndzonesHelp: () =>
+    i18n.translate('expressionXY.xyVis.hideEndzones.help', {
+      defaultMessage: 'Hide endzone markers for partial data',
+    }),
+  getValuesInLegendHelp: () =>
+    i18n.translate('expressionXY.xyVis.valuesInLegend.help', {
+      defaultMessage: 'Show values in legend',
+    }),
+  getAriaLabelHelp: () =>
+    i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+      defaultMessage: 'Specifies the aria label of the xy chart',
     }),
 };

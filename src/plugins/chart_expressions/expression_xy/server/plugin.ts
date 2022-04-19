@@ -25,7 +25,7 @@ import {
   extendedDataLayerFunction,
   extendedReferenceLineLayerFunction,
   layeredXyVisFunction,
-} from '../common';
+} from '../common/expression_functions';
 import { SetupDeps } from './types';
 
 export class ExpressionXyPlugin
