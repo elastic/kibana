@@ -116,6 +116,49 @@ describe('AlertsTable', () => {
       userEvent.click(renderResult.getByTestId('pagination-button-1'));
       expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
     });
+
+    describe('flyout', () => {
+      it('should show a flyout when selecting an alert', async () => {
+        const wrapper = render(
+          <AlertsTable
+            {...{
+              ...tableProps,
+              pageSize: 10,
+            }}
+          />
+        );
+        userEvent.click(wrapper.queryAllByTestId('openFlyoutButton')[0]);
+
+        const result = await wrapper.findAllByTestId('alertsFlyout');
+        expect(result.length).toBe(1);
+
+        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('one');
+        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+
+        // Should paginate too
+        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginateNext')[0]);
+        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('three');
+        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
+
+        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginatePrevious')[0]);
+        expect(wrapper.queryByTestId('alertsFlyoutTitle')?.textContent).toBe('one');
+        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+      });
+
+      it('should refetch data if flyout pagination exceeds the current page', async () => {
+        const wrapper = render(<AlertsTable {...tableProps} />);
+
+        userEvent.click(wrapper.queryAllByTestId('openFlyoutButton')[0]);
+        const result = await wrapper.findAllByTestId('alertsFlyout');
+        expect(result.length).toBe(1);
+
+        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginateNext')[0]);
+        expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+
+        userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginatePrevious')[0]);
+        expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 0, pageSize: 1 });
+      });
+    });
   });
 
   describe('Alerts table configuration registry', () => {
