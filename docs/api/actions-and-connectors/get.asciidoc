@@ -51,6 +51,7 @@ The API returns the following:
     "executionTimeField": null
   },
   "is_preconfigured": false,
+  "is_deprecated": false,
   "is_missing_secrets": false
 }
 --------------------------------------------------
