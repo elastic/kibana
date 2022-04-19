@@ -59,7 +59,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
   const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
   const [mode, setMode] = useState<FlyoutMode>(defaultMode);
-  const [selectionType, setSelectionType] = useState<SelectionType>('tabs');
+  const [selectionType, setSelectionType] = useState<SelectionType>();
 
   const {
     agentPolicies,

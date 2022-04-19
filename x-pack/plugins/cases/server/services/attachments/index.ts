@@ -36,7 +36,13 @@ interface AttachedToCaseArgs extends ClientArgs {
 }
 
 type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
-type CountAlertsAttachedToCaseArgs = AttachedToCaseArgs;
+type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
+
+interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
+  attachmentType: CommentType;
+  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
+}
+
 interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
   aggregations: Record<string, estypes.AggregationsAggregationContainer>;
 }
@@ -79,50 +85,48 @@ interface CommentStats {
 export class AttachmentService {
   constructor(private readonly log: Logger) {}
 
-  public async countAlertsAttachedToCase({
-    unsecuredSavedObjectsClient,
-    caseId,
-    filter,
-  }: CountAlertsAttachedToCaseArgs): Promise<number | undefined> {
+  public async countAlertsAttachedToCase(
+    params: AlertsAttachedToCaseArgs
+  ): Promise<number | undefined> {
     try {
-      this.log.debug(`Attempting to count alerts for case id ${caseId}`);
-      const alertsFilter = buildFilter({
-        filters: [CommentType.alert],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
+      this.log.debug(`Attempting to count alerts for case id ${params.caseId}`);
+      const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
+        ...params,
+        attachmentType: CommentType.alert,
+        aggregations: this.buildAlertsAggs('cardinality'),
       });
 
-      const combinedFilter = combineFilters([alertsFilter, filter]);
-
-      const response = await unsecuredSavedObjectsClient.find<
-        AttachmentAttributes,
-        { alerts: { value: number } }
-      >({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        aggs: this.buildCountAlertsAggs(),
-        filter: combinedFilter,
-      });
-
-      return response.aggregations?.alerts?.value;
+      return res?.alerts?.value;
     } catch (error) {
-      this.log.error(`Error while counting alerts for case id ${caseId}: ${error}`);
+      this.log.error(`Error while counting alerts for case id ${params.caseId}: ${error}`);
       throw error;
     }
   }
 
-  private buildCountAlertsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
+  private buildAlertsAggs(agg: string): Record<string, estypes.AggregationsAggregationContainer> {
     return {
       alerts: {
-        cardinality: {
+        [agg]: {
           field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
         },
       },
     };
+  }
+
+  public async valueCountAlertsAttachedToCase(params: AlertsAttachedToCaseArgs): Promise<number> {
+    try {
+      this.log.debug(`Attempting to value count alerts for case id ${params.caseId}`);
+      const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
+        ...params,
+        attachmentType: CommentType.alert,
+        aggregations: this.buildAlertsAggs('value_count'),
+      });
+
+      return res?.alerts?.value ?? 0;
+    } catch (error) {
+      this.log.error(`Error while value counting alerts for case id ${params.caseId}: ${error}`);
+      throw error;
+    }
   }
 
   /**
@@ -166,29 +170,27 @@ export class AttachmentService {
   }
 
   /**
-   * Executes the aggregations against the actions attached to a case.
+   * Executes the aggregations against a type of attachment attached to a case.
    */
-  public async executeCaseActionsAggregations({
+  public async executeCaseAggregations<Agg extends AggregationResponse = AggregationResponse>({
     unsecuredSavedObjectsClient,
     caseId,
     filter,
     aggregations,
-  }: CountActionsAttachedToCaseArgs): Promise<AggregationResponse | undefined> {
+    attachmentType,
+  }: AttachmentsAttachedToCaseArgs): Promise<Agg | undefined> {
     try {
-      this.log.debug(`Attempting to count actions for case id ${caseId}`);
-      const actionsFilter = buildFilter({
-        filters: [CommentType.actions],
+      this.log.debug(`Attempting to aggregate for case id ${caseId}`);
+      const attachmentFilter = buildFilter({
+        filters: attachmentType,
         field: 'type',
         operator: 'or',
         type: CASE_COMMENT_SAVED_OBJECT,
       });
 
-      const combinedFilter = combineFilters([actionsFilter, filter]);
+      const combinedFilter = combineFilters([attachmentFilter, filter]);
 
-      const response = await unsecuredSavedObjectsClient.find<
-        AttachmentAttributes,
-        AggregationResponse
-      >({
+      const response = await unsecuredSavedObjectsClient.find<AttachmentAttributes, Agg>({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
         page: 1,
@@ -200,7 +202,22 @@ export class AttachmentService {
 
       return response.aggregations;
     } catch (error) {
-      this.log.error(`Error while counting actions for case id ${caseId}: ${error}`);
+      this.log.error(`Error while executing aggregation for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Executes the aggregations against the actions attached to a case.
+   */
+  public async executeCaseActionsAggregations(
+    params: CountActionsAttachedToCaseArgs
+  ): Promise<AggregationResponse | undefined> {
+    try {
+      this.log.debug(`Attempting to count actions for case id ${params.caseId}`);
+      return await this.executeCaseAggregations({ ...params, attachmentType: CommentType.actions });
+    } catch (error) {
+      this.log.error(`Error while counting actions for case id ${params.caseId}: ${error}`);
       throw error;
     }
   }
