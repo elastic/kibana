@@ -6,7 +6,8 @@
  */
 
 import { useQuery } from 'react-query';
-import { DataView, SortDirection } from '../../../../../src/plugins/data/common';
+import { lastValueFrom } from 'rxjs';
+import { DataView, SortDirection } from '@kbn/data-plugin/common';
 
 import { useKibana } from '../common/lib/kibana';
 
@@ -69,7 +70,8 @@ export const usePackQueryErrors = ({
       });
 
       searchSource.setField('index', logsDataView);
-      return searchSource.fetch$().toPromise();
+
+      return lastValueFrom(searchSource.fetch$());
     },
     {
       keepPreviousData: true,

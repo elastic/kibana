@@ -9,9 +9,9 @@
 import { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { sha256 } from 'js-sha256';
-import type { Rule } from '../../../../../../x-pack/plugins/alerting/common';
-import { getTime, IndexPattern } from '../../../../data/common';
-import type { Filter } from '../../../../data/public';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import { getTime, IndexPattern } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/data-plugin/public';
 import { DiscoverAppLocatorParams } from '../../locator';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { getAlertUtils, QueryParams, SearchThresholdAlertParams } from './view_alert_utils';

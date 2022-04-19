@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb, CoreStart } from 'kibana/public';
+import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useEffect } from 'react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_ID } from '../../../common';
 import type { CspNavigationItem } from './types';
 import { CLOUD_POSTURE } from './translations';

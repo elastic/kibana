@@ -7,7 +7,7 @@
 
 import { Observable, Subject, Subscription } from 'rxjs';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ILicense } from '../common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
@@ -27,7 +27,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   /**
    * Used as a flag to halt all other plugin observables.
    */
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
 
   /**
    * A function to execute once the plugin's HTTP interceptor needs to stop listening.
@@ -73,7 +73,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   }
 
   public setup(core: CoreSetup) {
-    const signatureUpdated$ = new Subject();
+    const signatureUpdated$ = new Subject<void>();
 
     const { license$, refreshManually } = createLicenseUpdate(
       signatureUpdated$,

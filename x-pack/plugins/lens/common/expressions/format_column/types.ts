@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Datatable,
-  ExpressionFunctionDefinition,
-} from '../../../../../../src/plugins/expressions';
-import type { FormatColumnArgs } from './index';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import type { FormatColumnArgs } from '.';
 
 export type FormatColumnExpressionFunction = ExpressionFunctionDefinition<
   'lens_format_column',

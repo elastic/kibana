@@ -15,7 +15,7 @@ import { mountWithIntl } from '../../../../test_helpers';
 
 import { LogRetentionOptions } from '../types';
 
-import { LogRetentionMessage } from './';
+import { LogRetentionMessage } from '.';
 
 describe('LogRetentionMessage', () => {
   const analytics = LogRetentionOptions.Analytics;

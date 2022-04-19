@@ -7,13 +7,13 @@
  */
 import React, { CSSProperties, lazy } from 'react';
 import { Observable } from 'rxjs';
-import { CoreTheme } from 'kibana/public';
+import { CoreTheme } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '../../../../core/public';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { withSuspense, defaultTheme$ } from '../../../presentation_util/public';
+import { CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {

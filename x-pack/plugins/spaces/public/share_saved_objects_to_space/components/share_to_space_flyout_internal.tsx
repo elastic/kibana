@@ -23,9 +23,9 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
+import type { SavedObjectReferenceWithContext, ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DEFAULT_OBJECT_NOUN } from '../../constants';

@@ -8,16 +8,17 @@
 import { Stream } from 'stream';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+
+import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import {
   ExportListItemsToStreamOptions,
   GetResponseOptions,
   WriteNextResponseOptions,
   WriteResponseHitsToStreamOptions,
-} from '../items';
-import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
-import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
+} from '.';
 
 export const getExportListItemsToStreamOptionsMock = (): ExportListItemsToStreamOptions => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,

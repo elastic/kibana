@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
-import { Sourcerer } from './index';
+import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
   createSecuritySolutionStorageMock,
@@ -43,8 +43,8 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,
@@ -1000,6 +1000,14 @@ describe('Update available', () => {
     expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
       'This timeline uses a legacy data view selector'
     );
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
+    ).toEqual('The active index patterns in this timeline are: myFakebeat-*');
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-message"]`).first().text()).toEqual(
+      "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view here."
+    );
   });
 
   test('Show Add index pattern in UpdateDefaultDataViewModal', () => {
@@ -1103,6 +1111,10 @@ describe('Update available for timeline template', () => {
     expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
       'This timeline template uses a legacy data view selector'
     );
+
+    expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-message"]`).first().text()).toEqual(
+      "We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view here."
+    );
   });
 });
 
@@ -1179,6 +1191,20 @@ describe('Missing index patterns', () => {
     expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
       'This timeline is out of date with the Security Data View'
     );
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
+    ).toEqual('The active index patterns in this timeline are: myFakebeat-*');
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-callout"]`).first().text()
+    ).toEqual('Security Data View is missing the following index patterns: myFakebeat-*');
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-message"]`).first().text()
+    ).toEqual(
+      "We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
+    );
   });
 
   test('Show UpdateDefaultDataViewModal CallOut for timeline template', () => {
@@ -1200,6 +1226,20 @@ describe('Missing index patterns', () => {
 
     expect(wrapper.find(`[data-test-subj="sourcerer-deprecated-callout"]`).first().text()).toEqual(
       'This timeline template is out of date with the Security Data View'
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-current-patterns-message"]`).first().text()
+    ).toEqual('The active index patterns in this timeline template are: myFakebeat-*');
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-callout"]`).first().text()
+    ).toEqual('Security Data View is missing the following index patterns: myFakebeat-*');
+
+    expect(
+      wrapper.find(`[data-test-subj="sourcerer-missing-patterns-message"]`).first().text()
+    ).toEqual(
+      "We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view here."
     );
   });
 });

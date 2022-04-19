@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin as CorePlugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
-import { PluginInitializerContext } from 'kibana/public';
-import { FeaturesPluginStart } from '../../features/public';
-import { KibanaFeature } from '../../features/common';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import { KibanaFeature } from '@kbn/features-plugin/common';
+import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { TypeRegistry } from './application/type_registry';
-import {
-  ManagementAppMountParams,
-  ManagementSetup,
-} from '../../../../src/plugins/management/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { PluginStartContract as AlertingStart } from '../../alerting/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type { SpacesPluginStart } from '../../spaces/public';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
@@ -49,7 +45,6 @@ import type {
   AlertsTableProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
-import type { UnifiedSearchPublicPluginStart } from '../../../../src/plugins/unified_search/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -82,6 +77,7 @@ interface PluginsSetup {
 
 interface PluginsStart {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -135,7 +131,7 @@ export class Plugin
         icon: 'watchesApp',
         path: '/app/management/insightsAndAlerting/triggersActions',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
@@ -165,6 +161,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
           charts: pluginsStart.charts,
           alerting: pluginsStart.alerting,
           spaces: pluginsStart.spaces,

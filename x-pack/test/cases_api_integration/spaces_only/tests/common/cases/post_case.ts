@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { ConnectorTypes } from '../../../../../../plugins/cases/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
 import { getPostCaseRequest, nullUser, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,

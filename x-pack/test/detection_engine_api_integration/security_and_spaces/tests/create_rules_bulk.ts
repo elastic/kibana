@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_BULK_CREATE } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -30,6 +30,24 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   describe('create_rules_bulk', () => {
+    describe('deprecations', () => {
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log);
+      });
+
+      it('should return a warning header', async () => {
+        const { header } = await supertest
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
+          .set('kbn-xsrf', 'true')
+          .send([getSimpleRule()])
+          .expect(200);
+
+        expect(header.warning).to.be(
+          '299 Kibana "Deprecated endpoint: /api/detection_engine/rules/_bulk_create API is deprecated since v8.2. Please use the /api/detection_engine/rules/_bulk_action API instead. See https://www.elastic.co/guide/en/security/master/rule-api-overview.html for more detail."'
+        );
+      });
+    });
+
     describe('creating rules in bulk', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -50,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a single rule with a rule_id', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule()])
           .expect(200);
@@ -81,7 +99,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
         const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([simpleRule])
           .expect(200);
@@ -91,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a single rule without a rule_id', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRuleWithoutRuleId()])
           .expect(200);
@@ -102,7 +120,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id twice', async () => {
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule(), getSimpleRule()])
           .expect(200);
@@ -120,13 +138,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the same rule_id that already exists', async () => {
         await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
           .send([getSimpleRule()])
           .expect(200);
 
         const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
+          .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'foo')
           .send([getSimpleRule()])
           .expect(200);
