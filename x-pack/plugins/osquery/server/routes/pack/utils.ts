@@ -19,6 +19,7 @@ export const convertPackQueriesToSO = (queries) =>
         ...pick(value, ['query', 'interval', 'platform', 'version']),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
+
       return acc;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,6 +36,7 @@ export const convertSOQueriesToPack = (queries) =>
         ...query,
         ecs_mapping: convertECSMappingToObject(ecs_mapping),
       };
+
       return acc;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

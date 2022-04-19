@@ -33,6 +33,7 @@ export const useOsqueryPolicies = () => {
         }),
     }
   );
+
   return useMemo(
     () => ({ osqueryPoliciesLoading, osqueryPolicies }),
     [osqueryPoliciesLoading, osqueryPolicies]
