@@ -581,7 +581,7 @@ x-pack/plugins/security_solution/public/common/components/sessions_viewer @elast
 /x-pack/plugins/osquery @elastic/security-asset-management
 
 # Cloud Security Posture
-/x-pack/plugins/cloud_security_posture/ @elastic/cloud-security-posture-control-plane
+/x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
