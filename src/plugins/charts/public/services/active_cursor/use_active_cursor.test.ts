@@ -30,13 +30,12 @@ describe('useActiveCursor', () => {
   const act = async (
     syncOption: ActiveCursorSyncOption,
     events: Record<string, Partial<ActiveCursorPayload>>
-  ): Promise<{ dispatchExternalPointerEvent: DispatchExternalPointerEventFn }> => {
-    const dispatchExternalPointerEvent: DispatchExternalPointerEventFn = jest.fn();
-
-    return new Promise((res) => {
+  ): Promise<{ dispatchExternalPointerEvent: DispatchExternalPointerEventFn }> =>
+    new Promise((res) => {
       testScheduler.run(({ cold }) => {
         const marble = `${Object.keys(events).join(`-`)} |`;
         const activeCursor$ = cold(marble, events);
+        const dispatchExternalPointerEvent: DispatchExternalPointerEventFn = jest.fn();
 
         renderHook(() =>
           useActiveCursor(
@@ -59,7 +58,6 @@ describe('useActiveCursor', () => {
         });
       });
     });
-  };
 
   test('should debounce events', async () => {
     const { dispatchExternalPointerEvent } = await act(
