@@ -13,7 +13,7 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -45,17 +45,22 @@ import type {
   ConnectorEditFlyoutProps,
   AlertsTableProps,
   RuleStatusDropdownProps,
+  AlertsTableConfigurationRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
+import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
+import { PLUGIN_ID } from './common/constants';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
+  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
+  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   getAddConnectorFlyout: (
     props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<ConnectorAddFlyoutProps>;
@@ -100,12 +105,14 @@ export class Plugin
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
+  private alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   private config: TriggersActionsUiConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
 
   constructor(ctx: PluginInitializerContext) {
     this.actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     this.ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+    this.alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
     this.config = ctx.config.get();
     this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
   }
@@ -113,6 +120,7 @@ export class Plugin
   public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
+    const alertsTableConfigurationRegistry = this.alertsTableConfigurationRegistry;
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
@@ -128,18 +136,18 @@ export class Plugin
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
-        id: 'triggersActions',
+        id: PLUGIN_ID,
         title: featureTitle,
         description: featureDescription,
         icon: 'watchesApp',
         path: '/app/management/insightsAndAlerting/triggersActions',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
     plugins.management.sections.section.insightsAndAlerting.registerApp({
-      id: 'triggersActions',
+      id: PLUGIN_ID,
       title: featureTitle,
       order: 0,
       async mount(params: ManagementAppMountParams) {
@@ -177,6 +185,7 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           ruleTypeRegistry,
+          alertsTableConfigurationRegistry,
           kibanaFeatures,
         });
       },
@@ -186,9 +195,16 @@ export class Plugin
       actionTypeRegistry: this.actionTypeRegistry,
     });
 
+    if (this.experimentalFeatures.internalAlertsTable) {
+      registerAlertsTableConfiguration({
+        alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
+      });
+    }
+
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
     };
   }
 
@@ -196,6 +212,7 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
       getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
       },

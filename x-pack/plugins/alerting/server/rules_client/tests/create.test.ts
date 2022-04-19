@@ -1167,7 +1167,7 @@ describe('create()', () => {
         injectReferences: injectReferencesFn,
       },
       config: {
-        execution: {
+        run: {
           actions: { max: 1000 },
         },
       },
@@ -1340,7 +1340,7 @@ describe('create()', () => {
         injectReferences: injectReferencesFn,
       },
       config: {
-        execution: {
+        run: {
           actions: { max: 1000 },
         },
       },
@@ -2099,7 +2099,7 @@ describe('create()', () => {
       async executor() {},
       producer: 'alerts',
       config: {
-        execution: {
+        run: {
           actions: { max: 1000 },
         },
       },
@@ -2629,7 +2629,7 @@ describe('create()', () => {
         injectReferences: jest.fn(),
       },
       config: {
-        execution: {
+        run: {
           actions: { max: 1000 },
         },
       },
