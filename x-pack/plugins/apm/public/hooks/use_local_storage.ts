@@ -8,6 +8,8 @@
 import { useState, useEffect, useMemo } from 'react';
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
+  // This is necessary to fix a race condition issue.
+  // It guarantees that the latest value will be always returned after the value is updated
   const [storageUpdate, setStorageUpdate] = useState(0);
 
   const item = useMemo(() => {
