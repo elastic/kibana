@@ -2755,7 +2755,7 @@ describe('Task Runner', () => {
 
     expect(logger.debug).nthCalledWith(
       3,
-      'The maximum number of actions (3) for this rule type (ruleId:1) has been reached'
+      'Rule "1" skipped scheduling action "4" because the maximum number of allowed actions has been reached.'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -2965,7 +2965,7 @@ describe('Task Runner', () => {
 
     expect(logger.debug).nthCalledWith(
       3,
-      'The maximum number of actions (1) for the connector ".server-log" has been reached'
+      'Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type .server-log has been reached.'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
