@@ -15,7 +15,7 @@ import { EuiModal } from '@elastic/eui';
 
 import { MultiInputRows } from '../../multi_input_rows';
 
-import { SynonymModal } from './';
+import { SynonymModal } from '.';
 
 describe('SynonymModal', () => {
   const MOCK_SYNONYM_SET = {

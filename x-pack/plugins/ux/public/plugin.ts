@@ -13,25 +13,25 @@ import {
   HasDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
+} from '@kbn/observability-plugin/public';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+} from '@kbn/data-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
-import { FeaturesPluginSetup } from '../../features/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { MapsStartApi } from '../../maps/public';
-import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { MapsStartApi } from '@kbn/maps-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;

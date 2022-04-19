@@ -7,10 +7,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import type { CoreStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
-import type { CoreStatus } from 'src/core/server';
-import { ServiceStatusLevels } from 'src/core/server';
-import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';

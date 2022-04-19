@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   CASE_REF_NAME,
@@ -20,7 +21,6 @@ import {
   NONE_CONNECTOR_ID,
   User,
 } from '../../../common/api';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import {
   BuilderParameters,
   BuilderReturnValue,

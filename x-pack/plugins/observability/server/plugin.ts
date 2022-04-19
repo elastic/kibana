@@ -11,15 +11,15 @@ import {
   Plugin,
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
-import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
-import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';

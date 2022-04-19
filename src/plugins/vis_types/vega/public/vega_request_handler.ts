@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from 'src/core/public';
-import type { DataView } from 'src/plugins/data_views/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Filter, buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig, TimeRange, Query } from '../../../data/public';
+import { getEsQueryConfig, TimeRange, Query } from '@kbn/data-plugin/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';

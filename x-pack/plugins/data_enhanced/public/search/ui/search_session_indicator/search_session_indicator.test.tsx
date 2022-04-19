@@ -10,7 +10,7 @@ import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SearchSessionIndicator } from './search_session_indicator';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
+import { SearchSessionState } from '@kbn/data-plugin/public';
 
 function Container({ children }: { children?: ReactNode }) {
   return <IntlProvider locale="en">{children}</IntlProvider>;

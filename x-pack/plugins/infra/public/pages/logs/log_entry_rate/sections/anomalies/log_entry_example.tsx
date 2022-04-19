@@ -9,9 +9,10 @@ import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
 import { encode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
+import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
   LogEntryColumn,
@@ -27,7 +28,6 @@ import {
   LogColumnHeadersWrapper,
   LogColumnHeader,
 } from '../../../../../components/logging/log_text_stream/column_headers';
-import { useLinkProps, shouldHandleLinkEvent } from '../../../../../../../observability/public';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';

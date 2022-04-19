@@ -20,7 +20,7 @@ import {
   formatSortForTermsSort,
   getExecutionEventAggregation,
   getProviderAndActionFilter,
-} from './index';
+} from '.';
 
 describe('getExecutionEventAggregation', () => {
   test('should throw error when given bad maxExecutions field', () => {

@@ -12,15 +12,15 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListPopover } from './options_list_popover_component';
-import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
 
 import './options_list.scss';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { OptionsListEmbeddableInput } from './types';
-import { DataViewField } from '../../../../data_views/public';
 
 // OptionsListComponentState is controlled by the embeddable, but is not considered embeddable input.
 export interface OptionsListComponentState {

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../common/infra_ml';
 import { decodeOrThrow } from '../../../../common/runtime_types';

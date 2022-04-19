@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EntSearchLogStream } from './';
+import { EntSearchLogStream } from '.';
 
 const fakeSourceId = 'fake-source-id';
 
