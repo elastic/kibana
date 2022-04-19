@@ -251,7 +251,12 @@ export class DiscoverPageObject extends FtrService {
     }
 
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
-    const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+    const result = await Promise.all(
+      row.map(async (cell) => {
+        const textContent = await cell.getAttribute('textContent');
+        return textContent.trim();
+      })
+    );
     // Remove control columns
     return result.slice(2).join(' ');
   }
