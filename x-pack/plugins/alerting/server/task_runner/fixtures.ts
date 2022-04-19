@@ -109,7 +109,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   producer: 'alerts',
   config: {
-    execution: {
+    run: {
       actions: { max: 1000 },
     },
   },
@@ -216,7 +216,7 @@ export const generateEventLog = ({
   actionId,
   status,
   numberOfTriggeredActions,
-  numberOfScheduledActions,
+  numberOfGeneratedActions,
   savedObjects = [generateAlertSO('1')],
 }: GeneratorParams = {}) => ({
   ...(status === 'error' && {
@@ -240,10 +240,10 @@ export const generateEventLog = ({
         ...(consumer && { consumer }),
         execution: {
           uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-          ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfScheduledActions)) && {
+          ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfGeneratedActions)) && {
             metrics: {
               number_of_triggered_actions: numberOfTriggeredActions,
-              number_of_scheduled_actions: numberOfScheduledActions,
+              number_of_generated_actions: numberOfGeneratedActions,
               number_of_searches: 3,
               es_search_duration_ms: 33,
               total_search_duration_ms: 23423,

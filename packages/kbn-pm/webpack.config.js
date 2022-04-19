@@ -86,4 +86,12 @@ module.exports = {
   watchOptions: {
     ignored: [/node_modules/, /vendor/],
   },
+
+  optimization: {
+    moduleIds: 'named',
+    nodeEnv: 'production',
+    usedExports: true,
+    sideEffects: true,
+    minimize: false,
+  },
 };

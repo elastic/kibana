@@ -108,7 +108,7 @@ describe('migrations v2 model', () => {
       type: 'retryable_es_client_error',
       message: 'snapshot_in_progress_exception',
     };
-    test('sets retryCount, exponential retryDelay if an action fails with a retryable_es_client_error', () => {
+    test('increments retryCount, exponential retryDelay if an action fails with a retryable_es_client_error', () => {
       const states = new Array(10).fill(1).map(() => {
         state = model(state, Either.left(retryableError));
         return state;

@@ -24,7 +24,11 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
-import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
+import {
+  ActionTypeRegistryContract,
+  AlertsTableConfigurationRegistryContract,
+  RuleTypeRegistryContract,
+} from '../types';
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 
 import { setSavedObjectsClient } from '../common/lib/data_apis';
@@ -46,6 +50,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
