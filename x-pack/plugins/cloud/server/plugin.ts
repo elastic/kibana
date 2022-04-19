@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import type { SecurityPluginSetup } from '../../security/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';

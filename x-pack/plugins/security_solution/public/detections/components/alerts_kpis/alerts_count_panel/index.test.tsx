@@ -11,7 +11,7 @@ import { waitFor, act } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { TestProviders } from '../../../../common/mock';
 
-import { AlertsCountPanel } from './index';
+import { AlertsCountPanel } from '.';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 jest.mock('../../../../common/containers/query_toggle');

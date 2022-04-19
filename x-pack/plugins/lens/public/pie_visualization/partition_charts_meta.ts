@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiIconProps } from '@elastic/eui';
 
-import type { DatatableColumn } from '../../../../../src/plugins/expressions';
+import type { DatatableColumn } from '@kbn/expressions-plugin';
 import { LensIconChartDonut } from '../assets/chart_donut';
 import { LensIconChartPie } from '../assets/chart_pie';
 import { LensIconChartTreemap } from '../assets/chart_treemap';

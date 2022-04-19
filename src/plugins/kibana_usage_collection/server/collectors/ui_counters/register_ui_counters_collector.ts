@@ -9,11 +9,6 @@
 import moment from 'moment';
 import { mergeWith } from 'lodash';
 import type { Subject } from 'rxjs';
-import {
-  UICounterSavedObject,
-  UICounterSavedObjectAttributes,
-  UI_COUNTER_SAVED_OBJECT_TYPE,
-} from './ui_counter_saved_object_type';
 
 import {
   CollectorFetchContext,
@@ -22,12 +17,17 @@ import {
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
   serializeCounterKey,
-} from '../../../../usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
 
 import {
   deserializeUiCounterName,
   serializeUiCounterName,
-} from '../../../../usage_collection/common/ui_counters';
+} from '@kbn/usage-collection-plugin/common/ui_counters';
+import {
+  UICounterSavedObject,
+  UICounterSavedObjectAttributes,
+  UI_COUNTER_SAVED_OBJECT_TYPE,
+} from './ui_counter_saved_object_type';
 
 interface UiCounterEvent {
   appName: string;

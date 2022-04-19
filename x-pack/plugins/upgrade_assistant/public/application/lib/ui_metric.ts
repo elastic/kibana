@@ -6,7 +6,7 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const UIM_APP_NAME = 'upgrade_assistant';
 export const UIM_ES_DEPRECATIONS_PAGE_LOAD = 'es_deprecations_page_load';

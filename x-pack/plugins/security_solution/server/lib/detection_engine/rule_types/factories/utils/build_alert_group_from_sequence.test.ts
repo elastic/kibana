@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 

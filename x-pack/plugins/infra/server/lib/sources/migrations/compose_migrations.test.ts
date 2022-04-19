@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from '../../../../../../../src/core/server';
-import { migrationMocks } from '../../../../../../../src/core/server/mocks';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { composeMigrations } from './compose_migrations';
 
 type TestDocument = SavedObjectUnsanitizedDoc<{

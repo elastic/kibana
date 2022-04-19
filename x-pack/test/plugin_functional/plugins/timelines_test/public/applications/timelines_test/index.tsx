@@ -8,12 +8,12 @@
 import { Router } from 'react-router-dom';
 import React, { useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
-import { TimelinesUIStart } from '../../../../../../../plugins/timelines/public';
-import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 type CoreStartTimelines = CoreStart & { data: DataPublicPluginStart };
 

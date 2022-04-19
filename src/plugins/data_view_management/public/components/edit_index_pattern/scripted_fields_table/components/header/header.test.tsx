@@ -9,9 +9,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { RouteComponentProps } from 'react-router-dom';
-import { ScopedHistory } from 'kibana/public';
-import { scopedHistoryMock } from '../../../../../../../../core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { ScopedHistory } from '@kbn/core/public';
+import { scopedHistoryMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockManagementPlugin } from '../../../../../mocks';
 
 import { Header } from './header';

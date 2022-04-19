@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { DiscoverEnhancedPlugin } from './plugin';
 
 export type { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';

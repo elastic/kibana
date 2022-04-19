@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionTypeDefinition } from '../../../../../../src/plugins/expressions/common';
+import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
 import { LensMultiTable } from '../../types';
 
 const name = 'lens_multitable';

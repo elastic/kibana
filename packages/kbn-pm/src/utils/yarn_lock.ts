@@ -9,10 +9,10 @@
 // @ts-expect-error published types are worthless
 import { parse as parseLockfile } from '@yarnpkg/lockfile';
 
-import { readFile } from '../utils/fs';
-import { Kibana } from '../utils/kibana';
-import { Project } from '../utils/project';
-import { Log } from '../utils/log';
+import { readFile } from './fs';
+import { Kibana } from './kibana';
+import { Project } from './project';
+import { Log } from './log';
 
 export interface YarnLock {
   /** a simple map of name@versionrange tags to metadata about a package */
