@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaFeature } from '../../../../../features/public';
+import type { KibanaFeature } from '@kbn/features-plugin/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { featuresPluginMock } from '../../../../../features/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { LicenseType } from '../../../../../licensing/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+
 import type { SecurityLicenseFeatures } from '../../../../common/licensing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Actions } from '../../../../server/authorization';

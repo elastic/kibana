@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { TelemetryReceiver } from './receiver';
 import { TelemetryEventsSender } from './sender';
 
@@ -131,16 +131,19 @@ export class OsqueryTelemetryTask {
     this.logger.debug(`[task ${taskId}]: attempting to run`);
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`[task ${taskId}]: outdated task`);
+
       return 0;
     }
 
     const isOptedIn = await this.sender.isTelemetryOptedIn();
     if (!isOptedIn) {
       this.logger.debug(`[task ${taskId}]: telemetry is not opted-in`);
+
       return 0;
     }
 
     this.logger.debug(`[task ${taskId}]: running task`);
+
     return this.config.runTask(taskId, this.logger, this.receiver, this.sender, executionPeriod);
   };
 }

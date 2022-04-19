@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Dimensions, Dimension } from '../../../../../pie/public';
+import type { Dimensions, Dimension } from '@kbn/vis-type-pie-plugin/public';
 import { buildHierarchicalData } from './build_hierarchical_data';
 import { Table, TableParent } from '../../types';
 

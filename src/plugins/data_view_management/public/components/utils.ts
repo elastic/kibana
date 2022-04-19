@@ -11,7 +11,7 @@ import {
   DataView,
   DataViewField,
   DataViewListItem,
-} from 'src/plugins/data_views/public';
+} from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 const defaultIndexPatternListName = i18n.translate(

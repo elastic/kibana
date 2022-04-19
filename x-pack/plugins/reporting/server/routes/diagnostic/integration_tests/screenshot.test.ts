@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { setupServer } from 'src/core/server/test_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { setupServer } from '@kbn/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../../../';
+import { ReportingCore } from '../../..';
 import { generatePngObservable } from '../../../export_types/common';
 import {
   createMockConfigSchema,

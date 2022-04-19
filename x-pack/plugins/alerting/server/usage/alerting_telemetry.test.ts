@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
@@ -264,12 +264,12 @@ Object {
       },
       countTotal: 4,
       countTotalFailures: 4,
-      scheduledActionsPercentiles: {
+      generatedActionsPercentiles: {
         p50: 4,
         p90: 26,
         p99: 26,
       },
-      scheduledActionsPercentilesByType: {
+      generatedActionsPercentilesByType: {
         p50: {
           '__index-threshold': 4,
           logs__alert__document__count: 10,

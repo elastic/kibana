@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiCallOut, EuiButton, EuiSpacer, EuiLink } from '@elastic/eui';
-import { useTrackPageview } from '../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { ConfigKey } from '../../../common/runtime_types';
 import { getMonitors } from '../../state/actions';
 import { monitorManagementListSelector } from '../../state/selectors';
@@ -47,7 +47,7 @@ export const MonitorManagementPage: React.FC = () => {
           page: 1, // saved objects page index is base 1
           perPage: 10,
           sortOrder: 'asc',
-          sortField: ConfigKey.NAME,
+          sortField: `${ConfigKey.NAME}.keyword`,
         })
       );
     }

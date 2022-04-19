@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectReference, SavedObjectsClient } from 'kibana/server';
+import { SavedObjectReference, SavedObjectsClient } from '@kbn/core/server';
 import { filter, map } from 'lodash';
+import { PostPackagePolicyDeleteCallback } from '@kbn/fleet-plugin/server';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { packSavedObjectType } from '../../common/types';
-import { PostPackagePolicyDeleteCallback } from '../../../fleet/server';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const getPackagePolicyDeleteCallback =

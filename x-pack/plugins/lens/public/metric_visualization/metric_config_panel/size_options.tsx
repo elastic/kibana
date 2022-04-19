@@ -15,6 +15,8 @@ export interface TitlePositionProps {
   setState: (newState: MetricState) => void;
 }
 
+export const DEFAULT_TITLE_SIZE = 'm';
+
 const titleSizes = [
   {
     id: 'xs',
@@ -55,7 +57,9 @@ const titleSizes = [
 ];
 
 export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
-  const currSizeIndex = titleSizes.findIndex((size) => size.id === (state.size || 'xl'));
+  const currSizeIndex = titleSizes.findIndex(
+    (size) => size.id === (state.size || DEFAULT_TITLE_SIZE)
+  );
 
   const changeSize = (change: number) => {
     setState({ ...state, size: titleSizes[currSizeIndex + change].id });
@@ -86,7 +90,7 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
           inputDisplay: position.label,
         };
       })}
-      valueOfSelected={state.size ?? 'xl'}
+      valueOfSelected={state.size ?? DEFAULT_TITLE_SIZE}
       onChange={(value) => {
         setState({ ...state, size: value });
       }}

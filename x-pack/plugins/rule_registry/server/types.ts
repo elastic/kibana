@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { RequestHandlerContext } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
-} from '../../alerting/common';
-import { RuleExecutorOptions, RuleExecutorServices, RuleType } from '../../alerting/server';
+} from '@kbn/alerting-plugin/common';
+import { RuleExecutorOptions, RuleExecutorServices, RuleType } from '@kbn/alerting-plugin/server';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<

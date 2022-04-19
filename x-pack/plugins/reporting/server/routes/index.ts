@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import { ReportingCore } from '..';
 import { registerDeprecationsRoutes } from './deprecations/deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';

@@ -6,7 +6,6 @@
  */
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
-import { meanBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -19,12 +18,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
+  const commonQuery = {
+    start: new Date(start).toISOString(),
+    end: new Date(end).toISOString(),
+    environment: 'ENVIRONMENT_ALL',
+  };
+
+  async function callApi() {
+    return await apmApiClient.readUser({
+      endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
+      params: {
+        path: { serviceName },
+        query: commonQuery,
+      },
+    });
+  }
+
   async function getThroughputValues(processorEvent: 'transaction' | 'metric') {
-    const commonQuery = {
-      start: new Date(start).toISOString(),
-      end: new Date(end).toISOString(),
-      environment: 'ENVIRONMENT_ALL',
-    };
     const [serviceInventoryAPIResponse, serviceMapsNodeDetails] = await Promise.all([
       apmApiClient.readUser({
         endpoint: 'GET /internal/apm/services',
@@ -46,10 +56,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     const serviceInventoryThroughput = serviceInventoryAPIResponse.body.items[0].throughput;
 
-    const serviceMapsNodeDetailsThroughput = meanBy(
-      serviceMapsNodeDetails.body.currentPeriod.transactionStats?.throughput?.timeseries,
-      'y'
-    );
+    const serviceMapsNodeDetailsThroughput =
+      serviceMapsNodeDetails.body.currentPeriod.transactionStats?.throughput?.value;
 
     return {
       serviceInventoryThroughput,
@@ -79,22 +87,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoProdInstance
-                  .transaction('GET /api/product/list', 'Worker')
+                  .transaction('GET /apple 🍎 ', 'Worker')
                   .duration(1000)
                   .timestamp(timestamp)
-                  .serialize()
               ),
             timerange(start, end)
               .interval('1m')
               .rate(GO_DEV_RATE)
-              .spans((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoDevInstance
-                  .transaction('GET /api/product/:id')
+                  .transaction('GET /apple 🍎 ')
                   .duration(1000)
                   .timestamp(timestamp)
-                  .serialize()
               ),
           ]);
         });
@@ -113,7 +119,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             [
               ...Object.values(throughputTransactionValues),
               ...Object.values(throughputMetricValues),
-            ].forEach((value) => expect(roundNumber(value)).to.be.equal(roundNumber(GO_DEV_RATE)));
+            ].forEach((value) => expect(roundNumber(value)).to.be.equal(GO_DEV_RATE));
+          });
+        });
+
+        describe('when calling service maps transactions stats api', () => {
+          let serviceMapsNodeThroughput: number | null | undefined;
+          before(async () => {
+            const response = await callApi();
+            serviceMapsNodeThroughput =
+              response.body.currentPeriod.transactionStats?.throughput?.value;
+          });
+
+          it('returns expected throughput value', () => {
+            expect(roundNumber(serviceMapsNodeThroughput)).to.be.equal(GO_DEV_RATE);
           });
         });
       });

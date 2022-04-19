@@ -9,14 +9,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import { TodoSavedObjectAttributes } from 'examples/embeddable_examples/common';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import {
   Embeddable,
   IContainer,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { TodoSavedObjectAttributes } from '../../common';
 import { TodoRefEmbeddableComponent } from './todo_ref_component';
 
 // Notice this is not the same value as the 'todo' saved object type. Many of our

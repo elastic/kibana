@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { NotificationsSetup, ThemeServiceStart } from 'src/core/public';
+import { NotificationsSetup, ThemeServiceStart } from '@kbn/core/public';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
 import { JobId, JobSummary, JobSummarySet } from '../../common/types';
 import {

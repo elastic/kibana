@@ -10,7 +10,7 @@ import {
   PackageService,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
-} from '../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 
 export interface CspAppServiceDependencies {
   packageService: PackageService;

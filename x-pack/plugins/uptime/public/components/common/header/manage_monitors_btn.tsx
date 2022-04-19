@@ -12,9 +12,9 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../common/constants';
 import { PUBLIC_BETA_DESCRIPTION } from '../../../pages/monitor_management/service_allowed_wrapper';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsSetup } from '../../../apps/plugin';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 

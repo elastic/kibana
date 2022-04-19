@@ -8,7 +8,7 @@
 import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
-} from '../../../../lists/common/schemas/request/import_exceptions_schema.mock';
+} from '../../../common/schemas/request/import_exceptions_schema.mock';
 import { createExtensionPointStorageMock } from '../extension_points/extension_point_storage.mock';
 
 import { importExceptionLists } from './utils/import/import_exception_lists';

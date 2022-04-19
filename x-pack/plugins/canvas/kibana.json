@@ -32,7 +32,6 @@
   "optionalPlugins": ["home", "reporting", "spaces", "usageCollection"],
   "requiredBundles": [
     "discover",
-    "home",
     "kibanaReact",
     "kibanaUtils",
     "lens",
