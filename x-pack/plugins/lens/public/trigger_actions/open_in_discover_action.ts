@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { IEmbeddable } from 'src/plugins/embeddable/public';
+import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import type { Embeddable } from '../embeddable';
 import type { DiscoverStart } from '../../../../../src/plugins/discover/public';
@@ -21,8 +21,8 @@ export const createOpenInDiscoverAction = (discover: DiscoverStart, hasDiscoverA
     order: 19, // right after Inspect which is 20
     getIconType: () => 'popout',
     getDisplayName: () =>
-      i18n.translate('xpack.lens.actions.exploreRawData', {
-        defaultMessage: 'Explore raw data',
+      i18n.translate('xpack.lens.app.exploreDataInDiscover', {
+        defaultMessage: 'Explore data in Discover',
       }),
     isCompatible: async (context: { embeddable: IEmbeddable }) => {
       if (!hasDiscoverAccess) return false;

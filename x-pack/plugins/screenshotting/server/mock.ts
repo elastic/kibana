@@ -17,6 +17,13 @@ export function createMockScreenshottingStart(): jest.Mocked<ScreenshottingStart
   const driver = createMockBrowserDriverFactory();
   const { getScreenshots } = createMockScreenshots();
   const { diagnose } = driver;
+  const packageInfo = {
+    branch: 'screenshot-test',
+    buildNum: 567891011,
+    buildSha: 'screenshot-dfdfed0a',
+    dist: false,
+    version: '5000.0.0',
+  };
 
   return {
     diagnose,
@@ -24,7 +31,9 @@ export function createMockScreenshottingStart(): jest.Mocked<ScreenshottingStart
       (options): ReturnType<ScreenshottingStart['getScreenshots']> =>
         getScreenshots(options).pipe(
           mergeMap<ScreenshotResult, Promise<PngScreenshotResult | PdfScreenshotResult>>(
-            options.format === 'pdf' ? toPdf({ logger: loggingSystemMock.createLogger() }) : toPng
+            options.format === 'pdf'
+              ? toPdf({ logger: loggingSystemMock.createLogger(), packageInfo })
+              : toPng
           )
         )
     ),

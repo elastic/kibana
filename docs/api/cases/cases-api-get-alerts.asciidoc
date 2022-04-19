@@ -1,0 +1,60 @@
+[[cases-api-get-alerts]]
+== Get alerts attached to case API
+++++
+<titleabbrev>Get alerts</titleabbrev>
+++++
+
+preview::[]
+
+Gets all alerts attached to a case.
+
+=== {api-request-title}
+
+`GET <kibana host>:<port>/api/cases/<case_id>/alerts`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/alerts`
+
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the cases you're seeking.
+
+=== {api-path-parms-title}
+
+`<case_id>`::
+(Required, string) The identifier for the case. To retrieve case IDs, use
+<<cases-api-find-cases>>.
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== {api-response-codes-title}
+
+`200`::
+   Indicates a successful call.
+
+=== {api-example-title}
+
+Return all alerts attached to case `293f1bc0-74f6-11ea-b83a-553aecdb28b6`:
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/293f1bc0-74f6-11ea-b83a-553aecdb28b6/alerts
+--------------------------------------------------
+// KIBANA
+
+The API returns a JSON array listing the alerts. For example:
+
+[source,json]
+--------------------------------------------------
+[
+   {
+      "id": "09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540",
+      "index": ".internal.alerts-security.alerts-default-000001",
+      "attached_at": "2022-04-13T21:35:24.602Z"
+   }
+]
+--------------------------------------------------
