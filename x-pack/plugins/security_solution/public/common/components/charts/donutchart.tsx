@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
 import {
   Chart,
@@ -18,7 +18,7 @@ import {
   NodeColorAccessor,
   PartialTheme,
 } from '@elastic/charts';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { useTheme } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
@@ -69,10 +69,6 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
 `;
 
-const EmptyChartLabel = styled(EuiText)`
-  color: #abb4c4;
-`;
-
 export const DonutChart = ({
   data,
   fillColor,
@@ -84,7 +80,13 @@ export const DonutChart = ({
   totalCount,
 }: DonutChartProps) => {
   const theme = useTheme();
-
+  const { euiTheme } = useEuiTheme();
+  const emptyLabelStyle = useMemo(
+    () => ({
+      color: euiTheme.colors.disabled,
+    }),
+    [euiTheme.colors.disabled]
+  );
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -103,9 +105,9 @@ export const DonutChart = ({
           <EuiFlexItem>{title}</EuiFlexItem>
           <EuiFlexItem className="eui-textTruncate">
             {!data && (
-              <EmptyChartLabel className="eui-textTruncate" size="s">
+              <EuiText className="eui-textTruncate" size="s" style={emptyLabelStyle}>
                 {label}
-              </EmptyChartLabel>
+              </EuiText>
             )}
             {data && !link && (
               <EuiText className="eui-textTruncate" size="s">
