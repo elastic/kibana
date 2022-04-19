@@ -9,34 +9,59 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { HostStatus } from '../../../../common/endpoint/types';
+import { useGetEndpointHostInfo } from '../../../management/hooks/use_get_endpoint_host_info';
+import { useShowEndpointResponseActionsConsole } from '../../../management/hooks';
 
 export interface ResponseActionsConsoleContextMenuItemProps {
-  endpointId?: string;
+  endpointId: string;
   onClick?: () => void;
 }
 
 export const ResponseActionsConsoleContextMenuItem =
   memo<ResponseActionsConsoleContextMenuItemProps>(({ endpointId, onClick }) => {
-    const handleResponseActionsClick = useCallback(() => {
-      if (onClick) onClick();
-    }, [onClick]);
+    const showEndpointResponseActionsConsole = useShowEndpointResponseActionsConsole();
+    const { data: endpointHostInfo, isFetching, error } = useGetEndpointHostInfo(endpointId);
 
     const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
-      // FIXME:PT add check for agentStatus === HostStatus.UNENROLLED
-      return [
-        !endpointId,
-        !endpointId
-          ? i18n.translate(
-              'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
-              { defaultMessage: 'The current item does not support endpoint response actions' }
-            )
-          : undefined,
-      ];
-    }, [endpointId]);
+      if (!endpointId) {
+        return [
+          true,
+          i18n.translate(
+            'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
+            { defaultMessage: 'The current item does not support endpoint response actions' }
+          ),
+        ];
+      }
 
-    // TODO:PT menu item should be disabled until we get the actual metadata doc for the endpoint
-    // TODO:PT menu item should be disabled if host status is un-enrolled (show tooltip)
-    // TODO:PT menu item should be disabled if not an Alert
+      // Still loading Endpoint host info
+      if (isFetching) {
+        return [true, undefined];
+      }
+
+      // if we got an error and it's a 404 (alerts can exist for endpoint that are no longer around)
+      // or,
+      // the Host status is `unenrolled`
+      if (
+        (error && error.body.statusCode === 404) ||
+        endpointHostInfo?.host_status === HostStatus.UNENROLLED
+      ) {
+        return [
+          true,
+          i18n.translate(
+            'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.unenrolledTooltip',
+            { defaultMessage: 'Host is not longer enrolled with endpoint security' }
+          ),
+        ];
+      }
+
+      return [false, undefined];
+    }, [endpointHostInfo?.host_status, endpointId, error, isFetching]);
+
+    const handleResponseActionsClick = useCallback(() => {
+      if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo);
+      if (onClick) onClick();
+    }, [endpointHostInfo, onClick, showEndpointResponseActionsConsole]);
 
     return (
       <EuiContextMenuItem

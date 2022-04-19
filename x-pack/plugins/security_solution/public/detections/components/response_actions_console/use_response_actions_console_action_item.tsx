@@ -32,7 +32,7 @@ export const useResponseActionsConsoleActionItem = (
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (!eventDetailsData || !isEndpointAlert) {
+    if (!eventDetailsData || !isEndpointAlert || !endpointId) {
       return actions;
     }
 
