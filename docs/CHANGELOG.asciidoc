@@ -168,13 +168,14 @@ Lens & Visualizations::
 Machine Learning::
 * Combines annotations into one block if multiple annotations overlap {kibana-pull}128782[#128782]
 * Adds `throughput_last_minute` to the deployment stats {kibana-pull}128611[#128611]
-* Anomaly Charts API endpoint {kibana-pull}128165[#128165]
+* Adds new API endpoint to improve anomaly chart performance {kibana-pull}128165[#128165]
 * Utilize ML memory stats endpoint for the memory overview chart {kibana-pull}127751[#127751]
 * Deleting trained model space checks {kibana-pull}127438[#127438]
 * Show at least one correlation value and consolidate correlations columns {kibana-pull}126683[#126683]
 * Include fields not in docs in Data Visualizer field name control {kibana-pull}126519[#126519]
 * Anomaly Explorer performance enhancements {kibana-pull}126274[#126274]
 * Fixes Index data visualizer reaching Elasticsearch rate request limits {kibana-pull}124898[#124898]
+* Adds cache for data recognizer module configs to reduce number of privilege checks {kibana-pull}126338[#126338]
 
 Management::
 * Extend Transform Health alerting rule with error messages check {kibana-pull}128731[#128731]
@@ -268,9 +269,7 @@ Machine Learning::
 * Fix outlier detection results exploration color legend display {kibana-pull}129058[#129058]
 * Fixes new anomaly detection job from saved search with no query filter {kibana-pull}129022[#129022]
 * Fixes data frame analytics map saved object sync warning {kibana-pull}128876[#128876]
-* Fixes get_filter endpoint {kibana-pull}128238[#128238]
 * Adds error toast to Data visualizer when using unpopulated time field {kibana-pull}127196[#127196]
-* Adds data recognizer module config cache {kibana-pull}126338[#126338]
 
 Management::
 * Transforms: Fix to not pass on default values in configurations {kibana-pull}129091[#129091]
