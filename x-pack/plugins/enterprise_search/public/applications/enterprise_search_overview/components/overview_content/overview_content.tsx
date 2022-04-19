@@ -81,14 +81,14 @@ export const OverviewContent: React.FC<ProductSelectorProps> = ({ access }) => {
           size="fullWidth"
           src={illustration}
           alt={i18n.translate(
-            'xpack.enterpriseSearch.overview.insufficientPermissionsIllustration',
+            'xpack.enterpriseSearch.overviewContent.insufficientPermissionsIllustration',
             { defaultMessage: 'Insufficient permissions illustration' }
           )}
         />
       }
       title={
         <h2>
-          {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsTitle', {
+          {i18n.translate('xpack.enterpriseSearch.overviewContent.insufficientPermissionsTitle', {
             defaultMessage: 'Insufficient permissions',
           })}
         </h2>
@@ -98,7 +98,7 @@ export const OverviewContent: React.FC<ProductSelectorProps> = ({ access }) => {
       body={
         <>
           <p>
-            {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsBody', {
+            {i18n.translate('xpack.enterpriseSearch.overviewContent.insufficientPermissionsBody', {
               defaultMessage:
                 'You don’t have access to view this page. If you feel this may be an error, please contact your administrator.',
             })}
@@ -107,23 +107,29 @@ export const OverviewContent: React.FC<ProductSelectorProps> = ({ access }) => {
       }
       actions={
         <EuiButton color="primary" fill href="/">
-          {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsButtonLabel', {
-            defaultMessage: 'Go to the Kibana dashboard',
-          })}
+          {i18n.translate(
+            'xpack.enterpriseSearch.overviewContent.insufficientPermissionsButtonLabel',
+            {
+              defaultMessage: 'Go to the Kibana dashboard',
+            }
+          )}
         </EuiButton>
       }
       footer={
         <>
           <EuiTitle size="xxs">
             <span>
-              {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsFooterBody', {
-                defaultMessage: 'Go to the Kibana dashboard',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.overviewContent.insufficientPermissionsFooterBody',
+                {
+                  defaultMessage: 'Go to the Kibana dashboard',
+                }
+              )}
             </span>
           </EuiTitle>{' '}
           <EuiLink href={docLinks.kibanaSecurity} target="_blank">
             {i18n.translate(
-              'xpack.enterpriseSearch.overview.insufficientPermissionsFooterLinkLabel',
+              'xpack.enterpriseSearch.overviewContent.insufficientPermissionsFooterLinkLabel',
               {
                 defaultMessage: 'Read documentation',
               }
@@ -136,7 +142,7 @@ export const OverviewContent: React.FC<ProductSelectorProps> = ({ access }) => {
   return (
     <EnterpriseSearchOverviewPageTemplate
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.overview.heading', {
+        pageTitle: i18n.translate('xpack.enterpriseSearch.overviewContent.heading', {
           defaultMessage: 'Welcome to Enterprise Search',
         }),
       }}
