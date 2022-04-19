@@ -98,7 +98,7 @@ you can now increase or decrease the visibility of your legend by changing the s
 
 In *Maps*, you can now display your clusters as hexagons
 instead of rectangles. This feature adds another beautiful, and more precise way, to
-visualize your geo_point fields. Hexagon aggregation is
+visualize your geo_point fields. Hexagon aggregations require
 a basic license on Cloud and a platinum license on prem.
 
 [role="screenshot"]
