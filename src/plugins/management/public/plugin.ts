@@ -9,11 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-<<<<<<< HEAD
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-=======
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import {
   CoreSetup,
   CoreStart,

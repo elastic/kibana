@@ -9,10 +9,6 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-<<<<<<< HEAD
-=======
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 
 const mockFeatures = [
   {

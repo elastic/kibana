@@ -14,12 +14,7 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { Overview } from './overview';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-<<<<<<< HEAD
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-=======
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
-
 const mockNewsFetchResult = {
   error: null,
   feedItems: [

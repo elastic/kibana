@@ -10,11 +10,7 @@ import { CoreSetup, Plugin, CoreStart, Capabilities } from '@kbn/core/public';
 import { first, map, skip } from 'rxjs/operators';
 import { Subject, combineLatest } from 'rxjs';
 
-<<<<<<< HEAD
 import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
-=======
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { LicenseStatus } from '../common/types/license_status';
 import { PLUGIN } from '../common/constants';

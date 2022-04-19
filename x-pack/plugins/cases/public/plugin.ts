@@ -6,10 +6,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-<<<<<<< HEAD
-=======
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CasesUiStart, CasesPluginSetup, CasesPluginStart } from './types';

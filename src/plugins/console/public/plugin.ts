@@ -9,10 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 
-<<<<<<< HEAD
-=======
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import {
   AppSetupUIPluginDependencies,
   ClientConfigType,

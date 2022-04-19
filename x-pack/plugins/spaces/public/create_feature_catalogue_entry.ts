@@ -6,10 +6,6 @@
  */
 
 import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
-<<<<<<< HEAD
-=======
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { i18n } from '@kbn/i18n';
 
 import { getSpacesFeatureDescription } from './constants';

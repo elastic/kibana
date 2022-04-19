@@ -24,15 +24,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-<<<<<<< HEAD
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-=======
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { checkLicense } from '../common/check_license';
 import { ConfigSchema } from '../config';

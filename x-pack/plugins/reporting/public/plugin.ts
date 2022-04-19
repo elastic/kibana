@@ -21,15 +21,7 @@ import {
 } from '@kbn/core/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-<<<<<<< HEAD
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-=======
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { durationToNumber } from '../common/schema_utils';

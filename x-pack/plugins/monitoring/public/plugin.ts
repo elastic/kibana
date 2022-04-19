@@ -15,11 +15,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-<<<<<<< HEAD
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-=======
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import {
