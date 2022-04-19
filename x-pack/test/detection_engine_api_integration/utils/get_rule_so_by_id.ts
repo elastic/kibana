@@ -8,9 +8,10 @@
 import type { Client } from '@elastic/elasticsearch';
 import { SavedObjectReference } from 'kibana/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { LegacyRuleActions } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_actions/legacy_types';
+import { Rule } from '@kbn/alerting-plugin/common';
 
-interface LegacyActionSO extends LegacyRuleActions {
+interface RuleSO {
+  alert: Rule;
   references: SavedObjectReference[];
 }
 
@@ -19,10 +20,7 @@ interface LegacyActionSO extends LegacyRuleActions {
  * @param es The ElasticSearch service
  * @param id SO id
  */
-export const getRuleSOById = async (
-  es: Client,
-  id: string
-): Promise<SearchResponse<LegacyActionSO>> =>
+export const getRuleSOById = async (es: Client, id: string): Promise<SearchResponse<RuleSO>> =>
   es.search({
     index: '.kibana',
     q: `type:alert AND _id:"alert:${id}"`,

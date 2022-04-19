@@ -383,6 +383,10 @@ export const legacyMigrate = async ({
       },
     }),
   ]);
+  console.log({
+    siemNotification: JSON.stringify(siemNotification),
+    legacyRuleActionsSO: JSON.stringify(legacyRuleActionsSO),
+  });
 
   const siemNotificationsExist = siemNotification != null && siemNotification.data.length > 0;
   const legacyRuleNotificationSOsExist =
@@ -393,7 +397,6 @@ export const legacyMigrate = async ({
   if (!siemNotificationsExist && !legacyRuleNotificationSOsExist) {
     return rule;
   }
-
   // If the legacy notification rule type ("siem.notification") exist,
   // migration and cleanup are needed
   if (siemNotificationsExist) {
@@ -417,6 +420,7 @@ export const legacyMigrate = async ({
       legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'no_actions' ||
       legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'rule'
     ) {
+      console.log('NO ACTIONS');
       return rule;
     }
 

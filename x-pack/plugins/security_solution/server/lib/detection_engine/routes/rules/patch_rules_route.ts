@@ -131,13 +131,13 @@ export const patchRulesRoute = (
           // reject an unauthorized modification of an ML rule
           throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
-
+        console.log('HERE');
         const migratedRule = await legacyMigrate({
           rulesClient,
           savedObjectsClient,
           rule: existingRule,
         });
-
+        console.log({ migratedRule });
         const rule = await patchRules({
           rulesClient,
           author,
