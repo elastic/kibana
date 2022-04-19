@@ -17729,7 +17729,6 @@
     "xpack.ml.jobsList.multiJobsActions.startDatafeedsLabel": "{jobsCount, plural, other  {データフィード}}を開始",
     "xpack.ml.jobsList.multiJobsActions.stopDatafeedsLabel": "{jobsCount, plural, other  {データフィード}}を停止",
     "xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText": "Elastic Cloud 展開",
-    "xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription": "{link}を編集してください。1GBの空き機械学習ノードを有効にするか、既存のML構成を拡張することができます。",
     "xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableDescription": "利用可能な ML ノードがありません。",
     "xpack.ml.jobsList.nodeAvailableWarning.noMLNodesAvailableTitle": "利用可能な ML ノードがありません",
     "xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription": "ジョブの作成または実行はできません。",
