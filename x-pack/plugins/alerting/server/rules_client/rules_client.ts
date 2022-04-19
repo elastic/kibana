@@ -144,7 +144,7 @@ export interface ConstructorOptions {
   ruleTypeRegistry: RuleTypeRegistry;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  spaceId?: string;
+  spaceId: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
@@ -281,7 +281,7 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
 export class RulesClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
-  private readonly spaceId?: string;
+  private readonly spaceId: string;
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;

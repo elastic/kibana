@@ -127,7 +127,7 @@ export function createExecutionHandler<
           status: ActionsCompletion.PARTIAL,
         });
         logger.debug(
-          `The maximum number of actions (${actionsConfigMap.default.max}) for this rule type (ruleId:${ruleId}) has been reached`
+          `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
         );
         break;
       }
@@ -140,7 +140,7 @@ export function createExecutionHandler<
       ) {
         if (!alertExecutionStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
           logger.debug(
-            `The maximum number of actions (${actionsConfigMap[actionTypeId].max}) for the connector "${actionTypeId}" has been reached`
+            `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
           );
         }
         alertExecutionStore.setTriggeredActionsStatusByConnectorType({
