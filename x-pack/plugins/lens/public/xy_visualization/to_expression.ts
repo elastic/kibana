@@ -381,11 +381,7 @@ export const buildExpression = (
               )
             ),
             ...validAnnotationsLayers.map((layer) =>
-              annotationLayerToExpression(
-                layer,
-                eventAnnotationService,
-                datasourceExpressionsByLayers[layer.layerId]
-              )
+              annotationLayerToExpression(layer, eventAnnotationService)
             ),
           ],
         },
@@ -427,18 +423,16 @@ const referenceLineLayerToExpression = (
 
 const annotationLayerToExpression = (
   layer: XYAnnotationLayerConfig,
-  eventAnnotationService: EventAnnotationServiceType,
-  datasourceExpression: Ast
+  eventAnnotationService: EventAnnotationServiceType
 ): Ast => {
   return {
     type: 'expression',
     chain: [
       {
         type: 'function',
-        function: 'extendedAnnotationLayer',
+        function: 'annotationLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
           annotations: layer.annotations
             ? layer.annotations.map(
                 (ann): Ast =>

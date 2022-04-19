@@ -12,29 +12,30 @@ import { calculateMinInterval } from './interval';
 
 describe('calculateMinInterval', () => {
   let xyProps: XYChartProps;
-
+  let layer: DataLayerConfigResult;
   beforeEach(() => {
     const { layers, ...restArgs } = sampleArgs().args;
 
     xyProps = { args: { ...restArgs, layers } };
-
-    (xyProps.args.layers[0] as DataLayerConfigResult).xScaleType = 'time';
+    layer = xyProps.args.layers[0] as DataLayerConfigResult;
+    layer.xScaleType = 'time';
   });
   it('should use first valid layer and determine interval', async () => {
-    xyProps.args.layers[0].table.columns[2].meta.source = 'esaggs';
-    xyProps.args.layers[0].table.columns[2].meta.sourceParams = {
+    layer.table.columns[2].meta.source = 'esaggs';
+    layer.table.columns[2].meta.sourceParams = {
       type: 'date_histogram',
       params: {
         used_interval: '5m',
       },
     };
+    xyProps.args.layers[0] = layer;
     const result = await calculateMinInterval(xyProps);
     expect(result).toEqual(5 * 60 * 1000);
   });
 
   it('should return interval of number histogram if available on first x axis columns', async () => {
-    (xyProps.args.layers[0] as DataLayerConfigResult).xScaleType = 'linear';
-    xyProps.args.layers[0].table.columns[2].meta = {
+    layer.xScaleType = 'linear';
+    layer.table.columns[2].meta = {
       source: 'esaggs',
       type: 'number',
       field: 'someField',
@@ -46,19 +47,22 @@ describe('calculateMinInterval', () => {
         },
       },
     };
+    xyProps.args.layers[0] = layer;
     const result = await calculateMinInterval(xyProps);
     expect(result).toEqual(5);
   });
 
   it('should return undefined if data table is empty', async () => {
-    xyProps.args.layers[0].table.rows = [];
-    xyProps.args.layers[0].table.columns[2].meta.source = 'esaggs';
-    xyProps.args.layers[0].table.columns[2].meta.sourceParams = {
+    layer.table.rows = [];
+    layer.table.columns[2].meta.source = 'esaggs';
+    layer.table.columns[2].meta.sourceParams = {
       type: 'date_histogram',
       params: {
         used_interval: '5m',
       },
     };
+
+    xyProps.args.layers[0] = layer;
     const result = await calculateMinInterval(xyProps);
     expect(result).toEqual(undefined);
   });
@@ -69,13 +73,15 @@ describe('calculateMinInterval', () => {
   });
 
   it('should return undefined if date column is not found', async () => {
-    xyProps.args.layers[0].table.columns.splice(2, 1);
+    layer.table.columns.splice(2, 1);
+    xyProps.args.layers[0] = layer;
     const result = await calculateMinInterval(xyProps);
     expect(result).toEqual(undefined);
   });
 
   it('should return undefined if x axis is not a date', async () => {
-    (xyProps.args.layers[0] as DataLayerConfigResult).xScaleType = 'ordinal';
+    layer.xScaleType = 'ordinal';
+    xyProps.args.layers[0] = layer;
     xyProps.args.layers[0].table.columns.splice(2, 1);
     const result = await calculateMinInterval(xyProps);
     expect(result).toEqual(undefined);

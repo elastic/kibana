@@ -38,7 +38,6 @@ import {
   EXTENDED_REFERENCE_LINE_LAYER,
   ANNOTATION_LAYER,
   EndValues,
-  EXTENDED_ANNOTATION_LAYER,
   EXTENDED_Y_CONFIG,
   AvailableReferenceLineIcons,
 } from '../constants';
@@ -191,7 +190,7 @@ export interface XYArgs {
   valueLabels: ValueLabelMode;
   dataLayers: DataLayerConfigResult[];
   referenceLineLayers: ReferenceLineLayerConfigResult[];
-  annotationLayers: AnnotationLayerConfigResult[];
+  annotationLayers: CommonXYAnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -255,22 +254,9 @@ export interface AnnotationLayerArgs {
   hide?: boolean;
 }
 
-export interface ExtendedAnnotationLayerArgs {
-  annotations: EventAnnotationOutput[];
-  hide?: boolean;
-  table?: Datatable;
-}
-
-export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
+export type CommonXYAnnotationLayerConfigResult = AnnotationLayerArgs & {
   type: typeof ANNOTATION_LAYER;
   layerType: typeof LayerTypes.ANNOTATIONS;
-  table: Datatable;
-};
-
-export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & {
-  type: typeof EXTENDED_ANNOTATION_LAYER;
-  layerType: typeof LayerTypes.ANNOTATIONS;
-  table: Datatable;
 };
 
 export interface ReferenceLineLayerArgs {
@@ -291,12 +277,12 @@ export type XYLayerArgs = DataLayerArgs | ReferenceLineLayerArgs | AnnotationLay
 export type XYLayerConfigResult =
   | DataLayerConfigResult
   | ReferenceLineLayerConfigResult
-  | AnnotationLayerConfigResult;
+  | CommonXYAnnotationLayerConfigResult;
 
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult
-  | ExtendedAnnotationLayerConfigResult;
+  | CommonXYAnnotationLayerConfigResult;
 
 export interface LensMultiTable {
   type: typeof MULTITABLE;
@@ -354,7 +340,3 @@ export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedData
 export type CommonXYReferenceLineLayerConfigResult =
   | ReferenceLineLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult;
-
-export type CommonXYAnnotationLayerConfigResult =
-  | AnnotationLayerConfigResult
-  | ExtendedAnnotationLayerConfigResult;

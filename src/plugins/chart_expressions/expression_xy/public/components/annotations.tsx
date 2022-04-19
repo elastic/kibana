@@ -24,7 +24,6 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
 import type {
   AnnotationLayerArgs,
-  ExtendedAnnotationLayerArgs,
   CommonXYAnnotationLayerConfigResult,
   CollectiveConfig,
 } from '../../common';
@@ -49,7 +48,7 @@ export interface AnnotationsProps {
 }
 
 const groupVisibleConfigsByInterval = (
-  layers: Array<AnnotationLayerArgs | ExtendedAnnotationLayerArgs>,
+  layers: AnnotationLayerArgs[],
   minInterval?: number,
   firstTimestamp?: number
 ) => {

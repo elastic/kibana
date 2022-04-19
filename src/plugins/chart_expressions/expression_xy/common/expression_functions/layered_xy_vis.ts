@@ -24,7 +24,7 @@ import {
   EXTENDED_REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
   EndValues,
-  EXTENDED_ANNOTATION_LAYER,
+  ANNOTATION_LAYER,
 } from '../constants';
 import { logDatatables } from '../utils';
 
@@ -130,7 +130,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       }),
     },
     layers: {
-      types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER, EXTENDED_ANNOTATION_LAYER],
+      types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER, ANNOTATION_LAYER],
       help: i18n.translate('expressionXY.layeredXyVis.layers.help', {
         defaultMessage: 'Layers of visual series',
       }),

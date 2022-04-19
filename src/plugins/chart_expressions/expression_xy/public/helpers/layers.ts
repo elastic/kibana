@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Datatable } from '@kbn/expressions-plugin/common';
 import {
   CommonXYDataLayerConfigResult,
   CommonXYLayerConfigResult,
@@ -16,7 +17,7 @@ import { isDataLayer, isReferenceLayer } from './visualization';
 export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
   return layers.filter<CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult>(
     (layer): layer is CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult => {
-      const { table } = layer;
+      let table: Datatable | undefined;
       let accessors: string[] = [];
       let xAccessor: undefined | string | number;
       let splitAccessor: undefined | string | number;
@@ -27,6 +28,7 @@ export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
       }
 
       if (isDataLayer(layer) || isReferenceLayer(layer)) {
+        table = layer.table;
         accessors = layer.accessors;
       }
 

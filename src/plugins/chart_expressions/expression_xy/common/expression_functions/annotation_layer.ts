@@ -9,13 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, ANNOTATION_LAYER } from '../constants';
-import { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../types';
+import { AnnotationLayerArgs, CommonXYAnnotationLayerConfigResult } from '../types';
 
 export function annotationLayerFunction(): ExpressionFunctionDefinition<
   typeof ANNOTATION_LAYER,
   Datatable,
   AnnotationLayerArgs,
-  AnnotationLayerConfigResult
+  CommonXYAnnotationLayerConfigResult
 > {
   return {
     name: ANNOTATION_LAYER,
@@ -47,7 +47,6 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
         ...args,
         annotations: args.annotations ?? [],
         layerType: LayerTypes.ANNOTATIONS,
-        table: input,
       };
     },
   };

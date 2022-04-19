@@ -30,7 +30,7 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
-import { AnnotationLayerConfigResult, DataLayerConfigResult } from '../../common';
+import { CommonXYAnnotationLayerConfigResult, DataLayerConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { XyEndzones } from './x_domain';
 import {
@@ -214,8 +214,8 @@ describe('XYChart component', () => {
           args={{
             ...multiLayerArgs,
             layers: [
-              { ...multiLayerArgs.layers[0], table: table1 },
-              { ...multiLayerArgs.layers[1], table: table2 },
+              { ...(multiLayerArgs.layers[0] as DataLayerConfigResult), table: table1 },
+              { ...(multiLayerArgs.layers[1] as DataLayerConfigResult), table: table2 },
             ],
           }}
         />
@@ -2520,7 +2520,7 @@ describe('XYChart component', () => {
       lineStyle: 'dashed',
       lineWidth: 3,
     };
-    const sampleAnnotationLayers: AnnotationLayerConfigResult[] = [
+    const sampleAnnotationLayers: CommonXYAnnotationLayerConfigResult[] = [
       {
         type: 'annotationLayer',
         layerType: LayerTypes.ANNOTATIONS,
@@ -2531,7 +2531,6 @@ describe('XYChart component', () => {
             type: 'manual_event_annotation',
           },
         ],
-        table: sampleArgs().data,
       },
     ];
 
@@ -2551,7 +2550,7 @@ describe('XYChart component', () => {
     });
     test('should render simplified annotation when hide is true', () => {
       const { args } = sampleArgsWithAnnotation();
-      (args.layers[0] as AnnotationLayerConfigResult).hide = true;
+      (args.layers[0] as CommonXYAnnotationLayerConfigResult).hide = true;
       const component = mount(<XYChart {...defaultProps} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
     });
@@ -2561,7 +2560,6 @@ describe('XYChart component', () => {
         {
           type: 'annotationLayer',
           layerType: LayerTypes.ANNOTATIONS,
-          table: sampleArgs().data,
           annotations: [
             sampleStyledAnnotation,
             { ...sampleStyledAnnotation, time: '2022-03-18T08:25:00.020Z', label: 'Event 2' },
@@ -2597,12 +2595,10 @@ describe('XYChart component', () => {
           type: 'annotationLayer',
           layerType: LayerTypes.ANNOTATIONS,
           annotations: [sampleStyledAnnotation],
-          table: sampleArgs().data,
         },
         {
           type: 'annotationLayer',
           layerType: LayerTypes.ANNOTATIONS,
-          table: sampleArgs().data,
           annotations: [
             {
               ...sampleStyledAnnotation,
@@ -2628,7 +2624,6 @@ describe('XYChart component', () => {
         {
           type: 'annotationLayer',
           layerType: LayerTypes.ANNOTATIONS,
-          table: sampleArgs().data,
           annotations: [
             sampleStyledAnnotation,
             { ...sampleStyledAnnotation, time: '2022-03-18T08:30:00.020Z', label: 'Event 2' },

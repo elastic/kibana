@@ -25,7 +25,6 @@ import {
   extendedDataLayerFunction,
   extendedReferenceLineLayerFunction,
   layeredXyVisFunction,
-  extendedAnnotationLayerFunction,
 } from '../common';
 import { SetupDeps } from './types';
 
@@ -42,7 +41,6 @@ export class ExpressionXyPlugin
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
-    expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(extendedReferenceLineLayerFunction);

@@ -154,7 +154,7 @@ export function XYChart({
   );
 
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-    datatables: layers.map(({ table }) => table),
+    datatables: filteredLayers.map(({ table }) => table),
   });
 
   if (filteredLayers.length === 0) {
@@ -229,7 +229,9 @@ export function XYChart({
       axisSeries
         .map(
           (series) =>
-            layers[series.layer].table.columns.find((column) => column.id === series.accessor)?.name
+            filteredLayers[series.layer].table.columns.find(
+              (column) => column.id === series.accessor
+            )?.name
         )
         .filter((name) => Boolean(name))[0]
     );
