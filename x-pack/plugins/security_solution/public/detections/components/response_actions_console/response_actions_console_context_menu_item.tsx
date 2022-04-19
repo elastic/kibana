@@ -10,7 +10,7 @@ import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { useGetEndpointHostInfo } from '../../../management/hooks/use_get_endpoint_host_info';
+import { useGetEndpointHostInfo } from '../../../management/hooks/endpoint/use_get_endpoint_host_info';
 import { useShowEndpointResponseActionsConsole } from '../../../management/hooks';
 
 export interface ResponseActionsConsoleContextMenuItemProps {

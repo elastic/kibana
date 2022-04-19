@@ -7,10 +7,10 @@
 
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
 import type { HttpFetchError } from '@kbn/core/public';
-import { resolvePathVariables } from '../../common/utils/resolve_path_variables';
-import { useHttp } from '../../common/lib/kibana';
-import type { HostInfo } from '../../../common/endpoint/types';
-import { HOST_METADATA_GET_ROUTE } from '../../../common/endpoint/constants';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
+import { useHttp } from '../../../common/lib/kibana';
+import type { HostInfo } from '../../../../common/endpoint/types';
+import { HOST_METADATA_GET_ROUTE } from '../../../../common/endpoint/constants';
 
 /**
  * Get info for a security solution endpoint host using the endpoint id (`agent.id`)

@@ -6,9 +6,9 @@
  */
 
 import { useCallback } from 'react';
-import { EndpointConsoleCommandService } from '../components/endpoint_console/endpoint_console_command_service';
-import { useConsoleManager } from '../components/console';
-import { HostInfo } from '../../../common/endpoint/types';
+import { EndpointConsoleCommandService } from '../../components/endpoint_console/endpoint_console_command_service';
+import { useConsoleManager } from '../../components/console';
+import { HostInfo } from '../../../../common/endpoint/types';
 
 export const useShowEndpointResponseActionsConsole = (): ((endpointHostInfo: HostInfo) => void) => {
   const consoleManager = useConsoleManager();

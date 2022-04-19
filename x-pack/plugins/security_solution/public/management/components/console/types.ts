@@ -46,22 +46,26 @@ export interface Command {
   commandDefinition: CommandDefinition;
 }
 
+export interface CommandExecutionResponse {
+  result: ReactNode;
+}
+
 export interface CommandServiceInterface {
   getCommandList(): CommandDefinition[];
 
-  executeCommand(command: Command): Promise<{ result: ReactNode }>;
+  executeCommand(command: Command): Promise<CommandExecutionResponse>;
 
   /**
    * If defined, then the `help` builtin command will display this output instead of the default one
    * which is generated out of the Command list
    */
-  getHelp?: () => Promise<{ result: ReactNode }>;
+  getHelp?: () => Promise<CommandExecutionResponse>;
 
   /**
    * If defined, then the output of this function will be used to display individual
    * command help (`--help`)
    */
-  getCommandUsage?: (command: CommandDefinition) => Promise<{ result: ReactNode }>;
+  getCommandUsage?: (command: CommandDefinition) => Promise<CommandExecutionResponse>;
 }
 
 export interface ConsoleProps extends CommonProps {
