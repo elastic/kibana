@@ -523,9 +523,8 @@
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-solution-platform
 /packages/kbn-securitysolution* @elastic/security-solution-platform
 
-
-## Security Solution sub teams - Security Threat Intelligence
-/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-threat-intelligence
+## Security Threat Intelligence - Under Security Platform
+/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-solution-platform
 
 ## Security Solution cross teams ownership
 /x-pack/plugins/security_solution/cypress/downloads @elastic/security-detections-response @elastic/security-threat-hunting
