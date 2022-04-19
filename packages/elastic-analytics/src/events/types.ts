@@ -8,7 +8,34 @@
 
 import type { ShipperName } from '../analytics_client';
 
+/**
+ * Definition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}.
+ */
 export interface EventContext {
+  /**
+   * The unique user ID.
+   */
+  userId?: string;
+  /**
+   * The user's organization ID.
+   */
+  esOrgId?: string;
+  /**
+   * The product's version.
+   */
+  version?: string;
+  /**
+   * The name of the current page.
+   */
+  pageName?: string;
+  /**
+   * The current application ID.
+   */
+  applicationId?: string;
+  /**
+   * The current entity ID (dashboard ID, visualization ID, etc.).
+   */
+  entityId?: string;
   // TODO: Extend with known keys
   [key: string]: unknown;
 }

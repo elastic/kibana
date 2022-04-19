@@ -39,6 +39,7 @@ import { getExternalRoutes } from './routes/api/get_external_routes';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
+import { getInternalRoutes } from './routes/api/get_internal_routes';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -130,7 +131,7 @@ export class CasePlugin {
 
     registerRoutes({
       router,
-      routes: getExternalRoutes(),
+      routes: [...getExternalRoutes(), ...getInternalRoutes()],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,

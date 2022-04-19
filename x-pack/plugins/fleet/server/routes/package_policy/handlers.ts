@@ -112,7 +112,16 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       force,
       spaceId,
     });
-    const body: CreatePackagePolicyResponse = { item: packagePolicy };
+
+    const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyPostCreate',
+      packagePolicy,
+      context,
+      request
+    );
+
+    const body: CreatePackagePolicyResponse = { item: enrichedPackagePolicy };
+
     return response.ok({
       body,
     });

@@ -319,41 +319,37 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           }
 
           return synthtraceEsClient.index([
-            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_SUCCESS).generator((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(GO_A_INSTANCE_RATE_FAILURE).spans((timestamp) =>
+            interval.rate(GO_A_INSTANCE_RATE_FAILURE).generator((timestamp) =>
               goInstanceA
                 .transaction('GET /api/product/list')
                 .failure()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).spans((timestamp) =>
+            interval.rate(GO_B_INSTANCE_RATE_SUCCESS).generator((timestamp) =>
               goInstanceB
                 .transaction('GET /api/product/list')
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
-            interval.rate(JAVA_INSTANCE_RATE).spans((timestamp) =>
+            interval.rate(JAVA_INSTANCE_RATE).generator((timestamp) =>
               javaInstance
                 .transaction('GET /api/product/list')
                 .success()
                 .duration(500)
                 .timestamp(timestamp)
                 .children(...withSpans(timestamp))
-                .serialize()
             ),
           ]);
         });
