@@ -75,7 +75,10 @@ export const EnablementEmptyState = ({ focusButton }: { focusButton: boolean }) 
           <EuiTitle size="xxs">
             <h3>{LEARN_MORE_LABEL}</h3>
           </EuiTitle>
-          <EuiLink href="#" target="_blank">
+          <EuiLink
+            href="https://docs.google.com/document/d/1hkzFibu9LggPWXQqfbAd0mMlV75wCME7_BebXlEH-oI"
+            target="_blank"
+          >
             {DOCS_LABEL}
           </EuiLink>
         </>
@@ -102,7 +105,7 @@ const MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE = i18n.translate(
   'xpack.uptime.monitorManagement.emptyState.enablement',
   {
     defaultMessage:
-      'Enable Monitor Management to run lightweight checks and real-browser monitors from hosted testing locations around the world. Enabling Monitor Management will generate an API key to allow the Synthetics Service to write back to your Elasticsearch cluster.',
+      'Enable Monitor Management to run lightweight and real-browser monitors from hosted testing locations around the world. Enabling Monitor Management will generate an API key to allow the Synthetics Service to write back to your Elasticsearch cluster.',
   }
 );
 
@@ -110,7 +113,7 @@ const MONITOR_MANAGEMENT_DISABLED_MESSAGE = i18n.translate(
   'xpack.uptime.monitorManagement.emptyState.enablement.disabledDescription',
   {
     defaultMessage:
-      'Monitor Management is currently disabled. Monitor Management allows you to run lightweight checks and real-browser monitors from hosted testing locations around the world. To enable Monitor Management, please contact an administrator.',
+      'Monitor Management is currently disabled. Monitor Management allows you to run lightweight and real-browser monitors from hosted testing locations around the world. To enable Monitor Management, please contact an administrator.',
   }
 );
 
