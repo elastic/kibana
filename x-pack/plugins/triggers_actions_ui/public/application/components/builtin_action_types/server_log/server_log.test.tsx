@@ -37,6 +37,7 @@ describe('server-log connector validation', () => {
       name: 'server-log',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({

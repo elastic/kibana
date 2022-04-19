@@ -21,6 +21,7 @@ describe('ResilientActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.resilient',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'resilient',
       config: {
         apiUrl: 'https://test/',
@@ -62,6 +63,7 @@ describe('ResilientActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.resilient',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'resilient',
       config: {
         apiUrl: 'https://test/',
@@ -99,6 +101,7 @@ describe('ResilientActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.resilient',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {},
       secrets: {},
     } as ResilientActionConnector;
@@ -121,6 +124,7 @@ describe('ResilientActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.resilient',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {},
       secrets: {},
       isMissingSecrets: true,
@@ -148,6 +152,7 @@ describe('ResilientActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.resilient',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'resilient',
       config: {
         apiUrl: 'https://test/',

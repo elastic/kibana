@@ -32,6 +32,7 @@ const actionConnector = {
   actionTypeId: '.servicenow',
   name: 'ServiceNow ITSM',
   isPreconfigured: false,
+  isDeprecated: false,
   config: {
     apiUrl: 'https://test.service-now.com/',
     usesTableApi: false,

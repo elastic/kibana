@@ -50,6 +50,7 @@ describe('servicenow connector validation', () => {
         actionTypeId: id,
         name: 'ServiceNow',
         isPreconfigured: false,
+        isDeprecated: false,
         config: {
           apiUrl: 'https://dev94428.service-now.com/',
           usesTableApi: false,

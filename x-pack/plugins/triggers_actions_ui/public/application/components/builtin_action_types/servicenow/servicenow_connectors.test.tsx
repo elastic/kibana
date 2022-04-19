@@ -96,6 +96,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.servicenow',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {},
       secrets: {},
     } as ServiceNowActionConnector;
@@ -119,6 +120,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.servicenow',
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: true,
       config: {},
       secrets: {},
