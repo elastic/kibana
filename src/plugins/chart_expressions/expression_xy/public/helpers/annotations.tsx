@@ -27,6 +27,11 @@ type PartialExtendedYConfig = Pick<
 
 type PartialCollectiveConfig = Pick<CollectiveConfig, 'axisMode' | 'icon' | 'textVisibility'>;
 
+const isExtendedYConfig = (
+  config: PartialExtendedYConfig | PartialCollectiveConfig | undefined
+): config is PartialExtendedYConfig =>
+  (config as PartialExtendedYConfig)?.iconPosition ? true : false;
+
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
   visualConfigs: Array<PartialExtendedYConfig | PartialCollectiveConfig | undefined>,
@@ -40,7 +45,7 @@ export const getLinesCausedPaddings = (
       return;
     }
     const { axisMode, icon, textVisibility } = config;
-    const iconPosition = (config as PartialExtendedYConfig).iconPosition ?? undefined;
+    const iconPosition = isExtendedYConfig(config) ? config.iconPosition : undefined;
 
     if (axisMode && (hasIcon(icon) || textVisibility)) {
       const placement = getBaseIconPlacement(iconPosition, axesMap, axisMode);
