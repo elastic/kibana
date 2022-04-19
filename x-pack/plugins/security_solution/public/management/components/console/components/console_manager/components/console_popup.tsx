@@ -22,11 +22,11 @@ import { ConfirmTerminate } from './confirm_terminate';
 
 const ConsolePopupWrapper = styled.div`
   position: fixed;
-  top: 100px;
-  right: 0;
-  min-height: 60vh;
-  min-width: 40vw;
-  max-width: 70vw;
+  bottom: 60px;
+  left: 20px;
+  height: 70vh;
+  width: 48vw;
+  max-width: 90vw;
 
   &.is-hidden {
     display: none;

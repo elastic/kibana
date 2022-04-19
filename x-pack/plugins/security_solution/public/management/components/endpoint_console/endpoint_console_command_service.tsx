@@ -6,17 +6,20 @@
  */
 
 import React, { ReactNode } from 'react';
+import { HostInfo } from '../../../../common/endpoint/types';
 import { CommandServiceInterface, CommandDefinition, Command } from '../console';
 
 /**
  * Endpoint specific Response Actions (commands) for use with Console.
  */
 export class EndpointConsoleCommandService implements CommandServiceInterface {
+  constructor(private readonly endpointHostInfo: HostInfo) {}
+
   getCommandList(): CommandDefinition[] {
     return [];
   }
 
   async executeCommand(command: Command): Promise<{ result: ReactNode }> {
-    return { result: <></> };
+    return { result: <>{`done for host ${this.endpointHostInfo.metadata.agent.id}`}</> };
   }
 }
