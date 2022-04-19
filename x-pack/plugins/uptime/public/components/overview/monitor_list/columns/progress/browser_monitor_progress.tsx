@@ -34,13 +34,14 @@ export const BrowserMonitorProgress = ({
   updateMonitorStatus: () => void;
   stopProgressTrack: () => void;
 }) => {
-  const { data, summariesLoading, checkGroupResults, lastUpdated } = useBrowserRunOnceMonitors({
-    configId,
-    testRunId,
-    refresh: false,
-    skipDetails: true,
-    expectSummaryDocs: expectPings,
-  });
+  const { data, checkGroupResults, lastUpdated, expectedSummariesLoaded } =
+    useBrowserRunOnceMonitors({
+      configId,
+      testRunId,
+      refresh: false,
+      skipDetails: true,
+      expectSummaryDocs: expectPings,
+    });
 
   const journeyStarted = checkGroupResults.some((result) => result.journeyStarted);
   const [passedTime, setPassedTime] = useState(0);
@@ -48,10 +49,10 @@ export const BrowserMonitorProgress = ({
   const startTime = useRef(Date.now());
 
   useEffect(() => {
-    if (!summariesLoading) {
+    if (expectedSummariesLoaded) {
       updateMonitorStatus();
     }
-  }, [updateMonitorStatus, summariesLoading]);
+  }, [updateMonitorStatus, expectedSummariesLoaded]);
 
   useEffect(() => {
     setPassedTime((Date.now() - startTime.current) * 1000);
