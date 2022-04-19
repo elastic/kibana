@@ -7,7 +7,7 @@
  */
 
 import * as path from 'path';
-import { StorybookConfig } from '@storybook/core-common';
+import type { StorybookConfig } from '@storybook/core-common';
 import { Configuration } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './constants';

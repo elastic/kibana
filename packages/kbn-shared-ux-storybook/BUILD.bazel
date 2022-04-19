@@ -61,6 +61,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@storybook/react",
   "@npm//@storybook/addon-actions",
+  "@npm//@storybook/core-common",
 ]
 
 jsts_transpiler(
