@@ -70,6 +70,7 @@ export const usePackQueryErrors = ({
       });
 
       searchSource.setField('index', logsDataView);
+
       return lastValueFrom(searchSource.fetch$());
     },
     {
