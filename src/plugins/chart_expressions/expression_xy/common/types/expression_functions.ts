@@ -202,6 +202,7 @@ export interface XYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  showTooltip?: boolean;
 }
 
 export interface LayeredXYArgs {
@@ -225,6 +226,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  showTooltip?: boolean;
 }
 
 export interface XYProps {
@@ -248,6 +250,7 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  showTooltip: boolean;
 }
 
 export interface AnnotationLayerArgs {

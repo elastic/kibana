@@ -24,6 +24,7 @@ import {
   DisplayValueStyle,
   RecursivePartial,
   AxisStyle,
+  TooltipType,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -526,6 +527,7 @@ export function XYChart({
         tooltip={{
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
+          type: args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None,
         }}
         allowBrushingLastHistogramBin={isTimeViz}
         rotation={shouldRotate ? 90 : 0}

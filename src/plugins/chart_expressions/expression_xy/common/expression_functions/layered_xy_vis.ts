@@ -171,6 +171,13 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       }),
       required: false,
     },
+    showTooltip: {
+      types: ['boolean'],
+      default: true,
+      help: i18n.translate('expressionXY.layeredXyVis.showTooltip.help', {
+        defaultMessage: 'Show tooltip',
+      }),
+    },
   },
   fn(data, args, handlers) {
     const layers = (args.layers ?? []).filter<XYExtendedLayerConfigResult>(
@@ -185,6 +192,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
       value: {
         args: {
           ...args,
+          showTooltip: args.showTooltip ?? false,
           layers,
           ariaLabel:
             args.ariaLabel ??

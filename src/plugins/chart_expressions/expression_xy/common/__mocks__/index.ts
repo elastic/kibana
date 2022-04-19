@@ -67,6 +67,7 @@ export const createArgsWithLayers = (
   xTitle: '',
   yTitle: '',
   yRightTitle: '',
+  showTooltip: true,
   legend: {
     type: 'legendConfig',
     isVisible: false,

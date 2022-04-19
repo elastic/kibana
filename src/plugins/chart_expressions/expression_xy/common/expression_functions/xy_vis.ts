@@ -243,6 +243,13 @@ export const xyVisFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Specifies the aria label of the xy chart',
       }),
     },
+    showTooltip: {
+      types: ['boolean'],
+      default: true,
+      help: i18n.translate('expressionXY.xyVis.showTooltip.help', {
+        defaultMessage: 'Show tooltip',
+      }),
+    },
   },
   fn(data, args, handlers) {
     const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
@@ -293,6 +300,7 @@ export const xyVisFunction: ExpressionFunctionDefinition<
       value: {
         args: {
           ...restArgs,
+          showTooltip: args.showTooltip ?? false,
           layers,
           ariaLabel:
             args.ariaLabel ??

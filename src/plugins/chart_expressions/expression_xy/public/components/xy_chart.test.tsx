@@ -2064,6 +2064,7 @@ describe('XYChart component', () => {
     };
 
     const args: XYProps = {
+      showTooltip: true,
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
@@ -2151,6 +2152,7 @@ describe('XYChart component', () => {
     };
 
     const args: XYProps = {
+      showTooltip: true,
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
@@ -2222,6 +2224,7 @@ describe('XYChart component', () => {
     };
 
     const args: XYProps = {
+      showTooltip: true,
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
