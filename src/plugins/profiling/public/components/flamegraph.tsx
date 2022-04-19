@@ -57,18 +57,11 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
           id={id}
           data={ctx.leaves}
           layers={layers}
+          drilldown
+          maxRowCount={1}
+          layout={PartitionLayout.icicle}
           valueAccessor={(d: any) => d.value as number}
           valueFormatter={() => ''}
-          config={{
-            partitionLayout: PartitionLayout.icicle,
-            drilldown: true,
-            fillLabel: {
-              padding: { left: 0, right: 0, top: 0, bottom: 0 },
-            },
-            minFontSize: 5,
-            maxFontSize: 20,
-            maxRowCount: 1,
-          }}
         />
       </Chart>
     </>
