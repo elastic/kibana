@@ -11,8 +11,8 @@ import {
   postApmInstanceRequestParamsRT,
   postApmInstanceRequestPayloadRT,
 } from '../../../../../common/http_api/apm';
-import { createValidationFunction } from '../../../../../common/runtime_types';
 import { getApmInfo } from '../../../../lib/apm';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
 import { MonitoringCore } from '../../../../types';

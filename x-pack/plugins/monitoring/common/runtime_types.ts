@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { RouteValidationFunction } from '../../../../src/core/server';
+import { Context, IntersectionType, UnionType, ValidationError } from 'io-ts';
 
 const getErrorPath = ([first, ...rest]: Context): string[] => {
   if (typeof first === 'undefined') {
@@ -34,20 +30,5 @@ const formatError = (error: ValidationError) =>
     error.value
   )} does not match expected type ${getErrorType(error)}`;
 
-const formatErrors = (errors: ValidationError[]) =>
+export const formatErrors = (errors: ValidationError[]) =>
   `Failed to validate: \n${errors.map((error) => `  ${formatError(error)}`).join('\n')}`;
-
-type ValdidationResult<Value> = ReturnType<RouteValidationFunction<Value>>;
-
-export const createValidationFunction =
-  <DecodedValue, EncodedValue, InputValue>(
-    runtimeType: Type<DecodedValue, EncodedValue, InputValue>
-  ): RouteValidationFunction<DecodedValue> =>
-  (inputValue, { badRequest, ok }) =>
-    pipe(
-      runtimeType.decode(inputValue),
-      fold<Errors, DecodedValue, ValdidationResult<DecodedValue>>(
-        (errors: Errors) => badRequest(formatErrors(errors)),
-        (result: DecodedValue) => ok(result)
-      )
-    );

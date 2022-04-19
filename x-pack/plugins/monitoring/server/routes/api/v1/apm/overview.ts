@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { getMetrics } from '../../../../lib/details/get_metrics';
-import { metricSet } from './metric_set_overview';
-import { handleError } from '../../../../lib/errors';
-import { getApmClusterStatus } from './_get_apm_cluster_status';
 import {
   postApmOverviewRequestParamsRT,
   postApmOverviewRequestPayloadRT,
 } from '../../../../../common/http_api/apm';
-import { createValidationFunction } from '../../../../../common/runtime_types';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { getMetrics } from '../../../../lib/details/get_metrics';
+import { handleError } from '../../../../lib/errors';
 import { MonitoringCore } from '../../../../types';
+import { metricSet } from './metric_set_overview';
+import { getApmClusterStatus } from './_get_apm_cluster_status';
 
 export function apmOverviewRoute(server: MonitoringCore) {
   server.route({
