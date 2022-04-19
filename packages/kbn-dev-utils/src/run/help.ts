@@ -11,9 +11,9 @@ import Path from 'path';
 import chalk from 'chalk';
 import 'core-js/features/string/repeat';
 import dedent from 'dedent';
+import { getLogLevelFlagsHelp } from '@kbn/tooling-log';
 
 import { Command } from './run_with_commands';
-import { getLogLevelFlagsHelp } from '../tooling_log/log_levels';
 
 const DEFAULT_GLOBAL_USAGE = `node ${Path.relative(process.cwd(), process.argv[1])}`;
 export const GLOBAL_FLAGS = dedent`

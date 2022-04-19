@@ -94,6 +94,9 @@ export type ActionTypeRegistryContract<
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
+export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
+  TypeRegistry<AlertsTableConfigurationRegistry>
+>;
 
 export type ActionConnectorFieldsCallbacks = {
   beforeActionConnectorSave?: () => Promise<void>;
@@ -394,9 +397,9 @@ export interface BulkActionsObjectProp {
 }
 
 export interface AlertsTableProps {
+  configurationId: string;
   consumers: AlertConsumers[];
   bulkActions: BulkActionsObjectProp;
-  columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
@@ -415,3 +418,8 @@ export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
   alert: AlertsData;
   field: AlertsField;
 };
+
+export interface AlertsTableConfigurationRegistry {
+  id: string;
+  columns: EuiDataGridColumn[];
+}

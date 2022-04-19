@@ -4,17 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useMemo, Suspense, lazy } from 'react';
+
+import React, { useState, Suspense, lazy, useCallback, useMemo } from 'react';
 import {
   EuiDataGrid,
+  EuiEmptyPrompt,
   EuiDataGridCellValueElementProps,
   EuiDataGridCellValueProps,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps, AlertsField } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
 import { getLeadingControlColumns } from './lib';
-// import AlertsFlyout from './alerts_flyout';
+import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
+
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
+
+const emptyConfiguration = {
+  id: '',
+  columns: [],
+};
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const { activePage, alertsCount, onPageChange, onSortChange } = props.useFetchAlertsData();
@@ -34,7 +43,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alertsCount,
   });
 
-  const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
+  const alertsTableConfigurationRegistry = useKibana().services.alertsTableConfigurationRegistry;
+  const hasAlertsTableConfiguration = alertsTableConfigurationRegistry.has(props.configurationId);
+  const alertsTableConfiguration = hasAlertsTableConfiguration
+    ? alertsTableConfigurationRegistry.get(props.configurationId)
+    : emptyConfiguration;
+
+  const [visibleColumns, setVisibleColumns] = useState(
+    alertsTableConfiguration.columns.map(({ id }) => id)
+  );
 
   const leadingControlColumns = useMemo(() => {
     return getLeadingControlColumns({
@@ -45,7 +62,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [props.leadingControlColumns, flyoutAlertIndex, setFlyoutAlertIndex]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
-  return (
+
+  return hasAlertsTableConfiguration ? (
     <section data-test-subj={props['data-test-subj']}>
       {flyoutAlertIndex > -1 && (
         <Suspense fallback={null}>
@@ -59,7 +77,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       )}
       <EuiDataGrid
         aria-label="Alerts table"
-        columns={props.columns}
+        columns={alertsTableConfiguration.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
         leadingControlColumns={leadingControlColumns}
@@ -82,6 +100,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         }}
       />
     </section>
+  ) : (
+    <EuiEmptyPrompt
+      data-test-subj="alerts-table-no-configuration"
+      iconType="watchesApp"
+      title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
+      body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
+    />
   );
 };
 

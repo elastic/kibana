@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-export const queryClient = new QueryClient();
+export type ReactQueryClientProviderProps = PropsWithChildren<{
+  queryClient?: QueryClient;
+}>;
 
-export const ReactQueryClientProvider = memo(({ children }) => {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-});
+export const ReactQueryClientProvider = memo<ReactQueryClientProviderProps>(
+  ({ queryClient, children }) => {
+    const client = useMemo(() => {
+      return queryClient || new QueryClient();
+    }, [queryClient]);
+    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  }
+);
 
 ReactQueryClientProvider.displayName = 'ReactQueryClientProvider';

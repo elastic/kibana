@@ -21,6 +21,7 @@ import {
   RuleRegistrySearchRequestPagination,
 } from '@kbn/rule-registry-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
 // import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
@@ -135,29 +136,9 @@ const AlertsPage: React.FunctionComponent = () => {
   };
 
   const tableProps = {
+    configurationId: PLUGIN_ID,
     consumers,
     bulkActions: [],
-    columns: [
-      {
-        id: 'event.action',
-        displayAsText: 'Alert status',
-        initialWidth: 150,
-      },
-      {
-        id: '@timestamp',
-        displayAsText: 'Last updated',
-        initialWidth: 250,
-      },
-      {
-        id: 'kibana.alert.duration.us',
-        displayAsText: 'Duration',
-        initialWidth: 150,
-      },
-      {
-        id: 'kibana.alert.reason',
-        displayAsText: 'Reason',
-      },
-    ],
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: defaultPagination.pageSize,
