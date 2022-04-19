@@ -318,6 +318,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         notifyWhen: 'onActionGroupChange',
       });
 
+      await waitForDocs(1);
+
       await createEsDocumentsInGroups(1);
 
       const docs = await waitForDocs(2);
