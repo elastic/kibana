@@ -490,6 +490,7 @@ Used for calculating automatic intervals in visualizations, this is the number
 of buckets to try to represent.
 
 [[timelion-legacyChartsLibrary]]`timelion:legacyChartsLibrary`::
+**The legacy timelion charts are deprecated and will not be supported as of 8.4.**
 Enables the legacy charts library for timelion charts in Visualize.
 
 
