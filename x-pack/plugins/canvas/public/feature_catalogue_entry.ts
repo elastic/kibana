@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 
 export const featureCatalogueEntry = {
   id: 'canvas',
