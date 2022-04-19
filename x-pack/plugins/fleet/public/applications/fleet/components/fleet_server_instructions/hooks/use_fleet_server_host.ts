@@ -71,7 +71,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
       return;
     }
 
-    // If the Fleet Server host provided already exists in settings, don't submit it again
+    // If the Fleet Server host provided already exists in settings, don't submit it
     if (settings?.item.fleet_server_hosts.includes(fleetServerHost!)) {
       setIsFleetServerHostSubmitted(true);
       return;

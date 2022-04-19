@@ -55,7 +55,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const { notifications } = useStartServices();
   const { fleetServerPolicyId, setFleetServerPolicyId } = useSelectFleetServerPolicy();
-  const { serviceToken, generateServiceToken } = useServiceToken();
+  const { serviceToken, generateServiceToken } = useServiceToken({ fleetServerPolicyId });
 
   useEffect(() => {
     if (fleetServerPolicyId) {
