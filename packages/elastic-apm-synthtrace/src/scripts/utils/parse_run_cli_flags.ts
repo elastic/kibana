@@ -8,7 +8,7 @@
 
 import { pick } from 'lodash';
 import { LogLevel } from '../../lib/utils/create_logger';
-import { RunCliFlags } from '../run';
+import { RunCliFlags } from '../run_synthtrace';
 
 export function parseRunCliFlags(flags: RunCliFlags) {
   const { file, _, logLevel } = flags;
