@@ -115,7 +115,7 @@ export const SessionView = ({
 
   const hasData = alerts && data && data.pages?.[0].events.length > 0;
   const hasError = error || alertsError;
-  const renderIsLoading = (isFetching || alertsFetching) && !data;
+  const renderIsLoading = (isFetching || alertsFetching) && !(data && alerts);
   const renderDetails = isDetailOpen && selectedProcess;
   const { data: newUpdatedAlertsStatus } = useFetchAlertStatus(
     updatedAlertsStatus,
@@ -154,7 +154,18 @@ export const SessionView = ({
     [setDisplayOptions]
   );
 
-  if (!isFetching && !hasData) {
+  if (renderIsLoading) {
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.sessionView.loadingProcessTree"
+          defaultMessage="Loading session…"
+        />
+      </SectionLoading>
+    );
+  }
+
+  if (!hasData) {
     return (
       <EuiEmptyPrompt
         data-test-subj="sessionView:sessionViewProcessEventsEmpty"
@@ -227,15 +238,6 @@ export const SessionView = ({
                 minSize="60%"
                 paddingSize="none"
               >
-                {renderIsLoading && (
-                  <SectionLoading>
-                    <FormattedMessage
-                      id="xpack.sessionView.loadingProcessTree"
-                      defaultMessage="Loading session…"
-                    />
-                  </SectionLoading>
-                )}
-
                 {hasError && (
                   <EuiEmptyPrompt
                     iconType="alert"
