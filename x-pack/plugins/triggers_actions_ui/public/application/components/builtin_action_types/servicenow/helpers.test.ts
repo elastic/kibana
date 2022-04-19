@@ -22,6 +22,7 @@ const deprecatedConnector: ActionConnector = {
   actionTypeId: '.servicenow',
   name: 'Test',
   isPreconfigured: false,
+  isDeprecated: true,
 };
 
 const validConnector = { ...deprecatedConnector, config: { usesTableApi: false } };

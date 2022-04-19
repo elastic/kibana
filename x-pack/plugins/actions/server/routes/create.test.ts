@@ -39,6 +39,7 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: false,
     };
 
@@ -46,6 +47,7 @@ describe('createActionRoute', () => {
       ...omit(createResult, ['actionTypeId', 'isPreconfigured', 'isMissingSecrets']),
       connector_type_id: createResult.actionTypeId,
       is_preconfigured: createResult.isPreconfigured,
+      is_deprecated: createResult.isDeprecated,
       is_missing_secrets: createResult.isMissingSecrets,
     };
 
@@ -104,6 +106,7 @@ describe('createActionRoute', () => {
       isMissingSecrets: false,
       config: { foo: true },
       isPreconfigured: false,
+      isDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(
@@ -143,6 +146,7 @@ describe('createActionRoute', () => {
       config: { foo: true },
       isMissingSecrets: false,
       isPreconfigured: false,
+      isDeprecated: false,
     });
 
     const [context, req, res] = mockHandlerArguments(

@@ -27,7 +27,6 @@ import { useGetChoices } from './use_get_choices';
 import { ServiceNowSIRActionParams, Fields, Choice } from './types';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
 import { DeprecatedCallout } from './deprecated_callout';
-import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -45,7 +44,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isDeprecatedActionConnector = checkConnectorIsDeprecated(actionConnector);
+  const isDeprecatedActionConnector = actionConnector?.isDeprecated;
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(

@@ -73,6 +73,7 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   isMissingSecrets?: boolean;
   config?: Config;
   isPreconfigured: boolean;
+  isDeprecated: boolean;
 }
 
 export interface PreConfiguredAction<
