@@ -26,7 +26,7 @@ const rulesSchema = schema.object({
     }),
     enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
   }),
-  execution: schema.object({
+  run: schema.object({
     timeout: schema.maybe(schema.string({ validate: validateDurationSchema })),
     actions: schema.object({
       max: schema.number({ defaultValue: 100000 }),
@@ -55,5 +55,5 @@ export const configSchema = schema.object({
 export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type AlertingRulesConfig = Pick<AlertingConfig['rules'], 'minimumScheduleInterval'>;
-export type ActionsConfig = RulesConfig['execution']['actions'];
+export type ActionsConfig = RulesConfig['run']['actions'];
 export type ActionTypeConfig = Omit<ActionsConfig, 'connectorTypeOverrides'>;

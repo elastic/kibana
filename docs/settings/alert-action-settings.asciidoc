@@ -198,33 +198,34 @@ For example, `20m`, `24h`, `7d`. Default: `1m`.
 `xpack.alerting.rules.minimumScheduleInterval.enforce`::
 Specifies the behavior when a new or changed rule has a schedule interval less than the value defined in `xpack.alerting.rules.minimumScheduleInterval.value`. If `false`, rules with schedules less than the interval will be created but warnings will be logged. If `true`, rules with schedules less than the interval cannot be created. Default: `false`.
 
-`xpack.alerting.rules.execution.actions.max`::
+`xpack.alerting.rules.run.actions.max`::
 Specifies the maximum number of actions that a rule can trigger each time detection checks run.
 
-`xpack.alerting.rules.execution.timeout`::
+`xpack.alerting.rules.run.timeout`::
 Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
 +
 `<count>[ms,s,m,h,d,w,M,Y]`
 +
 For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
 
-`xpack.alerting.rules.execution.ruleTypeOverrides`::
-Overrides the configs under `xpack.alerting.rules.execution` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
+`xpack.alerting.rules.run.ruleTypeOverrides`::
+Overrides the configs under `xpack.alerting.rules.run` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
 +
+--
 For example:
 ```
-xpack.alerting.rules.execution:
+xpack.alerting.rules.run:
     timeout: '5m'
     ruleTypeOverrides:
         - id: '.index-threshold'
           timeout: '15m'
 ```
-`xpack.alerting.rules.execution.actions.connectorTypeOverrides`::
-Overrides the configs under `xpack.alerting.rules.execution.actions` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
+`xpack.alerting.rules.run.actions.connectorTypeOverrides`::
+Overrides the configs under `xpack.alerting.rules.run.actions` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
 +
 For example:
 ```
-xpack.alerting.rules.execution:
+xpack.alerting.rules.run:
     actions:
         max: 10
         connectorTypeOverrides:

@@ -34,7 +34,7 @@ const generateAlertingConfig = (): AlertingConfig => ({
   cancelAlertsOnRuleTimeout: true,
   rules: {
     minimumScheduleInterval: { value: '1m', enforce: false },
-    execution: {
+    run: {
       actions: {
         max: 1000,
       },

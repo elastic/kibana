@@ -13,7 +13,6 @@ import { createApmAndObsUsersAndRoles } from '@kbn/apm-plugin/scripts/create_apm
 import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
-import { importMonitors } from './tasks/import_monitors';
 
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
   return async ({ getService }: any) => {
@@ -43,8 +42,6 @@ async function playwrightStart(getService: any, headless = true, match?: string)
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.kibana.port'),
   });
-
-  await importMonitors({ kibanaUrl });
 
   await createApmAndObsUsersAndRoles({
     elasticsearch: { username: 'elastic', password: 'changeme' },
