@@ -34,6 +34,7 @@ RUNTIME_DEPS = [
   "@npm//yargs",
   "@npm//node-fetch",
   "@npm//semver",
+  "@npm//uuid",
 ]
 
 TYPES_DEPS = [
@@ -47,6 +48,7 @@ TYPES_DEPS = [
   "@npm//p-limit",
   "@npm//@types/node-fetch",
   "@npm//@types/semver",
+  "@npm//@types/uuid",
 ]
 
 jsts_transpiler(

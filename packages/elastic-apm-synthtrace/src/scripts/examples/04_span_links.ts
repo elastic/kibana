@@ -7,7 +7,7 @@
  */
 
 import uuid from 'uuid';
-import { apm, timerange } from '../../index';
+import { apm, ApmFields, EntityArrayIterable, timerange } from '../..';
 import { Scenario } from '../scenario';
 
 function generateExternalSpanLinks() {
@@ -25,7 +25,7 @@ function generateEventsSpanLinks() {
   const events = range
     .interval('1m')
     .rate(1)
-    .spans((timestamp) => {
+    .generator((timestamp) => {
       return instanceGo
         .transaction('Sender')
         .timestamp(timestamp)
@@ -37,21 +37,20 @@ function generateEventsSpanLinks() {
             .timestamp(timestamp + 50)
             .duration(100)
             .success()
-        )
-        .serialize();
+        );
     });
 
   return events;
 }
 
-const scenario: Scenario = async () => {
+const scenario: Scenario<ApmFields> = async () => {
   return {
     generate: ({ from, to }) => {
       const externalSpanLinks = generateExternalSpanLinks();
-      const eventsSpanLinks = generateEventsSpanLinks();
+      let eventsSpanLinks = generateEventsSpanLinks().toArray();
+      if (from > to) eventsSpanLinks = eventsSpanLinks.reverse();
 
       const spanLinks = eventsSpanLinks
-        .toArray()
         .map((event) => {
           const spanId = event['span.id'];
           return spanId ? { span: { id: spanId }, trace: { id: event['trace.id'] } } : undefined;
@@ -63,7 +62,7 @@ const scenario: Scenario = async () => {
       const events = consumerRange
         .interval('1m')
         .rate(1)
-        .spans((timestamp) => {
+        .generator((timestamp) => {
           return instanceJava
             .transaction('Consumer')
             .timestamp(timestamp)
@@ -77,11 +76,9 @@ const scenario: Scenario = async () => {
                 .duration(900)
                 .destination('elasticsearch')
                 .success()
-            )
-            .serialize();
+            );
         });
-
-      return events.concat(eventsSpanLinks);
+      return events.merge(new EntityArrayIterable(eventsSpanLinks));
     },
   };
 };
