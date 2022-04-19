@@ -94,8 +94,8 @@ export default function createCappedActionsTests({ getService }: FtrProviderCont
       const [executionEvent] = await getRuleEvents(createdRule.id, 1);
 
       expect(
-        executionEvent?.kibana?.alert?.rule?.execution?.metrics?.number_of_scheduled_actions
-      ).to.be.eql(3, 'all the scheduled actions');
+        executionEvent?.kibana?.alert?.rule?.execution?.metrics?.number_of_generated_actions
+      ).to.be.eql(3, 'all the generated actions');
       expect(
         executionEvent?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions
       ).to.be.eql(1, 'only 1 action was triggered');
