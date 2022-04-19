@@ -509,6 +509,7 @@ Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
 [[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
+**The legacy pie charts are deprecated and will not be supported in a future version.**
 The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use the legacy charts library.
 
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import { OnlyEsQueryAlertParams } from '../types';
-import { parseDuration } from '../../../../../alerting/common';
 
 export function getSearchParams(queryParams: OnlyEsQueryAlertParams) {
   const date = Date.now();

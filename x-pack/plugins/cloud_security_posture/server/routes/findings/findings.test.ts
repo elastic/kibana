@@ -8,10 +8,10 @@ import {
   elasticsearchClientMock,
   ElasticsearchClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'src/core/server/elasticsearch/client/mocks';
+} from '@kbn/core/server/elasticsearch/client/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from 'src/core/server/http/router/request';
-import { httpServerMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { KibanaRequest } from '@kbn/core/server/http/router/request';
+import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
 import {
@@ -54,7 +54,7 @@ describe('findings API', () => {
 
     const [config, _] = router.get.mock.calls[0];
 
-    expect(config.path).toEqual('/api/csp/findings');
+    expect(config.path).toEqual('/internal/cloud_security_posture/findings');
   });
 
   it('should accept to a user with fleet.all privilege', async () => {

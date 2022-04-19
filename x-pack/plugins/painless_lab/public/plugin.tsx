@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup } from 'src/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN } from '../common/constants';
 
 import { PluginDependencies } from './types';
 import { getLinks } from './links';
-import { ILicense } from '../../licensing/common/types';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
@@ -60,7 +60,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           chrome,
         } = core;
 
-        const license = await licensing.license$.pipe(first()).toPromise();
+        const license = await firstValueFrom(licensing.license$);
         const licenseStatus = checkLicenseStatus(license);
 
         if (!licenseStatus.valid) {

@@ -12,7 +12,7 @@ import type { History } from 'history';
 import { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
 import type { SavedSearch } from './types';
 
-import { spacesPluginMock } from '../../../../../../x-pack/plugins/spaces/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 describe('useSavedSearchAliasMatchRedirect', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;

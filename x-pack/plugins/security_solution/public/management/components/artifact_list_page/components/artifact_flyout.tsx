@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { DocLinks } from '@kbn/doc-links';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EuiButton,
@@ -20,8 +21,9 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+
 import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import { useUrlParams } from '../../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -33,7 +35,7 @@ import {
 } from '../types';
 import { ManagementPageLoader } from '../../management_page_loader';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
-import { useToasts } from '../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
 import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
@@ -96,7 +98,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
    *   );
    * }
    */
-  flyoutDowngradedLicenseDocsInfo: (): React.ReactNode =>
+  flyoutDowngradedLicenseDocsInfo: (_: DocLinks['securitySolution']): React.ReactNode =>
     i18n.translate('xpack.securitySolution.artifactListPage.flyoutDowngradedLicenseDocsInfo', {
       defaultMessage: 'For more information, see our documentation.',
     }),
@@ -188,6 +190,11 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     'data-test-subj': dataTestSubj,
     size = 'm',
   }) => {
+    const {
+      docLinks: {
+        links: { securitySolution },
+      },
+    } = useKibana().services;
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const isFlyoutOpened = useIsFlyoutOpened();
@@ -364,7 +371,8 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             iconType="help"
             data-test-subj={getTestId('expiredLicenseCallout')}
           >
-            {`${labels.flyoutDowngradedLicenseInfo} ${labels.flyoutDowngradedLicenseDocsInfo()}`}
+            {labels.flyoutDowngradedLicenseInfo}{' '}
+            {labels.flyoutDowngradedLicenseDocsInfo(securitySolution)}
           </EuiCallOut>
         )}
 

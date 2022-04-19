@@ -76,17 +76,15 @@ export const ThrottlingExceededCallout = () => {
 export const ThrottlingExceededMessage = ({
   throttlingField,
   limit,
-  unit,
 }: {
   throttlingField: string;
   limit: number;
-  unit: string;
 }) => {
   return (
     <FormattedMessage
       id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.throttling_exceeded.message"
-      defaultMessage="You have exceeded the { throttlingField } limit for Synthetic Nodes. The { throttlingField } value can't be larger than { limit }{unit}."
-      values={{ throttlingField, limit, unit }}
+      defaultMessage="You have exceeded the { throttlingField } limit for Synthetic Nodes. The { throttlingField } value can't be larger than { limit }Mbps."
+      values={{ throttlingField, limit }}
     />
   );
 };
@@ -97,7 +95,6 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
 
   const maxDownload = throttling[BandwidthLimitKey.DOWNLOAD];
   const maxUpload = throttling[BandwidthLimitKey.UPLOAD];
-  const maxLatency = throttling[BandwidthLimitKey.LATENCY];
 
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ThrottlingConfigs }) => {
@@ -110,7 +107,6 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
     runsOnService && parseFloat(fields[ConfigKey.DOWNLOAD_SPEED]) > maxDownload;
   const exceedsUploadLimits =
     runsOnService && parseFloat(fields[ConfigKey.UPLOAD_SPEED]) > maxUpload;
-  const exceedsLatencyLimits = runsOnService && parseFloat(fields[ConfigKey.LATENCY]) > maxLatency;
   const isThrottlingEnabled = fields[ConfigKey.IS_THROTTLING_ENABLED];
 
   const throttlingInputs = isThrottlingEnabled ? (
@@ -127,7 +123,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
         isInvalid={!!validate[ConfigKey.DOWNLOAD_SPEED]?.(fields) || exceedsDownloadLimits}
         error={
           exceedsDownloadLimits ? (
-            <ThrottlingExceededMessage throttlingField="download" limit={maxDownload} unit="Mbps" />
+            <ThrottlingExceededMessage throttlingField="download" limit={maxDownload} />
           ) : (
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.download.error"
@@ -166,7 +162,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
         isInvalid={!!validate[ConfigKey.UPLOAD_SPEED]?.(fields) || exceedsUploadLimits}
         error={
           exceedsUploadLimits ? (
-            <ThrottlingExceededMessage throttlingField="upload" limit={maxUpload} unit="Mbps" />
+            <ThrottlingExceededMessage throttlingField="upload" limit={maxUpload} />
           ) : (
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.upload.error"
@@ -202,16 +198,12 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
           />
         }
         labelAppend={<OptionalLabel />}
-        isInvalid={!!validate[ConfigKey.LATENCY]?.(fields) || exceedsLatencyLimits}
+        isInvalid={!!validate[ConfigKey.LATENCY]?.(fields)}
         error={
-          exceedsLatencyLimits ? (
-            <ThrottlingExceededMessage throttlingField="latency" limit={maxLatency} unit="ms" />
-          ) : (
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.error"
-              defaultMessage="Latency must not be negative."
-            />
-          )
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.error"
+            defaultMessage="Latency must not be negative."
+          />
         }
       >
         <EuiFieldNumber
@@ -277,8 +269,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
         }
         onBlur={() => onFieldBlur?.(ConfigKey.IS_THROTTLING_ENABLED)}
       />
-      {isThrottlingEnabled &&
-      (exceedsDownloadLimits || exceedsUploadLimits || exceedsLatencyLimits) ? (
+      {isThrottlingEnabled && (exceedsDownloadLimits || exceedsUploadLimits) ? (
         <>
           <EuiSpacer />
           <ThrottlingExceededCallout />

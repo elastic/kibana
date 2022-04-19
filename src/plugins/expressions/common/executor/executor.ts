@@ -11,6 +11,13 @@
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from '@kbn/core/types';
+import {
+  MigrateFunctionsObject,
+  migrateToLatest,
+  PersistableStateService,
+  VersionedState,
+} from '@kbn/kibana-utils-plugin/common';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -21,13 +28,6 @@ import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
 import { ALL_NAMESPACES, getByAlias } from '../util';
-import { SavedObjectReference } from '../../../../core/types';
-import {
-  MigrateFunctionsObject,
-  migrateToLatest,
-  PersistableStateService,
-  VersionedState,
-} from '../../../kibana_utils/common';
 import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
