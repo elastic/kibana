@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('create visualize button', async () => {
+    it('create visualize button', async () => {
       await PageObjects.visualize.clickNewVisualization();
       await a11y.testAppSnapshot();
     });
