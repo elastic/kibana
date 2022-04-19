@@ -638,11 +638,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   ]);
 
   return (
-    <EuiContextMenuPanel
-      hasFocus={discoverUrlError !== undefined || !!openInDiscoverUrl}
-      items={contextMenuItems}
-      data-test-subj="mlAnomaliesListRowActionsMenu"
-    />
+    <EuiContextMenuPanel items={contextMenuItems} data-test-subj="mlAnomaliesListRowActionsMenu" />
   );
 };
 
