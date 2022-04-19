@@ -7,23 +7,25 @@
  */
 
 import Path from 'path';
-import Fs from 'fs/promises';
+import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
 
 import { run } from '../run';
 
-import { MANAGED_CONFIG_KEYS } from './managed_config_keys';
+import { MANAGED_CONFIG_KEYS, MANAGED_CONFIG_FILES } from './managed_config_keys';
 import { updateVscodeConfig } from './update_vscode_config';
+
+const CONFIG_DIR = Path.resolve(REPO_ROOT, '.vscode');
 
 export function runUpdateVscodeConfigCli() {
   run(async ({ log }) => {
-    const path = Path.resolve(REPO_ROOT, '.vscode/settings.json');
+    const path = Path.resolve(CONFIG_DIR, 'settings.json');
 
     let json;
     try {
-      json = await Fs.readFile(path, 'utf-8');
+      json = await Fsp.readFile(path, 'utf-8');
     } catch (error) {
       if (error.code !== 'ENOENT') {
         throw error;
@@ -40,8 +42,14 @@ export function runUpdateVscodeConfigCli() {
       `,
       json
     );
-    await Fs.mkdir(Path.dirname(path), { recursive: true });
-    await Fs.writeFile(path, updatedJson);
+    await Fsp.mkdir(Path.dirname(path), { recursive: true });
+
+    // write managed config files
+    for (const { name, content } of MANAGED_CONFIG_FILES) {
+      await Fsp.writeFile(Path.resolve(CONFIG_DIR, name), content);
+    }
+
+    await Fsp.writeFile(path, updatedJson);
 
     log.success('updated', path);
   });
