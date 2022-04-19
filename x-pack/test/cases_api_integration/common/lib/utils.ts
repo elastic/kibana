@@ -289,6 +289,19 @@ export const getWebhookConnector = () => ({
   },
 });
 
+export const getEmailConnector = () => ({
+  name: 'An email action',
+  connector_type_id: '.email',
+  config: {
+    service: '__json',
+    from: 'bob@example.com',
+  },
+  secrets: {
+    user: 'bob',
+    password: 'supersecret',
+  },
+});
+
 interface CommonSavedObjectAttributes {
   id?: string | null;
   created_at?: string | null;
