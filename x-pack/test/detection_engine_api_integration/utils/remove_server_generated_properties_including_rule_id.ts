@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FullResponseSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 

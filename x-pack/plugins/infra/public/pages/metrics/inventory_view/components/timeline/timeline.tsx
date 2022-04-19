@@ -26,7 +26,8 @@ import {
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
@@ -40,7 +41,6 @@ import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_me
 import { getTimelineChartTheme } from '../../../metrics_explorer/components/helpers/get_chart_theme';
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
 
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';

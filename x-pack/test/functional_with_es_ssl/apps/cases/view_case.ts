@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { CaseStatuses } from '../../../../plugins/cases/common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');

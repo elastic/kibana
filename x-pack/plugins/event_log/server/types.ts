@@ -35,21 +35,13 @@ export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
 // the object exposed by plugin.setup()
 export interface IEventLogService {
   isLoggingEntries(): boolean;
-
   isIndexingEntries(): boolean;
-
   registerProviderActions(provider: string, actions: string[]): void;
-
   isProviderActionRegistered(provider: string, action: string): boolean;
-
   getProviderActions(): Map<string, Set<string>>;
-
   registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
-
   getLogger(properties: IEvent): IEventLogger;
-
   getIndexPattern(): string;
-
   isEsContextReady(): Promise<boolean>;
 }
 
@@ -64,7 +56,6 @@ export interface IEventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
-
   aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],
@@ -75,9 +66,7 @@ export interface IEventLogClient {
 
 export interface IEventLogger {
   logEvent(properties: IEvent): void;
-
   startTiming(event: IEvent): void;
-
   stopTiming(event: IEvent): void;
 }
 

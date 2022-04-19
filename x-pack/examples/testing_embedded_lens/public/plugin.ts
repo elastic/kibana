@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { LensPublicStart } from '../../../plugins/lens/public';
-import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
+import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
 import image from './image.png';
 

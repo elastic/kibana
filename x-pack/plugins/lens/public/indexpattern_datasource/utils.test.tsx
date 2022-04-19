@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import { getPrecisionErrorWarningMessages } from './utils';
 import type { IndexPatternPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../types';
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { EuiButton } from '@elastic/eui';
 
 describe('indexpattern_datasource utils', () => {

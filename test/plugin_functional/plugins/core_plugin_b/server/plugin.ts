@@ -55,6 +55,5 @@ export class CorePluginBPlugin implements Plugin {
   }
 
   public start() {}
-
   public stop() {}
 }

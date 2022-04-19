@@ -12,18 +12,14 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataView, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESQuery } from '../../../common/typed_json';
-import {
-  DataView,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../src/plugins/data/common';
 
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { timelineActions } from '../../timelines/store/timeline';
+import { timelineActions } from '../store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import {

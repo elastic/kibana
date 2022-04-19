@@ -21,7 +21,6 @@ import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
-
 export * from '../common';
 import {
   Rule,
@@ -43,7 +42,6 @@ import {
   MappedParams,
 } from '../common';
 import { RuleTypeConfig } from './config';
-
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -174,7 +172,6 @@ export interface RuleType<
   doesSetRecoveryContext?: boolean;
   config?: RuleTypeConfig;
 }
-
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
   RuleTypeState,

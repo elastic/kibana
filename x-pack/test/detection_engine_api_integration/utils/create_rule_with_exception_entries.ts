@@ -11,9 +11,9 @@ import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io
 import type {
   CreateRulesSchema,
   FullResponseSchema,
-} from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { createContainerWithEntries } from './create_container_with_entries';
 import { createContainerWithEndpointEntries } from './create_container_with_endpoint_entries';
 import { createRule } from './create_rule';

@@ -60,6 +60,14 @@ export function parseTileKey(tileKey: string): {
   return { x, y, zoom, tileCount };
 }
 
+export function getTileKey(lat: number, lon: number, zoom: number): string {
+  const tileCount = getTileCount(zoom);
+
+  const x = longitudeToTile(lon, tileCount);
+  const y = latitudeToTile(lat, tileCount);
+  return `${zoom}/${x}/${y}`;
+}
+
 function sinh(x: number): number {
   return (Math.exp(x) - Math.exp(-x)) / 2;
 }

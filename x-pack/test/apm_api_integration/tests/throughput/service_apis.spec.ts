@@ -7,7 +7,7 @@
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 

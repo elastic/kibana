@@ -29,9 +29,9 @@ import type {
   PersistedIndexPatternLayer,
   PieVisualizationState,
   TermsIndexPatternColumn,
-} from '../../../lens/public';
-import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '../../../lens/common/constants';
-import { FilterStateStore, DataView } from '../../../../../src/plugins/data/common';
+} from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
+import { FilterStateStore, DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';

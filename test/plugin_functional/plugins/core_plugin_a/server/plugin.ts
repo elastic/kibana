@@ -33,6 +33,5 @@ export class CorePluginAPlugin implements Plugin {
   }
 
   public start() {}
-
   public stop() {}
 }

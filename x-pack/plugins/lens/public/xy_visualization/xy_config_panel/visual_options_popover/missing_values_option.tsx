@@ -8,12 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiIconTip, EuiSuperSelect, EuiSwitch, EuiText } from '@elastic/eui';
+import type { FittingFunction, EndValue } from '@kbn/expression-xy-plugin/common';
 import { fittingFunctionDefinitions } from './fitting_function_definitions';
 import { endValueDefinitions } from './end_value_definitions';
-import type {
-  FittingFunction,
-  EndValue,
-} from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
 
 export interface MissingValuesOptionProps {
   fittingFunction?: FittingFunction;
