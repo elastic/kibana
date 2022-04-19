@@ -188,7 +188,7 @@ const LogstashInstructionSteps = () => {
               defaultMessage="Replace the parts between the brackets with your generated SSL certificate file paths. View {documentationLink} to generate the certificates."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href={docLinks.links.fleet.guide}>
+                  <EuiLink external={true} href={docLinks.links.fleet.secureLogstash}>
                     <FormattedMessage
                       id="xpack.fleet.settings.logstashInstructions.ourDocumentationLink"
                       defaultMessage="our documentation"
