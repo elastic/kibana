@@ -27,7 +27,7 @@ export const MonitorListContainer: React.FC = () => {
       pageIndex: 1, // saved objects page index is base 1
       pageSize: 10,
       sortOrder: 'asc',
-      sortField: ConfigKey.NAME,
+      sortField: `${ConfigKey.NAME}.keyword`,
     }
   );
 
