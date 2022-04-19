@@ -8,4 +8,4 @@
 
 import { createContext } from 'react';
 
-export const TopNContext = createContext();
+export const TopNContext = createContext({});

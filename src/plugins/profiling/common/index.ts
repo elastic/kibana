@@ -28,20 +28,10 @@ function toMilliseconds(seconds: string): number {
   return parseInt(seconds, 10) * 1000;
 }
 
-export function getTopN(obj) {
+export function getTopN(obj: any) {
   const data = [];
 
-  if (obj.topN?.histogram?.buckets!) {
-    // needed for data served from Elasticsearch
-    for (let i = 0; i < obj.topN.histogram.buckets.length; i++) {
-      const bucket = obj.topN.histogram.buckets[i];
-      for (let j = 0; j < bucket.group_by.buckets.length; j++) {
-        const v = bucket.group_by.buckets[j];
-        data.push({ x: bucket.key, y: v.Count.value, g: v.key });
-      }
-    }
-  } else if (obj.TopN!) {
-    // needed for data served from fixtures
+  if (obj.TopN!) {
     for (const x in obj.TopN) {
       if (obj.TopN.hasOwnProperty(x)) {
         const values = obj.TopN[x];
@@ -56,7 +46,7 @@ export function getTopN(obj) {
   return data;
 }
 
-export function groupSamplesByCategory(samples) {
+export function groupSamplesByCategory(samples: any) {
   const series = new Map();
   for (let i = 0; i < samples.length; i++) {
     const v = samples[i];
@@ -73,4 +63,16 @@ export function timeRangeFromRequest(request: any): [number, number] {
   const timeFrom = parseInt(request.query.timeFrom!, 10);
   const timeTo = parseInt(request.query.timeTo!, 10);
   return [timeFrom, timeTo];
+}
+
+// Converts from a Map object to a Record object since Map objects are not
+// serializable to JSON by default
+export function fromMapToRecord<K extends string, V>(m: Map<K, V>): Record<string, V> {
+  let output: Record<string, V> = {};
+
+  for (const [key, value] of m) {
+    output[key] = value;
+  }
+
+  return output;
 }

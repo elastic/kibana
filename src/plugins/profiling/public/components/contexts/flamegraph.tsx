@@ -8,4 +8,4 @@
 
 import { createContext } from 'react';
 
-export const FlameGraphContext = createContext();
+export const FlameGraphContext = createContext({});

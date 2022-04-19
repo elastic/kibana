@@ -19,7 +19,7 @@ import {
   StackFrame,
   Executable,
   createStackFrameMetadata,
-  StackFrameMetadata,
+  groupStackFrameMetadataByStackTrace,
 } from './profiling';
 
 interface PixiFlameGraph extends CallerCalleeNode {
@@ -73,36 +73,6 @@ export class FlameGraph {
     this.stackframes = stackFrames;
     this.executables = executables;
     this.logger = logger;
-  }
-
-  // getFrameMetadataForTraces collects all of the per-stack-frame metadata for a
-  // given set of trace IDs and their respective stack frames.
-  //
-  // This is similar to GetTraceMetaData in pf-storage-backend/storagebackend/storagebackendv1/reads_webservice.go
-  private getFrameMetadataForTraces(): Map<StackTraceID, StackFrameMetadata[]> {
-    const frameMetadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
-    for (const [stackTraceID, trace] of this.stacktraces) {
-      const frameMetadata = new Array<StackFrameMetadata>();
-      for (let i = 0; i < trace.FrameID.length; i++) {
-        const frame = this.stackframes.get(trace.FrameID[i])!;
-        const executable = this.executables.get(trace.FileID[i])!;
-
-        const metadata = createStackFrameMetadata({
-          FileID: Buffer.from(trace.FileID[i], 'base64url').toString('hex'),
-          FrameType: trace.Type[i],
-          AddressOrLine: frame.LineNumber,
-          FunctionName: frame.FunctionName,
-          FunctionOffset: frame.FunctionOffset,
-          SourceLine: frame.LineNumber,
-          ExeFileName: executable.FileName,
-          Index: i,
-        });
-
-        frameMetadata.push(metadata);
-      }
-      frameMetadataForTraces.set(stackTraceID, frameMetadata);
-    }
-    return frameMetadataForTraces;
   }
 
   private getExeFileName(exe: any, type: number) {
@@ -188,7 +158,11 @@ export class FlameGraph {
 
   toPixi(): PixiFlameGraph {
     const rootFrame = createStackFrameMetadata();
-    const frameMetadataForTraces = this.getFrameMetadataForTraces();
+    const frameMetadataForTraces = groupStackFrameMetadataByStackTrace(
+      this.stacktraces,
+      this.stackframes,
+      this.executables
+    );
     const diagram = createCallerCalleeIntermediateRoot(
       rootFrame,
       this.events,
