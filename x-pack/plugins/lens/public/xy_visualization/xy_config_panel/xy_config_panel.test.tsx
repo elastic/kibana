@@ -128,7 +128,7 @@ describe('XY Config panels', () => {
     it('should pass in information about current data bounds', () => {
       const state = testState();
       frame.activeData = {
-        0: {
+        first: {
           type: 'datatable',
           rows: [{ bar: -5 }, { bar: 50 }],
           columns: [
