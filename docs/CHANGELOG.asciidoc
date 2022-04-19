@@ -166,7 +166,7 @@ Lens & Visualizations::
 * Adds new autoExtendBounds setting to histogram agg config {kibana-pull}118855[#118855]
 
 Machine Learning::
-* Combines annotations into one block if multiple of them overlap {kibana-pull}128782[#128782]
+* Combines annotations into one block if multiple annotations overlap {kibana-pull}128782[#128782]
 * Adds `throughput_last_minute` to the Deployment stats {kibana-pull}128611[#128611]
 * Anomaly Charts API endpoint {kibana-pull}128165[#128165]
 * Utilize ML memory stats endpoint for the memory overview chart {kibana-pull}127751[#127751]
