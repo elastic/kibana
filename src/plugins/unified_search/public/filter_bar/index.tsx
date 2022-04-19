@@ -30,3 +30,10 @@ export const FilterItem = (props: React.ComponentProps<typeof LazyFilterItem>) =
     <LazyFilterItem {...props} />
   </React.Suspense>
 );
+
+const LazyFilterAdd = React.lazy(() => import('./filter_add'));
+export const FilterAdd = (props: React.ComponentProps<typeof LazyFilterAdd>) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFilterAdd {...props} />
+  </React.Suspense>
+);

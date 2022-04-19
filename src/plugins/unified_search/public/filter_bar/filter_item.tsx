@@ -20,9 +20,9 @@ import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { getIndexPatterns } from '../services';
+import { FilterEditor } from './filter_editor';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
 
@@ -37,7 +37,7 @@ export interface FilterItemProps {
   uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: PanelOptions[];
   timeRangeForSuggestionsOverride?: boolean;
-  readonly?: boolean;
+  editOnly?: boolean;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -361,7 +361,6 @@ export function FilterItem(props: FilterItemProps) {
     iconOnClick: props.onRemove,
     onClick: handleBadgeClick,
     'data-test-subj': getDataTestSubj(valueLabelConfig),
-    readonly: props.readonly,
   };
 
   const popoverProps: FilterPopoverProps = {
@@ -376,14 +375,18 @@ export function FilterItem(props: FilterItemProps) {
     panelPaddingSize: 'none',
   };
 
-  if (props.readonly) {
+  if (props.editOnly) {
     return (
-      <EuiPopover
-        panelClassName="globalFilterItem__readonlyPanel"
-        anchorPosition="upCenter"
-        {...popoverProps}
-      >
-        <FilterView {...filterViewProps} hideAlias />
+      <EuiPopover panelClassName="globalFilterItem__editOnlyPanel" {...popoverProps}>
+        <FilterEditor
+          filter={filter}
+          indexPatterns={indexPatterns}
+          onSubmit={onSubmit}
+          onCancel={() => {
+            setIsPopoverOpen(false);
+          }}
+          timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+        />
       </EuiPopover>
     );
   }

@@ -5,18 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 
 import 'brace/theme/github';
 
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ErrorKey, EsQueryAlertParams } from '../types';
-import { SearchSourceExpression } from './search_source_expression';
+import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { isSearchSourceAlert } from '../util';
 import { EXPRESSION_ERROR_KEYS } from '../constants';
+
+function areSearchSourceExpressionPropsEqual(
+  prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,
+  nextProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>
+) {
+  const areErrorsEqual = isEqual(prevProps.errors, nextProps.errors);
+  const areRuleParamsEqual = isEqual(prevProps.ruleParams, nextProps.ruleParams);
+  return areErrorsEqual && areRuleParamsEqual;
+}
+
+const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
+  SearchSourceExpression,
+  areSearchSourceExpressionPropsEqual
+);
 
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<EsQueryAlertParams>
@@ -49,7 +64,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       )}
 
       {isSearchSource ? (
-        <SearchSourceExpression {...props} ruleParams={ruleParams} />
+        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
       ) : (
         <EsQueryExpression {...props} ruleParams={ruleParams} />
       )}

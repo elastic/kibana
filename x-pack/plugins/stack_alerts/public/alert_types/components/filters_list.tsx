@@ -18,14 +18,24 @@ import { useTriggersAndActionsUiDeps } from '../es_query/util';
 interface FiltersListProps {
   dataView: DataView;
   filters: Filter[];
+  onUpdateFilters: (filters: Filter[]) => void;
 }
 
-const noOp = () => {};
 const FilterItemComponent = injectI18n(FilterItem);
 
-export const FiltersList = ({ filters, dataView }: FiltersListProps) => {
+export const FiltersList = ({ filters, dataView, onUpdateFilters }: FiltersListProps) => {
   const { uiSettings } = useTriggersAndActionsUiDeps();
   const dataViews = useMemo(() => [dataView], [dataView]);
+
+  const onUpdate = (newFilter: Filter, index: number) => {
+    const newFilters = [...filters];
+    newFilters[index] = newFilter;
+    onUpdateFilters(newFilters);
+  };
+
+  const onRemove = (index: number) => {
+    onUpdateFilters(filters.filter((_, currentIndex) => currentIndex !== index));
+  };
 
   const filterList = filters.map((filter, index) => {
     const filterValue = getDisplayValueFromFilter(filter, dataViews);
@@ -35,11 +45,11 @@ export const FiltersList = ({ filters, dataView }: FiltersListProps) => {
           key={`${filter.meta.key}${filterValue}`}
           id={`${index}`}
           filter={filter}
-          onUpdate={noOp}
-          onRemove={noOp}
+          onUpdate={(newFilter) => onUpdate(newFilter, index)}
+          onRemove={() => onRemove(index)}
           indexPatterns={dataViews}
           uiSettings={uiSettings!}
-          readonly
+          editOnly
         />
       </EuiFlexItem>
     );

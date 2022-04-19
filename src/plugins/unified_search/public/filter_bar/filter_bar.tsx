@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
-  buildEmptyFilter,
   Filter,
   enableFilter,
   disableFilter,
@@ -19,16 +18,15 @@ import {
   unpinFilter,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterOptions } from './filter_options';
-import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
-import { FilterEditor } from './filter_editor';
+import { FilterItem } from './filter_item';
+import { FilterAdd } from './filter_add';
 
 export interface Props {
   filters: Filter[];
@@ -42,7 +40,6 @@ export interface Props {
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
-  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings } = kibana.services;
   if (!uiSettings) return null;
@@ -54,8 +51,6 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       props.onFiltersUpdated(filters);
     }
   }
-
-  const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
 
   function renderItems() {
     return props.filters.map((filter, i) => (
@@ -74,60 +69,8 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     ));
   }
 
-  function renderAddFilter() {
-    const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
-    const [indexPattern] = props.indexPatterns;
-    const index = indexPattern && indexPattern.id;
-    const newFilter = buildEmptyFilter(isPinned, index);
-
-    const button = (
-      <EuiButtonEmpty
-        size="s"
-        onClick={onAddFilterClick}
-        data-test-subj="addFilter"
-        className="globalFilterBar__addButton"
-      >
-        +{' '}
-        <FormattedMessage
-          id="unifiedSearch.filter.filterBar.addFilterButtonLabel"
-          defaultMessage="Add filter"
-        />
-      </EuiButtonEmpty>
-    );
-
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="addFilterPopover"
-          button={button}
-          isOpen={isAddFilterPopoverOpen}
-          closePopover={() => setIsAddFilterPopoverOpen(false)}
-          anchorPosition="downLeft"
-          panelPaddingSize="none"
-          initialFocus=".filterEditor__hiddenItem"
-          ownFocus
-          repositionOnScroll
-        >
-          <EuiFlexItem grow={false}>
-            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
-              <FilterEditor
-                filter={newFilter}
-                indexPatterns={props.indexPatterns}
-                onSubmit={onAdd}
-                onCancel={() => setIsAddFilterPopoverOpen(false)}
-                key={JSON.stringify(newFilter)}
-                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-              />
-            </div>
-          </EuiFlexItem>
-        </EuiPopover>
-      </EuiFlexItem>
-    );
-  }
-
   function onAdd(filter: Filter) {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
-    setIsAddFilterPopoverOpen(false);
 
     const filters = [...props.filters, filter];
     onFiltersUpdated(filters);
@@ -221,7 +164,11 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           tabIndex={-1}
         >
           {renderItems()}
-          {renderAddFilter()}
+          <FilterAdd
+            dataViews={props.indexPatterns}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            onAdd={onAdd}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
