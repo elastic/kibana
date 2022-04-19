@@ -7,7 +7,6 @@
  */
 
 import expect from '@kbn/expect';
-import _saved_queries from '../apps/discover/_saved_queries';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -242,12 +241,6 @@ export class DiscoverPageObject extends FtrService {
 
   public async useLegacyTable() {
     return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
-  }
-
-  public async dismissDocumentExplorerCallout() {
-    await this.retry.tryForTime(5000, async () => {
-      await this.testSubjects.click('document-explorer-update-callout-dismiss-button');
-    });
   }
 
   public async getDocTableIndex(index: number) {
