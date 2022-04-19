@@ -46,8 +46,9 @@ export const createArrayItem = (path: string, index: number, isNew = true): Arra
 
 /**
  * We create an internal field to represent the Array items. This field is not returned
- * as part as the form data but is used internally to run validation on the array items
- * and its value (an array of ArrayItem) is used to map to actual form fields.
+ * as part as the form data but is used internally to run validation on the array items.
+ * It is this internal field value (ArrayItem[]) that we then map to actual form fields
+ * (in the children func <UseArray>{({ items }) => (...)}</UseArray>)
  *
  * @param path The array path in the form data
  * @returns The internal array field path
