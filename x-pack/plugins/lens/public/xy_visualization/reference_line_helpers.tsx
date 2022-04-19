@@ -312,8 +312,6 @@ export const getReferenceSupportedLayer = (
     },
   ];
 
-  const layers = state?.layers || [];
-
   const referenceLineGroups = getGroupsRelatedToData(
     referenceLineGroupIds,
     state,
@@ -321,6 +319,7 @@ export const getReferenceSupportedLayer = (
     frame?.activeData
   );
 
+  const layers = state?.layers || [];
   const dataLayers = getDataLayers(layers);
 
   const filledDataLayers = dataLayers.filter(
@@ -337,7 +336,7 @@ export const getReferenceSupportedLayer = (
         groupId: id,
         columnId: generateId(),
         dataType: 'number',
-        label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+        label: getAxisName(label, { isHorizontal: isHorizontalChart(layers) }),
         staticValue: getStaticValue(
           dataLayers,
           label,
