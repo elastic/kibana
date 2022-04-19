@@ -80,8 +80,7 @@ const APPEND_PROHIBITED = (
       defaultMessage: 'Cannot assign to this space',
     })}
     content={i18n.translate('xpack.spaces.shareToSpace.prohibitedSpaceTooltip', {
-      defaultMessage:
-        'A copy of this saved object exists in this space. In a future release, you can merge copies of saved objects.',
+      defaultMessage: 'A copy of this saved object exists in this space.',
     })}
     position="left"
     type="iInCircle"
