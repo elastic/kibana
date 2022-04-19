@@ -21,6 +21,7 @@ import {
 } from './internal_utils';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import type { RepositoryEsClient } from './repository_es_client';
+import { findSharedOriginObjects } from './find_shared_origin_objects';
 
 /**
  * When we collect an object's outbound references, we will only go a maximum of this many levels deep before we throw an error.
@@ -28,13 +29,13 @@ import type { RepositoryEsClient } from './repository_es_client';
 const MAX_REFERENCE_GRAPH_DEPTH = 20;
 
 /**
- * How many aliases to search for per page. This is smaller than the PointInTimeFinder's default of 1000. We specify 100 for the page count
- * because this is a relatively unimportant operation, and we want to avoid blocking the Elasticsearch thread pool for longer than
- * necessary.
+ * How many aliases or objects with shared origins to search for per page. This is smaller than the PointInTimeFinder's default of 1000. We
+ * specify 100 for the page count because this is a relatively unimportant operation, and we want to avoid blocking the Elasticsearch thread
+ * pool for longer than necessary.
  *
  * @internal
  */
-export const ALIAS_SEARCH_PER_PAGE = 100;
+export const ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE = 100;
 
 /**
  * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the
@@ -71,6 +72,8 @@ export interface SavedObjectReferenceWithContext {
   type: string;
   /** The ID of the referenced object */
   id: string;
+  /** The origin ID of the referenced object (if it has one) */
+  originId?: string;
   /** The space(s) that the referenced object exists in */
   spaces: string[];
   /**
@@ -89,6 +92,8 @@ export interface SavedObjectReferenceWithContext {
   isMissing?: boolean;
   /** The space(s) that legacy URL aliases matching this type/id exist in */
   spacesWithMatchingAliases?: string[];
+  /** The space(s) that objects matching this origin exist in (including this one) */
+  spacesWithMatchingOrigins?: string[];
 }
 
 /**
@@ -140,8 +145,16 @@ export async function collectMultiNamespaceReferences(
     });
     const { type, id } = parseObjectKey(referenceKey);
     const object = objectMap.get(referenceKey);
+    const originId = object?.originId;
     const spaces = object?.namespaces ?? [];
-    return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
+    return {
+      type,
+      id,
+      originId,
+      spaces,
+      inboundReferences,
+      ...(object === null && { isMissing: true }),
+    };
   });
 
   const objectsToFindAliasesFor = objectsWithContext
@@ -150,13 +163,22 @@ export async function collectMultiNamespaceReferences(
   const aliasesMap = await findLegacyUrlAliases(
     createPointInTimeFinder,
     objectsToFindAliasesFor,
-    ALIAS_SEARCH_PER_PAGE
+    ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
+  );
+  const objectOriginsToSearchFor = objectsWithContext
+    .filter(({ spaces }) => spaces.length !== 0)
+    .map(({ type, id, originId }) => ({ type, origin: originId || id }));
+  const originsMap = await findSharedOriginObjects(
+    createPointInTimeFinder,
+    objectOriginsToSearchFor,
+    ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
   );
   const results = objectsWithContext.map((obj) => {
-    const key = getObjectKey(obj);
-    const val = aliasesMap.get(key);
-    const spacesWithMatchingAliases = val && Array.from(val);
-    return { ...obj, spacesWithMatchingAliases };
+    const aliasesVal = aliasesMap.get(getObjectKey(obj));
+    const spacesWithMatchingAliases = aliasesVal && Array.from(aliasesVal).sort();
+    const originsVal = originsMap.get(getObjectKey({ type: obj.type, id: obj.originId || obj.id }));
+    const spacesWithMatchingOrigins = originsVal && Array.from(originsVal).sort();
+    return { ...obj, spacesWithMatchingAliases, spacesWithMatchingOrigins };
   });
 
   return {
