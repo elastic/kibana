@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { AlertsByStatus } from './alerts_by_status';
 import { parsedMockAlertsData } from './mock_data';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { mockCasesContract } from '../../../../../../cases/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAlertsByStatus } from './use_alerts_by_status';
