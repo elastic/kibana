@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from 'kibana/public';
+import { HttpHandler } from '@kbn/core/public';
 import { last } from 'lodash';
 import {
   loadInitialState,
@@ -16,8 +16,8 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import { DataViewsContract } from '../../../../../src/plugins/data_views/public';
-import { HttpFetchError } from '../../../../../src/core/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { HttpFetchError } from '@kbn/core/public';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,

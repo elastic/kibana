@@ -18,9 +18,9 @@ import {
 import type { ReactElement } from 'react';
 import React, { Component, lazy, Suspense } from 'react';
 
+import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import type { ApplicationStart, Capabilities } from 'src/core/public';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';

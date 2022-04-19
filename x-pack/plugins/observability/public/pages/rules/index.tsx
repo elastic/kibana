@@ -22,6 +22,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  deleteRules,
+  RuleTableItem,
+  enableRule,
+  disableRule,
+  muteRule,
+  useLoadRuleTypes,
+  unmuteRule,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
@@ -38,16 +48,6 @@ import { DeleteModalConfirmation } from './components/delete_modal_confirmation'
 import { NoDataPrompt } from './components/prompts/no_data_prompt';
 import { NoPermissionPrompt } from './components/prompts/no_permission_prompt';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import {
-  deleteRules,
-  RuleTableItem,
-  enableRule,
-  disableRule,
-  muteRule,
-  useLoadRuleTypes,
-  unmuteRule,
-} from '../../../../triggers_actions_ui/public';
-import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '../../../../alerting/common';
 import { Pagination } from './types';
 import {
   DEFAULT_SEARCH_PAGE_SIZE,
@@ -83,7 +83,7 @@ export function RulesPage() {
     application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
-  const documentationLink = docLinks.links.alerting.guide;
+  const documentationLink = docLinks.links.observability.createAlerts;
   const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });

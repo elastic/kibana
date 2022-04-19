@@ -18,7 +18,6 @@ describe('getServiceLocations', function () {
       throttling: {
         [BandwidthLimitKey.DOWNLOAD]: 100,
         [BandwidthLimitKey.UPLOAD]: 50,
-        [BandwidthLimitKey.LATENCY]: 20,
       },
       locations: {
         us_central: {
@@ -50,7 +49,6 @@ describe('getServiceLocations', function () {
       throttling: {
         [BandwidthLimitKey.DOWNLOAD]: 100,
         [BandwidthLimitKey.UPLOAD]: 50,
-        [BandwidthLimitKey.LATENCY]: 20,
       },
       locations: [
         {

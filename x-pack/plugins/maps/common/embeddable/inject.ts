@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import { MapEmbeddablePersistableState } from './types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { extractReferences, injectReferences } from '../migrations/references';

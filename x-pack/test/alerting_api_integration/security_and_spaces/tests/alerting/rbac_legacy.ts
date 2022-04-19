@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import { SavedObjectsUtils } from '@kbn/core/server/saved_objects';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ESTestIndexTool, getUrlPrefix, ObjectRemover, AlertUtils } from '../../../common/lib';
 import { setupSpacesAndUsers } from '..';
-import { SavedObjectsUtils } from '../../../../../../src/core/server/saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {

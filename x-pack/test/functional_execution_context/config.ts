@@ -12,7 +12,7 @@ import { logFilePath } from './test_utils';
 const alertTestPlugin = Path.resolve(__dirname, './fixtures/plugins/alerts');
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../test/functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   const servers = {
     ...functionalConfig.get('servers'),
@@ -25,7 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     rootTags: ['skipCloud'],
-    testFiles: [require.resolve('./tests/')],
+    testFiles: [require.resolve('./tests')],
     junit: {
       reportName: 'Execution Context Functional Tests',
     },

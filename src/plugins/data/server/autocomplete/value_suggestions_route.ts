@@ -7,11 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { IRouter } from '@kbn/core/server';
+import { firstValueFrom, Observable } from 'rxjs';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { getRequestAbortedSignal } from '../lib';
-import { getKbnServerError, reportServerError } from '../../../kibana_utils/server';
 import type { ConfigSchema } from '../../config';
 import { termsEnumSuggestions } from './terms_enum';
 import { termsAggSuggestions } from './terms_agg';
@@ -42,7 +41,7 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
       },
     },
     async (context, request, response) => {
-      const config = await config$.pipe(first()).toPromise();
+      const config = await firstValueFrom(config$);
       const { field: fieldName, query, filters, fieldMeta, method } = request.body;
       const { index } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);

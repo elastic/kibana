@@ -8,8 +8,8 @@
 import { RuleType } from '../types';
 import { Subject } from 'rxjs';
 import { LicenseState, ILicenseState } from './license_state';
-import { licensingMock } from '../../../licensing/server/mocks';
-import { ILicense } from '../../../licensing/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { ILicense } from '@kbn/licensing-plugin/server';
 
 describe('checkLicense()', () => {
   const getRawLicense = jest.fn();

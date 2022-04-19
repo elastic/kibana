@@ -9,13 +9,13 @@ import {
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   ElasticsearchClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'src/core/server/elasticsearch/client/mocks';
+} from '@kbn/core/server/elasticsearch/client/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from 'src/core/server/http/router/request';
+import { KibanaRequest } from '@kbn/core/server/http/router/request';
 import {
   benchmarksInputSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
@@ -28,13 +28,13 @@ import {
   createBenchmarkEntry,
 } from './benchmarks';
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   createMockAgentPolicyService,
   createPackagePolicyServiceMock,
-} from '../../../../fleet/server/mocks';
-import { createPackagePolicyMock } from '../../../../fleet/common/mocks';
-import { AgentPolicy } from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/server/mocks';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { AgentPolicy } from '@kbn/fleet-plugin/common';
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
@@ -88,7 +88,7 @@ describe('benchmarks API', () => {
 
     const [config] = router.get.mock.calls[0];
 
-    expect(config.path).toEqual('/api/csp/benchmarks');
+    expect(config.path).toEqual('/internal/cloud_security_posture/benchmarks');
   });
 
   it('should accept to a user with fleet.all privilege', async () => {

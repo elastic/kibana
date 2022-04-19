@@ -17,7 +17,7 @@ import { Bytes, BYTES_FORMAT } from './bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { FormattedIp } from '../../../../components/formatted_ip';
+import { FormattedIp } from '../../../formatted_ip';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { Port } from '../../../../../network/components/port';
 import { PORT_NAMES } from '../../../../../network/components/port/helpers';
@@ -185,6 +185,8 @@ const FormattedFieldValueComponent: React.FC<{
         eventId={eventId}
         fieldName={fieldName}
         isDraggable={isDraggable}
+        isButton={isButton}
+        onClick={onClick}
         linkValue={linkValue}
         title={title}
         truncate={truncate}

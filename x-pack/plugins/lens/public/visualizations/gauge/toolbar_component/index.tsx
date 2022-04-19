@@ -8,7 +8,7 @@
 import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GaugeLabelMajorMode } from '../../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import type { GaugeLabelMajorMode } from '@kbn/expression-gauge-plugin/common';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, useDebouncedValue, VisLabel } from '../../../shared_components';
 import './gauge_config_panel.scss';
@@ -30,9 +30,9 @@ export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualiz
   });
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <ToolbarPopover
             handleClose={() => {
               setSubtitleMode(inputValue.labelMinor ? 'custom' : 'none');
