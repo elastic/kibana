@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer, EuiText } 
 import React, { useCallback, useMemo } from 'react';
 import { ShapeTreeNode } from '@elastic/charts';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import styled from 'styled-components';
 import { DonutChart, FillColor } from '../../../../common/components/charts/donutchart';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useNavigation } from '../../../../common/lib/kibana';
@@ -39,6 +40,14 @@ import { emptyDonutColor } from '../../../../common/components/charts/donutchart
 import { LinkButton } from '../../../../common/components/links';
 
 const donutHeight = 120;
+const StyledFlexItem = styled(EuiFlexItem)`
+  padding: 0 4px;
+`;
+
+const StyledLegendFlexItem = styled(EuiFlexItem)`
+  padding-left: 32px;
+  padding-top: 45px;
+`;
 
 interface AlertsByStatusProps {
   signalIndexName: string | null;
@@ -142,50 +151,54 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           <EuiSpacer size="s" />
           {toggleStatus && (
             <>
-              {!loading && (
-                <EuiText className="eui-textCenter" size="s">
-                  <b>
-                    <FormattedCount count={totalAlerts} />
-                  </b>
-                  <> </>
-                  <small>{ALERTS(totalAlerts)}</small>
-                </EuiText>
-              )}
-              <EuiSpacer size="l" />
-              <EuiFlexGroup>
-                <EuiFlexItem key={`alerts-status-open`}>
-                  <DonutChart
-                    data={donutData?.open?.severities}
-                    fillColor={fillColor}
-                    height={donutHeight}
-                    label={STATUS_OPEN}
-                    title={<ChartLabel count={donutData?.open?.total ?? 0} />}
-                    totalCount={donutData?.open?.total ?? 0}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem key={`alerts-status-acknowledged`}>
-                  <DonutChart
-                    data={donutData?.acknowledged?.severities}
-                    fillColor={fillColor}
-                    height={donutHeight}
-                    label={STATUS_ACKNOWLEDGED}
-                    title={<ChartLabel count={donutData?.acknowledged?.total ?? 0} />}
-                    totalCount={donutData?.acknowledged?.total ?? 0}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem key={`alerts-status-closed`}>
-                  <DonutChart
-                    data={donutData?.closed?.severities}
-                    fillColor={fillColor}
-                    height={donutHeight}
-                    label={STATUS_CLOSED}
-                    title={<ChartLabel count={donutData?.closed?.total ?? 0} />}
-                    totalCount={donutData?.closed?.total ?? 0}
-                  />
-                </EuiFlexItem>
+              <EuiFlexGroup justifyContent="center" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  {legendItems.length > 0 && <Legend legendItems={legendItems} />}
+                  {!loading && (
+                    <EuiText className="eui-textCenter" size="s">
+                      <b>
+                        <FormattedCount count={totalAlerts} />
+                      </b>
+                      <> </>
+                      <small>{ALERTS(totalAlerts)}</small>
+                    </EuiText>
+                  )}
+                  <EuiSpacer size="l" />
+                  <EuiFlexGroup justifyContent="center">
+                    <StyledFlexItem key="alerts-status-open" grow={false}>
+                      <DonutChart
+                        data={donutData?.open?.severities}
+                        fillColor={fillColor}
+                        height={donutHeight}
+                        label={STATUS_OPEN}
+                        title={<ChartLabel count={donutData?.open?.total ?? 0} />}
+                        totalCount={donutData?.open?.total ?? 0}
+                      />
+                    </StyledFlexItem>
+                    <StyledFlexItem key="alerts-status-acknowledged" grow={false}>
+                      <DonutChart
+                        data={donutData?.acknowledged?.severities}
+                        fillColor={fillColor}
+                        height={donutHeight}
+                        label={STATUS_ACKNOWLEDGED}
+                        title={<ChartLabel count={donutData?.acknowledged?.total ?? 0} />}
+                        totalCount={donutData?.acknowledged?.total ?? 0}
+                      />
+                    </StyledFlexItem>
+                    <StyledFlexItem key="alerts-status-closed" grow={false}>
+                      <DonutChart
+                        data={donutData?.closed?.severities}
+                        fillColor={fillColor}
+                        height={donutHeight}
+                        label={STATUS_CLOSED}
+                        title={<ChartLabel count={donutData?.closed?.total ?? 0} />}
+                        totalCount={donutData?.closed?.total ?? 0}
+                      />
+                    </StyledFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
+                <StyledLegendFlexItem grow={false}>
+                  {legendItems.length > 0 && <Legend legendItems={legendItems} />}
+                </StyledLegendFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="m" />
             </>
