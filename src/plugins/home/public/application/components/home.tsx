@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate, OverviewPageFooter } from '../../../../kibana_react/public';
+import { KibanaPageTemplate, OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import type {
   FeatureCatalogueEntry,

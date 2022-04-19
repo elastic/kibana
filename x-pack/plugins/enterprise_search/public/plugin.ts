@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -13,13 +15,11 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { CloudSetup, CloudStart } from '../../cloud/public';
-import { LicensingPluginStart } from '../../licensing/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
+} from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import {
   APP_SEARCH_PLUGIN,

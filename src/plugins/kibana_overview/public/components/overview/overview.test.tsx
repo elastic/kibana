@@ -14,7 +14,7 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { Overview } from './overview';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { FeatureCatalogueCategory } from 'src/plugins/home/public';
+import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 
 const mockNewsFetchResult = {
   error: null,

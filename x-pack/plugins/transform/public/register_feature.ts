@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {
   // register Transforms so it appears on the Kibana home page

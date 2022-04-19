@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 

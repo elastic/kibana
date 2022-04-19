@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 
 import {
   AppSetupUIPluginDependencies,

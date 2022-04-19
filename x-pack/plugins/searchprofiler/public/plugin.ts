@@ -7,9 +7,9 @@
 
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup } from 'src/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
-import { ILicense } from '../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { PLUGIN } from '../common';
 import { AppPublicPluginDependencies } from './types';

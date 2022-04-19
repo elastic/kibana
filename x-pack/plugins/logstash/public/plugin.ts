@@ -10,10 +10,10 @@ import { Subscription, Subject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { once } from 'lodash';
 
-import { Capabilities, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 // @ts-ignore
 import { LogstashLicenseService } from './services';

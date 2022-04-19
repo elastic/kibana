@@ -13,11 +13,11 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,

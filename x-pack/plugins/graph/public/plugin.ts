@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { SpacesApi } from '../../spaces/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
   AppNavLinkStatus,
   AppUpdater,
@@ -17,20 +17,17 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { checkLicense } from '../common/check_license';
-import type {
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
 import { ConfigSchema } from '../config';
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 export interface GraphPluginSetupDependencies {
   home?: HomePublicPluginSetup;
