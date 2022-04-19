@@ -219,7 +219,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   id: 'my-deprecated-servicenow',
                   is_deprecated: true,
                   is_preconfigured: true,
-                  is_deprecated: true,
                   name: 'ServiceNow#xyz',
                   referenced_by_count: 0,
                 },
