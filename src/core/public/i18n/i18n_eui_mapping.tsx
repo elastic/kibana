@@ -618,6 +618,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '(opens in a new tab or window)',
       }
     ),
+    'euiMark.highlightStart': i18n.translate('core.euiMark.highlightStart', {
+      defaultMessage: 'highlight start',
+    }),
+    'euiMark.highlightEnd': i18n.translate('core.euiMark.highlightEnd', {
+      defaultMessage: 'highlight end',
+    }),
     'euiMarkdownEditorFooter.closeButton': i18n.translate(
       'core.euiMarkdownEditorFooter.closeButton',
       {
