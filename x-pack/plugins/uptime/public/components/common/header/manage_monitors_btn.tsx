@@ -40,7 +40,7 @@ export const ManageMonitorsBtn = () => {
     <EuiTourStep
       content={
         <>
-          <EuiText>
+          <EuiText size="s">
             <p>{PUBLIC_BETA_DESCRIPTION}</p>
           </EuiText>
           <EuiSpacer />
@@ -56,6 +56,7 @@ export const ManageMonitorsBtn = () => {
       subtitle={NEW_LABEL}
       title={GETTING_STARTED_LABEL}
       anchorPosition="upCenter"
+      maxWidth={416}
       footerAction={<EuiLink onClick={() => setIsOpen(false)}>{DISMISS_LABEL}</EuiLink>}
     >
       <EuiHeaderLink
