@@ -46,7 +46,7 @@ import type {
   AlertsTableConfigurationRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
-import { registerAlertsTable } from './application/sections/alerts_table/alerts_page/register_alerts_table';
+import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { PLUGIN_ID } from './common/constants';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
@@ -193,7 +193,7 @@ export class Plugin
     });
 
     if (this.experimentalFeatures.internalAlertsTable) {
-      registerAlertsTable({
+      registerAlertsTableConfiguration({
         alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
       });
     }

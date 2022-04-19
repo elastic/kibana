@@ -9,7 +9,7 @@ import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTableConfigurationRegistry } from '../../../../types';
 import { TypeRegistry } from '../../../type_registry';
 
-export function registerAlertsTable({
+export function registerAlertsTableConfiguration({
   alertsTableConfigurationRegistry,
 }: {
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
