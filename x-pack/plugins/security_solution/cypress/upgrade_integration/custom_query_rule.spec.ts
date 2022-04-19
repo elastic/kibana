@@ -39,7 +39,7 @@ import {
 } from '../screens/rule_details';
 
 import { waitForPageToBeLoaded } from '../tasks/common';
-import { waitForRulesTableToBeLoaded, goToRuleDetails } from '../tasks/alerts_detection_rules';
+import { waitForRulesTableToBeLoaded, goToRuleDetailsByName } from '../tasks/alerts_detection_rules';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../urls/navigation';
@@ -78,7 +78,7 @@ describe('After an upgrade, the custom query rule', () => {
   before(() => {
     loginAndWaitForPage(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    goToRuleDetails();
+    goToRuleDetailsByName(rule.name);
     waitForPageToBeLoaded();
   });
 
