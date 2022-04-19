@@ -11,7 +11,7 @@ import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_se
 import { renderHook } from '@testing-library/react-hooks';
 import { useExpViewTimeRange } from './use_time_range';
 import { ReportTypes } from '../configurations/constants';
-import { createKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   TRANSACTION_DURATION,
   METRIC_SYSTEM_MEMORY_USAGE,

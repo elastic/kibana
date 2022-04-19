@@ -9,22 +9,22 @@
 import { Observable } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { KibanaRequest } from 'src/core/server';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 
+import { SavedObjectReference } from '@kbn/core/types';
+import {
+  MigrateFunctionsObject,
+  PersistableStateService,
+  VersionedState,
+} from '@kbn/kibana-utils-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract, ExecutionResult } from '../execution';
 import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
-import { SavedObjectReference } from '../../../../core/types';
-import {
-  MigrateFunctionsObject,
-  PersistableStateService,
-  VersionedState,
-} from '../../../kibana_utils/common';
-import { Adapters } from '../../../inspector/common/adapters';
 import {
   clog,
   createTable,

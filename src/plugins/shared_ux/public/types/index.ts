@@ -9,9 +9,9 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import { SharedUxServices } from '@kbn/shared-ux-services';
-import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
-import { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import { DocLinksStart } from 'kibana/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DocLinksStart } from '@kbn/core/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 /** @internal */
 export interface SharedUXPluginSetup {}

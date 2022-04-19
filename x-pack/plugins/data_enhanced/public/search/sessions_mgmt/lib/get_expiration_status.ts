@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { SessionsConfigSchema } from '../';
+import { SessionsConfigSchema } from '..';
 
 export const getExpirationStatus = (config: SessionsConfigSchema, expires: string | null) => {
   const tNow = moment.utc().valueOf();

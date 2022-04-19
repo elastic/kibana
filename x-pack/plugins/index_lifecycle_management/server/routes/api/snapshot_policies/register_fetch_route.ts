@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
-
-async function fetchSnapshotPolicies(client: ElasticsearchClient): Promise<any> {
-  const response = await client.slm.getLifecycle();
-  return response.body;
-}
 
 export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/snapshot_policies'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const policiesByName = await fetchSnapshotPolicies(
-          context.core.elasticsearch.client.asCurrentUser
-        );
+        const policiesByName =
+          await context.core.elasticsearch.client.asCurrentUser.slm.getLifecycle();
         return response.ok({ body: Object.keys(policiesByName) });
       } catch (error) {
         return handleEsError({ error, response });

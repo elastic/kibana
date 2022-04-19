@@ -7,7 +7,7 @@
  */
 
 import { SharedUxServices } from '@kbn/shared-ux-services';
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   SharedUXPluginSetup,
   SharedUXPluginStart,

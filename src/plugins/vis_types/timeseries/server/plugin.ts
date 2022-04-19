@@ -14,17 +14,18 @@ import {
   Logger,
   KibanaRequest,
   IUiSettingsClient,
-} from 'src/core/server';
-import { Observable } from 'rxjs';
+} from '@kbn/core/server';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
-import { first, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { PluginStart } from '@kbn/data-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { PluginStart as DataViewsPublicPluginStart } from '@kbn/data-views-plugin/server';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData } from './lib/get_vis_data';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
-import { HomeServerPluginSetup } from '../../../home/server';
-import { PluginStart } from '../../../data/server';
-import type { DataViewsService } from '../../../data_views/common';
-import type { PluginStart as DataViewsPublicPluginStart } from '../../../data_views/server';
 import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { getUiSettings } from './ui_settings';
@@ -32,7 +33,6 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from './types';
-import type { FieldFormatsRegistry } from '../../../field_formats/common';
 
 import {
   SearchStrategyRegistry,
@@ -104,12 +104,9 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       logger,
       searchStrategyRegistry,
       getEsShardTimeout: () =>
-        globalConfig$
-          .pipe(
-            first(),
-            map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
-          )
-          .toPromise(),
+        firstValueFrom(
+          globalConfig$.pipe(map((config) => config.elasticsearch.shardTimeout.asMilliseconds()))
+        ),
       getIndexPatternsService: async (requestContext) => {
         const [, { dataViews }] = await core.getStartServices();
 

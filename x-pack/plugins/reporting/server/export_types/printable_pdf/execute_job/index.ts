@@ -47,8 +47,8 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
               ...layout,
               // TODO: We do not do a runtime check for supported layout id types for now. But technically
               // we should.
-              id: layout?.id as PdfScreenshotOptions['layout']['id'],
-            },
+              id: layout?.id,
+            } as PdfScreenshotOptions['layout'],
           });
         }),
         tap(({ buffer }) => {
@@ -71,6 +71,6 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
       const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
       apmTrans?.end();
-      return process$.pipe(takeUntil(stop$)).toPromise();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
     };
   };

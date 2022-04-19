@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/public';
 import { getDataViewsStart } from '../../services';
-import { KBN_FIELD_TYPES, Query } from '../../../../../../plugins/data/public';
 
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
