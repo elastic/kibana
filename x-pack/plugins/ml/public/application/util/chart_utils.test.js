@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat';
+import seriesConfig from '../explorer/explorer_charts/__mocks__/mock_series_config_filebeat.json';
 
 jest.mock('./dependency_cache', () => {
   const dateMath = require('@kbn/datemath');

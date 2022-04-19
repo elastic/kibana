@@ -9,16 +9,16 @@ import pMap from 'p-map';
 import semver from 'semver';
 import LRU from 'lru-cache';
 import { isEqual, isEmpty } from 'lodash';
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { ListResult } from '../../../../../../fleet/common';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import { ExceptionListClient } from '../../../../../../lists/server';
+import { ListResult } from '@kbn/fleet-plugin/common';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
   manifestDispatchSchema,

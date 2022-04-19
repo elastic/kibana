@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { EnhancedDataServerPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../config';
 
@@ -20,9 +20,6 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new EnhancedDataServerPlugin(initializerContext);
 }
 
-export {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  EQL_SEARCH_STRATEGY,
-} from '../../../../src/plugins/data/common';
+export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 
 export { EnhancedDataServerPlugin as Plugin };

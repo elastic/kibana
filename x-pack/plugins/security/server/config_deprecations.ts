@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ConfigDeprecationProvider } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { ConfigDeprecationProvider } from 'src/core/server';
 
 export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename,

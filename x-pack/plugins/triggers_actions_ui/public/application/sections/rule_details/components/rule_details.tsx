@@ -25,8 +25,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { RuleExecutionStatusErrorReasons, parseDuration } from '../../../../../../alerting/common';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -271,8 +271,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <EuiText size="s">
                     <p>
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.triggerActionsTitle"
-                        defaultMessage="Trigger actions"
+                        id="xpack.triggersActionsUI.sections.ruleDetails.stateTitle"
+                        defaultMessage="State"
                       />
                     </p>
                   </EuiText>

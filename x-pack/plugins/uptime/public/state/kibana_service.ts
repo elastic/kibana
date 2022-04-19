@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { CoreStart, CoreTheme } from 'kibana/public';
+import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { apiService } from './api/utils';
 
 class KibanaService {

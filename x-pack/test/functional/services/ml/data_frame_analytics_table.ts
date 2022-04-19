@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type ExpectedSectionTableEntries = Record<string, string>;

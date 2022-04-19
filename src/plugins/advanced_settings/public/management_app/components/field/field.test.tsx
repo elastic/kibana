@@ -11,13 +11,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
-import { UiSettingsType } from '../../../../../../core/public';
-import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
+import { UiSettingsType } from '@kbn/core/public';
+import { notificationServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';
 
-jest.mock('../../../../../kibana_react/public/ui_settings/use_ui_setting', () => ({
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn(),
 }));
 
