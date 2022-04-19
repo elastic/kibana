@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,20 +16,18 @@ import { FindingsTable } from './findings_table';
 import { FindingsSearchBar } from './findings_search_bar';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useUrlQuery } from '../../common/hooks/use_url_query';
-import { useFindings, type CspFindingsRequest } from './use_findings';
+import { useFindings } from './use_findings';
+import type { FindingsGroupByNoneQuery } from './use_findings';
+import type { FindingsBaseURLQuery } from './types';
+import { useFindingsByResource } from './use_findings_by_resource';
 import { FindingsGroupBySelector } from './findings_group_by_selector';
 import { INTERNAL_FEATURE_FLAGS } from '../../../common/constants';
 import { useFindingsCounter } from './use_findings_count';
 import { FindingsDistributionBar } from './findings_distribution_bar';
-import type { CspClientPluginStartDeps } from '../../types';
-import { useKibana } from '../../common/hooks/use_kibana';
-import * as TEXT from './translations';
-
-export type GroupBy = 'none' | 'resourceType';
-export type FindingsBaseQuery = ReturnType<typeof getFindingsBaseEsQuery>;
+import { FindingsByResourceTable } from './findings_by_resource_table';
 
 // TODO: define this as a schema with default values
-export const getDefaultQuery = (): CspFindingsRequest & { groupBy: GroupBy } => ({
+export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQuery => ({
   query: { language: 'kuery', query: '' },
   filters: [],
   sort: [{ ['@timestamp']: SortDirection.desc }],
@@ -38,7 +36,7 @@ export const getDefaultQuery = (): CspFindingsRequest & { groupBy: GroupBy } => 
   groupBy: 'none',
 });
 
-const getGroupByOptions = (): Array<EuiComboBoxOptionOption<GroupBy>> => [
+const getGroupByOptions = (): Array<EuiComboBoxOptionOption<FindingsBaseURLQuery['groupBy']>> => [
   {
     value: 'none',
     label: i18n.translate('xpack.csp.findings.groupBySelector.groupByNoneLabel', {
@@ -46,88 +44,55 @@ const getGroupByOptions = (): Array<EuiComboBoxOptionOption<GroupBy>> => [
     }),
   },
   {
-    value: 'resourceType',
-    label: i18n.translate('xpack.csp.findings.groupBySelector.groupByResourceTypeLabel', {
-      defaultMessage: 'Resource Type',
+    value: 'resource',
+    label: i18n.translate('xpack.csp.findings.groupBySelector.groupByResourceIdLabel', {
+      defaultMessage: 'Resource ID',
     }),
   },
 ];
 
-const getFindingsBaseEsQuery = ({
-  query,
-  dataView,
-  filters,
-  queryService,
-}: Pick<CspFindingsRequest, 'filters' | 'query'> & {
-  dataView: DataView;
-  queryService: CspClientPluginStartDeps['data']['query'];
-}) => {
-  if (query) queryService.queryString.setQuery(query);
-  queryService.filterManager.setFilters(filters);
-
-  try {
-    return {
-      index: dataView.title,
-      query: buildEsQuery(
-        dataView,
-        queryService.queryString.getQuery(),
-        queryService.filterManager.getFilters()
-      ),
-    };
-  } catch (error) {
-    return {
-      error:
-        error instanceof Error
-          ? error
-          : new Error(
-              i18n.translate('xpack.csp.findings.unknownError', {
-                defaultMessage: 'Unknown Error',
-              })
-            ),
-    };
-  }
-};
-
 export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
   const { euiTheme } = useEuiTheme();
   const groupByOptions = useMemo(getGroupByOptions, []);
-  const {
-    data,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
 
-  const {
-    urlQuery: { groupBy, ...findingsQuery },
-    setUrlQuery,
-  } = useUrlQuery(getDefaultQuery);
-
-  const baseQuery = useMemo(
-    () => getFindingsBaseEsQuery({ ...findingsQuery, dataView, queryService: data.query }),
-    [data.query, dataView, findingsQuery]
+  const baseEsQuery = useMemo(
+    () => ({
+      index: dataView.title,
+      // TODO: this will throw for malformed query
+      // page will display an error boundary with the JS error
+      // will be accounted for before releasing the feature
+      query: buildEsQuery(dataView, urlQuery.query, urlQuery.filters),
+    }),
+    [dataView, urlQuery]
   );
 
-  const countResult = useFindingsCounter(baseQuery);
-  const findingsResult = useFindings({
-    ...baseQuery,
-    size: findingsQuery.size,
-    from: findingsQuery.from,
-    sort: findingsQuery.sort,
+  const findingsGroupByResource = useFindingsByResource({
+    ...baseEsQuery,
+    enabled: urlQuery.groupBy === 'resource',
   });
 
-  useEffect(() => {
-    if (baseQuery.error) {
-      toasts.addError(baseQuery.error, { title: TEXT.SEARCH_FAILED });
-    }
-  }, [baseQuery.error, toasts]);
+  const findingsCount = useFindingsCounter({
+    ...baseEsQuery,
+    enabled: urlQuery.groupBy === 'none',
+  });
+
+  const findingsGroupByNone = useFindings({
+    ...baseEsQuery,
+    enabled: urlQuery.groupBy === 'none',
+    size: urlQuery.size,
+    from: urlQuery.from,
+    sort: urlQuery.sort,
+  });
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
         dataView={dataView}
         setQuery={setUrlQuery}
-        query={findingsQuery.query}
-        filters={findingsQuery.filters}
-        loading={findingsResult.isLoading}
+        query={urlQuery.query}
+        filters={urlQuery.filters}
+        loading={findingsGroupByNone.isLoading}
       />
       <div
         css={css`
@@ -138,32 +103,41 @@ export const FindingsContainer = ({ dataView }: { dataView: DataView }) => {
         <EuiSpacer />
         {INTERNAL_FEATURE_FLAGS.showFindingsGroupBy && (
           <FindingsGroupBySelector
-            type={groupBy}
+            type={urlQuery.groupBy}
             onChange={(type) => setUrlQuery({ groupBy: type[0]?.value })}
             options={groupByOptions}
           />
         )}
         <EuiSpacer />
-        {groupBy === 'none' && (
+        {urlQuery.groupBy === 'none' && (
           <>
             <FindingsDistributionBar
-              total={findingsResult.data?.total || 0}
-              passed={countResult.data?.passed || 0}
-              failed={countResult.data?.failed || 0}
-              pageStart={findingsQuery.from + 1} // API index is 0, but UI is 1
-              pageEnd={findingsQuery.from + findingsQuery.size}
+              total={findingsGroupByNone.data?.total || 0}
+              passed={findingsCount.data?.passed || 0}
+              failed={findingsCount.data?.failed || 0}
+              pageStart={urlQuery.from + 1} // API index is 0, but UI is 1
+              pageEnd={urlQuery.from + urlQuery.size}
             />
             <EuiSpacer />
             <FindingsTable
-              {...findingsQuery}
+              {...urlQuery}
               setQuery={setUrlQuery}
-              data={findingsResult.data}
-              error={findingsResult.error}
-              loading={findingsResult.isLoading}
+              data={findingsGroupByNone.data}
+              error={findingsGroupByNone.error}
+              loading={findingsGroupByNone.isLoading}
             />
           </>
         )}
-        {groupBy === 'resourceType' && <div />}
+        {urlQuery.groupBy === 'resource' && (
+          <>
+            <FindingsByResourceTable
+              {...urlQuery}
+              data={findingsGroupByResource.data}
+              error={findingsGroupByResource.error}
+              loading={findingsGroupByResource.isLoading}
+            />
+          </>
+        )}
       </div>
     </div>
   );
