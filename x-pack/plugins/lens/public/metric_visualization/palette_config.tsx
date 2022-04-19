@@ -6,7 +6,7 @@
  */
 
 import { RequiredPaletteParamTypes } from '@kbn/coloring';
-import { defaultPaletteParams as sharedDefaultParams } from '../shared_components/';
+import { defaultPaletteParams as sharedDefaultParams } from '../shared_components';
 
 export const DEFAULT_PALETTE_NAME = 'status';
 export const DEFAULT_COLOR_STEPS = 3;

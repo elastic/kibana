@@ -42,7 +42,7 @@ import type {
   CalculateExcludeFiltersState,
 } from '../state';
 import { SavedObjectsRawDoc } from '../../serialization';
-import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../../migrations/core';
+import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import { AliasAction, RetryableEsClientError } from '../actions';
 import { ResponseType } from '../next';
 import { createInitialProgress } from './progress';

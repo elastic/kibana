@@ -1,0 +1,95 @@
+[[cases-get-configuration]]
+== Get case configuration API
+++++
+<titleabbrev>Get configuration</titleabbrev>
+++++
+
+Retrieves external connection details, such as the closure type and
+default connector for cases.
+
+=== {api-request-title}
+
+`GET <kibana host>:<port>/api/cases/configure`
+
+`GET <kibana host>:<port>/s/<space_id>/api/cases/configure`
+
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Cases* feature in the *Management*,
+*{observability}*, or *Security* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`owner` of the case configuration.
+
+=== {api-path-parms-title}
+
+`<space_id>`::
+(Optional, string) An identifier for the space. If it is not specified, the
+default space is used.
+
+=== {api-query-parms-title}
+
+`owner`::
+(Optional, string or array of strings) A filter to limit the retrieved
+details to a specific set of applications. Valid values are: `cases`,
+`observability`, and `securitySolution`. If this parameter is omitted, the
+response contains information for all applications that the user has access to
+read.
+
+=== Response code
+
+`200`::
+   Indicates a successful call.
+
+=== Example
+
+[source,sh]
+--------------------------------------------------
+GET api/cases/configure?owner=securitySolution
+--------------------------------------------------
+// KIBANA
+
+The API returns the following type of information:
+
+[source,json]
+--------------------------------------------------
+[
+  {
+    "owner": "securitySolution",
+    "closure_type": "close-by-user",
+    "created_at": "2020-03-30T13:31:38.083Z",
+    "created_by": {
+      "email": "admin@hms.gov.uk",
+      "full_name": "Mr Admin",
+      "username": "admin"
+    },
+    "updated_at": null,
+    "updated_by": null,
+    "connector": {
+      "id": "131d4448-abe0-4789-939d-8ef60680b498",
+      "name": "my-jira",
+      "type": ".jira",
+      "fields": null
+    },
+    "mappings": [
+      {
+        "source": "title", 
+        "target": "summary",
+        "action_type": "overwrite"
+      },
+      {
+        "source": "description", 
+        "target": "description",
+        "action_type": "overwrite"
+      },
+      {
+        "source": "comments", 
+        "target": "comments",
+        "action_type": "append"
+      }
+    ],
+    "version": "WzE3NywxXQ==",
+    "error": null,
+    "id": "7349772f-421a-4de3-b8bb-2d9b22ccee30"
+  }
+]
+--------------------------------------------------

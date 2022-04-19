@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import type { DeepReadonly } from 'utility-types';
 
@@ -13,6 +13,7 @@ import type {
   DeletePackagePoliciesResponse,
   NewPackagePolicy,
   UpdatePackagePolicy,
+  PackagePolicy,
 } from '../../common';
 
 export type PostPackagePolicyDeleteCallback = (
@@ -25,6 +26,12 @@ export type PostPackagePolicyCreateCallback = (
   request: KibanaRequest
 ) => Promise<NewPackagePolicy>;
 
+export type PostPackagePolicyPostCreateCallback = (
+  packagePolicy: PackagePolicy,
+  context: RequestHandlerContext,
+  request: KibanaRequest
+) => Promise<PackagePolicy>;
+
 export type PutPackagePolicyUpdateCallback = (
   updatePackagePolicy: UpdatePackagePolicy,
   context: RequestHandlerContext,
@@ -32,6 +39,10 @@ export type PutPackagePolicyUpdateCallback = (
 ) => Promise<UpdatePackagePolicy>;
 
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
+export type ExternalCallbackPostCreate = [
+  'packagePolicyPostCreate',
+  PostPackagePolicyPostCreateCallback
+];
 export type ExternalCallbackDelete = ['postPackagePolicyDelete', PostPackagePolicyDeleteCallback];
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
 
@@ -40,6 +51,7 @@ export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpd
  */
 export type ExternalCallback =
   | ExternalCallbackCreate
+  | ExternalCallbackPostCreate
   | ExternalCallbackDelete
   | ExternalCallbackUpdate;
 

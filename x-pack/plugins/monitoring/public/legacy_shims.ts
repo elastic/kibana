@@ -15,19 +15,19 @@ import {
   DocLinksStart,
   ChromeStart,
   I18nStart,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { HttpRequestInit } from '../../../../src/core/public';
+import { HttpRequestInit } from '@kbn/core/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
 } from './types';
-import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionTypeModel, RuleTypeModel } from '../../triggers_actions_ui/public/types';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 interface BreadcrumbItem {
   ['data-test-subj']?: string;
@@ -99,9 +99,11 @@ export class Legacy {
         set: (breadcrumbs: BreadcrumbItem[]) => this._shims.breadcrumbs.update(breadcrumbs),
         update: (breadcrumbs?: BreadcrumbItem[]) => {
           if (!breadcrumbs) {
-            const currentBreadcrumbs: Observable<any> & {
-              value?: BreadcrumbItem[];
-            } = core.chrome.getBreadcrumbs$()?.source;
+            const currentBreadcrumbs:
+              | (Observable<any> & {
+                  value?: BreadcrumbItem[];
+                })
+              | undefined = core.chrome.getBreadcrumbs$()?.source;
             breadcrumbs = currentBreadcrumbs?.value;
           }
           const globalStateStr = location.hash.split('?')[1];

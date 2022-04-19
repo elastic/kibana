@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Overview } from './';
-import { TestProviders } from '../../../../common/mock';
+import { Overview } from '.';
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../utils', () => ({
@@ -27,6 +27,20 @@ describe('Event Details Overview Cards', () => {
     getByText('Severity');
     getByText('Risk Score');
     getByText('Rule');
+  });
+
+  it('renders only readOnly cards', () => {
+    const { getByText, queryByText } = render(
+      <TestProviders>
+        <Overview {...propsWithReadOnly} />
+      </TestProviders>
+    );
+
+    getByText('Severity');
+    getByText('Risk Score');
+
+    expect(queryByText('Status')).not.toBeInTheDocument();
+    expect(queryByText('Rule')).not.toBeInTheDocument();
   });
 
   it('renders all cards it has data for', () => {
@@ -193,4 +207,9 @@ const propsWithoutSeverity = {
   ...props,
   browserFields: { kibana: { fields: fieldsWithoutSeverity } },
   data: dataWithoutSeverity,
+};
+
+const propsWithReadOnly = {
+  ...props,
+  isReadOnly: true,
 };

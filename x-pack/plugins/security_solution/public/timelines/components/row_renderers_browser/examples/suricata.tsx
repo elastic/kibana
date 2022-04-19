@@ -14,7 +14,6 @@ import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 const SuricataExampleComponent: React.FC = () => (
   <>
     {suricataRowRenderer.renderRow({
-      browserFields: {},
       data: mockTimelineData[2].ecs,
       isDraggable: false,
       timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,

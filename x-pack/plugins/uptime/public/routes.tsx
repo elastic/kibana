@@ -10,6 +10,8 @@ import { EuiPageTemplateProps, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { useInspectorContext } from '@kbn/observability-plugin/public';
 import {
   CERTIFICATES_ROUTE,
   MAPPING_ERROR_ROUTE,
@@ -46,7 +48,6 @@ import { UptimeDatePicker } from './components/common/uptime_date_picker';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
 import { SyntheticsCallout } from './components/overview/synthetics_callout';
-import { APP_WRAPPER_CLASS } from '../../../../src/core/public';
 import {
   StepDetailPageChildren,
   StepDetailPageHeader,
@@ -54,7 +55,6 @@ import {
 } from './pages/synthetics/step_detail_page';
 import { UptimePageTemplateComponent } from './apps/uptime_page_template';
 import { apiService } from './state/api/utils';
-import { useInspectorContext } from '../../observability/public';
 import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
 import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
 import { ServiceAllowedWrapper } from './pages/monitor_management/service_allowed_wrapper';
@@ -259,7 +259,8 @@ const getRoutes = (): RouteProps[] => {
               <EuiBetaBadge
                 label="Beta"
                 tooltipContent={i18n.translate('xpack.uptime.routes.monitorManagement.betaLabel', {
-                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                  defaultMessage:
+                    'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
                 })}
               />
             </EuiFlexItem>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { InputControlVisDependencies } from './plugin';
 import { InputControlRenderValue } from './input_control_fn';
 import type { InputControlVisControllerType } from './vis_controller';

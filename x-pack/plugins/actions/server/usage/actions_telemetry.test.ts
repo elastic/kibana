@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { getExecutionsPerDayCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
 
 describe('actions telemetry', () => {

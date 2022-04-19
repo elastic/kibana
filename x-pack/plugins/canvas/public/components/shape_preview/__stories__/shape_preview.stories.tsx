@@ -7,8 +7,8 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { Shape } from '@kbn/expression-shape-plugin/public';
 import { ShapePreview } from '../shape_preview';
-import { Shape } from '../../../../../../../src/plugins/expression_shape/public';
 
 storiesOf('components/Shapes/ShapePreview', module)
   .add('arrow', () => <ShapePreview shape={Shape.ARROW} />)

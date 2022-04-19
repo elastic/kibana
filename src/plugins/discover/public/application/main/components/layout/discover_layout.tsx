@@ -21,11 +21,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { InspectorSession } from '@kbn/inspector-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { generateFilters } from '../../../../../../data/public';
-import { DataView, DataViewField, DataViewType } from '../../../../../../data_views/public';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -34,7 +35,6 @@ import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverChart } from '../chart';
 import { getResultState } from '../../utils/get_result_state';
-import { InspectorSession } from '../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg } from '../../utils/use_saved_search';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
@@ -234,7 +234,16 @@ export function DiscoverLayout({
           history={history}
         />
         <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
-          {savedSearch.title}
+          {savedSearch.title
+            ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                defaultMessage: 'Discover - {savedSearchTitle}',
+                values: {
+                  savedSearchTitle: savedSearch.title,
+                },
+              })
+            : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                defaultMessage: 'Discover - Search not yet saved',
+              })}
         </h1>
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
           <EuiFlexItem grow={false}>
@@ -298,7 +307,7 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next()} />
+                <DiscoverUninitialized onRefresh={() => savedSearchRefetch$.next(undefined)} />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (

@@ -19,6 +19,7 @@ export interface State {
   workUnits?: number;
   referencedPaths?: string[];
   bundleRefExportIds?: string[];
+  dllRefKeys?: string[];
 }
 
 const DEFAULT_STATE: State = {};
@@ -88,6 +89,10 @@ export class BundleCache {
 
   public getBundleRefExportIds() {
     return this.get().bundleRefExportIds;
+  }
+
+  public getDllRefKeys() {
+    return this.get().dllRefKeys;
   }
 
   public getCacheKey() {

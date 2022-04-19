@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { ImportDataModalComponent } from './index';
+import { ImportDataModalComponent } from '.';
 jest.mock('../../lib/kibana');
 
 describe('ImportDataModal', () => {
