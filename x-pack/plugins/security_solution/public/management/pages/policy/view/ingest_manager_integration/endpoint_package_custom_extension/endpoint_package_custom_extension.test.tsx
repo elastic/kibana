@@ -38,7 +38,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   afterEach(() => {
-    useEndpointPrivilegesMock.mockReturnValue(getEndpointPrivilegesInitialStateMock());
+    useEndpointPrivilegesMock.mockImplementation(getEndpointPrivilegesInitialStateMock);
   });
 
   it.each([
@@ -57,8 +57,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
       ...getEndpointPrivilegesInitialStateMock(),
       canIsolateHost: false,
     });
-    // Mock APIs. Using Trusted Apps http mock here, which will still work
-    // for exceptions since the mocks don't currently check for list id
+    // Mock APIs
     exceptionsListAllHttpMocks(http);
     render();
 

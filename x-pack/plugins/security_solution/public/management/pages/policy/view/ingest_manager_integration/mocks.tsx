@@ -13,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient } from 'react-query';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -84,6 +85,8 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     additionalMiddleware: [mockedContext.middlewareSpy.actionSpyMiddleware],
   });
 
+  const queryClient = new QueryClient();
+
   const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
     const services = useMemo(() => {
       const { http, notifications, application } = mockedContext.coreStart;
@@ -110,7 +113,11 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
       <I18nProvider>
         <EuiThemeProvider>
           <KibanaContextProvider services={services}>
-            <RenderContextProviders store={store} depsStart={mockedContext.depsStart}>
+            <RenderContextProviders
+              store={store}
+              depsStart={mockedContext.depsStart}
+              queryClient={queryClient}
+            >
               {children}
             </RenderContextProviders>
           </KibanaContextProvider>

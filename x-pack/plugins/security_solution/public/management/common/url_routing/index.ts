@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './fleet_mocks';
-export * from './trusted_apps_http_mocks';
-export * from './exceptions_list_http_mocks';
+export * from './utils';
+export {
+  getArtifactListPageUrlPath,
+  extractArtifactListPageUrlSearchParams,
+} from './artifact_list_page_routing';

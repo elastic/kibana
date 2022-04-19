@@ -202,7 +202,7 @@ export type ExceptionsPostCreateListHttpMockInterface = ResponseProvidersInterfa
   exceptionCreateList: (options: HttpFetchOptionsWithPath) => ExceptionListSchema;
 }>;
 /**
- * HTTP mocks that support updating a single Exception
+ * HTTP mock that support creating the list
  */
 export const exceptionsPostCreateListHttpMock =
   httpHandlerMockFactory<ExceptionsPostCreateListHttpMockInterface>([
@@ -220,7 +220,7 @@ export type ExceptionsGetSummaryHttpMockInterface = ResponseProvidersInterface<{
   exceptionsSummary: (options: HttpFetchOptionsWithPath) => ExceptionListSummarySchema;
 }>;
 /**
- * HTTP mocks that support updating a single Exception
+ * HTTP mocks that support the Get Summary api
  */
 export const exceptionsGetSummaryHttpMock =
   httpHandlerMockFactory<ExceptionsGetSummaryHttpMockInterface>([
