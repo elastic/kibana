@@ -1454,10 +1454,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.0.0":
-  version "46.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.0.0.tgz#1714ae3d0cbbaf2d7319170577a429bd1776a190"
-  integrity sha512-saWKUg+UNF47sLw3WFeGppcZwB58qm3hLJzX/dwfI9dxZmba/PsYGSTuQXiGWuDQeHoMPlRXLe1lA+hD1cETzw==
+"@elastic/charts@46.0.1":
+  version "46.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.0.1.tgz#2d3bd3de9e4f294ddd9d9969dca1dc1ed5c6f278"
+  integrity sha512-CWiyEHaxEk9zKOPOm4ISyAluXSxu6pqLdG+ARBu4jQx0t1ROe93vssICHq6JIrQdiMHn44pleQnWZzKzanZtDw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
