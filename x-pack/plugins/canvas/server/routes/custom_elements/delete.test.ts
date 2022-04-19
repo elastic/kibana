@@ -7,8 +7,8 @@
 
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteCustomElementRoute } from './delete';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {

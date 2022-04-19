@@ -10,7 +10,10 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
-import type { DataViewField, DataView } from 'src/plugins/data/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { lastValueFrom } from 'rxjs';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { SortDirection, SortDirectionNumeric, TimeRange } from '@kbn/data-plugin/common';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -51,12 +54,6 @@ import {
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import {
-  SortDirection,
-  SortDirectionNumeric,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, IMvtVectorSource, SourceStatus } from '../vector_source';
@@ -597,12 +594,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const { rawResponse: resp } = await searchSource
-      .fetch$({
+    const { rawResponse: resp } = await lastValueFrom(
+      searchSource.fetch$({
         legacyHitsTotal: false,
         executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
       })
-      .toPromise();
+    );
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
@@ -901,14 +898,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
-    const { rawResponse: resp } = await searchSource
-      .fetch$({
+    const { rawResponse: resp } = await lastValueFrom(
+      searchSource.fetch$({
         abortSignal: abortController.signal,
         sessionId: searchFilters.searchSessionId,
         legacyHitsTotal: false,
         executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
       })
-      .toPromise();
+    );
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 }

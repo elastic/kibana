@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getVisSchemas, VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { getVisSchemas, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 import { PieVisParams } from './pie';
 import { vislibPieName, VisTypeVislibPieExpressionFunctionDefinition } from './pie_fn';

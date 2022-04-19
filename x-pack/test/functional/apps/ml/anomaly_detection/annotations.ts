@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

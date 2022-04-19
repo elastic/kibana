@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface VisDefaultEditorKibanaServices {
   data: DataPublicPluginStart;

@@ -10,7 +10,7 @@ import { EuiComboBoxOptionOption, EuiForm, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
