@@ -21,6 +21,7 @@ describe('Host Risk Flyout', () => {
           to={'2020-07-08T08:20:18.966Z'}
           queryId={'test_query_id'}
           title={'test_query_title'}
+          toggleStatus={true}
         />
       </TestProviders>
     );
@@ -37,6 +38,7 @@ describe('Host Risk Flyout', () => {
           to={'2020-07-08T08:20:18.966Z'}
           queryId={'test_query_id'}
           title={'test_query_title'}
+          toggleStatus={true}
         />
       </TestProviders>
     );
