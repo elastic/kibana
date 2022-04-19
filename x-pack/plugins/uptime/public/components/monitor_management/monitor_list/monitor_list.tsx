@@ -15,13 +15,12 @@ import {
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   CommonFields,
   ConfigKey,
   FetchMonitorManagementListQueryArgs,
   ICMPSimpleFields,
-  MonitorFields,
   Ping,
   ServiceLocations,
   EncryptedSyntheticsMonitorWithId,
@@ -39,7 +38,10 @@ import { MonitorTags } from './tags';
 export interface MonitorManagementListPageState {
   pageIndex: number;
   pageSize: number;
-  sortField: keyof MonitorFields;
+  sortField:
+    | `${ConfigKey.URLS}.keyword`
+    | `${ConfigKey.NAME}.keyword`
+    | `${ConfigKey.MONITOR_TYPE}.keyword`;
   sortOrder: NonNullable<FetchMonitorManagementListQueryArgs['sortOrder']>;
 }
 
@@ -86,7 +88,7 @@ export const MonitorManagementList = ({
       onPageStateChange({
         pageIndex: index + 1, // page index for Saved Objects is base 1
         pageSize: size,
-        sortField: field as keyof MonitorFields,
+        sortField: `${field}.keyword` as MonitorManagementListPageState['sortField'],
         sortOrder: direction,
       });
     },
@@ -102,7 +104,7 @@ export const MonitorManagementList = ({
 
   const sorting: EuiTableSortingType<EncryptedSyntheticsMonitorWithId> = {
     sort: {
-      field: sortField as keyof EncryptedSyntheticsMonitorWithId,
+      field: sortField.replace('.keyword', '') as keyof EncryptedSyntheticsMonitorWithId,
       direction: sortOrder,
     },
   };

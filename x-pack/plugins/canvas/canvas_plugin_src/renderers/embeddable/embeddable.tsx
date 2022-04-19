@@ -7,21 +7,21 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '../../../../../../src/core/public';
-import { StartDeps } from '../../plugin';
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   IEmbeddable,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   isErrorEmbeddable,
-} from '../../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableContainerContext } from '@kbn/embeddable-plugin/public';
+import { StartDeps } from '../../plugin';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { RendererFactory, EmbeddableInput } from '../../../types';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
-import type { EmbeddableContainerContext } from '../../../../../../src/plugins/embeddable/public/';
 
 const { embeddable: strings } = RendererStrings;
 

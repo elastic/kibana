@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTrackPageview } from '../..';
 import { DatePicker } from '../../components/shared/date_picker';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -17,7 +18,6 @@ import { RouteParams } from '../../routes';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { LoadingObservability } from './loading_observability';
 import { ObservabilityStatus } from '../../components/app/observability_status';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityAppServices } from '../../application/types';
 
 interface Props {

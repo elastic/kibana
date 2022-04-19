@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createBootstrapIndex,
   deleteAllIndex,
@@ -28,15 +28,6 @@ import type {
 
 import type { ConfigType } from '../../config';
 import {
-  createList,
-  deleteList,
-  findList,
-  getList,
-  getListIndex,
-  getListTemplate,
-  updateList,
-} from '../../services/lists';
-import {
   createListItem,
   deleteListItem,
   deleteListItemByValue,
@@ -50,7 +41,7 @@ import {
   importListItemsToStream,
   searchListItemByValues,
   updateListItem,
-} from '../../services/items';
+} from '../items';
 import listsItemsPolicy from '../items/list_item_policy.json';
 
 import listPolicy from './list_policy.json';
@@ -75,6 +66,16 @@ import type {
   UpdateListOptions,
 } from './list_client_types';
 import { createListIfItDoesNotExist } from './create_list_if_it_does_not_exist';
+
+import {
+  createList,
+  deleteList,
+  findList,
+  getList,
+  getListIndex,
+  getListTemplate,
+  updateList,
+} from '.';
 
 /**
  * Class for use for value lists are are associated with exception lists.

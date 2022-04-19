@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiStat } from '@elastic/eui';
 
-import { AnalyticsCards } from './';
+import { AnalyticsCards } from '.';
 
 describe('AnalyticsCards', () => {
   it('renders', () => {

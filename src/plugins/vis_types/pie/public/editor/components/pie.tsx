@@ -30,17 +30,17 @@ import {
   PalettePicker,
   LongLegendOptions,
   LegendSizeSettings,
-} from '../../../../../vis_default_editor/public';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
-import { TruncateLabelsOption } from './truncate_labels';
-import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieTypeProps } from '../../types';
+} from '@kbn/vis-default-editor-plugin/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   PartitionVisParams,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
-} from '../../../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/expression-partition-vis-plugin/common';
+import { TruncateLabelsOption } from './truncate_labels';
+import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
+import { PieTypeProps } from '../../types';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';

@@ -11,37 +11,21 @@ import { i18n } from '@kbn/i18n';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import type { CommandsByPlatform } from '../../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
-import { PlatformSelector } from '../../enrollment_instructions/manual/platform_selector';
-
-import { InstallationMessage } from '../installation_message';
+import { InstallSection } from '../../enrollment_instructions/install_section';
 
 import type { K8sMode } from '../types';
 
 export const InstallStandaloneAgentStep = ({
   installCommand,
   isK8s,
-  selectedPolicyId,
 }: {
   installCommand: CommandsByPlatform;
   isK8s?: K8sMode;
-  selectedPolicyId?: string;
 }): EuiContainedStepProps => {
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your host',
     }),
-    children: (
-      <>
-        <InstallationMessage />
-        <PlatformSelector
-          linuxCommand={installCommand.linux}
-          macCommand={installCommand.mac}
-          windowsCommand={installCommand.windows}
-          linuxDebCommand={installCommand.deb}
-          linuxRpmCommand={installCommand.rpm}
-          isK8s={isK8s === 'IS_KUBERNETES'}
-        />
-      </>
-    ),
+    children: <InstallSection installCommand={installCommand} isK8s={isK8s} />,
   };
 };

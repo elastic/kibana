@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from 'kibana/server';
+import { SavedObjectsBulkCreateObject, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   BulkErrorSchema,

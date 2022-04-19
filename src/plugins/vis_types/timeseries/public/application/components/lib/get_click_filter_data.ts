@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { ValueClickContext } from 'src/plugins/embeddable/public';
+import { ValueClickContext } from '@kbn/embeddable-plugin/public';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import { BUCKET_TYPES } from '../../../../common/enums';
 import { TimeseriesVisParams } from '../../../types';
