@@ -11,7 +11,7 @@ import {
   SavedObjectReference,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   CaseResponse,
   CaseResponseRt,
@@ -24,8 +24,13 @@ import {
   CaseAttributes,
   ActionTypes,
   Actions,
+  CommentRequestAlertType,
 } from '../../../common/api';
-import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_ALERTS_PER_CASE,
+  MAX_DOCS_PER_PAGE,
+} from '../../../common/constants';
 import { CasesClientArgs } from '../../client';
 import { createCaseError } from '../error';
 import {
@@ -34,9 +39,11 @@ import {
   transformNewComment,
   getOrUpdateLensReferences,
   createAlertUpdateRequest,
+  isCommentRequestTypeAlert,
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
+const ALERT_LIMIT_MSG = `Case has already reach the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts on a case`;
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -188,7 +195,7 @@ export class CaseCommentModel {
     id: string;
   }): Promise<CaseCommentModel> {
     try {
-      this.validateCreateCommentRequest([commentReq]);
+      await this.validateCreateCommentRequest([commentReq]);
 
       const references = [...this.buildRefsToCase(), ...this.getCommentReferences(commentReq)];
 
@@ -221,16 +228,47 @@ export class CaseCommentModel {
     }
   }
 
-  private validateCreateCommentRequest(req: CommentRequest[]) {
-    if (
-      req.some((attachment) => attachment.type === CommentType.alert) &&
-      this.caseInfo.attributes.status === CaseStatuses.closed
-    ) {
+  private async validateCreateCommentRequest(req: CommentRequest[]) {
+    const totalAlertsInReq = req
+      .filter<CommentRequestAlertType>(isCommentRequestTypeAlert)
+      .reduce((count, attachment) => {
+        const ids = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
+        return count + ids.length;
+      }, 0);
+
+    const reqHasAlerts = totalAlertsInReq > 0;
+
+    if (reqHasAlerts && this.caseInfo.attributes.status === CaseStatuses.closed) {
       throw Boom.badRequest('Alert cannot be attached to a closed case');
     }
 
     if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
       throw Boom.badRequest('The owner field of the comment must match the case');
+    }
+
+    if (reqHasAlerts) {
+      /**
+       * This check is for optimization reasons.
+       * It saves one aggregation if the total number
+       * of alerts of the request is already greater than
+       * MAX_ALERTS_PER_CASE
+       */
+      if (totalAlertsInReq > MAX_ALERTS_PER_CASE) {
+        throw Boom.badRequest(ALERT_LIMIT_MSG);
+      }
+
+      await this.validateAlertsLimitOnCase(totalAlertsInReq);
+    }
+  }
+
+  private async validateAlertsLimitOnCase(totalAlertsInReq: number) {
+    const alertsValueCount = await this.params.attachmentService.valueCountAlertsAttachedToCase({
+      unsecuredSavedObjectsClient: this.params.unsecuredSavedObjectsClient,
+      caseId: this.caseInfo.id,
+    });
+
+    if (alertsValueCount + totalAlertsInReq > MAX_ALERTS_PER_CASE) {
+      throw Boom.badRequest(ALERT_LIMIT_MSG);
     }
   }
 
@@ -354,7 +392,7 @@ export class CaseCommentModel {
     attachments: Array<{ id: string } & CommentRequest>;
   }): Promise<CaseCommentModel> {
     try {
-      this.validateCreateCommentRequest(attachments);
+      await this.validateCreateCommentRequest(attachments);
 
       const caseReference = this.buildRefsToCase();
 

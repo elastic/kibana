@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, ElasticsearchClient } from 'kibana/server';
+import { CoreSetup, Logger, ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { getVisualizationCounts } from './visualization_counts';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { getMultitermsCounts } from './multiterms_count';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects

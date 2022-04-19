@@ -7,14 +7,14 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { SavedObject } from 'kibana/server';
-import { KibanaRequest, Logger } from '../../../../../../src/core/server';
+import { SavedObject } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   TaskInstance,
-} from '../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
@@ -369,7 +369,10 @@ export class SyntheticsService {
       encryptedMonitors.map((monitor) =>
         encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
           syntheticsMonitor.name,
-          monitor.id
+          monitor.id,
+          {
+            namespace: monitor.namespaces?.[0],
+          }
         )
       )
     );

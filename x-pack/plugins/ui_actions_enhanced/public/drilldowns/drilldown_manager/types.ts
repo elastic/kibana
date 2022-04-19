@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToastsStart } from 'kibana/public';
-import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
-import { Trigger } from '../../../../../../src/plugins/ui_actions/public';
+import { ToastsStart } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Trigger } from '@kbn/ui-actions-plugin/public';
 import {
   ActionFactory,
   BaseActionFactoryContext,

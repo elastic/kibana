@@ -7,7 +7,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { TimeRange } from '../../../../../common';
+import { TimeRange } from '../../../..';
 
 export function toAbsoluteDates(range: TimeRange) {
   const fromDate = dateMath.parse(range.from);

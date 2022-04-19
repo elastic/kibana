@@ -10,8 +10,6 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
 import {
   mockDnsEvent,
@@ -118,10 +116,7 @@ describe('GenericRowRenderer', () => {
       });
     });
     test('renders correctly against snapshot', () => {
-      // I cannot and do not want to use BrowserFields mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const children = connectedToRenderer.renderRow({
-        browserFields,
         data: system,
         isDraggable: true,
         timelineId: 'test',
@@ -151,7 +146,6 @@ describe('GenericRowRenderer', () => {
     });
     test('should render a system row', () => {
       const children = connectedToRenderer.renderRow({
-        browserFields: mockBrowserFields,
         data: system,
         isDraggable: true,
         timelineId: 'test',
@@ -182,10 +176,7 @@ describe('GenericRowRenderer', () => {
     });
 
     test('renders correctly against snapshot', () => {
-      // I cannot and do not want to use BrowserFields mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const children = fileToRenderer.renderRow({
-        browserFields,
         data: systemFile,
         isDraggable: true,
         timelineId: 'test',
@@ -214,7 +205,6 @@ describe('GenericRowRenderer', () => {
 
     test('should render a system row', () => {
       const children = fileToRenderer.renderRow({
-        browserFields: mockBrowserFields,
         data: systemFile,
         isDraggable: true,
         timelineId: 'test',
@@ -246,7 +236,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(mockEndpointFileCreationMalwarePreventionAlert) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileCreationMalwarePreventionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -274,7 +263,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(mockEndpointFileCreationMalwareDetectionAlert) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileCreationMalwareDetectionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -304,7 +292,6 @@ describe('GenericRowRenderer', () => {
             mockEndpointFilesEncryptedRansomwarePreventionAlert
           ) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFilesEncryptedRansomwarePreventionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -334,7 +321,6 @@ describe('GenericRowRenderer', () => {
             mockEndpointFilesEncryptedRansomwareDetectionAlert
           ) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFilesEncryptedRansomwareDetectionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -364,7 +350,6 @@ describe('GenericRowRenderer', () => {
             mockEndpointFileModificationMalwarePreventionAlert
           ) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileModificationMalwarePreventionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -394,7 +379,6 @@ describe('GenericRowRenderer', () => {
             mockEndpointFileModificationMalwareDetectionAlert
           ) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileModificationMalwareDetectionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -422,7 +406,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(mockEndpointFileRenameMalwarePreventionAlert) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileRenameMalwarePreventionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -450,7 +433,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointAlertsRowRenderer.isInstance(mockEndpointFileRenameMalwareDetectionAlert) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileRenameMalwareDetectionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -480,7 +462,6 @@ describe('GenericRowRenderer', () => {
             mockEndpointProcessExecutionMalwarePreventionAlert
           ) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointProcessExecutionMalwarePreventionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -510,7 +491,6 @@ describe('GenericRowRenderer', () => {
             mockEndpointProcessExecutionMalwareDetectionAlert
           ) &&
             endpointAlertsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointProcessExecutionMalwareDetectionAlert,
               isDraggable: true,
               timelineId: 'test',
@@ -538,7 +518,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointProcessStartRowRenderer.isInstance(mockEndpointProcessExecEvent) &&
             endpointProcessStartRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointProcessExecEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -564,7 +543,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointProcessStartRowRenderer.isInstance(mockEndpointProcessForkEvent) &&
             endpointProcessStartRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointProcessForkEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -590,7 +568,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointProcessStartRowRenderer.isInstance(mockEndpointProcessStartEvent) &&
             endpointProcessStartRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointProcessStartEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -619,7 +596,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameProcessCreationEventRowRenderer.isInstance(endgameCreationEvent) &&
             endgameProcessCreationEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameCreationEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -645,7 +621,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointProcessEndRowRenderer.isInstance(mockEndpointProcessEndEvent) &&
             endpointProcessEndRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointProcessEndEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -674,7 +649,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameProcessTerminationEventRowRenderer.isInstance(endgameTerminationEvent) &&
             endgameProcessTerminationEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameTerminationEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -703,7 +677,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameProcessCreationEventRowRenderer.isInstance(endgameCreationEvent) &&
             endgameProcessCreationEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameCreationEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -734,7 +707,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameProcessCreationEventRowRenderer.isInstance(endgameCreationEvent) &&
             endgameProcessCreationEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameCreationEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -765,7 +737,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameProcessCreationEventRowRenderer.isInstance(endgameCreationEvent) &&
             endgameProcessCreationEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameCreationEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -791,7 +762,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointFileCreationRowRenderer.isInstance(mockEndpointFileCreationEvent) &&
             endpointFileCreationRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileCreationEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -820,7 +790,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameFileCreateEventRowRenderer.isInstance(endgameFileCreateEvent) &&
             endgameFileCreateEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -846,7 +815,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointFileDeletionRowRenderer.isInstance(mockEndpointFileDeletionEvent) &&
             endpointFileDeletionRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileDeletionEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -872,7 +840,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointFileModificationRowRenderer.isInstance(mockEndpointFileModificationEvent) &&
             endpointFileModificationRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileModificationEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -898,7 +865,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointFileOverwriteRowRenderer.isInstance(mockEndpointFileOverwriteEvent) &&
             endpointFileOverwriteRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileOverwriteEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -924,7 +890,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointFileRenameRowRenderer.isInstance(mockEndpointFileRenameEvent) &&
             endpointFileRenameRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointFileRenameEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -953,7 +918,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameFileDeleteEventRowRenderer.isInstance(endgameFileDeleteEvent) &&
             endgameFileDeleteEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameFileDeleteEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -982,7 +946,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {fileCreatedEventRowRenderer.isInstance(fimFileCreatedEvent) &&
             fileCreatedEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: fimFileCreatedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1009,7 +972,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {fileDeletedEventRowRenderer.isInstance(fimFileDeletedEvent) &&
             fileDeletedEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: fimFileDeletedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1038,7 +1000,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameFileCreateEventRowRenderer.isInstance(endgameFileCreateEvent) &&
             endgameFileCreateEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1069,7 +1030,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameFileCreateEventRowRenderer.isInstance(endgameFileCreateEvent) &&
             endgameFileCreateEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: endgameFileCreateEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1100,7 +1060,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {fileCreatedEventRowRenderer.isInstance(fimFileCreatedEvent) &&
             fileCreatedEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: fimFileCreatedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1128,7 +1087,6 @@ describe('GenericRowRenderer', () => {
             mockEndpointNetworkConnectionAcceptedEvent
           ) &&
             endpointConnectionAcceptedRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointNetworkConnectionAcceptedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1157,7 +1115,6 @@ describe('GenericRowRenderer', () => {
               mockEndpointRegistryModificationEvent
             ) &&
               endpointRegistryModificationRowRenderer.renderRow({
-                browserFields: mockBrowserFields,
                 data: mockEndpointRegistryModificationEvent,
                 isDraggable: true,
                 timelineId: 'test',
@@ -1185,7 +1142,6 @@ describe('GenericRowRenderer', () => {
           <TestProviders>
             {endpointLibraryLoadRowRenderer.isInstance(mockEndpointLibraryLoadEvent) &&
               endpointLibraryLoadRowRenderer.renderRow({
-                browserFields: mockBrowserFields,
                 data: mockEndpointLibraryLoadEvent,
                 isDraggable: true,
                 timelineId: 'test',
@@ -1212,7 +1168,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointHttpRequestEventRowRenderer.isInstance(mockEndpointNetworkHttpRequestEvent) &&
             endpointHttpRequestEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointNetworkHttpRequestEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1241,7 +1196,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameIpv4ConnectionAcceptEventRowRenderer.isInstance(ipv4ConnectionAcceptEvent) &&
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: ipv4ConnectionAcceptEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1270,7 +1224,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameIpv6ConnectionAcceptEventRowRenderer.isInstance(ipv6ConnectionAcceptEvent) &&
             endgameIpv6ConnectionAcceptEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: ipv6ConnectionAcceptEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1296,7 +1249,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endpointDisconnectReceivedRowRenderer.isInstance(mockEndpointDisconnectReceivedEvent) &&
             endpointDisconnectReceivedRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointDisconnectReceivedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1325,7 +1277,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameIpv4DisconnectReceivedEventRowRenderer.isInstance(ipv4DisconnectReceivedEvent) &&
             endgameIpv4DisconnectReceivedEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: ipv4DisconnectReceivedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1354,7 +1305,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameIpv6DisconnectReceivedEventRowRenderer.isInstance(ipv6DisconnectReceivedEvent) &&
             endgameIpv6DisconnectReceivedEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: ipv6DisconnectReceivedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1383,7 +1333,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {socketOpenedEventRowRenderer.isInstance(socketOpenedEvent) &&
             socketOpenedEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: socketOpenedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1412,7 +1361,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {socketClosedEventRowRenderer.isInstance(socketClosedEvent) &&
             socketClosedEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: socketClosedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1441,7 +1389,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {endgameIpv4ConnectionAcceptEventRowRenderer.isInstance(ipv4ConnectionAcceptEvent) &&
             endgameIpv4ConnectionAcceptEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: ipv4ConnectionAcceptEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1463,7 +1410,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {securityLogOnRowRenderer.isInstance(mockEndpointSecurityLogOnSuccessEvent) &&
             securityLogOnRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointSecurityLogOnSuccessEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1485,7 +1431,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {securityLogOnRowRenderer.isInstance(mockEndpointSecurityLogOnFailureEvent) &&
             securityLogOnRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointSecurityLogOnFailureEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1510,7 +1455,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {userLogonEventRowRenderer.isInstance(userLogonEvent) &&
             userLogonEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: userLogonEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1535,7 +1479,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {adminLogonEventRowRenderer.isInstance(adminLogonEvent) &&
             adminLogonEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: adminLogonEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1560,7 +1503,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {explicitUserLogonEventRowRenderer.isInstance(explicitUserLogonEvent) &&
             explicitUserLogonEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: explicitUserLogonEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1582,7 +1524,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {securityLogOffRowRenderer.isInstance(mockEndpointSecurityLogOffEvent) &&
             securityLogOffRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointSecurityLogOffEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1607,7 +1548,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {userLogoffEventRowRenderer.isInstance(userLogoffEvent) &&
             userLogoffEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: userLogoffEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1632,7 +1572,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {userLogonEventRowRenderer.isInstance(userLogonEvent) &&
             userLogonEventRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: userLogonEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1652,7 +1591,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {dnsRowRenderer.isInstance(mockEndpointNetworkLookupRequestedEvent) &&
             dnsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointNetworkLookupRequestedEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1672,7 +1610,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {dnsRowRenderer.isInstance(mockEndpointNetworkLookupResultEvent) &&
             dnsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: mockEndpointNetworkLookupResultEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1696,7 +1633,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {dnsRowRenderer.isInstance(requestEvent) &&
             dnsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: requestEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1720,7 +1656,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {dnsRowRenderer.isInstance(dnsEvent) &&
             dnsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: dnsEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1750,7 +1685,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {dnsRowRenderer.isInstance(requestEvent) &&
             dnsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: requestEvent,
               isDraggable: true,
               timelineId: 'test',
@@ -1778,7 +1712,6 @@ describe('GenericRowRenderer', () => {
         <TestProviders>
           {dnsRowRenderer.isInstance(requestEvent) &&
             dnsRowRenderer.renderRow({
-              browserFields: mockBrowserFields,
               data: requestEvent,
               isDraggable: true,
               timelineId: 'test',

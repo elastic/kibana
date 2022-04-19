@@ -9,18 +9,18 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-// @ts-ignore
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+// @ts-expect-error
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import {
   SelectSeverityUI,
   TableSeverity,
 } from '../../components/controls/select_severity/select_severity';
 import type { TimeBuckets } from '../../util/time_buckets';
-import type { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import type { EntityFieldOperation } from '../../../../common/util/anomaly_utils';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 import type { MlLocator } from '../../../../common/types/locator';
-import { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from 'src/core/public';
+import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
 import { UiSettingsCommon } from '../common';
 
 export class UiSettingsPublicToCommon implements UiSettingsCommon {

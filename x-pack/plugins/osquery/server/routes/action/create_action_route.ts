@@ -9,7 +9,7 @@ import { pickBy, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
@@ -75,6 +75,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       incrementCount(internalSavedObjectsClient, 'live_query');
       if (!selectedAgents.length) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
+
         return response.badRequest({ body: new Error('No agents found for selection') });
       }
 
@@ -111,6 +112,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         });
       } catch (error) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
+
         return response.customError({
           statusCode: 500,
           body: new Error(`Error occurred while processing ${error}`),

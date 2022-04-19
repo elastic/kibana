@@ -39,7 +39,12 @@ export const MonitorListTabs = ({
 
   useEffect(() => {
     setSelectedTabId(viewType);
-    onPageStateChange({ pageIndex: 1, pageSize: 10, sortOrder: 'asc', sortField: ConfigKey.NAME });
+    onPageStateChange({
+      pageIndex: 1,
+      pageSize: 10,
+      sortOrder: 'asc',
+      sortField: `${ConfigKey.NAME}.keyword`,
+    });
   }, [viewType, onPageStateChange]);
 
   const tabs = [

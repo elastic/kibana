@@ -7,8 +7,8 @@
  */
 
 import { AxesSettingsConfig } from '../types';
-import { tickLabelsConfigFunction } from '../expression_functions';
-import { createMockExecutionContext } from '../../../../../plugins/expressions/common/mocks';
+import { tickLabelsConfigFunction } from '.';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 
 describe('tickLabelsConfig', () => {
   test('produces the correct arguments', () => {

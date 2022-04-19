@@ -12,11 +12,19 @@ import {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunction,
+  MigrateFunctionsObject,
+} from '@kbn/kibana-utils-plugin/common';
+import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { migrations730 } from './migrations_730';
 import { SavedDashboardPanel } from '../../common/types';
-import { EmbeddableSetup } from '../../../embeddable/server';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import {
   serializableToRawAttributes,
@@ -29,15 +37,7 @@ import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from '../../common/embeddable/embeddable_saved_object_converters';
-import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../data/common';
-import {
-  mergeMigrationFunctionMaps,
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
-import { CONTROL_GROUP_TYPE } from '../../../controls/common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import type { Assign } from '@kbn/utility-types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FetchedIndexPattern, IndexPatternValue } from '../../../../../common/types';
-import type { DataView } from '../../../../../../../data_views/public';
 
 /** @internal **/
 export interface SelectIndexComponentProps {

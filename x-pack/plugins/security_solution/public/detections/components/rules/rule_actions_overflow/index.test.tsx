@@ -12,7 +12,7 @@ import {
   goToRuleEditPage,
   executeRulesBulkAction,
 } from '../../../pages/detection_engine/rules/all/actions';
-import { RuleActionsOverflow } from './index';
+import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 
 jest.mock('../../../../common/hooks/use_app_toasts');

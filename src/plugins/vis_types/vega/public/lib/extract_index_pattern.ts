@@ -7,10 +7,10 @@
  */
 
 import { flatten } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViews } from '../services';
 
 import type { Data, VegaSpec } from '../data_model/types';
-import type { DataView } from '../../../../data_views/public';
 
 export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
   const dataViews = getDataViews();

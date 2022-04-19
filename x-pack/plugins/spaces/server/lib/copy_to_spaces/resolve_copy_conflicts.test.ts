@@ -12,14 +12,14 @@ import type {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsResolveImportErrorsOptions,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
   savedObjectsTypeRegistryMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
 
