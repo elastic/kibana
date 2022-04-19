@@ -41,6 +41,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { LensPublicSetup } from '@kbn/lens-plugin/public';
+import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import {
   createRegionMapFn,
   regionMapRenderer,
@@ -76,7 +77,6 @@ import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_s
 import { MapInspectorView } from './inspector/map_inspector_view';
 
 import { setupLensChoroplethChart } from './lens';
-import { ScreenshotModePluginSetup } from '../../../../src/plugins/screenshot_mode/public';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
